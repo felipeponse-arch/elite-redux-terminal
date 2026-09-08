@@ -701,6 +701,22 @@
   .cov-resist { background: color-mix(in srgb, var(--sem-resist) 22%, transparent); color: var(--sem-resist); }
   .cov-immune { background: color-mix(in srgb, var(--sem-immune) 26%, transparent); color: var(--sem-immune); }
   .cov-neutral { color: var(--text-dim); }
+
+  /* Species rank badge - same tinted-background-plus-saturated-text pattern
+     as .cov-weak/.cov-resist/.cov-immune above, reusing the same tokens, so
+     "purple = exceptional" etc. reads consistently across the whole app. */
+  .rank-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 17px; padding: 0 4px; border-radius: 5px;
+    font-size: 10px; font-weight: 800; font-family: "IBM Plex Mono", monospace;
+    letter-spacing: .02em; cursor: help; flex: none;
+  }
+  .rank-badge.tier-SS { background: color-mix(in srgb, var(--sem-immune) 26%, transparent); color: var(--sem-immune); }
+  .rank-badge.tier-S  { background: color-mix(in srgb, var(--accent) 24%, transparent); color: var(--accent); }
+  .rank-badge.tier-A  { background: color-mix(in srgb, var(--sem-resist) 22%, transparent); color: var(--sem-resist); }
+  .rank-badge.tier-B  { background: color-mix(in srgb, var(--accent-2) 22%, transparent); color: var(--accent-2); }
+  .rank-badge.tier-C  { background: var(--surface-3); color: var(--text-dim); }
+  .rank-badge.tier-D  { background: color-mix(in srgb, var(--sem-weak) 20%, transparent); color: var(--sem-weak); }
   .cov-flag { cursor: help; font-weight: 700; margin-left: 1px; opacity: .85; }
 
   .risk-list { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
@@ -1003,11 +1019,17 @@
 <script id="spriteindex" type="application/json">__SPRITE_INDEX_JSON__</script>
 <script id="buildhistory" type="application/json">__BUILD_HISTORY_JSON__</script>
 <script id="bossbuilds" type="application/json">__BOSS_BUILDS_JSON__</script>
+<script id="speciesrank" type="application/json">__SPECIES_RANK_JSON__</script>
 <script>
 (function () {
   "use strict";
   var DATA = JSON.parse(document.getElementById("dexdata").textContent);
   var BUILDS = JSON.parse(document.getElementById("builds").textContent || "{}");
+  // Fully-automatic SS/S/A/B/C/D rank per species (BST + boss usage +
+  // ability impact, all computed with no per-species human review - see
+  // scripts/compute_species_rank.ps1). Unlisted sname = not computed
+  // (shouldn't happen for a real species, but degrade safely regardless).
+  var SPECIES_RANK = JSON.parse(document.getElementById("speciesrank").textContent || "{}");
   // Past builds.json entries for a species, archived by scripts/archive_build.ps1
   // whenever a curated build gets replaced - see data/build_history.json.
   var BUILD_HISTORY = JSON.parse(document.getElementById("buildhistory").textContent || "{}");
@@ -1489,6 +1511,7 @@
         '<span class="dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</span>' +
         spriteImgHtml(sp.x, sp.n, 28) +
         '<span class="sname">' + escapeHtml(sp.n) + '</span>' +
+        rankBadgeHtml(sp.sname) +
         '<span class="pips">' + pips + '</span>' +
         '<button class="row-add-btn' + (!inTeam && teamFull ? ' is-swap' : '') + '" data-add="' + sp.x + '" type="button" title="' + addTitle + '" aria-label="' + addTitle + '"' +
           (inTeam ? ' disabled' : '') + '>' + addLabel + '</button></li>';
@@ -1647,6 +1670,20 @@
   // boss party member. One function so "click a Pokemon" behaves the same
   // everywhere, wired via the single delegated ".goto-species" listener
   // right below it.
+  var RANK_TIER_CLASS = { SS: "tier-SS", S: "tier-S", A: "tier-A", B: "tier-B", C: "tier-C", D: "tier-D" };
+  // Shown next to a species' name everywhere it appears (Dex list/detail,
+  // team slot, box chip) - the tooltip spells out the three inputs AND the
+  // limitation (no moveset/synergy judgment) every time, not just once in a
+  // help page nobody reads.
+  function rankBadgeHtml(sname) {
+    var r = SPECIES_RANK[sname];
+    if (!r) return "";
+    var title = "Rank " + r.tier + " (score " + r.score + "/100) — calculado automaticamente a partir de " +
+      "BST (percentil " + r.bstPct + "), uso em chefões (percentil " + r.bossPct + ") e impacto das habilidades " +
+      "(percentil " + r.abilityPct + "). Não avalia moveset nem sinergia com o resto do time.";
+    return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.tier + '</span>';
+  }
+
   function goToDexSpecies(x) {
     document.querySelector('.tab-btn[data-tab="dex"]').click();
     selectSpecies(x);
@@ -1703,7 +1740,7 @@
       // 48 matches the atlas cell size, so the largest sprite in the UI is shown
       // 1:1 and never upscaled.
       '<div class="detail-head"><div class="ts-head">' + spriteImgHtml(sp.x, sp.n, 48) + '<div class="detail-titles">' +
-        '<h2>' + escapeHtml(sp.n) + '</h2>' +
+        '<h2>' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + '</h2>' +
         '<div class="detail-dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</div>' +
         '<div class="detail-sname mono">' + escapeHtml(sp.sname) + '</div>' +
       '</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' +
@@ -1800,6 +1837,7 @@
         return '<div class="box-chip">' +
           '<span class="bc-name-wrap goto-species" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 26) +
           '<span>' + escapeHtml(sp.n) + '</span></span>' +
+          rankBadgeHtml(sp.sname) +
           '<span class="box-chip-pips">' + names.map(typePip).join("") + '</span>' +
           '<button class="box-to-team' + (teamFull ? ' is-swap' : '') + '" data-x="' + sp.x + '" type="button" title="' + title + '" aria-label="' + title + '">' +
             (teamFull ? '&hArr;&nbsp;trocar' : '&rarr;&nbsp;time') + '</button>' +
@@ -2017,7 +2055,7 @@
         var swapOpen = teamSwapIdx === i;
         slots.push('<div class="team-slot' + (swapOpen ? ' swapping' : '') + '"><div>' +
           '<div class="ts-head goto-species" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 40) +
-          '<div><div class="ts-name">' + escapeHtml(sp.n) + '</div>' +
+          '<div><div class="ts-name">' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + '</div>' +
           '<div class="ts-types">' + names.map(function (n) { return typePill(n, true); }).join("") + '</div></div></div>' +
           '<div class="ts-abis"><b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + '</div>' +
           buildHtml +

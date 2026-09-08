@@ -38,6 +38,11 @@ if (-not $SkipExtract) {
     & (Join-Path $PSScriptRoot "slim_dex.ps1")
     Write-Output "--- expanding combo abilities ---"
     & (Join-Path $PSScriptRoot "expand_combo_abilities.ps1")
+    # Must run AFTER expand_combo_abilities.ps1: it scores each ability's
+    # translated text (including combo abilities), so it needs the final
+    # expanded description, not the raw "A + B" placeholder.
+    Write-Output "--- computing species ranks ---"
+    & (Join-Path $PSScriptRoot "compute_species_rank.ps1")
 } else {
     Write-Output "--- skipping extraction, reusing existing data/dex_compact.json and data/bosses.json ---"
 }
@@ -60,6 +65,7 @@ $dataFiles = @{
     "__MOVE_PT_JSON__" = Join-Path $dataDir "move_translations_pt.json"
     "__BUILD_HISTORY_JSON__" = Join-Path $dataDir "build_history.json"
     "__BOSS_BUILDS_JSON__" = Join-Path $dataDir "boss_reference_builds.json"
+    "__SPECIES_RANK_JSON__" = Join-Path $dataDir "species_rank.json"
 }
 
 foreach ($path in $dataFiles.Values) {
