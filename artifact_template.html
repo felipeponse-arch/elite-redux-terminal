@@ -996,6 +996,7 @@
 <script id="movept" type="application/json">__MOVE_PT_JSON__</script>
 <script id="spriteindex" type="application/json">__SPRITE_INDEX_JSON__</script>
 <script id="buildhistory" type="application/json">__BUILD_HISTORY_JSON__</script>
+<script id="bossbuilds" type="application/json">__BOSS_BUILDS_JSON__</script>
 <script>
 (function () {
   "use strict";
@@ -1004,6 +1005,12 @@
   // Past builds.json entries for a species, archived by scripts/archive_build.ps1
   // whenever a curated build gets replaced - see data/build_history.json.
   var BUILD_HISTORY = JSON.parse(document.getElementById("buildhistory").textContent || "{}");
+  // Boss-team builds, one per species per boss appearance at that species' own
+  // highest difficulty tier reached anywhere (hell > insane > party) - see
+  // scripts/extract_boss_builds.ps1. Reference/inspiration, NOT a substitute
+  // for BUILDS: a boss's moveset is tuned for one specific fight (sometimes a
+  // double battle), not necessarily a generically good build for the player.
+  var BOSS_BUILDS = JSON.parse(document.getElementById("bossbuilds").textContent || "{}");
   var BOSSES = JSON.parse(document.getElementById("bossdata").textContent || "[]");
   var LEVELCAPS = JSON.parse(document.getElementById("levelcapdata").textContent || "null");
   var SAVEDTEAMS_SEED = JSON.parse(document.getElementById("savedteamsseed").textContent || "[]");
@@ -1694,7 +1701,10 @@
         '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
       '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
         '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p></div>' +
-      (BUILD_HISTORY[sp.sname] ? '<div class="card">' + buildHistoryHtml(sp) + '</div>' : "") +
+      (function () {
+        var inner = buildHistoryHtml(sp) + bossReferenceHtml(sp);
+        return inner ? '<div class="card">' + inner + '</div>' : "";
+      })() +
       evoHtml + lmHtml + tuHtml;
 
     var backBtn = document.getElementById("back-to-list");
@@ -1896,37 +1906,61 @@
     return lines.join("\n");
   }
 
-  // Shared by the Dex detail card and the team-slot card (renderTeam) - same
-  // markup either way, wired up right after each place injects it into the
-  // DOM (see the two ".bh-copy" listener blocks below).
+  // Shared by buildHistoryHtml and bossReferenceHtml below - same entry
+  // markup either way, just a different meta line and copy-button attrs.
+  function buildEntryHtml(sp, entry, metaHtml, copyAttrs) {
+    return '<div class="bh-entry">' +
+      '<div class="bh-meta">' + metaHtml +
+      '<button class="bh-copy" ' + copyAttrs + ' type="button" title="Copiar este set">copiar</button></div>' +
+      '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, entry)) + '</pre>' +
+      (entry.note ? '<div class="ts-build-note">' + escapeHtml(entry.note) + '</div>' : '') +
+    '</div>';
+  }
+
+  // Used by the Dex detail card and the team-slot card (renderTeam).
   function buildHistoryHtml(sp) {
     var hist = BUILD_HISTORY[sp.sname];
     if (!hist || !hist.length) return "";
     var items = hist.slice().reverse().map(function (entry, i) {
-      return '<div class="bh-entry">' +
-        '<div class="bh-meta"><span class="bh-date mono">' + escapeHtml(entry.savedAt || "") + '</span>' +
-        (entry.context ? '<span class="bh-context">' + escapeHtml(entry.context) + '</span>' : '') +
-        '<button class="bh-copy" data-sname="' + sp.sname + '" data-idx="' + i + '" type="button" title="Copiar este set">copiar</button></div>' +
-        '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, entry)) + '</pre>' +
-        (entry.note ? '<div class="ts-build-note">' + escapeHtml(entry.note) + '</div>' : '') +
-      '</div>';
+      var meta = '<span class="bh-date mono">' + escapeHtml(entry.savedAt || "") + '</span>' +
+        (entry.context ? '<span class="bh-context">' + escapeHtml(entry.context) + '</span>' : '');
+      return buildEntryHtml(sp, entry, meta, 'data-src="hist" data-sname="' + sp.sname + '" data-idx="' + i + '"');
     }).join("");
     return '<details class="bh-details"><summary>Histórico de builds (' + hist.length + ')</summary>' + items + '</details>';
   }
 
-  // Delegated once for the whole document: both the Dex detail and the team
-  // slots re-render their own subtree often, so binding here avoids having
-  // to re-attach a listener every single time either view redraws.
+  // Dex detail only (see selectSpecies) - reference/inspiration builds pulled
+  // from boss trainer parties, not shown in the team card on purpose: the
+  // team card is about the ACTIVE build + its own history, and a boss's
+  // moveset is tuned for one specific fight, not necessarily a good general
+  // build (flagged as such via the "chefão" label and (dupla) tag).
+  function bossReferenceHtml(sp) {
+    var refs = BOSS_BUILDS[sp.sname];
+    if (!refs || !refs.length) return "";
+    var items = refs.map(function (entry, i) {
+      var meta = '<span class="bh-date mono">' + escapeHtml(DIFF_LABELS[entry.tier] || entry.tier) + '</span>' +
+        '<span class="bh-context">' + escapeHtml(entry.boss) + (entry.db ? " (dupla)" : "") + '</span>';
+      return buildEntryHtml(sp, entry, meta, 'data-src="boss" data-sname="' + sp.sname + '" data-idx="' + i + '"');
+    }).join("");
+    return '<details class="bh-details"><summary>Builds vistas em chefões (' + refs.length + ')</summary>' + items +
+      '<p style="color:var(--text-dim);font-size:11px;margin-top:8px;">Referência do time de um chefão, não uma recomendação — o moveset foi ajustado pra aquela luta específica, não necessariamente pro seu time.</p></details>';
+  }
+
+  // Delegated once for the whole document: the Dex detail and the team slots
+  // re-render their own subtree often, so binding here avoids re-attaching a
+  // listener every time either view redraws.
   document.addEventListener("click", function (e) {
     var btn = e.target.closest && e.target.closest(".bh-copy");
     if (!btn) return;
     var sp = getSpeciesBySname(btn.dataset.sname);
-    var hist = sp && BUILD_HISTORY[sp.sname];
-    if (!sp || !hist) return;
-    var entry = hist.slice().reverse()[parseInt(btn.dataset.idx, 10)];
+    if (!sp) return;
+    var fromBoss = btn.dataset.src === "boss";
+    var list = fromBoss ? BOSS_BUILDS[sp.sname] : BUILD_HISTORY[sp.sname];
+    if (!list) return;
+    var entry = fromBoss ? list[parseInt(btn.dataset.idx, 10)] : list.slice().reverse()[parseInt(btn.dataset.idx, 10)];
     if (!entry) return;
     copyText(showdownSet(sp, entry), null, "");
-    flashToast("Build antiga do " + sp.n + " copiada (formato Showdown)");
+    flashToast((fromBoss ? "Build de chefão do " : "Build antiga do ") + sp.n + " copiada (formato Showdown)");
   });
 
   function showdownTeam() {
@@ -2403,6 +2437,7 @@
         '<div class="bm-row"><b>Habilidade:</b> ' + escapeHtml(m.abi || "?") + '</div>' +
         '<div class="bm-row"><b>Item:</b> ' + escapeHtml(m.item || "nenhum") + '</div>' +
         '<div class="bm-row"><b>Nature:</b> ' + escapeHtml(m.nat || "?") + '</div>' +
+        (m.evs ? '<div class="bm-row"><b>EVs:</b> ' + escapeHtml(m.evs) + '</div>' : "") +
         '<div class="bm-row"><b>Golpes:</b> ' + escapeHtml(m.mv.join(" / ")) + '</div>' +
       '</div>';
     }).join("");

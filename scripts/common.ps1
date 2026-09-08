@@ -71,3 +71,18 @@ function ConvertTo-JsonManual($val) {
     Write-JsonValue $sb $val
     return $sb.ToString()
 }
+
+# Raw EVs are stored as a 6-int array [HP,Atk,Def,SpA,SpD,Spe] (same order as
+# dex_compact.json species "b" base-stat arrays). Format as the same Showdown
+# EV string style already used by hand in data/builds.json, e.g.
+# "252 HP / 252 SpD / 4 Def" - zero values dropped, HP/Atk/Def/SpA/SpD/Spe order.
+function Format-Evs($evsArr) {
+    $labels = @("HP", "Atk", "Def", "SpA", "SpD", "Spe")
+    $arr = @($evsArr)
+    $parts = New-Object System.Collections.ArrayList
+    for ($i = 0; $i -lt 6; $i++) {
+        $v = if ($i -lt $arr.Count) { [int]$arr[$i] } else { 0 }
+        if ($v -gt 0) { [void]$parts.Add("$v $($labels[$i])") }
+    }
+    return ($parts -join " / ")
+}

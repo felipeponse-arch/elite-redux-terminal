@@ -27,6 +27,8 @@ if (-not $SkipExtract) {
     Write-Output "--- regenerating dex_compact.json and bosses.json from raw source ---"
     & (Join-Path $PSScriptRoot "transform.ps1")
     & (Join-Path $PSScriptRoot "extract_bosses.ps1")
+    Write-Output "--- extracting boss reference builds ---"
+    & (Join-Path $PSScriptRoot "extract_boss_builds.ps1")
     # These used to be manual, run-by-hand steps, which meant a fresh
     # transform.ps1 run silently reverted slim_dex.ps1's size cuts and
     # expand_combo_abilities.ps1's "A + B" expansions back to their raw
@@ -57,6 +59,7 @@ $dataFiles = @{
     "__SPRITE_INDEX_JSON__" = Join-Path $dataDir "sprite_index.json"
     "__MOVE_PT_JSON__" = Join-Path $dataDir "move_translations_pt.json"
     "__BUILD_HISTORY_JSON__" = Join-Path $dataDir "build_history.json"
+    "__BOSS_BUILDS_JSON__" = Join-Path $dataDir "boss_reference_builds.json"
 }
 
 foreach ($path in $dataFiles.Values) {

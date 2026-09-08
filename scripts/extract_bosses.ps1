@@ -51,6 +51,7 @@ function ResolveParty($rawParty) {
             abi = $abiName
             item = $itemName
             nat = $natName
+            evs = Format-Evs $mon["evs"]
             mv = $moveNames
         })
     }
