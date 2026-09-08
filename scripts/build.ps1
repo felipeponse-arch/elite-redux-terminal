@@ -56,6 +56,7 @@ $dataFiles = @{
     "__ABILITY_PT_JSON__" = Join-Path $dataDir "ability_translations_pt.json"
     "__SPRITE_INDEX_JSON__" = Join-Path $dataDir "sprite_index.json"
     "__MOVE_PT_JSON__" = Join-Path $dataDir "move_translations_pt.json"
+    "__BUILD_HISTORY_JSON__" = Join-Path $dataDir "build_history.json"
 }
 
 foreach ($path in $dataFiles.Values) {
