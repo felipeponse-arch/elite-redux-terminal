@@ -678,6 +678,7 @@
   .cov-resist { background: color-mix(in srgb, var(--sem-resist) 22%, transparent); color: var(--sem-resist); }
   .cov-immune { background: color-mix(in srgb, var(--sem-immune) 26%, transparent); color: var(--sem-immune); }
   .cov-neutral { color: var(--text-dim); }
+  .cov-flag { cursor: help; font-weight: 700; margin-left: 1px; opacity: .85; }
 
   .risk-list { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
   .risk-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
@@ -1074,6 +1075,78 @@
     Steel:    { Fire:0.5, Water:0.5, Electric:0.5, Ice:2, Rock:2, Steel:0.5, Fairy:2 },
     Fairy:    { Fire:0.5, Fighting:2, Poison:0.5, Dragon:2, Dark:2, Steel:0.5 }
   };
+
+  // Curated, NOT auto-generated: type-effectiveness modifiers for abilities
+  // verified against their real (translated) Elite Redux description text -
+  // never assumed from vanilla Pokemon behavior, since this hack renames and
+  // rebalances abilities freely (see AUDITORIA-DOSSIE.md 9.4 - this is
+  // exactly why a full 1033-ability table wasn't attempted in one go).
+  // Only covers abilities actually seen on the user's team/box so far.
+  // Unlisted ids simply have no effect (same safe-degrade as ABILITY_PT).
+  // Ids are the same indices as ABILITIES / dex_compact.json "abilities".
+  var TYPE_MOD_ABILITIES = {
+    26:  { immune: ["Ground"] },                // Levitate
+    444: { immune: ["Water"] },                 // Evaporate
+    450: { immune: ["Ground"], healPct: 25 },   // Earth Eater
+    116: { seDamper: 0.65 },                    // Solid Rock: -35% on SE hits
+    318: { seDamper: 0.5 },                     // Primal Armor: -50% on SE hits
+    303: { resist: { Rock: 0.5 } }               // Fossilized: extra half dmg from Rock
+  };
+
+  // Which of a species' abilities are safe to treat as ALWAYS active without
+  // knowing which build the player picked: innates (always on, by the game's
+  // own rule) plus any choosable slot that isn't really a choice - when all 3
+  // listed choosable ids are identical there's no alternative to pick, so
+  // it's effectively locked (e.g. Coalossal Mega's 3 slots are all Earth
+  // Eater). A choosable ability with real alternatives (e.g. Terrakion's
+  // Justified/Avenger/Rockhard Will) is deliberately left out here - which one
+  // is active depends on the build, and guessing wrong would be worse than
+  // showing the unmodified type chart.
+  function alwaysActiveAbilities(sp) {
+    var ids = sp.inn.slice();
+    if (sp.ab.length && sp.ab.every(function (id) { return id === sp.ab[0]; })) ids.push(sp.ab[0]);
+    return ids;
+  }
+
+  // Applies TYPE_MOD_ABILITIES on top of the flat type chart for one species'
+  // real ability kit. Returns the adjusted multiplier plus which ability(ies)
+  // caused a change, so the UI can show its work instead of a bare number.
+  function abilityTypeMod(atk, sp) {
+    var raw = typeMultiplier(atk, speciesTypeNames(sp));
+    var ids = alwaysActiveAbilities(sp);
+
+    // Immunity always wins and is checked across ALL active abilities first:
+    // otherwise, if a damage-dampening ability (Solid Rock) happens to be
+    // listed before an immunity one (Evaporate) in sp.inn's order, the
+    // dampener's now-moot reason ("amortece...") would show alongside the
+    // real answer ("imune"), which is confusing even though the final
+    // number is still correct either way.
+    var immuneId = ids.filter(function (id) {
+      var mod = TYPE_MOD_ABILITIES[id];
+      return mod && mod.immune && mod.immune.indexOf(atk) !== -1;
+    })[0];
+    if (immuneId !== undefined) {
+      var mod = TYPE_MOD_ABILITIES[immuneId];
+      var name = (ABILITIES[immuneId] && ABILITIES[immuneId][0]) || "?";
+      return { raw: raw, mult: 0, reasons: [name + (mod.healPct ? " (imune, cura " + mod.healPct + "%)" : " (imune)")] };
+    }
+
+    var mult = raw;
+    var reasons = [];
+    ids.forEach(function (id) {
+      var m = TYPE_MOD_ABILITIES[id];
+      if (!m) return;
+      var nm = (ABILITIES[id] && ABILITIES[id][0]) || "?";
+      if (m.resist && m.resist[atk] !== undefined) {
+        mult *= m.resist[atk];
+        reasons.push(nm + " (resistência extra)");
+      } else if (m.seDamper && raw > 1) {
+        mult *= m.seDamper;
+        reasons.push(nm + " (amortece dano super efetivo)");
+      }
+    });
+    return { raw: raw, mult: mult, reasons: reasons };
+  }
 
   function typeMultiplier(atk, defTypes) {
     var m = 1;
@@ -2120,16 +2193,26 @@
     }
     var head = '<th class="rowhead">Vs. tipo</th>' + members.map(function (sp) { return '<th>' + escapeHtml(sp.n.split(" ")[0]) + '</th>'; }).join("");
     var riskCount = {};
+    var anyAbilityMod = false;
     var rows = USABLE_TYPES.map(function (atk) {
       var cells = members.map(function (sp) {
-        var m = typeMultiplier(atk, speciesTypeNames(sp));
+        var info = abilityTypeMod(atk, sp);
+        var m = info.mult;
         var cls = m === 0 ? "cov-immune" : m >= 2 ? "cov-weak" : m < 1 ? "cov-resist" : "cov-neutral";
         if (m >= 2) riskCount[atk] = (riskCount[atk] || 0) + 1;
-        var label = m === 0 ? "0" : m === 0.25 ? "&frac14;" : m === 0.5 ? "&frac12;" : m === 1 ? "&mdash;" : m + "&times;";
-        return '<td><span class="cov-cell ' + cls + '">' + label + '</span></td>';
+        var label = m === 0 ? "0" : m === 0.25 ? "&frac14;" : m === 0.5 ? "&frac12;" : m === 1 ? "&mdash;" : (Math.round(m * 100) / 100) + "&times;";
+        var flag = "";
+        if (info.reasons.length) {
+          anyAbilityMod = true;
+          flag = '<span class="cov-flag" title="' + escapeHtml(info.reasons.join("; ")) + '">*</span>';
+        }
+        return '<td><span class="cov-cell ' + cls + '">' + label + flag + '</span></td>';
       }).join("");
       return '<tr><td class="rowhead">' + typePill(atk, true) + '</td>' + cells + '</tr>';
     }).join("");
+    var abilityNote = anyAbilityMod
+      ? '<p style="color:var(--text-dim);font-size:11.5px;margin-top:6px;">* ajustado por habilidade inata ou travada (passe o mouse pra ver qual). Só cobre as habilidades já verificadas neste time — o resto da tabela ainda é o multiplicador de tipo puro, sem considerar habilidade.</p>'
+      : '<p style="color:var(--text-dim);font-size:11.5px;margin-top:6px;">Tabela de multiplicador de tipo puro — nenhuma habilidade deste time altera esses valores hoje (mas isso só está verificado para as habilidades já conferidas, não para as 1033 do jogo).</p>';
 
     var risks = Object.keys(riskCount).map(function (t) { return { t: t, n: riskCount[t] }; })
       .filter(function (r) { return r.n >= 2; })
@@ -2142,8 +2225,9 @@
     }).join("") : '<p style="color:var(--text-dim);font-size:13px;">Nenhum tipo derruba 2 ou mais membros do time ao mesmo tempo &mdash; boa cobertura defensiva de base.</p>';
 
     el.innerHTML = '<h3>Riscos compartilhados do time</h3><div class="risk-list">' + riskHtml + '</div>' +
-      '<h3 style="margin-top:22px;">Cobertura defensiva (tabela padrão de tipos)</h3>' +
-      '<div class="scroll-x"><table class="cov-table"><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+      '<h3 style="margin-top:22px;">Cobertura defensiva</h3>' +
+      '<div class="scroll-x"><table class="cov-table"><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      abilityNote;
   }
 
   // ---------------- bosses view ----------------
