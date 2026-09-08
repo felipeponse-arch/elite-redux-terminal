@@ -103,6 +103,32 @@ document.getElementById("goto-team-link").click();
 document.getElementById("view-team").classList.contains("active"); // esperado: true
 ```
 
+## 6b. Historico de builds (data/build_history.json)
+
+Teste descartavel - usa `scripts/archive_build.ps1` contra uma especie real de
+`builds.json`, confere a renderizacao nos dois lugares, depois reverte
+`data/build_history.json` para `{}` antes de publicar de verdade.
+
+```powershell
+powershell -File scripts\archive_build.ps1 -Sname SPECIES_PROBOPASS -Context "TESTE - reverter depois"
+powershell -File scripts\build.ps1 -SkipExtract
+```
+
+```javascript
+// abra a ficha do Probopass na Dex e confirme o bloco recolhivel:
+document.querySelector("#species-detail .bh-details summary").textContent; // "Historico de builds (1)"
+// va pra aba Meu Time (com Probopass no time) e confirme o mesmo bloco:
+document.querySelector("#team-slots .bh-details summary").textContent; // idem
+// clique em "copiar" numa entrada do historico e confirme o toast:
+document.querySelector(".bh-copy").click();
+document.getElementById("toast").textContent; // "Build antiga do Probopass copiada (formato Showdown)"
+// confirme que uma especie SEM historico nao mostra nada (nao so vazio - o elemento nao existe):
+!!document.querySelector("#species-detail .bh-details"); // false, pra uma especie sem historico
+```
+
+Depois: sobrescreva `data/build_history.json` de volta para `{}` e rode
+`build.ps1 -SkipExtract` de novo antes de publicar.
+
 ## 6. Toast nao se perde em acoes rapidas
 
 ```javascript
