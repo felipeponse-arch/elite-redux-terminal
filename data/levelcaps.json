@@ -1,0 +1,16 @@
+{
+  "source": "https://eliteredux.net/level-caps/",
+  "note": "Se voce passar do cap, o Pokemon acima do nivel pode parar de obedecer. Dificuldade pode ser abaixada a qualquer Centro Pokemon, mas nao aumentada de novo depois.",
+  "rows": [
+    { "milestone": "Sem Badge (inicio)", "easy": 20, "ace": 18, "elite": 16 },
+    { "milestone": "Stone Badge (1o ginasio)", "easy": 28, "ace": 25, "elite": 23 },
+    { "milestone": "Knuckle Badge (2o ginasio)", "easy": 44, "ace": 40, "elite": 36 },
+    { "milestone": "Dynamo Badge (3o ginasio)", "easy": 55, "ace": 50, "elite": 45 },
+    { "milestone": "Heat Badge (4o ginasio)", "easy": 65, "ace": 55, "elite": 50 },
+    { "milestone": "Balance Badge (5o ginasio)", "easy": 80, "ace": 70, "elite": 55 },
+    { "milestone": "Feather Badge (6o ginasio)", "easy": 90, "ace": 85, "elite": 60 },
+    { "milestone": "Mind Badge (7o ginasio)", "easy": null, "ace": 92, "elite": 70 },
+    { "milestone": "Rain Badge (8o ginasio)", "easy": null, "ace": 95, "elite": 80 },
+    { "milestone": "Champion / Alto Comando", "easy": null, "ace": null, "elite": null }
+  ]
+}

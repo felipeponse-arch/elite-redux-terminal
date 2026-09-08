@@ -1,0 +1,66 @@
+{
+  "SPECIES_AERODACTYL_MEGA": {
+    "ability": "Fatal Precision",
+    "nature": "Jolly",
+    "evs": "252 Atk / 4 SpD / 252 Spe",
+    "item": "Life Orb",
+    "moves": ["Head Smash", "Dragon Dance", "Brave Bird", "Tectonic Fangs"],
+    "note": "Mega permanente: a Aerodactylite só é necessária na 1a evolução, depois libera o slot pro Life Orb. Rock Head (innate) zera o recuo do Head Smash."
+  },
+  "SPECIES_GLIMMORA_MEGA": {
+    "ability": "Corrosion",
+    "nature": "Modest",
+    "evs": "252 SpA / 252 Spe / 4 HP",
+    "item": "Life Orb",
+    "moves": ["Meteor Beam", "Sludge Wave", "Earth Power", "Stealth Rock"],
+    "note": "Mega permanente: Glimmoranite só na 1a evolução. Corrosion faz Poison pegar em Steel; Accelerate (innate) tira o turno de carga do Meteor Beam."
+  },
+  "SPECIES_ARCANINE_HISUIAN_MEGA": {
+    "ability": "Tough Claws",
+    "nature": "Jolly",
+    "evs": "252 Atk / 4 SpD / 252 Spe",
+    "item": "Life Orb",
+    "moves": ["Flare Blitz", "Head Smash", "Close Combat", "Extreme Speed"],
+    "note": "Habilidade travada (as 3 opções são Tough Claws). Mega permanente: Arcanite H só na 1a evolução. Rock Head + Reckless = recuo zero e +20% de dano."
+  },
+  "SPECIES_TERRAKION": {
+    "ability": "Rockhard Will",
+    "nature": "Jolly",
+    "evs": "252 Atk / 4 SpD / 252 Spe",
+    "item": "Life Orb",
+    "moves": ["Stone Edge", "Sacred Sword", "Earthquake", "Swords Dance"],
+    "note": "Sem Mega. Mold Breaker (innate) ignora habilidades defensivas do alvo — combina com Swords Dance."
+  },
+  "SPECIES_AVALUGG_HISUIAN": {
+    "ability": "Self Sufficient",
+    "nature": "Impish",
+    "evs": "252 HP / 252 Def / 4 SpD",
+    "item": "Leftovers",
+    "moves": ["Recover", "Body Press", "Avalanche", "Rock Slide"],
+    "note": "Impish porque Body Press usa a Defesa como ataque: subir Def aumenta dano e resistência ao mesmo tempo."
+  },
+  "SPECIES_TYRANITAR_MEGA_REDUX": {
+    "ability": "Evaporate",
+    "nature": "Modest",
+    "evs": "252 HP / 252 SpA / 4 SpD",
+    "item": "Leftovers",
+    "moves": ["Eruption", "Diamond Storm", "Flamethrower", "Earth Power"],
+    "note": "Habilidade travada (Evaporate = imunidade a Water). Leftovers em vez de Life Orb porque Eruption escala com %HP."
+  },
+  "SPECIES_PROBOPASS": {
+    "ability": "Impenetrable",
+    "nature": "Calm",
+    "evs": "252 HP / 252 SpD / 4 Def",
+    "item": "Leftovers",
+    "moves": ["Stealth Rock", "Volt Switch", "Power Gem", "Body Press"],
+    "note": "Levitate (innate) dá imunidade real a Ground — o buraco do time. Rock/Steel ainda resiste Psychic e Electric."
+  },
+  "SPECIES_COALOSSAL_MEGA": {
+    "ability": "Earth Eater",
+    "nature": "Modest",
+    "evs": "252 HP / 252 SpA / 4 SpD",
+    "item": "Leftovers",
+    "moves": ["Meteor Beam", "Magma Storm", "Steam Eruption", "Rock Polish"],
+    "note": "Habilidade travada. Earth Eater cura 25% ao levar Ground; resistir Fire anula o Molten Down inimigo."
+  }
+}

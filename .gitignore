@@ -1,0 +1,9 @@
+# Build output - regenerated deterministically by scripts/build.ps1 from the
+# template + data/*.json + data/sprite_atlas.png. Not source, so not tracked.
+artifact_final.html
+
+# Cache of the ~1900 raw 64px sprite PNGs downloaded from NextDex, used only
+# to avoid re-downloading when scripts/build_sprite_atlas.ps1 rebuilds
+# data/sprite_atlas.png (which IS tracked - it's the actual build input).
+# Regenerates automatically (re-downloads any missing file) if deleted.
+data/sprites_all/
