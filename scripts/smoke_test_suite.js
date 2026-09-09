@@ -585,6 +585,72 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
+  // --- sync-banner CSS bug - 2026-09-09, user report: "sync aparecendo
+  // toda hora mesmo sem eu ter atualizado nada". Root cause: the EXACT
+  // same class of bug as the "Mais" dropdown from earlier today -
+  // .sync-banner's own `display: flex` (author rule) always beat the
+  // browser's native [hidden] handling, so the banner rendered visible
+  // regardless of its .hidden property being correctly true the whole
+  // time. Same fix as before: an explicit [hidden] override. Also
+  // hardened the underlying logic to compare save CONTENT, not just the
+  // savedAt timestamp (a changed timestamp isn't the same as changed
+  // data) - can't easily exercise that half live without a real db
+  // connection (unavailable on the local dev server this suite runs
+  // against), so this check is scoped to what's actually verifiable here:
+  // the CSS itself.
+  const syncBanner = document.getElementById("sync-banner");
+  check("sync banner is actually invisible while hidden (not just .hidden===true)",
+    syncBanner && getComputedStyle(syncBanner).display === "none");
+
+  // --- "#app" height bug - 2026-09-09, user report: "ao rolar para baixo a
+  // dex fica travada". Root cause: #app used `min-height: 100%` (a FLOOR,
+  // not a ceiling) instead of `height: 100%` - once its content (topbar +
+  // main + footer) grew taller than the viewport, #app just grew past it
+  // instead of being capped, so `main`'s flex:1/min-height:0 chain never
+  // got a bounded height to clip against. Every internal panel's own
+  // `overflow-y: auto` (.species-detail, .species-list, etc.) was already
+  // correct CSS that simply never got the chance to engage - the whole
+  // BODY scrolled instead (confirmed directly: window.scrollY moved,
+  // every inner panel's own scrollTop stayed 0). At desktop width this
+  // meant scrolling a long species' detail scrolled the search box and
+  // species list away with it. Fixed by capping #app at `height: 100%`.
+  setSearch("Charizard");
+  await wait(30);
+  const charRow3 = document.querySelector("#species-list .species-row");
+  if (charRow3) {
+    charRow3.click();
+    await wait(30);
+    const detailPanel = document.querySelector(".species-detail");
+    detailPanel.scrollTop = 500;
+    await wait(30);
+    check(".species-detail scrolls internally (not the whole page/body)",
+      detailPanel.scrollTop > 0 && window.scrollY === 0 && document.body.scrollTop === 0,
+      "detailScrollTop=" + detailPanel.scrollTop + " windowScrollY=" + window.scrollY);
+
+    // Switching to a DIFFERENT species should reset scroll to the top...
+    document.getElementById("back-to-list").click();
+    await wait(30);
+    setSearch("Bulbasaur");
+    await wait(30);
+    document.querySelector("#species-list .species-row").click();
+    await wait(30);
+    check("scroll resets to top when switching to a different species",
+      document.querySelector(".species-detail").scrollTop === 0);
+
+    // ...but refreshing the SAME species in place (e.g. after "Salvar
+    // build") must NOT yank the user back to the top - a real regression
+    // this fix could easily have introduced if not careful.
+    document.querySelector(".species-detail").scrollTop = 400;
+    await wait(30);
+    document.getElementById("mybuild-save").click();
+    await wait(50);
+    check("scroll position is preserved when the SAME species re-renders in place",
+      document.querySelector(".species-detail").scrollTop === 400,
+      document.querySelector(".species-detail").scrollTop);
+  } else { check("Charizard found for the #app height-fix test", false); }
+  setSearch("");
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

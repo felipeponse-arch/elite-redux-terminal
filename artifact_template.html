@@ -110,7 +110,26 @@
   ::selection { background: var(--accent); color: var(--accent-ink); }
 
   #app {
-    min-height: 100%;
+    /* This was the real root cause of "a dex fica travada ao rolar" (user
+       report, 2026-09-09): `min-height: 100%` sets a FLOOR, not a ceiling -
+       once #app's content (topbar + main + footer) is taller than the
+       viewport, #app just grows past it instead of being capped, which
+       means `main`'s `flex:1; min-height:0` (and everything inside it -
+       .species-detail, .species-list, etc. - each already correctly
+       `overflow-y:auto`) never actually gets a bounded height to clip
+       against. Nothing inside ever got the chance to scroll internally -
+       the whole BODY scrolled instead (confirmed directly: scrolling the
+       page moved `window.scrollY`/`document.body.scrollTop`, not any
+       inner panel's own `scrollTop`, which stayed 0 the entire time). On
+       a desktop-width Dex specifically this meant scrolling down through
+       a long species' detail scrolled the SEARCH BOX AND SPECIES LIST
+       away with it, instead of leaving that sidebar in place with its own
+       independent scroll (which its CSS already intended -
+       `.species-list { overflow-y: auto; flex: 1; }` was correct and
+       simply never got the chance to engage). `height: 100%` caps it
+       instead, so every already-correct internal `overflow-y:auto` now
+       actually does its job. */
+    height: 100%;
     display: flex;
     flex-direction: column;
   }
@@ -654,6 +673,15 @@
     background: var(--accent-2); color: var(--accent-ink);
     font-size: 12.5px; font-weight: 600; padding: 8px 14px; box-shadow: var(--shadow);
   }
+  /* The EXACT same bug as .tabs-more-panel earlier today: an author-
+     stylesheet `display` always beats the browser's native [hidden]
+     handling, regardless of the hidden attribute/property being correctly
+     set. Missed it again when adding this banner - this is why the user
+     saw "Atualizar" showing constantly even though the banner's own JS
+     logic (.hidden===true) was correct the whole time; the content-diff
+     fix alongside this one was real too, but this CSS bug alone explains
+     the reported symptom on its own. */
+  .sync-banner[hidden] { display: none; }
   .sync-banner button {
     border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700;
     cursor: pointer; background: rgba(0,0,0,.15); color: inherit;
@@ -1536,16 +1564,9 @@
   //     settings: {difficulty, milestone}, dataVersion, savedAt }
   var STORE_KEY = "er_terminal_save";
   var SCHEMA_VERSION = 2;
-  var LEGACY_KEYS = {
-    team: "er_terminal_team",
-    box: "er_terminal_box",
-    savedTeams: "er_terminal_saved_teams",
-    settings: "er_terminal_settings"
-  };
 
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
-  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
 
   function applySave(save) {
     if (!save || typeof save !== "object") return;
@@ -1641,41 +1662,10 @@
   function saveSettings() { persist(); }
   function saveSavedTeams() { persist(); }
 
-  // v1 stored raw array indices (`x`). Those are only meaningful against the
-  // data build that wrote them, so translate them to snames NOW, while this
-  // build still matches, and drop the old keys.
-  function migrateLegacy() {
-    var hadAny = false;
-    var legacy = { team: [], box: [], savedTeams: [], settings: null };
-    try {
-      var t = JSON.parse(lsGet(LEGACY_KEYS.team) || "null");
-      if (Array.isArray(t)) { legacy.team = xsToSnames(t); hadAny = true; }
-      var b = JSON.parse(lsGet(LEGACY_KEYS.box) || "null");
-      if (Array.isArray(b)) { legacy.box = xsToSnames(b); hadAny = true; }
-      var st = JSON.parse(lsGet(LEGACY_KEYS.savedTeams) || "null");
-      if (Array.isArray(st)) {
-        legacy.savedTeams = st.filter(function (x) { return x && Array.isArray(x.team); })
-          .map(function (x) { return { name: x.name, team: xsToSnames(x.team) }; });
-        hadAny = true;
-      }
-      var se = JSON.parse(lsGet(LEGACY_KEYS.settings) || "null");
-      if (se && typeof se === "object") { legacy.settings = se; hadAny = true; }
-    } catch (e) { /* corrupt legacy data: fall through to a clean start */ }
-    if (!hadAny) return null;
-    return { v: SCHEMA_VERSION, team: legacy.team, box: legacy.box, savedTeams: legacy.savedTeams, settings: legacy.settings };
-  }
-
   (function loadSave() {
     var raw = lsGet(STORE_KEY);
     if (raw) {
       try { applySave(JSON.parse(raw)); return; } catch (e) { /* fall through */ }
-    }
-    var migrated = migrateLegacy();
-    if (migrated) {
-      applySave(migrated);
-      persist();
-      Object.keys(LEGACY_KEYS).forEach(function (k) { lsDel(LEGACY_KEYS[k]); });
-      return;
     }
     // First visit on this browser: seed with Claude's latest recommendation
     // instead of starting empty, and persist so it only happens once.
@@ -1703,10 +1693,34 @@
   // real risk for real benefit here) - instead a dismissible banner offers
   // a reload, so a build the user is mid-editing is never silently
   // overwritten by a remote change arriving in the background.
-  var syncDb = null, syncRef = null, syncLastSeenAt = null;
+  // UPDATE 2026-09-09, same day: the banner was showing up "toda hora" even
+  // with nothing actually changed anywhere (user report). Root cause: this
+  // compared `savedAt` timestamps, but `savedAt` ticks forward on every
+  // persist() call - including a call that re-saves byte-identical content
+  // (e.g. this same reconciliation code unconditionally re-pushing local
+  // up on every single page load, even when local already matched remote
+  // exactly). A changed TIMESTAMP isn't the same thing as changed DATA.
+  // Switched to comparing the actual save CONTENT (team/box/savedTeams/
+  // settings/notes/customBuilds), ignoring savedAt/dataVersion entirely -
+  // the banner (and any store write at all) now only fires when something
+  // real actually differs.
+  var syncDb = null, syncRef = null;
+  var SYNC_CONTENT_KEYS = ["team", "box", "savedTeams", "settings", "notes", "customBuilds"];
+  function syncContentDiffers(a, b) {
+    if (!a || !b) return true;
+    for (var i = 0; i < SYNC_CONTENT_KEYS.length; i++) {
+      var k = SYNC_CONTENT_KEYS[i];
+      if (JSON.stringify(a[k]) !== JSON.stringify(b[k])) return true;
+    }
+    return false;
+  }
   function pushToSync(save) {
     if (!syncRef) return;
-    syncLastSeenAt = save.savedAt;
+    // persist() only ever runs from a genuine content-changing action (every
+    // call site checked directly - all gated behind a click/change event,
+    // none on mere navigation/render), so every push here is real; no need
+    // to content-diff before writing, unlike the read side below where an
+    // incoming write's REASON isn't known and has to be checked.
     syncRef.set(save).catch(function () { /* offline/transient - localStorage already has it; the next persist() retries */ });
   }
   function showSyncBanner(text) {
@@ -1725,18 +1739,20 @@
         var remote = snap.data();
         var localRaw = lsGet(STORE_KEY);
         var local = localRaw ? JSON.parse(localRaw) : null;
-        if (!local || !local.savedAt || (remote.savedAt && remote.savedAt > local.savedAt)) {
-          lsSet(STORE_KEY, JSON.stringify(remote));
-          syncLastSeenAt = remote.savedAt;
-          showSyncBanner("Encontramos um save mais novo de outro aparelho.");
-        } else {
-          syncLastSeenAt = local.savedAt;
-          syncRef.set(local).catch(function () {});
+        if (syncContentDiffers(local, remote)) {
+          if (!local || (remote.savedAt && (!local.savedAt || remote.savedAt > local.savedAt))) {
+            // Remote has real differences and is the newer (or only) copy.
+            lsSet(STORE_KEY, JSON.stringify(remote));
+            showSyncBanner("Encontramos um save mais novo de outro aparelho.");
+          } else {
+            // Local has real differences and isn't older - push it up.
+            syncRef.set(local).catch(function () {});
+          }
         }
+        // else: content already matches - nothing to write, nothing to show.
       } else {
         var localRaw2 = lsGet(STORE_KEY);
         var seed = localRaw2 ? JSON.parse(localRaw2) : buildSave();
-        syncLastSeenAt = seed.savedAt;
         syncRef.set(seed).catch(function () {});
       }
     } catch (e) { /* get() failed - stay local-only for this load; persist() keeps trying to push */ }
@@ -1744,10 +1760,11 @@
     syncRef.onSnapshot(function (snap) {
       if (!snap.exists || snap.metadata.hasPendingWrites) return;
       var remote = snap.data();
-      if (remote.savedAt && remote.savedAt !== syncLastSeenAt) {
-        lsSet(STORE_KEY, JSON.stringify(remote));
-        showSyncBanner("Seu time foi atualizado em outro aparelho agora.");
-      }
+      var localRaw3 = lsGet(STORE_KEY);
+      var local3 = localRaw3 ? JSON.parse(localRaw3) : null;
+      if (!syncContentDiffers(local3, remote)) return;
+      lsSet(STORE_KEY, JSON.stringify(remote));
+      showSyncBanner("Seu time foi atualizado em outro aparelho agora.");
     }, function () { syncDb = null; syncRef = null; });
   })();
   document.getElementById("sync-banner-reload").addEventListener("click", function () { location.reload(); });
@@ -2291,6 +2308,16 @@
   });
 
   function selectSpecies(x) {
+    // Only reset scroll when the species actually CHANGES - selectSpecies()
+    // is also called to refresh the currently-open species in place (e.g.
+    // after "Salvar build"/"Limpar" in Meu build), and yanking the user
+    // back to the top after they clicked a button deep in the page would be
+    // its own real regression. Paired with the #app height fix just above
+    // (min-height -> height, the actual root cause of "a dex fica travada"
+    // - the whole page was scrolling instead of this panel internally) -
+    // without that fix this reset would have had nothing to reset, since
+    // .species-detail's own scrollTop never moved at all before.
+    var isSameSpecies = state.selected === x;
     state.selected = x;
     var sp = getSpeciesByX(x);
     if (!sp) return;
@@ -2370,6 +2397,11 @@
         return inner ? '<div class="card"><h3>Builds de referência</h3>' + inner + '</div>' : "";
       })() +
       evoHtml + lmHtml + tuHtml;
+
+    if (!isSameSpecies) {
+      var detailPanel = document.querySelector(".species-detail");
+      if (detailPanel) detailPanel.scrollTop = 0;
+    }
 
     var backBtn = document.getElementById("back-to-list");
     if (backBtn) backBtn.addEventListener("click", function () {
