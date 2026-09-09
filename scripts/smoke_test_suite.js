@@ -530,6 +530,45 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
+  // --- 18. "+ Usar como meu build" on Dex-side reference entries -
+  // 2026-09-09, user caught that "Builds vistas em chefões" (and build
+  // history) on the Dex detail had a "copiar" button that only ever put
+  // text on the clipboard, never touched state.customBuilds or the Team
+  // tab - the OLDER of two "copy a build" mechanisms in this app, built
+  // before "Meu build" existed. Charizard's real boss-reference fixture
+  // (Courtney Mossdeep, Charizardite Y) is used here specifically because
+  // its EVs string ("252 SpA / 4 SpD / 252 Spe") exercises the new
+  // evsTextToArray() parser - the inverse of evsToShowdownText(), needed
+  // because these reference entries store EVs as a string while
+  // customBuilds needs the raw 6-number array.
+  setSearch("Charizard");
+  await wait(30);
+  const charRow2 = document.querySelector("#species-list .species-row");
+  if (charRow2) {
+    charRow2.click();
+    await wait(30);
+    const details = document.querySelector(".bh-details");
+    if (details) details.setAttribute("open", "");
+    await wait(30);
+    const useEntryBtn = document.querySelector(".use-entry-build-btn");
+    if (useEntryBtn) {
+      useEntryBtn.click();
+      await wait(50);
+      const savedChar = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").customBuilds;
+      const char = savedChar && savedChar.SPECIES_CHARIZARD;
+      check("boss-reference 'usar como meu build' copies ability/item/nature",
+        char && char.ability && char.item && char.nature, char && JSON.stringify(char));
+      check("boss-reference EVs string is correctly parsed into the raw array (evsTextToArray)",
+        char && char.evs && char.evs.reduce(function (a, b) { return a + b; }, 0) > 0 &&
+        document.getElementById("mybuild-ev-total").textContent.indexOf(String(char.evs.reduce(function (a, b) { return a + b; }, 0))) !== -1,
+        char && char.evs);
+      check("the open Dex 'Meu build' editor refreshes to show the copied values",
+        document.getElementById("mybuild-ability").value === (char && char.ability));
+    } else { check("'+ Usar como meu build' button found on a boss-reference entry", false); }
+  } else { check("Charizard found for the reference-entry build-copy test", false); }
+  setSearch("");
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

@@ -2620,13 +2620,37 @@
 
   // Shared by buildHistoryHtml and bossReferenceHtml below - same entry
   // markup either way, just a different meta line and copy-button attrs.
+  // Two DISTINCT actions, not one repurposed button, 2026-09-09 (user
+  // caught the gap: clicking "copiar" here did nothing to "Meu build" or
+  // the Team tab) - "copiar" still only puts clipboard text (someone
+  // pasting into Showdown directly shouldn't have their own saved build
+  // silently overwritten as a side effect), "+ Usar como meu build" is the
+  // new, explicit write into state.customBuilds, same button/label
+  // convention already shipped on the boss party card.
   function buildEntryHtml(sp, entry, metaHtml, copyAttrs) {
     return '<div class="bh-entry">' +
       '<div class="bh-meta">' + metaHtml +
       '<button class="bh-copy" ' + copyAttrs + ' type="button" title="Copiar este set">copiar</button></div>' +
       '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, entry)) + '</pre>' +
       (entry.note ? '<div class="ts-build-note">' + escapeHtml(entry.note) + '</div>' : '') +
+      '<button class="ts-build-copy use-entry-build-btn" ' + copyAttrs + ' type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
     '</div>';
+  }
+
+  // Inverse of evsToShowdownText() - these reference builds (build history,
+  // boss-seen builds) store EVs as that same formatted string, but
+  // state.customBuilds needs the raw 6-number array. No IVs are stored on
+  // either source, so a copy from here defaults to 31 all - same default
+  // "Meu build" itself already assumes for an unfilled IV field.
+  function evsTextToArray(text) {
+    var out = [0, 0, 0, 0, 0, 0];
+    (text || "").split("/").forEach(function (part) {
+      var m = part.trim().match(/^(\d+)\s+(\S+)$/);
+      if (!m) return;
+      var idx = STAT_LABELS_SHORT.indexOf(m[2]);
+      if (idx !== -1) out[idx] = parseInt(m[1], 10);
+    });
+    return out;
   }
 
   function evsToShowdownText(evs) {
@@ -2843,6 +2867,37 @@
     if (!entry) return;
     copyText(showdownSet(sp, entry), null, "");
     flashToast((fromBoss ? "Build de chefão do " : "Build antiga do ") + sp.n + " copiada (formato Showdown)");
+  });
+
+  // "+ Usar como meu build" on a history/boss-reference entry - 2026-09-09,
+  // user caught that the "copiar" button above never touched "Meu build" or
+  // the Team tab, only the clipboard. Same data, same effectiveBuild()
+  // priority rule (a user's own pick always wins - this just sets it),
+  // reuses the exact data-src/data-sname/data-idx attrs "copiar" already
+  // carries so there's no second lookup scheme to keep in sync.
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest && e.target.closest(".use-entry-build-btn");
+    if (!btn) return;
+    var sp = getSpeciesBySname(btn.dataset.sname);
+    if (!sp) return;
+    var fromBoss = btn.dataset.src === "boss";
+    var list = fromBoss ? BOSS_BUILDS[sp.sname] : BUILD_HISTORY[sp.sname];
+    if (!list) return;
+    var entry = fromBoss ? list[parseInt(btn.dataset.idx, 10)] : list.slice().reverse()[parseInt(btn.dataset.idx, 10)];
+    if (!entry) return;
+    state.customBuilds[sp.sname] = {
+      ability: entry.ability || "",
+      nature: entry.nature || "",
+      item: entry.item || "",
+      moves: (entry.moves || []).slice(0, 4),
+      ivs: [31, 31, 31, 31, 31, 31],
+      evs: evsTextToArray(entry.evs)
+    };
+    persist();
+    flashToast("Build " + (fromBoss ? "de chefão " : "antiga ") + "copiada pro seu \"Meu build\" de " + sp.n);
+    // Refresh the open Dex detail so "Meu build"'s fields/preview reflect
+    // this write immediately, same as every other write path already does.
+    if (document.getElementById("mybuild-ability")) selectSpecies(sp.x);
   });
 
   // A user's own "Meu build" (state.customBuilds) always wins over the
