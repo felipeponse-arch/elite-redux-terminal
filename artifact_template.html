@@ -189,6 +189,13 @@
     box-shadow: var(--shadow); padding: 4px; display: flex; flex-direction: column;
     gap: 2px; min-width: 160px;
   }
+  /* An author-stylesheet display value always beats the browser's native
+     [hidden] handling regardless of selector specificity (author origin
+     outranks user-agent origin in the cascade) - found via an actual fresh
+     page load, not just checking morePanel.hidden === true in JS, which
+     stayed correct throughout. Same fix .modal-backdrop[hidden] already
+     has below; this rule was missing here since the dropdown shipped. */
+  .tabs-more-panel[hidden] { display: none; }
   .tabs-more-panel .tab-btn { justify-content: flex-start; width: 100%; }
 
   /* min-width:0 on every flex item in this chain: without it a wide child (the
@@ -336,7 +343,15 @@
   .dash-label { color: var(--text-dim); font-weight: 600; text-transform: uppercase; font-size: 10.5px; letter-spacing: .04em; }
   .dash-value { color: var(--text); display: inline-flex; align-items: center; gap: 5px; }
   .dash-suggestion { flex-basis: 100%; }
-  .dash-suggestion .dash-value { color: var(--accent-2); }
+  /* .dash-value's inline-flex is right for the other dash-items (a short
+     pill + a couple words), but the suggestion's value is a full sentence
+     with two links stitched in - flexbox lays out each text run/link as
+     its own wrapping box instead of one flowing paragraph, which visually
+     stacked into a column of single words (found by actually looking at
+     the dashboard with a real 6-Pokemon team, not from a DOM assertion -
+     the existing smoke check only looks for the word "fracos" in the
+     text, which was still present and "passing" the whole time). */
+  .dash-suggestion .dash-value { color: var(--accent-2); display: inline; }
   .dash-suggestion .goto-species { text-decoration: underline; text-decoration-style: dotted; }
 
   .stat-row { display: grid; grid-template-columns: 90px 40px 1fr; align-items: center; gap: 10px; margin-bottom: 7px; }
@@ -498,6 +513,7 @@
     padding: 14px;
     background: var(--surface);
     min-height: 96px;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -883,6 +899,17 @@
   .footer a:hover { text-decoration: underline; }
 
   @media (max-width: 860px) {
+    /* #view-dex is the only view with two direct children (#dashboard +
+       .dex-shell) - .view.active is `display:flex` with no direction set,
+       so it defaults to row, and every screenshot so far (including this
+       project's own past mobile-review passes) happened to land wide
+       enough that a ~180px dashboard sidebar still read fine next to the
+       list. A real phone-width check (found the pane's viewport floor is
+       549px in this environment, testing narrower via width/height didn't
+       go below it - still narrow enough to show the problem) revealed
+       #dashboard squeezed to ~200px, wrapping every stat/suggestion onto
+       its own near-vertical column of single words. Stack them instead. */
+    #view-dex.active { flex-direction: column; }
     .dex-shell { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
     .dex-sidebar { display: flex; }
     /* With a detail open, keep the search box on screen and step only the
@@ -1973,6 +2000,22 @@
   }
 
   // ---------------- detail rendering ----------------
+  // Real data quirk, not a bug: 149 of 1906 species have all 3 choosable-
+  // ability slots pointing at the identical id in the raw game data (e.g.
+  // Tyranitar Mega Redux's own "abis":[444,444,444] - checked directly,
+  // this is upstream, not a splicing mistake). alwaysActiveAbilities()
+  // already treats that case as "no real choice" for the weakness table;
+  // this dedupes the same ids before they reach a card list, so a species
+  // like that shows ONE Evaporate card instead of three identical ones -
+  // found by actually opening the Dex on the user's own team member, not
+  // by reading the data cold.
+  function uniqueIds(ids) {
+    var seen = {}, out = [];
+    for (var i = 0; i < ids.length; i++) {
+      if (!seen[ids[i]]) { seen[ids[i]] = true; out.push(ids[i]); }
+    }
+    return out;
+  }
   function abilityCard(id, kindLabel, kindClass) {
     var a = ABILITIES[id];
     if (!a) return "";
@@ -2121,7 +2164,7 @@
         '<div class="stat-bar-track"><div class="stat-bar-fill ' + statTier(v) + '" style="width:' + statPct(v) + '%"></div></div></div>';
     }).join("");
 
-    var abiHtml = sp.ab.map(function (id) { return abilityCard(id, "Escolhível", "choosable"); }).join("");
+    var abiHtml = uniqueIds(sp.ab).map(function (id) { return abilityCard(id, "Escolhível", "choosable"); }).join("");
     var innHtml = sp.inn.map(function (id) { return abilityCard(id, "Innate", "innate"); }).join("");
 
     var evoHtml = "";
@@ -2485,7 +2528,7 @@
       if (members[i]) {
         var sp = members[i];
         var names = speciesTypeNames(sp);
-        var abiNames = sp.ab.map(function (id) { return ABILITIES[id][0]; }).join(", ");
+        var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ");
         var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ");
         var build = BUILDS[sp.sname];
         var buildHtml = build ? (

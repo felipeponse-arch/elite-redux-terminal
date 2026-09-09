@@ -156,6 +156,13 @@ async function runLiveTests() {
   const moreToggle = document.getElementById("tabs-more-toggle");
   const morePanel = document.getElementById("tabs-more-panel");
   check("Mais panel starts hidden", morePanel.hidden === true);
+  // The DOM property alone missed a real bug: .tabs-more-panel's own
+  // `display: flex` (an author rule) always beat the browser's native
+  // [hidden] handling regardless of the hidden attribute/property being
+  // correctly set - found 2026-09-09 by actually looking at a fresh page
+  // load, not by reading this same assertion. Check the rendered box too.
+  check("Mais panel is actually invisible while hidden (not just .hidden===true)",
+    getComputedStyle(morePanel).display === "none");
   moreToggle.click();
   check("Mais panel opens on click", morePanel.hidden === false);
   const progressInPanel = morePanel.querySelector('[data-tab="progress"]');
@@ -307,6 +314,60 @@ async function runLiveTests() {
   // (not vanilla's x2 - this hack's own rebalance) on BOTH Atk and SpA.
   await checkItemFlag("Wattson 1", "Raichu Alolan", "insane", "Atk", "Light Ball (x1.5)");
   await checkItemFlag("Wattson 1", "Raichu Alolan", "insane", "SpA", "Light Ball (x1.5)");
+
+  // --- 14. real usability pass, 2026-09-09 - 3 more bugs found by actually
+  // using the app (real team, real narrow viewport), not by reading DOM
+  // state cold. All root-caused before fixing, not guessed at.
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  setSearch("Tyranitar Mega Redux");
+  await wait(30);
+  const ttarRow = document.querySelector("#species-list .species-row");
+  if (ttarRow) {
+    ttarRow.click();
+    await wait(30);
+    // Raw game data has this species' 3 choosable-ability slots all
+    // pointing at the same id ("abis":[444,444,444], checked directly -
+    // true for 149/1906 species, not a splicing bug) - it used to render
+    // the identical "Evaporate" card 3 times.
+    const choosable = [...document.querySelectorAll("#species-detail .abi-card")]
+      .filter(c => c.querySelector(".abi-kind").textContent === "Escolhível");
+    check("duplicate choosable abilities collapse to one card (Tyranitar Mega Redux)",
+      choosable.length === 1, choosable.length + " cards");
+  } else { check("Tyranitar Mega Redux (duplicate-ability fixture) found", false); }
+  setSearch("");
+  await wait(30);
+
+  // Dashboard suggestion sentence used to render as flexbox children
+  // (each text run/link its own wrapping box) instead of one flowing
+  // paragraph - visually stacked into a column of single words. The team
+  // seeded at the top of this suite is full (6/6), so the suggestion
+  // should be showing.
+  const dashVal = document.querySelector(".dash-suggestion .dash-value");
+  // The fix sets `display: inline`, but a flex item's outer display is
+  // always "blockified" per spec regardless of the specified value, so the
+  // COMPUTED style correctly reports "block" here, not "inline" - checked
+  // this against the live page instead of assuming, after the first
+  // version of this assertion (checking for "inline" literally) failed on
+  // a working fix. What actually matters is that it's neither of the flex
+  // values that caused the bug.
+  check("dashboard suggestion text flows as a paragraph (not flex children)",
+    dashVal && getComputedStyle(dashVal).display !== "flex" && getComputedStyle(dashVal).display !== "inline-flex",
+    dashVal && getComputedStyle(dashVal).display);
+
+  // Team-slot cards used to force the whole page to scroll horizontally on
+  // a narrow screen - a CSS grid item's default min-width:auto blocked it
+  // from shrinking to its track's width, so its <pre> build block (which
+  // already had its own overflow-x:auto) never got the chance to self-
+  // scroll instead. Checking the computed min-width directly is cheaper
+  // and just as real a regression guard as resizing the viewport here.
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  const tslot = document.querySelector(".team-slot");
+  check("team-slot can shrink below its content's natural width (min-width:0)",
+    tslot && getComputedStyle(tslot).minWidth === "0px", tslot && getComputedStyle(tslot).minWidth);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
 
   localStorage.clear();
 
