@@ -266,6 +266,48 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
+  // --- 13. boss held-item stat modifiers, round 2 - 2026-09-09, field
+  // research into the hack's real item source (er-config textproto +
+  // pokemon-showdown-ER data/items.ts) confirmed Tactical Vest, Thick Club
+  // and Light Ball. Light Ball is the interesting case: species-gated with
+  // a DIFFERENT multiplier for Pikachu (x2) vs Raichu (x1.5), and applies to
+  // TWO stats (Atk and SpA) at once - the other checks only ever exercise
+  // one flagged stat, so this is the one case actually testing itemRuleFor's
+  // species-prefix + multi-rule logic instead of a single flat lookup.
+  async function checkItemFlag(bossQuery, monPrefix, diffKey, statLabel, itemLabel) {
+    document.querySelector('.tab-btn[data-tab="bosses"]').click();
+    await wait(50);
+    document.getElementById("boss-search-input").value = bossQuery;
+    document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
+    await wait(30);
+    const row = document.querySelector("#boss-list .species-row");
+    if (!row) { check(bossQuery + " (fixture boss) found", false); return; }
+    row.click();
+    await wait(50);
+    if (diffKey) {
+      const diffBtn = document.querySelector('.chip-btn[data-diff="' + diffKey + '"]');
+      if (diffBtn) { diffBtn.click(); await wait(50); }
+    }
+    const card = [...document.querySelectorAll(".boss-mon-card")].find(c => c.querySelector(".bm-name").textContent.indexOf(monPrefix) === 0);
+    if (!card) { check(monPrefix + " (fixture) found on " + bossQuery, false); return; }
+    const stat = [...card.querySelectorAll(".bm-stat")].find(s => s.querySelector(".bm-stat-label").textContent === statLabel);
+    const flag = stat && stat.querySelector(".cov-flag");
+    check(itemLabel + " flags " + statLabel + " on " + monPrefix, flag && flag.title.indexOf(itemLabel) === 0, flag && flag.title);
+    document.getElementById("boss-search-input").value = "";
+    document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
+    document.getElementById("boss-shell").classList.remove("show-detail");
+    document.querySelector('.tab-btn[data-tab="dex"]').click();
+    await wait(30);
+  }
+  // Archie Slateport, Hell tier: Swampert holds Tactical Vest.
+  await checkItemFlag("Archie Slateport", "Swampert", "hell", "Def", "Tactical Vest");
+  // Phoebe 4: Marowak Alolan holds Thick Club.
+  await checkItemFlag("Phoebe 4", "Marowak Alolan", null, "Atk", "Thick Club");
+  // Wattson 1, Insane tier: Raichu Alolan holds Light Ball, boosted at x1.5
+  // (not vanilla's x2 - this hack's own rebalance) on BOTH Atk and SpA.
+  await checkItemFlag("Wattson 1", "Raichu Alolan", "insane", "Atk", "Light Ball (x1.5)");
+  await checkItemFlag("Wattson 1", "Raichu Alolan", "insane", "SpA", "Light Ball (x1.5)");
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
