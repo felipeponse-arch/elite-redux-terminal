@@ -21,6 +21,19 @@
     --sem-immune: #6b3fa0;
     --focus: #1f9e93;
     --shadow: 0 8px 24px -12px rgb(32 29 22 / 0.35);
+    /* Badge-only text-safe variants of --accent/--accent-2/--sem-resist,
+       LIGHT mode only (dark mode reuses the plain tokens below unchanged -
+       they already clear AA there). Accessibility review, 2026-09-09:
+       measured that --accent/--accent-2/--sem-resist at full saturation
+       fall short of WCAG AA 4.5:1 as TEXT against a light surface (4.27,
+       4.45, 4.08) - not something tinting a background can fix, since a
+       fainter version of an already-too-light color only gets fainter.
+       These are ~10% darker (same hue), which alone clears 4.5:1 - not a
+       change to the actual brand/accent colors used everywhere else in the
+       app, scoped to rank badges only to keep the blast radius small. */
+    --badge-accent: #c3421c;
+    --badge-accent2: #10796e;
+    --badge-resist: #1c8156;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
@@ -41,6 +54,11 @@
       --sem-immune: #b28ce0;
       --focus: #3fd8c8;
       --shadow: 0 8px 28px -12px rgb(0 0 0 / 0.55);
+      /* Dark mode's plain --accent/--accent-2/--sem-resist already clear
+         AA as text (6.3-9.2:1 measured) - no darkening needed here. */
+      --badge-accent: #ff7a45;
+      --badge-accent2: #3fd8c8;
+      --badge-resist: #4fce93;
       color-scheme: dark;
     }
   }
@@ -61,6 +79,9 @@
     --sem-immune: #b28ce0;
     --focus: #3fd8c8;
     --shadow: 0 8px 28px -12px rgb(0 0 0 / 0.55);
+    --badge-accent: #ff7a45;
+    --badge-accent2: #3fd8c8;
+    --badge-resist: #4fce93;
     color-scheme: dark;
   }
 
@@ -720,26 +741,45 @@
   .cov-immune { background: color-mix(in srgb, var(--sem-immune) 26%, transparent); color: var(--sem-immune); }
   .cov-neutral { color: var(--text-dim); }
 
-  /* Species rank badge - same tinted-background-plus-saturated-text pattern
-     as .cov-weak/.cov-resist/.cov-immune above, reusing the same tokens, so
-     "purple = exceptional" etc. reads consistently across the whole app. */
+  /* Species rank badge. Originally used the same translucent-tint pattern as
+     .cov-weak/.cov-resist/.cov-immune above - accessibility review,
+     2026-09-09, MEASURED (actual WCAG relative-luminance contrast ratios,
+     not eyeballed) that several tiers fell short of the 4.5:1 AA minimum
+     for normal-size text: in light mode S/A/B were only 3.0-3.3:1 tinted,
+     and their FULL-saturation color already falls short of white
+     (--accent 4.27, --sem-resist 4.08, --accent-2 4.45 - a tint can only
+     make that worse, never better). Switched to a solid background (each
+     tier's real color, ~10% darker for the three light-mode offenders -
+     see --badge-accent/--badge-accent2/--badge-resist above) with
+     --accent-ink text, the same computed-contrast approach typePill()
+     already uses for type colors. Verified: every tier now clears 4.5:1 in
+     both themes (worst case 4.65:1, light mode A-tier).
+     NOTE: .cov-weak/.cov-resist/.cov-immune above have this SAME underlying
+     problem (same tint percentages) and were NOT touched in this pass -
+     they're used in more places (the type matrix, team coverage table) and
+     deserve their own dedicated pass rather than a rushed fix bundled into
+     this one. Flagged, not fixed yet. */
   .rank-badge {
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 20px; height: 17px; padding: 0 4px; border-radius: 5px;
     font-size: 10px; font-weight: 800; font-family: "IBM Plex Mono", monospace;
     letter-spacing: .02em; cursor: help; flex: none;
+    color: var(--accent-ink);
   }
-  .rank-badge.tier-SS { background: color-mix(in srgb, var(--sem-immune) 26%, transparent); color: var(--sem-immune); }
-  .rank-badge.tier-S  { background: color-mix(in srgb, var(--accent) 24%, transparent); color: var(--accent); }
-  .rank-badge.tier-A  { background: color-mix(in srgb, var(--sem-resist) 22%, transparent); color: var(--sem-resist); }
-  .rank-badge.tier-B  { background: color-mix(in srgb, var(--accent-2) 22%, transparent); color: var(--accent-2); }
-  .rank-badge.tier-C  { background: var(--surface-3); color: var(--text-dim); }
-  .rank-badge.tier-D  { background: color-mix(in srgb, var(--sem-weak) 20%, transparent); color: var(--sem-weak); }
+  .rank-badge.tier-SS { background: var(--sem-immune); }
+  .rank-badge.tier-S  { background: var(--badge-accent); }
+  .rank-badge.tier-A  { background: var(--badge-resist); }
+  .rank-badge.tier-B  { background: var(--badge-accent2); }
+  .rank-badge.tier-C  { background: var(--surface-3); color: var(--text); }
+  .rank-badge.tier-D  { background: var(--sem-weak); }
 
-  /* Stage-relative badge - same tier colors, but outlined instead of filled
-     so it visually reads as "secondary/contextual" next to the plain rank
-     badge, not a second opinion on the same question. Dex only (list +
-     detail) - see rankStageBadgeHtml(). */
+  /* Stage-relative badge - outlined instead of filled so it visually reads
+     as "secondary/contextual" next to the plain rank badge, not a second
+     opinion on the same question. Dex only (list + detail) - see
+     rankStageBadgeHtml(). Text-on-surface, so it needs the SAME
+     accessibility-safe tokens as .rank-badge above for S/A/B (verified:
+     worst case 4.65:1 in light mode); SS/D/C's plain tokens already cleared
+     4.5:1 as text without adjustment. */
   .rank-badge-stage {
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 20px; height: 17px; padding: 0 4px; border-radius: 5px;
@@ -748,10 +788,10 @@
     border: 1.5px solid currentColor;
   }
   .rank-badge-stage.tier-SS { color: var(--sem-immune); }
-  .rank-badge-stage.tier-S  { color: var(--accent); }
-  .rank-badge-stage.tier-A  { color: var(--sem-resist); }
-  .rank-badge-stage.tier-B  { color: var(--accent-2); }
-  .rank-badge-stage.tier-C  { color: var(--text-dim); }
+  .rank-badge-stage.tier-S  { color: var(--badge-accent); }
+  .rank-badge-stage.tier-A  { color: var(--badge-resist); }
+  .rank-badge-stage.tier-B  { color: var(--badge-accent2); }
+  .rank-badge-stage.tier-C  { color: var(--text); }
   .rank-badge-stage.tier-D  { color: var(--sem-weak); }
 
   .rank-info-line { display: flex; flex-wrap: wrap; gap: 16px; margin: -4px 0 14px; }

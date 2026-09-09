@@ -53,6 +53,35 @@ $dex = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "dex_compact.json
 $bosses = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "bosses.json") -Raw -Encoding UTF8))
 $pt = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "ability_translations_pt.json") -Raw -Encoding UTF8))
 
+# Order guard (architecture review, 2026-09-09): this script must run AFTER
+# expand_combo_abilities.ps1, because Score-AbilityText reads the EXPANDED
+# text - a raw "A + B" combo description matches none of its patterns and
+# silently scores 0. Nothing enforced that ordering except a comment in
+# build.ps1, so a reordering mistake would miscore all 151 combo abilities
+# quietly. Detect it the same way expand_combo_abilities.ps1 detects a combo
+# (name matches "X + Y" against known ability names) and fail loud if the
+# translated text hasn't actually been expanded (no "`n- " marker).
+$byName = @{}
+for ($i = 0; $i -lt $dex.abilities.Count; $i++) {
+    $n = $dex.abilities[$i][0]
+    if ($n -and -not $byName.ContainsKey($n)) { $byName[$n] = $i }
+}
+$unexpanded = New-Object System.Collections.ArrayList
+for ($i = 0; $i -lt $dex.abilities.Count; $i++) {
+    $rawDesc = $dex.abilities[$i][1]
+    if (-not $rawDesc -or $rawDesc -notmatch '\+') { continue }
+    $parts = ($rawDesc.TrimEnd('.').Trim()) -split '\s*\+\s*'
+    if ($parts.Count -lt 2) { continue }
+    $isCombo = $true
+    foreach ($p in $parts) { if (-not $byName.ContainsKey($p.Trim())) { $isCombo = $false; break } }
+    if (-not $isCombo) { continue }
+    $translated = $pt["$i"]
+    if (-not $translated -or $translated -notmatch "`n-") { [void]$unexpanded.Add($dex.abilities[$i][0]) }
+}
+if ($unexpanded.Count -gt 0) {
+    throw "compute_species_rank.ps1: $($unexpanded.Count) combo abilities are not expanded in ability_translations_pt.json ($($unexpanded -join ', ')) - run expand_combo_abilities.ps1 before this script (build.ps1 already orders this correctly; if you're running compute_species_rank.ps1 standalone, run expand_combo_abilities.ps1 first)."
+}
+
 $abilityScoreCache = @{}
 function Get-AbilityScore([int]$id) {
     $key = [string]$id

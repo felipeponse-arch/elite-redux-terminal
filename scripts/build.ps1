@@ -24,6 +24,28 @@ $templatePath = Join-Path $root "artifact_template.html"
 $outPath = Join-Path $root "artifact_final.html"
 
 if (-not $SkipExtract) {
+    # Back-end review, 2026-09-09: this used to be a manual step nobody was
+    # forced to remember - same class of risk as slim_dex.ps1/
+    # expand_combo_abilities.ps1 used to be before they got wired in. Only
+    # runs here (not on -SkipExtract, which never touches game data at all)
+    # so routine template-only iteration doesn't pay a network round-trip.
+    # A warning, not a hard failure: drift means "don't trust a build/strategy
+    # off this data without re-checking", not "nothing can be built right
+    # now" - hard-blocking would stop even unrelated template work the
+    # moment upstream changes, which is worse than a loud warning.
+    Write-Output "--- checking upstream data for drift ---"
+    & (Join-Path $PSScriptRoot "check_upstream.ps1")
+    if ($LASTEXITCODE -ne 0) {
+        Write-Output ""
+        Write-Output "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        Write-Output "!! UPSTREAM DATA DRIFT DETECTED (or check failed) - see details above.  !!"
+        Write-Output "!! Builds/strategy suggestions may be based on stale game data. Run     !!"
+        Write-Output "!! scripts\check_upstream.ps1 directly for the full report.             !!"
+        Write-Output "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        Write-Output ""
+    } else {
+        Write-Output "  em dia."
+    }
     Write-Output "--- regenerating dex_compact.json and bosses.json from raw source ---"
     & (Join-Path $PSScriptRoot "transform.ps1")
     & (Join-Path $PSScriptRoot "extract_bosses.ps1")
