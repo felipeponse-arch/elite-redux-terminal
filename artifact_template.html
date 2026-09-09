@@ -2750,9 +2750,31 @@
     flashToast((fromBoss ? "Build de chefão do " : "Build antiga do ") + sp.n + " copiada (formato Showdown)");
   });
 
+  // A user's own "Meu build" (state.customBuilds) always wins over the
+  // curated one (BUILDS/builds.json) when both exist for the same species -
+  // it's THEIR pick, made deliberately in the Dex editor; the curated one is
+  // a starting suggestion, not something that should keep overriding a
+  // choice the user already made. Centralized here so the team-slot card,
+  // "copy whole team", and the per-slot copy button can't disagree about
+  // which build is actually showing - found a real bug in this session
+  // where renderTeam() only ever read BUILDS, so a saved "Meu build" from
+  // the Dex never reached the Team tab at all (user feedback, 2026-09-09).
+  function effectiveBuild(sp) {
+    var custom = state.customBuilds[sp.sname];
+    if (custom) {
+      // Normalized to the exact shape showdownSet()/renderTeam() already
+      // expect from a BUILDS entry (evs as a formatted string, not the raw
+      // 6-number array customBuilds actually stores) - found live: without
+      // this, the preview printed "EVs: 0,252,0,0,0,0" (Array.toString()
+      // via string concatenation) instead of "EVs: 252 Atk".
+      return { ability: custom.ability, nature: custom.nature, item: custom.item, evs: evsToShowdownText(custom.evs), moves: custom.moves };
+    }
+    return BUILDS[sp.sname] || null;
+  }
+
   function showdownTeam() {
     return state.team.map(getSpeciesByX).filter(Boolean).map(function (sp) {
-      var b = BUILDS[sp.sname];
+      var b = effectiveBuild(sp);
       return b ? showdownSet(sp, b) : showdownName(sp.n) + "\n(sem build definida)";
     }).join("\n\n");
   }
@@ -2767,16 +2789,17 @@
         var names = speciesTypeNames(sp);
         var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ");
         var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ");
-        var build = BUILDS[sp.sname];
+        var isCustomBuild = !!state.customBuilds[sp.sname];
+        var build = effectiveBuild(sp);
         var buildHtml = build ? (
           '<div class="ts-build">' +
-            '<div class="ts-build-head"><span class="ts-build-label">Build (formato Showdown)</span>' +
+            '<div class="ts-build-head"><span class="ts-build-label">' + (isCustomBuild ? "Meu build" : "Build (formato Showdown)") + '</span>' +
               '<button class="ts-build-copy" data-x="' + sp.x + '" type="button" title="Copiar este set">copiar</button></div>' +
             '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
             (build.note ? '<div class="ts-build-note">' + escapeHtml(build.note) + '</div>' : '') +
           '</div>'
         ) : (
-          '<div class="ts-build ts-build-empty">Sem build salva ainda — peça uma ao Claude na conversa.</div>'
+          '<div class="ts-build ts-build-empty">Sem build salva ainda — monte uma na ficha do Pokémon na Dex, ou peça uma ao Claude numa conversa.</div>'
         );
         var swapOpen = teamSwapIdx === i;
         slots.push('<div class="team-slot' + (swapOpen ? ' swapping' : '') + '"><div>' +
@@ -2825,7 +2848,7 @@
     slotsEl.querySelectorAll(".ts-build-copy").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var sp = getSpeciesByX(parseInt(btn.dataset.x, 10));
-        copyText(showdownSet(sp, BUILDS[sp.sname]), null, "");
+        copyText(showdownSet(sp, effectiveBuild(sp)), null, "");
         flashToast("Set do " + sp.n + " copiado (formato Showdown)");
       });
     });
@@ -3208,6 +3231,24 @@
         var ta = document.getElementById("boss-export-text");
         copyText(ta.value, document.getElementById("boss-export-status"), "Copiado! Cole na conversa com o Claude.", ta);
       }
+      var buildBtn = e.target && e.target.closest && e.target.closest(".use-boss-build-btn");
+      if (buildBtn) {
+        var boss = BOSSES[bossState.selected];
+        var party = boss && boss[bossState.diff || "party"];
+        var m = party && party[parseInt(buildBtn.dataset.idx, 10)];
+        var sp = m && getSpeciesByX(m.x);
+        if (!sp) return;
+        state.customBuilds[sp.sname] = {
+          ability: m.abi || "",
+          nature: m.nat || "",
+          item: m.item || "",
+          moves: (m.mv || []).slice(0, 4),
+          ivs: m.ivsRaw.slice(),
+          evs: m.evsRaw.slice()
+        };
+        persist();
+        flashToast("Build do " + m.n + " copiado pro seu \"Meu build\" - vá na Dex pra ver/ajustar");
+      }
     });
 
     renderBossList();
@@ -3285,7 +3326,7 @@
       return '<button class="chip-btn' + active + '" data-diff="' + k + '" type="button" style="margin-right:6px;">' + DIFF_LABELS[k] + '</button>';
     }).join("") : "";
 
-    var monsHtml = party.map(function (m) {
+    var monsHtml = party.map(function (m, idx) {
       var sp = getSpeciesByX(m.x);
       // Mega Evolution / Primal Reversion, 2026-09-09 (user's follow-up
       // question on the held-item pass): a Mega Stone or Primal orb doesn't
@@ -3361,6 +3402,17 @@
         (m.evs ? '<div class="bm-row"><b>EVs:</b> ' + escapeHtml(m.evs) + '</div>' : "") +
         '<div class="bm-row"><b>Golpes:</b> ' + escapeHtml(m.mv.join(" / ")) + '</div>' +
         statsHtml +
+        // Copies this boss party member's build straight into "Meu build"
+        // for the same species - 2026-09-09, user feedback: the only way to
+        // act on a boss's set was to export text and paste it into a chat.
+        // Saved under the BASE (held) species' sname, even when Mega/Primal
+        // transformed - the held item IS the mega stone/orb itself, so a
+        // player's own copy of that Pokemon holding the same item would
+        // transform the same way. Only offered when the base species and
+        // its raw EV/IV arrays actually resolve (same guard as statsHtml).
+        (sp && m.evsRaw && m.ivsRaw
+          ? '<button class="ts-build-copy use-boss-build-btn" data-idx="' + idx + '" type="button" style="margin-top:8px;">+ Usar como meu build (' + escapeHtml(m.n) + ')</button>'
+          : "") +
       '</div>';
     }).join("");
 

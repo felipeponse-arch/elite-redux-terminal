@@ -458,6 +458,78 @@ async function runLiveTests() {
   setSearch("");
   await wait(30);
 
+  // --- 17. "Meu build" reaching the Team tab + boss-build copy - 2026-09-09,
+  // user feedback: a build saved in the Dex never showed up on the Team
+  // tab (renderTeam() only ever read the curated BUILDS table, never
+  // state.customBuilds), and the only way to act on a boss's set was to
+  // export text and paste it into a separate chat. Also caught a real
+  // formatting bug while fixing this: effectiveBuild() first passed
+  // customBuilds' raw EVs array straight into showdownSet(), which just
+  // string-concatenates it - printed "EVs: 0,252,0,0,0,0" instead of
+  // "EVs: 252 Atk" until normalized through evsToShowdownText().
+  setSearch("Tyranitar Mega Redux"); // already on the seeded team
+  await wait(30);
+  const ttarRow2 = document.querySelector("#species-list .species-row");
+  if (ttarRow2) {
+    ttarRow2.click();
+    await wait(30);
+    function setSel2(id, v) { const e = document.getElementById(id); e.value = v; e.dispatchEvent(new Event("change", { bubbles: true })); }
+    setSel2("mybuild-nature", "Timid");
+    document.getElementById("mybuild-ev-5").value = 252;
+    document.getElementById("mybuild-save").click();
+    await wait(50);
+  } else { check("Tyranitar Mega Redux found for cross-tab build test", false); }
+  setSearch("");
+  await wait(30);
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  // Team order follows state.team's insertion order - Tyranitar Mega Redux
+  // was added LAST in the seed at the top of this suite, so a bare
+  // querySelector(".ts-build-label") would silently grab the FIRST slot's
+  // label instead (Aerodactyl Mega, which has an unrelated curated build)
+  // - caught by actually running this against the live page, not by
+  // reading the assertion and assuming it checked the right element.
+  const ttarSlot = [...document.querySelectorAll(".team-slot")].find(s => s.textContent.indexOf("Tyranitar Mega Redux") !== -1);
+  const teamBuildLabel = ttarSlot && ttarSlot.querySelector(".ts-build-label");
+  const teamBuildText = ttarSlot && ttarSlot.querySelector(".showdown-block");
+  check("a build saved in the Dex shows up on the Team tab, labeled as mine",
+    teamBuildLabel && teamBuildLabel.textContent === "Meu build", teamBuildLabel && teamBuildLabel.textContent);
+  check("EVs render as a formatted string on the Team tab (not the raw array's default toString)",
+    teamBuildText && teamBuildText.textContent.indexOf("252 Spe") !== -1 && teamBuildText.textContent.indexOf(",") === -1,
+    teamBuildText && teamBuildText.textContent);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
+  document.querySelector('.tab-btn[data-tab="bosses"]').click();
+  await wait(50);
+  document.getElementById("boss-search-input").value = "Greta";
+  document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
+  await wait(30);
+  const gretaRow2 = document.querySelector("#boss-list .species-row");
+  if (gretaRow2) {
+    gretaRow2.click();
+    await wait(50);
+    const useBtn = document.querySelector(".use-boss-build-btn");
+    if (useBtn) {
+      useBtn.click();
+      await wait(30);
+      var savedLando = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").customBuilds;
+      var lando = savedLando && savedLando.SPECIES_LANDORUS_THERIAN;
+      check("'usar como meu build' copies the boss's real ability/item/nature",
+        lando && lando.ability === "Moxie" && lando.item === "Choice Band" && lando.nature === "Adamant",
+        lando && JSON.stringify(lando));
+      check("'usar como meu build' copies the boss's real EVs (not the default 0s)",
+        lando && lando.evs && lando.evs[1] === 252 && lando.evs[5] === 252, lando && lando.evs);
+      check("'usar como meu build' copies the boss's real moves",
+        lando && lando.moves && lando.moves.indexOf("Earthquake") !== -1 && lando.moves.length === 4, lando && lando.moves);
+    } else { check("'usar como meu build' button found on Landorus Therian", false); }
+  } else { check("Greta Slateport found for the boss-build-copy test", false); }
+  document.getElementById("boss-search-input").value = "";
+  document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
+  document.getElementById("boss-shell").classList.remove("show-detail");
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
