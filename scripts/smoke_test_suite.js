@@ -188,6 +188,56 @@ async function runLiveTests() {
     await wait(30);
   }
 
+  // --- 10. boss final-stat calculator - 2026-09-09 field-research follow-up ---
+  document.querySelector('.tab-btn[data-tab="bosses"]').click();
+  await wait(50);
+  const bossRow = document.querySelector("#boss-list .species-row");
+  if (bossRow) {
+    bossRow.click();
+    await wait(50);
+    const levelInput = document.getElementById("boss-level-input");
+    check("boss level input exists with a sensible default", levelInput && parseInt(levelInput.value, 10) >= 1);
+    check("stats render for at least one boss party member", !!document.querySelector(".bm-stats"));
+    if (levelInput) {
+      var hpBefore = document.querySelector(".bm-stats .bm-stat .mono").textContent;
+      levelInput.value = "100";
+      levelInput.dispatchEvent(new Event("change", { bubbles: true }));
+      await wait(30);
+      var hpAfter = document.querySelector(".bm-stats .bm-stat .mono").textContent;
+      check("changing level recomputes stats (HP changes) without losing the typed value",
+        document.getElementById("boss-level-input").value === "100" && hpAfter !== hpBefore,
+        "before=" + hpBefore + " after=" + hpAfter);
+    }
+    document.getElementById("boss-shell").classList.remove("show-detail");
+  } else {
+    check("at least one boss found to test the stat calculator", false);
+  }
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
+  // --- 11. "Minhas anotações" + move-row type tint - 2026-09-09, third field-research follow-up ---
+  setSearch("Charizard");
+  await wait(30);
+  const cRow = document.querySelector("#species-list .species-row");
+  if (cRow) {
+    cRow.click();
+    await wait(30);
+    const notesArea = document.getElementById("species-notes-input");
+    check("notes textarea renders", !!notesArea);
+    if (notesArea) {
+      notesArea.value = "teste automatizado";
+      document.getElementById("species-notes-save").click();
+      await wait(30);
+      var savedNote = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+      check("note saved to localStorage under the sname",
+        savedNote.notes && savedNote.notes.SPECIES_CHARIZARD === "teste automatizado");
+    }
+    const moveRow = document.querySelector(".moves-table .move-row");
+    check("move row has a type-tinted background", moveRow && moveRow.style.background.indexOf("color-mix") !== -1);
+  } else { check("Charizard found for notes/move-tint test", false); }
+  setSearch("");
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

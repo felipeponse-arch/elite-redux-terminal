@@ -480,6 +480,18 @@
   .boss-mon-card .bm-types { display: flex; gap: 5px; }
   .boss-mon-card .bm-row { font-size: 11.5px; color: var(--text-dim); line-height: 1.5; }
   .boss-mon-card .bm-row b { color: var(--text); font-weight: 600; }
+  .boss-level-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 2px; }
+  .boss-level-row label { font-size: 12.5px; color: var(--text-dim); }
+  #boss-level-input {
+    width: 62px; padding: 5px 8px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-size: 13px;
+  }
+  .bm-stats {
+    display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; padding-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+  .bm-stat { display: inline-flex; align-items: baseline; gap: 4px; font-size: 11.5px; }
+  .bm-stat-label { color: var(--text-dim); }
   .team-slot {
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -725,6 +737,20 @@
     font-size: 11.5px;
     resize: vertical;
   }
+  .notes-textarea {
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 12.5px;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 8px;
+  }
+  .notes-actions { display: flex; align-items: center; gap: 10px; }
+  .notes-status { font-size: 11.5px; color: var(--accent-2); }
   .sr-only {
     position: absolute;
     width: 1px; height: 1px;
@@ -1433,7 +1459,16 @@
     // recognise (e.g. a save made on a newer game version). Kept verbatim
     // and written back by buildSave() so importing an old save into this
     // build, then saving again, doesn't delete those Pokemon for good.
-    orphans: { team: [], box: [] }
+    orphans: { team: [], box: [] },
+    // Free-text notes per species, sname-keyed - "minhas anotações", 2026-09-09
+    // field research follow-up: the official NextDex for this same game has
+    // a per-species notes field the PLAYER fills in, separate from anything
+    // the site curates - this project had build history and boss-reference
+    // builds (both things I write), but nothing where the user writes
+    // something themselves without going through me. Purely additive field,
+    // safe default {} for any save saved before this existed - no
+    // SCHEMA_VERSION bump needed, same pattern as adding `orphans` earlier.
+    notes: {}
   };
 
   // ---------------- persistence ----------------
@@ -1483,6 +1518,15 @@
       if (state.settings.milestone < 0) state.settings.milestone = 0;
       if (state.settings.milestone > maxMilestone) state.settings.milestone = maxMilestone;
     }
+    // Defensive on import: only keep string values, so a hand-edited or
+    // corrupted save can't inject something odd into a field that gets
+    // rendered as plain text.
+    state.notes = {};
+    if (save.notes && typeof save.notes === "object") {
+      Object.keys(save.notes).forEach(function (k) {
+        if (typeof save.notes[k] === "string" && save.notes[k]) state.notes[k] = save.notes[k];
+      });
+    }
   }
 
   function buildSave() {
@@ -1493,7 +1537,8 @@
       team: xsToSnames(state.team).concat(state.orphans.team),
       box: xsToSnames(state.box).concat(state.orphans.box),
       savedTeams: state.savedTeams,
-      settings: state.settings
+      settings: state.settings,
+      notes: state.notes
     };
   }
 
@@ -1552,6 +1597,47 @@
   function getCurrentCap() {
     if (!LEVELCAPS || !LEVELCAPS.rows[state.settings.milestone]) return null;
     return LEVELCAPS.rows[state.settings.milestone][state.settings.difficulty];
+  }
+
+  // Final-stat calculator for boss Pokemon - 2026-09-09 field research +
+  // approved next step. Deliberately NOT a full damage calculator (that idea
+  // was aborted the same day: no trainer in the raw data has a level field
+  // anywhere, so a real damage calc would need a level from somewhere we
+  // can't source with confidence). This sidesteps that exact problem: the
+  // user TYPES the level in (they can read it off their own screen), the
+  // tool never asserts one. The stat formula itself (base+IV+EV -> final
+  // stat, nature +/-10%) is the same since Gen 3 and not something a
+  // data-only ROM hack rewrites, so it's safe to hardcode - unlike level,
+  // which is genuinely unknowable from this project's data.
+  // Shows the RAW final stat only - no in-battle ability/item/stage
+  // modifiers (e.g. a +50% Choice Band). That's a deliberate scope line,
+  // not an oversight: this is "what does the stat screen say", the same
+  // thing showdownSet()/the Dex stat bars already show for the player's own
+  // side, not an attempt to simulate a turn.
+  var NATURE_MODS = {
+    Lonely: [1, 2], Brave: [1, 5], Adamant: [1, 3], Naughty: [1, 4],
+    Bold: [2, 1], Relaxed: [2, 5], Impish: [2, 3], Lax: [2, 4],
+    Timid: [5, 1], Hasty: [5, 2], Jolly: [5, 3], Naive: [5, 4],
+    Modest: [3, 1], Mild: [3, 2], Quiet: [3, 5], Rash: [3, 4],
+    Calm: [4, 1], Gentle: [4, 2], Sassy: [4, 5], Careful: [4, 3]
+    // Hardy/Docile/Serious/Bashful/Quirky are neutral - no entry, falls
+    // through to the no-modifier case below.
+  };
+  function calcFinalStat(base, iv, ev, level, statIdx, natureName) {
+    iv = (typeof iv === "number") ? iv : 31;
+    ev = (typeof ev === "number") ? ev : 0;
+    level = level || 1;
+    if (statIdx === 0) {
+      return Math.floor(((2 * base + iv + Math.floor(ev / 4)) * level / 100) + level + 10);
+    }
+    var raw = Math.floor((2 * base + iv + Math.floor(ev / 4)) * level / 100) + 5;
+    var mods = NATURE_MODS[natureName];
+    var mult = 1;
+    if (mods) {
+      if (mods[0] === statIdx) mult = 1.1;
+      else if (mods[1] === statIdx) mult = 0.9;
+    }
+    return Math.floor(raw * mult);
   }
 
   // ---------------- tabs ----------------
@@ -1837,7 +1923,17 @@
       var splitName = DATA.splits[mv[2]] || "";
       var id = "mv_" + title.replace(/\s/g, "") + "_" + idx;
       var aboveCap = cap !== null && cap !== undefined && lv > cap;
-      var main = '<tr class="move-row' + (aboveCap ? " above-cap" : "") + '" data-target="' + id + '">' +
+      // Whole-row type tint, not just the pill - field research, 2026-09-09
+      // (the official NextDex for this same game does this and it's
+      // genuinely faster to scan a long movepool by). Low alpha (9%) so it
+      // stays a background hint, not competing with the text - a much
+      // bigger shift than that isn't needed to be visible, and this project
+      // learned the hard way (rank badges, same day) not to touch a colored
+      // background without checking what it does to text contrast: at 9%
+      // the row barely moves off --surface, so --text's already-huge margin
+      // there (12:1+, verified in that same pass) has no realistic way to
+      // drop under the 4.5:1 AA minimum.
+      var main = '<tr class="move-row' + (aboveCap ? " above-cap" : "") + '" data-target="' + id + '" style="background:color-mix(in srgb, ' + meta.hex + ' 9%, transparent);">' +
         '<td class="mono">' + (lv !== undefined && lv !== null && title.indexOf("Nível") !== -1 ? lv + (aboveCap ? ' <span class="cap-tag" title="Acima do level cap atual (' + cap + ')">acima</span>' : "") : "&mdash;") + '</td>' +
         '<td>' + escapeHtml(mv[0]) + '</td>' +
         '<td><span class="move-type-tag" style="background:' + meta.hex + ';color:' + (meta.dark ? "#1c1b17" : "#fff9f2") + '">' + typeName + '</span></td>' +
@@ -1992,6 +2088,7 @@
         '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
       '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
         '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p></div>' +
+      notesCardHtml(sp) +
       (function () {
         var inner = buildHistoryHtml(sp) + bossReferenceHtml(sp);
         // Used to be a bare, untitled card - just a couple of collapsed
@@ -2025,6 +2122,17 @@
     if (gotoTeamLink) {
       gotoTeamLink.addEventListener("click", function () {
         document.querySelector('.tab-btn[data-tab="team"]').click();
+      });
+    }
+
+    var notesSaveBtn = document.getElementById("species-notes-save");
+    if (notesSaveBtn) {
+      notesSaveBtn.addEventListener("click", function () {
+        var text = document.getElementById("species-notes-input").value.trim();
+        if (text) state.notes[sp.sname] = text; else delete state.notes[sp.sname];
+        persist();
+        var status = document.getElementById("species-notes-status");
+        if (status) status.textContent = "Salvo.";
       });
     }
 
@@ -2220,6 +2328,20 @@
   }
 
   // Used by the Dex detail card and the team-slot card (renderTeam).
+  // "Minhas anotações" - free text per species, the user's own, saved
+  // locally (see state.notes). Explicit Save button rather than
+  // auto-save-on-blur, matching the same predictable pattern already used
+  // for renaming a saved team - the user should always know exactly when
+  // something got written, not guess.
+  function notesCardHtml(sp) {
+    var val = state.notes[sp.sname] || "";
+    return '<div class="card"><h3>Minhas anotações</h3>' +
+      '<textarea id="species-notes-input" class="notes-textarea" rows="3" placeholder="Sua própria anotação sobre este Pokémon - build que testou, estratégia, o que funcionou numa luta...">' + escapeHtml(val) + '</textarea>' +
+      '<div class="notes-actions"><button id="species-notes-save" class="ts-build-copy" type="button">Salvar</button>' +
+      '<span id="species-notes-status" class="notes-status"></span></div>' +
+    '</div>';
+  }
+
   function buildHistoryHtml(sp) {
     var hist = BUILD_HISTORY[sp.sname];
     if (!hist || !hist.length) return "";
@@ -2688,7 +2810,11 @@
 
   // ---------------- bosses view ----------------
   var bossInited = false;
-  var bossState = { query: "", cat: "", selected: null, diff: "party" };
+  // level: null until first shown, then defaults once to the current level
+  // cap (getCurrentCap()) as a starting point - NOT reset every time a
+  // different boss is opened, so browsing several bosses at "the level I'm
+  // actually at" doesn't mean re-typing it each time.
+  var bossState = { query: "", cat: "", selected: null, diff: "party", level: null };
 
   function initBosses() {
     document.getElementById("boss-count-badge").textContent = BOSSES.length;
@@ -2780,12 +2906,15 @@
     renderBossDetail();
   }
 
+  var STAT_LABELS_SHORT = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
   function renderBossDetail() {
     var boss = BOSSES[bossState.selected];
     if (!boss) return;
     var diffKey = bossState.diff || "party";
     var party = boss[diffKey];
     if (!party || !party.length) { diffKey = "party"; party = boss.party; bossState.diff = "party"; }
+
+    if (bossState.level === null) bossState.level = getCurrentCap() || 50;
 
     var availableDiffs = ["party", "insane", "hell"].filter(function (k) { return boss[k] && boss[k].length; });
     var diffBtns = availableDiffs.length > 1 ? availableDiffs.map(function (k) {
@@ -2796,6 +2925,20 @@
     var monsHtml = party.map(function (m) {
       var sp = getSpeciesByX(m.x);
       var typesHtml = sp ? speciesTypeNames(sp).map(function (n) { return typePill(n, true); }).join("") : "";
+      // Final stats at the level typed in above - only computable at all
+      // when the species resolves (need base stats) and the boss data has
+      // real EV/IV arrays (should always be true post-2026-09-09, but a
+      // species that fails to resolve degrades safely to no stats shown
+      // rather than a crash or a fabricated number).
+      var statsHtml = "";
+      if (sp && m.evsRaw && m.ivsRaw) {
+        var vals = sp.b.map(function (base, i) {
+          return calcFinalStat(base, m.ivsRaw[i], m.evsRaw[i], bossState.level, i, m.nat);
+        });
+        statsHtml = '<div class="bm-stats">' + vals.map(function (v, i) {
+          return '<span class="bm-stat"><span class="bm-stat-label">' + STAT_LABELS_SHORT[i] + '</span><span class="mono">' + v + '</span></span>';
+        }).join("") + '</div>';
+      }
       return '<div class="boss-mon-card">' +
         '<div class="bm-head goto-species" data-x="' + m.x + '" title="Ver na Dex">' + spriteImgHtml(m.x, m.n, 36) +
         '<div><div class="bm-name">' + escapeHtml(m.n) + '</div>' +
@@ -2805,6 +2948,7 @@
         '<div class="bm-row"><b>Nature:</b> ' + escapeHtml(m.nat || "?") + '</div>' +
         (m.evs ? '<div class="bm-row"><b>EVs:</b> ' + escapeHtml(m.evs) + '</div>' : "") +
         '<div class="bm-row"><b>Golpes:</b> ' + escapeHtml(m.mv.join(" / ")) + '</div>' +
+        statsHtml +
       '</div>';
     }).join("");
 
@@ -2817,7 +2961,11 @@
         '<div class="detail-dexno mono">' + escapeHtml(boss.cat) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +
       (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:11px;margin:6px 0 0;max-width:65ch;">Nomes crus dos dados do jogo — não temos 100% de certeza que "Insane"/"Hell" batem exatamente com os modos "Ace"/"Elite" do menu do jogo atual. Confira sua dificuldade no Centro Pokémon se quiser ter certeza.</p></div>' : "") +
-      '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3><div class="boss-mon-grid">' + monsHtml + '</div></div>' +
+      '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
+        '<div class="boss-level-row"><label for="boss-level-input">Status final calculados pro nível</label>' +
+          '<input type="number" id="boss-level-input" min="1" max="100" value="' + bossState.level + '"></div>' +
+        '<p style="color:var(--text-dim);font-size:11px;margin:4px 0 12px;max-width:65ch;">Você digita o nível — não temos como saber o nível real de um treinador nos dados do jogo (por isso não existe uma calculadora de dano completa aqui, só isso). EVs/IVs são reais, extraídos do jogo; sem modificador de habilidade, item ou fase de batalha.</p>' +
+        '<div class="boss-mon-grid">' + monsHtml + '</div></div>' +
       '<div class="card"><h3>Enviar para o Claude</h3>' +
         '<p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">Junta o time dele com o seu time e sua caixa num texto só. Copie e cole na conversa pra eu montar a contra-estratégia.</p>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">' +
@@ -2837,6 +2985,18 @@
         bossState.diff = btn.dataset.diff;
         renderBossDetail();
       });
+    });
+
+    // "change" (fires on blur/Enter), not "input" (fires every keystroke) -
+    // renderBossDetail() replaces the whole card via innerHTML, which would
+    // yank focus off this very input after the first digit if it re-rendered
+    // on every keystroke, making a 2-digit level impossible to type.
+    var levelInput = document.getElementById("boss-level-input");
+    if (levelInput) levelInput.addEventListener("change", function () {
+      var v = parseInt(levelInput.value, 10);
+      if (isNaN(v) || v < 1) v = 1;
+      bossState.level = Math.min(100, v);
+      renderBossDetail();
     });
   }
 

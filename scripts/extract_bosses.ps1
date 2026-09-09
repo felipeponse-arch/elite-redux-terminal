@@ -52,6 +52,16 @@ function ResolveParty($rawParty) {
             item = $itemName
             nat = $natName
             evs = Format-Evs $mon["evs"]
+            # Raw 6-int arrays alongside the formatted "evs" string above -
+            # the string is for display (existing boss card / showdown-style
+            # exports), these are for the final-stat calculator (2026-09-09
+            # field research + approved next step) to compute with, without
+            # re-parsing a formatted string back into numbers. Real IVs, not
+            # assumed 31s - the raw game data has them per trainer (flawless
+            # in every sample checked so far, but extracted for real in case
+            # some trainer isn't).
+            evsRaw = @($mon["evs"])
+            ivsRaw = @($mon["ivs"])
             mv = $moveNames
         })
     }
