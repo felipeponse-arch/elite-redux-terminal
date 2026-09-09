@@ -569,6 +569,17 @@ async function runLiveTests() {
   setSearch("");
   await wait(30);
 
+  // --- transfer card removal - 2026-09-09, replaced by the db-capability
+  // sync above and confirmed working on real devices the same day, so the
+  // manual copy/paste/download UI was removed to keep the page lighter
+  // (user's own request, right after confirming sync worked).
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  check("manual transfer card is gone (replaced by automatic sync)", !document.getElementById("transfer-card"));
+  check("Enviar para o Claude card is untouched (unrelated feature, still there)", !!document.getElementById("claude-export-card"));
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

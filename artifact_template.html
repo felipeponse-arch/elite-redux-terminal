@@ -747,25 +747,6 @@
   }
   .modal-close:hover { color: var(--text); }
 
-  .transfer-label {
-    display: block;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    font-weight: 700;
-    color: var(--text-dim);
-    margin-bottom: 5px;
-  }
-  #transfer-import {
-    width: 100%;
-    padding: 9px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--text);
-    font-size: 11.5px;
-    resize: vertical;
-  }
   .notes-textarea {
     width: 100%;
     padding: 9px 10px;
@@ -1139,21 +1120,6 @@
             <button id="claude-export-copy" class="add-team-btn" type="button">Copiar</button>
           </div>
           <div id="claude-export-status" style="font-size:11.5px;color:var(--accent-2);margin-top:6px;min-height:14px;"></div>
-        </div>
-
-        <div class="card" id="transfer-card">
-          <h3>Levar para outro aparelho</h3>
-          <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 12px;max-width:65ch;">Time, caixa, times salvos e progresso ficam guardados por navegador — o celular e o PC não se enxergam. Este código carrega tudo de um para o outro.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
-            <button id="transfer-copy" class="add-team-btn" type="button">Copiar código do save</button>
-            <button id="transfer-download" class="add-team-btn" type="button" style="background:var(--surface-3);color:var(--text);" hidden>Baixar arquivo</button>
-          </div>
-          <label for="transfer-import" class="transfer-label">Colar código vindo do outro aparelho</label>
-          <textarea id="transfer-import" class="mono" rows="3" placeholder="Cole aqui o código copiado no outro aparelho..."></textarea>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;">
-            <button id="transfer-apply" class="add-team-btn" type="button">Carregar este save</button>
-            <span id="transfer-status" style="font-size:11.5px;color:var(--accent-2);"></span>
-          </div>
         </div>
 
         <div class="team-analysis" id="team-analysis"></div>
@@ -1719,7 +1685,10 @@
 
   // ---------------- cross-device sync (db capability) ----------------
   // 2026-09-09, user asked for automatic sync between PC and phone instead
-  // of the manual copy/paste or file-download transfer card. One SHARED
+  // of the manual copy/paste or file-download transfer card - confirmed
+  // working on real devices the same day, so that card (and the
+  // now-unused `downloads` capability it was the only user of) was
+  // removed right after, same day, to keep the page lighter. One SHARED
   // document (not the `user` capability's per-viewer data/users/ subtree)
   // is deliberate: this artifact is private/unshared (sharing: owner), so
   // only the owner can ever open it regardless of who else is technically
@@ -3034,59 +3003,6 @@
   document.getElementById("showdown-copy").addEventListener("click", function () {
     copyText(showdownTeam(), document.getElementById("showdown-status"), "Copiado! Cole no teambuilder do Showdown.");
   });
-
-  // ---- moving a save between devices ----
-  // Storage is per-browser, so phone and desktop are separate. The save is
-  // small and sname-keyed, so a plain text blob transfers cleanly.
-  var transferStatus = document.getElementById("transfer-status");
-
-  document.getElementById("transfer-copy").addEventListener("click", function () {
-    copyText(JSON.stringify(buildSave()), transferStatus, "Código copiado. Cole no outro aparelho e toque em Carregar.");
-  });
-
-  document.getElementById("transfer-apply").addEventListener("click", function () {
-    var raw = document.getElementById("transfer-import").value.trim();
-    if (!raw) { transferStatus.textContent = "Cole o código primeiro."; return; }
-    var parsed;
-    try { parsed = JSON.parse(raw); }
-    catch (e) { transferStatus.textContent = "Código inválido — copie de novo no outro aparelho."; return; }
-    if (!parsed || typeof parsed !== "object" || !("team" in parsed || "box" in parsed)) {
-      transferStatus.textContent = "Esse código não parece um save do Terminal.";
-      return;
-    }
-    applySave(parsed);
-    persist();
-    document.getElementById("transfer-import").value = "";
-    renderList();
-    renderTeam();
-    renderBox();
-    renderCapBadge();
-    if (progressInited) initProgress();
-    var n = state.team.length;
-    transferStatus.textContent = "Save carregado: " + n + " no time, " + state.box.length + " na caixa.";
-    flashToast("Save carregado deste código");
-  });
-
-  // The download half needs the host's save capability; hide the button where
-  // it isn't available instead of offering a control that silently does nothing.
-  if (window.claude && typeof window.claude.use === "function") {
-    window.claude.use("downloads").then(function (downloads) {
-      if (!downloads) return;
-      var btn = document.getElementById("transfer-download");
-      btn.hidden = false;
-      btn.addEventListener("click", function () {
-        downloads.save({
-          filename: "elite-redux-terminal-save.json",
-          data: JSON.stringify(buildSave(), null, 2)
-        }).then(function () {
-          transferStatus.textContent = "Arquivo salvo.";
-        }).catch(function (err) {
-          if (err && err.code === "declined") return;
-          transferStatus.textContent = "Não consegui salvar o arquivo — use o código de texto.";
-        });
-      });
-    }).catch(function () { /* capability unavailable: text transfer still works */ });
-  }
 
   // ---- team <-> box swapping ----
   var teamSwapIdx = null;
