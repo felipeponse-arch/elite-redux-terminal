@@ -326,6 +326,19 @@
   }
   .card h3 { font-size: 12.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--text-dim); margin-bottom: 12px; }
 
+  /* Dashboard summary, top of the Dex - design proposal B, 2026-09-09. */
+  #dashboard { padding: 12px 20px 0; }
+  .dashboard-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center;
+  }
+  .dash-item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; }
+  .dash-label { color: var(--text-dim); font-weight: 600; text-transform: uppercase; font-size: 10.5px; letter-spacing: .04em; }
+  .dash-value { color: var(--text); display: inline-flex; align-items: center; gap: 5px; }
+  .dash-suggestion { flex-basis: 100%; }
+  .dash-suggestion .dash-value { color: var(--accent-2); }
+  .dash-suggestion .goto-species { text-decoration: underline; text-decoration-style: dotted; }
+
   .stat-row { display: grid; grid-template-columns: 90px 40px 1fr; align-items: center; gap: 10px; margin-bottom: 7px; }
   .stat-row:last-child { margin-bottom: 0; }
   .stat-row .stat-label { font-size: 12px; color: var(--text-dim); font-weight: 600; }
@@ -861,6 +874,10 @@
     .dex-shell.show-detail .type-filter-panel { display: none; }
     .dex-shell.show-detail .search-row { padding: 10px 14px; }
     .dex-shell:not(.show-detail) .species-detail { display: none; }
+    /* Vertical space is scarce here and the Pokemon being looked at matters
+       more than the team summary - hide the dashboard while a detail is
+       open. */
+    #dashboard:has(+ .dex-shell.show-detail) { display: none; }
     .back-btn {
       display: inline-flex;
       align-items: center;
@@ -958,6 +975,19 @@
 
   <main>
     <section id="view-dex" class="view active">
+      <!--
+        Design proposal B, 2026-09-09: the Dex used to open straight into a
+        raw list of 1906 species with a search box - no orientation, no "here's
+        where you left off", even though the team-analysis and rank data
+        needed to answer that already existed elsewhere in the app. Filled by
+        renderDashboard(), called from updateTeamBadge()/updateBoxBadge() (the
+        two existing chokepoints every roster change already runs through -
+        see rosterMove()), so it never needs its own separate update wiring.
+        Hidden on mobile while a Dex detail is open (:has() - see CSS), where
+        vertical space is scarce and the summary is less relevant than the
+        Pokemon actually being looked at.
+      -->
+      <div id="dashboard"></div>
       <div class="dex-shell" id="dex-shell">
         <aside class="dex-sidebar">
           <div class="search-row">
@@ -2020,11 +2050,13 @@
   function updateTeamBadge() {
     document.getElementById("team-count-badge").textContent = state.team.length + "/6";
     syncRowAddButtons();
+    renderDashboard();
   }
 
   // ---------------- box view ----------------
   function updateBoxBadge() {
     document.getElementById("box-count-badge").textContent = state.box.length;
+    renderDashboard();
   }
 
   function renderBox() {
@@ -2547,6 +2579,65 @@
     document.getElementById("saved-teams-status").textContent = "Salvo como \"" + name + "\".";
   });
 
+  // Shared by renderTeamAnalysis (the full table) and renderDashboard (the
+  // one-line "biggest shared weakness" summary) - factored out so the two
+  // can never quietly disagree about what the team's worst shared risk is.
+  function computeSharedRisks(members) {
+    var riskCount = {};
+    USABLE_TYPES.forEach(function (atk) {
+      members.forEach(function (sp) {
+        if (abilityTypeMod(atk, sp).mult >= 2) riskCount[atk] = (riskCount[atk] || 0) + 1;
+      });
+    });
+    return Object.keys(riskCount).map(function (t) { return { t: t, n: riskCount[t] }; })
+      .filter(function (r) { return r.n >= 2; })
+      .sort(function (a, b) { return b.n - a.n; });
+  }
+
+  // Dashboard summary at the top of the Dex - design proposal B, 2026-09-09.
+  // Deliberately reuses computeSharedRisks() (also used by the full team
+  // analysis table) rather than a separate calculation, so this can't
+  // quietly disagree with what "Cobertura defensiva" says the same risk is.
+  function renderDashboard() {
+    var el = document.getElementById("dashboard");
+    if (!el) return;
+    var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
+    if (!teamMembers.length) {
+      el.innerHTML = '<div class="dashboard-card"><p style="color:var(--text-dim);font-size:13px;margin:0;">Monte seu time na Dex pra ver um resumo aqui.</p></div>';
+      return;
+    }
+    var boxMembers = state.box.map(getSpeciesByX).filter(Boolean);
+
+    var items = '<div class="dash-item"><span class="dash-label">Time</span><span class="dash-value">' + teamMembers.length + '/6</span></div>';
+
+    var risks = computeSharedRisks(teamMembers);
+    items += risks.length
+      ? '<div class="dash-item"><span class="dash-label">Maior risco</span><span class="dash-value">' + typePill(risks[0].t, true) + ' <span class="mono">' + risks[0].n + '/' + teamMembers.length + '</span> fracos</span></div>'
+      : '<div class="dash-item"><span class="dash-label">Maior risco</span><span class="dash-value">nenhum tipo derruba 2+ ao mesmo tempo</span></div>';
+
+    // Swap suggestion: biggest-scoring box member vs lowest-scoring team
+    // member, only surfaced when the gap is real (>=15 of 100) - a 2-point
+    // difference isn't worth interrupting the user over every session.
+    if (boxMembers.length) {
+      var worstTeam = null, bestBox = null;
+      teamMembers.forEach(function (sp) {
+        var r = SPECIES_RANK[sp.sname];
+        if (r && (!worstTeam || r.score < worstTeam.score)) worstTeam = { sp: sp, score: r.score, tier: r.tier };
+      });
+      boxMembers.forEach(function (sp) {
+        var r = SPECIES_RANK[sp.sname];
+        if (r && (!bestBox || r.score > bestBox.score)) bestBox = { sp: sp, score: r.score, tier: r.tier };
+      });
+      if (worstTeam && bestBox && bestBox.score - worstTeam.score >= 15) {
+        items += '<div class="dash-item dash-suggestion"><span class="dash-label">Sugestão</span><span class="dash-value">' +
+          '<span class="goto-species" data-x="' + bestBox.sp.x + '">' + escapeHtml(bestBox.sp.n) + '</span> (' + bestBox.tier + ') na caixa rende mais que ' +
+          '<span class="goto-species" data-x="' + worstTeam.sp.x + '">' + escapeHtml(worstTeam.sp.n) + '</span> (' + worstTeam.tier + ') no time</span></div>';
+      }
+    }
+
+    el.innerHTML = '<div class="dashboard-card">' + items + '</div>';
+  }
+
   function renderTeamAnalysis(members) {
     var el = document.getElementById("team-analysis");
     if (!members.length) {
@@ -2554,14 +2645,12 @@
       return;
     }
     var head = '<th class="rowhead">Vs. tipo</th>' + members.map(function (sp) { return '<th>' + escapeHtml(sp.n.split(" ")[0]) + '</th>'; }).join("");
-    var riskCount = {};
     var anyAbilityMod = false;
     var rows = USABLE_TYPES.map(function (atk) {
       var cells = members.map(function (sp) {
         var info = abilityTypeMod(atk, sp);
         var m = info.mult;
         var cls = m === 0 ? "cov-immune" : m >= 2 ? "cov-weak" : m < 1 ? "cov-resist" : "cov-neutral";
-        if (m >= 2) riskCount[atk] = (riskCount[atk] || 0) + 1;
         var label = m === 0 ? "0" : m === 0.25 ? "&frac14;" : m === 0.5 ? "&frac12;" : m === 1 ? "&mdash;" : (Math.round(m * 100) / 100) + "&times;";
         var flag = "";
         if (info.reasons.length) {
@@ -2576,9 +2665,7 @@
       ? '<p style="color:var(--text-dim);font-size:11.5px;margin-top:6px;">* ajustado por habilidade inata ou travada (passe o mouse pra ver qual). Só cobre as habilidades já verificadas neste time — o resto da tabela ainda é o multiplicador de tipo puro, sem considerar habilidade.</p>'
       : '<p style="color:var(--text-dim);font-size:11.5px;margin-top:6px;">Tabela de multiplicador de tipo puro — nenhuma habilidade deste time altera esses valores hoje (mas isso só está verificado para as habilidades já conferidas, não para as 1033 do jogo).</p>';
 
-    var risks = Object.keys(riskCount).map(function (t) { return { t: t, n: riskCount[t] }; })
-      .filter(function (r) { return r.n >= 2; })
-      .sort(function (a, b) { return b.n - a.n; });
+    var risks = computeSharedRisks(members);
     var riskHtml = risks.length ? risks.map(function (r) {
       var pct = (r.n / members.length) * 100;
       return '<div class="risk-item">' + typePill(r.t, true) +

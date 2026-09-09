@@ -171,6 +171,23 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
+  // --- 9. dashboard summary - design proposal B, 2026-09-09 ---
+  document.getElementById("dex-shell").classList.remove("show-detail");
+  const dash = document.querySelector(".dashboard-card");
+  check("dashboard renders with a 6-member team", !!dash);
+  check("dashboard shows team completeness", dash && dash.textContent.indexOf("6/6") !== -1);
+  check("dashboard shows a shared-risk item", dash && dash.textContent.indexOf("fracos") !== -1);
+  const suggestionLink = document.querySelector(".dash-suggestion .goto-species[data-x]");
+  if (suggestionLink) {
+    suggestionLink.click();
+    await wait(30);
+    check("clicking a dashboard suggestion opens its Dex detail",
+      document.querySelector('.tab-btn[data-tab="dex"]').classList.contains("active") &&
+      document.getElementById("dex-shell").classList.contains("show-detail"));
+    document.getElementById("back-to-list").click();
+    await wait(30);
+  }
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
