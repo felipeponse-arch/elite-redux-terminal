@@ -717,6 +717,24 @@
   .rank-badge.tier-B  { background: color-mix(in srgb, var(--accent-2) 22%, transparent); color: var(--accent-2); }
   .rank-badge.tier-C  { background: var(--surface-3); color: var(--text-dim); }
   .rank-badge.tier-D  { background: color-mix(in srgb, var(--sem-weak) 20%, transparent); color: var(--sem-weak); }
+
+  /* Stage-relative badge - same tier colors, but outlined instead of filled
+     so it visually reads as "secondary/contextual" next to the plain rank
+     badge, not a second opinion on the same question. Dex only (list +
+     detail) - see rankStageBadgeHtml(). */
+  .rank-badge-stage {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 17px; padding: 0 4px; border-radius: 5px;
+    font-size: 9.5px; font-weight: 800; font-family: "IBM Plex Mono", monospace;
+    letter-spacing: .02em; cursor: help; flex: none; background: none;
+    border: 1.5px solid currentColor;
+  }
+  .rank-badge-stage.tier-SS { color: var(--sem-immune); }
+  .rank-badge-stage.tier-S  { color: var(--accent); }
+  .rank-badge-stage.tier-A  { color: var(--sem-resist); }
+  .rank-badge-stage.tier-B  { color: var(--accent-2); }
+  .rank-badge-stage.tier-C  { color: var(--text-dim); }
+  .rank-badge-stage.tier-D  { color: var(--sem-weak); }
   .cov-flag { cursor: help; font-weight: 700; margin-left: 1px; opacity: .85; }
 
   .risk-list { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
@@ -1511,7 +1529,7 @@
         '<span class="dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</span>' +
         spriteImgHtml(sp.x, sp.n, 28) +
         '<span class="sname">' + escapeHtml(sp.n) + '</span>' +
-        rankBadgeHtml(sp.sname) +
+        rankBadgeHtml(sp.sname) + rankStageBadgeHtml(sp.sname) +
         '<span class="pips">' + pips + '</span>' +
         '<button class="row-add-btn' + (!inTeam && teamFull ? ' is-swap' : '') + '" data-add="' + sp.x + '" type="button" title="' + addTitle + '" aria-label="' + addTitle + '"' +
           (inTeam ? ' disabled' : '') + '>' + addLabel + '</button></li>';
@@ -1684,6 +1702,23 @@
     return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.tier + '</span>';
   }
 
+  // Dex only (list + detail), not Team/Box: this answers "is this a good
+  // example of a Pokemon at ITS stage" (useful when deciding whether an
+  // early-game catch is worth grinding), which is a different question from
+  // the plain rank badge's "how strong is this right now". A species with no
+  // real evolution line (standalones, and Mega/Primal-only lineages like
+  // most box legendaries - see compute_species_rank.ps1) has no stageTier
+  // and renders nothing, same safe-degrade as everywhere else.
+  var STAGE_LABEL = { 1: "1º estágio", 2: "2º estágio", 3: "3º estágio", 4: "4º estágio" };
+  function rankStageBadgeHtml(sname) {
+    var r = SPECIES_RANK[sname];
+    if (!r || r.stageTier === null || r.stageTier === undefined) return "";
+    var label = STAGE_LABEL[r.stage] || (r.stage + "º estágio");
+    var title = "Rank " + r.stageTier + " entre outros Pokémon de " + label + " (score " + r.stageScore + "/100) — " +
+      "mesma fórmula do rank normal, mas comparado só com quem está no mesmo estágio evolutivo, não com o jogo todo.";
+    return '<span class="rank-badge-stage ' + (RANK_TIER_CLASS[r.stageTier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.stageTier + '</span>';
+  }
+
   function goToDexSpecies(x) {
     document.querySelector('.tab-btn[data-tab="dex"]').click();
     selectSpecies(x);
@@ -1740,7 +1775,7 @@
       // 48 matches the atlas cell size, so the largest sprite in the UI is shown
       // 1:1 and never upscaled.
       '<div class="detail-head"><div class="ts-head">' + spriteImgHtml(sp.x, sp.n, 48) + '<div class="detail-titles">' +
-        '<h2>' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + '</h2>' +
+        '<h2>' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + ' ' + rankStageBadgeHtml(sp.sname) + '</h2>' +
         '<div class="detail-dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</div>' +
         '<div class="detail-sname mono">' + escapeHtml(sp.sname) + '</div>' +
       '</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' +
