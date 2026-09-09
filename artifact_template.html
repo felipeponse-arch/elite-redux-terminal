@@ -768,6 +768,26 @@
   }
   .notes-actions { display: flex; align-items: center; gap: 10px; }
   .notes-status { font-size: 11.5px; color: var(--accent-2); }
+  .mybuild-hint { color: var(--text-dim); font-size: 12px; margin: 0 0 12px; }
+  .mybuild-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+  .mybuild-field {
+    display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px;
+    font-size: 11px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: .03em;
+  }
+  .mybuild-field select, .mybuild-field input {
+    padding: 8px 9px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit;
+    text-transform: none; letter-spacing: normal; font-weight: 400;
+  }
+  .mybuild-ivev { margin-bottom: 12px; }
+  .mybuild-ivev-row { display: grid; grid-template-columns: 34px repeat(6, 1fr); gap: 6px; align-items: center; margin-bottom: 5px; }
+  .mybuild-ivev-header { font-size: 10.5px; color: var(--text-dim); font-weight: 600; text-align: center; }
+  .mybuild-ivev-row > span { font-size: 11px; color: var(--text-dim); font-weight: 600; }
+  .mybuild-num {
+    width: 100%; padding: 6px 4px; text-align: center; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-size: 12.5px; font-family: inherit;
+  }
+  .mybuild-ev-total { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
   .sr-only {
     position: absolute;
     width: 1px; height: 1px;
@@ -1268,6 +1288,7 @@
   var TYPES = DATA.types;
   var ABILITIES = DATA.abilities;
   var MOVES = DATA.moves;
+  var ITEMS = DATA.items || [];
   var EVOKINDS = DATA.evoKinds;
   var SPECIES = DATA.species.filter(function (s) { return s; });
 
@@ -1507,7 +1528,17 @@
     // something themselves without going through me. Purely additive field,
     // safe default {} for any save saved before this existed - no
     // SCHEMA_VERSION bump needed, same pattern as adding `orphans` earlier.
-    notes: {}
+    notes: {},
+    // Interactive "meu build" per species, sname-keyed - 2026-09-09, user
+    // feedback: the free-text notes field above has "no interaction with
+    // the Pokemon", the user has to type everything by hand instead of
+    // picking from real options. This is the structured counterpart -
+    // ability/nature/item/moves picked from that species' own real data
+    // (choosable abilities, its actual movepool, the full item list), IVs/
+    // EVs as numbers - rendered as a Showdown block via the same
+    // showdownSet() every other build source already uses. Purely
+    // additive, same {} safe-default pattern as notes/orphans.
+    customBuilds: {}
   };
 
   // ---------------- persistence ----------------
@@ -1566,6 +1597,34 @@
         if (typeof save.notes[k] === "string" && save.notes[k]) state.notes[k] = save.notes[k];
       });
     }
+    // Same defensive-import discipline as notes above: only accept a build
+    // that actually has the right shape, so a hand-edited or corrupted
+    // save can't inject something odd into fields that get rendered as
+    // plain text or fed into calcFinalStat.
+    state.customBuilds = {};
+    if (save.customBuilds && typeof save.customBuilds === "object") {
+      Object.keys(save.customBuilds).forEach(function (k) {
+        var b = save.customBuilds[k];
+        if (!b || typeof b !== "object") return;
+        var clean = {
+          ability: typeof b.ability === "string" ? b.ability : "",
+          nature: typeof b.nature === "string" ? b.nature : "",
+          item: typeof b.item === "string" ? b.item : "",
+          moves: Array.isArray(b.moves) ? b.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4) : [],
+          ivs: Array.isArray(b.ivs) && b.ivs.length === 6 ? b.ivs.map(function (v) { return clampInt(v, 0, 31, 31); }) : [31, 31, 31, 31, 31, 31],
+          evs: Array.isArray(b.evs) && b.evs.length === 6 ? b.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0]
+        };
+        var isEmpty = !clean.ability && !clean.nature && !clean.item && !clean.moves.length &&
+          clean.ivs.every(function (v) { return v === 31; }) && clean.evs.every(function (v) { return v === 0; });
+        if (!isEmpty) state.customBuilds[k] = clean;
+      });
+    }
+  }
+
+  function clampInt(v, min, max, fallback) {
+    var n = parseInt(v, 10);
+    if (isNaN(n)) return fallback;
+    return Math.max(min, Math.min(max, n));
   }
 
   function buildSave() {
@@ -1577,7 +1636,8 @@
       box: xsToSnames(state.box).concat(state.orphans.box),
       savedTeams: state.savedTeams,
       settings: state.settings,
-      notes: state.notes
+      notes: state.notes,
+      customBuilds: state.customBuilds
     };
   }
 
@@ -1739,6 +1799,9 @@
     // Hardy/Docile/Serious/Bashful/Quirky are neutral - no entry, falls
     // through to the no-modifier case below.
   };
+  // Full 25-nature list for the "Meu build" picker (Object.keys(NATURE_MODS)
+  // is only the 20 that actually change a stat).
+  var ALL_NATURES = Object.keys(NATURE_MODS).concat(["Hardy", "Docile", "Serious", "Bashful", "Quirky"]).sort();
   function calcFinalStat(base, iv, ev, level, statIdx, natureName, itemName, speciesName) {
     iv = (typeof iv === "number") ? iv : 31;
     ev = (typeof ev === "number") ? ev : 0;
@@ -2229,6 +2292,7 @@
         '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
       '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
         '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p></div>' +
+      myBuildEditorHtml(sp) +
       notesCardHtml(sp) +
       (function () {
         var inner = buildHistoryHtml(sp) + bossReferenceHtml(sp);
@@ -2276,6 +2340,8 @@
         if (status) status.textContent = "Salvo.";
       });
     }
+
+    wireMyBuildEditor(sp);
 
     var addBoxBtn = document.getElementById("add-box-btn");
     if (addBoxBtn && !inBox) {
@@ -2466,6 +2532,162 @@
       '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, entry)) + '</pre>' +
       (entry.note ? '<div class="ts-build-note">' + escapeHtml(entry.note) + '</div>' : '') +
     '</div>';
+  }
+
+  function evsToShowdownText(evs) {
+    var parts = [];
+    for (var i = 0; i < 6; i++) { if (evs[i] > 0) parts.push(evs[i] + " " + STAT_LABELS_SHORT[i]); }
+    return parts.join(" / ");
+  }
+
+  // "Meu build" - 2026-09-09, user feedback on the free-text notes field
+  // ("não tem interação com o poke, o usuário tem que digitar tudo"):
+  // pick ability/nature/item/moves from this species' own real options
+  // (choosable abilities, its actual movepool via lm+tu, the full item
+  // list) instead of typing them from memory, plus IV/EV number fields.
+  // Saved separately from the free-text notes (state.customBuilds, kept
+  // alongside it, not replacing it - prose notes are still their own
+  // useful thing). Renders through the same showdownSet() every other
+  // build source (builds.json, build history, boss reference) already
+  // uses, so it looks and copies identically to a curated build.
+  function myBuildEditorHtml(sp) {
+    var b = state.customBuilds[sp.sname] || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
+    var abiIds = uniqueIds(sp.ab);
+    var abiOptionsHtml = '<option value="">(nenhuma)</option>' + abiIds.map(function (id) {
+      var a = ABILITIES[id];
+      return a ? '<option value="' + escapeHtml(a[0]) + '">' + escapeHtml(a[0]) + '</option>' : "";
+    }).join("");
+    var natureOptionsHtml = '<option value="">(neutra)</option>' + ALL_NATURES.map(function (n) {
+      return '<option value="' + n + '">' + n + '</option>';
+    }).join("");
+    // This species' real movepool only - level-up + tutor (which already
+    // covers what would be TM-taught moves in this hack's own data model,
+    // see extract_bosses.ps1/transform.ps1 notes - TMHMMoves is empty for
+    // every species, checked directly).
+    var moveIds = uniqueIds(sp.lm.map(function (p) { return p[1]; }).concat(sp.tu));
+    var moveOptionsHtml = '<option value="">(nenhum)</option>' + moveIds.map(function (id) {
+      var m = MOVES[id];
+      return m ? '<option value="' + escapeHtml(m[0]) + '">' + escapeHtml(m[0]) + '</option>' : "";
+    }).join("");
+    var itemDatalist = '<datalist id="mybuild-item-list">' + ITEMS.map(function (n) { return '<option value="' + escapeHtml(n) + '">'; }).join("") + '</datalist>';
+    var ivEvHeader = '<span></span>' + STAT_LABELS_SHORT.map(function (l) { return '<span>' + l + '</span>'; }).join("");
+    var ivRow = '<span>IV</span>' + [0, 1, 2, 3, 4, 5].map(function (i) {
+      return '<input type="number" class="mybuild-num" id="mybuild-iv-' + i + '" min="0" max="31">';
+    }).join("");
+    var evRow = '<span>EV</span>' + [0, 1, 2, 3, 4, 5].map(function (i) {
+      return '<input type="number" class="mybuild-num" id="mybuild-ev-' + i + '" min="0" max="252" step="4">';
+    }).join("");
+    var hasBuild = state.customBuilds[sp.sname];
+    var preview = hasBuild ? showdownSet(sp, {
+      ability: b.ability, nature: b.nature, item: b.item,
+      evs: evsToShowdownText(b.evs), moves: b.moves.filter(Boolean)
+    }) : "";
+    return '<div class="card"><h3>Meu build</h3>' +
+      '<p class="mybuild-hint">Monte seu set escolhendo direto das opções reais deste Pokémon - nada de digitar de cabeça.</p>' +
+      '<div class="mybuild-row">' +
+        '<label class="mybuild-field">Habilidade<select id="mybuild-ability">' + abiOptionsHtml + '</select></label>' +
+        '<label class="mybuild-field">Nature<select id="mybuild-nature">' + natureOptionsHtml + '</select></label>' +
+        '<label class="mybuild-field">Item<input type="text" id="mybuild-item" list="mybuild-item-list" placeholder="Buscar item..." autocomplete="off"></label>' +
+      '</div>' + itemDatalist +
+      '<div class="mybuild-row mybuild-moves">' +
+        [0, 1, 2, 3].map(function (i) {
+          return '<label class="mybuild-field">Golpe ' + (i + 1) + '<select id="mybuild-move-' + i + '">' + moveOptionsHtml + '</select></label>';
+        }).join("") +
+      '</div>' +
+      '<div class="mybuild-ivev">' +
+        '<div class="mybuild-ivev-row mybuild-ivev-header">' + ivEvHeader + '</div>' +
+        '<div class="mybuild-ivev-row">' + ivRow + '</div>' +
+        '<div class="mybuild-ivev-row">' + evRow + '</div>' +
+        '<div class="mybuild-ev-total" id="mybuild-ev-total"></div>' +
+      '</div>' +
+      '<div class="notes-actions"><button id="mybuild-save" class="ts-build-copy" type="button">Salvar build</button>' +
+        (hasBuild ? '<button id="mybuild-clear" class="ts-build-copy" type="button" style="color:var(--sem-weak);">Limpar</button>' : '') +
+        '<span id="mybuild-status" class="notes-status"></span></div>' +
+      (hasBuild ? '<pre class="showdown-block">' + escapeHtml(preview) + '</pre><button id="mybuild-copy" class="ts-build-copy" type="button">Copiar</button>' : '') +
+    '</div>';
+  }
+
+  function updateMyBuildEvTotal() {
+    var total = 0;
+    for (var i = 0; i < 6; i++) {
+      var el = document.getElementById("mybuild-ev-" + i);
+      if (el) total += clampInt(el.value, 0, 252, 0);
+    }
+    var out = document.getElementById("mybuild-ev-total");
+    if (!out) return;
+    out.textContent = "Total de EVs: " + total + " / 510";
+    out.style.color = total > 510 ? "var(--sem-weak)" : "var(--text-dim)";
+  }
+
+  // Sets initial <select>/<input> values from saved state (kept out of the
+  // HTML-string generation in myBuildEditorHtml() - easier to set .value
+  // directly than to re-walk every option list marking one "selected"),
+  // and wires the save/clear/copy buttons + the live EV-total counter.
+  function wireMyBuildEditor(sp) {
+    var b = state.customBuilds[sp.sname] || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
+    var abiEl = document.getElementById("mybuild-ability");
+    if (abiEl) abiEl.value = b.ability || "";
+    var natEl = document.getElementById("mybuild-nature");
+    if (natEl) natEl.value = b.nature || "";
+    var itemEl = document.getElementById("mybuild-item");
+    if (itemEl) itemEl.value = b.item || "";
+    for (var i = 0; i < 4; i++) {
+      var mv = document.getElementById("mybuild-move-" + i);
+      if (mv) mv.value = b.moves[i] || "";
+    }
+    for (var j = 0; j < 6; j++) {
+      var ivEl = document.getElementById("mybuild-iv-" + j);
+      if (ivEl) ivEl.value = b.ivs[j];
+      var evEl = document.getElementById("mybuild-ev-" + j);
+      if (evEl) evEl.value = b.evs[j];
+      if (evEl) evEl.addEventListener("input", updateMyBuildEvTotal);
+    }
+    updateMyBuildEvTotal();
+
+    var saveBtn = document.getElementById("mybuild-save");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", function () {
+        var moves = [];
+        for (var i = 0; i < 4; i++) {
+          var mv = document.getElementById("mybuild-move-" + i);
+          if (mv && mv.value) moves.push(mv.value);
+        }
+        var ivs = [], evs = [];
+        for (var j = 0; j < 6; j++) {
+          ivs.push(clampInt(document.getElementById("mybuild-iv-" + j).value, 0, 31, 31));
+          evs.push(clampInt(document.getElementById("mybuild-ev-" + j).value, 0, 252, 0));
+        }
+        state.customBuilds[sp.sname] = {
+          ability: document.getElementById("mybuild-ability").value,
+          nature: document.getElementById("mybuild-nature").value,
+          item: document.getElementById("mybuild-item").value.trim(),
+          moves: moves, ivs: ivs, evs: evs
+        };
+        persist();
+        flashToast("Build salvo para " + sp.n);
+        selectSpecies(sp.x);
+      });
+    }
+    var clearBtn = document.getElementById("mybuild-clear");
+    if (clearBtn) {
+      clearBtn.addEventListener("click", function () {
+        delete state.customBuilds[sp.sname];
+        persist();
+        selectSpecies(sp.x);
+      });
+    }
+    var copyBtn = document.getElementById("mybuild-copy");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", function () {
+        var saved = state.customBuilds[sp.sname];
+        if (!saved) return;
+        var text = showdownSet(sp, {
+          ability: saved.ability, nature: saved.nature, item: saved.item,
+          evs: evsToShowdownText(saved.evs), moves: saved.moves.filter(Boolean)
+        });
+        copyText(text, document.getElementById("mybuild-status"), "Copiado!");
+      });
+    }
   }
 
   // Used by the Dex detail card and the team-slot card (renderTeam).

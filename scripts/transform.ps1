@@ -24,6 +24,11 @@ foreach ($m in $data.moves) {
     [void]$movesOut.Add(@($m["name"], $t0, $m["split"], $m["pwr"], $m["acc"], $m["pp"], $m["desc"]))
 }
 
+# --- items lookup: flat, sorted list of real item names (no ids needed -
+# a custom build just stores the chosen name as a string, same as
+# bosses.json/builds.json already do). Placeholder entries filtered out.
+$itemsOut = @($data.items | ForEach-Object { $_["name"] } | Where-Object { $_ -and $_ -ne "????????" } | Sort-Object -Unique)
+
 # --- species ---
 $speciesOut = New-Object System.Collections.ArrayList
 for ($idx = 0; $idx -lt $data.species.Count; $idx++) {
@@ -90,6 +95,7 @@ $out = [ordered]@{
     evoKinds = @($data.evoKindT)
     abilities = $abilitiesOut.ToArray()
     moves = $movesOut.ToArray()
+    items = $itemsOut
     species = $speciesOut.ToArray()
 }
 

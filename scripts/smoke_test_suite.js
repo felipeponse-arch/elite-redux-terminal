@@ -406,6 +406,58 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
+  // --- 16. "Meu build" interactive editor - 2026-09-09, user feedback that
+  // the free-text notes field had no real interaction with the Pokemon
+  // ("o usuario tem que digitar tudo"). Charizard's 3 real choosable
+  // abilities are Molten Down/Giant Wings/Tough Claws (matches the
+  // original NextDex FAQ example this whole project started from) - a
+  // good fixture because it's easy to independently verify by eye.
+  setSearch("Charizard");
+  await wait(30);
+  const charRow = document.querySelector("#species-list .species-row");
+  if (charRow) {
+    charRow.click();
+    await wait(30);
+    const abiOptions = [...document.querySelectorAll("#mybuild-ability option")].map(o => o.value).filter(Boolean);
+    check("ability picker only offers this species' real choosable abilities",
+      abiOptions.length === 3 && abiOptions.indexOf("Tough Claws") !== -1, abiOptions.join(","));
+    // Earthquake is NOT in Charizard's real movepool in this hack - trying
+    // to select it should silently fail (native <select> behavior when the
+    // value isn't one of its options), proving the move list is actually
+    // restricted to real options, not just decorative.
+    const moveSel = document.getElementById("mybuild-move-0");
+    moveSel.value = "Earthquake";
+    check("move picker rejects a move not in this species' real movepool", moveSel.value !== "Earthquake");
+    moveSel.value = "Flare Blitz";
+    check("move picker accepts a move that IS in this species' real movepool", moveSel.value === "Flare Blitz");
+
+    function setSel(id, v) { const e = document.getElementById(id); e.value = v; e.dispatchEvent(new Event("change", { bubbles: true })); }
+    setSel("mybuild-ability", "Tough Claws");
+    setSel("mybuild-nature", "Adamant");
+    document.getElementById("mybuild-item").value = "Life Orb";
+    setSel("mybuild-move-1", "Dragon Claw");
+    document.getElementById("mybuild-ev-1").value = 252;
+    document.getElementById("mybuild-ev-1").dispatchEvent(new Event("input", { bubbles: true }));
+    await wait(20);
+    check("EV total counter updates live as EVs are typed",
+      document.getElementById("mybuild-ev-total").textContent.indexOf("252") !== -1,
+      document.getElementById("mybuild-ev-total").textContent);
+    document.getElementById("mybuild-save").click();
+    await wait(50);
+    const preview = [...document.querySelectorAll("#species-detail .showdown-block")].find(p => p.textContent.indexOf("Charizard @ Life Orb") === 0);
+    check("saved build renders as a real Showdown-format block",
+      preview && preview.textContent.indexOf("Tough Claws") !== -1, preview && preview.textContent);
+    var savedRaw = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+    check("build persists to localStorage under the sname",
+      savedRaw.customBuilds && savedRaw.customBuilds.SPECIES_CHARIZARD && savedRaw.customBuilds.SPECIES_CHARIZARD.ability === "Tough Claws");
+    document.getElementById("mybuild-clear").click();
+    await wait(30);
+    check("clear button removes the build and resets the form",
+      !document.getElementById("mybuild-clear") && document.getElementById("mybuild-ability").value === "");
+  } else { check("Charizard found for the Meu build editor test", false); }
+  setSearch("");
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

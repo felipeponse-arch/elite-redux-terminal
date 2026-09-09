@@ -69,6 +69,7 @@ $out = [ordered]@{
     evoKinds = $dex.evoKinds
     abilities = $dex.abilities
     moves = $movesOut.ToArray()
+    items = $dex.items
     species = $speciesOut.ToArray()
 }
 
