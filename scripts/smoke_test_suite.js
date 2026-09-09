@@ -651,6 +651,51 @@ async function runLiveTests() {
   setSearch("");
   await wait(30);
 
+  // --- "Meu build" status preview - 2026-09-09, urgent user request:
+  // after filling every field, the editor showed no final stats and no
+  // sense of a selected move's power. Deliberately not a damage
+  // calculator (no defender/type effectiveness) - just final stats
+  // (base+IV+EV+nature+item, same calcFinalStat used for bosses) and
+  // each move's power with STAB/Life Orb factored in.
+  setSearch("Charizard");
+  await wait(30);
+  const charRow4 = document.querySelector("#species-list .species-row");
+  if (charRow4) {
+    charRow4.click();
+    await wait(30);
+    function setSel4(id, v) { const e = document.getElementById(id); e.value = v; e.dispatchEvent(new Event("change", { bubbles: true })); }
+    setSel4("mybuild-nature", "Adamant");
+    document.getElementById("mybuild-item").value = "Life Orb";
+    document.getElementById("mybuild-item").dispatchEvent(new Event("input", { bubbles: true }));
+    document.getElementById("mybuild-ev-1").value = 252;
+    document.getElementById("mybuild-ev-1").dispatchEvent(new Event("input", { bubbles: true }));
+    document.getElementById("mybuild-level").value = 100;
+    document.getElementById("mybuild-level").dispatchEvent(new Event("input", { bubbles: true }));
+    setSel4("mybuild-move-0", "Flare Blitz");
+    setSel4("mybuild-move-1", "Swords Dance");
+    await wait(50);
+    const preview4 = document.getElementById("mybuild-status-preview").textContent;
+    // Hand-verified: base Atk 84, 252 EV, level 100, Adamant (+10%) -> 293.
+    check("final stats appear and match the hand-verified formula (Charizard Atk 293 at these settings)",
+      preview4.indexOf("293") !== -1, preview4);
+    // Flare Blitz: base power 120, STAB (Fire on a Fire/Flying mon) x1.5,
+    // Life Orb x1.3 -> floor(120*1.5*1.3) = 234.
+    check("damaging move shows base power AND a STAB+item-adjusted power",
+      preview4.indexOf("120") !== -1 && preview4.indexOf("234") !== -1, preview4);
+    check("status move shows no power, not a fabricated number",
+      preview4.indexOf("Swords Dance") !== -1 && preview4.indexOf("sem poder de ataque") !== -1, preview4);
+    // Changing the level live (no page reload, no button click) must
+    // recompute the stats shown, proving it isn't a one-shot snapshot.
+    document.getElementById("mybuild-level").value = 50;
+    document.getElementById("mybuild-level").dispatchEvent(new Event("input", { bubbles: true }));
+    await wait(30);
+    const preview4b = document.getElementById("mybuild-status-preview").textContent;
+    check("final stats recompute live when the level changes, without a page reload",
+      preview4b.indexOf("293") === -1, preview4b);
+  } else { check("Charizard found for the Meu build status-preview test", false); }
+  setSearch("");
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

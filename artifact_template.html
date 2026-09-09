@@ -517,7 +517,7 @@
   .boss-mon-card .bm-transform { color: var(--accent-2); font-style: italic; margin-bottom: 4px; }
   .boss-level-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 2px; }
   .boss-level-row label { font-size: 12.5px; color: var(--text-dim); }
-  #boss-level-input {
+  #boss-level-input, #mybuild-level {
     width: 62px; padding: 5px 8px; border-radius: 7px; border: 1px solid var(--border);
     background: var(--surface-2); color: var(--text); font-size: 13px;
   }
@@ -809,6 +809,9 @@
     background: var(--surface-2); color: var(--text); font-size: 12.5px; font-family: inherit;
   }
   .mybuild-ev-total { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+  .mybuild-moves-power { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
+  .mybuild-move-power { font-size: 11.5px; color: var(--text-dim); line-height: 1.6; }
+  .mybuild-move-power b { color: var(--text); font-weight: 600; }
   .sr-only {
     position: absolute;
     width: 1px; height: 1px;
@@ -1326,6 +1329,13 @@
   function getSpeciesByX(x) { return SPECIES_BY_X[x] || null; }
   function getSpeciesBySname(sn) { return SPECIES_BY_SNAME[sn] || null; }
   function snameOf(x) { var s = SPECIES_BY_X[x]; return s ? s.sname : null; }
+
+  // Move lookup by name, not id - "Meu build"'s move <select> options are
+  // keyed by name (same as the rest of a saved build), so the status
+  // preview (2026-09-09) needs the reverse direction of what MOVES[id]
+  // already gives everywhere else.
+  var MOVE_BY_NAME = Object.create(null);
+  MOVES.forEach(function (m) { if (m && m[0]) MOVE_BY_NAME[m[0]] = m; });
 
   // sname list (persisted form) -> x list (runtime form), dropping anything
   // this data build no longer knows about. Unknown snames are NOT lost: the
@@ -1858,6 +1868,19 @@
       { statIdx: 3, mult: 1.5, speciesPrefix: ["Raichu"] }
     ]
   };
+  // Move-power multipliers, distinct from ITEM_STAT_MODS above (those
+  // change a STAT, this changes a MOVE's power directly) - added 2026-09-09
+  // for "Meu build"'s status preview (see myBuildStatusHtml below). Kept to
+  // exactly one entry on purpose: Life Orb's 1.3x-to-all-damaging-moves is
+  // textbook, universal-since-introduction vanilla mechanics (same caution
+  // already applied to the Choice items in ITEM_STAT_MODS above), and it's
+  // confirmed genuinely in use in this hack's own boss data under its exact
+  // vanilla name (76 occurrences in bosses.json). Ability-based power
+  // modifiers (Tough Claws, Technician, etc.) are deliberately NOT
+  // attempted here - that needs a curated per-ability dataset this project
+  // doesn't have, the same reason TYPE_MOD_ABILITIES only covers a handful
+  // of abilities instead of all ~1033.
+  var ITEM_MOVE_POWER_MODS = { "Life Orb": 1.3 };
   function itemRuleFor(itemName, statIdx, speciesName) {
     var rules = ITEM_STAT_MODS[itemName];
     if (!rules) return null;
@@ -2720,6 +2743,10 @@
         '<div class="mybuild-ivev-row">' + evRow + '</div>' +
         '<div class="mybuild-ev-total" id="mybuild-ev-total"></div>' +
       '</div>' +
+      '<div class="boss-level-row"><label for="mybuild-level">Status calculados pro nível</label>' +
+        '<input type="number" id="mybuild-level" min="1" max="100" value="' + (myBuildLevel || getCurrentCap() || 50) + '"></div>' +
+      '<div id="mybuild-status-preview"></div>' +
+      '<p class="mybuild-hint" style="margin:2px 0 12px;">Você digita o nível (a ferramenta não sabe o nível real do seu Pokémon). Poder de golpe considera STAB e Life Orb quando presente - não é uma calculadora de dano (sem efetividade de tipo, sem status de campo, sem outras habilidades de golpe).</p>' +
       '<div class="notes-actions"><button id="mybuild-save" class="ts-build-copy" type="button">Salvar build</button>' +
         (hasBuild ? '<button id="mybuild-clear" class="ts-build-copy" type="button" style="color:var(--sem-weak);">Limpar</button>' : '') +
         '<span id="mybuild-status" class="notes-status"></span></div>' +
@@ -2739,30 +2766,99 @@
     out.style.color = total > 510 ? "var(--sem-weak)" : "var(--text-dim)";
   }
 
+  // Status preview for "Meu build" - 2026-09-09, urgent user request: after
+  // filling every field, the editor showed no HP/Atk/etc. and no sense of
+  // how strong the chosen moves actually are. Reads every field straight
+  // from the live DOM (same idiom as updateMyBuildEvTotal above) and
+  // rewrites ONLY this small block - never the whole card - so typing in
+  // any field never steals focus from itself. Deliberately NOT a damage
+  // calculator: no defender, no type effectiveness, no field state - just
+  // "how strong is this stat / this move for THIS build", the same scope
+  // boundary the boss stat calculator already draws.
+  function updateMyBuildStatus(sp) {
+    var out = document.getElementById("mybuild-status-preview");
+    if (!out) return;
+    var levelEl = document.getElementById("mybuild-level");
+    var level = levelEl ? clampInt(levelEl.value, 1, 100, myBuildLevel || 50) : (myBuildLevel || 50);
+    var nature = document.getElementById("mybuild-nature").value;
+    var item = document.getElementById("mybuild-item").value.trim();
+    var ivs = [], evs = [];
+    for (var i = 0; i < 6; i++) {
+      ivs.push(clampInt(document.getElementById("mybuild-iv-" + i).value, 0, 31, 31));
+      evs.push(clampInt(document.getElementById("mybuild-ev-" + i).value, 0, 252, 0));
+    }
+    var statsHtml = '<div class="bm-stats">' + sp.b.map(function (base, i) {
+      var v = calcFinalStat(base, ivs[i], evs[i], level, i, nature, item, sp.n);
+      var rule = itemRuleFor(item, i, sp.n);
+      var flag = rule ? '<span class="cov-flag" title="' + escapeHtml(item) + ' (x' + rule.mult + ')">*</span>' : "";
+      return '<span class="bm-stat"><span class="bm-stat-label">' + STAT_LABELS_SHORT[i] + '</span><span class="mono">' + v + '</span>' + flag + '</span>';
+    }).join("") + '</div>';
+
+    var typeNames = speciesTypeNames(sp);
+    var powerMult = ITEM_MOVE_POWER_MODS[item] || 1;
+    var movesHtml = [0, 1, 2, 3].map(function (i) {
+      var el = document.getElementById("mybuild-move-" + i);
+      var name = el ? el.value : "";
+      if (!name) return "";
+      var mv = MOVE_BY_NAME[name];
+      if (!mv) return "";
+      var splitName = DATA.splits[mv[2]] || "";
+      if (splitName === "STATUS" || !mv[3]) {
+        return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> <span style="color:var(--text-dim);">golpe de status, sem poder de ataque</span></div>';
+      }
+      var typeName = TYPES[mv[1]];
+      var base = mv[3];
+      var stab = typeNames.indexOf(typeName) !== -1;
+      var withBuffs = Math.floor(base * (stab ? 1.5 : 1) * powerMult);
+      var buffParts = [];
+      if (stab) buffParts.push("STAB");
+      if (powerMult !== 1) buffParts.push(item);
+      var buffLabel = buffParts.length ? ' &middot; com ' + buffParts.join(" + ") + ': <span class="mono">' + withBuffs + '</span>' : "";
+      return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> (' + escapeHtml(typeName) + ') poder base <span class="mono">' + base + '</span>' + buffLabel + '</div>';
+    }).join("");
+
+    out.innerHTML = statsHtml + (movesHtml ? '<div class="mybuild-moves-power">' + movesHtml + '</div>' : "");
+  }
+
   // Sets initial <select>/<input> values from saved state (kept out of the
   // HTML-string generation in myBuildEditorHtml() - easier to set .value
   // directly than to re-walk every option list marking one "selected"),
   // and wires the save/clear/copy buttons + the live EV-total counter.
   function wireMyBuildEditor(sp) {
     var b = state.customBuilds[sp.sname] || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
+    myBuildLevel = myBuildLevel || getCurrentCap() || 50;
     var abiEl = document.getElementById("mybuild-ability");
     if (abiEl) abiEl.value = b.ability || "";
     var natEl = document.getElementById("mybuild-nature");
     if (natEl) natEl.value = b.nature || "";
+    if (natEl) natEl.addEventListener("change", function () { updateMyBuildStatus(sp); });
     var itemEl = document.getElementById("mybuild-item");
     if (itemEl) itemEl.value = b.item || "";
+    if (itemEl) itemEl.addEventListener("input", function () { updateMyBuildStatus(sp); });
     for (var i = 0; i < 4; i++) {
       var mv = document.getElementById("mybuild-move-" + i);
       if (mv) mv.value = b.moves[i] || "";
+      if (mv) mv.addEventListener("change", function () { updateMyBuildStatus(sp); });
     }
     for (var j = 0; j < 6; j++) {
       var ivEl = document.getElementById("mybuild-iv-" + j);
       if (ivEl) ivEl.value = b.ivs[j];
+      if (ivEl) ivEl.addEventListener("input", function () { updateMyBuildStatus(sp); });
       var evEl = document.getElementById("mybuild-ev-" + j);
       if (evEl) evEl.value = b.evs[j];
       if (evEl) evEl.addEventListener("input", updateMyBuildEvTotal);
+      if (evEl) evEl.addEventListener("input", function () { updateMyBuildStatus(sp); });
     }
     updateMyBuildEvTotal();
+    // "input" (not "change") - unlike the boss-level-input, this only ever
+    // touches #mybuild-status-preview, never re-renders the level field
+    // itself, so there's no focus-loss risk from updating on every keystroke.
+    var levelEl = document.getElementById("mybuild-level");
+    if (levelEl) levelEl.addEventListener("input", function () {
+      myBuildLevel = clampInt(levelEl.value, 1, 100, myBuildLevel);
+      updateMyBuildStatus(sp);
+    });
+    updateMyBuildStatus(sp);
 
     var saveBtn = document.getElementById("mybuild-save");
     if (saveBtn) {
@@ -3299,6 +3395,12 @@
   // different boss is opened, so browsing several bosses at "the level I'm
   // actually at" doesn't mean re-typing it each time.
   var bossState = { query: "", cat: "", selected: null, diff: "party", level: null };
+
+  // "Meu build"'s own level, separate from bossState.level - a single value
+  // reused across every species the user edits (same "sticky, not reset per
+  // switch" idiom as the boss calculator's level), defaulted the same way:
+  // the current level cap if one is set, else 50.
+  var myBuildLevel = null;
 
   function initBosses() {
     document.getElementById("boss-count-badge").textContent = BOSSES.length;
