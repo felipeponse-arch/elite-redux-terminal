@@ -89,6 +89,7 @@ $dataFiles = @{
     "__BOSS_BUILDS_JSON__" = Join-Path $dataDir "boss_reference_builds.json"
     "__SPECIES_RANK_JSON__" = Join-Path $dataDir "species_rank.json"
     "__MEGA_FORMS_JSON__" = Join-Path $dataDir "mega_forms.json"
+    "__CHANGELOG_JSON__" = Join-Path $dataDir "changelog.json"
 }
 
 foreach ($path in $dataFiles.Values) {

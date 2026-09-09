@@ -1,0 +1,31 @@
+[
+  {
+    "date": "2026-09-09",
+    "items": [
+      "Aviso de armazenamento cheio agora fica visível até você dispensar, não some sozinho",
+      "Trava de segurança: o app avisa se o arquivo errado for publicado por engano",
+      "\"Meu build\" agora mostra os status finais do Pokémon e o poder de cada golpe escolhido",
+      "Corrigido: banner de sincronização entre aparelhos aparecendo sem necessidade",
+      "Corrigido: a Dex travava ao rolar para baixo em telas largas",
+      "\"Copiar\" build de chefão ou do histórico agora também salva como seu build",
+      "\"Meu build\" aparece agora também na aba Meu Time",
+      "Editor \"Meu build\": monte um set escolhendo direto das opções reais do Pokémon",
+      "Sincronização automática entre PC e celular",
+      "Calculadora de chefão agora modela Mega Evolução e Reversão Primal",
+      "Calculadora de chefão passa a considerar item segurado e nível digitado",
+      "Corrigidos 4 bugs reais encontrados usando o app de verdade (menu \"Mais\" preso aberto, habilidades duplicadas, sugestão do painel quebrada, rolagem lateral)",
+      "Resumo do time (\"Dashboard\") no topo da Dex",
+      "Anotações pessoais por Pokémon + golpes coloridos por tipo",
+      "Selos de rank: corrigido contraste e ordenação mais clara"
+    ]
+  },
+  {
+    "date": "2026-09-08",
+    "items": [
+      "Rank automático SS/S/A/B/C/D para todas as espécies (geral e por estágio evolutivo)",
+      "Clique no nome/sprite de qualquer Pokémon leva direto para a ficha dele",
+      "Builds de referência extraídas de chefões de verdade + histórico de builds recomendadas",
+      "Correções de usabilidade (troca time/caixa, cores de status, menu no celular)"
+    ]
+  }
+]

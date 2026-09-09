@@ -731,6 +731,47 @@ async function runLiveTests() {
       document.getElementById("storage-banner").hidden === true);
   }
 
+  // --- Fase 1 quality-of-life batch, 2026-09-09: changelog card + keyboard
+  // shortcuts. Sort/type-filter PERSISTENCE across a reload is Part D below
+  // (same reason Part B exists - can't verify "survives a reload" without
+  // one), this only covers what's testable without a reload.
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  document.getElementById("tabs-more-toggle").click();
+  const progressTabBtn = document.querySelector('#tabs-more-panel [data-tab="progress"]');
+  if (progressTabBtn) progressTabBtn.click();
+  await wait(30);
+  const changelogHtml = document.getElementById("changelog-list").innerHTML;
+  check("Novidades card renders real changelog entries (not empty)",
+    changelogHtml.indexOf("<li>") !== -1 && changelogHtml.indexOf("2026-09-09") !== -1,
+    changelogHtml.length + " chars");
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
+  function press(key) { document.dispatchEvent(new KeyboardEvent("keydown", { key: key, bubbles: true, cancelable: true })); }
+  document.activeElement.blur();
+  press("/");
+  await wait(20);
+  check("'/' focuses the Dex search input", document.activeElement === document.getElementById("search-input"));
+  document.activeElement.blur();
+  press("ArrowDown");
+  await wait(20);
+  const kbdRow1 = document.querySelector("#species-list .species-row.kbd-active");
+  check("ArrowDown highlights the first row", !!kbdRow1);
+  press("ArrowDown");
+  await wait(20);
+  const kbdRow2 = document.querySelector("#species-list .species-row.kbd-active");
+  check("ArrowDown a second time moves the highlight to a DIFFERENT row",
+    kbdRow2 && kbdRow1 && kbdRow2 !== kbdRow1);
+  press("Enter");
+  await wait(50);
+  check("Enter opens the highlighted species' detail",
+    document.getElementById("dex-shell").classList.contains("show-detail"));
+  press("Escape");
+  await wait(50);
+  check("Escape backs out of the detail view (same as clicking 'Voltar')",
+    !document.getElementById("dex-shell").classList.contains("show-detail"));
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
@@ -806,6 +847,47 @@ localStorage.setItem("er_terminal_save", JSON.stringify(fakeSave));
   const passed = results.filter(r => r.pass).length;
   console.log("=== smoke_test_suite PART C: " + passed + "/" + results.length + " passed ===");
   results.forEach(r => console.log((r.pass ? "PASS" : "FAIL") + "  " + r.name + (r.detail ? "  (" + r.detail + ")" : "")));
+  return results;
+})();
+*/
+
+// ============================== PART D ==============================
+// Sort order + type filter persistence, Fase 1, 2026-09-09 - genuinely
+// needs a reload between "set a preference" and "confirm it survived",
+// same reason Part B is split. Run D1, reload the page, then run D2.
+// D1 - run this FIRST, then reload the page (navigate to the same URL):
+/*
+(function () {
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  const sel = document.getElementById("sort-select");
+  sel.value = "rank";
+  sel.dispatchEvent(new Event("change", { bubbles: true }));
+  document.getElementById("type-filter-toggle").click();
+  const fireCb = [...document.querySelectorAll(".type-check input")].find(cb => cb.parentElement.textContent.trim() === "Fire");
+  fireCb.checked = true;
+  fireCb.dispatchEvent(new Event("change", { bubbles: true }));
+  return "D1 done - sort=rank, type filter=Fire - now reload the page, then run D2";
+})();
+*/
+
+// D2 - run this AFTER reloading:
+/*
+(function () {
+  const results = [];
+  function check(name, cond, detail) { results.push({ name, pass: !!cond, detail: detail || "" }); }
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  check("sort order restored to 'rank' after reload",
+    document.getElementById("sort-select").value === "rank");
+  const fireCb = [...document.querySelectorAll(".type-check input")].find(cb => cb.parentElement.textContent.trim() === "Fire");
+  check("Fire type-filter checkbox restored as checked after reload",
+    fireCb && fireCb.checked === true);
+  check("species list actually reflects the restored filter (Fire-only)",
+    document.querySelectorAll("#species-list .species-row").length > 0 &&
+    document.querySelectorAll("#species-list .species-row").length < 1906);
+  const passed = results.filter(r => r.pass).length;
+  console.log("=== smoke_test_suite PART D: " + passed + "/" + results.length + " passed ===");
+  results.forEach(r => console.log((r.pass ? "PASS" : "FAIL") + "  " + r.name + (r.detail ? "  (" + r.detail + ")" : "")));
+  localStorage.clear();
   return results;
 })();
 */

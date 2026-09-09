@@ -304,6 +304,11 @@
   }
   .species-row:hover { background: var(--surface-2); }
   .species-row.selected { background: var(--surface-2); border-left-color: var(--accent); }
+  /* Keyboard navigation (Fase 1, 2026-09-09) - distinct from .selected
+     (which marks the species currently OPEN in the detail panel) so moving
+     the arrow-key highlight around never looks like it silently changed
+     what's actually selected. */
+  .species-row.kbd-active { outline: 2px solid var(--focus); outline-offset: -2px; }
   .species-row .dexno { color: var(--text-dim); font-size: 11.5px; width: 34px; flex: none; }
   .species-row .sname { font-weight: 600; font-size: 13.5px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .species-row .pips { display: flex; gap: 3px; flex: none; }
@@ -926,6 +931,11 @@
   /* ---------- Types view ---------- */
   .types-shell { flex: 1; min-width: 0; overflow-y: auto; padding: 24px 28px 60px; }
   .hint { color: var(--text-dim); font-size: 13px; max-width: 70ch; margin-bottom: 16px; }
+  .changelog-entry { margin-bottom: 14px; }
+  .changelog-entry:last-child { margin-bottom: 0; }
+  .changelog-date { font-size: 11.5px; color: var(--text-dim); margin-bottom: 6px; }
+  .changelog-items { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.6; }
+  .changelog-items li { margin-bottom: 3px; }
   #type-matrix { border-collapse: collapse; font-size: 11.5px; }
   #type-matrix th, #type-matrix td { padding: 5px 7px; text-align: center; border: 1px solid var(--border); white-space: nowrap; }
   #type-matrix th { font-weight: 700; font-size: 10px; }
@@ -1215,6 +1225,10 @@
           <div class="stat-total" style="margin-top:16px;">Level cap atual <b class="mono" id="cap-display" style="font-size:16px;"></b></div>
           <p style="color:var(--text-dim);font-size:11px;margin-top:10px;" id="settings-note"></p>
         </div>
+        <div class="card" style="max-width:460px;">
+          <h3>Novidades</h3>
+          <div id="changelog-list"></div>
+        </div>
       </div>
     </section>
 
@@ -1282,6 +1296,7 @@
 <script id="bossbuilds" type="application/json">__BOSS_BUILDS_JSON__</script>
 <script id="speciesrank" type="application/json">__SPECIES_RANK_JSON__</script>
 <script id="megaforms" type="application/json">__MEGA_FORMS_JSON__</script>
+<script id="changelog" type="application/json">__CHANGELOG_JSON__</script>
 <script>
 (function () {
   "use strict";
@@ -1346,6 +1361,9 @@
   // ability_translations_pt.json) - re-run the research if this hack adds
   // new Mega/Primal items and they're missing here.
   var MEGA_FORMS = JSON.parse(document.getElementById("megaforms").textContent || "{}");
+  // Player-facing "o que mudou" list, hand-authored (data/changelog.json) -
+  // newest date first. Fase 1 quality-of-life item, 2026-09-09.
+  var CHANGELOG = JSON.parse(document.getElementById("changelog").textContent || "[]");
   var BOSSES = JSON.parse(document.getElementById("bossdata").textContent || "[]");
   var LEVELCAPS = JSON.parse(document.getElementById("levelcapdata").textContent || "null");
   var SAVEDTEAMS_SEED = JSON.parse(document.getElementById("savedteamsseed").textContent || "[]");
@@ -1646,6 +1664,16 @@
     if (save.settings && typeof save.settings === "object") {
       if (save.settings.difficulty) state.settings.difficulty = save.settings.difficulty;
       if (typeof save.settings.milestone === "number") state.settings.milestone = save.settings.milestone;
+      // Fase 1 quality-of-life, 2026-09-09: remember sort order + type
+      // filter between sessions - both used to silently reset on reload.
+      // typeFilter is validated against USABLE_TYPES so a hand-edited or
+      // stale save can't inject a name that isn't a real type.
+      if (typeof save.settings.sort === "string") state.sort = save.settings.sort;
+      if (Array.isArray(save.settings.typeFilter)) {
+        state.typeFilter = new Set(save.settings.typeFilter.filter(function (t) {
+          return USABLE_TYPES.indexOf(t) !== -1;
+        }));
+      }
     }
     // Bounds-check against this build's actual level-cap table: a save from
     // a build with more/fewer milestones could otherwise index past the end
@@ -1702,7 +1730,14 @@
       team: xsToSnames(state.team).concat(state.orphans.team),
       box: xsToSnames(state.box).concat(state.orphans.box),
       savedTeams: state.savedTeams,
-      settings: state.settings,
+      // sort/typeFilter merged in here (not stored directly on
+      // state.settings) so every mutation site doesn't need to remember to
+      // keep two copies in sync - state.sort/state.typeFilter stay the
+      // single source of truth the rendering code already reads directly.
+      settings: Object.assign({}, state.settings, {
+        sort: state.sort,
+        typeFilter: Array.from(state.typeFilter)
+      }),
       notes: state.notes,
       customBuilds: state.customBuilds
     };
@@ -2051,9 +2086,20 @@
     label.className = "type-check";
     label.innerHTML = '<input type="checkbox" value="' + escapeHtml(t) + '">' + escapeHtml(t);
     var meta = TYPE_META[t];
-    label.querySelector("input").addEventListener("change", function (e) {
+    // Fase 1 quality-of-life, 2026-09-09: type filter now persists between
+    // sessions (see applySave()/buildSave()) - reflect any restored value
+    // in this checkbox's initial appearance, not just an empty checkbox
+    // regardless of state.
+    var checkboxEl = label.querySelector("input");
+    if (state.typeFilter.has(t)) {
+      checkboxEl.checked = true;
+      label.classList.add("checked");
+      label.style.background = meta.hex; label.style.color = meta.dark ? "#1c1b17" : "#fff9f2"; label.style.borderColor = meta.hex;
+    }
+    checkboxEl.addEventListener("change", function (e) {
       if (e.target.checked) { state.typeFilter.add(t); label.classList.add("checked"); label.style.background = meta.hex; label.style.color = meta.dark ? "#1c1b17" : "#fff9f2"; label.style.borderColor = meta.hex; }
       else { state.typeFilter.delete(t); label.classList.remove("checked"); label.style.background = ""; label.style.color = ""; label.style.borderColor = ""; }
+      persist();
       renderList();
     });
     typeFilterPanel.appendChild(label);
@@ -2070,9 +2116,72 @@
     document.getElementById("dex-shell").classList.remove("show-detail");
     renderList();
   });
+  // Fase 1 quality-of-life, 2026-09-09: sort order persists between
+  // sessions - reflect a restored value in the <select> itself, since the
+  // static HTML always ships with "dex" marked as the default option.
+  document.getElementById("sort-select").value = state.sort;
   document.getElementById("sort-select").addEventListener("change", function (e) {
     state.sort = e.target.value;
+    persist();
     renderList();
+  });
+
+  // Keyboard shortcuts - Fase 1 quality-of-life, 2026-09-09: "/" jumps to
+  // the relevant search box, Esc backs out of a detail view (same action
+  // as clicking "Voltar para a lista"), arrow keys move a highlight
+  // through the Dex list and Enter opens the highlighted species. All
+  // guarded on not currently typing in a field, so "/" typed into notes or
+  // an item search still types a literal slash instead of stealing focus.
+  document.addEventListener("keydown", function (e) {
+    var activeTag = document.activeElement && document.activeElement.tagName;
+    var typing = activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT";
+
+    if (e.key === "/" && !typing) {
+      e.preventDefault();
+      var dexActive = document.querySelector('.tab-btn[data-tab="dex"]').classList.contains("active");
+      var bossesActive = document.querySelector('.tab-btn[data-tab="bosses"]').classList.contains("active");
+      if (dexActive) {
+        document.getElementById("search-input").focus();
+      } else if (bossesActive) {
+        var bossSearch = document.getElementById("boss-search-input");
+        if (bossSearch) bossSearch.focus();
+      }
+      return;
+    }
+
+    if (e.key === "Escape" && !typing) {
+      if (document.getElementById("dex-shell").classList.contains("show-detail")) {
+        document.getElementById("back-to-list").click();
+      } else if (document.getElementById("boss-shell").classList.contains("show-detail")) {
+        var bossBack = document.getElementById("boss-back-to-list");
+        if (bossBack) bossBack.click();
+      }
+      return;
+    }
+
+    if ((e.key === "ArrowDown" || e.key === "ArrowUp") && !typing) {
+      var dexActiveNav = document.querySelector('.tab-btn[data-tab="dex"]').classList.contains("active");
+      if (!dexActiveNav || document.getElementById("dex-shell").classList.contains("show-detail")) return;
+      var rows = document.querySelectorAll("#species-list .species-row");
+      if (!rows.length) return;
+      e.preventDefault();
+      var curIdx = -1;
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i].classList.contains("kbd-active")) { curIdx = i; break; }
+      }
+      if (curIdx !== -1) rows[curIdx].classList.remove("kbd-active");
+      var nextIdx;
+      if (e.key === "ArrowDown") nextIdx = curIdx === -1 ? 0 : Math.min(curIdx + 1, rows.length - 1);
+      else nextIdx = curIdx === -1 ? 0 : Math.max(curIdx - 1, 0);
+      rows[nextIdx].classList.add("kbd-active");
+      rows[nextIdx].scrollIntoView({ block: "nearest" });
+      return;
+    }
+
+    if (e.key === "Enter" && !typing) {
+      var activeRow = document.querySelector("#species-list .species-row.kbd-active");
+      if (activeRow) activeRow.click();
+    }
   });
 
   // ---------------- list rendering ----------------
@@ -3743,9 +3852,28 @@
     document.getElementById("cap-display").textContent = cap === null ? "Sem limite" : "Nível " + cap;
     if (LEVELCAPS) document.getElementById("settings-note").textContent = LEVELCAPS.note;
   }
+  // "Novidades" - Fase 1 quality-of-life item, 2026-09-09: the user asked
+  // to see what changed without having to ask. Static, hand-authored list
+  // (data/changelog.json) - no attempt to auto-generate from git log, which
+  // would just dump dev-facing commit messages instead of player-facing
+  // summaries.
+  function renderChangelog() {
+    var out = document.getElementById("changelog-list");
+    if (!out) return;
+    if (!CHANGELOG.length) { out.innerHTML = '<p class="hint">Nada por aqui ainda.</p>'; return; }
+    out.innerHTML = CHANGELOG.map(function (entry) {
+      var items = (entry.items || []).map(function (line) {
+        return "<li>" + escapeHtml(line) + "</li>";
+      }).join("");
+      return '<div class="changelog-entry"><div class="changelog-date mono">' + escapeHtml(entry.date) + '</div>' +
+        '<ul class="changelog-items">' + items + '</ul></div>';
+    }).join("");
+  }
+
   function initProgress() {
-    if (progressInited) { renderCapDisplay(); return; }
+    if (progressInited) { renderCapDisplay(); renderChangelog(); return; }
     progressInited = true;
+    renderChangelog();
     var diffSel = document.getElementById("settings-difficulty");
     diffSel.value = state.settings.difficulty;
     var msSel = document.getElementById("settings-milestone");
