@@ -757,6 +757,7 @@
   .rank-info-line { display: flex; flex-wrap: wrap; gap: 16px; margin: -4px 0 14px; }
   .rank-info-item { display: inline-flex; align-items: center; gap: 6px; }
   .rank-info-label { font-size: 11px; color: var(--text-dim); }
+  .rank-info-scale { font-size: 10.5px; color: var(--text-dim); }
   .cov-flag { cursor: help; font-weight: 700; margin-left: 1px; opacity: .85; }
 
   .risk-list { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
@@ -884,6 +885,7 @@
             <select id="sort-select" aria-label="Ordenar a lista">
               <option value="dex">Nº Dex</option>
               <option value="name">Nome A-Z</option>
+              <option value="rank">Rank (melhor primeiro)</option>
               <option value="bst">BST total</option>
               <option value="hp">HP</option>
               <option value="atk">Ataque</option>
@@ -1524,6 +1526,15 @@
     });
     list.sort(function (a, b) {
       if (state.sort === "name") return a.n.localeCompare(b.n);
+      // SS is the highest tier, D the lowest - .score is already the
+      // underlying 0-100 percentile the letter comes from, so sorting by it
+      // directly (rather than the letter) also orders correctly WITHIN a
+      // tier. Species without a rank (shouldn't happen - all 1906 get one)
+      // fall to the bottom instead of erroring.
+      if (state.sort === "rank") {
+        var ra = SPECIES_RANK[a.sname], rb = SPECIES_RANK[b.sname];
+        return (rb ? rb.score : -1) - (ra ? ra.score : -1);
+      }
       if (state.sort === "bst") return bst(b) - bst(a);
       if (state.sort in STAT_IDX) return b.b[STAT_IDX[state.sort]] - a.b[STAT_IDX[state.sort]];
       return (a.i || 9999) - (b.i || 9999) || a.x - b.x;
@@ -1718,7 +1729,7 @@
   function rankBadgeHtml(sname) {
     var r = SPECIES_RANK[sname];
     if (!r) return "";
-    var title = "Rank " + r.tier + " (score " + r.score + "/100) — calculado automaticamente a partir de " +
+    var title = "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100, calculado automaticamente a partir de " +
       "BST (percentil " + r.bstPct + "), uso em chefões (percentil " + r.bossPct + ") e impacto das habilidades " +
       "(percentil " + r.abilityPct + "). Não avalia moveset nem sinergia com o resto do time.";
     return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.tier + '</span>';
@@ -1758,6 +1769,11 @@
       var label = STAGE_LABEL[r.stage] || (r.stage + "º estágio");
       items += '<span class="rank-info-item"><span class="rank-info-label">Rank no ' + label + '</span>' + rankStageBadgeHtml(sp.sname) + '</span>';
     }
+    // The letters alone don't say which end is good without a hover -
+    // user feedback, 2026-09-09 ("falta indicar qual seria o rank mais
+    // valioso"). Spelled out in plain text every time, not just on hover,
+    // plus you can now sort the whole Dex list by rank (search controls).
+    items += '<span class="rank-info-scale">Escala: SS (melhor) &rarr; S &rarr; A &rarr; B &rarr; C &rarr; D (pior)</span>';
     return '<div class="rank-info-line">' + items + '</div>';
   }
 
