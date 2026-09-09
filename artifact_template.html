@@ -1272,7 +1272,42 @@
 <script>
 (function () {
   "use strict";
-  var DATA = JSON.parse(document.getElementById("dexdata").textContent);
+  // Fail-fast self-check, 2026-09-09 - direct response to a real incident
+  // the same day: artifact_template.html (raw source, still carrying
+  // literal placeholder tags) got published instead of the build.ps1
+  // output. JSON.parse on a raw placeholder already throws, so the app
+  // never silently ran with fake/empty data - but it crashed with no
+  // visible explanation, leaving only the static HTML shell (topbar, dead
+  // tab buttons) on screen, which is exactly what "tudo sumiu" looks like
+  // to someone who didn't open devtools. This turns that same crash into
+  // an explicit message naming the actual mistake instead of a blank page.
+  // IMPORTANT: this check deliberately never writes a placeholder's exact
+  // text (e.g. the literal "__DEX" + "_DATA_JSON__" tag) anywhere in this
+  // file, not even split across a string concat, and not even inside this
+  // comment as a real contiguous token - build.ps1's splice step is a
+  // blind whole-file .Replace() per placeholder (scripts/build.ps1), so
+  // any occurrence of that exact text ANYWHERE in the template - comments
+  // included - gets substituted too. A first version of this exact check
+  // did write the placeholder literally to compare against, and that one
+  // mistake alone bloated a 4.5MB build to 7MB by splicing the whole
+  // 1.3MB dex_compact.json into the middle of this function's source.
+  // Checking that real JSON starts with "{" sidesteps needing the
+  // placeholder text at all, and is the more general check anyway (also
+  // catches a script tag left simply empty, not just one still literally
+  // holding its own placeholder).
+  var dexRaw = document.getElementById("dexdata").textContent || "";
+  if (dexRaw.charAt(0) !== "{") {
+    document.body.innerHTML =
+      '<div style="padding:32px 24px;font-family:system-ui,sans-serif;max-width:60ch;color:#c23b3b;">' +
+      '<h2 style="margin:0 0 10px;">Build incompleto publicado</h2>' +
+      '<p style="color:#444;line-height:1.5;">Os dados do Pokedex nao foram embutidos corretamente neste ' +
+      'arquivo. Isso normalmente significa que <code>artifact_template.html</code> foi publicado em vez do ' +
+      'arquivo gerado por <code>scripts/build.ps1</code> (<code>artifact_final.html</code>).</p>' +
+      '<p style="color:#444;line-height:1.5;">Rode <code>scripts\\build.ps1</code> e publique o ' +
+      '<code>artifact_final.html</code> resultante.</p></div>';
+    throw new Error("Build incompleto: dados do dex nao foram substituidos (arquivo errado publicado).");
+  }
+  var DATA = JSON.parse(dexRaw);
   var BUILDS = JSON.parse(document.getElementById("builds").textContent || "{}");
   // Fully-automatic SS/S/A/B/C/D rank per species (BST + boss usage +
   // ability impact, all computed with no per-species human review - see
@@ -1662,7 +1697,15 @@
 
   function persist() {
     var save = buildSave();
-    lsSet(STORE_KEY, JSON.stringify(save));
+    // lsSet() already swallows a quota/disabled-storage exception and
+    // returns false - persist() used to just ignore that, so a full
+    // localStorage (customBuilds/notes/build history all grow unbounded
+    // over time) would silently drop every save from that point on, with
+    // no sign anything was wrong until the user reloaded and found nothing
+    // there. Real gap flagged by an external audit pass, 2026-09-09.
+    if (!lsSet(STORE_KEY, JSON.stringify(save))) {
+      flashToast("Erro: não deu para salvar (armazenamento cheio?). Tente apagar anotações antigas.");
+    }
     pushToSync(save);
   }
   // Kept as separate names so call sites still read clearly; all write the
