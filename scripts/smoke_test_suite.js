@@ -150,6 +150,27 @@ async function runLiveTests() {
     check("coverage table has a scroll mask", !!(cs.maskImage && cs.maskImage !== "none") || !!(cs.webkitMaskImage && cs.webkitMaskImage !== "none"));
   }
 
+  // --- 8. "Mais" dropdown (Progresso/Tipos) - design proposal A, 2026-09-09 ---
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  const moreToggle = document.getElementById("tabs-more-toggle");
+  const morePanel = document.getElementById("tabs-more-panel");
+  check("Mais panel starts hidden", morePanel.hidden === true);
+  moreToggle.click();
+  check("Mais panel opens on click", morePanel.hidden === false);
+  const progressInPanel = morePanel.querySelector('[data-tab="progress"]');
+  if (progressInPanel) progressInPanel.click();
+  await wait(30);
+  check("selecting Progresso inside the panel activates that view",
+    document.getElementById("view-progress").classList.contains("active"));
+  check("panel closes after selecting an item inside it", morePanel.hidden === true);
+  check("Mais toggle highlights while Progresso/Tipos is active", moreToggle.classList.contains("active"));
+  moreToggle.click();
+  document.body.click();
+  check("clicking outside the dropdown closes it", morePanel.hidden === true);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

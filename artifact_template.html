@@ -146,7 +146,12 @@
   .brand-sub { margin: 2px 0 0; font-size: 12.5px; color: var(--text-dim); }
   .brand-sub .mono { color: var(--accent-2); }
 
-  .tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 10px; }
+  /* Groups .tabs + .tabs-more so .topbar's justify-content:space-between
+     (brand <-> nav area) only fires once, between brand and this whole row -
+     without it, space-between would also push .tabs-more away from .tabs
+     itself, off to the far edge instead of sitting right beside it. */
+  .tabs-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 10px; min-width: 0; }
   .tab-btn {
     border: none;
     background: transparent;
@@ -172,6 +177,19 @@
     font-family: "IBM Plex Mono", monospace;
   }
   .tab-btn:not(.active) .count-badge { background: var(--surface-3); color: var(--text-dim); }
+
+  /* "Mais" dropdown (Progresso/Tipos) - design review, 2026-09-09. The
+     toggle reuses .tab-btn/.tab-btn.active as-is (same class), so it looks
+     identical to a real tab and gets the same "active" highlight
+     automatically when Progresso or Tipos is the current view. */
+  .tabs-more { position: relative; flex: none; }
+  .tabs-more-panel {
+    position: absolute; top: calc(100% + 6px); right: 0; z-index: 50;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: var(--shadow); padding: 4px; display: flex; flex-direction: column;
+    gap: 2px; min-width: 160px;
+  }
+  .tabs-more-panel .tab-btn { justify-content: flex-start; width: 100%; }
 
   /* min-width:0 on every flex item in this chain: without it a wide child (the
      type matrix) stretches its ancestors instead of scrolling inside .scroll-x,
@@ -868,8 +886,9 @@
     .brand-mark { width: 32px; height: 32px; font-size: 16px; border-radius: 8px; }
     .brand-text h1 { font-size: 16px; }
     .topbar { padding: 8px 10px; gap: 8px; }
+    .tabs-row { width: 100%; }
     .tabs {
-      width: 100%;
+      flex: 1;
       overflow-x: auto;
       flex-wrap: nowrap;
       scrollbar-width: none;
@@ -903,14 +922,38 @@
         <p class="brand-sub">Dex offline &middot; build <span class="mono">2.65beta</span> &middot; <span id="species-count" class="mono"></span> espécies &middot; dados de <span id="data-stamp" class="mono"></span></p>
       </div>
     </div>
+    <div class="tabs-row">
     <nav class="tabs" role="tablist" aria-label="Seções">
       <button class="tab-btn active" data-tab="dex" type="button" role="tab" aria-selected="true" aria-controls="view-dex">Dex</button>
       <button class="tab-btn" data-tab="team" type="button" role="tab" aria-selected="false" aria-controls="view-team">Meu Time <span id="team-count-badge" class="count-badge mono">0/6</span></button>
       <button class="tab-btn" data-tab="box" type="button" role="tab" aria-selected="false" aria-controls="view-box">Caixa <span id="box-count-badge" class="count-badge mono">0</span></button>
       <button class="tab-btn" data-tab="bosses" type="button" role="tab" aria-selected="false" aria-controls="view-bosses">Chefões <span id="boss-count-badge" class="count-badge mono"></span></button>
-      <button class="tab-btn" data-tab="progress" type="button" role="tab" aria-selected="false" aria-controls="view-progress">Progresso <span id="cap-badge" class="count-badge mono"></span></button>
-      <button class="tab-btn" data-tab="types" type="button" role="tab" aria-selected="false" aria-controls="view-types">Tipos</button>
     </nav>
+    <!--
+        Design review, 2026-09-09: 6 flat tabs of equal visual weight was the
+        root cause behind the mobile scroll-mask patch two sessions ago -
+        deliberately a SIBLING of <nav class="tabs">, not nested inside it -
+        .tabs gets overflow-x:auto on narrow screens (the existing mobile
+        scroll fix) and an absolutely-positioned dropdown inside a clipped
+        scroll container gets clipped too regardless of z-index (found this
+        the hard way: the first version rendered a real, positioned,
+        non-hidden panel that was nonetheless invisible).
+        Dex/Meu Time/Caixa/Chefões are the daily-use core loop, Progresso and
+        Tipos are configured once or checked occasionally. Splitting them
+        fixes the crowding at its source instead of masking the symptom
+        further. #tabs-more-toggle/-panel are real .tab-btn elements inside,
+        same class + data-tab the existing delegated click handler already
+        matches - moving them visually didn't need any of that logic to
+        change, only where they render and a show/hide toggle for the panel.
+      -->
+      <div class="tabs-more">
+        <button id="tabs-more-toggle" class="tab-btn" type="button" aria-haspopup="true" aria-expanded="false">Mais &#9662;</button>
+        <div id="tabs-more-panel" class="tabs-more-panel" hidden>
+          <button class="tab-btn" data-tab="progress" type="button" role="tab" aria-selected="false" aria-controls="view-progress">Progresso <span id="cap-badge" class="count-badge mono"></span></button>
+          <button class="tab-btn" data-tab="types" type="button" role="tab" aria-selected="false" aria-controls="view-types">Tipos</button>
+        </div>
+      </div>
+    </div>
   </header>
 
   <main>
@@ -1482,7 +1525,18 @@
   }
 
   // ---------------- tabs ----------------
+  var moreToggle = document.getElementById("tabs-more-toggle");
+  var morePanel = document.getElementById("tabs-more-panel");
+  var MORE_TABS = ["progress", "types"];
+  function closeMorePanel() {
+    morePanel.hidden = true;
+    moreToggle.setAttribute("aria-expanded", "false");
+  }
   document.querySelectorAll(".tab-btn").forEach(function (btn) {
+    // #tabs-more-toggle shares the .tab-btn class for matching visual sizing
+    // (see .tabs-more-toggle CSS) but isn't a real tab - it has no data-tab
+    // and is wired separately below.
+    if (!btn.dataset.tab) return;
     btn.addEventListener("click", function () {
       document.querySelectorAll(".tab-btn").forEach(function (b) {
         b.classList.remove("active");
@@ -1492,12 +1546,26 @@
       btn.classList.add("active");
       btn.setAttribute("aria-selected", "true");
       document.getElementById("view-" + btn.dataset.tab).classList.add("active");
+      moreToggle.classList.toggle("active", MORE_TABS.indexOf(btn.dataset.tab) !== -1);
+      closeMorePanel();
       if (btn.dataset.tab === "team") renderTeam();
       if (btn.dataset.tab === "box") renderBox();
       if (btn.dataset.tab === "bosses") initBosses();
       if (btn.dataset.tab === "progress") initProgress();
       if (btn.dataset.tab === "types") renderTypeMatrix();
     });
+  });
+  moreToggle.addEventListener("click", function (e) {
+    e.stopPropagation();
+    var willOpen = morePanel.hidden;
+    morePanel.hidden = !willOpen;
+    moreToggle.setAttribute("aria-expanded", String(willOpen));
+  });
+  document.addEventListener("click", function (e) {
+    if (!morePanel.hidden && !e.target.closest(".tabs-more")) closeMorePanel();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !morePanel.hidden) closeMorePanel();
   });
 
   // ---------------- type filter panel ----------------
