@@ -369,6 +369,43 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
+  // --- 15. Mega Evolution / Primal Reversion in the boss stat calculator -
+  // 2026-09-09, user's follow-up on the held-item pass ("como devemos
+  // aplicar da melhor forma"). Lucy Lavaridge (Insane tier) has a Milotic
+  // holding Miloticite - hand-verified all 6 final stats against Milotic
+  // MEGA's real base stats (95/69/110/129/156/81) at level 18, Careful
+  // nature, 252 HP/4 Def/252 SpD: HP79 Atk35 Def50 SpA51 SpD85 Spe39, all
+  // matched exactly. This just re-checks the card shows the transformed
+  // identity/types/note, not the numbers again (those are covered by hand
+  // once; re-deriving them here would just duplicate that arithmetic).
+  document.querySelector('.tab-btn[data-tab="bosses"]').click();
+  await wait(50);
+  document.getElementById("boss-search-input").value = "Lucy Lavaridge";
+  document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
+  await wait(30);
+  const lucyRow = document.querySelector("#boss-list .species-row");
+  if (lucyRow) {
+    lucyRow.click();
+    await wait(50);
+    const insaneBtn = document.querySelector('.chip-btn[data-diff="insane"]');
+    if (insaneBtn) { insaneBtn.click(); await wait(50); }
+    const milCard = [...document.querySelectorAll(".boss-mon-card")].find(c => c.querySelector(".bm-name").textContent.indexOf("Milotic") === 0);
+    if (milCard) {
+      check("Mega-stone holder shows the transformed species name", milCard.querySelector(".bm-name").textContent === "Milotic Mega");
+      const typeNames = [...milCard.querySelectorAll(".bm-types .type-pill")].map(t => t.textContent);
+      check("Mega-stone holder shows the transformed species' types (Water/Fairy, not just Water)",
+        typeNames.indexOf("Fairy") !== -1, typeNames.join(","));
+      check("card explains what species it enters as", milCard.textContent.indexOf("Entra como") !== -1 && milCard.textContent.indexOf("Milotic") !== -1);
+      check("card is honest that the post-transform choosable ability is unknown",
+        milCard.textContent.indexOf("não sabemos qual") !== -1);
+    } else { check("Milotic Mega (the Miloticite fixture) found on Lucy Lavaridge", false); }
+  } else { check("Lucy Lavaridge (the Miloticite fixture boss) found", false); }
+  document.getElementById("boss-search-input").value = "";
+  document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
+  document.getElementById("boss-shell").classList.remove("show-detail");
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
