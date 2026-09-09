@@ -238,6 +238,34 @@ async function runLiveTests() {
   setSearch("");
   await wait(30);
 
+  // --- 12. boss held-item stat modifier - 2026-09-09, user asked directly ---
+  // Greta Slateport's Landorus Therian holds a Choice Band. Checks the FLAG
+  // and that it lands on the right stat (Atk) and not an unrelated one
+  // (HP), not a hardcoded final number - stays valid regardless of the
+  // level-cap default used to compute it.
+  document.querySelector('.tab-btn[data-tab="bosses"]').click();
+  await wait(50);
+  document.getElementById("boss-search-input").value = "Greta";
+  document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
+  await wait(30);
+  const gretaRow = document.querySelector("#boss-list .species-row");
+  if (gretaRow) {
+    gretaRow.click();
+    await wait(50);
+    const landoCard = [...document.querySelectorAll(".boss-mon-card")].find(c => c.querySelector(".bm-name").textContent.indexOf("Landorus") === 0);
+    if (landoCard) {
+      const bmStats = [...landoCard.querySelectorAll(".bm-stat")];
+      check("Choice Band flags the Atk stat with a tooltip",
+        bmStats[1] && bmStats[1].querySelector(".cov-flag") && bmStats[1].querySelector(".cov-flag").title.indexOf("Choice Band") === 0);
+      check("Choice Band does NOT flag an unrelated stat (HP)", bmStats[0] && !bmStats[0].querySelector(".cov-flag"));
+    } else { check("Landorus Therian (the Choice Band fixture) found on this boss", false); }
+  } else { check("Greta Slateport (the Choice Band fixture boss) found", false); }
+  document.getElementById("boss-search-input").value = "";
+  document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
+  document.getElementById("boss-shell").classList.remove("show-detail");
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

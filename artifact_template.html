@@ -1609,11 +1609,31 @@
   // stat, nature +/-10%) is the same since Gen 3 and not something a
   // data-only ROM hack rewrites, so it's safe to hardcode - unlike level,
   // which is genuinely unknowable from this project's data.
-  // Shows the RAW final stat only - no in-battle ability/item/stage
-  // modifiers (e.g. a +50% Choice Band). That's a deliberate scope line,
-  // not an oversight: this is "what does the stat screen say", the same
-  // thing showdownSet()/the Dex stat bars already show for the player's own
-  // side, not an attempt to simulate a turn.
+  // UPDATE 2026-09-09 (same day, user asked directly): held-item stat
+  // modifiers ARE now applied, for the items this data actually confirms
+  // the identity of - Choice Band/Specs/Scarf and Assault Vest appear under
+  // their exact, unmistakable franchise names (checked: `grep -o
+  // '"item":"[^"]*"' data/bosses.json`, 13/12/33/75 occurrences
+  // respectively) and their effect is textbook, unchanged-since-introduced
+  // vanilla mechanics. Deliberately NOT extended to every item: this same
+  // data also has "Tactical Vest" (31 occurrences) - not a real franchise
+  // item, and gameData.items[] carries only {name, NAME, id}, no effect
+  // text anywhere in the source to check it against (same gap documented
+  // for item sprites). Guessing a 31-occurrence item is Assault-Vest-with-
+  // a-reskin would be exactly the kind of fabricated confidence this
+  // project has consistently refused to ship. Species-locked items (Light
+  // Ball/Thick Club, also present in the data) are left out too - applying
+  // them correctly requires confirming which SPECIES holds them, which
+  // this hack could have reassigned, and that verification hasn't been
+  // done. Still no in-battle ability/stage modifiers (stat stages, weather,
+  // an ability's damage-time effect) - this is "what does the stat screen
+  // say", not an attempt to simulate a turn.
+  var ITEM_STAT_MODS = {
+    "Choice Band": { statIdx: 1, mult: 1.5 },
+    "Choice Specs": { statIdx: 3, mult: 1.5 },
+    "Choice Scarf": { statIdx: 5, mult: 1.5 },
+    "Assault Vest": { statIdx: 4, mult: 1.5 }
+  };
   var NATURE_MODS = {
     Lonely: [1, 2], Brave: [1, 5], Adamant: [1, 3], Naughty: [1, 4],
     Bold: [2, 1], Relaxed: [2, 5], Impish: [2, 3], Lax: [2, 4],
@@ -1623,7 +1643,7 @@
     // Hardy/Docile/Serious/Bashful/Quirky are neutral - no entry, falls
     // through to the no-modifier case below.
   };
-  function calcFinalStat(base, iv, ev, level, statIdx, natureName) {
+  function calcFinalStat(base, iv, ev, level, statIdx, natureName, itemName) {
     iv = (typeof iv === "number") ? iv : 31;
     ev = (typeof ev === "number") ? ev : 0;
     level = level || 1;
@@ -1637,7 +1657,14 @@
       if (mods[0] === statIdx) mult = 1.1;
       else if (mods[1] === statIdx) mult = 0.9;
     }
-    return Math.floor(raw * mult);
+    var withNature = Math.floor(raw * mult);
+    // Held-item multiplier applies to the nature-adjusted stat, same order
+    // the actual games compute it in (base formula -> nature -> item).
+    var itemMod = ITEM_STAT_MODS[itemName];
+    if (itemMod && itemMod.statIdx === statIdx) {
+      return Math.floor(withNature * itemMod.mult);
+    }
+    return withNature;
   }
 
   // ---------------- tabs ----------------
@@ -2932,11 +2959,17 @@
       // rather than a crash or a fabricated number).
       var statsHtml = "";
       if (sp && m.evsRaw && m.ivsRaw) {
+        var itemMod = ITEM_STAT_MODS[m.item];
         var vals = sp.b.map(function (base, i) {
-          return calcFinalStat(base, m.ivsRaw[i], m.evsRaw[i], bossState.level, i, m.nat);
+          return calcFinalStat(base, m.ivsRaw[i], m.evsRaw[i], bossState.level, i, m.nat, m.item);
         });
         statsHtml = '<div class="bm-stats">' + vals.map(function (v, i) {
-          return '<span class="bm-stat"><span class="bm-stat-label">' + STAT_LABELS_SHORT[i] + '</span><span class="mono">' + v + '</span></span>';
+          // Flag which single stat the held item actually changed - same
+          // "*" + tooltip pattern already used for ability-adjusted type
+          // multipliers (Meu Time's coverage table), not a new convention.
+          var flag = (itemMod && itemMod.statIdx === i)
+            ? '<span class="cov-flag" title="' + escapeHtml(m.item) + ' (x' + itemMod.mult + ')">*</span>' : "";
+          return '<span class="bm-stat"><span class="bm-stat-label">' + STAT_LABELS_SHORT[i] + '</span><span class="mono">' + v + '</span>' + flag + '</span>';
         }).join("") + '</div>';
       }
       return '<div class="boss-mon-card">' +
@@ -2964,7 +2997,7 @@
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
         '<div class="boss-level-row"><label for="boss-level-input">Status final calculados pro nível</label>' +
           '<input type="number" id="boss-level-input" min="1" max="100" value="' + bossState.level + '"></div>' +
-        '<p style="color:var(--text-dim);font-size:11px;margin:4px 0 12px;max-width:65ch;">Você digita o nível — não temos como saber o nível real de um treinador nos dados do jogo (por isso não existe uma calculadora de dano completa aqui, só isso). EVs/IVs são reais, extraídos do jogo; sem modificador de habilidade, item ou fase de batalha.</p>' +
+        '<p style="color:var(--text-dim);font-size:11px;margin:4px 0 12px;max-width:65ch;">Você digita o nível — não temos como saber o nível real de um treinador nos dados do jogo (por isso não existe uma calculadora de dano completa aqui, só isso). EVs/IVs são reais, extraídos do jogo. Considera o item quando é Choice Band/Specs/Scarf ou Assault Vest (marcado com *) — outros itens (inclusive alguns exclusivos deste hack, sem descrição nos dados) e efeito de habilidade não entram na conta.</p>' +
         '<div class="boss-mon-grid">' + monsHtml + '</div></div>' +
       '<div class="card"><h3>Enviar para o Claude</h3>' +
         '<p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">Junta o time dele com o seu time e sua caixa num texto só. Copie e cole na conversa pra eu montar a contra-estratégia.</p>' +
