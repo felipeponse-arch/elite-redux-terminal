@@ -352,7 +352,17 @@
   .move-detail-row td { background: var(--surface-2); color: var(--text-dim); font-size: 12px; padding: 8px 12px; }
   .move-detail-row.hidden { display: none; }
   .move-type-tag { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
-  .scroll-x { overflow-x: auto; }
+  /* Same edge-fade already used for the mobile tab bar (see .tabs) - used
+     here without a media-query gate because both tables that rely on this
+     (cov-table, the type matrix) stretch far enough (up to 18 type columns)
+     that they overflow at almost any realistic viewport width, not just
+     mobile. Design review, 2026-09-09: this was the one other place in the
+     app hiding a scrollbar with zero cue that there's more to see. */
+  .scroll-x {
+    overflow-x: auto;
+    mask-image: linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%);
+  }
   .tutor-chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .tutor-chip { background: var(--surface-2); border-radius: 999px; padding: 4px 10px; font-size: 12px; cursor: default; }
 
@@ -701,7 +711,6 @@
     padding: 2px 0;
   }
 
-  .team-analysis h3 { font-size: 13px; margin-bottom: 10px; }
   .cov-table { border-collapse: collapse; font-size: 12px; }
   .cov-table th, .cov-table td { padding: 6px 7px; text-align: center; border-bottom: 1px solid var(--border); }
   .cov-table th.rowhead, .cov-table td.rowhead { text-align: left; font-weight: 600; }
@@ -2417,7 +2426,7 @@
   function renderTeamAnalysis(members) {
     var el = document.getElementById("team-analysis");
     if (!members.length) {
-      el.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">Adicione Pokémon na aba Dex para ver a cobertura defensiva do time.</p>';
+      el.innerHTML = '<div class="card"><p style="color:var(--text-dim);font-size:13px;">Adicione Pokémon na aba Dex para ver a cobertura defensiva do time.</p></div>';
       return;
     }
     var head = '<th class="rowhead">Vs. tipo</th>' + members.map(function (sp) { return '<th>' + escapeHtml(sp.n.split(" ")[0]) + '</th>'; }).join("");
@@ -2453,10 +2462,17 @@
         '<span class="mono">' + r.n + '/' + members.length + ' fracos</span></div>';
     }).join("") : '<p style="color:var(--text-dim);font-size:13px;">Nenhum tipo derruba 2 ou mais membros do time ao mesmo tempo &mdash; boa cobertura defensiva de base.</p>';
 
-    el.innerHTML = '<h3>Riscos compartilhados do time</h3><div class="risk-list">' + riskHtml + '</div>' +
-      '<h3 style="margin-top:22px;">Cobertura defensiva</h3>' +
+    // Used to be two bare <h3>s dumped straight into #team-analysis, with no
+    // .card wrapper - the only section titles in the whole app that didn't
+    // get the standard uppercase/letter-spaced/dim treatment every other
+    // <h3> gets (see .card h3). Right in the densest, most important screen
+    // in the tool, of all places (design review, 2026-09-09). Two separate
+    // cards now, matching how every other section on this page is chunked
+    // (Stats, Habilidades, Builds de referência...), not one mega-block.
+    el.innerHTML = '<div class="card"><h3>Riscos compartilhados do time</h3><div class="risk-list">' + riskHtml + '</div></div>' +
+      '<div class="card"><h3>Cobertura defensiva</h3>' +
       '<div class="scroll-x"><table class="cov-table"><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      abilityNote;
+      abilityNote + '</div>';
   }
 
   // ---------------- bosses view ----------------
