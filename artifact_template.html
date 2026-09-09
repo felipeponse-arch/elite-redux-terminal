@@ -648,6 +648,18 @@
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  .sync-banner {
+    position: fixed; left: 0; right: 0; top: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    background: var(--accent-2); color: var(--accent-ink);
+    font-size: 12.5px; font-weight: 600; padding: 8px 14px; box-shadow: var(--shadow);
+  }
+  .sync-banner button {
+    border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700;
+    cursor: pointer; background: rgba(0,0,0,.15); color: inherit;
+  }
+  #sync-banner-dismiss { background: none; font-size: 16px; padding: 0 4px; line-height: 1; }
+
   .showdown-block {
     font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
     font-size: 11.5px;
@@ -1226,6 +1238,16 @@
   </footer>
   <div id="toast" role="status" aria-live="polite"></div>
 
+  <!-- Cross-device sync banner (db capability), 2026-09-09: unlike the toast
+       above, this must stay up until the user notices and acts, not
+       auto-hide after 2.2s - a "your save changed elsewhere" notice that
+       vanished on its own would defeat the point. See wireSync() below. -->
+  <div id="sync-banner" class="sync-banner" hidden>
+    <span id="sync-banner-text"></span>
+    <button id="sync-banner-reload" type="button">Atualizar</button>
+    <button id="sync-banner-dismiss" type="button" aria-label="Dispensar">&times;</button>
+  </div>
+
   <div id="swap-modal" class="modal-backdrop" hidden>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="swap-modal-title">
       <div class="modal-head">
@@ -1641,7 +1663,11 @@
     };
   }
 
-  function persist() { lsSet(STORE_KEY, JSON.stringify(buildSave())); }
+  function persist() {
+    var save = buildSave();
+    lsSet(STORE_KEY, JSON.stringify(save));
+    pushToSync(save);
+  }
   // Kept as separate names so call sites still read clearly; all write the
   // one versioned blob.
   function saveTeam() { persist(); }
@@ -1690,6 +1716,75 @@
     applySave({ savedTeams: SAVEDTEAMS_SEED.slice(0, 3) });
     persist();
   })();
+
+  // ---------------- cross-device sync (db capability) ----------------
+  // 2026-09-09, user asked for automatic sync between PC and phone instead
+  // of the manual copy/paste or file-download transfer card. One SHARED
+  // document (not the `user` capability's per-viewer data/users/ subtree)
+  // is deliberate: this artifact is private/unshared (sharing: owner), so
+  // only the owner can ever open it regardless of who else is technically
+  // in the org - a plain shared doc is simpler than per-viewer scoping for
+  // a single-person tool, and avoids depending on a capability this
+  // control plane doesn't list as declarable.
+  // Never blocks first paint (see artifact-capabilities guidance): this
+  // runs AFTER the synchronous loadSave() above already rendered from
+  // localStorage, entirely in the background. A newer save found elsewhere
+  // is written to localStorage immediately but NOT live-patched into the
+  // already-rendered UI (surgically re-rendering every view correctly is
+  // real risk for real benefit here) - instead a dismissible banner offers
+  // a reload, so a build the user is mid-editing is never silently
+  // overwritten by a remote change arriving in the background.
+  var syncDb = null, syncRef = null, syncLastSeenAt = null;
+  function pushToSync(save) {
+    if (!syncRef) return;
+    syncLastSeenAt = save.savedAt;
+    syncRef.set(save).catch(function () { /* offline/transient - localStorage already has it; the next persist() retries */ });
+  }
+  function showSyncBanner(text) {
+    document.getElementById("sync-banner-text").textContent = text;
+    document.getElementById("sync-banner").hidden = false;
+  }
+  (async function wireSync() {
+    if (typeof claude === "undefined" || !claude.use) return; // no viewer chrome (e.g. local dev server) - stays local-only
+    var db = await claude.use("db");
+    if (!db) return; // not served/granted/loaded in this view
+    syncDb = db;
+    syncRef = db.doc("sync/save");
+    try {
+      var snap = await syncRef.get();
+      if (snap.exists) {
+        var remote = snap.data();
+        var localRaw = lsGet(STORE_KEY);
+        var local = localRaw ? JSON.parse(localRaw) : null;
+        if (!local || !local.savedAt || (remote.savedAt && remote.savedAt > local.savedAt)) {
+          lsSet(STORE_KEY, JSON.stringify(remote));
+          syncLastSeenAt = remote.savedAt;
+          showSyncBanner("Encontramos um save mais novo de outro aparelho.");
+        } else {
+          syncLastSeenAt = local.savedAt;
+          syncRef.set(local).catch(function () {});
+        }
+      } else {
+        var localRaw2 = lsGet(STORE_KEY);
+        var seed = localRaw2 ? JSON.parse(localRaw2) : buildSave();
+        syncLastSeenAt = seed.savedAt;
+        syncRef.set(seed).catch(function () {});
+      }
+    } catch (e) { /* get() failed - stay local-only for this load; persist() keeps trying to push */ }
+
+    syncRef.onSnapshot(function (snap) {
+      if (!snap.exists || snap.metadata.hasPendingWrites) return;
+      var remote = snap.data();
+      if (remote.savedAt && remote.savedAt !== syncLastSeenAt) {
+        lsSet(STORE_KEY, JSON.stringify(remote));
+        showSyncBanner("Seu time foi atualizado em outro aparelho agora.");
+      }
+    }, function () { syncDb = null; syncRef = null; });
+  })();
+  document.getElementById("sync-banner-reload").addEventListener("click", function () { location.reload(); });
+  document.getElementById("sync-banner-dismiss").addEventListener("click", function () {
+    document.getElementById("sync-banner").hidden = true;
+  });
 
   var DIFF_TO_BOSSKEY = { easy: "party", ace: "insane", elite: "hell" };
 
