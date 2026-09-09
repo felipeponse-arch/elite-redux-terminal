@@ -582,14 +582,23 @@
   }
   .ts-build-note { font-size: 11px; color: var(--text-dim); margin-top: 6px; font-style: italic; }
 
-  .bh-details { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+  .bh-details { margin-top: 10px; }
+  .bh-details + .bh-details { margin-top: 8px; }
+  /* Used to be a bare dim line with a tiny triangle - easy to mistake for
+     stray text, not a feature (user feedback, 2026-09-09). Now styled like
+     any other clickable row in the app, so it reads as one. */
   .bh-details summary {
     cursor: pointer;
-    font-size: 11.5px;
+    font-size: 12.5px;
     font-weight: 700;
-    color: var(--text-dim);
+    color: var(--accent-2);
     list-style: none;
+    padding: 9px 12px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
   }
+  .bh-details summary:hover { background: var(--surface-3); }
   .bh-details summary::-webkit-details-marker { display: none; }
   .bh-details summary::before { content: "▸ "; }
   .bh-details[open] summary::before { content: "▾ "; }
@@ -735,6 +744,10 @@
   .rank-badge-stage.tier-B  { color: var(--accent-2); }
   .rank-badge-stage.tier-C  { color: var(--text-dim); }
   .rank-badge-stage.tier-D  { color: var(--sem-weak); }
+
+  .rank-info-line { display: flex; flex-wrap: wrap; gap: 16px; margin: -4px 0 14px; }
+  .rank-info-item { display: inline-flex; align-items: center; gap: 6px; }
+  .rank-info-label { font-size: 11px; color: var(--text-dim); }
   .cov-flag { cursor: help; font-weight: 700; margin-left: 1px; opacity: .85; }
 
   .risk-list { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
@@ -1529,7 +1542,7 @@
         '<span class="dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</span>' +
         spriteImgHtml(sp.x, sp.n, 28) +
         '<span class="sname">' + escapeHtml(sp.n) + '</span>' +
-        rankBadgeHtml(sp.sname) + rankStageBadgeHtml(sp.sname) +
+        rankBadgeHtml(sp.sname) +
         '<span class="pips">' + pips + '</span>' +
         '<button class="row-add-btn' + (!inTeam && teamFull ? ' is-swap' : '') + '" data-add="' + sp.x + '" type="button" title="' + addTitle + '" aria-label="' + addTitle + '"' +
           (inTeam ? ' disabled' : '') + '>' + addLabel + '</button></li>';
@@ -1702,13 +1715,14 @@
     return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.tier + '</span>';
   }
 
-  // Dex only (list + detail), not Team/Box: this answers "is this a good
-  // example of a Pokemon at ITS stage" (useful when deciding whether an
-  // early-game catch is worth grinding), which is a different question from
-  // the plain rank badge's "how strong is this right now". A species with no
-  // real evolution line (standalones, and Mega/Primal-only lineages like
-  // most box legendaries - see compute_species_rank.ps1) has no stageTier
-  // and renders nothing, same safe-degrade as everywhere else.
+  // Dex DETAIL only (never the list, never Team/Box - see rankInfoLineHtml
+  // below): answers "is this a good example of a Pokemon at ITS stage"
+  // (useful when deciding whether an early-game catch is worth grinding),
+  // a different question from the plain rank badge's "how strong is this
+  // right now". A species with no real evolution line (standalones, and
+  // Mega/Primal-only lineages like most box legendaries - see
+  // compute_species_rank.ps1) has no stageTier and renders nothing, same
+  // safe-degrade as everywhere else.
   var STAGE_LABEL = { 1: "1º estágio", 2: "2º estágio", 3: "3º estágio", 4: "4º estágio" };
   function rankStageBadgeHtml(sname) {
     var r = SPECIES_RANK[sname];
@@ -1717,6 +1731,25 @@
     var title = "Rank " + r.stageTier + " entre outros Pokémon de " + label + " (score " + r.stageScore + "/100) — " +
       "mesma fórmula do rank normal, mas comparado só com quem está no mesmo estágio evolutivo, não com o jogo todo.";
     return '<span class="rank-badge-stage ' + (RANK_TIER_CLASS[r.stageTier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.stageTier + '</span>';
+  }
+
+  // The Dex detail used to show both badges bare, side by side, right next
+  // to the species name - "S" filled next to "A" outlined with zero label,
+  // which read as confusing/contradictory rather than as two different
+  // questions being answered (user feedback, 2026-09-09). Now a labeled
+  // line of its own, in plain words, so no tooltip is required to understand
+  // it. The list row and Team/Box cards keep just the bare rankBadgeHtml()
+  // chip - that's fine there, it's a single glanceable "how good is this"
+  // signal, not a place to also explain a second, different ranking.
+  function rankInfoLineHtml(sp) {
+    var r = SPECIES_RANK[sp.sname];
+    if (!r) return "";
+    var items = '<span class="rank-info-item"><span class="rank-info-label">Rank geral</span>' + rankBadgeHtml(sp.sname) + '</span>';
+    if (r.stageTier !== null && r.stageTier !== undefined) {
+      var label = STAGE_LABEL[r.stage] || (r.stage + "º estágio");
+      items += '<span class="rank-info-item"><span class="rank-info-label">Rank no ' + label + '</span>' + rankStageBadgeHtml(sp.sname) + '</span>';
+    }
+    return '<div class="rank-info-line">' + items + '</div>';
   }
 
   function goToDexSpecies(x) {
@@ -1775,7 +1808,7 @@
       // 48 matches the atlas cell size, so the largest sprite in the UI is shown
       // 1:1 and never upscaled.
       '<div class="detail-head"><div class="ts-head">' + spriteImgHtml(sp.x, sp.n, 48) + '<div class="detail-titles">' +
-        '<h2>' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + ' ' + rankStageBadgeHtml(sp.sname) + '</h2>' +
+        '<h2>' + escapeHtml(sp.n) + '</h2>' +
         '<div class="detail-dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</div>' +
         '<div class="detail-sname mono">' + escapeHtml(sp.sname) + '</div>' +
       '</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' +
@@ -1790,6 +1823,7 @@
         (inTeam ? '<button class="back-btn" id="goto-team-link" type="button" style="margin:0;">Ir para Meu Time &rarr;</button>' : "") +
       '</div></div>' +
       '<div class="detail-types">' + names.map(function (n) { return typePill(n); }).join("") + '</div>' +
+      rankInfoLineHtml(sp) +
       (sp.d ? '<p class="flavor">' + escapeHtml(sp.d) + '</p>' : "") +
       '<div class="card"><h3>Stats base</h3>' + statsHtml +
         '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
@@ -1797,7 +1831,14 @@
         '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p></div>' +
       (function () {
         var inner = buildHistoryHtml(sp) + bossReferenceHtml(sp);
-        return inner ? '<div class="card">' + inner + '</div>' : "";
+        // Used to be a bare, untitled card - just a couple of collapsed
+        // one-line <details>, indistinguishable from stray text between
+        // Habilidades and Linha evolutiva (user feedback, 2026-09-09: "muito
+        // mal localizada"). A real header fixes the "what IS this" problem;
+        // the individual <details> summaries got heavier styling (see
+        // .bh-details summary) to read as a real, clickable feature instead
+        // of a barely-visible line.
+        return inner ? '<div class="card"><h3>Builds de referência</h3>' + inner + '</div>' : "";
       })() +
       evoHtml + lmHtml + tuHtml;
 
