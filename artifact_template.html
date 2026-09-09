@@ -686,7 +686,7 @@
     border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700;
     cursor: pointer; background: rgba(0,0,0,.15); color: inherit;
   }
-  #sync-banner-dismiss { background: none; font-size: 16px; padding: 0 4px; line-height: 1; }
+  #sync-banner-dismiss, #storage-banner-dismiss { background: none; font-size: 16px; padding: 0 4px; line-height: 1; }
 
   .showdown-block {
     font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
@@ -1245,6 +1245,19 @@
     <button id="sync-banner-dismiss" type="button" aria-label="Dispensar">&times;</button>
   </div>
 
+  <!-- Storage-full warning, 2026-09-09 (design review after the Gemini audit
+       pass): a UX specialist flagged that this is a data-loss warning, not a
+       trivial confirmation like "Copiado!" - a flashToast() that auto-hides
+       in ~2s could pass completely unnoticed and the user would never learn
+       their build/note didn't actually save. Same persistent-banner pattern
+       as sync-banner above, reusing its CSS (background color differs via
+       --sem-weak instead of --accent-2, so it visually reads as an error,
+       not a routine sync notice) - stays up until dismissed by hand. -->
+  <div id="storage-banner" class="sync-banner" style="background:var(--sem-weak);" hidden>
+    <span id="storage-banner-text"></span>
+    <button id="storage-banner-dismiss" type="button" aria-label="Dispensar">&times;</button>
+  </div>
+
   <div id="swap-modal" class="modal-backdrop" hidden>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="swap-modal-title">
       <div class="modal-head">
@@ -1703,10 +1716,19 @@
     // over time) would silently drop every save from that point on, with
     // no sign anything was wrong until the user reloaded and found nothing
     // there. Real gap flagged by an external audit pass, 2026-09-09.
+    // UPDATE, same day: this used flashToast() at first, but a UX review
+    // pointed out a toast auto-hides in ~2s - fine for a routine "Salvo.",
+    // wrong for a data-loss warning the user might not be looking at the
+    // screen for. showStorageBanner() below stays up until dismissed by
+    // hand, same idiom as showSyncBanner().
     if (!lsSet(STORE_KEY, JSON.stringify(save))) {
-      flashToast("Erro: não deu para salvar (armazenamento cheio?). Tente apagar anotações antigas.");
+      showStorageBanner("Não deu para salvar - armazenamento cheio? Tente apagar anotações antigas.");
     }
     pushToSync(save);
+  }
+  function showStorageBanner(text) {
+    document.getElementById("storage-banner-text").textContent = text;
+    document.getElementById("storage-banner").hidden = false;
   }
   // Kept as separate names so call sites still read clearly; all write the
   // one versioned blob.
@@ -1823,6 +1845,9 @@
   document.getElementById("sync-banner-reload").addEventListener("click", function () { location.reload(); });
   document.getElementById("sync-banner-dismiss").addEventListener("click", function () {
     document.getElementById("sync-banner").hidden = true;
+  });
+  document.getElementById("storage-banner-dismiss").addEventListener("click", function () {
+    document.getElementById("storage-banner").hidden = true;
   });
 
   var DIFF_TO_BOSSKEY = { easy: "party", ace: "insane", elite: "hell" };

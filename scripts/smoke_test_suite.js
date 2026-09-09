@@ -26,6 +26,13 @@
 //     "assert the app read it correctly". Run snippet B1, reload the page
 //     (navigate to the same URL), then run snippet B2.
 //
+//   PART C (1 snippet below, run standalone) - the fail-fast build-integrity
+//     check (2026-09-09, post-audit). Can't run inside PART A: it needs the
+//     page to actually load artifact_template.html (raw, unbuilt) instead of
+//     artifact_final.html, a different URL/file entirely, not just a
+//     different in-page state. Navigate to artifact_template.html served
+//     locally, then run snippet C.
+//
 // To serve the build locally first: a plain HTTP server (not file://, some
 // things behave differently) rooted at this project folder, e.g. a simple
 // PowerShell HttpListener on port 8100 serving artifact_final.html, opened
@@ -696,6 +703,34 @@ async function runLiveTests() {
   setSearch("");
   await wait(30);
 
+  // --- storage-full warning - 2026-09-09, from the Gemini audit pass +
+  // same-day UX review: persist() used to swallow a localStorage quota
+  // failure completely silently. Fixed to show a PERSISTENT banner (not a
+  // flashToast() that auto-hides in ~2s and could go unnoticed for a
+  // data-loss warning) - same show/dismiss idiom as #sync-banner. Monkey-
+  // patches Storage.prototype.setItem to force the failure, same technique
+  // used to verify this by hand before it had suite coverage.
+  (function () {
+    const origSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function () { throw new DOMException("Quota exceeded", "QuotaExceededError"); };
+    const notesArea = document.getElementById("species-notes-input");
+    if (notesArea) {
+      notesArea.value = "teste banner de armazenamento";
+      document.getElementById("species-notes-save").click();
+    }
+    Storage.prototype.setItem = origSetItem;
+  })();
+  await wait(50);
+  const storageBanner = document.getElementById("storage-banner");
+  check("storage-full banner appears on a failed persist()",
+    storageBanner && storageBanner.hidden === false && getComputedStyle(storageBanner).display !== "none",
+    storageBanner && storageBanner.textContent);
+  if (storageBanner) {
+    document.getElementById("storage-banner-dismiss").click();
+    check("storage-full banner can be dismissed by hand (doesn't auto-hide)",
+      document.getElementById("storage-banner").hidden === true);
+  }
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
@@ -746,6 +781,31 @@ localStorage.setItem("er_terminal_save", JSON.stringify(fakeSave));
   console.log("=== smoke_test_suite PART B: " + passed + "/" + results.length + " passed ===");
   results.forEach(r => console.log((r.pass ? "PASS" : "FAIL") + "  " + r.name + (r.detail ? "  (" + r.detail + ")" : "")));
   localStorage.clear();
+  return results;
+})();
+*/
+
+// ============================== PART C ==============================
+// Run standalone: navigate to artifact_template.html (raw, unbuilt) served
+// locally, THEN run this snippet. Regression coverage for the fail-fast
+// build-integrity check added 2026-09-09 after the wrong-file publish
+// incident - artifact_template.html always has unfilled placeholders (it's
+// the source, not the build output), so #dexdata never starts with "{"
+// there and the check should always fire on it.
+/*
+(function () {
+  const results = [];
+  function check(name, cond, detail) { results.push({ name, pass: !!cond, detail: detail || "" }); }
+  const bodyText = document.body.textContent || "";
+  check("fail-fast message shows instead of a silent crash",
+    bodyText.indexOf("Build incompleto publicado") !== -1, bodyText.slice(0, 200));
+  check("fail-fast message names the actual mistake (wrong file)",
+    bodyText.indexOf("artifact_template.html") !== -1 && bodyText.indexOf("artifact_final.html") !== -1);
+  check("app never rendered species rows on top of the error (no silent partial run)",
+    document.querySelectorAll("#species-list .species-row").length === 0);
+  const passed = results.filter(r => r.pass).length;
+  console.log("=== smoke_test_suite PART C: " + passed + "/" + results.length + " passed ===");
+  results.forEach(r => console.log((r.pass ? "PASS" : "FAIL") + "  " + r.name + (r.detail ? "  (" + r.detail + ")" : "")));
   return results;
 })();
 */
