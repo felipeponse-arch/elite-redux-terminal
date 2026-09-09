@@ -1,9 +1,16 @@
 # Testes manuais de fumaça
 
-Não existe suite automatizada neste projeto (é uma ferramenta de uso solo, publicada
-como Artifact — ver `AUDITORIA-DOSSIE.md` secao 13 para o raciocinio). Em vez disso,
-estes sao os trechos de JavaScript realmente usados para verificar cada correcao antes
-de publicar, para nao precisar reinventa-los a cada mudanca no template.
+Não existe test runner de verdade neste projeto (sem node/npm/framework de teste de
+browser disponivel neste ambiente — ver `AUDITORIA-DOSSIE.md` secao 13). O que existe
+desde 2026-09-09 e `scripts/smoke_test_suite.js`: os mesmos testes abaixo, só que cada
+um **verifica e reporta PASS/FAIL sozinho**, em vez de devolver um valor cru pra
+comparar a olho com um comentario — foi exatamente esse passo manual de leitura que
+gerou risco real (dev review, 2026-09-09), e ironicamente foi rodando essa suite pela
+primeira vez que pegamos 2 bugs — nela mesma, nao no produto (ordem de teste
+dependente de estado anterior, e um seletor com init preguicoso que só populada
+depois de abrir a aba Progresso). Prefira `smoke_test_suite.js` a copiar os trechos
+soltos abaixo; este arquivo continua existindo como o raciocinio por tras de cada
+teste, nao como o texto a colar.
 
 Rode isso **sempre que mexer em `artifact_template.html`**, antes de publicar.
 
