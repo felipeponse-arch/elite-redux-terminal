@@ -1,11 +1,14 @@
 // Consolidated smoke-test suite for artifact_final.html - dev review, 2026-09-09:
 // "toda correcao dependeu de eu lembrar de rodar aqueles trechos de JS na mao"
-// (manual_smoke_tests.md) "e so eu conferindo o resultado a olho, sem garantia
-// nenhuma de que eu li certo". This doesn't add a real test *runner* (no
-// node/npm/browser-test-framework in this environment - see
-// AUDITORIA-DOSSIE.md section 13) - it removes the "read the result by eye"
-// step: every check below asserts and reports PASS/FAIL itself, instead of
-// returning a raw value the caller has to compare against a comment.
+// (from the old scripts/manual_smoke_tests.md, since removed - fully
+// superseded by this file, 2026-09-09, part of a broader pass removing
+// things "Meu build"/sync made obsolete) "e so eu conferindo o resultado a
+// olho, sem garantia nenhuma de que eu li certo". This doesn't add a real
+// test *runner* (no node/npm/browser-test-framework in this environment -
+// see AUDITORIA-DOSSIE.md section 13) - it removes the "read the result by
+// eye" step: every check below asserts and reports PASS/FAIL itself,
+// instead of returning a raw value the caller has to compare against a
+// comment.
 //
 // Two parts, because a page reload always ends whatever script triggered it
 // (the Browser tool's javascript_tool call dies with the page) - they can't
@@ -23,8 +26,10 @@
 //     "assert the app read it correctly". Run snippet B1, reload the page
 //     (navigate to the same URL), then run snippet B2.
 //
-// Usage: see scripts/manual_smoke_tests.md for how to serve the build
-// locally and open it in the Browser tool.
+// To serve the build locally first: a plain HTTP server (not file://, some
+// things behave differently) rooted at this project folder, e.g. a simple
+// PowerShell HttpListener on port 8100 serving artifact_final.html, opened
+// in the Browser tool via preview_start.
 
 // ============================== PART A ==============================
 async function runLiveTests() {
