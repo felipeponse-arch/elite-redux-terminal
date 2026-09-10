@@ -831,6 +831,13 @@
     background: var(--surface-2); color: var(--text); font-size: 12.5px; font-family: inherit;
   }
   .mybuild-ev-total { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+  .mybuild-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .mybuild-chip {
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text-dim);
+    padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  }
+  .mybuild-chip.active { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .mybuild-ai-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
   .mybuild-moves-power { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
   .mybuild-move-power { font-size: 11.5px; color: var(--text-dim); line-height: 1.6; }
   .mybuild-move-power b { color: var(--text); font-weight: 600; }
@@ -1753,24 +1760,90 @@
     // that actually has the right shape, so a hand-edited or corrupted
     // save can't inject something odd into fields that get rendered as
     // plain text or fed into calcFinalStat.
+    // UPDATE 2026-09-09: customBuilds[sname] used to be ONE build object;
+    // now it's an ARRAY of up to 3 (manual and/or AI-generated variants),
+    // so an old save (single object per species) needs wrapping into a
+    // 1-item array here - this is the one and only place that has to know
+    // both shapes exist, everything downstream only ever sees the array.
     state.customBuilds = {};
     if (save.customBuilds && typeof save.customBuilds === "object") {
       Object.keys(save.customBuilds).forEach(function (k) {
-        var b = save.customBuilds[k];
-        if (!b || typeof b !== "object") return;
-        var clean = {
-          ability: typeof b.ability === "string" ? b.ability : "",
-          nature: typeof b.nature === "string" ? b.nature : "",
-          item: typeof b.item === "string" ? b.item : "",
-          moves: Array.isArray(b.moves) ? b.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4) : [],
-          ivs: Array.isArray(b.ivs) && b.ivs.length === 6 ? b.ivs.map(function (v) { return clampInt(v, 0, 31, 31); }) : [31, 31, 31, 31, 31, 31],
-          evs: Array.isArray(b.evs) && b.evs.length === 6 ? b.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0]
-        };
-        var isEmpty = !clean.ability && !clean.nature && !clean.item && !clean.moves.length &&
-          clean.ivs.every(function (v) { return v === 31; }) && clean.evs.every(function (v) { return v === 0; });
-        if (!isEmpty) state.customBuilds[k] = clean;
+        var raw = save.customBuilds[k];
+        var rawList = Array.isArray(raw) ? raw : (raw && typeof raw === "object" ? [raw] : []);
+        var clean = rawList.slice(0, 3).map(function (b) {
+          if (!b || typeof b !== "object") return null;
+          return {
+            ability: typeof b.ability === "string" ? b.ability : "",
+            nature: typeof b.nature === "string" ? b.nature : "",
+            item: typeof b.item === "string" ? b.item : "",
+            moves: Array.isArray(b.moves) ? b.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4) : [],
+            ivs: Array.isArray(b.ivs) && b.ivs.length === 6 ? b.ivs.map(function (v) { return clampInt(v, 0, 31, 31); }) : [31, 31, 31, 31, 31, 31],
+            evs: Array.isArray(b.evs) && b.evs.length === 6 ? b.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0],
+            source: (b.source === "ia") ? "ia" : "manual",
+            active: !!b.active,
+            savedAt: typeof b.savedAt === "string" ? b.savedAt : new Date().toISOString()
+          };
+        }).filter(function (b) {
+          if (!b) return false;
+          var isEmpty = !b.ability && !b.nature && !b.item && !b.moves.length &&
+            b.ivs.every(function (v) { return v === 31; }) && b.evs.every(function (v) { return v === 0; });
+          return !isEmpty;
+        });
+        if (clean.length) {
+          if (!clean.some(function (b) { return b.active; })) clean[0].active = true;
+          state.customBuilds[k] = clean;
+        }
       });
     }
+  }
+
+  // ---------------- custom build list helpers ----------------
+  // state.customBuilds[sname] is always an array (0-3 entries) from this
+  // point on - every read/write in the app goes through these, so "which
+  // one is active", "add a new variant", "replace the shown one" and the
+  // 3-build cap all live in exactly one place.
+  function getBuildList(sname) { return state.customBuilds[sname] || []; }
+  function getActiveBuild(sname) {
+    var list = getBuildList(sname);
+    for (var i = 0; i < list.length; i++) { if (list[i].active) return list[i]; }
+    return list.length ? list[0] : null;
+  }
+  // Used by the two pre-existing "+ Usar como meu build" quick-copy buttons
+  // (boss party card, build-history/boss-reference entries) - their
+  // established behavior is "replace whatever's currently showing", not
+  // "add a new variant", so they keep working exactly as before even with
+  // the list-based storage underneath.
+  function setOrReplaceActiveBuild(sname, build, source) {
+    var list = getBuildList(sname).slice();
+    var activeIdx = -1;
+    for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
+    var entry = { ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs, source: source, active: true, savedAt: new Date().toISOString() };
+    if (activeIdx !== -1) { list[activeIdx] = entry; }
+    else if (list.length < 3) { list.forEach(function (b) { b.active = false; }); list.push(entry); }
+    else { list.forEach(function (b, i) { b.active = (i === 0); }); list[0] = entry; }
+    state.customBuilds[sname] = list;
+  }
+  // New explicit action, 2026-09-09 (user's own rule): ALWAYS adds a
+  // separate variant rather than overwriting - refuses past the 3-build
+  // cap instead of silently dropping one, since these are deliberate
+  // choices (manual or AI), not disposable snapshots like save history.
+  function addBuildVariant(sname, build, source) {
+    var list = getBuildList(sname).slice();
+    if (list.length >= 3) return false;
+    list.forEach(function (b) { b.active = false; });
+    list.push({ ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs, source: source, active: true, savedAt: new Date().toISOString() });
+    state.customBuilds[sname] = list;
+    return true;
+  }
+  function setActiveBuildIndex(sname, idx) {
+    var list = getBuildList(sname);
+    list.forEach(function (b, i) { b.active = (i === idx); });
+  }
+  function removeBuildIndex(sname, idx) {
+    var list = getBuildList(sname).slice();
+    list.splice(idx, 1);
+    if (list.length && !list.some(function (b) { return b.active; })) list[0].active = true;
+    if (list.length) state.customBuilds[sname] = list; else delete state.customBuilds[sname];
   }
 
   function clampInt(v, min, max, fallback) {
@@ -2994,8 +3067,21 @@
   // useful thing). Renders through the same showdownSet() every other
   // build source (builds.json, build history, boss reference) already
   // uses, so it looks and copies identically to a curated build.
+  // Chips to switch between up to 3 saved builds per species (manual and/or
+  // AI-generated) - 2026-09-09, user's own rule: show what's saved, ask if
+  // they want a different one, cap at 3. Kept as its own small function
+  // (not inlined in myBuildEditorHtml) since it's also useful standalone.
+  function buildChipsHtml(list) {
+    if (!list.length) return "";
+    return '<div class="mybuild-chips">' + list.map(function (b, i) {
+      var label = (b.source === "ia" ? "IA" : "Manual") + " " + (i + 1);
+      return '<button type="button" class="mybuild-chip' + (b.active ? " active" : "") + '" data-idx="' + i + '">' + label + '</button>';
+    }).join("") + '</div>';
+  }
+
   function myBuildEditorHtml(sp) {
-    var b = state.customBuilds[sp.sname] || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
+    var list = getBuildList(sp.sname);
+    var b = getActiveBuild(sp.sname) || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
     var abiIds = uniqueIds(sp.ab);
     var abiOptionsHtml = '<option value="">(nenhuma)</option>' + abiIds.map(function (id) {
       var a = ABILITIES[id];
@@ -3021,13 +3107,14 @@
     var evRow = '<span>EV</span>' + [0, 1, 2, 3, 4, 5].map(function (i) {
       return '<input type="number" class="mybuild-num" id="mybuild-ev-' + i + '" min="0" max="252" step="4">';
     }).join("");
-    var hasBuild = state.customBuilds[sp.sname];
+    var hasBuild = list.length > 0;
     var preview = hasBuild ? showdownSet(sp, {
       ability: b.ability, nature: b.nature, item: b.item,
       evs: evsToShowdownText(b.evs), moves: b.moves.filter(Boolean)
     }) : "";
     return '<div class="card"><h3>Meu build</h3>' +
       '<p class="mybuild-hint">Monte seu set escolhendo direto das opções reais deste Pokémon - nada de digitar de cabeça.</p>' +
+      buildChipsHtml(list) +
       '<div class="mybuild-row">' +
         '<label class="mybuild-field">Habilidade<select id="mybuild-ability">' + abiOptionsHtml + '</select></label>' +
         '<label class="mybuild-field">Nature<select id="mybuild-nature">' + natureOptionsHtml + '</select></label>' +
@@ -3049,9 +3136,22 @@
       '<div id="mybuild-status-preview"></div>' +
       '<p class="mybuild-hint" style="margin:2px 0 12px;">Você digita o nível (a ferramenta não sabe o nível real do seu Pokémon). Poder de golpe considera STAB e Life Orb quando presente - não é uma calculadora de dano (sem efetividade de tipo, sem status de campo, sem outras habilidades de golpe).</p>' +
       '<div class="notes-actions"><button id="mybuild-save" class="ts-build-copy" type="button">Salvar build</button>' +
-        (hasBuild ? '<button id="mybuild-clear" class="ts-build-copy" type="button" style="color:var(--sem-weak);">Limpar</button>' : '') +
+        (list.length < 3 ? '<button id="mybuild-save-variant" class="ts-build-copy" type="button">Salvar como nova variante</button>' : '') +
+        (hasBuild ? '<button id="mybuild-clear" class="ts-build-copy" type="button" style="color:var(--sem-weak);">Apagar esta</button>' : '') +
         '<span id="mybuild-status" class="notes-status"></span></div>' +
       (hasBuild ? '<pre class="showdown-block">' + escapeHtml(preview) + '</pre><button id="mybuild-copy" class="ts-build-copy" type="button">Copiar</button>' : '') +
+      // "Gerar build com IA" - 2026-09-09, user's own rule: quando não tem
+      // build salva (ou quando quer uma diferente das já salvas), chama o
+      // Claude pra montar uma nova, em vez de exigir que o usuário venha
+      // pedir numa conversa separada. Disparado só por clique explícito -
+      // a capacidade `sample` cobra do usuário por chamada e a própria
+      // regra da plataforma proíbe disparo automático sem gesto real.
+      '<div class="mybuild-ai-row">' +
+        (list.length >= 3
+          ? '<p class="hint" style="margin:0;">Limite de 3 builds atingido - apague uma antes de gerar outra.</p>'
+          : '<button id="mybuild-ai-generate" class="ts-build-copy" type="button">Gerar build com IA</button>') +
+        '<span id="mybuild-ai-status" class="notes-status"></span>' +
+      '</div>' +
     '</div>';
   }
 
@@ -3126,7 +3226,7 @@
   // directly than to re-walk every option list marking one "selected"),
   // and wires the save/clear/copy buttons + the live EV-total counter.
   function wireMyBuildEditor(sp) {
-    var b = state.customBuilds[sp.sname] || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
+    var b = getActiveBuild(sp.sname) || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
     myBuildLevel = myBuildLevel || getCurrentCap() || 50;
     var abiEl = document.getElementById("mybuild-ability");
     if (abiEl) abiEl.value = b.ability || "";
@@ -3161,34 +3261,65 @@
     });
     updateMyBuildStatus(sp);
 
+    function readEditorForm() {
+      var moves = [];
+      for (var i = 0; i < 4; i++) {
+        var mv = document.getElementById("mybuild-move-" + i);
+        if (mv && mv.value) moves.push(mv.value);
+      }
+      var ivs = [], evs = [];
+      for (var j = 0; j < 6; j++) {
+        ivs.push(clampInt(document.getElementById("mybuild-iv-" + j).value, 0, 31, 31));
+        evs.push(clampInt(document.getElementById("mybuild-ev-" + j).value, 0, 252, 0));
+      }
+      return {
+        ability: document.getElementById("mybuild-ability").value,
+        nature: document.getElementById("mybuild-nature").value,
+        item: document.getElementById("mybuild-item").value.trim(),
+        moves: moves, ivs: ivs, evs: evs
+      };
+    }
+
     var saveBtn = document.getElementById("mybuild-save");
     if (saveBtn) {
       saveBtn.addEventListener("click", function () {
-        var moves = [];
-        for (var i = 0; i < 4; i++) {
-          var mv = document.getElementById("mybuild-move-" + i);
-          if (mv && mv.value) moves.push(mv.value);
-        }
-        var ivs = [], evs = [];
-        for (var j = 0; j < 6; j++) {
-          ivs.push(clampInt(document.getElementById("mybuild-iv-" + j).value, 0, 31, 31));
-          evs.push(clampInt(document.getElementById("mybuild-ev-" + j).value, 0, 252, 0));
-        }
-        state.customBuilds[sp.sname] = {
-          ability: document.getElementById("mybuild-ability").value,
-          nature: document.getElementById("mybuild-nature").value,
-          item: document.getElementById("mybuild-item").value.trim(),
-          moves: moves, ivs: ivs, evs: evs
-        };
+        setOrReplaceActiveBuild(sp.sname, readEditorForm(), "manual");
         persist();
         flashToast("Build salvo para " + sp.n);
         selectSpecies(sp.x);
       });
     }
+    // "Salvar como nova variante" - 2026-09-09, user's own rule: up to 3
+    // builds salvas por espécie, cada uma independente (não sobrescreve a
+    // que já está ativa). Só existe quando há espaço - o próprio HTML já
+    // esconde o botão com 3 salvas, mas addBuildVariant() também recusa por
+    // conta própria, então não depende só da UI pra respeitar o limite.
+    var saveVariantBtn = document.getElementById("mybuild-save-variant");
+    if (saveVariantBtn) {
+      saveVariantBtn.addEventListener("click", function () {
+        var ok = addBuildVariant(sp.sname, readEditorForm(), "manual");
+        if (ok) {
+          persist();
+          flashToast("Nova variante salva para " + sp.n);
+          selectSpecies(sp.x);
+        }
+      });
+    }
+    // Chips switch WHICH saved build is active/shown - 2026-09-09.
+    document.querySelectorAll(".mybuild-chip").forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        setActiveBuildIndex(sp.sname, parseInt(chip.dataset.idx, 10));
+        persist();
+        selectSpecies(sp.x);
+      });
+    });
     var clearBtn = document.getElementById("mybuild-clear");
     if (clearBtn) {
       clearBtn.addEventListener("click", function () {
-        delete state.customBuilds[sp.sname];
+        var list = getBuildList(sp.sname);
+        var activeIdx = 0;
+        for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
+        removeBuildIndex(sp.sname, activeIdx);
         persist();
         selectSpecies(sp.x);
       });
@@ -3196,7 +3327,7 @@
     var copyBtn = document.getElementById("mybuild-copy");
     if (copyBtn) {
       copyBtn.addEventListener("click", function () {
-        var saved = state.customBuilds[sp.sname];
+        var saved = getActiveBuild(sp.sname);
         if (!saved) return;
         var text = showdownSet(sp, {
           ability: saved.ability, nature: saved.nature, item: saved.item,
@@ -3204,6 +3335,98 @@
         });
         copyText(text, document.getElementById("mybuild-status"), "Copiado!");
       });
+    }
+    var aiBtn = document.getElementById("mybuild-ai-generate");
+    if (aiBtn) {
+      aiBtn.addEventListener("click", function () { generateBuildWithAI(sp); });
+    }
+  }
+
+  // Checks an AI-suggested build against this species' REAL data before
+  // it's ever allowed to become a saved build - 2026-09-09, the Meta
+  // Pokémon specialist's own non-negotiable rule: an LLM call can propose
+  // an ability/move this species doesn't actually have in this hack, and
+  // that must be rejected, not silently trusted. Ability/moves/nature are
+  // HARD requirements (reject the whole build if any is invalid) since
+  // those are small, exact, checkable lists; item soft-falls-back to "no
+  // item" if not recognized (a build without a held item is still a real,
+  // usable build - unlike one with a fabricated move); EVs are clamped/
+  // scaled to the real 510 cap rather than rejected outright for a minor
+  // overage.
+  function validateAiBuild(sp, raw) {
+    if (!raw || typeof raw !== "object") return null;
+    var validAbilities = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+    if (typeof raw.ability !== "string" || validAbilities.indexOf(raw.ability) === -1) return null;
+    if (typeof raw.nature !== "string" || ALL_NATURES.indexOf(raw.nature) === -1) return null;
+    var validMoves = uniqueIds(sp.lm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return MOVES[id][0]; });
+    if (!Array.isArray(raw.moves) || raw.moves.length !== 4) return null;
+    for (var i = 0; i < 4; i++) { if (validMoves.indexOf(raw.moves[i]) === -1) return null; }
+    var item = (typeof raw.item === "string" && ITEMS.indexOf(raw.item) !== -1) ? raw.item : "";
+    var evs = Array.isArray(raw.evs) && raw.evs.length === 6 ? raw.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0];
+    var evSum = evs.reduce(function (a, v) { return a + v; }, 0);
+    if (evSum > 510) {
+      var scale = 510 / evSum;
+      evs = evs.map(function (v) { return Math.floor((v * scale) / 4) * 4; });
+    }
+    return { ability: raw.ability, nature: raw.nature, item: item, moves: raw.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: evs };
+  }
+
+  // "Gerar build com IA" - 2026-09-09, user's own rule: check for a saved
+  // build first (that's the normal render path, already handled by
+  // myBuildEditorHtml/effectiveBuild); when there's room for another (cap
+  // 3), a single explicit click here calls Claude directly from the
+  // published page via the `sample` capability instead of requiring the
+  // user to leave the app and paste an export into a separate chat.
+  // Requires `capabilities: {sample: {}}` at publish time - degrades to a
+  // status message, not a silent failure, when unavailable (viewer denied
+  // it, or running somewhere `window.claude` doesn't exist at all, like
+  // this project's own local dev-server tests).
+  async function generateBuildWithAI(sp) {
+    var statusEl = document.getElementById("mybuild-ai-status");
+    if (statusEl) statusEl.textContent = "Consultando o Claude...";
+    if (typeof claude === "undefined" || !claude.use) {
+      if (statusEl) statusEl.textContent = "Geração por IA não disponível neste ambiente.";
+      return;
+    }
+    var sample = await claude.use("sample");
+    if (!sample) {
+      if (statusEl) statusEl.textContent = "Geração por IA não disponível (recurso não concedido).";
+      return;
+    }
+    var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+    var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; });
+    var moveNames = uniqueIds(sp.lm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return MOVES[id][0]; });
+    var cap = getCurrentCap();
+    var prompt = "Monte um set competitivo, formato Pokemon Showdown, para o Pokemon " + sp.n +
+      " no ROM hack Pokemon Elite Redux (build " + (DATA.meta ? DATA.meta.version : "?") + ").\n" +
+      "Tipo: " + speciesTypeNames(sp).join("/") + "\n" +
+      "Status base (HP/Atk/Def/SpA/SpD/Spe): " + sp.b.join("/") + "\n" +
+      "Habilidades escolhiveis - escolha exatamente UMA destas, escrita EXATAMENTE assim: " + abiNames.join(", ") + "\n" +
+      "Innates sempre ativas (nao escolhiveis, so contexto): " + innNames.join(", ") + "\n" +
+      "Movepool real - escolha exatamente 4 desta lista, nenhum golpe fora dela: " + moveNames.join(", ") + "\n" +
+      (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
+      "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
+      '{"ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe]}' +
+      ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
+      "evs sao 6 numeros inteiros de 0 a 252, somando no maximo 510. " +
+      "Nao invente golpes, habilidades ou items fora do que foi listado.";
+    try {
+      var raw = await sample.json(prompt);
+      var validated = validateAiBuild(sp, raw);
+      if (!validated) {
+        if (statusEl) statusEl.textContent = "A resposta não bateu com os dados reais deste Pokémon - tente de novo.";
+        return;
+      }
+      var ok = addBuildVariant(sp.sname, validated, "ia");
+      if (!ok) {
+        if (statusEl) statusEl.textContent = "Limite de 3 builds atingido.";
+        return;
+      }
+      persist();
+      flashToast("Build gerada por IA salva para " + sp.n);
+      selectSpecies(sp.x);
+    } catch (e) {
+      if (statusEl) statusEl.textContent = "Erro ao gerar build - tente de novo.";
     }
   }
 
@@ -3342,14 +3565,14 @@
     if (!list) return;
     var entry = fromBoss ? list[parseInt(btn.dataset.idx, 10)] : list.slice().reverse()[parseInt(btn.dataset.idx, 10)];
     if (!entry) return;
-    state.customBuilds[sp.sname] = {
+    setOrReplaceActiveBuild(sp.sname, {
       ability: entry.ability || "",
       nature: entry.nature || "",
       item: entry.item || "",
       moves: (entry.moves || []).slice(0, 4),
       ivs: [31, 31, 31, 31, 31, 31],
       evs: evsTextToArray(entry.evs)
-    };
+    }, "manual");
     persist();
     flashToast("Build " + (fromBoss ? "de chefão " : "antiga ") + "copiada pro seu \"Meu build\" de " + sp.n);
     // Refresh the open Dex detail so "Meu build"'s fields/preview reflect
@@ -3367,7 +3590,7 @@
   // where renderTeam() only ever read BUILDS, so a saved "Meu build" from
   // the Dex never reached the Team tab at all (user feedback, 2026-09-09).
   function effectiveBuild(sp) {
-    var custom = state.customBuilds[sp.sname];
+    var custom = getActiveBuild(sp.sname);
     if (custom) {
       // Normalized to the exact shape showdownSet()/renderTeam() already
       // expect from a BUILDS entry (evs as a formatted string, not the raw
@@ -3396,11 +3619,12 @@
         var names = speciesTypeNames(sp);
         var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ");
         var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ");
-        var isCustomBuild = !!state.customBuilds[sp.sname];
+        var activeCustom = getActiveBuild(sp.sname);
         var build = effectiveBuild(sp);
+        var buildLabel = activeCustom ? (activeCustom.source === "ia" ? "Build gerada por IA" : "Meu build") : "Build (formato Showdown)";
         var buildHtml = build ? (
           '<div class="ts-build">' +
-            '<div class="ts-build-head"><span class="ts-build-label">' + (isCustomBuild ? "Meu build" : "Build (formato Showdown)") + '</span>' +
+            '<div class="ts-build-head"><span class="ts-build-label">' + buildLabel + '</span>' +
               '<button class="ts-build-copy" data-x="' + sp.x + '" type="button" title="Copiar este set">copiar</button></div>' +
             '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
             (build.note ? '<div class="ts-build-note">' + escapeHtml(build.note) + '</div>' : '') +
@@ -3799,14 +4023,14 @@
         var m = party && party[parseInt(buildBtn.dataset.idx, 10)];
         var sp = m && getSpeciesByX(m.x);
         if (!sp) return;
-        state.customBuilds[sp.sname] = {
+        setOrReplaceActiveBuild(sp.sname, {
           ability: m.abi || "",
           nature: m.nat || "",
           item: m.item || "",
           moves: (m.mv || []).slice(0, 4),
           ivs: m.ivsRaw.slice(),
           evs: m.evsRaw.slice()
-        };
+        }, "manual");
         persist();
         flashToast("Build do " + m.n + " copiado pro seu \"Meu build\" - vá na Dex pra ver/ajustar");
       }
