@@ -1018,6 +1018,91 @@ async function runLiveTests() {
   setSearch("");
   await wait(30);
 
+  // --- Resolve o problema do QA, 2026-09-10: reunião da equipe sobre onde o
+  // Especialista em Meta Pokémon entra na geração de build por IA. Antes,
+  // "não dá pra testar a chamada real de sample() localmente" era aceito
+  // como limitação permanente (não existe window.claude no dev-server local).
+  // Isso resolve a parte que REALMENTE precisa ser testada por QA: que o
+  // app monta o prompt certo, que as ferramentas (getTeamWeaknesses/
+  // getSpeciesRank) são chamadas de verdade, que a resposta é validada
+  // contra os dados reais, e que ela é salva/exibida corretamente. Um
+  // window.claude FALSO, só nesta suíte de testes (nunca no build
+  // publicado), que devolve uma resposta fabricada usando valores REAIS
+  // lidos direto das opções já renderizadas na tela (não chutados) - assim
+  // a resposta sempre passa em validateAiBuild() sem precisar adivinhar
+  // qual ability/golpe é real pra cada espécie. O que isso NÃO testa (e
+  // nunca vai testar por aqui): se a IA de verdade, ao vivo, dá uma resposta
+  // de qualidade - isso continua precisando do aparelho real do usuário.
+  setSearch("Squirtle"); // espécie ainda não tocada por nenhuma seção anterior
+  await wait(30);
+  const squirtleRow = document.querySelector("#species-list .species-row");
+  if (squirtleRow) {
+    squirtleRow.click();
+    await wait(30);
+    const realAbility = document.querySelector("#mybuild-ability option[value]:not([value=''])");
+    const realNature = document.querySelector("#mybuild-nature option[value]:not([value=''])");
+    const realMoveOptions = [...document.querySelectorAll("#mybuild-move-0 option")].filter(o => o.value);
+    if (realAbility && realNature && realMoveOptions.length >= 4) {
+      const fakeMoves = realMoveOptions.slice(0, 4).map(o => o.value);
+      const mockRationale = "Escolhido pra cobrir a fraqueza compartilhada do time (teste automatizado).";
+      window.__mockToolCalls = [];
+      window.claude = {
+        use: async function (name) {
+          if (name !== "sample") return null;
+          return {
+            json: async function (prompt, opts) {
+              window.__mockLastPrompt = prompt;
+              if (opts && Array.isArray(opts.tools)) {
+                for (const t of opts.tools) {
+                  const input = t.name === "getSpeciesRank" ? { sname: "SPECIES_SQUIRTLE" } : {};
+                  const result = await t.execute(input);
+                  window.__mockToolCalls.push({ name: t.name, result });
+                }
+              }
+              return {
+                ability: realAbility.value, nature: realNature.value, item: "",
+                moves: fakeMoves, evs: [252, 0, 0, 252, 0, 4],
+                rationale: mockRationale
+              };
+            }
+          };
+        }
+      };
+      const aiBtn = document.getElementById("mybuild-ai-generate");
+      if (aiBtn) {
+        aiBtn.click();
+        await wait(80);
+        check("o mock chamou getTeamWeaknesses (ferramenta real, não simulada por fora)",
+          window.__mockToolCalls.some(c => c.name === "getTeamWeaknesses" && typeof c.result.teamSize === "number"),
+          JSON.stringify(window.__mockToolCalls.find(c => c.name === "getTeamWeaknesses")));
+        const rankCall = window.__mockToolCalls.find(c => c.name === "getSpeciesRank");
+        check("o mock chamou getSpeciesRank e recebeu um tier real (ou null, mas nunca inventado)",
+          rankCall && ("tier" in rankCall.result), rankCall && JSON.stringify(rankCall.result));
+        check("build gerada por IA foi validada e salva (aparece 1 chip 'IA 1')",
+          document.querySelectorAll(".mybuild-chip").length === 1 &&
+          document.querySelector(".mybuild-chip").textContent.indexOf("IA 1") !== -1,
+          document.querySelector(".mybuild-chip") && document.querySelector(".mybuild-chip").textContent);
+        const rationaleEl = document.querySelector(".mybuild-rationale");
+        check("a justificativa aparece em destaque na tela (bloco .mybuild-rationale)",
+          rationaleEl && rationaleEl.textContent.indexOf(mockRationale) !== -1,
+          rationaleEl && rationaleEl.textContent);
+        var savedSquirtle = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").customBuilds.SPECIES_SQUIRTLE;
+        var savedEntry = savedSquirtle && savedSquirtle[0];
+        check("a ability/golpes salvos batem exatamente com o que a IA (mock) escolheu",
+          savedEntry && savedEntry.ability === realAbility.value && JSON.stringify(savedEntry.moves) === JSON.stringify(fakeMoves),
+          savedEntry && JSON.stringify(savedEntry));
+      } else { check("botão 'Gerar build com IA' encontrado pro teste de mock", false); }
+      // Limpa o mock - as seções mais acima (Bulbasaur) já rodaram e não
+      // dependem mais disso, mas nada depois deste ponto deve herdar um
+      // window.claude falso por engano.
+      delete window.claude;
+      delete window.__mockToolCalls;
+      delete window.__mockLastPrompt;
+    } else { check("Squirtle tem opções reais suficientes (ability/nature/4 golpes) pro teste de mock", false); }
+  } else { check("Squirtle encontrado pro teste de mock da IA", false); }
+  setSearch("");
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

@@ -846,6 +846,20 @@
   }
   .mybuild-chip.active { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
   .mybuild-ai-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  /* Justificativa da build gerada por IA, em destaque - pedido da UX,
+     2026-09-10: cor de acento + borda esquerda pra chamar atenção, distinto
+     do resto do card (que é tudo formulário/texto neutro). */
+  .mybuild-rationale {
+    background: color-mix(in srgb, var(--accent-2) 12%, transparent);
+    border-left: 3px solid var(--accent-2);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 10px 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .mybuild-rationale strong { color: var(--accent-2); }
   .mybuild-moves-power { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
   .mybuild-move-power { font-size: 11.5px; color: var(--text-dim); line-height: 1.6; }
   .mybuild-move-power b { color: var(--text); font-weight: 600; }
@@ -1796,7 +1810,8 @@
             evs: Array.isArray(b.evs) && b.evs.length === 6 ? b.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0],
             source: (b.source === "ia") ? "ia" : "manual",
             active: !!b.active,
-            savedAt: typeof b.savedAt === "string" ? b.savedAt : new Date().toISOString()
+            savedAt: typeof b.savedAt === "string" ? b.savedAt : new Date().toISOString(),
+            rationale: typeof b.rationale === "string" ? b.rationale.slice(0, 280) : ""
           };
         }).filter(function (b) {
           if (!b) return false;
@@ -1832,7 +1847,7 @@
     var list = getBuildList(sname).slice();
     var activeIdx = -1;
     for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
-    var entry = { ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs, source: source, active: true, savedAt: new Date().toISOString() };
+    var entry = { ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs, source: source, active: true, savedAt: new Date().toISOString(), rationale: build.rationale || "" };
     if (activeIdx !== -1) { list[activeIdx] = entry; }
     else if (list.length < 3) { list.forEach(function (b) { b.active = false; }); list.push(entry); }
     else { list.forEach(function (b, i) { b.active = (i === 0); }); list[0] = entry; }
@@ -1846,7 +1861,7 @@
     var list = getBuildList(sname).slice();
     if (list.length >= 3) return false;
     list.forEach(function (b) { b.active = false; });
-    list.push({ ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs, source: source, active: true, savedAt: new Date().toISOString() });
+    list.push({ ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs, source: source, active: true, savedAt: new Date().toISOString(), rationale: build.rationale || "" });
     state.customBuilds[sname] = list;
     return true;
   }
@@ -3233,6 +3248,15 @@
         (list.length < 3 ? '<button id="mybuild-save-variant" class="ts-build-copy" type="button">Salvar como nova variante</button>' : '') +
         (hasBuild ? '<button id="mybuild-clear" class="ts-build-copy" type="button" style="color:var(--sem-weak);">Apagar esta</button>' : '') +
         '<span id="mybuild-status" class="notes-status"></span></div>' +
+      // Justificativa em destaque, 2026-09-10 (pedido da UX na reunião da
+      // equipe: "a linha precisa ser em destaque") - só aparece pra build
+      // com origem "ia" e que realmente veio com uma justificativa (uma
+      // build manual, ou uma da IA sem essa parte da resposta, não mostra
+      // nada aqui). Visualmente separado do bloco Showdown de baixo (que é
+      // só o set em si) - isso é o "porquê", não o "o quê".
+      (hasBuild && b.source === "ia" && b.rationale
+        ? '<div class="mybuild-rationale"><strong>Por que essa escolha:</strong> ' + escapeHtml(b.rationale) + '</div>'
+        : '') +
       (hasBuild ? '<pre class="showdown-block">' + escapeHtml(preview) + '</pre><button id="mybuild-copy" class="ts-build-copy" type="button">Copiar</button>' : '') +
       // "Gerar build com IA" - 2026-09-09, user's own rule: quando não tem
       // build salva (ou quando quer uma diferente das já salvas), chama o
@@ -3462,7 +3486,66 @@
       var scale = 510 / evSum;
       evs = evs.map(function (v) { return Math.floor((v * scale) / 4) * 4; });
     }
-    return { ability: raw.ability, nature: raw.nature, item: item, moves: raw.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: evs };
+    // Justificativa, 2026-09-10 (revisão da equipe sobre "Gerar build com
+    // IA"): uma frase livre, NÃO validada contra dados reais como tudo
+    // acima - não há o que checar, é texto corrido, não uma referência de
+    // dado do jogo. Cortada num tamanho razoável e escapada na hora de
+    // renderizar (myBuildEditorHtml), igual qualquer outro texto exibido pro
+    // usuário. A ausência dela não é motivo de rejeição - uma build
+    // válida sem justificativa ainda assim é salva.
+    var rationale = typeof raw.rationale === "string" ? raw.rationale.trim().slice(0, 280) : "";
+    return { ability: raw.ability, nature: raw.nature, item: item, moves: raw.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: evs, rationale: rationale };
+  }
+
+  // Lista curada e verificada à mão de itens de batalha COMPETITIVOS
+  // comumente relevantes, 2026-09-10 (revisão da equipe: "o especialista
+  // deve analisar a base completa de itens e pensar em qual seria melhor").
+  // A lista real de itens (`ITEMS`) tem 926 entradas - quase todas
+  // irrelevantes pra escolha de item de batalha (itens-chave, TMs como
+  // item, berries de culinária/concurso, mega-pedras de OUTRAS espécies,
+  // pedras de evolução etc.), e esse dataset não tem um campo de categoria
+  // pra filtrar isso automaticamente. Em vez de jogar as 926 inteiras no
+  // prompt (caro e majoritariamente ruído) ou chutar uma heurística de
+  // categoria (arriscado), isso é um subconjunto pequeno e real, verificado
+  // como existente, cobrindo os arquétipos competitivos comuns (ataque/
+  // defesa/utilidade/status) - cada um confirmado no `items` de
+  // `data/dex_compact.json` deste hack antes de entrar aqui, a mesma
+  // disciplina de toda lista curada deste projeto. Não é teoria completa de
+  // itens (este projeto não tem modelo mecânico por item além de
+  // ITEM_STAT_MODS/ITEM_MOVE_POWER_MODS acima) - é um menu real e limitado
+  // pra escolher, exatamente o mesmo tratamento que golpes/habilidades já
+  // recebem.
+  var AI_ITEM_POOL = [
+    "Leftovers", "Life Orb", "Choice Band", "Choice Specs", "Choice Scarf",
+    "Assault Vest", "Tactical Vest", "Black Sludge", "Rocky Helmet",
+    "Heavy-Duty Boots", "Eviolite", "Focus Sash", "Weakness Policy",
+    "Expert Belt", "Sitrus Berry", "Custap Berry", "Shell Bell",
+    "Muscle Band", "Wise Glasses", "Metronome", "Wide Lens", "Air Balloon",
+    "Safety Goggles", "Mental Herb", "Lum Berry", "Toxic Orb", "Flame Orb",
+    "Booster Energy", "Loaded Dice", "Clear Amulet", "Covert Cloak",
+    "Punching Glove", "Throat Spray"
+  ].filter(function (n) { return ITEMS.indexOf(n) !== -1; });
+
+  // Contexto real, já calculado em outro lugar, exposto como ferramentas do
+  // sample() em vez de inventado/alucinado - revisão da equipe, 2026-09-10:
+  // "ele tem que analisar o conjunto do Poke e definir a melhor forma de
+  // usar ele naquele momento do jogo". Nenhuma das duas funções faz cálculo
+  // novo - ambas só chamam a MESMA lógica que o painel/análise da aba Time
+  // já usa (computeSharedRisks, SPECIES_RANK), então a visão da IA sobre "o
+  // que esse time precisa" nunca pode discordar do que o usuário vê na tela.
+  function aiTool_getTeamWeaknesses() {
+    var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
+    var risks = computeSharedRisks(teamMembers);
+    return {
+      teamSize: teamMembers.length,
+      teamSpecies: teamMembers.map(function (sp) { return sp.n; }),
+      sharedWeaknesses: risks.map(function (r) { return { type: r.t, weakCount: r.n }; })
+    };
+  }
+  function aiTool_getSpeciesRank(input) {
+    var sname = input && input.sname;
+    var r = sname ? SPECIES_RANK[sname] : null;
+    return r ? { tier: r.tier, score: r.score } : { tier: null, score: null };
   }
 
   // "Gerar build com IA" - 2026-09-09, user's own rule: check for a saved
@@ -3475,6 +3558,16 @@
   // status message, not a silent failure, when unavailable (viewer denied
   // it, or running somewhere `window.claude` doesn't exist at all, like
   // this project's own local dev-server tests).
+  // Reforçado, 2026-09-10 (reunião da equipe sobre onde o Especialista em
+  // Meta Pokémon entra nesse processo): antes só mandava os dados isolados
+  // desse Pokémon. Agora também dá pro Claude, via `opts.tools`, acesso à
+  // MESMA análise de fraquezas do time e ao MESMO rank real que o resto do
+  // app já usa (aiTool_getTeamWeaknesses/aiTool_getSpeciesRank acima) - o
+  // especialista não tem acesso à internet dentro dessa chamada (a
+  // capability `sample` não navega, não tem ferramenta de busca, não tem
+  // memória entre chamadas - ver skill artifact-capabilities), então isso
+  // é o que dá pra fazer de real: raciocinar sobre o time e o momento do
+  // jogo de verdade, em vez de inventar contexto que não existe.
   async function generateBuildWithAI(sp) {
     var statusEl = document.getElementById("mybuild-ai-status");
     if (statusEl) statusEl.textContent = "Consultando o Claude...";
@@ -3491,21 +3584,42 @@
     var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; });
     var moveNames = uniqueIds(sp.lm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return MOVES[id][0]; });
     var cap = getCurrentCap();
-    var prompt = "Monte um set competitivo, formato Pokemon Showdown, para o Pokemon " + sp.n +
-      " no ROM hack Pokemon Elite Redux (build " + (DATA.meta ? DATA.meta.version : "?") + ").\n" +
+    var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon). " +
+      "Monte um set competitivo, formato Pokemon Showdown, para o Pokemon " + sp.n +
+      " (build " + (DATA.meta ? DATA.meta.version : "?") + ").\n" +
       "Tipo: " + speciesTypeNames(sp).join("/") + "\n" +
       "Status base (HP/Atk/Def/SpA/SpD/Spe): " + sp.b.join("/") + "\n" +
       "Habilidades escolhiveis - escolha exatamente UMA destas, escrita EXATAMENTE assim: " + abiNames.join(", ") + "\n" +
       "Innates sempre ativas (nao escolhiveis, so contexto): " + innNames.join(", ") + "\n" +
       "Movepool real - escolha exatamente 4 desta lista, nenhum golpe fora dela: " + moveNames.join(", ") + "\n" +
+      "Itens de batalha reais disponiveis - escolha UM destes (ou deixe vazio se nenhum fizer sentido): " + AI_ITEM_POOL.join(", ") + "\n" +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
+      "Antes de responder, use as ferramentas disponiveis pra ver as fraquezas reais do time atual " +
+      "do jogador e o rank real desta especie - use isso pra decidir o PAPEL que este Pokemon deve " +
+      "cumprir agora (ofensivo, defensivo, suporte, resposta a uma fraqueza especifica do time etc.), " +
+      "nao so um set generico isolado.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
-      '{"ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe]}' +
+      '{"ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"rationale":"..."}' +
       ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
       "evs sao 6 numeros inteiros de 0 a 252, somando no maximo 510. " +
+      "rationale e uma frase curta em portugues explicando a escolha com base no time/rank/momento do jogo. " +
       "Nao invente golpes, habilidades ou items fora do que foi listado.";
     try {
-      var raw = await sample.json(prompt);
+      var raw = await sample.json(prompt, {
+        tools: [
+          {
+            name: "getTeamWeaknesses",
+            description: "Retorna o tamanho do time atual do jogador e quais tipos derrubam 2 ou mais membros ao mesmo tempo (fraqueza compartilhada real, ja calculada pelo app).",
+            execute: function () { return aiTool_getTeamWeaknesses(); }
+          },
+          {
+            name: "getSpeciesRank",
+            description: "Retorna o tier (SS/S/A/B/C/D) e a pontuacao real deste hack pra uma especie, dado o sname interno (ex: SPECIES_CHARIZARD).",
+            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
+            execute: function (input) { return aiTool_getSpeciesRank(input); }
+          }
+        ]
+      });
       var validated = validateAiBuild(sp, raw);
       if (!validated) {
         if (statusEl) statusEl.textContent = "A resposta não bateu com os dados reais deste Pokémon - tente de novo.";
