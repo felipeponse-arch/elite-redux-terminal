@@ -244,6 +244,14 @@
     font-size: 14px;
   }
   #search-input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+  /* Accessibility pass, 2026-09-10: a global visible-focus ring for every
+     interactive element, not just the search box. Most custom controls here
+     (chip-btn, type-check, tab-btn, box-chip buttons...) reset the browser's
+     default outline via their own styling, which silently made keyboard-only
+     navigation invisible on anything but the search box. `:focus-visible`
+     (not plain `:focus`) so a mouse click doesn't ring every button - only
+     real keyboard/AT focus does. */
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   .filter-row { display: flex; gap: 8px; padding: 0 14px 10px; }
   .chip-btn {
     border: 1px solid var(--border);
@@ -1146,7 +1154,7 @@
             </select>
           </div>
           <div id="type-filter-panel" class="type-filter-panel hidden"></div>
-          <ul id="species-list" class="species-list"></ul>
+          <ul id="species-list" class="species-list" role="listbox" aria-label="Resultados da busca na Dex"></ul>
         </aside>
         <div id="species-detail" class="species-detail">
           <div class="empty-state">Selecione um Pokémon na lista para ver a ficha completa: stats, as 3 habilidades, as 3 innates, evolução e movepool.</div>
@@ -1232,7 +1240,7 @@
               <option value="">Todas as categorias</option>
             </select>
           </div>
-          <ul id="boss-list" class="species-list"></ul>
+          <ul id="boss-list" class="species-list" role="listbox" aria-label="Resultados da busca de chefões"></ul>
         </aside>
         <div id="boss-detail" class="species-detail">
           <div class="empty-state">Perdeu pra algum chefão? Escolha ele na lista — eu monto o time completo dele, e você exporta pra mim junto com seu time e sua caixa pra eu bolar a estratégia de vitória.</div>
@@ -1288,7 +1296,7 @@
        above, this must stay up until the user notices and acts, not
        auto-hide after 2.2s - a "your save changed elsewhere" notice that
        vanished on its own would defeat the point. See wireSync() below. -->
-  <div id="sync-banner" class="sync-banner" hidden>
+  <div id="sync-banner" class="sync-banner" role="status" aria-live="polite" hidden>
     <span id="sync-banner-text"></span>
     <button id="sync-banner-reload" type="button">Atualizar</button>
     <button id="sync-banner-dismiss" type="button" aria-label="Dispensar">&times;</button>
@@ -1302,7 +1310,7 @@
        as sync-banner above, reusing its CSS (background color differs via
        --sem-weak instead of --accent-2, so it visually reads as an error,
        not a routine sync notice) - stays up until dismissed by hand. -->
-  <div id="storage-banner" class="sync-banner" style="background:var(--sem-weak);" hidden>
+  <div id="storage-banner" class="sync-banner" style="background:var(--sem-weak);" role="alert" hidden>
     <span id="storage-banner-text"></span>
     <button id="storage-banner-dismiss" type="button" aria-label="Dispensar">&times;</button>
   </div>
@@ -1608,7 +1616,11 @@
 
   function typePip(name) {
     var meta = TYPE_META[name] || { hex: "#777" };
-    return '<span class="type-pip" style="background:' + meta.hex + '" title="' + escapeHtml(name) + '"></span>';
+    // aria-hidden: purely a decorative color swatch (the row's own sname
+    // text is the row's accessible name) - a "title" attribute alone isn't
+    // reliably announced, and without aria-hidden some screen readers try
+    // anyway and read the tooltip text as stray content.
+    return '<span class="type-pip" style="background:' + meta.hex + '" title="' + escapeHtml(name) + '" aria-hidden="true"></span>';
   }
 
   // Sprites come from one packed atlas image (see scripts/build_sprite_atlas.ps1):
@@ -1627,7 +1639,10 @@
         'role="img" aria-label="' + escapeHtml(speciesName || "") + '"></span>';
     }
     var letter = (speciesName || "?").charAt(0).toUpperCase();
-    return '<span class="sprite-fallback" style="width:' + sizePx + 'px;height:' + sizePx + 'px;font-size:' + Math.round(sizePx * 0.45) + 'px;">' + escapeHtml(letter) + '</span>';
+    // aria-hidden: this letter tile is a placeholder for a missing sprite,
+    // not information of its own - the surrounding row/card already spells
+    // the full species name out in real text.
+    return '<span class="sprite-fallback" aria-hidden="true" style="width:' + sizePx + 'px;height:' + sizePx + 'px;font-size:' + Math.round(sizePx * 0.45) + 'px;">' + escapeHtml(letter) + '</span>';
   }
 
   function prettify(str) {
@@ -2356,28 +2371,51 @@
 
     if ((e.key === "ArrowDown" || e.key === "ArrowUp") && !typing) {
       var dexActiveNav = document.querySelector('.tab-btn[data-tab="dex"]').classList.contains("active");
-      if (!dexActiveNav || document.getElementById("dex-shell").classList.contains("show-detail")) return;
-      var rows = document.querySelectorAll("#species-list .species-row");
-      if (!rows.length) return;
-      e.preventDefault();
-      var curIdx = -1;
-      for (var i = 0; i < rows.length; i++) {
-        if (rows[i].classList.contains("kbd-active")) { curIdx = i; break; }
+      var bossesActiveNav = document.querySelector('.tab-btn[data-tab="bosses"]').classList.contains("active");
+      if (dexActiveNav && !document.getElementById("dex-shell").classList.contains("show-detail")) {
+        moveListboxCursor("#species-list .species-row", e);
+      } else if (bossesActiveNav && !document.getElementById("boss-shell").classList.contains("show-detail")) {
+        // Accessibility pass, 2026-09-10: Chefões never had this shortcut at
+        // all before - only the Dex list did (Fase 1). Same cursor logic,
+        // same helper.
+        moveListboxCursor("#boss-list .species-row", e);
       }
-      if (curIdx !== -1) rows[curIdx].classList.remove("kbd-active");
-      var nextIdx;
-      if (e.key === "ArrowDown") nextIdx = curIdx === -1 ? 0 : Math.min(curIdx + 1, rows.length - 1);
-      else nextIdx = curIdx === -1 ? 0 : Math.max(curIdx - 1, 0);
-      rows[nextIdx].classList.add("kbd-active");
-      rows[nextIdx].scrollIntoView({ block: "nearest" });
       return;
     }
 
     if (e.key === "Enter" && !typing) {
-      var activeRow = document.querySelector("#species-list .species-row.kbd-active");
+      var activeRow = document.querySelector("#species-list .species-row.kbd-active, #boss-list .species-row.kbd-active");
       if (activeRow) activeRow.click();
     }
   });
+
+  // Shared by the Dex and Chefões arrow-key cursors above. Moves BOTH the
+  // existing .kbd-active visual highlight (unchanged from Fase 1, still
+  // exactly what the smoke suite checks) AND real DOM focus + a roving
+  // tabindex, so a screen reader actually announces which option has the
+  // keyboard's attention instead of only a sighted user seeing an outline
+  // move. Deliberately does NOT touch aria-selected - that reflects which
+  // species/boss is actually OPEN in the detail panel (state.selected /
+  // bossState.selected), a distinct concept from "where the keyboard cursor
+  // currently sits", same reasoning already documented for why .kbd-active
+  // is its own CSS class instead of reusing .selected.
+  function moveListboxCursor(rowSelector, e) {
+    var rows = document.querySelectorAll(rowSelector);
+    if (!rows.length) return;
+    e.preventDefault();
+    var curIdx = -1;
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].classList.contains("kbd-active")) { curIdx = i; break; }
+    }
+    if (curIdx !== -1) { rows[curIdx].classList.remove("kbd-active"); rows[curIdx].tabIndex = -1; }
+    var nextIdx;
+    if (e.key === "ArrowDown") nextIdx = curIdx === -1 ? 0 : Math.min(curIdx + 1, rows.length - 1);
+    else nextIdx = curIdx === -1 ? 0 : Math.max(curIdx - 1, 0);
+    rows[nextIdx].classList.add("kbd-active");
+    rows[nextIdx].tabIndex = 0;
+    rows[nextIdx].focus();
+    rows[nextIdx].scrollIntoView({ block: "nearest" });
+  }
 
   // ---------------- list rendering ----------------
   var STAT_IDX = { hp: 0, atk: 1, def: 2, spa: 3, spd: 4, spe: 5 };
@@ -2438,15 +2476,28 @@
       return;
     }
     var teamFull = state.team.length >= 6;
-    var html = list.map(function (sp) {
+    // Accessibility pass, 2026-09-10: role="listbox"/"option" + a roving
+    // tabindex (ARIA APG listbox pattern) so this list is reachable with a
+    // plain Tab, not only via the "/" + arrow-keys shortcut from Fase 1 -
+    // that shortcut moved a CSS class (.kbd-active) around, never real DOM
+    // focus, so a screen reader user tabbing through the page skipped the
+    // list entirely and had no way to know it was there. Exactly one row is
+    // a tab stop at a time (tabindex=0): the selected one, or the first row
+    // if nothing is selected yet - everyone else is -1 so Tab doesn't stop
+    // 1900+ times. Arrow keys move which row is 0 (see the keydown handler
+    // below), matching how a real listbox behaves.
+    var hasSelectedRow = list.some(function (s) { return s.x === state.selected; });
+    var html = list.map(function (sp, idx) {
       var names = speciesTypeNames(sp);
       var pips = names.map(typePip).join("");
-      var sel = state.selected === sp.x ? " selected" : "";
+      var isSel = state.selected === sp.x;
+      var sel = isSel ? " selected" : "";
+      var isTabStop = isSel || (!hasSelectedRow && idx === 0);
       var inTeam = state.team.indexOf(sp.x) !== -1;
       // Same three states syncRowAddButtons() maintains: in team / team full (swap) / free slot.
       var addTitle = inTeam ? "Já está no time" : teamFull ? "Trocar por um do time" : "Adicionar ao time";
       var addLabel = inTeam ? "✓" : teamFull ? "⇄" : "+";
-      return '<li class="species-row' + sel + '" data-x="' + sp.x + '">' +
+      return '<li class="species-row' + sel + '" data-x="' + sp.x + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
         '<span class="dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</span>' +
         spriteImgHtml(sp.x, sp.n, 28) +
         '<span class="sname">' + escapeHtml(sp.n) + '</span>' +
@@ -2493,10 +2544,17 @@
   // ---- Dex -> team swap modal ----
   var swapModalX = null;
 
+  // Accessibility pass, 2026-09-10: remembers whatever had focus before the
+  // modal opened (a Dex row-add button or a Box "box-to-team" button - both
+  // real, focusable elements already) so closeSwapModal() can hand focus
+  // back instead of silently dropping it onto <body>.
+  var swapModalTrigger = null;
+
   function openSwapModal(x) {
     var sp = getSpeciesByX(x);
     if (!sp) return;
     swapModalX = x;
+    swapModalTrigger = document.activeElement;
     document.getElementById("swap-modal-title").textContent = "Colocar " + sp.n + " no time";
     var list = document.getElementById("swap-modal-list");
     list.innerHTML = state.team.map(getSpeciesByX).filter(Boolean).map(function (m) {
@@ -2521,11 +2579,22 @@
       });
     });
     document.getElementById("swap-modal").hidden = false;
+    // Move focus INTO the dialog (first swap pick, or the close button if
+    // the team were somehow empty) - a screen reader user opening this
+    // otherwise has no signal a dialog appeared at all, since focus would
+    // silently stay on the row/button they just clicked in the page behind it.
+    var firstPick = list.querySelector(".swap-pick");
+    (firstPick || document.getElementById("swap-modal-close")).focus();
   }
 
   function closeSwapModal() {
     document.getElementById("swap-modal").hidden = true;
     swapModalX = null;
+    // Return focus to whatever opened the modal, same reasoning as moving
+    // focus in on open - closing a dialog shouldn't leave a keyboard/screen
+    // reader user's focus dangling on a now-hidden/removed element.
+    if (swapModalTrigger && document.contains(swapModalTrigger)) swapModalTrigger.focus();
+    swapModalTrigger = null;
   }
 
   document.getElementById("swap-modal-close").addEventListener("click", closeSwapModal);
@@ -2534,6 +2603,25 @@
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && !document.getElementById("swap-modal").hidden) closeSwapModal();
+  });
+  // Tab trap: while the modal is open, Tab/Shift+Tab cycle only through its
+  // own focusable elements instead of leaking out into the (still present,
+  // just visually covered) page behind it.
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Tab") return;
+    var modal = document.getElementById("swap-modal");
+    if (modal.hidden) return;
+    var focusables = modal.querySelectorAll("button:not([disabled])");
+    if (!focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
   });
 
   var toastTimer = null;
@@ -2718,7 +2806,13 @@
     if (!sp) return;
     document.getElementById("dex-shell").classList.add("show-detail");
     document.querySelectorAll(".species-row").forEach(function (r) {
-      r.classList.toggle("selected", parseInt(r.dataset.x, 10) === x);
+      var isThis = parseInt(r.dataset.x, 10) === x;
+      r.classList.toggle("selected", isThis);
+      // Keep listbox semantics/roving tabindex in sync with a mouse click too,
+      // not just the initial render - see the accessibility-pass comment
+      // in renderList().
+      r.setAttribute("aria-selected", String(isThis));
+      r.tabIndex = isThis ? 0 : -1;
     });
 
     var names = speciesTypeNames(sp);
@@ -4054,9 +4148,14 @@
       ul.innerHTML = '<li class="no-results">Nenhum treinador encontrado.</li>';
       return;
     }
-    ul.innerHTML = rows.map(function (row) {
-      var sel = bossState.selected === row.i ? " selected" : "";
-      return '<li class="species-row' + sel + '" data-i="' + row.i + '">' +
+    // Same listbox/roving-tabindex treatment as the Dex's #species-list -
+    // see the accessibility-pass comment there, 2026-09-10.
+    var hasSelectedBossRow = rows.some(function (row) { return row.i === bossState.selected; });
+    ul.innerHTML = rows.map(function (row, idx) {
+      var isSel = bossState.selected === row.i;
+      var sel = isSel ? " selected" : "";
+      var isTabStop = isSel || (!hasSelectedBossRow && idx === 0);
+      return '<li class="species-row' + sel + '" data-i="' + row.i + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
         '<span class="sname">' + escapeHtml(row.b.name) + (row.b.db ? " (dupla)" : "") + '</span>' +
         '<span class="boss-cat-tag">' + escapeHtml(row.b.cat) + '</span></li>';
     }).join("");
@@ -4089,7 +4188,10 @@
     var boss = BOSSES[i];
     bossState.diff = (boss && boss[preferred] && boss[preferred].length) ? preferred : "party";
     document.querySelectorAll("#boss-list .species-row").forEach(function (r) {
-      r.classList.toggle("selected", parseInt(r.dataset.i, 10) === i);
+      var isThis = parseInt(r.dataset.i, 10) === i;
+      r.classList.toggle("selected", isThis);
+      r.setAttribute("aria-selected", String(isThis));
+      r.tabIndex = isThis ? 0 : -1;
     });
     document.getElementById("boss-shell").classList.add("show-detail");
     renderBossDetail();

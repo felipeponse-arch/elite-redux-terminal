@@ -856,20 +856,35 @@ async function runLiveTests() {
   // limitation as the db-capability sync feature) - this covers the parts
   // that ARE fully testable: the chip switcher, the 3-build cap, deleting
   // just the active entry, and the graceful "not available" degrade path.
-  setSearch("Bulbasaur"); // a species untouched by every earlier section
+  setSearch("Bulbasaur"); // NOT actually untouched by every earlier section -
+  // see the note below, found while adding the 2026-09-10 accessibility pass.
   await wait(30);
   const bulbaRow = document.querySelector("#species-list .species-row");
   if (bulbaRow) {
     bulbaRow.click();
     await wait(30);
     function setSelMB(id, v) { const e = document.getElementById(id); e.value = v; e.dispatchEvent(new Event("change", { bubbles: true })); }
-    check("no chips shown before any build is saved", document.querySelectorAll(".mybuild-chip").length === 0);
+    // These two asserted hardcoded counts (0 chips, then exactly 1) until
+    // 2026-09-10: the "#app height bug" section earlier in this same suite
+    // also uses Bulbasaur and clicks "mybuild-save" on it (to test that
+    // re-rendering the SAME species in place preserves scroll position) -
+    // that save has nothing filled in, but the app doesn't reject an empty
+    // build, so it silently leaves 1 real chip behind before this section
+    // ever runs. Not a regression from today's accessibility work (verified
+    // this already happened before touching anything here) and not this
+    // section's bug to fix (it doesn't own that other section's fixture
+    // choice) - made these two assertions relative to whatever the baseline
+    // actually is instead of hardcoding "0" and "1", which is what a "does
+    // saving add exactly one more chip" check should mean anyway.
+    const chipsBeforeAnySave = document.querySelectorAll(".mybuild-chip").length;
     check("'Gerar build com IA' button is present", !!document.getElementById("mybuild-ai-generate"));
 
     setSelMB("mybuild-ability", "Overgrow");
     document.getElementById("mybuild-save").click();
     await wait(50);
-    check("first saved build creates exactly 1 chip", document.querySelectorAll(".mybuild-chip").length === 1);
+    check("saving a build adds exactly one more chip",
+      document.querySelectorAll(".mybuild-chip").length === chipsBeforeAnySave + 1,
+      "before=" + chipsBeforeAnySave + " after=" + document.querySelectorAll(".mybuild-chip").length);
 
     setSelMB("mybuild-ability", "Overgrow");
     document.getElementById("mybuild-save-variant").click();
@@ -910,6 +925,96 @@ async function runLiveTests() {
         document.getElementById("mybuild-ai-status").textContent);
     } else { check("AI button available again under the 3-build cap", false); }
   } else { check("Bulbasaur found for the multi-build test", false); }
+  setSearch("");
+  await wait(30);
+
+  // --- Accessibility pass, 2026-09-10: Fase 2 item 3, deferred twice before
+  // today for its own dedicated pass. Real gap found by looking, not
+  // assumed: #species-list/#boss-list were plain <li>s with a global
+  // arrow-key handler that only ever moved a CSS class (.kbd-active),
+  // never real DOM focus - a screen reader or Tab-only user had no way to
+  // reach the list at all except by already knowing the "/" shortcut.
+  // Converted to the ARIA APG listbox pattern (role=listbox/option + a
+  // roving tabindex) and extended arrow-key nav to the Chefões list, which
+  // never had it before. Also: a global :focus-visible ring, aria-hidden on
+  // purely decorative bits (type dots, sprite-fallback letters), aria-live
+  // roles on the sync/storage banners, and a real focus trap + focus
+  // return on the swap-team modal.
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  setSearch("");
+  await wait(30);
+  const a11yList = document.getElementById("species-list");
+  check("species list is a real listbox (role=listbox + label)",
+    a11yList.getAttribute("role") === "listbox" && !!a11yList.getAttribute("aria-label"));
+  const a11yRows = document.querySelectorAll("#species-list .species-row");
+  const a11yTabbable = [...a11yRows].filter(r => r.tabIndex === 0);
+  check("exactly one species row is a tab stop at a time (roving tabindex)",
+    a11yTabbable.length === 1, "tabbable=" + a11yTabbable.length);
+  check("species rows expose role=option + aria-selected",
+    a11yRows[0].getAttribute("role") === "option" && a11yRows[0].hasAttribute("aria-selected"));
+  const a11yPip = document.querySelector(".type-pip");
+  check("decorative type dots are aria-hidden (real type name is the text pill elsewhere)",
+    a11yPip && a11yPip.getAttribute("aria-hidden") === "true");
+  check("sync banner is a live region", document.getElementById("sync-banner").getAttribute("role") === "status");
+  check("storage-full banner is an assertive live region (data-loss warning, not routine)",
+    document.getElementById("storage-banner").getAttribute("role") === "alert");
+
+  document.activeElement.blur();
+  function pressA11y(key) { document.dispatchEvent(new KeyboardEvent("keydown", { key: key, bubbles: true, cancelable: true })); }
+  pressA11y("ArrowDown");
+  await wait(20);
+  const a11yActiveRow = document.querySelector("#species-list .species-row.kbd-active");
+  check("ArrowDown moves REAL DOM focus onto the highlighted row, not just a CSS class",
+    a11yActiveRow && document.activeElement === a11yActiveRow && a11yActiveRow.tabIndex === 0,
+    a11yActiveRow && document.activeElement === a11yActiveRow);
+
+  document.querySelector('.tab-btn[data-tab="bosses"]').click();
+  await wait(50);
+  document.activeElement.blur();
+  pressA11y("ArrowDown");
+  await wait(20);
+  const a11yBossRow = document.querySelector("#boss-list .species-row.kbd-active");
+  check("Chefões list ALSO has arrow-key navigation now (previously had none at all)",
+    a11yBossRow && document.activeElement === a11yBossRow);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
+  // Modal focus management. Opening moves focus in; Tab traps inside it.
+  // NOTE: this suite drives the page via synthetic events (no real mouse
+  // click ever establishes browser-level document focus in this harness),
+  // so "focus returns to the trigger button on close" isn't asserted here -
+  // it depends on document.hasFocus(), which this harness doesn't reliably
+  // have. Manually verified via real mouse clicks in this session instead
+  // (same category of harness gap as the sample()/window.claude limitation
+  // documented elsewhere in this file).
+  setSearch("Bulbasaur");
+  await wait(30);
+  const bulbaRowA11y = document.querySelector("#species-list .species-row");
+  if (bulbaRowA11y) {
+    bulbaRowA11y.click();
+    await wait(30);
+    const addBtnA11y = document.getElementById("add-team-btn");
+    if (addBtnA11y && !addBtnA11y.disabled) {
+      // team is full (6/6) from the seed at the top of this suite, so this opens the swap modal
+      addBtnA11y.click();
+      await wait(50);
+      const swapModal = document.getElementById("swap-modal");
+      check("opening the swap modal moves focus inside it",
+        !swapModal.hidden && swapModal.contains(document.activeElement),
+        document.activeElement && document.activeElement.className);
+      const modalFocusables = swapModal.querySelectorAll("button:not([disabled])");
+      if (modalFocusables.length) {
+        modalFocusables[modalFocusables.length - 1].focus();
+        pressA11y("Tab");
+        await wait(20);
+        check("Tab from the last focusable in the modal wraps to the first (focus trap)",
+          document.activeElement === modalFocusables[0]);
+      }
+      document.getElementById("swap-modal-close").click();
+      await wait(30);
+    }
+  }
   setSearch("");
   await wait(30);
 
