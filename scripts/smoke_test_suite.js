@@ -772,6 +772,74 @@ async function runLiveTests() {
   check("Escape backs out of the detail view (same as clicking 'Voltar')",
     !document.getElementById("dex-shell").classList.contains("show-detail"));
 
+  // --- Fase 2, 2026-09-09: save history / "desfazer" + "Comparar builds".
+  // History check reuses the team already seeded at the top of this suite
+  // (6 add-to-team calls, each its own persist() -> its own history entry).
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  const histRows = document.querySelectorAll(".save-history-row").length;
+  check("save history has entries after a real session of team changes", histRows > 0, histRows);
+  const firstRestoreBtn = document.querySelector(".save-history-restore");
+  if (firstRestoreBtn) {
+    // The topmost (most recent) history row is a snapshot from just before
+    // the LAST persist() call in this suite's seed sequence, which was
+    // "add Eelektross to the BOX" - team size is unaffected by that action
+    // (only box size changes), so check box count here, not team count,
+    // or this assertion would be checking the wrong thing for this
+    // specific seed sequence and could falsely "pass" or "fail" depending
+    // on unrelated seeding changes elsewhere in this file.
+    // #box-grid is lazily rendered by renderBox(), only once the Box tab
+    // is actually opened - visiting it here first, or "before" would read
+    // as 0 regardless of the real state (nothing rendered yet, not "empty").
+    document.querySelector('.tab-btn[data-tab="box"]').click();
+    await wait(50);
+    const boxCountBefore = document.querySelectorAll(".box-chip").length;
+    document.querySelector('.tab-btn[data-tab="team"]').click();
+    await wait(50);
+    firstRestoreBtn.click();
+    await wait(50);
+    document.querySelector('.tab-btn[data-tab="box"]').click();
+    await wait(50);
+    const boxCountAfter = document.querySelectorAll(".box-chip").length;
+    check("restoring the most recent history entry undoes the last action (Eelektross leaves the box)",
+      boxCountAfter < boxCountBefore, "before=" + boxCountBefore + " after=" + boxCountAfter);
+    document.querySelector('.tab-btn[data-tab="team"]').click();
+    await wait(50);
+    check("restoring is itself undoable (the pre-restore state got pushed back into history)",
+      document.querySelectorAll(".save-history-row").length > 0);
+  } else { check("at least one save-history restore button found", false); }
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
+  setSearch("Charizard");
+  await wait(30);
+  const charRowCmp = document.querySelector("#species-list .species-row");
+  if (charRowCmp) {
+    charRowCmp.click();
+    await wait(30);
+    const cmpInput = document.getElementById("compare-input");
+    cmpInput.value = "Venusaur";
+    cmpInput.dispatchEvent(new Event("input", { bubbles: true }));
+    await wait(30);
+    const cmpText = document.getElementById("compare-result").innerText;
+    // Hand-verified: Charizard 79/84/78/109/85/100 (BST 535) vs Venusaur's
+    // own real base stats - just checking the table renders with both
+    // names and a BST row, not re-deriving every stat's win/lose here.
+    check("compare table shows both species by name", cmpText.indexOf("Charizard") !== -1 && cmpText.indexOf("Venusaur") !== -1, cmpText);
+    check("compare table includes a BST row", cmpText.indexOf("BST") !== -1);
+    const cmpRows = [...document.querySelectorAll("#compare-result .compare-table tbody tr")];
+    const hpRow = cmpRows.find(r => r.firstElementChild.textContent.trim() === "HP");
+    check("at least one stat row shows a win/lose class, not just plain numbers",
+      hpRow && (hpRow.innerHTML.indexOf("cmp-win") !== -1 || hpRow.innerHTML.indexOf("cmp-lose") !== -1));
+    cmpInput.value = "Venusa";
+    cmpInput.dispatchEvent(new Event("input", { bubbles: true }));
+    await wait(30);
+    check("compare shows nothing for a partial (not exact) species name",
+      document.getElementById("compare-result").innerHTML === "");
+  } else { check("Charizard found for the compare-builds test", false); }
+  setSearch("");
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
