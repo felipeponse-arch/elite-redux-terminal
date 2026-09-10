@@ -1214,6 +1214,37 @@ async function runLiveTests() {
     check("a caixa mostra Charizard na tela, não só no localStorage (re-render real)",
       boxGridText.indexOf("Charizard") !== -1 && boxGridText.indexOf("Charmander") === -1 && boxGridText.indexOf("Charmeleon") === -1, boxGridText);
   } else { check("Charmander encontrado pro teste de level cap", false); }
+
+  // --- Correção de exibição, 2026-09-10: achado ao construir a auto-
+  // evolução (mesma classe de bug - rs vem como STRING no dado bruto, não
+  // number), mas num lugar diferente e pré-existente: evoConditionText() na
+  // ficha da Dex sempre caía no fallback e mostrava só o número solto
+  // ("16") em vez de "Nível 16" - nenhuma evolução por nível JAMAIS
+  // mostrou o prefixo "Nível" corretamente até esta correção. Milotic
+  // (Mega Evolução) é a fixture de controle - confirma que o fix não
+  // alterou o texto de condições não-numéricas.
+  setSearch("Charmander");
+  await wait(30);
+  const charmanderRow2 = document.querySelector("#species-list .species-row");
+  if (charmanderRow2) {
+    charmanderRow2.click();
+    await wait(30);
+    check("linha evolutiva mostra 'Nível 16', não só '16' solto",
+      document.querySelector(".evo-chain").textContent.indexOf("Nível 16") !== -1,
+      document.querySelector(".evo-chain").textContent);
+  } else { check("Charmander encontrado pro teste de texto de evolução", false); }
+  setSearch("Milotic");
+  await wait(30);
+  const miloticRow = [...document.querySelectorAll("#species-list .species-row")].find(r => r.querySelector(".sname").textContent === "Milotic");
+  if (miloticRow) {
+    miloticRow.click();
+    await wait(30);
+    check("condição de Mega Evolução continua intacta (não é 'Nível X')",
+      document.querySelector(".evo-chain").textContent.indexOf("Mega Evolução") !== -1 &&
+      document.querySelector(".evo-chain").textContent.indexOf("Nível") === -1,
+      document.querySelector(".evo-chain").textContent);
+  } else { check("Milotic encontrado pro teste de texto de evolução (Mega)", false); }
+
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
   setSearch("");

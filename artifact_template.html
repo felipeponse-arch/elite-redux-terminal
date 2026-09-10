@@ -2757,9 +2757,17 @@
     var rs = ev[1];
     if (kind.indexOf("MEGA") !== -1) return "Mega Evolução &middot; " + prettify(rs);
     if (kind.indexOf("PRIMAL") !== -1) return "Reversão Primal &middot; " + prettify(rs);
-    if (typeof rs === "number") {
+    // Bug real, achado e corrigido em 2026-09-10 construindo a auto-evolução
+    // por level cap: o nível de evolução vem como STRING no dado bruto (ex:
+    // "16", não 16 - confirmado direto em data/dex_compact.json), então
+    // "typeof rs === 'number'" nunca era verdadeiro - essa condição sempre
+    // caía no fallback prettify(rs) abaixo, mostrando só o número solto
+    // ("16") em vez de "Nível 16" na linha evolutiva da Dex. Mesmo problema
+    // de tipo já corrigido em evolveChainByX() com Number(rs).
+    var numRs = Number(rs);
+    if (rs !== "" && rs !== null && rs !== undefined && !isNaN(numRs)) {
       var suffix = kind.indexOf("MALE") !== -1 ? " (♂)" : kind.indexOf("FEMALE") !== -1 ? " (♀)" : "";
-      return "Nível " + rs + suffix;
+      return "Nível " + numRs + suffix;
     }
     return prettify(rs);
   }
