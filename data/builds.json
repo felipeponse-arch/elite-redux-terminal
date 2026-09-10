@@ -62,5 +62,53 @@
     "item": "Leftovers",
     "moves": ["Meteor Beam", "Magma Storm", "Steam Eruption", "Rock Polish"],
     "note": "Habilidade travada. Earth Eater cura 25% ao levar Ground; resistir Fire anula o Molten Down inimigo."
+  },
+  "SPECIES_QUAGSIRE": {
+    "ability": "Unaware",
+    "nature": "Relaxed",
+    "evs": "252 HP / 252 Def / 4 SpD",
+    "item": "Leftovers",
+    "moves": ["Recover", "Earthquake", "Toxic", "Stealth Rock"],
+    "note": "Unaware ignora buffs de setup do oponente. Relaxed maximiza a bulk física, já que a Velocidade (35) é baixa demais pra importar."
+  },
+  "SPECIES_SWAMPERT": {
+    "ability": "Field Explorer",
+    "nature": "Adamant",
+    "evs": "252 HP / 252 Atk / 4 Def",
+    "item": "Leftovers",
+    "moves": ["Waterfall", "Earthquake", "Ice Punch", "Stealth Rock"],
+    "note": "Field Explorer dá +50% em golpes de campo como Waterfall. Ice Punch cobre Grass/Dragon/Flying — a fraqueza real do time inteiro (todo Ground), confirmada na própria análise de riscos compartilhados da ferramenta."
+  },
+  "SPECIES_CAMERUPT": {
+    "ability": "Sheer Force",
+    "nature": "Modest",
+    "evs": "252 HP / 252 SpA / 4 SpD",
+    "item": "Life Orb",
+    "moves": ["Earth Power", "Flamethrower", "Rock Slide", "Stealth Rock"],
+    "note": "Sheer Force potencializa Earth Power em 1.3x removendo o efeito secundário (queda de SpD). Flamethrower responde por golpes Grass — Fire é super efetivo contra Grass."
+  },
+  "SPECIES_CLAYDOL": {
+    "ability": "Ancient Idol",
+    "nature": "Careful",
+    "evs": "252 HP / 252 Def / 4 SpD",
+    "item": "Leftovers",
+    "moves": ["Ancient Power", "Psychic", "Earth Power", "Recover"],
+    "note": "Ancient Idol troca a base de ataque para Def/SpD (105/120 — bem maior que Atk/SpA 70/90). Por isso Careful: perder SpA não custa nada, e investir em SpD ataca e defende ao mesmo tempo. Mystic Power (innate) dá STAB 1.5x em todos os golpes, mesmo os que não batem com o tipo do Claydol."
+  },
+  "SPECIES_ZYGARDE_10": {
+    "ability": "Overwhelm",
+    "nature": "Jolly",
+    "evs": "252 Atk / 252 Spe / 4 HP",
+    "item": "Life Orb",
+    "moves": ["Crunch", "Dragon Dance", "High Horsepower", "Stone Edge"],
+    "note": "Overwhelm faz golpes Dragon acertarem Fairy, normalmente imune. Speed Force (innate) soma 20% da Velocidade como dano extra em golpes de contato (Crunch, High Horsepower) — Jolly maximiza dano e velocidade ao mesmo tempo."
+  },
+  "SPECIES_WHISCASH": {
+    "ability": "Water Absorb",
+    "nature": "Modest",
+    "evs": "252 HP / 252 SpA / 4 SpD",
+    "item": "Life Orb",
+    "moves": ["Surf", "Thunderbolt", "Earth Power", "Amnesia"],
+    "note": "Transistor (innate) potencializa Thunderbolt em 1.5x — dá ao time uma resposta a Water que os outros 3 membros Water/Ground não têm. Water Absorb cobre o próprio Whiscash contra Water."
   }
 }
