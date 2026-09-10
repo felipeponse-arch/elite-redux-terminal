@@ -2000,7 +2000,14 @@
   (function loadSave() {
     var raw = lsGet(STORE_KEY);
     if (raw) {
-      try { applySave(JSON.parse(raw)); return; } catch (e) { /* fall through */ }
+      try {
+        applySave(JSON.parse(raw));
+        // Cobre o caso de um save de ANTES desta feature existir: se o cap
+        // salvo já libera evoluções que nunca foram aplicadas, aplica agora
+        // mesmo, antes da primeira renderização.
+        if (autoEvolveRoster(true)) persist();
+        return;
+      } catch (e) { /* fall through */ }
     }
     // First visit on this browser: seed with Claude's latest recommendation
     // instead of starting empty, and persist so it only happens once.
@@ -2115,6 +2122,69 @@
   function getCurrentCap() {
     if (!LEVELCAPS || !LEVELCAPS.rows[state.settings.milestone]) return null;
     return LEVELCAPS.rows[state.settings.milestone][state.settings.difficulty];
+  }
+
+  // Auto-evolução por level cap, 2026-09-10 (pedido do usuário, decisões
+  // confirmadas por ele antes de construir): assume que todo Pokémon do
+  // time/caixa já está no nível liberado pelo cap atual - qualquer evolução
+  // por NÍVEL cujo requisito seja <= cap acontece sozinha, encadeando quantas
+  // etapas o cap permitir de uma vez (ex: cap pula de 20 pra 40 e o Pokémon
+  // evolui 2 vezes). Escopo deliberadamente restrito a `EVO_LEVEL` puro -
+  // EXCLUI variantes por gênero (EVO_LEVEL_MALE/FEMALE, que também têm `rs`
+  // numérico): o app não sabe o sexo real do Pokémon do usuário, e evoluir
+  // errado é pior que não evoluir. Também exclui troca/pedra/amizade/mega de
+  // propósito (mega já é seu próprio mecanismo de "mega permanente" em outro
+  // lugar deste app - não confundir os dois).
+  // Build/anotação salvas no nome antigo são carregadas pro novo nome (só se
+  // o novo nome ainda não tiver uma build/anotação própria - nunca sobrescreve
+  // algo que o usuário já configurou manualmente pra forma evoluída).
+  function evolveChainByX(x, cap, messages) {
+    var steps = 0;
+    while (steps < 10) { // trava de segurança contra dado malformado/ciclo
+      var sp = getSpeciesByX(x);
+      if (!sp || !sp.ev || !sp.ev.length) return x;
+      var applicable = null;
+      for (var i = 0; i < sp.ev.length; i++) {
+        var ev = sp.ev[i];
+        // O nível de evolução vem como STRING no dado bruto (ex: "16", não
+        // 16 - confirmado direto em data/dex_compact.json), mesmo quando é
+        // puramente numérico - por isso Number(...) em vez de checar
+        // typeof === "number", que falharia silenciosamente sempre.
+        var reqLevel = Number(ev[1]);
+        if (EVOKINDS[ev[0]] === "EVO_LEVEL" && !isNaN(reqLevel) && reqLevel <= cap) { applicable = ev; break; }
+      }
+      if (!applicable) return x;
+      var target = getSpeciesByX(applicable[2]);
+      if (!target || target.x === x) return x;
+      if (state.customBuilds[sp.sname] && !state.customBuilds[target.sname]) {
+        state.customBuilds[target.sname] = state.customBuilds[sp.sname];
+      }
+      delete state.customBuilds[sp.sname];
+      if (state.notes[sp.sname] && !state.notes[target.sname]) {
+        state.notes[target.sname] = state.notes[sp.sname];
+      }
+      delete state.notes[sp.sname];
+      messages.push(sp.n + " → " + target.n);
+      x = target.x;
+      steps++;
+    }
+    return x;
+  }
+  // Roda ao carregar o save e sempre que dificuldade/milestone mudam (na
+  // hora, conforme pedido do usuário) - não em toda renderização, já que
+  // percorre time+caixa inteiros. Retorna true se algo mudou, pra quem
+  // chamou saber se precisa re-renderizar/persistir de novo.
+  function autoEvolveRoster(announce) {
+    var cap = getCurrentCap();
+    if (cap === null || cap === undefined) return false;
+    var messages = [];
+    var newTeam = state.team.map(function (x) { return evolveChainByX(x, cap, messages); });
+    var newBox = state.box.map(function (x) { return evolveChainByX(x, cap, messages); });
+    if (!messages.length) return false;
+    state.team = newTeam;
+    state.box = newBox;
+    if (announce) flashToast(messages.join("; ") + " (level cap " + cap + ")");
+    return true;
   }
 
   // Final-stat calculator for boss Pokemon - 2026-09-09 field research +
@@ -3203,11 +3273,24 @@
     // covers what would be TM-taught moves in this hack's own data model,
     // see extract_bosses.ps1/transform.ps1 notes - TMHMMoves is empty for
     // every species, checked directly).
-    var moveIds = uniqueIds(sp.lm.map(function (p) { return p[1]; }).concat(sp.tu));
+    // Trava por level cap, 2026-09-10 (pedido do usuário): assume que o
+    // Pokémon já está no nível liberado pelo cap - golpes de NÍVEL acima
+    // dele somem do seletor (a tabela "Golpes por Nível" já sinalizava isso
+    // visualmente com "acima", mas o seletor da build ainda oferecia todos).
+    // Golpes de tutor ficam sempre disponíveis de propósito - não há gate
+    // por nível pra eles no jogo. Sem cap configurado (null), não filtra
+    // nada - não há base pra travar.
+    var mbCap = getCurrentCap();
+    var mbAllowedLm = sp.lm.filter(function (p) { return mbCap === null || mbCap === undefined || p[0] <= mbCap; });
+    var mbLockedCount = sp.lm.length - mbAllowedLm.length;
+    var moveIds = uniqueIds(mbAllowedLm.map(function (p) { return p[1]; }).concat(sp.tu));
     var moveOptionsHtml = '<option value="">(nenhum)</option>' + moveIds.map(function (id) {
       var m = MOVES[id];
       return m ? '<option value="' + escapeHtml(m[0]) + '">' + escapeHtml(m[0]) + '</option>' : "";
     }).join("");
+    var mbLockedHint = mbLockedCount > 0
+      ? '<p class="mybuild-hint" style="margin:4px 0 0;">' + mbLockedCount + ' golpe(s) de nível acima do level cap atual (' + mbCap + ') não aparecem aqui.</p>'
+      : "";
     var itemDatalist = '<datalist id="mybuild-item-list">' + ITEMS.map(function (n) { return '<option value="' + escapeHtml(n) + '">'; }).join("") + '</datalist>';
     var ivEvHeader = '<span></span>' + STAT_LABELS_SHORT.map(function (l) { return '<span>' + l + '</span>'; }).join("");
     var ivRow = '<span>IV</span>' + [0, 1, 2, 3, 4, 5].map(function (i) {
@@ -3233,17 +3316,17 @@
         [0, 1, 2, 3].map(function (i) {
           return '<label class="mybuild-field">Golpe ' + (i + 1) + '<select id="mybuild-move-' + i + '">' + moveOptionsHtml + '</select></label>';
         }).join("") +
-      '</div>' +
+      '</div>' + mbLockedHint +
       '<div class="mybuild-ivev">' +
         '<div class="mybuild-ivev-row mybuild-ivev-header">' + ivEvHeader + '</div>' +
         '<div class="mybuild-ivev-row">' + ivRow + '</div>' +
         '<div class="mybuild-ivev-row">' + evRow + '</div>' +
         '<div class="mybuild-ev-total" id="mybuild-ev-total"></div>' +
       '</div>' +
-      '<div class="boss-level-row"><label for="mybuild-level">Status calculados pro nível</label>' +
-        '<input type="number" id="mybuild-level" min="1" max="100" value="' + (myBuildLevel || getCurrentCap() || 50) + '"></div>' +
+      '<div class="boss-level-row"><label for="mybuild-level">Status calculados pro nível (level cap atual' + (mbCap ? ": " + mbCap : "") + ')</label>' +
+        '<input type="number" id="mybuild-level" min="1" max="100" value="' + (myBuildLevel || mbCap || 50) + '"></div>' +
       '<div id="mybuild-status-preview"></div>' +
-      '<p class="mybuild-hint" style="margin:2px 0 12px;">Você digita o nível (a ferramenta não sabe o nível real do seu Pokémon). Poder de golpe considera STAB e Life Orb quando presente - não é uma calculadora de dano (sem efetividade de tipo, sem status de campo, sem outras habilidades de golpe).</p>' +
+      '<p class="mybuild-hint" style="margin:2px 0 12px;">Preenchido a partir do level cap configurado em Progresso - pode digitar outro valor pra simular, mas volta a seguir o cap sempre que ele mudar. Poder de golpe considera STAB e Life Orb quando presente - não é uma calculadora de dano (sem efetividade de tipo, sem status de campo, sem outras habilidades de golpe).</p>' +
       '<div class="notes-actions"><button id="mybuild-save" class="ts-build-copy" type="button">Salvar build</button>' +
         (list.length < 3 ? '<button id="mybuild-save-variant" class="ts-build-copy" type="button">Salvar como nova variante</button>' : '') +
         (hasBuild ? '<button id="mybuild-clear" class="ts-build-copy" type="button" style="color:var(--sem-weak);">Apagar esta</button>' : '') +
@@ -4507,17 +4590,36 @@
       }).join("");
     }
     msSel.value = String(state.settings.milestone);
-    diffSel.addEventListener("change", function () {
-      state.settings.difficulty = diffSel.value;
+    // Auto-evolução por level cap, 2026-09-10: dispara na hora, junto com a
+    // mudança que acabou de alterar o cap - exatamente o que o usuário pediu
+    // ("na hora, ao mudar o level cap"), não só no próximo save manual.
+    function afterCapChange() {
       saveSettings();
       renderCapDisplay();
       renderCapBadge();
+      if (autoEvolveRoster(true)) {
+        persist();
+        renderTeam();
+        renderBox();
+        renderDashboard();
+        syncRowAddButtons();
+      }
+      // "Meu build" fica linkado ao level cap (pedido do usuário): zera o
+      // valor manual que o campo de nível guardava, então a próxima
+      // renderização volta a puxar do cap - e se a Dex já estiver mostrando
+      // um Pokémon agora mesmo, atualiza na hora, não só na próxima visita.
+      myBuildLevel = null;
+      if (document.getElementById("dex-shell").classList.contains("show-detail") && state.selected !== null) {
+        selectSpecies(state.selected);
+      }
+    }
+    diffSel.addEventListener("change", function () {
+      state.settings.difficulty = diffSel.value;
+      afterCapChange();
     });
     msSel.addEventListener("change", function () {
       state.settings.milestone = parseInt(msSel.value, 10);
-      saveSettings();
-      renderCapDisplay();
-      renderCapBadge();
+      afterCapChange();
     });
     renderCapDisplay();
   }

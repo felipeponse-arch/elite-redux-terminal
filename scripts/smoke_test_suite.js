@@ -72,6 +72,27 @@ async function runLiveTests() {
   }
   await addByName("Eelektross", true);
 
+  // Level cap "sem limite" (Champion / Alto Comando), 2026-09-10: desde a
+  // trava de golpes por level cap, o seletor de golpes da build só oferece
+  // golpes de NÍVEL já liberados - vários testes mais abaixo assumem um
+  // golpe de nível específico está selecionável (ex: Flare Blitz no
+  // Charizard), o que só é verdade sem cap nenhum restringindo. Configurado
+  // aqui, uma vez, pro resto desta suíte inteira - a auto-evolução por cap
+  // (testada em seção própria, mais abaixo, com um cap diferente e
+  // temporário) não dispara aqui porque getCurrentCap() retorna null
+  // quando "sem limite" está selecionado.
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  document.getElementById("tabs-more-toggle").click();
+  await wait(20);
+  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  await wait(50);
+  document.getElementById("settings-milestone").value = "9"; // Champion / Alto Comando
+  document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));
+  await wait(50);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
   // --- 1. box-to-team never disables, opens swap modal when team is full ---
   document.querySelector('.tab-btn[data-tab="box"]').click();
   await wait(50);
@@ -1100,6 +1121,101 @@ async function runLiveTests() {
       delete window.__mockLastPrompt;
     } else { check("Squirtle tem opções reais suficientes (ability/nature/4 golpes) pro teste de mock", false); }
   } else { check("Squirtle encontrado pro teste de mock da IA", false); }
+  setSearch("");
+  await wait(30);
+
+  // --- Pacote "level cap", 2026-09-10: 3 ideias interligadas, decisões
+  // confirmadas pelo usuário antes de construir (build/nota carrega pro
+  // nome novo; encadeia quantas evoluções o cap libere de uma vez; roda na
+  // hora, ao mudar milestone/dificuldade). Charmander usado como fixture
+  // NOVA pra auto-evolução (não Bulbasaur/Squirtle, já usados acima) -
+  // Charmander evolui pra Charmeleon no nível 16 e Charmeleon pra Charizard
+  // no 36 (confirmado direto na Dex, não vanilla assumido).
+  // NOTA real encontrada testando isto: os caps reais desta dificuldade
+  // pulam de 25 (índice 1) direto pra 40 (índice 2) - não existe um
+  // milestone com cap estritamente entre 16 e 36, então essa mudança
+  // específica de cap encadeia as DUAS evoluções de uma vez (Charmander ->
+  // Charmeleon -> Charizard), não apenas uma. Isso não é um problema do
+  // teste nem do código - é exatamente o cenário "encadear até o limite do
+  // cap" que o usuário pediu, só que descoberto por acaso em vez de
+  // escolhido de propósito. Charizard já é fixture usada extensivamente em
+  // outras seções (sempre só na Dex, nunca antes posta no time/caixa), então
+  // não há conflito de estado - só ajustei a asserção pra refletir o
+  // encadeamento completo de verdade, em vez de assumir 1 etapa isolada.
+  document.getElementById("tabs-more-toggle").click();
+  await wait(20);
+  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  await wait(50);
+  document.getElementById("settings-milestone").value = "1"; // Stone Badge, cap 25 nesta dificuldade
+  document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));
+  await wait(50);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
+  setSearch("Charmander");
+  await wait(30);
+  const charmanderRow = document.querySelector("#species-list .species-row");
+  if (charmanderRow) {
+    charmanderRow.click();
+    await wait(30);
+    check("LV do 'Meu build' vem do level cap configurado, não digitado à mão",
+      document.getElementById("mybuild-level").value === "25" &&
+      document.querySelector('label[for="mybuild-level"]').textContent.indexOf("25") !== -1,
+      document.getElementById("mybuild-level").value);
+    const lockedHint = [...document.querySelectorAll(".mybuild-hint")].map(h => h.textContent).find(t => t.indexOf("acima do level cap") !== -1);
+    check("aviso de golpes travados aparece quando há golpes acima do cap", !!lockedHint, lockedHint);
+    const moveOpts = [...document.querySelectorAll("#mybuild-move-0 option")].filter(o => o.value);
+    const anyAboveCap = moveOpts.length < 100; // sanidade: lista real e não vazia, verificado com o hint acima
+    check("seletor de golpe não está vazio mesmo com trava aplicada", moveOpts.length > 0, moveOpts.length);
+
+    // Salva build + anotação ANTES de evoluir, pra confirmar que ambas
+    // migram pro nome novo (decisão do usuário: carrega, não descarta).
+    const notesArea = document.getElementById("species-notes-input");
+    notesArea.value = "nota de teste pre-evolucao (Charmander)";
+    document.getElementById("species-notes-save").click();
+    await wait(30);
+    document.getElementById("mybuild-save").click();
+    await wait(30);
+
+    document.getElementById("add-box-btn").click();
+    await wait(30);
+    const boxBefore = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").box;
+    check("Charmander entrou na caixa antes do teste de auto-evolução",
+      boxBefore.indexOf("SPECIES_CHARMANDER") !== -1, JSON.stringify(boxBefore));
+
+    // Sobe o cap pra 40 (Knuckle Badge/índice 2) - acima do requisito de
+    // Charmander->Charmeleon (16), abaixo do de Charmeleon->Charizard (36),
+    // então deve evoluir EXATAMENTE 1 vez, não encadear até Charizard.
+    document.getElementById("tabs-more-toggle").click();
+    await wait(20);
+    document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+    await wait(50);
+    document.getElementById("settings-milestone").value = "2";
+    document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));
+    await wait(80);
+    const toastText = document.getElementById("toast").textContent;
+    const saveAfter = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+    check("auto-evolução dispara na hora, ao mudar o level cap (sem precisar de outro save manual)",
+      toastText.indexOf("Charmander") !== -1 && toastText.indexOf("Charmeleon") !== -1, toastText);
+    check("cap saltou o suficiente pra encadear as DUAS evoluções de uma vez (Charmander -> Charmeleon -> Charizard)",
+      toastText.indexOf("Charizard") !== -1, toastText);
+    check("Charmander virou Charizard na caixa (encadeamento completo, nada ficou parado em Charmeleon)",
+      saveAfter.box.indexOf("SPECIES_CHARIZARD") !== -1 && saveAfter.box.indexOf("SPECIES_CHARMANDER") === -1 && saveAfter.box.indexOf("SPECIES_CHARMELEON") === -1,
+      JSON.stringify(saveAfter.box));
+    check("build salva migrou até o nome final (Charizard), não ficou órfã em nenhum estágio intermediário",
+      saveAfter.customBuilds && !!saveAfter.customBuilds.SPECIES_CHARIZARD && !saveAfter.customBuilds.SPECIES_CHARMANDER && !saveAfter.customBuilds.SPECIES_CHARMELEON,
+      saveAfter.customBuilds && Object.keys(saveAfter.customBuilds));
+    check("anotação migrou até o nome final junto com a build",
+      saveAfter.notes && saveAfter.notes.SPECIES_CHARIZARD === "nota de teste pre-evolucao (Charmander)" && !saveAfter.notes.SPECIES_CHARMANDER && !saveAfter.notes.SPECIES_CHARMELEON,
+      saveAfter.notes);
+    document.querySelector('.tab-btn[data-tab="box"]').click();
+    await wait(50);
+    const boxGridText = document.getElementById("box-grid").textContent;
+    check("a caixa mostra Charizard na tela, não só no localStorage (re-render real)",
+      boxGridText.indexOf("Charizard") !== -1 && boxGridText.indexOf("Charmander") === -1 && boxGridText.indexOf("Charmeleon") === -1, boxGridText);
+  } else { check("Charmander encontrado pro teste de level cap", false); }
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
   setSearch("");
   await wait(30);
 
