@@ -28,7 +28,15 @@ foreach ($m in $data.moves) {
     # confiável. Achado ao verificar: Quick Attack tem prio=2 NESTE hack (igual
     # Extreme Speed) - na série oficial Quick Attack é só +1, então é uma
     # mudança real do Elite Redux, não erro de leitura.
-    [void]$movesOut.Add(@($m["name"], $t0, $m["split"], $m["pwr"], $m["acc"], $m["pp"], $m["desc"], $m["prio"]))
+    #
+    # flags (índice 8, 2026-09-11): categorias reais do golpe (Faz Contato,
+    # Baseado em Som, Baseado em Chifre, etc. - ver $data.flagsT, 18 no
+    # total), pré-requisito pra cruzar habilidades que aumentam o poder de
+    # uma categoria específica (ex: Mighty Horn = chifre/broca) com o
+    # movepool real de cada espécie - hoje essas habilidades pontuam ZERO no
+    # rubric de habilidade (Score-AbilityText) porque nada nunca cruzou os
+    # dois lados. Array de ids (índices em flagsT), igual `types`/`ab`/`inn`.
+    [void]$movesOut.Add(@($m["name"], $t0, $m["split"], $m["pwr"], $m["acc"], $m["pp"], $m["desc"], $m["prio"], @($m["flags"])))
 }
 
 # --- items lookup: flat, sorted list of real item names (no ids needed -
@@ -100,6 +108,7 @@ $out = [ordered]@{
     types = @($data.typeT)
     splits = @($data.splitT)
     evoKinds = @($data.evoKindT)
+    flags = @($data.flagsT)
     abilities = $abilitiesOut.ToArray()
     moves = $movesOut.ToArray()
     items = $itemsOut

@@ -76,6 +76,7 @@ $out = [ordered]@{
     types = $dex.types
     splits = $dex.splits
     evoKinds = $dex.evoKinds
+    flags = $dex.flags
     abilities = $dex.abilities
     moves = $movesOut.ToArray()
     items = $dex.items

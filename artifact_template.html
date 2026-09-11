@@ -1440,6 +1440,11 @@
   var MOVES = DATA.moves;
   var ITEMS = DATA.items || [];
   var EVOKINDS = DATA.evoKinds;
+  // Flags reais de golpe (Faz Contato, Baseado em Som, Baseado em Chifre...
+  // 18 categorias, ver scripts/transform.ps1) - MOVES[id][8] é um array de
+  // índices aqui. Pré-requisito da Fase 3 (cruzar habilidade x movepool
+  // real); por enquanto só disponibilizado, sem UI própria ainda.
+  var FLAGS = DATA.flags || [];
   var SPECIES = DATA.species.filter(function (s) { return s; });
 
   // Two identifiers, on purpose:

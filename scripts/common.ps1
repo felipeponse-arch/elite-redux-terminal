@@ -128,6 +128,18 @@ function Score-AbilityText([string]$desc) {
     if ($d -match 'Aumenta.*em 1 est[áa]gio') { return 1 }
     if ($d -match 'Cura \d+% do HP') { return 1 }
     if ($d -match 'Aumenta.*em 1\.[1-2]x') { return 1 }
+    # Achado real, 2026-09-11 (varredura completa do jogo): habilidades como
+    # Mighty Horn ("Aumenta o poder de golpes de chifre e broca em 1.3x.")
+    # pontuavam ZERO até agora - o padrão de tier 2 acima só reconhece "o
+    # próprio/os próprios golpes" (bônus incondicional a TODOS os golpes),
+    # não "golpes de uma categoria específica" (chifre/martelo/chute/asa/
+    # arremesso etc. - ver data flagsT, 18 categorias reais). Tier 1, não 2,
+    # de propósito: o bônus só vale se a espécie TIVER golpe daquela
+    # categoria no movepool real, o que este rubric isolado não verifica -
+    # a Fase 3 (cruzar habilidade x movepool real) é que vai dar a nota
+    # precisa por espécie; isto aqui é só o piso, pra parar de pontuar zero
+    # uma habilidade real de boost.
+    if ($d -match 'Aumenta o poder de golpes.*em [1-9]\.[3-9]x') { return 1 }
 
     return 0
 }
