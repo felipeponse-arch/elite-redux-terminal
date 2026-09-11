@@ -1676,6 +1676,65 @@ async function runLiveTests() {
   check("Fluffy (innate do Eevee) ajusta a cobertura como FRAQUEZA, não resistência",
     covFlags.indexOf("Fluffy (fraqueza extra)") !== -1, covFlags.join(" | "));
 
+  // --- 19. dashboardDirty / scheduleDashboardRefresh() (décima-sétima
+  // passagem, 2026-09-11 - fix de performance, commit 1c4b3c9) ---
+  // Gap real: aquele fix nunca ganhou cobertura de teste na hora (uma nota
+  // errada na memória do projeto chegou a dizer que a seção 18 acima
+  // cobria isto - não cobre, é sobre TYPE_MOD_ABILITIES). Compara
+  // IDENTIDADE de nó DOM (não conteúdo) pra provar se renderDashboard()
+  // rodou ou não - innerHTML sempre cria nós novos, então o mesmo nó
+  // sobrevivendo prova que NÃO recalculou; um nó diferente prova que
+  // recalculou. Mesma técnica já usada (fora da suíte) pra validar isto ao
+  // vivo na própria décima-sétima passagem.
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  const dashBefore = document.querySelector("#dashboard .dashboard-card");
+  document.querySelector('.tab-btn[data-tab="box"]').click();
+  await wait(50);
+  const firstRemoveBtn = document.querySelector("#box-grid .remove-btn");
+  if (firstRemoveBtn) {
+    firstRemoveBtn.click();
+    await wait(30);
+    const dashWhileOnBox = document.querySelector("#dashboard .dashboard-card");
+    check("dashboard NÃO recalcula enquanto o jogador está numa aba diferente da Dex (dashboardDirty adia o recálculo)",
+      dashWhileOnBox === dashBefore, "mesmo nó: " + (dashWhileOnBox === dashBefore));
+  } else {
+    check("caixa tinha pelo menos 1 membro pro teste de dashboardDirty", false);
+  }
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(50);
+  const dashAfterSwitch = document.querySelector("#dashboard .dashboard-card");
+  check("dashboard recalcula (flush) ao voltar pra aba Dex com dashboardDirty=true",
+    dashAfterSwitch !== dashBefore, "mesmo nó: " + (dashAfterSwitch === dashBefore));
+
+  // Atualização ao vivo, JÁ na aba Dex, sem trocar de aba nenhuma vez -
+  // usa Torkoal (não tocado por nenhuma seção anterior desta suíte) mas
+  // ainda confere `add-box-btn.disabled` antes de clicar em vez de supor -
+  // achado real da décima-sexta passagem: clicar numa espécie que já
+  // estava na caixa vira no-op e derruba este teste com um falso alarme.
+  setSearch("Torkoal");
+  await wait(120);
+  const torkoalRow = document.querySelector("#species-list .species-row");
+  if (torkoalRow) {
+    torkoalRow.click();
+    await wait(30);
+    const addBoxBtn = document.getElementById("add-box-btn");
+    if (addBoxBtn && !addBoxBtn.disabled) {
+      addBoxBtn.click();
+      await wait(30);
+      const dashAfterLiveAdd = document.querySelector("#dashboard .dashboard-card");
+      check("dashboard atualiza IMEDIATAMENTE (sem trocar de aba) quando o jogador já está na Dex",
+        dashAfterLiveAdd !== dashAfterSwitch, "mesmo nó: " + (dashAfterLiveAdd === dashAfterSwitch));
+    } else {
+      check("Torkoal ainda não estava na caixa (add-box-btn habilitado) pro teste de atualização ao vivo", false,
+        "disabled=" + (addBoxBtn && addBoxBtn.disabled));
+    }
+  } else {
+    check("Torkoal encontrado pro teste de atualização ao vivo do dashboard", false);
+  }
+  setSearch("");
+  await wait(120);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
