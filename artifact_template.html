@@ -1206,9 +1206,14 @@
         raw list of 1906 species with a search box - no orientation, no "here's
         where you left off", even though the team-analysis and rank data
         needed to answer that already existed elsewhere in the app. Filled by
-        renderDashboard(), called from updateTeamBadge()/updateBoxBadge() (the
-        two existing chokepoints every roster change already runs through -
-        see rosterMove()), so it never needs its own separate update wiring.
+        renderDashboard(), scheduled from updateTeamBadge()/updateBoxBadge()
+        (the two existing chokepoints every roster change already runs
+        through - see rosterMove()) via scheduleDashboardRefresh() - it only
+        recalculates immediately while the Dex tab is actually visible;
+        otherwise it marks itself dirty and renders once the player comes
+        back to this tab (perf pass, 2026-09-11 - the leitor de caixa
+        box-suggestion calc is real work, no reason to pay it on every
+        roster change while looking at a different tab entirely).
         Hidden on mobile while a Dex detail is open (:has() - see CSS), where
         vertical space is scarce and the summary is less relevant than the
         Pokemon actually being looked at.
@@ -2500,6 +2505,10 @@
       if (btn.dataset.tab === "bosses") initBosses();
       if (btn.dataset.tab === "progress") initProgress();
       if (btn.dataset.tab === "types") renderTypeMatrix();
+      // dashboardDirty (auditoria de performance, 2026-09-11): o dashboard só
+      // recalcula de verdade quando o jogador volta pra Dex depois de mexer
+      // no time/caixa noutra aba - ver scheduleDashboardRefresh().
+      if (btn.dataset.tab === "dex" && dashboardDirty) { renderDashboard(); dashboardDirty = false; }
     });
   });
   moreToggle.addEventListener("click", function (e) {
@@ -3308,17 +3317,38 @@
     });
   }
 
+  // Auditoria de performance, 2026-09-11 (pedido do usuário: "focar em
+  // performance e velocidade"): updateTeamBadge()/updateBoxBadge() chamavam
+  // renderDashboard() sem condição - inclusive o cálculo novo do "leitor de
+  // caixa" (bestBoxCandidateForBoss, itera a caixa inteira), mesmo quando o
+  // jogador está numa aba completamente diferente (Caixa, Chefões...) e não
+  // vai ver o dashboard até trocar de aba. Medido ao vivo: ~5ms a mais por
+  // clique de remover-da-caixa numa caixa de ~590, só de recalcular uma
+  // tela que nem está visível. dashboardDirty adia o recálculo pra quando a
+  // aba Dex realmente é exibida - se o jogador JÁ está na Dex, continua
+  // instantâneo como antes (nenhuma perda de atualização ao vivo).
+  var dashboardDirty = true;
+  function scheduleDashboardRefresh() {
+    var dexTabActive = document.querySelector('.tab-btn[data-tab="dex"]').classList.contains("active");
+    if (dexTabActive) {
+      renderDashboard();
+      dashboardDirty = false;
+    } else {
+      dashboardDirty = true;
+    }
+  }
+
   // ---------------- team view ----------------
   function updateTeamBadge() {
     document.getElementById("team-count-badge").textContent = state.team.length + "/6";
     syncRowAddButtons();
-    renderDashboard();
+    scheduleDashboardRefresh();
   }
 
   // ---------------- box view ----------------
   function updateBoxBadge() {
     document.getElementById("box-count-badge").textContent = state.box.length;
-    renderDashboard();
+    scheduleDashboardRefresh();
   }
 
   function renderBox() {
@@ -5313,7 +5343,7 @@
         persist();
         renderTeam();
         renderBox();
-        renderDashboard();
+        scheduleDashboardRefresh();
         syncRowAddButtons();
       }
       // "Meu build" fica linkado ao level cap (pedido do usuário): zera o
