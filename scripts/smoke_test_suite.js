@@ -1080,6 +1080,9 @@ async function runLiveTests() {
                   window.__mockToolCalls.push({ name: t.name, result });
                 }
               }
+              if (!(opts && Array.isArray(opts.tools) && opts.tools.some(t => t.name === "getRemainingBosses"))) {
+                window.__missingRemainingBossesTool = true;
+              }
               return {
                 ability: realAbility.value, nature: realNature.value, item: "",
                 moves: fakeMoves, evs: [252, 0, 0, 252, 0, 4],
@@ -1099,6 +1102,23 @@ async function runLiveTests() {
         const rankCall = window.__mockToolCalls.find(c => c.name === "getSpeciesRank");
         check("o mock chamou getSpeciesRank e recebeu um tier real (ou null, mas nunca inventado)",
           rankCall && ("tier" in rankCall.result), rankCall && JSON.stringify(rankCall.result));
+        // getRemainingBosses - 2026-09-10, contexto de progressao para a IA
+        // (pedido do usuario: "daqui ate o final o que faz sentido nesse
+        // poke agora"). Sem interacao nova - le so state.settings.milestone,
+        // ja configurado na aba Progresso. A suite inteira ja rodou com
+        // milestone="9" (Champion / Alto Comando, configurado la em cima
+        // pra destravar o seletor de golpes) - nesse milestone NAO falta
+        // nenhum chefe, entao a lista deve vir vazia. O teste de exclusao
+        // parcial (ex: milestone 2 -> Wattson em diante) foi verificado a
+        // mao ao vivo, nao aqui (mudar milestone aqui quebraria os outros
+        // testes de golpe por nivel que dependem de "sem limite").
+        const bossesCall = window.__mockToolCalls.find(c => c.name === "getRemainingBosses");
+        check("o mock chamou getRemainingBosses (terceira ferramenta real, nao simulada por fora)",
+          !window.__missingRemainingBossesTool && bossesCall && Array.isArray(bossesCall.result.remainingBossNames) && Array.isArray(bossesCall.result.mostCommonTypesAhead),
+          bossesCall && JSON.stringify(bossesCall.result));
+        check("com milestone 9 (Champion / Alto Comando) ja configurado, nao falta nenhum chefe",
+          bossesCall && bossesCall.result.remainingBossNames.length === 0,
+          bossesCall && JSON.stringify(bossesCall.result.remainingBossNames));
         check("build gerada por IA foi validada e salva (aparece 1 chip 'IA 1')",
           document.querySelectorAll(".mybuild-chip").length === 1 &&
           document.querySelector(".mybuild-chip").textContent.indexOf("IA 1") !== -1,
@@ -1119,6 +1139,7 @@ async function runLiveTests() {
       delete window.claude;
       delete window.__mockToolCalls;
       delete window.__mockLastPrompt;
+      delete window.__missingRemainingBossesTool;
     } else { check("Squirtle tem opções reais suficientes (ability/nature/4 golpes) pro teste de mock", false); }
   } else { check("Squirtle encontrado pro teste de mock da IA", false); }
   setSearch("");

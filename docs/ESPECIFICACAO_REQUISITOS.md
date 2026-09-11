@@ -66,21 +66,25 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   uma resposta que não corresponda a uma habilidade/golpe/nature real da espécie deve ser rejeitada.
 - RF27 — O Terminal deve exibir, em destaque visual, a justificativa que acompanha uma build gerada por
   IA.
-- RF28 — O nível usado para os cálculos de "Meu build" deve ser preenchido automaticamente a partir do
+- RF28 — Ao gerar uma build por IA, o Terminal deve fornecer à IA o contexto de progressão restante do
+  jogo (quais líderes de ginásio, membros do Alto Comando e o Campeão ainda faltam ser enfrentados),
+  derivado exclusivamente do milestone/dificuldade já configurados pelo jogador na aba Progresso — sem
+  introduzir nenhuma pergunta, campo ou interação nova para obter essa informação.
+- RF29 — O nível usado para os cálculos de "Meu build" deve ser preenchido automaticamente a partir do
   level cap vigente, continuando editável para simulação manual.
-- RF29 — O seletor de golpes de "Meu build" deve ocultar golpes de nível ainda não liberados pelo level
+- RF30 — O seletor de golpes de "Meu build" deve ocultar golpes de nível ainda não liberados pelo level
   cap vigente.
 
 ### 1.6 Auto-evolução
-- RF30 — O Terminal deve evoluir automaticamente qualquer espécie do time ou da caixa cuja evolução por
+- RF31 — O Terminal deve evoluir automaticamente qualquer espécie do time ou da caixa cuja evolução por
   nível já esteja liberada pelo level cap vigente, encadeando quantas etapas o cap permitir de uma vez.
-- RF31 — Ao evoluir automaticamente, o Terminal deve transferir a build e a anotação salvas para o novo
+- RF32 — Ao evoluir automaticamente, o Terminal deve transferir a build e a anotação salvas para o novo
   nome da espécie.
 
 ### 1.7 Sincronização e persistência
-- RF32 — O Terminal deve persistir todo o estado do jogador (time, caixa, builds, notas, configurações)
+- RF33 — O Terminal deve persistir todo o estado do jogador (time, caixa, builds, notas, configurações)
   localmente, sem exigir conexão.
-- RF33 — Quando disponível, o Terminal deve sincronizar esse estado entre os dispositivos do mesmo
+- RF34 — Quando disponível, o Terminal deve sincronizar esse estado entre os dispositivos do mesmo
   jogador, avisando quando encontrar uma versão mais recente salva em outro aparelho.
 
 ## 2. Requisitos não funcionais
@@ -115,6 +119,10 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   golpe, nature) é descartada, nunca salva parcialmente incorreta.
 - RN07 — Uma entrada de build já curada manualmente (`data/builds.json`) nunca é sobrescrita
   automaticamente por uma sugestão da IA ou do Especialista em Meta Pokémon.
+- RN08 — O mapeamento de cada líder de ginásio para o milestone de badge que sua derrota concede segue a
+  estrutura geográfica real desta hack (qual líder ocupa qual ginásio), verificada contra o campo `map`
+  dos próprios dados de treinador — nunca assumida a partir do conhecimento genérico do Pokémon Emerald
+  vanilla, mesmo quando os nomes coincidem.
 
 ---
 

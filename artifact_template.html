@@ -3639,6 +3639,86 @@
     return r ? { tier: r.tier, score: r.score } : { tier: null, score: null };
   }
 
+  // "Estou no 2º badge, o que faz sentido daqui até o final?" - pedido do
+  // usuário, 2026-09-10: sem NENHUMA pergunta nova pro jogador - usa só o
+  // milestone que ele já configura em Progresso (state.settings.milestone),
+  // interpretado internamente.
+  //
+  // Descoberta real que viabiliza isso (verificada contra os 107 chefões
+  // reais, não assumida): os líderes de ginásio deste hack têm exatamente os
+  // mesmos nomes e a mesma ordem do Pokémon Emerald original (Roxanne ->
+  // Brawly -> Wattson -> Flannery -> Norman -> Winona -> Tate And Liza ->
+  // Juan/Wallace), na mesma sequência dos 10 milestones já usados em
+  // LEVELCAPS - Elite Redux rebalanceia stats/times, não a posição dos
+  // líderes no mapa. "Juan" e "Wallace" aparecem como entradas separadas em
+  // bosses.json mas compartilham o mesmo `map` (501) no dado bruto,
+  // confirmando serem o mesmo 8º ginásio - tratados como equivalentes aqui.
+  // Índice = milestone que a vitória CONCEDE (mesmos índices de
+  // LEVELCAPS.rows, 1 = Stone Badge ... 8 = Rain Badge).
+  var GYM_LEADER_MILESTONE = {
+    "Roxanne": 1, "Brawly": 2, "Wattson": 3, "Flannery": 4,
+    "Norman": 5, "Winona": 6, "Tate And Liza": 7, "Juan": 8, "Wallace": 8
+  };
+  // Cada líder aparece várias vezes em bosses.json (Wattson 1, 2, 3...) -
+  // são rebatalhas em pontos diferentes do jogo, não dificuldades; só a
+  // PRIMEIRA ocorrência de cada nome-base é o encontro real que concede o
+  // badge, então só ela entra na lista de "o que falta".
+  function getRemainingBossEntries() {
+    var curMilestone = state.settings.milestone;
+    var seenLeader = {};
+    var seenEliteFour = {};
+    var champIncluded = false;
+    var remaining = [];
+    BOSSES.forEach(function (b) {
+      // Só líderes de ginásio e Alto Comando têm variantes puramente
+      // numéricas (nome-base + " N", ex: "Wattson 1"/"2"/"3" = rebatalhas).
+      // O Campeão tem variantes de NOME (Steven/Wallace, cada um em modo
+      // normal/Doubles/Legends/Doubles Legends - achado ao testar isso ao
+      // vivo: sem esse tratamento à parte, as 8 variações apareciam como 8
+      // entradas "restantes" distintas, quando na prática representam o
+      // mesmo desafio final) - por isso o Campeão usa uma regra própria em
+      // vez do mesmo dedup por nome-base.
+      if (b.cat === "Lider de Ginasio") {
+        var baseName = b.name.replace(/\s+\d+$/, "").trim();
+        if (seenLeader[baseName]) return;
+        var milestone = GYM_LEADER_MILESTONE[baseName];
+        if (milestone === undefined || milestone <= curMilestone) return;
+        seenLeader[baseName] = true;
+        remaining.push(b);
+      } else if (b.cat === "Alto Comando") {
+        if (curMilestone >= 9) return; // 9 = "Champion / Alto Comando", já não falta mais nada
+        var efName = b.name.replace(/\s+\d+$/, "").trim();
+        if (seenEliteFour[efName]) return;
+        seenEliteFour[efName] = true;
+        remaining.push(b);
+      } else if (b.cat === "Campeao") {
+        if (curMilestone >= 9) return;
+        if (champIncluded) return; // uma única entrada representa "o Campeão", não cada variante de nome
+        champIncluded = true;
+        remaining.push(b);
+      }
+      // Equipe Aqua/Magma, Frontier Brain etc. ficam fora de propósito -
+      // não são pontos fixos e ordenados da progressão de badges.
+    });
+    return remaining;
+  }
+  function aiTool_getRemainingBosses() {
+    var remaining = getRemainingBossEntries();
+    var typeCounts = {};
+    remaining.forEach(function (b) {
+      b.party.forEach(function (m) {
+        var sp = getSpeciesByX(m.x);
+        if (!sp) return;
+        speciesTypeNames(sp).forEach(function (t) { typeCounts[t] = (typeCounts[t] || 0) + 1; });
+      });
+    });
+    var topTypes = Object.keys(typeCounts).sort(function (a, b) { return typeCounts[b] - typeCounts[a]; }).slice(0, 6);
+    return {
+      remainingBossNames: remaining.map(function (b) { return b.name; }),
+      mostCommonTypesAhead: topTypes
+    };
+  }
+
   // "Gerar build com IA" - 2026-09-09, user's own rule: check for a saved
   // build first (that's the normal render path, already handled by
   // myBuildEditorHtml/effectiveBuild); when there's room for another (cap
@@ -3686,9 +3766,11 @@
       "Itens de batalha reais disponiveis - escolha UM destes (ou deixe vazio se nenhum fizer sentido): " + AI_ITEM_POOL.join(", ") + "\n" +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       "Antes de responder, use as ferramentas disponiveis pra ver as fraquezas reais do time atual " +
-      "do jogador e o rank real desta especie - use isso pra decidir o PAPEL que este Pokemon deve " +
-      "cumprir agora (ofensivo, defensivo, suporte, resposta a uma fraqueza especifica do time etc.), " +
-      "nao so um set generico isolado.\n" +
+      "do jogador, o rank real desta especie, e quais chefoes/lideres de ginasio ainda faltam ate o " +
+      "final do jogo a partir de onde o jogador esta agora - use tudo isso pra decidir o PAPEL que " +
+      "este Pokemon deve cumprir dai pra frente (ofensivo, defensivo, suporte, resposta a uma fraqueza " +
+      "especifica do time, ou resposta a uma ameaca recorrente nos chefoes que ainda vem pela frente), " +
+      "nao so um set generico isolado pro momento atual.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
       '{"ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"rationale":"..."}' +
       ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
@@ -3708,6 +3790,11 @@
             description: "Retorna o tier (SS/S/A/B/C/D) e a pontuacao real deste hack pra uma especie, dado o sname interno (ex: SPECIES_CHARIZARD).",
             inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
             execute: function (input) { return aiTool_getSpeciesRank(input); }
+          },
+          {
+            name: "getRemainingBosses",
+            description: "Retorna os nomes dos lideres de ginasio/Alto Comando/Campeao que o jogador AINDA NAO enfrentou a partir do progresso atual dele, mais os tipos mais comuns nos times deles - usa o progresso ja configurado pelo jogador, nao pergunta nada.",
+            execute: function () { return aiTool_getRemainingBosses(); }
           }
         ]
       });
