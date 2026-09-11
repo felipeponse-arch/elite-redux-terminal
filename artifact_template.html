@@ -355,6 +355,11 @@
   }
   .add-team-btn:disabled { background: var(--surface-3); color: var(--text-dim); cursor: default; }
   .flavor { color: var(--text-dim); font-size: 13.5px; font-style: italic; max-width: 65ch; margin-bottom: 20px; }
+  /* "Como conseguir" (Fase 2, 2026-09-11) - uma frase, não um card (decisão
+     da UX: informação real mas pequena o bastante pra não merecer sua
+     própria seção). Cor de destaque (não --text-dim, pra não se misturar
+     com o flavor text acima) mas sem peso de card. */
+  .obtain-hint { color: var(--accent-2); font-size: 12.5px; font-weight: 600; max-width: 65ch; margin: -8px 0 20px; }
 
   .card {
     background: var(--surface);
@@ -364,6 +369,26 @@
     margin-bottom: 16px;
   }
   .card h3 { font-size: 12.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--text-dim); margin-bottom: 12px; }
+
+  /* Blocos colapsáveis da tela de detalhe (Fase 2, 2026-09-11). <summary>
+     nativo já vem com foco/teclado/Enter-Espaço de graça - só estilizado
+     por cima, marcador triângulo mantido de propósito (sinaliza "isto
+     expande" sem precisar de ícone customizado). */
+  .detail-group { margin-bottom: 16px; }
+  .detail-group > summary {
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 4px;
+    color: var(--text);
+    list-style-position: outside;
+  }
+  .detail-group > summary:hover { color: var(--accent); }
+  .detail-group[open] > summary { margin-bottom: 4px; border-bottom: 1px solid var(--border); }
+  /* .card já tem margin-bottom próprio - dentro de um <details> aberto isso
+     empilha certo; o último .card de um grupo não precisa do espaço extra
+     porque o próprio .detail-group já tem margin-bottom. */
+  .detail-group .card:last-child { margin-bottom: 0; }
 
   /* Dashboard summary, top of the Dex - design proposal B, 2026-09-09. */
   #dashboard { padding: 12px 20px 0; }
@@ -1445,6 +1470,13 @@
   // índices aqui. Pré-requisito da Fase 3 (cruzar habilidade x movepool
   // real); por enquanto só disponibilizado, sem UI própria ainda.
   var FLAGS = DATA.flags || [];
+  // "Como conseguir" (SEnc) - 2026-09-11, achado na varredura completa do
+  // jogo: sp.senc é uma lista de [how, mapIdx] (ver scripts/transform.ps1),
+  // how resolve em SENC_HOW (0=scripted wild, 1=scripted not wild,
+  // 2=given with custom moves, 3=given), mapIdx resolve em MAPS (569 mapas
+  // reais). Nunca extraído/exibido até agora.
+  var SENC_HOW = DATA.sencHow || [];
+  var MAPS = DATA.maps || [];
   var SPECIES = DATA.species.filter(function (s) { return s; });
 
   // Two identifiers, on purpose:
@@ -2898,6 +2930,33 @@
       '<span title="' + escapeHtml(title) + '">' + escapeHtml(parts.join(" · ")) + '</span></span>';
   }
 
+  // "Como conseguir" (RF novo, Fase 2 - 2026-09-11): frase curta, não um
+  // card novo (decisão da equipe: UX apontou que isso é uma linha, não uma
+  // seção). Dedup por MAPA único (Sandslash tem 3 entradas no mesmo mapa
+  // com "how" diferente - pro jogador, o que importa é ONDE, não as 3
+  // variações mecânicas do mesmo encontro). O verbo usado ("Presente"/
+  // "Encontro especial"/"Encontro selvagem especial") reflete o "how" mais
+  // definitivo entre todas as entradas da espécie, não por mapa individual.
+  var SENC_HOW_PRIORITY = { 3: 3, 2: 3, 1: 2, 0: 1 }; // given/given custom moves empatam no topo
+  function howToObtainText(sp) {
+    var senc = sp.senc;
+    if (!senc || !senc.length) return "";
+    var seenMap = {};
+    var mapNames = [];
+    var bestPriority = 0;
+    senc.forEach(function (e) {
+      var how = e[0], mapIdx = e[1];
+      var pri = SENC_HOW_PRIORITY[how] || 0;
+      if (pri > bestPriority) bestPriority = pri;
+      var mapName = MAPS[mapIdx];
+      if (mapName && !seenMap[mapName]) { seenMap[mapName] = true; mapNames.push(mapName); }
+    });
+    if (!mapNames.length) return "";
+    var verb = bestPriority >= 3 ? "Presente" : bestPriority === 2 ? "Encontro especial" : "Encontro selvagem especial";
+    var locText = mapNames.length <= 3 ? mapNames.join(" ou ") : mapNames.slice(0, 3).join(", ") + " e outros locais";
+    return verb + ": " + locText + ".";
+  }
+
   function rankInfoLineHtml(sp) {
     var r = SPECIES_RANK[sp.sname];
     if (!r) return "";
@@ -3004,25 +3063,43 @@
       '<div class="detail-types">' + names.map(function (n) { return typePill(n); }).join("") + '</div>' +
       rankInfoLineHtml(sp) +
       (sp.d ? '<p class="flavor">' + escapeHtml(sp.d) + '</p>' : "") +
-      '<div class="card"><h3>Stats base</h3>' + statsHtml +
-        '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
-      compareCardHtml(sp) +
-      '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
-        '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p></div>' +
-      myBuildEditorHtml(sp) +
-      notesCardHtml(sp) +
+      (function () { var t = howToObtainText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })() +
+      // Reorganização em blocos colapsáveis, Fase 2 - 2026-09-11 (reunião:
+      // "a tela do Poke na dex tá meio pesada de informação"). <details>
+      // nativo em vez de JS customizado - foco/teclado/leitor de tela vêm de
+      // graça (skill artifact-design, princípio já seguido no resto do
+      // app). Critério de aberto/fechado por padrão (time, mesma reunião):
+      // o que é fato rápido de consultar (stats, habilidades, evolução)
+      // fica ABERTO; o que é denso (tabelas de golpe, inteiras) ou usado
+      // ocasionalmente (notas/histórico/comparar) fica FECHADO - mas nunca
+      // escondido de verdade, um clique sempre abre, e o <summary> sempre
+      // diz o que tem dentro (inclusive contagem, pra não precisar abrir só
+      // pra saber se há algo lá). "Meu build" fica ABERTO apesar de denso:
+      // é a ação central do app (RF21-30), esconder por padrão atrapalharia
+      // o fluxo principal mais do que ajudaria a limpar a tela.
+      '<details class="detail-group" open><summary>Conhecer a espécie</summary>' +
+        '<div class="card"><h3>Stats base</h3>' + statsHtml +
+          '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
+        '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
+          '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p></div>' +
+        evoHtml +
+      '</details>' +
+      '<details class="detail-group"><summary>Golpes (' + (lm.length + tuPairs.length) + ')</summary>' +
+        lmHtml + tuHtml +
+      '</details>' +
+      '<details class="detail-group" open><summary>Montar meu build</summary>' +
+        myBuildEditorHtml(sp) +
+      '</details>' +
       (function () {
-        var inner = buildHistoryHtml(sp) + bossReferenceHtml(sp);
-        // Used to be a bare, untitled card - just a couple of collapsed
-        // one-line <details>, indistinguishable from stray text between
-        // Habilidades and Linha evolutiva (user feedback, 2026-09-09: "muito
-        // mal localizada"). A real header fixes the "what IS this" problem;
-        // the individual <details> summaries got heavier styling (see
-        // .bh-details summary) to read as a real, clickable feature instead
-        // of a barely-visible line.
-        return inner ? '<div class="card"><h3>Builds de referência</h3>' + inner + '</div>' : "";
+        var notes = notesCardHtml(sp);
+        var refs = buildHistoryHtml(sp) + bossReferenceHtml(sp);
+        var refsBlock = refs ? '<div class="card"><h3>Builds de referência</h3>' + refs + '</div>' : "";
+        if (!notes && !refsBlock) return "";
+        return '<details class="detail-group"><summary>Anotações e builds de referência</summary>' + notes + refsBlock + '</details>';
       })() +
-      evoHtml + lmHtml + tuHtml;
+      '<details class="detail-group"><summary>Comparar com outro Pokémon</summary>' +
+        compareCardHtml(sp) +
+      '</details>';
 
     if (!isSameSpecies) {
       var detailPanel = document.querySelector(".species-detail");

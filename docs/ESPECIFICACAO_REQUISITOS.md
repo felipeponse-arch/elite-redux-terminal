@@ -98,6 +98,18 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   realmente aprende (nível ou tutor), para que ela avalie se vale a pena incluir um deles entre os 4
   golpes escolhidos.
 
+### 1.9 "Como conseguir" e Dex sem sobrecarga visual (Fase 2, 2026-09-11)
+- RF38 — Quando a espécie tiver ao menos um encontro roteirizado real (`SEnc` do dado bruto — inicial,
+  lendário, fóssil, presente de NPC ou recompensa exclusiva do hack), o Terminal deve exibir na ficha da
+  espécie uma frase curta e objetiva de "como conseguir" (ex: "Presente de NPC em Rota 101"), priorizando
+  a forma mais específica quando existir mais de uma entrada. Espécies sem `SEnc` (captura selvagem comum)
+  não exibem a frase.
+- RF39 — A ficha de detalhe de uma espécie na Dex deve ser organizada em blocos recolhíveis (nativo
+  `<details>`/`<summary>`), reduzindo a quantidade de informação visível de uma vez sem remover nenhum
+  dado hoje exibido. Os blocos "Conhecer a espécie" e "Montar meu build" começam abertos por padrão
+  (informação de consulta imediata); "Golpes", "Anotações e builds de referência" e "Comparar com outro
+  Pokémon" começam fechados (consulta sob demanda), preservando totalmente a navegação por teclado.
+
 ## 2. Requisitos não funcionais
 
 - RNF01 — **Portabilidade**: o Terminal deve funcionar como um único arquivo HTML autocontido (Claude
@@ -124,8 +136,12 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
 - RN03 — A soma dos EVs de um build não pode ultrapassar 510, nem 252 por stat individual.
 - RN04 — O level cap vigente é determinado pela combinação de dificuldade (Easy/Ace/Elite) e milestone
   de badge, conforme a tabela oficial do hack — não é um valor livre.
-- RN05 — Só evoluções cujo requisito seja estritamente "por nível" (`EVO_LEVEL`) evoluem automaticamente
-  pelo level cap; evoluções por gênero, troca, pedra, amizade ou mega ficam de fora dessa regra.
+- RN05 — Só evoluções cujo requisito seja estritamente "por nível" (`EVO_LEVEL`/`EVO_LEVEL_MALE`/
+  `EVO_LEVEL_FEMALE`) evoluem automaticamente pelo level cap; evolução Mega/Primal fica de fora dessa
+  regra. Correção 2026-09-11: verificado nos dados brutos (`evoKindT`/`evolutions[].kd`, todas as 1906
+  espécies) que este hack **não tem nenhuma evolução por troca, pedra ou amizade** — as únicas condições
+  reais são nível (com ou sem trava de gênero) e Mega/Primal. A exclusão de troca/pedra/amizade citada em
+  versões anteriores desta regra descrevia uma categoria vazia neste hack, não um caso real observado.
 - RN06 — Uma build gerada por IA que não corresponda exatamente às opções reais da espécie (habilidade,
   golpe, nature) é descartada, nunca salva parcialmente incorreta.
 - RN07 — Uma entrada de build já curada manualmente (`data/builds.json`) nunca é sobrescrita

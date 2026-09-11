@@ -50,6 +50,7 @@ foreach ($s in $dex.species) {
         x = $s["x"]; i = $s["i"]; n = $s["n"]; sname = $s["sname"]
         t = $s["t"]; b = $s["b"]; ab = $s["ab"]; inn = $s["inn"]
         ev = $s["ev"]; lm = $s["lm"]; tu = $s["tu"]
+        senc = $s["senc"]
     }
     if (-not $DropFlavor) { $entry["d"] = $s["d"] }
     [void]$speciesOut.Add($entry)
@@ -77,6 +78,8 @@ $out = [ordered]@{
     splits = $dex.splits
     evoKinds = $dex.evoKinds
     flags = $dex.flags
+    sencHow = $dex.sencHow
+    maps = $dex.maps
     abilities = $dex.abilities
     moves = $movesOut.ToArray()
     items = $dex.items

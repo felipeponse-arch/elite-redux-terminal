@@ -74,6 +74,29 @@ for ($idx = 0; $idx -lt $data.species.Count; $idx++) {
     $tu = @(@($s["tutor"]) | Where-Object { $_ -ne 0 })
     $tm = @(@($s["TMHMMoves"]) | Where-Object { $_ -ne 0 })
 
+    # SEnc ("scripted encounter") - 2026-09-11, achado na varredura completa
+    # do jogo: como conseguir esta espécie fora de captura selvagem comum
+    # (iniciais, lendários, fósseis, presentes de NPC, recompensas
+    # exclusivas do hack). Campo nunca extraído até agora. `how` é índice em
+    # scriptedEncoutersHowT (0=scripted wild, 1=scripted not wild, 2=given
+    # with custom moves, 3=given), `map` é índice em mapsT (569 mapas reais,
+    # também nunca extraído até agora). Dedup por par (how,map) EXATO -
+    # várias entradas idênticas existem no dado bruto (ex: Deoxys repete o
+    # mesmo par 3x, provavelmente por múltiplos gatilhos de jogo que levam
+    # ao mesmo fato prático) - sem isso a Dex mostraria a mesma frase
+    # repetida.
+    $sencSeen = @{}
+    $senc = New-Object System.Collections.ArrayList
+    foreach ($e in @($s["SEnc"])) {
+        if (-not $e) { continue }
+        $how = $e["how"]; $map = $e["map"]
+        if ($how -eq $null -or $map -eq $null) { continue }
+        $key = "$how|$map"
+        if ($sencSeen.ContainsKey($key)) { continue }
+        $sencSeen[$key] = $true
+        [void]$senc.Add(@($how, $map))
+    }
+
     $dexInfo = $s["dex"]
     $desc = if ($dexInfo) { $dexInfo["desc"] } else { "" }
     $hw = if ($dexInfo -and $dexInfo["hw"]) { @($dexInfo["hw"]) } else { @() }
@@ -94,6 +117,7 @@ for ($idx = 0; $idx -lt $data.species.Count; $idx++) {
         tm = $tm
         d = $desc
         hw = $hw
+        senc = $senc.ToArray()
     }
     [void]$speciesOut.Add($entry)
 }
@@ -109,6 +133,8 @@ $out = [ordered]@{
     splits = @($data.splitT)
     evoKinds = @($data.evoKindT)
     flags = @($data.flagsT)
+    sencHow = @($data.scriptedEncoutersHowT)
+    maps = @($data.mapsT)
     abilities = $abilitiesOut.ToArray()
     moves = $movesOut.ToArray()
     items = $itemsOut

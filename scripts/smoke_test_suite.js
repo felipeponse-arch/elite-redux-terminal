@@ -45,6 +45,20 @@ async function runLiveTests() {
     results.push({ name, pass: !!cond, detail: detail || "" });
   }
   function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+  // Reorganização em blocos colapsáveis (<details>), Fase 2, 2026-09-11:
+  // "Golpes"/"Anotações e builds de referência"/"Comparar" ficam FECHADOS
+  // por padrão (decisão da equipe - só "Conhecer a espécie" e "Montar meu
+  // build" abrem sozinhos). Um elemento dentro de um <details> fechado
+  // ainda existe no DOM (querySelector encontra), mas não está visível/
+  // interagível de verdade - qualquer teste que precise mexer em algo
+  // dentro de um grupo fechado chama isto primeiro. Acha pelo texto do
+  // <summary> (prefixo), não por índice, pra não quebrar se a ordem mudar.
+  function openDetailGroup(summaryPrefix) {
+    const groups = [...document.querySelectorAll(".detail-group")];
+    const g = groups.find(function (d) { return d.querySelector("summary").textContent.indexOf(summaryPrefix) === 0; });
+    if (g) g.open = true;
+    return g;
+  }
   function setSearch(q) {
     const el = document.getElementById("search-input");
     el.value = q;
@@ -185,6 +199,60 @@ async function runLiveTests() {
       roleText.indexOf("Pivô") !== -1 && roleText.indexOf("Físico") !== -1 && roleText.indexOf("Ã") === -1,
       roleText);
   } else { check("Scizor encontrado pro teste de papel/arquétipo", false); }
+  setSearch("");
+  await wait(30);
+
+  // --- 5c. reorganização em blocos colapsáveis (Fase 2, 2026-09-11) -
+  // "a tela do Poke na dex tá meio pesada de informação". Charizard, ainda
+  // selecionado da checagem 5b logo acima (sem precisar buscar de novo) -
+  // tem golpe de nível suficiente pra "Golpes (N)" mostrar uma contagem
+  // real, não zero.
+  (function () {
+    const groups = [...document.querySelectorAll(".detail-group")];
+    check("5 grupos colapsáveis na tela de detalhe", groups.length === 5, groups.length);
+    const bySummary = {};
+    groups.forEach(function (g) { bySummary[g.querySelector("summary").textContent.replace(/\s*\(\d+\)$/, "")] = g; });
+    check("'Conhecer a espécie' aberto por padrão", bySummary["Conhecer a espécie"] && bySummary["Conhecer a espécie"].open === true);
+    check("'Montar meu build' aberto por padrão (ação central do app, não deve ficar escondida)",
+      bySummary["Montar meu build"] && bySummary["Montar meu build"].open === true);
+    check("'Comparar com outro Pokémon' fechado por padrão", bySummary["Comparar com outro Pokémon"] && bySummary["Comparar com outro Pokémon"].open === false);
+    const golpesGroup = groups.find(function (g) { return g.querySelector("summary").textContent.indexOf("Golpes") === 0; });
+    check("'Golpes' fechado por padrão e mostra uma contagem real (não zero) no resumo",
+      golpesGroup && golpesGroup.open === false && /Golpes \([1-9]\d*\)/.test(golpesGroup.querySelector("summary").textContent),
+      golpesGroup && golpesGroup.querySelector("summary").textContent);
+  })();
+  // Clicar no <summary> abre o grupo E revela o conteúdo de verdade (não só
+  // o atributo `open` - .move-row só existe/conta quando o navegador
+  // realmente renderiza o conteúdo do <details>).
+  setSearch("Charizard");
+  await wait(30);
+  const charRowGroups = document.querySelector("#species-list .species-row");
+  if (charRowGroups) {
+    charRowGroups.click();
+    await wait(30);
+    const golpesGroup2 = openDetailGroup("Golpes");
+    // openDetailGroup já seta .open = true - desfaz pra testar o clique de
+    // verdade no <summary>, não só a propriedade.
+    if (golpesGroup2) golpesGroup2.open = false;
+    await wait(20);
+    // Nem getComputedStyle(...).display nem offsetParent são confiáveis
+    // aqui pra detectar "escondido por um <details> ancestral fechado" -
+    // testado ao vivo e os dois relataram o elemento como visível mesmo
+    // com o grupo fechado (offsetParent apontava pro <body> normalmente),
+    // enquanto get_page_text (extração de texto que respeita renderização
+    // de verdade) confirmava corretamente que o conteúdo não aparecia.
+    // checkVisibility() é a API certa pra isso (mais nova, criada
+    // exatamente pra este caso) - confere com get_page_text, então é o que
+    // fica no teste.
+    const firstMoveRow = golpesGroup2.querySelector(".move-row");
+    check("golpes ficam fora da renderização enquanto o grupo está fechado",
+      !firstMoveRow || (typeof firstMoveRow.checkVisibility === "function" ? firstMoveRow.checkVisibility() === false : true));
+    golpesGroup2.querySelector("summary").click();
+    await wait(20);
+    check("clicar no <summary> de 'Golpes' abre o grupo e revela as linhas de golpe",
+      golpesGroup2.open === true && golpesGroup2.querySelectorAll(".move-row").length > 0,
+      golpesGroup2.querySelectorAll(".move-row").length);
+  } else { check("Charizard encontrado pro teste de clique em <summary>", false); }
   setSearch("");
   await wait(30);
 
@@ -869,6 +937,7 @@ async function runLiveTests() {
   if (charRowCmp) {
     charRowCmp.click();
     await wait(30);
+    openDetailGroup("Comparar");
     const cmpInput = document.getElementById("compare-input");
     cmpInput.value = "Venusaur";
     cmpInput.dispatchEvent(new Event("input", { bubbles: true }));
