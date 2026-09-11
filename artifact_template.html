@@ -3812,7 +3812,47 @@
       flashToast("Build gerada por IA salva para " + sp.n);
       selectSpecies(sp.x);
     } catch (e) {
-      if (statusEl) statusEl.textContent = "Erro ao gerar build - tente de novo.";
+      if (statusEl) statusEl.textContent = sampleErrorMessage(e);
+    }
+  }
+
+  // Achado na reunião de 2026-09-11 sobre o material de IHC (capítulo de
+  // interação social/emocional, tabela "mensagens frustrantes x
+  // construtivas"): este catch era o único lugar do app com uma mensagem
+  // de erro genérica ("Erro ao gerar build - tente de novo.") que não diz
+  // o que aconteceu nem se adianta alguma coisa tentar de novo - o mesmo
+  // defeito do exemplo "Erro de sintaxe!" do livro. Toda outra mensagem do
+  // app (banner de armazenamento cheio, avisos de IA indisponível) já
+  // segue o padrão construtivo; esta só não tinha sido revisada porque o
+  // catch nunca tinha sido dividido por código de erro. Códigos e
+  // categorias conforme sample.d.ts (contrato 0.2.41): "sem sentido tentar
+  // de novo sem mudar algo" vs. "transitório, tentar de novo pode resolver".
+  function sampleErrorMessage(e) {
+    switch (e && e.code) {
+      case "not_granted":
+        return "Geração por IA não disponível (permissão não concedida).";
+      case "rate_limited":
+        return "Muitos pedidos de uma vez - espere um pouco e tente de novo.";
+      case "session_expired":
+        return "Sua sessão expirou - atualize a página e tente de novo.";
+      case "refused":
+        return "A IA recusou esse pedido - tente novamente ou escolha outro Pokémon.";
+      case "empty_completion":
+      case "invalid_json":
+        return "A resposta da IA veio incompleta ou num formato inesperado - tente de novo.";
+      case "prompt_too_large":
+        return "Esse Pokémon tem dados demais pra IA processar de uma vez.";
+      case "sampling_disabled":
+      case "not_declared":
+      case "capability_disabled":
+      case "capability_removed":
+      case "tools_unavailable":
+        return "Geração por IA não disponível neste ambiente.";
+      default:
+        // upstream_error e qualquer código não previsto: falha transitória
+        // do serviço, tentar de novo é uma ação real (sample.d.ts recomenda
+        // tratar código desconhecido como upstream_error).
+        return "Falha temporária ao consultar a IA - tente de novo em instantes.";
     }
   }
 

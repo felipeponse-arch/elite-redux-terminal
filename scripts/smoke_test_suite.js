@@ -1132,6 +1132,31 @@ async function runLiveTests() {
         check("a ability/golpes salvos batem exatamente com o que a IA (mock) escolheu",
           savedEntry && savedEntry.ability === realAbility.value && JSON.stringify(savedEntry.moves) === JSON.stringify(fakeMoves),
           savedEntry && JSON.stringify(savedEntry));
+
+        // sampleErrorMessage() - 2026-09-11, achado na reunião sobre o
+        // material de IHC (tabela "mensagens frustrantes x construtivas"):
+        // o catch de generateBuildWithAI() era genérico ("Erro ao gerar
+        // build - tente de novo."), sem dizer o que aconteceu - o mesmo
+        // defeito do exemplo "Erro de sintaxe!" do livro. Corrigido pra
+        // branchear por code (contrato sample.d.ts 0.2.41). O mock troca
+        // json() por uma versão que sempre rejeita com o code pedido -
+        // ainda é o código REAL do app (sampleErrorMessage) reagindo, só o
+        // resultado do sample() é fabricado, mesmo espírito do resto desta
+        // suíte. Testa 1 code documentado (mensagem específica) e 1 code
+        // desconhecido (sample.d.ts manda tratar como upstream_error -
+        // "falha transitória, tentar de novo é uma ação real" - nunca cair
+        // de volta na mensagem genérica antiga).
+        async function checkErrorCode(code, expectedSubstr) {
+          window.claude = { use: async function (name) { return name === "sample" ? { json: async function () { throw { code: code, message: "teste" }; } } : null; } };
+          document.getElementById("mybuild-ai-generate") && document.getElementById("mybuild-ai-generate").click();
+          await wait(80);
+          const status = document.getElementById("mybuild-ai-status").textContent;
+          check("sampleErrorMessage() dá uma mensagem construtiva pra code=\"" + code + "\" (não a genérica antiga)",
+            status.indexOf(expectedSubstr) !== -1 && status.indexOf("Erro ao gerar build - tente de novo.") === -1,
+            status);
+        }
+        await checkErrorCode("rate_limited", "espere um pouco");
+        await checkErrorCode("um_code_que_nao_existe_ainda", "temporária");
       } else { check("botão 'Gerar build com IA' encontrado pro teste de mock", false); }
       // Limpa o mock - as seções mais acima (Bulbasaur) já rodaram e não
       // dependem mais disso, mas nada depois deste ponto deve herdar um
