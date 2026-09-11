@@ -1636,21 +1636,95 @@
     Fairy:    { Fire:0.5, Fighting:2, Poison:0.5, Dragon:2, Dark:2, Steel:0.5 }
   };
 
-  // Curated, NOT auto-generated: type-effectiveness modifiers for abilities
-  // verified against their real (translated) Elite Redux description text -
-  // never assumed from vanilla Pokemon behavior, since this hack renames and
-  // rebalances abilities freely (see AUDITORIA-DOSSIE.md 9.4 - this is
-  // exactly why a full 1033-ability table wasn't attempted in one go).
-  // Only covers abilities actually seen on the user's team/box so far.
-  // Unlisted ids simply have no effect (same safe-degrade as ABILITY_PT).
-  // Ids are the same indices as ABILITIES / dex_compact.json "abilities".
+  // Curated, NOT auto-generated: type-effectiveness modifiers para habilidades
+  // verificadas contra o texto real (traduzido) de cada uma - nunca assumidas
+  // do comportamento vanilla, já que este hack renomeia e rebalanceia
+  // habilidades livremente (ver AUDITORIA-DOSSIE.md 9.4).
+  // 2026-09-11 (pedido do usuário: acurácia dos dados heurísticos entre
+  // 90-95%): até aqui a tabela só cobria as 6 habilidades vistas no time do
+  // usuário - o suficiente pro quadro de fraquezas do time, mas o "leitor de
+  // caixa" (bestBoxCandidateForBoss) reusa abilityTypeMod() pra QUALQUER
+  // espécie da caixa, não só o time, então uma tabela de 6 entradas deixava
+  // a maioria das sugestões silenciosamente erradas (voltando pro type chart
+  // cru sempre que a espécie da caixa tivesse uma habilidade defensiva real
+  // fora dessas 6). Ampliada via varredura sistemática (não automática) das
+  // 1033 descrições traduzidas: toda sentença mencionando um dos 18 tipos de
+  // dano real foi extraída (359 sentenças), filtrada por palavras-chave de
+  // dano (79 sobraram) e CADA UMA lida à mão contra o texto completo em PT e
+  // EN antes de virar entrada aqui - mesma disciplina de "nunca confiar em
+  // regex sozinho" já usada em Score-AbilityText (common.ps1).
+  // Escopo deliberadamente restrito ao que abilityTypeMod() modela (um
+  // multiplicador fixo por tipo de ataque recebido, no próprio portador).
+  // Ficou de fora, por não caber nesse modelo (não é erro/esquecimento):
+  //   - imunidade a status (veneno/queimadura/paralisia/sono) - não é dano
+  //     de golpe;
+  //   - dano de campo por turno tipo Toxic Spill/Funeral Pyre/Flame Coat
+  //     (afeta quem NÃO é de um tipo, todo turno - não é resposta a um
+  //     golpe recebido);
+  //   - redução plana contra TODO ataque (Shell Armor -20%, Multiscale
+  //     -50% com HP cheio) - não é por tipo, mecanismo diferente do que
+  //     seDamper já modela (que é só sobre golpes super efetivos);
+  //   - habilidades só ofensivas (aumentam o dano que o PRÓPRIO golpe
+  //     causa) - abilityTypeMod() é só sobre o lado defensivo;
+  //   - efeitos condicionados a clima/terreno (ex: Foggy Eye só sob
+  //     neblina) - mesma razão que o dashboard só olha pro PRÓXIMO chefão:
+  //     não dá pra assumir a condição ativa numa sugestão estática;
+  //   - mudança de tipo dinâmica no meio da batalha (Color Change, Protean)
+  //     - não modelável sem simular o turno.
+  // Ids batem com os índices de ABILITIES / dex_compact.json "abilities".
+  // Combos (ids que juntam 2+ habilidades, ex Aerialist = Levitate + Flock)
+  // ganham sua PRÓPRIA entrada aqui quando um componente relevante existe -
+  // abilityTypeMod() não decompõe o texto do combo em tempo real, então sem
+  // isso uma espécie com só o id do combo (não o id "puro" do componente)
+  // ficaria sem o efeito mesmo tendo a habilidade de verdade.
   var TYPE_MOD_ABILITIES = {
-    26:  { immune: ["Ground"] },                // Levitate
-    444: { immune: ["Water"] },                 // Evaporate
-    450: { immune: ["Ground"], healPct: 25 },   // Earth Eater
-    116: { seDamper: 0.65 },                    // Solid Rock: -35% on SE hits
-    318: { seDamper: 0.5 },                     // Primal Armor: -50% on SE hits
-    303: { resist: { Rock: 0.5 } }               // Fossilized: extra half dmg from Rock
+    26:  { immune: ["Ground"] },                          // Levitate
+    444: { immune: ["Water"] },                           // Evaporate
+    450: { immune: ["Ground"], healPct: 25 },             // Earth Eater
+    314: { immune: ["Rock"] },                             // Mountaineer
+    116: { seDamper: 0.65 },                               // Solid Rock: -35% em golpes SE
+    318: { seDamper: 0.5 },                                // Primal Armor: -50% em golpes SE
+    // Fossilized: "Reduz pela metade o dano recebido de golpes Rock" -
+    // RESISTE a Rock (0.5x = menos dano), não "dano extra" como um
+    // comentário antigo aqui dizia por engano (o valor sempre esteve
+    // certo, só o comentário estava invertido).
+    303: { resist: { Rock: 0.5 } },                        // Fossilized
+    17:  { resist: { Poison: 0.5 } },                      // Immunity
+    40:  { resist: { Water: 0.7, Ice: 0.7 } },              // Magma Armor
+    47:  { resist: { Fire: 0.5, Ice: 0.5 } },               // Thick Fat
+    85:  { resist: { Fire: 0.5 } },                         // Heatproof
+    134: { resist: { Ghost: 0.5, Dark: 0.5 } },             // Heavy Metal
+    195: { resist: { Water: 0.5 } },                        // Water Compaction
+    199: { resist: { Fire: 0.5 } },                         // Water Bubble
+    218: { resist: { Fire: 2 } },                           // Fluffy (FRAQUEZA a Fire, não resistência)
+    306: { resist: { Dark: 0.75, Fairy: 0.75 } },           // Nocturnal
+    311: { resist: { Water: 2 } },                          // Liquified (fraqueza a Water)
+    337: { resist: { Grass: 0.5 } },                        // Raw Wood
+    // Seaweed: texto diz "se for do tipo Grass" - verificado nos dados reais
+    // que TODOS os 8 portadores atuais (Tangela, Lotad/Lombre/Ludicolo,
+    // Lileep/Cradily, Tangrowth, Dhelmise) já são Grass, então a condição é
+    // sempre satisfeita na prática; sem gate condicional extra no código.
+    342: { resist: { Fire: 0.5 } },                         // Seaweed
+    442: { resist: { Fairy: 0.5 } },                        // Fae Hunter
+    445: { resist: { Grass: 0.5 } },                        // Lumberjack
+    526: { resist: { Dark: 0.5 } },                         // Monster Hunter
+    547: { resist: { Ghost: 0.5 } },                        // Purifying Salt
+    754: { resist: { Fire: 2 } },                           // Puffy (fraqueza a Fire)
+    764: { resist: { Fire: 0.5 } },                         // Deep Freeze
+    804: { resist: { Fire: 0.5 } },                         // Firefighter
+    889: { resist: { Fire: 0.25, Ice: 0.25 } },             // Thick Blubber
+    904: { resist: { Water: 0.5, Ground: 0.5 } },           // Strong Foundation
+    995: { resist: { Fire: 0.5, Electric: 0.5, Water: 0.5 } },      // Elemental Aegis
+    996: { resist: { Dark: 0.5, Ghost: 0.5, Psychic: 0.5 } },       // Aegis Ward
+    // Combos que embutem um componente já mapeado acima:
+    606: { immune: ["Ground"] },                           // Aerialist (Levitate + Flock)
+    688: { immune: ["Ground"] },                           // Imposing Wings (Giant Wings + Levitate)
+    664: { resist: { Fire: 0.5 } },                         // Flame Bubble (Water Bubble + Flaming Soul)
+    682: { resist: { Fire: 0.5 } },                         // Iron Giant (Heatproof + Juggernaut)
+    936: { resist: { Fire: 0.5, Ice: 0.5 } },               // Sumo Guard (Juggernaut + Thick Fat)
+    946: { resist: { Fire: 2 } },                           // Massive Pelt (Tangling Hair + Fluffy, fraqueza)
+    1010:{ resist: { Fire: 0.5 } },                         // Thermal Entropy (Thermal Exchange + Heatproof)
+    1015:{ resist: { Fire: 0.5 } }                          // Droideka (Heatproof + Shell Armor)
   };
 
   // Which of a species' abilities are safe to treat as ALWAYS active without
@@ -1699,7 +1773,11 @@
       var nm = (ABILITIES[id] && ABILITIES[id][0]) || "?";
       if (m.resist && m.resist[atk] !== undefined) {
         mult *= m.resist[atk];
-        reasons.push(nm + " (resistência extra)");
+        // "resist" guarda o multiplicador cru, que pode ser > 1 (ex:
+        // Fluffy causa FRAQUEZA a Fire, não resistência) - texto errado
+        // aqui seria pior que não mostrar nada, então o rótulo segue o
+        // valor real em vez de assumir sempre "resistência".
+        reasons.push(nm + (m.resist[atk] < 1 ? " (resistência extra)" : " (fraqueza extra)"));
       } else if (m.seDamper && raw > 1) {
         mult *= m.seDamper;
         reasons.push(nm + " (amortece dano super efetivo)");
