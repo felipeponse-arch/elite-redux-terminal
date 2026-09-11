@@ -457,6 +457,11 @@
   }
   .abi-kind.choosable { background: color-mix(in srgb, var(--accent-2) 22%, transparent); color: var(--accent-2); }
   .abi-kind.innate { background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--accent); }
+  /* Sinergia real habilidade x movepool (Fase 3 já calculava isso, só não
+     mostrava na Dex - pedido do usuário, 2026-09-11). --accent-2 (não
+     --accent, que já marca a innate acima) pra não competir visualmente com
+     o rótulo escolhível/innate no mesmo card. */
+  .abi-synergy { font-size: 11.5px; color: var(--accent-2); font-weight: 600; margin-top: 6px; }
 
   .evo-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .evo-node { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
@@ -959,9 +964,19 @@
   .cov-table th, .cov-table td { padding: 6px 7px; text-align: center; border-bottom: 1px solid var(--border); }
   .cov-table th.rowhead, .cov-table td.rowhead { text-align: left; font-weight: 600; }
   .cov-cell { border-radius: 5px; padding: 3px 0; font-weight: 700; font-family: "IBM Plex Mono", monospace; }
-  .cov-weak { background: color-mix(in srgb, var(--sem-weak) 24%, transparent); color: var(--sem-weak); }
-  .cov-resist { background: color-mix(in srgb, var(--sem-resist) 22%, transparent); color: var(--sem-resist); }
-  .cov-immune { background: color-mix(in srgb, var(--sem-immune) 26%, transparent); color: var(--sem-immune); }
+  /* Fundo sólido + texto --accent-ink, 2026-09-11 - pass dedicado prometido
+     desde a auditoria de contraste dos badges de rank (2026-09-09): mesmo
+     problema, texto tintado sobre fundo translúcido nunca clareia o
+     suficiente (a cor já falha 4.5:1 mesmo contra branco puro - um tint só
+     piora). Reaproveita exatamente os mesmos tokens já medidos/aprovados
+     pro rank-badge: --sem-weak e --sem-immune já eram seguros como fundo
+     sólido sem precisar escurecer (usados direto em .rank-badge.tier-D/
+     tier-SS); só --sem-resist precisava do --badge-resist ~10% mais escuro.
+     Medido de novo aqui (não só por analogia): pior caso 4.65:1 nos dois
+     temas - clareia a mesma margem que o rank-badge já tinha. */
+  .cov-weak { background: var(--sem-weak); color: var(--accent-ink); }
+  .cov-resist { background: var(--badge-resist); color: var(--accent-ink); }
+  .cov-immune { background: var(--sem-immune); color: var(--accent-ink); }
   .cov-neutral { color: var(--text-dim); }
 
   /* Species rank badge. Originally used the same translucent-tint pattern as
@@ -977,11 +992,9 @@
      --accent-ink text, the same computed-contrast approach typePill()
      already uses for type colors. Verified: every tier now clears 4.5:1 in
      both themes (worst case 4.65:1, light mode A-tier).
-     NOTE: .cov-weak/.cov-resist/.cov-immune above have this SAME underlying
-     problem (same tint percentages) and were NOT touched in this pass -
-     they're used in more places (the type matrix, team coverage table) and
-     deserve their own dedicated pass rather than a rushed fix bundled into
-     this one. Flagged, not fixed yet. */
+     NOTE: .cov-weak/.cov-resist/.cov-immune above had this SAME underlying
+     problem - fixed 2026-09-11 in their own dedicated pass, same approach,
+     see the comment right above their rule. */
   .rank-badge {
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 20px; height: 17px; padding: 0 4px; border-radius: 5px;
@@ -2871,13 +2884,29 @@
     }
     return out;
   }
-  function abilityCard(id, kindLabel, kindClass) {
+  // synergyHits (2026-09-11, pedido do usuário: sinergia habilidade x
+  // movepool visível na Dex, não só como ferramenta de IA - Fase 3 já
+  // calculava isso, só não mostrava) - lista de ABILITY_SYNERGY[sp.sname]
+  // (pode ser undefined/vazia). Mostra a nota SÓ quando existe combo real
+  // confirmado (id bate E a espécie tem golpe de verdade da categoria/tipo
+  // certo) - nunca uma associação genérica "esta habilidade é boa".
+  function abilityCard(id, kindLabel, kindClass, synergyHits) {
     var a = ABILITIES[id];
     if (!a) return "";
     var desc = ABILITY_PT[String(id)] || a[1];
+    var synergyHtml = "";
+    var hits = synergyHits || [];
+    for (var i = 0; i < hits.length; i++) {
+      if (hits[i].id !== id) continue;
+      var golpes = hits[i].golpes || [];
+      var golpesText = golpes.length <= 3 ? golpes.join(", ") : golpes.slice(0, 3).join(", ") + " e mais " + (golpes.length - 3);
+      synergyHtml = '<div class="abi-synergy" title="Combo real confirmado: esta espécie tem golpe verdadeiro da categoria ' + escapeHtml(hits[i].categoria) + '">' +
+        '&#9889; Combo real: potencializa ' + escapeHtml(golpesText) + '</div>';
+      break;
+    }
     return '<div class="abi-card"><span class="abi-kind ' + kindClass + '">' + kindLabel + '</span>' +
       '<div class="abi-name">' + escapeHtml(a[0]) + '</div>' +
-      '<div class="abi-desc">' + escapeHtml(desc) + '</div></div>';
+      '<div class="abi-desc">' + escapeHtml(desc) + '</div>' + synergyHtml + '</div>';
   }
 
   function evoConditionText(ev) {
@@ -3040,6 +3069,33 @@
     return verb + ": " + locText + ".";
   }
 
+  // "Onde encontrar" (2026-09-11, feature nova pedida pelo usuário) - dado
+  // real de captura selvagem comum (data.locations.maps, 176 mapas, 3114
+  // combinações espécie/mapa/método reais), achado na varredura completa do
+  // jogo mas nunca extraído até agora - complementa howToObtainText() acima
+  // (que só cobre SEnc: iniciais/lendários/presentes de NPC). As duas coisas
+  // são fatos DIFERENTES e podem coexistir pra uma mesma espécie (ex: uma
+  // espécie comum que também é dada de presente em algum ponto do jogo), por
+  // isso são duas linhas independentes, não uma substitui a outra. Mesma
+  // decisão de simplicidade de howToObtainText(): dedup só por MAPA (não
+  // por método - terra/água/pesca/etc - nem por faixa de nível), porque o
+  // que importa pro jogador é ONDE ir, não o mecanismo exato.
+  function whereToFindText(sp) {
+    var wenc = sp.wenc;
+    if (!wenc || !wenc.length) return "";
+    var seenMap = {};
+    var mapNames = [];
+    wenc.forEach(function (mapIdx) {
+      var mapName = MAPS[mapIdx];
+      if (mapName && !seenMap[mapName]) { seenMap[mapName] = true; mapNames.push(mapName); }
+    });
+    if (!mapNames.length) return "";
+    var locText = mapNames.length <= 3
+      ? mapNames.join(", ")
+      : mapNames.slice(0, 3).join(", ") + " e mais " + (mapNames.length - 3) + " " + (mapNames.length - 3 === 1 ? "local" : "locais");
+    return "Encontro selvagem em: " + locText + ".";
+  }
+
   function rankInfoLineHtml(sp) {
     var r = SPECIES_RANK[sp.sname];
     if (!r) return "";
@@ -3100,8 +3156,9 @@
         '<div class="stat-bar-track"><div class="stat-bar-fill ' + statTier(v) + '" style="width:' + statPct(v) + '%"></div></div></div>';
     }).join("");
 
-    var abiHtml = uniqueIds(sp.ab).map(function (id) { return abilityCard(id, "Escolhível", "choosable"); }).join("");
-    var innHtml = sp.inn.map(function (id) { return abilityCard(id, "Innate", "innate"); }).join("");
+    var synergyHits = ABILITY_SYNERGY[sp.sname];
+    var abiHtml = uniqueIds(sp.ab).map(function (id) { return abilityCard(id, "Escolhível", "choosable", synergyHits); }).join("");
+    var innHtml = sp.inn.map(function (id) { return abilityCard(id, "Innate", "innate", synergyHits); }).join("");
 
     var evoHtml = "";
     if (sp.ev.length) {
@@ -3147,6 +3204,7 @@
       rankInfoLineHtml(sp) +
       (sp.d ? '<p class="flavor">' + escapeHtml(sp.d) + '</p>' : "") +
       (function () { var t = howToObtainText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })() +
+      (function () { var t = whereToFindText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })() +
       // Reorganização em blocos colapsáveis, Fase 2 - 2026-09-11 (reunião:
       // "a tela do Poke na dex tá meio pesada de informação"). <details>
       // nativo em vez de JS customizado - foco/teclado/leitor de tela vêm de

@@ -285,6 +285,42 @@ async function runLiveTests() {
   setSearch("");
   await wait(120);
 
+  // --- 5d. "onde encontrar" (RF42, 2026-09-11) + sinergia habilidade x
+  // movepool visível na Dex (RF41, mesmo dia). Magikarp é a fixture real
+  // certa pro "onde encontrar": tem AMBOS os tipos de dado real ao mesmo
+  // tempo (SEnc - presente/fisgada especial - E encontro selvagem comum em
+  // várias rotas), confirmando que as duas frases coexistem em vez de uma
+  // suprimir a outra. Nidoking é a fixture já conhecida da Fase 3 (Mighty
+  // Horn + golpes de chifre reais) pra confirmar que a MESMA sinergia que a
+  // ferramenta de IA já usava agora também aparece no card da habilidade.
+  setSearch("Magikarp");
+  await wait(120);
+  const magikarpRow = document.querySelector("#species-list .species-row");
+  if (magikarpRow) {
+    magikarpRow.click();
+    await wait(30);
+    const hints = [...document.querySelectorAll(".obtain-hint")].map(function (p) { return p.textContent; });
+    check("'como conseguir' (SEnc) e 'onde encontrar' (encontro selvagem) coexistem, cada um sua própria frase",
+      hints.length === 2 && hints[0].indexOf("Presente") === 0 && hints[1].indexOf("Encontro selvagem em:") === 0,
+      hints);
+  } else { check("Magikarp encontrado pro teste de 'onde encontrar'", false); }
+  setSearch("");
+  await wait(120);
+
+  setSearch("Nidoking");
+  await wait(120);
+  const nidokingRow = document.querySelector("#species-list .species-row");
+  if (nidokingRow) {
+    nidokingRow.click();
+    await wait(30);
+    const synergyNotes = [...document.querySelectorAll(".abi-synergy")].map(function (d) { return d.textContent; });
+    check("sinergia real habilidade x movepool (Mighty Horn) aparece no card da habilidade na Dex",
+      synergyNotes.length > 0 && synergyNotes[0].indexOf("Combo real") !== -1 && synergyNotes[0].indexOf("Megahorn") !== -1,
+      synergyNotes);
+  } else { check("Nidoking encontrado pro teste de sinergia visível na Dex", false); }
+  setSearch("");
+  await wait(120);
+
   // --- 6. build-reference card has a real title (not a bare <details>) ---
   const buildCard = [...document.querySelectorAll("#species-detail .card h3")]
     .find(h => h.textContent === "Builds de referência");

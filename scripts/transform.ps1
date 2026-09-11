@@ -10,6 +10,32 @@ $ser = New-GameDataParser
 $json = Get-Content $srcPath -Raw -Encoding UTF8
 $data = $ser.DeserializeObject($json)
 
+# --- mapas de encontro selvagem por especie (locations.maps), 2026-09-11 ---
+# Achado na varredura completa do jogo (2026-09-11): $data.locations.maps
+# (176 mapas com dado de encontro selvagem real) nunca tinha sido puxado pro
+# pipeline - "onde encontrar" na Dex so cobria SEnc (encontros roteirizados:
+# iniciais, lendarios, presentes de NPC), nunca captura selvagem comum.
+# Cada mapa tem ate 6 metodos (land/water/fish/rock/hidden/honey), cada um
+# uma lista de [nivelMin, nivelMax, especieIdx]. Aqui so guarda MAPA (nao
+# metodo nem faixa de nivel - "onde", nao "como exatamente") por especie,
+# dedup - o mesmo padrao de simplicidade ja usado pro SEnc (howToObtainText).
+$wildMapsBySpecies = @{}
+$wildMethods = @("land", "water", "fish", "rock", "hidden", "honey")
+foreach ($lm in @($data.locations.maps)) {
+    if (-not $lm) { continue }
+    $mapId = $lm["id"]
+    if ($mapId -eq $null) { continue }
+    foreach ($method in $wildMethods) {
+        if (-not $lm.ContainsKey($method)) { continue }
+        foreach ($e in @($lm[$method])) {
+            if (-not $e -or @($e).Count -lt 3) { continue }
+            $spIdx = [int]$e[2]
+            if (-not $wildMapsBySpecies.ContainsKey($spIdx)) { $wildMapsBySpecies[$spIdx] = New-Object System.Collections.ArrayList }
+            if (-not $wildMapsBySpecies[$spIdx].Contains($mapId)) { [void]$wildMapsBySpecies[$spIdx].Add($mapId) }
+        }
+    }
+}
+
 # --- abilities lookup (array indexed by id) ---
 $abilitiesOut = New-Object System.Collections.ArrayList
 foreach ($a in $data.abilities) {
@@ -118,6 +144,7 @@ for ($idx = 0; $idx -lt $data.species.Count; $idx++) {
         d = $desc
         hw = $hw
         senc = $senc.ToArray()
+        wenc = if ($wildMapsBySpecies.ContainsKey($idx)) { $wildMapsBySpecies[$idx].ToArray() } else { @() }
     }
     [void]$speciesOut.Add($entry)
 }

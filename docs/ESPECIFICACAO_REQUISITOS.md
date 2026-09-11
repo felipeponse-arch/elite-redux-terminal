@@ -124,6 +124,17 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   "golpes de soco", "mordida/presa", "golpes cortantes" — Punch/Bite/Slicing não existem em `flagsT`
   aqui) ficam de fora da verificação e são reportadas como tal, nunca tratadas como combo confirmado
   por falta de dado pra verificar.
+- RF41 — A mesma sinergia habilidade x movepool (RF40) deve aparecer visível na ficha da espécie na
+  Dex, não só como contexto da geração de build por IA: cada card de habilidade (escolhível ou innate)
+  com combo real confirmado mostra os golpes reais que se beneficiam, direto ao lado da descrição.
+
+### 1.11 "Onde encontrar" — captura selvagem comum (2026-09-11)
+- RF42 — Quando a espécie tiver pelo menos um encontro selvagem comum real (`locations.maps` do dado
+  bruto — terra/água/pesca/rocha/oculto/árvore de mel, por mapa), o Terminal deve exibir na ficha da
+  espécie uma frase curta com os mapas onde ela pode ser encontrada, priorizando os 3 primeiros mapas
+  distintos e indicando quantos outros locais existem além desses. Esta informação é independente do
+  "como conseguir" (RF38, baseado em `SEnc` — encontros roteirizados) e as duas frases coexistem
+  quando a espécie tiver ambos os tipos de dado real.
 
 ## 2. Requisitos não funcionais
 
