@@ -329,14 +329,129 @@ async function runLiveTests() {
   check("no crash rendering species detail with/without build-reference card", true);
 
   // --- 7. team coverage table sits in a titled .card (not a bare <h3>) ---
+  // 3 cards desde a Fase 2 do "leitor de caixa" (2026-09-11): Riscos
+  // compartilhados + Cobertura defensiva (originais) + Leitura estratégica
+  // (nova, card de IA sob demanda).
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(50);
   const analysisCards = document.querySelectorAll("#team-analysis .card");
-  check("team-analysis renders inside .card elements (not bare <h3>)", analysisCards.length === 2, "found " + analysisCards.length);
+  check("team-analysis renders inside .card elements (not bare <h3>)", analysisCards.length === 3, "found " + analysisCards.length);
   const scrollX = document.querySelector("#team-analysis .scroll-x");
   if (scrollX) {
     const cs = getComputedStyle(scrollX);
     check("coverage table has a scroll mask", !!(cs.maskImage && cs.maskImage !== "none") || !!(cs.webkitMaskImage && cs.webkitMaskImage !== "none"));
+  }
+
+  // --- 7b. "leitor de caixa" (reunião 2026-09-11) - Fase 1 (dashboard) +
+  // Fase 2 (análise de time por IA) + Fase 3 (ferramenta unificada). Não
+  // dá pra chamar bestBoxCandidateForBoss()/BOSSES direto daqui (fecham
+  // dentro da IIFE do app, o teste só enxerga o DOM) - as checagens abaixo
+  // são estruturais: se uma sugestão aparecer, ela precisa ser
+  // autoconsistente com o que já está renderizado em outro lugar da tela
+  // (o nome sugerido é mesmo um membro real da caixa), não um valor
+  // hardcoded que quebraria se o balanceamento do jogo mudar.
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  document.getElementById("tabs-more-toggle").click();
+  await wait(20);
+  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  await wait(50);
+  const milestoneSelBefore = document.getElementById("settings-milestone").value;
+  document.getElementById("settings-milestone").value = "1"; // muitos chefões ainda faltam
+  document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));
+  await wait(50);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(50);
+  // Classe própria (.dash-suggestion-boss), não :last-child nem substring -
+  // achado real ao rodar isto pela primeira vez: a sugestão por RANK que já
+  // existia (dash-suggestion "normal") também tem "na caixa" no texto,
+  // então :last-child + indexOf("na caixa") colidia com ela quando a
+  // sugestão de chefão não renderiza (falso positivo pra classe errada).
+  const nextFightLine = document.querySelector("#dashboard .dash-suggestion-boss .dash-value");
+  const nextFightText = nextFightLine ? nextFightLine.textContent : "";
+  if (nextFightLine) {
+    check("linha 'Próxima luta' do dashboard (Fase 1) tem o formato esperado (chefão: espécie na caixa + motivo)",
+      /.+: .+ na caixa (imune a|resiste bem a) .+/.test(nextFightText), nextFightText);
+    // confirma que a espécie sugerida é mesmo um membro REAL da caixa agora
+    // (não do time, não inventado) - cruza com a aba Caixa renderizada
+    const suggestedName = nextFightLine.querySelector(".goto-species") ? nextFightLine.querySelector(".goto-species").textContent : "";
+    document.querySelector('.tab-btn[data-tab="box"]').click();
+    await wait(50);
+    const boxNames = [...document.querySelectorAll(".box-chip .bc-name-wrap span:last-child")].map(function (s) { return s.textContent; });
+    check("a espécie sugerida na Fase 1 é mesmo um membro real da caixa (não inventado, não do time)",
+      suggestedName && boxNames.indexOf(suggestedName) !== -1, { suggestedName: suggestedName, boxNames: boxNames });
+    document.querySelector('.tab-btn[data-tab="dex"]').click();
+    await wait(30);
+  } else {
+    // Nenhuma sugestão é um resultado válido (a caixa pode genuinamente não
+    // ter nada mais seguro que o time já tem) - só registra, não falha.
+    check("dashboard sem sugestão de 'próxima luta' é um resultado aceito (caixa sem candidato melhor)", true);
+  }
+  // restaura o milestone "sem limite" que o resto da suíte inteira depende
+  document.getElementById("tabs-more-toggle").click();
+  await wait(20);
+  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  await wait(50);
+  document.getElementById("settings-milestone").value = milestoneSelBefore;
+  document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));
+  await wait(50);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
+  // Fase 2 - "Analisar meu time": mesmo padrão de mock de window.claude já
+  // usado pra "Gerar build com IA", mas aqui sample() é chamado direto
+  // (devolve {text}), não sample.json() - contrato diferente pro mesmo
+  // capability, conforme sample.d.ts.
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  const strategyBtn = document.getElementById("team-strategy-generate");
+  if (strategyBtn) {
+    window.__strategyToolCalls = [];
+    const mockText = "Leitura de teste automatizado: time equilibrado, entra com o mais rápido primeiro.";
+    window.claude = {
+      use: async function (name) {
+        if (name !== "sample") return null;
+        var fn = async function (prompt, opts) {
+          window.__strategyLastPrompt = prompt;
+          if (opts && Array.isArray(opts.tools)) {
+            var teamSnames = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").team || [];
+            for (const t of opts.tools) {
+              if (t.inputSchema) {
+                for (const sname of teamSnames) {
+                  const result = await t.execute({ sname: sname });
+                  window.__strategyToolCalls.push({ name: t.name, sname: sname, result: result });
+                }
+              } else {
+                const result = await t.execute({});
+                window.__strategyToolCalls.push({ name: t.name, result: result });
+              }
+            }
+          }
+          return { text: mockText, truncated: false };
+        };
+        return fn;
+      }
+    };
+    strategyBtn.click();
+    await wait(100);
+    check("'Analisar meu time' chamou getTeamWeaknesses de verdade (não simulado por fora)",
+      window.__strategyToolCalls.some(function (c) { return c.name === "getTeamWeaknesses" && typeof c.result.teamSize === "number"; }));
+    check("'Analisar meu time' chamou getSpeciesRank/getPriorityMoveOptions/getAbilityMovepoolSynergy pra CADA membro do time (Fase 2)",
+      ["getSpeciesRank", "getPriorityMoveOptions", "getAbilityMovepoolSynergy"].every(function (name) {
+        return window.__strategyToolCalls.filter(function (c) { return c.name === name; }).length === 6;
+      }), window.__strategyToolCalls.map(function (c) { return c.name; }));
+    // Fase 3 - a MESMA ferramenta unificada de sugestão de caixa também
+    // chamada aqui, não só na geração de build
+    check("'Analisar meu time' também chamou getBoxCandidatesForBoss (Fase 3, ferramenta unificada)",
+      window.__strategyToolCalls.some(function (c) { return c.name === "getBoxCandidatesForBoss"; }));
+    const rationaleBlock = document.querySelector("#team-analysis .mybuild-rationale");
+    check("a leitura estratégica (mock) aparece em destaque na tela",
+      rationaleBlock && rationaleBlock.textContent.indexOf(mockText) !== -1);
+    check("o botão vira 'Analisar de novo' depois de uma leitura já existir",
+      document.getElementById("team-strategy-generate") && document.getElementById("team-strategy-generate").textContent.indexOf("de novo") !== -1);
+    delete window.claude;
+  } else {
+    check("botão 'Analisar meu time' encontrado", false);
   }
 
   // --- 8. "Mais" dropdown (Progresso/Tipos) - design proposal A, 2026-09-09 ---

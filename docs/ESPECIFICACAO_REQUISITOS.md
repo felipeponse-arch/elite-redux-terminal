@@ -136,6 +136,26 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   "como conseguir" (RF38, baseado em `SEnc` — encontros roteirizados) e as duas frases coexistem
   quando a espécie tiver ambos os tipos de dado real.
 
+### 1.12 Leitor de caixa para a próxima luta (2026-09-11)
+- RF43 — O Terminal deve identificar a próxima luta de progressão que falta (líder de ginásio, Alto
+  Comando ou Campeão, a partir do `milestone` já configurado em Progresso) e, quando a caixa tiver um
+  Pokémon genuinamente mais seguro contra o movepool real do time desse chefão do que o melhor
+  Pokémon já presente no time, exibir uma sugestão de troca em uma única linha no resumo do topo da
+  Dex — nunca uma tela nova, nunca uma sugestão por cada um dos chefões restantes.
+- RN11 — A sugestão de troca (RF43) é calculada SOMENTE em relação à próxima luta que falta, nunca
+  projetando risco de lutas futuras além dela — decisão explícita do usuário ("a sugestão do time é
+  sempre pensando no Boss seguinte e não no que pode acontecer antes dele"). O critério de segurança é
+  determinístico (tipos de ataque reais do movepool do chefão vs. multiplicador defensivo real do
+  candidato, incluindo habilidades já verificadas) — nunca simula dano nem uma batalha completa.
+- RF44 — O Terminal deve permitir gerar, sob demanda (nunca automaticamente), uma leitura estratégica
+  por IA para o time atual de até 6 Pokémon — papel de cada membro, ordem de entrada sugerida e o que
+  fazer se o membro mais fraco cair — reaproveitando as mesmas ferramentas reais (rank, papel,
+  sinergia, golpe de prioridade, chefões restantes) já usadas na geração de build por IA. A leitura só
+  é recalculada quando a composição do time muda; até lá, o resultado já gerado é reaproveitado.
+- RF45 — A ferramenta determinística de sugestão de troca (RF43) deve estar disponível tanto para a
+  geração de build por IA (RF21-30) quanto para a leitura estratégica de time (RF44), como a mesma
+  fonte de verdade — nunca duas implementações que possam divergir.
+
 ## 2. Requisitos não funcionais
 
 - RNF01 — **Portabilidade**: o Terminal deve funcionar como um único arquivo HTML autocontido (Claude

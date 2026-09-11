@@ -4044,6 +4044,26 @@
     };
   }
 
+  // Fase 3 do "leitor de caixa" (reunião 2026-09-11) - unifica a mesma
+  // sugestão determinística que já aparece no dashboard (Fase 1) como
+  // ferramenta de IA, pra que geração de build e análise de time possam
+  // recomendar a mesma troca sem recalcular nada por fora. SÓ a próxima
+  // luta que falta (trava do usuário) - nunca o jogo inteiro daqui pra
+  // frente.
+  function aiTool_getBoxCandidatesForBoss() {
+    var nextBoss = getRemainingBossEntries()[0];
+    if (!nextBoss) return { nextBossName: null, suggestion: null };
+    var suggestion = bestBoxCandidateForBoss(nextBoss);
+    return {
+      nextBossName: nextBoss.name,
+      suggestion: suggestion ? {
+        sname: suggestion.sp.sname,
+        name: suggestion.sp.n,
+        motivo: (suggestion.reasonMult === 0 ? "imune a " : "resiste bem a ") + suggestion.reasonType
+      } : null
+    };
+  }
+
   // "Gerar build com IA" - 2026-09-09, user's own rule: check for a saved
   // build first (that's the normal render path, already handled by
   // myBuildEditorHtml/effectiveBuild); when there's room for another (cap
@@ -4106,6 +4126,9 @@
       "um desses golpes reais entre os 4 escolhidos e escolha a habilidade que ativa a sinergia, em vez " +
       "de um set generico que ignora esse potencial. Lista vazia = nenhuma sinergia real confirmada, " +
       "escolha normalmente.\n" +
+      "Use tambem getBoxCandidatesForBoss - se ela sugerir ESTA MESMA especie como o melhor candidato da " +
+      "caixa pra proxima luta que falta, pode citar isso na rationale (ex: 'bom encaixe pra proxima luta, " +
+      "contra X'), mas so se for esta especie mesmo, senao ignore.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
       '{"ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"rationale":"..."}' +
       ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
@@ -4142,6 +4165,11 @@
             description: "Retorna, pro sname informado, quais habilidades (escolhivel ou innate) desta especie realmente aumentam o poder de uma categoria de golpe ou tipo E a especie de fato aprende (nivel ou tutor) pelo menos um golpe real dessa categoria - com os nomes dos golpes reais que se beneficiam. Lista vazia = nenhuma sinergia confirmada pro movepool real desta especie.",
             inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
             execute: function (input) { return aiTool_getAbilityMovepoolSynergy(input); }
+          },
+          {
+            name: "getBoxCandidatesForBoss",
+            description: "Retorna o nome da proxima luta que falta (a partir do progresso atual do jogador) e, se existir, uma sugestao real de troca da caixa pra essa luta especifica (nunca alem dela), ja calculada pelo app.",
+            execute: function () { return aiTool_getBoxCandidatesForBoss(); }
           }
         ]
       });
@@ -4671,6 +4699,74 @@
       .sort(function (a, b) { return b.n - a.n; });
   }
 
+  // Leitor de caixa pra próxima luta (Fase 1, reunião 2026-09-11) - trava
+  // explícita do usuário: pensa SÓ na próxima luta que falta, nunca no jogo
+  // inteiro daqui pra frente. Resolve os tipos de ataque reais do chefão a
+  // partir do movepool real do time dele (bosses.json), no mesmo tier que
+  // o resto do app já usa pra essa dificuldade (DIFF_TO_BOSSKEY, igual
+  // selectBoss()). Golpes de status não contam - não causam dano de tipo.
+  function computeBossAttackTypes(boss) {
+    var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
+    var party = (boss[tier] && boss[tier].length) ? boss[tier] : boss.party;
+    var types = {};
+    (party || []).forEach(function (m) {
+      (m.mv || []).forEach(function (moveName) {
+        var mv = MOVE_BY_NAME[moveName];
+        if (!mv) return;
+        if ((DATA.splits[mv[2]] || "") === "Status") return;
+        types[TYPES[mv[1]]] = true;
+      });
+    });
+    return Object.keys(types);
+  }
+
+  // Score simples e explicável (mesmo espírito de computeSharedRisks() -
+  // contagem, não simulação de batalha): quantos dos tipos de ataque reais
+  // do chefão o candidato resiste/é imune, menos quantos ele é fraco.
+  // Nunca sugere uma troca lateral ou pior - só quando a caixa tem alguém
+  // genuinamente mais seguro que o melhor que já está no time.
+  function bossSafetyScore(sp, atkTypes) {
+    var score = 0;
+    atkTypes.forEach(function (t) {
+      var mult = abilityTypeMod(t, sp).mult;
+      if (mult === 0) score -= 2;
+      else if (mult < 1) score -= 1;
+      else if (mult >= 2) score += 1;
+    });
+    return score;
+  }
+  function bestBoxCandidateForBoss(boss) {
+    var atkTypes = computeBossAttackTypes(boss);
+    if (!atkTypes.length) return null;
+    var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
+    var boxMembers = state.box.map(getSpeciesByX).filter(Boolean);
+    if (!teamMembers.length || !boxMembers.length) return null;
+
+    var teamBestScore = null;
+    teamMembers.forEach(function (sp) {
+      var s = bossSafetyScore(sp, atkTypes);
+      if (teamBestScore === null || s < teamBestScore) teamBestScore = s;
+    });
+
+    var boxBest = null;
+    boxMembers.forEach(function (sp) {
+      var s = bossSafetyScore(sp, atkTypes);
+      var r = SPECIES_RANK[sp.sname];
+      var rankScore = r ? r.score : 0;
+      if (!boxBest || s < boxBest.score || (s === boxBest.score && rankScore > boxBest.rankScore)) {
+        boxBest = { sp: sp, score: s, rankScore: rankScore };
+      }
+    });
+    if (!boxBest || boxBest.score >= teamBestScore) return null;
+
+    var reason = null;
+    atkTypes.forEach(function (t) {
+      var mult = abilityTypeMod(t, boxBest.sp).mult;
+      if (!reason || mult < reason.mult) reason = { t: t, mult: mult };
+    });
+    return { sp: boxBest.sp, reasonType: reason.t, reasonMult: reason.mult };
+  }
+
   // Dashboard summary at the top of the Dex - design proposal B, 2026-09-09.
   // Deliberately reuses computeSharedRisks() (also used by the full team
   // analysis table) rather than a separate calculation, so this can't
@@ -4712,7 +4808,104 @@
       }
     }
 
+    // Fase 1 do "leitor de caixa" (reunião 2026-09-11) - SÓ a próxima luta
+    // que falta, nunca o jogo inteiro (trava explícita do usuário). Uma
+    // linha a mais no MESMO card, não uma tela nova - herda o
+    // esconde-sozinho no celular que o dashboard já tinha.
+    var nextBoss = getRemainingBossEntries()[0];
+    if (nextBoss) {
+      var boxSuggestion = bestBoxCandidateForBoss(nextBoss);
+      if (boxSuggestion) {
+        var reasonText = boxSuggestion.reasonMult === 0 ? "imune a " + boxSuggestion.reasonType : "resiste bem a " + boxSuggestion.reasonType;
+        items += '<div class="dash-item dash-suggestion dash-suggestion-boss"><span class="dash-label">Próxima luta</span><span class="dash-value">' +
+          escapeHtml(nextBoss.name) + ': <span class="goto-species" data-x="' + boxSuggestion.sp.x + '">' + escapeHtml(boxSuggestion.sp.n) + '</span> na caixa ' + reasonText + '</span></div>';
+      }
+    }
+
     el.innerHTML = '<div class="dashboard-card">' + items + '</div>';
+  }
+
+  // Fase 2 do "leitor de caixa"/análise de time (reunião 2026-09-11) -
+  // cache efêmero, de propósito NÃO persistido em localStorage/state: é uma
+  // leitura descartável desta sessão, não um dado curado como builds.json.
+  // forTeamKey invalida sozinho quando o time muda (não mostra uma leitura
+  // velha pra um time diferente do que foi analisado).
+  var teamAnalysisReport = null;
+  function teamKeyFor(members) {
+    return members.map(function (sp) { return sp.sname; }).sort().join(",");
+  }
+  async function generateTeamStrategy(members) {
+    var statusEl = document.getElementById("team-strategy-status");
+    if (statusEl) statusEl.textContent = "Consultando o Claude...";
+    if (typeof claude === "undefined" || !claude.use) {
+      if (statusEl) statusEl.textContent = "Geração por IA não disponível neste ambiente.";
+      return;
+    }
+    var sample = await claude.use("sample");
+    if (!sample) {
+      if (statusEl) statusEl.textContent = "Geração por IA não disponível (recurso não concedido).";
+      return;
+    }
+    var teamList = members.map(function (sp) { return sp.n + " (" + speciesTypeNames(sp).join("/") + ", sname " + sp.sname + ")"; }).join("; ");
+    var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon), formato 1x1, " +
+      "build " + (DATA.meta ? DATA.meta.version : "?") + ".\n" +
+      "Time atual do jogador (6 no maximo): " + teamList + ".\n" +
+      "Antes de responder, use getTeamWeaknesses pra ver as fraquezas compartilhadas reais deste time, e " +
+      "use getSpeciesRank, getPriorityMoveOptions e getAbilityMovepoolSynergy PRA CADA UM dos membros " +
+      "(um sname por vez) pra saber o papel real (Pivo/Tanque/Wallbreaker/Sweeper), velocidade relativa, " +
+      "golpe de prioridade real e sinergia habilidade x movepool real de cada um - nunca chute isso de " +
+      "memoria. Use tambem getRemainingBosses pra saber o que falta a partir do progresso atual.\n" +
+      "Responda em texto corrido, portugues, no maximo 6 frases curtas: qual papel cada membro cumpre no " +
+      "time (nao precisa de 1 frase por Pokemon se varios cumprem papel parecido), qual costuma entrar " +
+      "primeiro numa luta dificil e por que, e o que fazer se o membro mais fraco do time cair. Nao invente " +
+      "golpe/habilidade/item fora do que as ferramentas confirmarem - se nao tiver certeza de algo, diga " +
+      "isso em vez de arriscar. Use tambem getBoxCandidatesForBoss - se ela devolver uma sugestao real de " +
+      "troca da caixa pra proxima luta que falta, mencione isso como parte da leitura (ex: 'pra proxima " +
+      "luta, considere trocar X pela caixa'). So a proxima luta - nao tente planejar alem dela. Sem " +
+      "markdown, sem lista, so o texto corrido.";
+    try {
+      var res = await sample(prompt, {
+        tools: [
+          {
+            name: "getTeamWeaknesses",
+            description: "Retorna o tamanho do time atual do jogador e quais tipos derrubam 2 ou mais membros ao mesmo tempo (fraqueza compartilhada real, ja calculada pelo app).",
+            execute: function () { return aiTool_getTeamWeaknesses(); }
+          },
+          {
+            name: "getBoxCandidatesForBoss",
+            description: "Retorna o nome da proxima luta que falta (a partir do progresso atual do jogador) e, se existir, uma sugestao real de troca da caixa pra essa luta especifica (nunca alem dela), ja calculada pelo app (tipos de ataque reais do chefao x defesa real do candidato).",
+            execute: function () { return aiTool_getBoxCandidatesForBoss(); }
+          },
+          {
+            name: "getSpeciesRank",
+            description: "Retorna o tier (SS/S/A/B/C/D) e a pontuacao real deste hack pra uma especie, dado o sname interno, mais o(s) papel(is) ja calculado(s) (Pivo/Tanque/Wallbreaker/Sweeper) e a divisao fisico/especial/misto do ataque.",
+            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
+            execute: function (input) { return aiTool_getSpeciesRank(input); }
+          },
+          {
+            name: "getRemainingBosses",
+            description: "Retorna os nomes dos lideres de ginasio/Alto Comando/Campeao que o jogador AINDA NAO enfrentou a partir do progresso atual dele, mais os tipos mais comuns nos times deles.",
+            execute: function () { return aiTool_getRemainingBosses(); }
+          },
+          {
+            name: "getPriorityMoveOptions",
+            description: "Retorna os golpes de prioridade (prio > 0) que esta especie realmente aprende (nivel ou tutor), com nome/poder/prioridade reais. Lista vazia = esta especie nao tem golpe de prioridade viavel.",
+            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
+            execute: function (input) { return aiTool_getPriorityMoveOptions(input); }
+          },
+          {
+            name: "getAbilityMovepoolSynergy",
+            description: "Retorna, pro sname informado, quais habilidades (escolhivel ou innate) desta especie realmente aumentam o poder de uma categoria de golpe ou tipo E a especie de fato aprende pelo menos um golpe real dessa categoria - com os nomes dos golpes reais que se beneficiam.",
+            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
+            execute: function (input) { return aiTool_getAbilityMovepoolSynergy(input); }
+          }
+        ]
+      });
+      teamAnalysisReport = { text: (res && res.text || "").trim(), forTeamKey: teamKeyFor(members) };
+      renderTeamAnalysis(members);
+    } catch (e) {
+      if (statusEl) statusEl.textContent = sampleErrorMessage(e);
+    }
   }
 
   function renderTeamAnalysis(members) {
@@ -4757,10 +4950,30 @@
     // in the tool, of all places (design review, 2026-09-09). Two separate
     // cards now, matching how every other section on this page is chunked
     // (Stats, Habilidades, Builds de referência...), not one mega-block.
+    // Fase 2 do "leitor de caixa" (reunião 2026-09-11) - card SEM PESO
+    // NENHUM até o jogador pedir: nada de texto/IA renderiza sozinho, só o
+    // botão. teamAnalysisReport só é reaproveitado se for pro MESMO time
+    // (teamKeyFor) - trocar um membro invalida a leitura antiga sozinho.
+    var strategyHtml;
+    if (teamAnalysisReport && teamAnalysisReport.forTeamKey === teamKeyFor(members)) {
+      strategyHtml = '<div class="card"><h3>Leitura estratégica</h3>' +
+        '<div class="mybuild-rationale">' + escapeHtml(teamAnalysisReport.text) + '</div>' +
+        '<button id="team-strategy-generate" class="ts-build-copy" type="button">Analisar de novo</button> ' +
+        '<span id="team-strategy-status" class="notes-status"></span></div>';
+    } else {
+      strategyHtml = '<div class="card"><h3>Leitura estratégica</h3>' +
+        '<p class="mybuild-hint">Pede pra IA ler o time inteiro (papel, sinergia, fraqueza) e sugerir como jogar com esses ' + members.length + '.</p>' +
+        '<button id="team-strategy-generate" class="ts-build-copy" type="button">Analisar meu time</button> ' +
+        '<span id="team-strategy-status" class="notes-status"></span></div>';
+    }
+
     el.innerHTML = '<div class="card"><h3>Riscos compartilhados do time</h3><div class="risk-list">' + riskHtml + '</div></div>' +
       '<div class="card"><h3>Cobertura defensiva</h3>' +
       '<div class="scroll-x"><table class="cov-table"><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      abilityNote + '</div>';
+      abilityNote + '</div>' + strategyHtml;
+
+    var strategyBtn = document.getElementById("team-strategy-generate");
+    if (strategyBtn) strategyBtn.addEventListener("click", function () { generateTeamStrategy(members); });
   }
 
   // ---------------- bosses view ----------------
