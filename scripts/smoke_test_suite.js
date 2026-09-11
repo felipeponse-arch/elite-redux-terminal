@@ -1634,6 +1634,48 @@ async function runLiveTests() {
   setSearch("");
   await wait(120);
 
+  // --- 18. TYPE_MOD_ABILITIES coverage (décima-oitava passagem, 2026-09-11) ---
+  // Regressão-guarda pra tabela que cresceu de 6 pra 37 entradas nesta
+  // passagem (pedido do usuário: acurácia dos dados heurísticos entre
+  // 90-95%, já que o "leitor de caixa" reusa abilityTypeMod() pra QUALQUER
+  // espécie da caixa, não só o time). Roda por ÚLTIMO de propósito - troca
+  // 3 dos 6 slots do time fixture original (Aerodactyl Mega/Probopass/.../
+  // Tyranitar Mega Redux) por Forretress/Magcargo/Eevee, que nenhum teste
+  // anterior nesta suíte depende mais a essa altura (localStorage.clear()
+  // logo abaixo limpa tudo de qualquer forma).
+  for (const n of ["Forretress", "Magcargo", "Eevee"]) {
+    await addByName(n, true);
+  }
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  async function swapSlotFor(slotIdx, wantName) {
+    const slots = [...document.querySelectorAll(".team-slot")];
+    const btn = slots[slotIdx] && slots[slotIdx].querySelector(".ts-swap-btn");
+    if (!btn) { check("botão de trocar encontrado no slot " + slotIdx, false); return; }
+    btn.click();
+    await wait(30);
+    const pick = [...document.querySelectorAll(".swap-pick")].find(b => b.title === wantName);
+    if (!pick) { check(wantName + " disponível pra trocar no time", false); return; }
+    pick.click();
+    await wait(50);
+  }
+  await swapSlotFor(0, "Forretress");
+  await swapSlotFor(1, "Magcargo");
+  await swapSlotFor(2, "Eevee");
+  await wait(50);
+  // Números batem com cálculo manual (ver commit 7e39577): Forretress
+  // (Bug/Steel) vs Fire = 4x cru * 0.5 Heatproof = 2x; Magcargo (Fire/Rock)
+  // vs Ice = 0.5 cru * 0.7 Magma Armor = 0.35x, vs Water = 4x cru * 0.7 =
+  // 2.8x; Eevee (Normal) vs Fire = 1x cru * 2 Fluffy = 2x - mas rotulado
+  // FRAQUEZA, não resistência (o bug de rótulo corrigido nesta passagem).
+  const covFlags = [...document.querySelectorAll(".cov-flag")].map(el => el.title);
+  check("Heatproof (innate do Forretress) ajusta a cobertura como resistência",
+    covFlags.indexOf("Heatproof (resistência extra)") !== -1, covFlags.join(" | "));
+  check("Magma Armor (innate do Magcargo) ajusta a cobertura como resistência (2 tipos)",
+    covFlags.filter(f => f === "Magma Armor (resistência extra)").length >= 2, covFlags.join(" | "));
+  check("Fluffy (innate do Eevee) ajusta a cobertura como FRAQUEZA, não resistência",
+    covFlags.indexOf("Fluffy (fraqueza extra)") !== -1, covFlags.join(" | "));
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
