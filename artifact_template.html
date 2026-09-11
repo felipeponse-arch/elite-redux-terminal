@@ -389,6 +389,20 @@
      empilha certo; o último .card de um grupo não precisa do espaço extra
      porque o próprio .detail-group já tem margin-bottom. */
   .detail-group .card:last-child { margin-bottom: 0; }
+  /* "Conhecer a espécie" virou sempre-visível, 2026-09-11 (pedido do
+     usuário: "quero que tudo que está ali fique visível") - não é mais um
+     <details>, então não tem <summary> nem marcador de expandir/recolher.
+     Reaproveita a mesma tipografia/espaçamento do <summary> dos outros
+     grupos (mesmo peso visual na tela), só sem cursor:pointer nem a
+     semântica de toggle. */
+  .detail-group-heading {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 4px 6px;
+    margin: 0 0 4px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
 
   /* Dashboard summary, top of the Dex - design proposal B, 2026-09-09. */
   #dashboard { padding: 12px 20px 0; }
@@ -3143,20 +3157,26 @@
       // ocasionalmente (notas/histórico/comparar) fica FECHADO - mas nunca
       // escondido de verdade, um clique sempre abre, e o <summary> sempre
       // diz o que tem dentro (inclusive contagem, pra não precisar abrir só
-      // pra saber se há algo lá). "Meu build" fica ABERTO apesar de denso:
+      // pra saber se há algo lá). "Auto Build" fica ABERTO apesar de denso:
       // é a ação central do app (RF21-30), esconder por padrão atrapalharia
       // o fluxo principal mais do que ajudaria a limpar a tela.
-      '<details class="detail-group" open><summary>Conhecer a espécie</summary>' +
+      //
+      // ATUALIZAÇÃO, mesmo dia (pedido do usuário): "Conhecer a espécie"
+      // deixou de ser colapsável - "quero que tudo que está ali fique
+      // visível". Virou um <div> comum (não <details>) com um cabeçalho
+      // estático (.detail-group-heading) no lugar do <summary> - mesmo
+      // peso visual, sem a semântica de abrir/fechar.
+      '<div class="detail-group"><h3 class="detail-group-heading">Conhecer a espécie</h3>' +
         '<div class="card"><h3>Stats base</h3>' + statsHtml +
           '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
         '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
           '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p></div>' +
         evoHtml +
-      '</details>' +
+      '</div>' +
       '<details class="detail-group"><summary>Golpes (' + (lm.length + tuPairs.length) + ')</summary>' +
         lmHtml + tuHtml +
       '</details>' +
-      '<details class="detail-group" open><summary>Montar meu build</summary>' +
+      '<details class="detail-group" open><summary>Auto Build</summary>' +
         myBuildEditorHtml(sp) +
       '</details>' +
       (function () {

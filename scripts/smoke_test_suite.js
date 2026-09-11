@@ -47,15 +47,23 @@ async function runLiveTests() {
   function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
   // Reorganização em blocos colapsáveis (<details>), Fase 2, 2026-09-11:
   // "Golpes"/"Anotações e builds de referência"/"Comparar" ficam FECHADOS
-  // por padrão (decisão da equipe - só "Conhecer a espécie" e "Montar meu
-  // build" abrem sozinhos). Um elemento dentro de um <details> fechado
-  // ainda existe no DOM (querySelector encontra), mas não está visível/
-  // interagível de verdade - qualquer teste que precise mexer em algo
-  // dentro de um grupo fechado chama isto primeiro. Acha pelo texto do
-  // <summary> (prefixo), não por índice, pra não quebrar se a ordem mudar.
+  // por padrão (decisão da equipe - só "Auto Build" abre sozinho; "Conhecer
+  // a espécie" nem é <details> mais, ver abaixo). Um elemento dentro de um
+  // <details> fechado ainda existe no DOM (querySelector encontra), mas não
+  // está visível/interagível de verdade - qualquer teste que precise mexer
+  // em algo dentro de um grupo fechado chama isto primeiro. Acha pelo texto
+  // do <summary> (prefixo), não por índice, pra não quebrar se a ordem
+  // mudar. Guard em `d.querySelector("summary")` (2026-09-11, mesmo dia):
+  // "Conhecer a espécie" virou um <div> sem <summary> - sem o guard, o
+  // .find() abaixo quebrava com TypeError na primeira iteração (ela vem
+  // primeiro no DOM), derrubando a suíte inteira mesmo pra prefixos
+  // completamente sem relação, tipo "Golpes".
   function openDetailGroup(summaryPrefix) {
     const groups = [...document.querySelectorAll(".detail-group")];
-    const g = groups.find(function (d) { return d.querySelector("summary").textContent.indexOf(summaryPrefix) === 0; });
+    const g = groups.find(function (d) {
+      const summary = d.querySelector("summary");
+      return summary && summary.textContent.indexOf(summaryPrefix) === 0;
+    });
     if (g) g.open = true;
     return g;
   }
@@ -203,33 +211,54 @@ async function runLiveTests() {
   await wait(120);
 
   // --- 5c. reorganização em blocos colapsáveis (Fase 2, 2026-09-11) -
-  // "a tela do Poke na dex tá meio pesada de informação". Charizard, ainda
-  // selecionado da checagem 5b logo acima (sem precisar buscar de novo) -
-  // tem golpe de nível suficiente pra "Golpes (N)" mostrar uma contagem
-  // real, não zero.
-  (function () {
-    const groups = [...document.querySelectorAll(".detail-group")];
-    check("5 grupos colapsáveis na tela de detalhe", groups.length === 5, groups.length);
-    const bySummary = {};
-    groups.forEach(function (g) { bySummary[g.querySelector("summary").textContent.replace(/\s*\(\d+\)$/, "")] = g; });
-    check("'Conhecer a espécie' aberto por padrão", bySummary["Conhecer a espécie"] && bySummary["Conhecer a espécie"].open === true);
-    check("'Montar meu build' aberto por padrão (ação central do app, não deve ficar escondida)",
-      bySummary["Montar meu build"] && bySummary["Montar meu build"].open === true);
-    check("'Comparar com outro Pokémon' fechado por padrão", bySummary["Comparar com outro Pokémon"] && bySummary["Comparar com outro Pokémon"].open === false);
-    const golpesGroup = groups.find(function (g) { return g.querySelector("summary").textContent.indexOf("Golpes") === 0; });
-    check("'Golpes' fechado por padrão e mostra uma contagem real (não zero) no resumo",
-      golpesGroup && golpesGroup.open === false && /Golpes \([1-9]\d*\)/.test(golpesGroup.querySelector("summary").textContent),
-      golpesGroup && golpesGroup.querySelector("summary").textContent);
-  })();
-  // Clicar no <summary> abre o grupo E revela o conteúdo de verdade (não só
-  // o atributo `open` - .move-row só existe/conta quando o navegador
-  // realmente renderiza o conteúdo do <details>).
+  // "a tela do Poke na dex tá meio pesada de informação". Busca e clica em
+  // Charizard ANTES de checar qualquer coisa (2026-09-11, correção real: a
+  // versão antiga deste teste assumia Scizor - selecionado na checagem 5b -
+  // continuava "aberto" só porque setSearch("") não muda `state.selected`;
+  // mas o handler de busca remove `show-detail` do dex-shell a cada
+  // digitação/limpeza, e neste viewport (mobile-width) isso esconde o
+  // painel de detalhe inteiro. A checagem antiga nunca pegava isso porque só
+  // olhava a propriedade `.open`/texto, não visibilidade renderizada de
+  // verdade - só quebrou quando um checkVisibility() real entrou aqui, ver
+  // abaixo. Charizard tem golpe de nível suficiente pra "Golpes (N)" mostrar
+  // uma contagem real, não zero.
   setSearch("Charizard");
   await wait(120);
   const charRowGroups = document.querySelector("#species-list .species-row");
   if (charRowGroups) {
     charRowGroups.click();
     await wait(30);
+    (function () {
+      const groups = [...document.querySelectorAll(".detail-group")];
+      check("5 grupos na tela de detalhe (4 colapsáveis + 'Conhecer a espécie' sempre visível)", groups.length === 5, groups.length);
+      // "Conhecer a espécie" (2026-09-11, pedido do usuário: "quero que tudo
+      // que está ali fique visível") não é mais um <details> - vira um <div>
+      // com .detail-group-heading no lugar do <summary>. Os outros 4 grupos
+      // continuam <details> de verdade.
+      const conhecerGroup = groups.find(function (g) { return g.tagName !== "DETAILS" && g.querySelector(".detail-group-heading"); });
+      check("'Conhecer a espécie' não é mais colapsável (não é <details>, sem <summary>)",
+        conhecerGroup && conhecerGroup.tagName === "DIV" && !conhecerGroup.querySelector("summary"),
+        conhecerGroup && conhecerGroup.tagName);
+      check("'Conhecer a espécie' mostra o cabeçalho certo",
+        conhecerGroup && conhecerGroup.querySelector(".detail-group-heading").textContent === "Conhecer a espécie");
+      const statsCardInConhecer = conhecerGroup && conhecerGroup.querySelector(".card");
+      check("o conteúdo de 'Conhecer a espécie' está genuinamente visível (checkVisibility)",
+        statsCardInConhecer && (typeof statsCardInConhecer.checkVisibility !== "function" || statsCardInConhecer.checkVisibility() === true));
+
+      const detailsGroups = groups.filter(function (g) { return g.tagName === "DETAILS"; });
+      const bySummary = {};
+      detailsGroups.forEach(function (g) { bySummary[g.querySelector("summary").textContent.replace(/\s*\(\d+\)$/, "")] = g; });
+      check("'Auto Build' aberto por padrão (ação central do app, não deve ficar escondida)",
+        bySummary["Auto Build"] && bySummary["Auto Build"].open === true);
+      check("'Comparar com outro Pokémon' fechado por padrão", bySummary["Comparar com outro Pokémon"] && bySummary["Comparar com outro Pokémon"].open === false);
+      const golpesGroup = detailsGroups.find(function (g) { return g.querySelector("summary").textContent.indexOf("Golpes") === 0; });
+      check("'Golpes' fechado por padrão e mostra uma contagem real (não zero) no resumo",
+        golpesGroup && golpesGroup.open === false && /Golpes \([1-9]\d*\)/.test(golpesGroup.querySelector("summary").textContent),
+        golpesGroup && golpesGroup.querySelector("summary").textContent);
+    })();
+    // Clicar no <summary> abre o grupo E revela o conteúdo de verdade (não só
+    // o atributo `open` - .move-row só existe/conta quando o navegador
+    // realmente renderiza o conteúdo do <details>).
     const golpesGroup2 = openDetailGroup("Golpes");
     // openDetailGroup já seta .open = true - desfaz pra testar o clique de
     // verdade no <summary>, não só a propriedade.

@@ -106,9 +106,11 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   não exibem a frase.
 - RF39 — A ficha de detalhe de uma espécie na Dex deve ser organizada em blocos recolhíveis (nativo
   `<details>`/`<summary>`), reduzindo a quantidade de informação visível de uma vez sem remover nenhum
-  dado hoje exibido. Os blocos "Conhecer a espécie" e "Montar meu build" começam abertos por padrão
-  (informação de consulta imediata); "Golpes", "Anotações e builds de referência" e "Comparar com outro
-  Pokémon" começam fechados (consulta sob demanda), preservando totalmente a navegação por teclado.
+  dado hoje exibido. "Auto Build" começa aberto por padrão (ação central do app); "Golpes", "Anotações
+  e builds de referência" e "Comparar com outro Pokémon" começam fechados (consulta sob demanda),
+  preservando totalmente a navegação por teclado. Correção 2026-09-11 (pedido do usuário): "Conhecer a
+  espécie" deixou de ser um bloco recolhível — todo o seu conteúdo (stats base, habilidades/innates,
+  linha evolutiva) fica sempre visível, sem opção de esconder.
 
 ### 1.10 Sinergia habilidade x movepool real (Fase 3, 2026-09-11)
 - RF40 — Ao gerar uma build por IA, o Terminal deve fornecer à IA quais habilidades (escolhível ou
