@@ -175,9 +175,18 @@ foreach ($s in $dex.species) {
     foreach ($ev in @($s["ev"])) { if ($megaKindIdx -notcontains $ev[0]) { $hasRealNextStage = $true; break } }
     $hasEvolutionLine = ($stage -gt 1) -or $hasRealNextStage
 
+    # Velocidade (índice 5 do array de stats base: HP/Atk/Def/SpA/SpD/Spe) como
+    # sinal próprio, 2026-09-11 - pedido do usuário: o rank até então só via
+    # velocidade dissolvida dentro do BST total (1/6 do peso, igual a
+    # qualquer outro stat), mas num formato 1x1 quem ataca primeiro com mais
+    # força geralmente vence a troca - dois Pokémon com o mesmo BST mas
+    # velocidades muito diferentes enfrentam realidades competitivas bem
+    # diferentes, o que o BST sozinho não captura.
+    $spe = if ($s["b"].Count -gt 5) { $s["b"][5] } else { 0 }
+
     [void]$rows.Add([ordered]@{
         sname = $s["sname"]; bst = $bst; bossCount = $bossCount; abilityScore = $abilityScore
-        stage = $stage; hasEvolutionLine = $hasEvolutionLine
+        spe = $spe; stage = $stage; hasEvolutionLine = $hasEvolutionLine
     })
 }
 
@@ -204,7 +213,16 @@ function Get-PercentileRanks($values) {
 # it's the most universally reliable signal, and boss usage is real but
 # noisier (see the doc-comment above). Same weights for the global rank and
 # every per-stage rank, so the two numbers stay comparable in spirit.
-$WEIGHTS = @{ bst = 0.40; boss = 0.25; ability = 0.35 }
+#
+# Velocidade adicionada como 4º componente, 2026-09-11 (pedido do usuário,
+# formato 1x1 do hack: quem ataca primeiro com mais força tende a vencer a
+# troca). Pesada igual à habilidade (0.25 cada) porque, no 1x1, velocidade é
+# tão decisiva quanto o kit de habilidade pra decidir uma troca - não é
+# apenas "mais um dos seis stats". BST ainda lidera (0.30) por ser o sinal
+# mais universalmente confiável; uso em chefões cai de 0.25 pra 0.20 pra
+# abrir espaço, mantendo a mesma ordem relativa de confiança entre os sinais
+# que já existiam.
+$WEIGHTS = @{ bst = 0.30; boss = 0.20; ability = 0.25; spe = 0.25 }
 
 function Get-Tier([double]$pct) {
     if ($pct -ge 97) { return "SS" }
@@ -229,15 +247,17 @@ function Compute-Tiers($subsetRows) {
     $bstRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.bst })
     $bossRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.bossCount })
     $abilityRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.abilityScore })
+    $speRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.spe })
 
     $composites = @{}
     foreach ($r in $subsetRows) {
         $bstPct = $bstRanks[[string]$r.bst]
         $bossPct = $bossRanks[[string]$r.bossCount]
         $abilityPct = $abilityRanks[[string]$r.abilityScore]
+        $spePct = $speRanks[[string]$r.spe]
         $composites[$r.sname] = @{
-            composite = $bstPct * $WEIGHTS.bst + $bossPct * $WEIGHTS.boss + $abilityPct * $WEIGHTS.ability
-            bstPct = $bstPct; bossPct = $bossPct; abilityPct = $abilityPct
+            composite = $bstPct * $WEIGHTS.bst + $bossPct * $WEIGHTS.boss + $abilityPct * $WEIGHTS.ability + $spePct * $WEIGHTS.spe
+            bstPct = $bstPct; bossPct = $bossPct; abilityPct = $abilityPct; spePct = $spePct
         }
     }
     $compositeRanks = Get-PercentileRanks ($composites.Values | ForEach-Object { $_.composite })
@@ -249,7 +269,7 @@ function Compute-Tiers($subsetRows) {
         $result[$r.sname] = @{
             tier = Get-Tier $finalPct
             score = [math]::Round($finalPct, 1)
-            bstPct = $c.bstPct; bossPct = $c.bossPct; abilityPct = $c.abilityPct
+            bstPct = $c.bstPct; bossPct = $c.bossPct; abilityPct = $c.abilityPct; spePct = $c.spePct
         }
     }
     return $result
@@ -281,6 +301,7 @@ foreach ($r in $rows) {
         bst = $r.bst; bstPct = $g.bstPct
         bossCount = $r.bossCount; bossPct = $g.bossPct
         abilityScore = $r.abilityScore; abilityPct = $g.abilityPct
+        spe = $r.spe; spePct = $g.spePct
     }
 }
 

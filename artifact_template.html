@@ -1352,6 +1352,7 @@
 <script id="buildhistory" type="application/json">__BUILD_HISTORY_JSON__</script>
 <script id="bossbuilds" type="application/json">__BOSS_BUILDS_JSON__</script>
 <script id="speciesrank" type="application/json">__SPECIES_RANK_JSON__</script>
+<script id="speciesrole" type="application/json">__SPECIES_ROLE_JSON__</script>
 <script id="megaforms" type="application/json">__MEGA_FORMS_JSON__</script>
 <script id="changelog" type="application/json">__CHANGELOG_JSON__</script>
 <script>
@@ -1399,6 +1400,13 @@
   // scripts/compute_species_rank.ps1). Unlisted sname = not computed
   // (shouldn't happen for a real species, but degrade safely regardless).
   var SPECIES_RANK = JSON.parse(document.getElementById("speciesrank").textContent || "{}");
+  // Papel/arquétipo por espécie (Pivô/Tanque/Wallbreaker/Sweeper) + divisão
+  // física/especial - 2026-09-11, sinal SEPARADO do rank de propósito
+  // (decisão do usuário: não fundir na letra SS/S/A/B/C/D, mesmo padrão que
+  // já existe entre tier/stageTier). Ver scripts/compute_species_role.ps1
+  // pros critérios (bulk = HP*Def/100 e HP*SpD/100, fórmula real usada em
+  // cálculo de dano competitivo, não inventada).
+  var SPECIES_ROLE = JSON.parse(document.getElementById("speciesrole").textContent || "{}");
   // Past builds.json entries for a species, archived by scripts/archive_build.ps1
   // whenever a curated build gets replaced - see data/build_history.json.
   var BUILD_HISTORY = JSON.parse(document.getElementById("buildhistory").textContent || "{}");
@@ -2825,8 +2833,9 @@
     var r = SPECIES_RANK[sname];
     if (!r) return "";
     var title = "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100, calculado automaticamente a partir de " +
-      "BST (percentil " + r.bstPct + "), uso em chefões (percentil " + r.bossPct + ") e impacto das habilidades " +
-      "(percentil " + r.abilityPct + "). Não avalia moveset nem sinergia com o resto do time.";
+      "BST (percentil " + r.bstPct + "), uso em chefões (percentil " + r.bossPct + "), impacto das habilidades " +
+      "(percentil " + r.abilityPct + ") e velocidade (percentil " + r.spePct + ") — formato 1x1, quem ataca primeiro " +
+      "com mais força tende a vencer a troca. Não avalia moveset nem sinergia com o resto do time.";
     return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.tier + '</span>';
   }
 
@@ -2856,6 +2865,34 @@
   // it. The list row and Team/Box cards keep just the bare rankBadgeHtml()
   // chip - that's fine there, it's a single glanceable "how good is this"
   // signal, not a place to also explain a second, different ranking.
+  // Papel/arquétipo (Pivô/Tanque/Wallbreaker/Sweeper) + divisão física/
+  // especial - sinal SEPARADO do rank (ver SPECIES_ROLE acima). Renderiza
+  // como texto simples, não como badge de letra única, porque não é uma
+  // nota de "quão forte" - é "que tipo de forte", e uma espécie pode
+  // acumular mais de um papel real ao mesmo tempo.
+  //
+  // As chaves em SPECIES_ROLE são ASCII sem acento (Pivo/Fisico) de
+  // propósito - achado real ao gerar o dado: compute_species_role.ps1 é lido
+  // pelo PowerShell 5.1 na codepage padrão do sistema (sem BOM no arquivo),
+  // então um literal acentuado no fonte do script virava mojibame no JSON.
+  // O rótulo final acentuado, em português, é responsabilidade desta
+  // camada (igual RANK_TIER_CLASS já faz pra tier, embora tier nunca tenha
+  // tido acento pra começo de conversa).
+  var ROLE_LABEL_PT = { Pivo: "Pivô", Tanque: "Tanque", Wallbreaker: "Wallbreaker", Sweeper: "Sweeper" };
+  var SPLIT_LABEL_PT = { Fisico: "Físico", Especial: "Especial", Misto: "Misto" };
+  function roleTagsHtml(sname) {
+    var role = SPECIES_ROLE[sname];
+    if (!role) return "";
+    var parts = (role.roles || []).map(function (r) { return ROLE_LABEL_PT[r] || r; });
+    if (role.split) parts.push(SPLIT_LABEL_PT[role.split] || role.split);
+    if (!parts.length) return "";
+    var title = "Calculado a partir de ataque (percentil " + role.offensePct + "), bulk (percentil " + role.bulkPct +
+      ") e velocidade (percentil " + role.spePct + "), mais o movepool real de golpe de pivô/recuperação/setup. " +
+      "Não avalia sinergia com o resto do time.";
+    return '<span class="rank-info-item"><span class="rank-info-label">Papel</span>' +
+      '<span title="' + escapeHtml(title) + '">' + escapeHtml(parts.join(" · ")) + '</span></span>';
+  }
+
   function rankInfoLineHtml(sp) {
     var r = SPECIES_RANK[sp.sname];
     if (!r) return "";
@@ -2864,6 +2901,7 @@
       var label = STAGE_LABEL[r.stage] || (r.stage + "º estágio");
       items += '<span class="rank-info-item"><span class="rank-info-label">Rank no ' + label + '</span>' + rankStageBadgeHtml(sp.sname) + '</span>';
     }
+    items += roleTagsHtml(sp.sname);
     // The letters alone don't say which end is good without a hover -
     // user feedback, 2026-09-09 ("falta indicar qual seria o rank mais
     // valioso"). Spelled out in plain text every time, not just on hover,
@@ -3636,7 +3674,43 @@
   function aiTool_getSpeciesRank(input) {
     var sname = input && input.sname;
     var r = sname ? SPECIES_RANK[sname] : null;
-    return r ? { tier: r.tier, score: r.score } : { tier: null, score: null };
+    // roles/split vem de SPECIES_ROLE (sinal separado, 2026-09-11) - juntado
+    // aqui na resposta da ferramenta porque o prompt já pede que a IA decida
+    // "o papel que este Pokemon deve cumprir": em vez de deixar isso a
+    // cargo da IA adivinhar, ela recebe o papel já calculado a partir do
+    // stat/movepool real desta espécie.
+    var role = sname ? SPECIES_ROLE[sname] : null;
+    return {
+      tier: r ? r.tier : null,
+      score: r ? r.score : null,
+      roles: role ? role.roles.map(function (x) { return ROLE_LABEL_PT[x] || x; }) : [],
+      split: role ? (SPLIT_LABEL_PT[role.split] || role.split) : null
+    };
+  }
+
+  // Golpes de prioridade REALMENTE aprendíveis por esta espécie (2026-09-11,
+  // pedido do usuário: "o especialista deve sempre avaliar se é viável
+  // incluir um golpe de prioridade"). Restrito ao mesmo movepool que
+  // validateAiBuild() aceita (nível + tutor - TM/HM fica de fora, mesmo
+  // escopo já usado pro resto da build por IA) para nunca sugerir um golpe
+  // que a validação depois rejeitaria. `prio` vem direto do dado real do
+  // jogo (MOVES[id][7], ver transform.ps1) - nunca uma lista fixa "os golpes
+  // de prioridade são X, Y, Z" chutada de memória, porque prioridade PODE
+  // mudar por golpe neste hack (achado ao extrair o campo: Quick Attack aqui
+  // tem prio=2, igual Extreme Speed, diferente do +1 da série oficial).
+  function aiTool_getPriorityMoveOptions(input) {
+    var sname = input && input.sname;
+    var sp = sname ? getSpeciesBySname(sname) : null;
+    if (!sp) return { priorityMoves: [] };
+    var ids = uniqueIds(sp.lm.map(function (p) { return p[1]; }).concat(sp.tu));
+    var priorityMoves = [];
+    ids.forEach(function (id) {
+      var m = MOVES[id];
+      if (m && typeof m[7] === "number" && m[7] > 0) {
+        priorityMoves.push({ name: m[0], power: m[3] || 0, priority: m[7] });
+      }
+    });
+    return { priorityMoves: priorityMoves };
   }
 
   // "Estou no 2º badge, o que faz sentido daqui até o final?" - pedido do
@@ -3770,7 +3844,11 @@
       "final do jogo a partir de onde o jogador esta agora - use tudo isso pra decidir o PAPEL que " +
       "este Pokemon deve cumprir dai pra frente (ofensivo, defensivo, suporte, resposta a uma fraqueza " +
       "especifica do time, ou resposta a uma ameaca recorrente nos chefoes que ainda vem pela frente), " +
-      "nao so um set generico isolado pro momento atual.\n" +
+      "nao so um set generico isolado pro momento atual. Use tambem getPriorityMoveOptions pra ver se " +
+      "esta especie tem acesso a algum golpe de prioridade real e avalie se vale a pena incluir um " +
+      "dos 4 golpes - o formato aqui e 1x1, entao golpe de prioridade pode decidir uma troca sozinho, " +
+      "mas so inclua se fizer sentido pro papel escolhido (ex: um wallbreaker lento se beneficia mais " +
+      "de prioridade do que um sweeper que ja e mais rapido que a maioria).\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
       '{"ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"rationale":"..."}' +
       ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
@@ -3787,7 +3865,7 @@
           },
           {
             name: "getSpeciesRank",
-            description: "Retorna o tier (SS/S/A/B/C/D) e a pontuacao real deste hack pra uma especie, dado o sname interno (ex: SPECIES_CHARIZARD).",
+            description: "Retorna o tier (SS/S/A/B/C/D) e a pontuacao real deste hack pra uma especie, dado o sname interno (ex: SPECIES_CHARIZARD), mais o(s) papel(is) ja calculado(s) (Pivo/Tanque/Wallbreaker/Sweeper) e a divisao fisico/especial/misto do ataque.",
             inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
             execute: function (input) { return aiTool_getSpeciesRank(input); }
           },
@@ -3795,6 +3873,12 @@
             name: "getRemainingBosses",
             description: "Retorna os nomes dos lideres de ginasio/Alto Comando/Campeao que o jogador AINDA NAO enfrentou a partir do progresso atual dele, mais os tipos mais comuns nos times deles - usa o progresso ja configurado pelo jogador, nao pergunta nada.",
             execute: function () { return aiTool_getRemainingBosses(); }
+          },
+          {
+            name: "getPriorityMoveOptions",
+            description: "Retorna os golpes de prioridade (prio > 0) que esta especie realmente aprende (nivel ou tutor - mesmo conjunto permitido nos 4 golpes da build), com nome/poder/prioridade reais. Lista vazia = esta especie nao tem golpe de prioridade viavel.",
+            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
+            execute: function (input) { return aiTool_getPriorityMoveOptions(input); }
           }
         ]
       });

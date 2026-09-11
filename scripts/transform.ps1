@@ -21,7 +21,14 @@ $movesOut = New-Object System.Collections.ArrayList
 foreach ($m in $data.moves) {
     $types = @($m["types"])
     $t0 = if ($types.Count -gt 0) { $types[0] } else { 0 }
-    [void]$movesOut.Add(@($m["name"], $t0, $m["split"], $m["pwr"], $m["acc"], $m["pp"], $m["desc"]))
+    # prio (índice 7, acrescentado no fim de propósito, 2026-09-11): campo real
+    # do jogo, não estava extraído até agora. Verificado contra golpes
+    # conhecidos antes de confiar - Protect=+4, Counter/Mirror Coat=-5, Trick
+    # Room=-7, Teleport=-6 batem exatos com o Pokémon real, então o campo é
+    # confiável. Achado ao verificar: Quick Attack tem prio=2 NESTE hack (igual
+    # Extreme Speed) - na série oficial Quick Attack é só +1, então é uma
+    # mudança real do Elite Redux, não erro de leitura.
+    [void]$movesOut.Add(@($m["name"], $t0, $m["split"], $m["pwr"], $m["acc"], $m["pp"], $m["desc"], $m["prio"]))
 }
 
 # --- items lookup: flat, sorted list of real item names (no ids needed -

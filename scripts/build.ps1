@@ -65,6 +65,8 @@ if (-not $SkipExtract) {
     # expanded description, not the raw "A + B" placeholder.
     Write-Output "--- computing species ranks ---"
     & (Join-Path $PSScriptRoot "compute_species_rank.ps1")
+    Write-Output "--- computing species roles (Pivo/Tanque/Wallbreaker/Sweeper) ---"
+    & (Join-Path $PSScriptRoot "compute_species_role.ps1")
 } else {
     Write-Output "--- skipping extraction, reusing existing data/dex_compact.json and data/bosses.json ---"
 }
@@ -88,6 +90,7 @@ $dataFiles = @{
     "__BUILD_HISTORY_JSON__" = Join-Path $dataDir "build_history.json"
     "__BOSS_BUILDS_JSON__" = Join-Path $dataDir "boss_reference_builds.json"
     "__SPECIES_RANK_JSON__" = Join-Path $dataDir "species_rank.json"
+    "__SPECIES_ROLE_JSON__" = Join-Path $dataDir "species_role.json"
     "__MEGA_FORMS_JSON__" = Join-Path $dataDir "mega_forms.json"
     "__CHANGELOG_JSON__" = Join-Path $dataDir "changelog.json"
 }

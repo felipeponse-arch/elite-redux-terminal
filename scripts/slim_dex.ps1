@@ -58,7 +58,16 @@ foreach ($s in $dex.species) {
 $movesOut = New-Object System.Collections.ArrayList
 foreach ($m in $dex.moves) {
     $arr = @($m)
-    if ($dropMoveDesc -and $arr.Count -ge 7) { $arr = $arr[0..5] + @("") }
+    # Bug real, achado 2026-09-11 ao adicionar o campo `prio` (índice 7,
+    # transform.ps1): isto reconstruía a tupla como EXATAMENTE arr[0..5] +
+    # desc-vazia, descartando silenciosamente qualquer campo além do índice
+    # 6 (a descrição) - inclusive prio. Preserva agora qualquer campo extra
+    # que já exista depois da descrição, não assume mais que 7 é o
+    # tamanho final da tupla pra sempre.
+    if ($dropMoveDesc -and $arr.Count -ge 7) {
+        $extra = if ($arr.Count -gt 7) { $arr[7..($arr.Count - 1)] } else { @() }
+        $arr = $arr[0..5] + @("") + $extra
+    }
     [void]$movesOut.Add($arr)
 }
 

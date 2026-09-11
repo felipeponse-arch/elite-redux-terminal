@@ -165,6 +165,29 @@ async function runLiveTests() {
   check("rank-info-line spells out the scale in plain text",
     rankLine && rankLine.textContent.indexOf("SS (melhor)") !== -1);
 
+  // --- 5b. papel/arquétipo tag (RF35), 2026-09-11 - sinal SEPARADO do rank
+  // (pedido do usuário: não fundir na letra). Scizor é fixture conhecida
+  // (Pivô real via Bullet Punch/U-turn + Wallbreaker físico, calibrado à
+  // mão contra teoria competitiva real antes de confiar no script). Checa
+  // também que o rótulo acentuado renderiza certo - achado real ao
+  // construir isto: PowerShell 5.1 lendo o .ps1 sem BOM corrompia "Pivô"/
+  // "Físico" pra mojibake no JSON, só pego ao olhar o BYTE real do
+  // arquivo, não o console (que mascarava o problema).
+  setSearch("Scizor");
+  await wait(30);
+  const scizorRow = document.querySelector("#species-list .species-row");
+  if (scizorRow) {
+    scizorRow.click();
+    await wait(30);
+    const roleLine = document.querySelector(".rank-info-line");
+    const roleText = roleLine ? roleLine.textContent : "";
+    check("papel/arquétipo aparece na Dex com acento correto (não mojibake)",
+      roleText.indexOf("Pivô") !== -1 && roleText.indexOf("Físico") !== -1 && roleText.indexOf("Ã") === -1,
+      roleText);
+  } else { check("Scizor encontrado pro teste de papel/arquétipo", false); }
+  setSearch("");
+  await wait(30);
+
   // --- 6. build-reference card has a real title (not a bare <details>) ---
   const buildCard = [...document.querySelectorAll("#species-detail .card h3")]
     .find(h => h.textContent === "Builds de referência");
@@ -1075,7 +1098,7 @@ async function runLiveTests() {
               window.__mockLastPrompt = prompt;
               if (opts && Array.isArray(opts.tools)) {
                 for (const t of opts.tools) {
-                  const input = t.name === "getSpeciesRank" ? { sname: "SPECIES_SQUIRTLE" } : {};
+                  const input = (t.name === "getSpeciesRank" || t.name === "getPriorityMoveOptions") ? { sname: "SPECIES_SQUIRTLE" } : {};
                   const result = await t.execute(input);
                   window.__mockToolCalls.push({ name: t.name, result });
                 }
@@ -1102,6 +1125,22 @@ async function runLiveTests() {
         const rankCall = window.__mockToolCalls.find(c => c.name === "getSpeciesRank");
         check("o mock chamou getSpeciesRank e recebeu um tier real (ou null, mas nunca inventado)",
           rankCall && ("tier" in rankCall.result), rankCall && JSON.stringify(rankCall.result));
+        // Papel/arquétipo (RF35) + golpe de prioridade (RF37) - 2026-09-11,
+        // pedido do usuário na reunião sobre montagem de build. getSpeciesRank
+        // agora também devolve roles/split (SPECIES_ROLE), e uma 4a ferramenta
+        // real, getPriorityMoveOptions, devolve os golpes de prioridade que a
+        // espécie realmente aprende (nível/tutor, mesmo escopo que
+        // validateAiBuild aceita). Squirtle não tem golpe de prioridade real
+        // nesta hack, então a lista esperada aqui é vazia - o ponto do teste
+        // é confirmar que a ferramenta foi chamada de verdade e devolveu um
+        // array (nunca undefined/erro), não que Squirtle tenha prioridade.
+        check("getSpeciesRank também devolve roles/split (nunca undefined)",
+          rankCall && Array.isArray(rankCall.result.roles) && typeof rankCall.result.split !== "undefined",
+          rankCall && JSON.stringify(rankCall.result));
+        const prioCall = window.__mockToolCalls.find(c => c.name === "getPriorityMoveOptions");
+        check("o mock chamou getPriorityMoveOptions (quarta ferramenta real, nao simulada por fora)",
+          prioCall && Array.isArray(prioCall.result.priorityMoves),
+          prioCall && JSON.stringify(prioCall.result));
         // getRemainingBosses - 2026-09-10, contexto de progressao para a IA
         // (pedido do usuario: "daqui ate o final o que faz sentido nesse
         // poke agora"). Sem interacao nova - le so state.settings.milestone,

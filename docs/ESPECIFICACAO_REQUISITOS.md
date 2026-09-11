@@ -87,6 +87,17 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
 - RF34 — Quando disponível, o Terminal deve sincronizar esse estado entre os dispositivos do mesmo
   jogador, avisando quando encontrar uma versão mais recente salva em outro aparelho.
 
+### 1.8 Papel/arquétipo e velocidade (extensão do rank, 2026-09-11)
+- RF35 — O Terminal deve calcular e exibir, para qualquer espécie, um ou mais papéis/arquétipos
+  (Pivô/Tanque/Wallbreaker/Sweeper) e a divisão física/especial/mista do seu ataque, como sinal SEPARADO
+  do rank geral (nunca fundido na mesma letra SS/S/A/B/C/D).
+- RF36 — O rank geral e por estágio evolutivo deve incluir a velocidade base da espécie como um dos
+  componentes ponderados do cálculo, refletindo o formato 1x1 do hack (quem ataca primeiro com mais
+  força tende a vencer a troca).
+- RF37 — Ao gerar uma build por IA, o Terminal deve fornecer à IA os golpes de prioridade que a espécie
+  realmente aprende (nível ou tutor), para que ela avalie se vale a pena incluir um deles entre os 4
+  golpes escolhidos.
+
 ## 2. Requisitos não funcionais
 
 - RNF01 — **Portabilidade**: o Terminal deve funcionar como um único arquivo HTML autocontido (Claude
@@ -123,6 +134,12 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   estrutura geográfica real desta hack (qual líder ocupa qual ginásio), verificada contra o campo `map`
   dos próprios dados de treinador — nunca assumida a partir do conhecimento genérico do Pokémon Emerald
   vanilla, mesmo quando os nomes coincidem.
+- RN09 — A classificação de papel/arquétipo (RF35) usa definições de teoria competitiva pesquisadas
+  (não inventadas) combinadas com dado 100% real desta hack (stats base, movepool de nível/tutor
+  verificado golpe a golpe) — nunca uma lista de "papéis conhecidos" aplicada de memória. Todo corte
+  numérico (percentil de bulk/ataque/velocidade) deve ser calibrado contra espécies reconhecíveis antes
+  de confiar no resultado amplo, e um corte que falhe num caso conhecido (ex: Rotom-Wash não bater como
+  Pivô) é motivo de ajuste, não de aceitar o resultado calado.
 
 ---
 
