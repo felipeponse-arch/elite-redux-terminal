@@ -1167,7 +1167,7 @@ async function runLiveTests() {
               window.__mockLastPrompt = prompt;
               if (opts && Array.isArray(opts.tools)) {
                 for (const t of opts.tools) {
-                  const input = (t.name === "getSpeciesRank" || t.name === "getPriorityMoveOptions") ? { sname: "SPECIES_SQUIRTLE" } : {};
+                  const input = (t.name === "getSpeciesRank" || t.name === "getPriorityMoveOptions" || t.name === "getAbilityMovepoolSynergy") ? { sname: "SPECIES_SQUIRTLE" } : {};
                   const result = await t.execute(input);
                   window.__mockToolCalls.push({ name: t.name, result });
                 }
@@ -1210,6 +1210,23 @@ async function runLiveTests() {
         check("o mock chamou getPriorityMoveOptions (quarta ferramenta real, nao simulada por fora)",
           prioCall && Array.isArray(prioCall.result.priorityMoves),
           prioCall && JSON.stringify(prioCall.result));
+        // Fase 3 (sinergia habilidade x movepool real, 2026-09-11): Squirtle
+        // tem um caso real e nao-trivial pra testar - Torrent (innate) e um
+        // bonus de TIPO (Water), nao de flag, e a especie realmente aprende
+        // varios golpes Water (Surf, Hydro Pump, Bubble...). Confirma que a
+        // 5a ferramenta foi chamada de verdade e devolveu o combo real, nao
+        // um array vazio por engano (o que aconteceria se o sname nao fosse
+        // repassado certo pro mock, ou se ABILITY_SYNERGY nao tivesse sido
+        // carregado).
+        const synergyCall = window.__mockToolCalls.find(c => c.name === "getAbilityMovepoolSynergy");
+        check("o mock chamou getAbilityMovepoolSynergy (quinta ferramenta real, nao simulada por fora)",
+          synergyCall && Array.isArray(synergyCall.result.synergies),
+          synergyCall && JSON.stringify(synergyCall.result));
+        check("getAbilityMovepoolSynergy confirma Torrent (Water) com golpes Water reais de Squirtle",
+          synergyCall && synergyCall.result.synergies.some(function (s) {
+            return s.ability === "Torrent" && s.categoria === "Water" && s.golpesReaisQueSeBeneficiam.indexOf("Surf") !== -1;
+          }),
+          synergyCall && JSON.stringify(synergyCall.result.synergies));
         // getRemainingBosses - 2026-09-10, contexto de progressao para a IA
         // (pedido do usuario: "daqui ate o final o que faz sentido nesse
         // poke agora"). Sem interacao nova - le so state.settings.milestone,

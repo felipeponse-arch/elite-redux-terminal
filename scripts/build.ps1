@@ -67,6 +67,11 @@ if (-not $SkipExtract) {
     & (Join-Path $PSScriptRoot "compute_species_rank.ps1")
     Write-Output "--- computing species roles (Pivo/Tanque/Wallbreaker/Sweeper) ---"
     & (Join-Path $PSScriptRoot "compute_species_role.ps1")
+    # Fase 3 do roadmap de sinergia (2026-09-11): precisa dos flags de golpe
+    # (transform.ps1) e do texto de habilidade ja combo-expandido
+    # (expand_combo_abilities.ps1), por isso roda depois dos dois.
+    Write-Output "--- computing ability x movepool synergy (Fase 3) ---"
+    & (Join-Path $PSScriptRoot "compute_ability_movepool_synergy.ps1")
 } else {
     Write-Output "--- skipping extraction, reusing existing data/dex_compact.json and data/bosses.json ---"
 }
@@ -91,6 +96,7 @@ $dataFiles = @{
     "__BOSS_BUILDS_JSON__" = Join-Path $dataDir "boss_reference_builds.json"
     "__SPECIES_RANK_JSON__" = Join-Path $dataDir "species_rank.json"
     "__SPECIES_ROLE_JSON__" = Join-Path $dataDir "species_role.json"
+    "__ABILITY_SYNERGY_JSON__" = Join-Path $dataDir "species_ability_synergy.json"
     "__MEGA_FORMS_JSON__" = Join-Path $dataDir "mega_forms.json"
     "__CHANGELOG_JSON__" = Join-Path $dataDir "changelog.json"
 }

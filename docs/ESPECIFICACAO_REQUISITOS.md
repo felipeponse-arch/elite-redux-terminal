@@ -110,6 +110,19 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   (informação de consulta imediata); "Golpes", "Anotações e builds de referência" e "Comparar com outro
   Pokémon" começam fechados (consulta sob demanda), preservando totalmente a navegação por teclado.
 
+### 1.10 Sinergia habilidade x movepool real (Fase 3, 2026-09-11)
+- RF40 — Ao gerar uma build por IA, o Terminal deve fornecer à IA quais habilidades (escolhível ou
+  innate) desta espécie realmente aumentam o poder de uma categoria de golpe (flag) ou de um tipo, E
+  a espécie de fato aprende (nível ou tutor) pelo menos um golpe real dessa categoria/tipo — o "combo
+  verdadeiro" entre habilidade e movepool, nunca uma associação genérica ("esta habilidade é boa")
+  sem checar se o golpe correspondente existe de verdade no movepool da espécie.
+- RN10 — Uma habilidade só entra na verificação de sinergia (RF40) quando a categoria de golpe que ela
+  cita no texto real tem uma flag correspondente nos dados desta hack (`flagsT`) ou é um tipo de golpe
+  real (`typeT`). Categorias citadas em texto de habilidade sem flag correspondente nesta hack (ex:
+  "golpes de soco", "mordida/presa", "golpes cortantes" — Punch/Bite/Slicing não existem em `flagsT`
+  aqui) ficam de fora da verificação e são reportadas como tal, nunca tratadas como combo confirmado
+  por falta de dado pra verificar.
+
 ## 2. Requisitos não funcionais
 
 - RNF01 — **Portabilidade**: o Terminal deve funcionar como um único arquivo HTML autocontido (Claude
