@@ -512,6 +512,21 @@
     padding: 5px 6px 5px 12px;
     font-size: 12.5px;
     font-weight: 600;
+    /* Auditoria de performance, 2026-09-11: só .species-row tinha essa
+       otimização - a caixa reconstrói TODOS os chips via innerHTML a cada
+       adicionar/remover/mover, sem teto de tamanho (ao contrário do time,
+       travado em 6). Medido ao vivo: ~20-25ms de bloqueio por clique numa
+       caixa com ~590 espécies, mais caro que renderizar a Dex INTEIRA
+       (1906 linhas) do zero. Altura é estável (38px, medido em espécies
+       reais de nome curtíssimo a longuíssimo - Muk a "Urshifu Rapid
+       Strike Style Mega"); largura varia bastante (206-374px na mesma
+       medição) porque o chip cresce com o nome - contain-intrinsic-size
+       aqui é só um palpite de largura MÉDIA pro placeholder de um chip
+       fora da tela, não uma medida exata; o layout se corrige sozinho
+       assim que o chip entra no viewport de verdade (o mesmo trade-off
+       aceito em qualquer grade de largura variável com content-visibility). */
+    content-visibility: auto;
+    contain-intrinsic-size: 240px 38px;
   }
   .box-chip .box-chip-pips { display: flex; gap: 3px; }
   .box-chip .bc-name-wrap { display: inline-flex; align-items: center; gap: 8px; }
@@ -1728,6 +1743,22 @@
     });
   }
 
+  // Auditoria de performance, 2026-09-11: busca da Dex disparava um
+  // rebuild completo da lista (até 1906 <li>, com sprite/badge/pips cada
+  // uma) a cada tecla, sem esperar o jogador parar de digitar. 80ms é
+  // curto o bastante pra continuar parecendo instantâneo (abaixo do
+  // limiar de ~100ms em que uma resposta deixa de parecer imediata), mas
+  // já corta o trabalho redundante numa digitação rápida (apagar e
+  // retigitar um nome, por exemplo).
+  function debounce(fn, wait) {
+    var t = null;
+    return function () {
+      var args = arguments, ctx = this;
+      clearTimeout(t);
+      t = setTimeout(function () { fn.apply(ctx, args); }, wait);
+    };
+  }
+
   // ---------------- state ----------------
   var state = {
     query: "",
@@ -1959,20 +1990,34 @@
   }
 
   function persist() {
+    var prevRaw = lsGet(STORE_KEY);
+    var save = buildSave();
     // Save history / "desfazer", Fase 2, 2026-09-09: snapshot whatever was
     // ABOUT TO BE overwritten, before overwriting it - this is what makes
     // every persist() an undo point. Guarded on the previous save actually
     // parsing (a corrupt/missing prior value just means there's nothing
     // meaningful to snapshot, not an error worth surfacing here).
-    var prevRaw = lsGet(STORE_KEY);
+    //
+    // Auditoria de performance, 2026-09-11: antes disto, TODA chamada de
+    // persist() empurrava mais uma cópia completa do save anterior pro
+    // histórico, mesmo quando o conteúdo não tinha mudado de verdade -
+    // cada snapshot cresce com state.notes/state.customBuilds, e
+    // HISTORY_MAX (5 cópias completas) já estava usando ~1MB de
+    // localStorage num teste de estresse real. syncContentDiffers() já
+    // existe pra essa exata comparação (usada na sincronização entre
+    // aparelhos) - reaproveitada aqui: só grava um novo ponto de desfazer
+    // quando team/box/savedTeams/settings/notes/customBuilds realmente
+    // mudaram, não a cada persist() disparado.
     if (prevRaw) {
       try {
-        var hist = loadHistory();
-        hist.push(JSON.parse(prevRaw));
-        saveHistory(hist);
+        var prev = JSON.parse(prevRaw);
+        if (syncContentDiffers(prev, save)) {
+          var hist = loadHistory();
+          hist.push(prev);
+          saveHistory(hist);
+        }
       } catch (e) { /* corrupt prior save - nothing safe to snapshot */ }
     }
-    var save = buildSave();
     // lsSet() already swallows a quota/disabled-storage exception and
     // returns false - persist() used to just ignore that, so a full
     // localStorage (customBuilds/notes/build history all grow unbounded
@@ -2473,13 +2518,13 @@
     this.classList.toggle("active");
   });
 
-  document.getElementById("search-input").addEventListener("input", function (e) {
+  document.getElementById("search-input").addEventListener("input", debounce(function (e) {
     state.query = e.target.value.trim().toLowerCase();
     // Typing means "find me something else": surface the results again. On
     // desktop both panes are visible anyway, so this is a no-op there.
     document.getElementById("dex-shell").classList.remove("show-detail");
     renderList();
-  });
+  }, 80));
   // Fase 1 quality-of-life, 2026-09-09: sort order persists between
   // sessions - reflect a restored value in the <select> itself, since the
   // static HTML always ships with "dex" marked as the default option.

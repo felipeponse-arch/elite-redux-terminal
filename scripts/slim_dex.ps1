@@ -43,16 +43,27 @@ if (Test-Path $ptPath) {
     else { Write-Output "  aviso: $missing golpes sem traducao - mantendo o texto em ingles como fallback" }
 }
 
+# Auditoria de performance/risco estrutural, 2026-09-11: isto era uma lista
+# de INCLUSAO (campo a campo, por nome) - o mesmo padrao que ja causou 3
+# bugs reais neste projeto (prio/flags/senc esquecidos aqui quando foram
+# adicionados em transform.ps1, cada vez descartados em silencio ate
+# alguem notar por acidente). Convertido pra passthrough com lista de
+# EXCLUSAO: qualquer campo novo que transform.ps1 adicionar no futuro
+# atravessa por padrao, e só é removido se alguem explicitamente incluir
+# o nome dele aqui - inverte o risco de "esquecer incluir" (perde dado
+# calado) pro mais seguro "esquecer excluir" (só engorda o arquivo, nao
+# quebra nada).
+$excludeSpeciesKeys = @("hw", "tm")
+if ($DropFlavor) { $excludeSpeciesKeys += "d" }
+
 $speciesOut = New-Object System.Collections.ArrayList
 foreach ($s in $dex.species) {
     if (-not $s) { [void]$speciesOut.Add($null); continue }
-    $entry = [ordered]@{
-        x = $s["x"]; i = $s["i"]; n = $s["n"]; sname = $s["sname"]
-        t = $s["t"]; b = $s["b"]; ab = $s["ab"]; inn = $s["inn"]
-        ev = $s["ev"]; lm = $s["lm"]; tu = $s["tu"]
-        senc = $s["senc"]
+    $entry = [ordered]@{}
+    foreach ($key in $s.Keys) {
+        if ($excludeSpeciesKeys -contains $key) { continue }
+        $entry[$key] = $s[$key]
     }
-    if (-not $DropFlavor) { $entry["d"] = $s["d"] }
     [void]$speciesOut.Add($entry)
 }
 
@@ -72,18 +83,16 @@ foreach ($m in $dex.moves) {
     [void]$movesOut.Add($arr)
 }
 
-$out = [ordered]@{
-    meta = $dex.meta
-    types = $dex.types
-    splits = $dex.splits
-    evoKinds = $dex.evoKinds
-    flags = $dex.flags
-    sencHow = $dex.sencHow
-    maps = $dex.maps
-    abilities = $dex.abilities
-    moves = $movesOut.ToArray()
-    items = $dex.items
-    species = $speciesOut.ToArray()
+# Mesmo motivo do bloco de especies acima: passthrough de todo campo
+# top-level, so `species`/`moves` recebem o array ja fatiado (o resto do
+# dado - meta/types/splits/evoKinds/flags/sencHow/maps/abilities/items -
+# atravessa como esta, e qualquer campo novo futuro tambem atravessa sem
+# precisar tocar este script de novo).
+$out = [ordered]@{}
+foreach ($key in $dex.Keys) {
+    if ($key -eq "species") { $out[$key] = $speciesOut.ToArray(); continue }
+    if ($key -eq "moves") { $out[$key] = $movesOut.ToArray(); continue }
+    $out[$key] = $dex[$key]
 }
 
 [System.IO.File]::WriteAllText($dexPath, (ConvertTo-JsonManual $out), (New-Object System.Text.UTF8Encoding($false)))

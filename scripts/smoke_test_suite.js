@@ -66,7 +66,7 @@ async function runLiveTests() {
   }
   async function addByName(name, toBox) {
     setSearch(name);
-    await wait(30);
+    await wait(120);
     const row = document.querySelector("#species-list .species-row");
     if (!row) { check("add " + name, false, "not found in list"); return; }
     row.click();
@@ -125,7 +125,7 @@ async function runLiveTests() {
   // --- 2. stat bar tiers (Shuckle: extreme high/low stats) ---
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   setSearch("Shuckle");
-  await wait(30);
+  await wait(120);
   const shuckleRow = document.querySelector("#species-list .species-row");
   if (shuckleRow) {
     shuckleRow.click();
@@ -145,7 +145,7 @@ async function runLiveTests() {
   setSearch(""); // clear any filter left by the stat-bar test above, or this
                   // "checks" the rank of whatever 1 species is still filtered
                   // in, not the actual top of the full sorted list
-  await wait(30);
+  await wait(120);
   const sel = document.getElementById("sort-select");
   sel.value = "rank";
   sel.dispatchEvent(new Event("change", { bubbles: true }));
@@ -188,7 +188,7 @@ async function runLiveTests() {
   // "Físico" pra mojibake no JSON, só pego ao olhar o BYTE real do
   // arquivo, não o console (que mascarava o problema).
   setSearch("Scizor");
-  await wait(30);
+  await wait(120);
   const scizorRow = document.querySelector("#species-list .species-row");
   if (scizorRow) {
     scizorRow.click();
@@ -200,7 +200,7 @@ async function runLiveTests() {
       roleText);
   } else { check("Scizor encontrado pro teste de papel/arquétipo", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- 5c. reorganização em blocos colapsáveis (Fase 2, 2026-09-11) -
   // "a tela do Poke na dex tá meio pesada de informação". Charizard, ainda
@@ -225,7 +225,7 @@ async function runLiveTests() {
   // o atributo `open` - .move-row só existe/conta quando o navegador
   // realmente renderiza o conteúdo do <details>).
   setSearch("Charizard");
-  await wait(30);
+  await wait(120);
   const charRowGroups = document.querySelector("#species-list .species-row");
   if (charRowGroups) {
     charRowGroups.click();
@@ -254,7 +254,7 @@ async function runLiveTests() {
       golpesGroup2.querySelectorAll(".move-row").length);
   } else { check("Charizard encontrado pro teste de clique em <summary>", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- 6. build-reference card has a real title (not a bare <details>) ---
   const buildCard = [...document.querySelectorAll("#species-detail .card h3")]
@@ -348,7 +348,7 @@ async function runLiveTests() {
 
   // --- 11. "Minhas anotações" + move-row type tint - 2026-09-09, third field-research follow-up ---
   setSearch("Charizard");
-  await wait(30);
+  await wait(120);
   const cRow = document.querySelector("#species-list .species-row");
   if (cRow) {
     cRow.click();
@@ -367,7 +367,7 @@ async function runLiveTests() {
     check("move row has a type-tinted background", moveRow && moveRow.style.background.indexOf("color-mix") !== -1);
   } else { check("Charizard found for notes/move-tint test", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- 12. boss held-item stat modifier - 2026-09-09, user asked directly ---
   // Greta Slateport's Landorus Therian holds a Choice Band. Checks the FLAG
@@ -445,7 +445,7 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
   setSearch("Tyranitar Mega Redux");
-  await wait(30);
+  await wait(120);
   const ttarRow = document.querySelector("#species-list .species-row");
   if (ttarRow) {
     ttarRow.click();
@@ -460,7 +460,7 @@ async function runLiveTests() {
       choosable.length === 1, choosable.length + " cards");
   } else { check("Tyranitar Mega Redux (duplicate-ability fixture) found", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // Dashboard suggestion sentence used to render as flexbox children
   // (each text run/link its own wrapping box) instead of one flowing
@@ -537,7 +537,7 @@ async function runLiveTests() {
   // original NextDex FAQ example this whole project started from) - a
   // good fixture because it's easy to independently verify by eye.
   setSearch("Charizard");
-  await wait(30);
+  await wait(120);
   const charRow = document.querySelector("#species-list .species-row");
   if (charRow) {
     charRow.click();
@@ -584,7 +584,7 @@ async function runLiveTests() {
       !document.getElementById("mybuild-clear") && document.getElementById("mybuild-ability").value === "");
   } else { check("Charizard found for the Meu build editor test", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- 17. "Meu build" reaching the Team tab + boss-build copy - 2026-09-09,
   // user feedback: a build saved in the Dex never showed up on the Team
@@ -596,7 +596,7 @@ async function runLiveTests() {
   // string-concatenates it - printed "EVs: 0,252,0,0,0,0" instead of
   // "EVs: 252 Atk" until normalized through evsToShowdownText().
   setSearch("Tyranitar Mega Redux"); // already on the seeded team
-  await wait(30);
+  await wait(120);
   const ttarRow2 = document.querySelector("#species-list .species-row");
   if (ttarRow2) {
     ttarRow2.click();
@@ -608,7 +608,7 @@ async function runLiveTests() {
     await wait(50);
   } else { check("Tyranitar Mega Redux found for cross-tab build test", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(50);
   // Team order follows state.team's insertion order - Tyranitar Mega Redux
@@ -671,7 +671,7 @@ async function runLiveTests() {
   // because these reference entries store EVs as a string while
   // customBuilds needs the raw 6-number array.
   setSearch("Charizard");
-  await wait(30);
+  await wait(120);
   const charRow2 = document.querySelector("#species-list .species-row");
   if (charRow2) {
     charRow2.click();
@@ -697,7 +697,7 @@ async function runLiveTests() {
     } else { check("'+ Usar como meu build' button found on a boss-reference entry", false); }
   } else { check("Charizard found for the reference-entry build-copy test", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- 18b. IVs reais de referência de chefão não podem virar 31 fixo -
   // bug real achado em auditoria (2026-09-11): scripts/extract_boss_builds.ps1
@@ -709,7 +709,7 @@ async function runLiveTests() {
   // Trick Room de verdade, e o próprio moveset inclui Trick Room) - testa
   // exatamente o cenário que passaria despercebido antes da correção.
   setSearch("Cofagrigus");
-  await wait(30);
+  await wait(120);
   const cofagrigusRow = document.querySelector("#species-list .species-row");
   if (cofagrigusRow) {
     cofagrigusRow.click();
@@ -730,7 +730,7 @@ async function runLiveTests() {
     } else { check("'+ Usar como meu build' button found on Cofagrigus (IV real test)", false); }
   } else { check("Cofagrigus found for the IV-real reference-entry test", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- transfer card removal - 2026-09-09, replaced by the db-capability
   // sync above and confirmed working on real devices the same day, so the
@@ -773,7 +773,7 @@ async function runLiveTests() {
   // meant scrolling a long species' detail scrolled the search box and
   // species list away with it. Fixed by capping #app at `height: 100%`.
   setSearch("Charizard");
-  await wait(30);
+  await wait(120);
   const charRow3 = document.querySelector("#species-list .species-row");
   if (charRow3) {
     charRow3.click();
@@ -789,7 +789,7 @@ async function runLiveTests() {
     document.getElementById("back-to-list").click();
     await wait(30);
     setSearch("Bulbasaur");
-    await wait(30);
+    await wait(120);
     document.querySelector("#species-list .species-row").click();
     await wait(30);
     check("scroll resets to top when switching to a different species",
@@ -807,7 +807,7 @@ async function runLiveTests() {
       document.querySelector(".species-detail").scrollTop);
   } else { check("Charizard found for the #app height-fix test", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- "Meu build" status preview - 2026-09-09, urgent user request:
   // after filling every field, the editor showed no final stats and no
@@ -816,7 +816,7 @@ async function runLiveTests() {
   // (base+IV+EV+nature+item, same calcFinalStat used for bosses) and
   // each move's power with STAB/Life Orb factored in.
   setSearch("Charizard");
-  await wait(30);
+  await wait(120);
   const charRow4 = document.querySelector("#species-list .species-row");
   if (charRow4) {
     charRow4.click();
@@ -852,7 +852,7 @@ async function runLiveTests() {
       preview4b.indexOf("293") === -1, preview4b);
   } else { check("Charizard found for the Meu build status-preview test", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- storage-full warning - 2026-09-09, from the Gemini audit pass +
   // same-day UX review: persist() used to swallow a localStorage quota
@@ -965,7 +965,7 @@ async function runLiveTests() {
   await wait(30);
 
   setSearch("Charizard");
-  await wait(30);
+  await wait(120);
   const charRowCmp = document.querySelector("#species-list .species-row");
   if (charRowCmp) {
     charRowCmp.click();
@@ -992,7 +992,7 @@ async function runLiveTests() {
       document.getElementById("compare-result").innerHTML === "");
   } else { check("Charizard found for the compare-builds test", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- Multi-build (up to 3 per species) + "Gerar build com IA" -
   // 2026-09-09, user's own rule: check for a saved build first, ask if a
@@ -1004,7 +1004,7 @@ async function runLiveTests() {
   // just the active entry, and the graceful "not available" degrade path.
   setSearch("Bulbasaur"); // NOT actually untouched by every earlier section -
   // see the note below, found while adding the 2026-09-10 accessibility pass.
-  await wait(30);
+  await wait(120);
   const bulbaRow = document.querySelector("#species-list .species-row");
   if (bulbaRow) {
     bulbaRow.click();
@@ -1072,7 +1072,7 @@ async function runLiveTests() {
     } else { check("AI button available again under the 3-build cap", false); }
   } else { check("Bulbasaur found for the multi-build test", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- Accessibility pass, 2026-09-10: Fase 2 item 3, deferred twice before
   // today for its own dedicated pass. Real gap found by looking, not
@@ -1089,7 +1089,7 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
   setSearch("");
-  await wait(30);
+  await wait(120);
   const a11yList = document.getElementById("species-list");
   check("species list is a real listbox (role=listbox + label)",
     a11yList.getAttribute("role") === "listbox" && !!a11yList.getAttribute("aria-label"));
@@ -1135,7 +1135,7 @@ async function runLiveTests() {
   // (same category of harness gap as the sample()/window.claude limitation
   // documented elsewhere in this file).
   setSearch("Bulbasaur");
-  await wait(30);
+  await wait(120);
   const bulbaRowA11y = document.querySelector("#species-list .species-row");
   if (bulbaRowA11y) {
     bulbaRowA11y.click();
@@ -1162,7 +1162,7 @@ async function runLiveTests() {
     }
   }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- Resolve o problema do QA, 2026-09-10: reunião da equipe sobre onde o
   // Especialista em Meta Pokémon entra na geração de build por IA. Antes,
@@ -1180,7 +1180,7 @@ async function runLiveTests() {
   // nunca vai testar por aqui): se a IA de verdade, ao vivo, dá uma resposta
   // de qualidade - isso continua precisando do aparelho real do usuário.
   setSearch("Squirtle"); // espécie ainda não tocada por nenhuma seção anterior
-  await wait(30);
+  await wait(120);
   const squirtleRow = document.querySelector("#species-list .species-row");
   if (squirtleRow) {
     squirtleRow.click();
@@ -1326,7 +1326,7 @@ async function runLiveTests() {
     } else { check("Squirtle tem opções reais suficientes (ability/nature/4 golpes) pro teste de mock", false); }
   } else { check("Squirtle encontrado pro teste de mock da IA", false); }
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   // --- Pacote "level cap", 2026-09-10: 3 ideias interligadas, decisões
   // confirmadas pelo usuário antes de construir (build/nota carrega pro
@@ -1357,7 +1357,7 @@ async function runLiveTests() {
   await wait(30);
 
   setSearch("Charmander");
-  await wait(30);
+  await wait(120);
   const charmanderRow = document.querySelector("#species-list .species-row");
   if (charmanderRow) {
     charmanderRow.click();
@@ -1428,7 +1428,7 @@ async function runLiveTests() {
   // (Mega Evolução) é a fixture de controle - confirma que o fix não
   // alterou o texto de condições não-numéricas.
   setSearch("Charmander");
-  await wait(30);
+  await wait(120);
   const charmanderRow2 = document.querySelector("#species-list .species-row");
   if (charmanderRow2) {
     charmanderRow2.click();
@@ -1438,7 +1438,7 @@ async function runLiveTests() {
       document.querySelector(".evo-chain").textContent);
   } else { check("Charmander encontrado pro teste de texto de evolução", false); }
   setSearch("Milotic");
-  await wait(30);
+  await wait(120);
   const miloticRow = [...document.querySelectorAll("#species-list .species-row")].find(r => r.querySelector(".sname").textContent === "Milotic");
   if (miloticRow) {
     miloticRow.click();
@@ -1452,7 +1452,7 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
   setSearch("");
-  await wait(30);
+  await wait(120);
 
   localStorage.clear();
 
@@ -1667,7 +1667,7 @@ localStorage.setItem("er_terminal_save", JSON.stringify(fakeSave));
   const el = document.getElementById("search-input");
   el.value = "Charizard";
   el.dispatchEvent(new Event("input", { bubbles: true }));
-  await wait(50);
+  await wait(120);
   document.querySelector("#species-list .species-row").click();
   await wait(50);
   document.getElementById("add-team-btn").click();
@@ -1719,7 +1719,7 @@ localStorage.setItem("er_terminal_save", JSON.stringify(fakeSave));
   const el = document.getElementById("search-input");
   el.value = "Charizard";
   el.dispatchEvent(new Event("input", { bubbles: true }));
-  await wait(50);
+  await wait(120);
   document.querySelector("#species-list .species-row").click();
   await wait(50);
   document.getElementById("add-team-btn").click();
@@ -1772,7 +1772,7 @@ localStorage.setItem("er_terminal_save", JSON.stringify(fakeSave));
   const el = document.getElementById("search-input");
   el.value = "Charizard";
   el.dispatchEvent(new Event("input", { bubbles: true }));
-  await wait(50);
+  await wait(120);
   document.querySelector("#species-list .species-row").click();
   await wait(50);
   document.getElementById("add-team-btn").click();
