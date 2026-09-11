@@ -64,6 +64,17 @@ foreach ($occ in $occurrences) {
         evs     = $occ.m["evs"]
         item    = $occ.m["item"]
         moves   = $occ.m["mv"]
+        # ivsRaw/evsRaw (2026-09-11, bug real achado em auditoria): faltavam
+        # aqui - extract_bosses.ps1 ja extrai os IVs REAIS de cada chefao
+        # (nem sempre 31, apesar de nao ter sido pego nenhum caso ainda), mas
+        # esta reconstrucao por campo nomeado (mesmo padrao de bug ja visto
+        # com prio/flags/senc) descartava silenciosamente ivsRaw - o botao
+        # "Usar como meu build" da Dex acabava assumindo 31 fixo sem
+        # verificar o dado real. A aba Chefoes (que le bosses.json direto,
+        # nao este arquivo) sempre usou o valor real - agora os dois
+        # caminhos usam o mesmo dado.
+        ivsRaw  = $occ.m["ivsRaw"]
+        evsRaw  = $occ.m["evsRaw"]
     })
 }
 

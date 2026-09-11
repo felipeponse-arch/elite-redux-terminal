@@ -699,6 +699,39 @@ async function runLiveTests() {
   setSearch("");
   await wait(30);
 
+  // --- 18b. IVs reais de referência de chefão não podem virar 31 fixo -
+  // bug real achado em auditoria (2026-09-11): scripts/extract_boss_builds.ps1
+  // reconstruía a entrada por campo nomeado e descartava ivsRaw/evsRaw
+  // (mesmo dado que extract_bosses.ps1 já extraía de verdade), então o
+  // template hardcodava ivs:[31,31,31,31,31,31] mesmo quando o chefão real
+  // NÃO era flawless. Cofagrigus (Phoebe 2) é um caso real confirmado
+  // (ivsRaw [31,31,31,31,31,0] - 0 de IV de Velocidade, típico de um set de
+  // Trick Room de verdade, e o próprio moveset inclui Trick Room) - testa
+  // exatamente o cenário que passaria despercebido antes da correção.
+  setSearch("Cofagrigus");
+  await wait(30);
+  const cofagrigusRow = document.querySelector("#species-list .species-row");
+  if (cofagrigusRow) {
+    cofagrigusRow.click();
+    await wait(30);
+    const details2 = document.querySelector(".bh-details");
+    if (details2) details2.setAttribute("open", "");
+    await wait(30);
+    const useEntryBtn2 = document.querySelector(".use-entry-build-btn");
+    if (useEntryBtn2) {
+      useEntryBtn2.click();
+      await wait(50);
+      const savedCofagrigus = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").customBuilds;
+      const cofagrigusList = savedCofagrigus && savedCofagrigus.SPECIES_COFAGRIGUS;
+      const cof = cofagrigusList && cofagrigusList[cofagrigusList.length - 1];
+      check("boss-reference com IV real NÃO-flawless (Cofagrigus/Phoebe 2, 0 de IV de Velocidade) copia o IV verdadeiro, não 31 fixo",
+        cof && Array.isArray(cof.ivs) && JSON.stringify(cof.ivs) === JSON.stringify([31, 31, 31, 31, 31, 0]),
+        cof && JSON.stringify(cof.ivs));
+    } else { check("'+ Usar como meu build' button found on Cofagrigus (IV real test)", false); }
+  } else { check("Cofagrigus found for the IV-real reference-entry test", false); }
+  setSearch("");
+  await wait(30);
+
   // --- transfer card removal - 2026-09-09, replaced by the db-capability
   // sync above and confirmed working on real devices the same day, so the
   // manual copy/paste/download UI was removed to keep the page lighter

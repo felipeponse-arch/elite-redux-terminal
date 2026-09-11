@@ -2139,6 +2139,18 @@
         if (syncContentDiffers(local, remote)) {
           if (!local || (remote.savedAt && (!local.savedAt || remote.savedAt > local.savedAt))) {
             // Remote has real differences and is the newer (or only) copy.
+            // Bug real, achado em auditoria (2026-09-11): isto só gravava o
+            // remoto no localStorage, nunca atualizava `state` em memória -
+            // qualquer persist() disparado por uma ação normal do jogador
+            // ANTES de clicar "recarregar" (buildSave() lê só de `state.*`)
+            // regravava o valor antigo por cima do remoto recém-chegado, e
+            // ainda empurrava esse dado desatualizado de volta pro banco,
+            // revertendo silenciosamente a mudança do outro aparelho.
+            // applySave() corrige o `state` imediatamente - o banner/reload
+            // continua existindo pra atualizar a TELA, mas persist() agora
+            // nunca mais sobrescreve o remoto com dado velho enquanto isso
+            // não acontece.
+            applySave(remote);
             lsSet(STORE_KEY, JSON.stringify(remote));
             showSyncBanner("Encontramos um save mais novo de outro aparelho.");
           } else {
@@ -2160,6 +2172,8 @@
       var localRaw3 = lsGet(STORE_KEY);
       var local3 = localRaw3 ? JSON.parse(localRaw3) : null;
       if (!syncContentDiffers(local3, remote)) return;
+      // Mesmo fix do bloco de carga inicial acima - ver o comentário lá.
+      applySave(remote);
       lsSet(STORE_KEY, JSON.stringify(remote));
       showSyncBanner("Seu time foi atualizado em outro aparelho agora.");
     }, function () { syncDb = null; syncRef = null; });
@@ -4020,7 +4034,15 @@
       }
       persist();
       flashToast("Build gerada por IA salva para " + sp.n);
-      selectSpecies(sp.x);
+      // Bug real, achado em auditoria (2026-09-11): sample.json() pode levar
+      // vários segundos - se o jogador já tiver navegado pra outra espécie
+      // (ou aba) enquanto esperava, forçar selectSpecies(sp.x) aqui puxava
+      // ele de volta pra ESTA espécie sem aviso nenhum, mesmo já tendo
+      // escolhido olhar outra coisa. A build é salva de qualquer forma
+      // (persist() já rodou acima) - só o "puxão" de tela é condicional
+      // agora: só reabre/atualiza a ficha se o jogador ainda estiver
+      // olhando pra esta mesma espécie na Dex.
+      if (state.selected === sp.x) selectSpecies(sp.x);
     } catch (e) {
       if (statusEl) statusEl.textContent = sampleErrorMessage(e);
     }
@@ -4201,12 +4223,21 @@
     if (!list) return;
     var entry = fromBoss ? list[parseInt(btn.dataset.idx, 10)] : list.slice().reverse()[parseInt(btn.dataset.idx, 10)];
     if (!entry) return;
+    // ivsRaw só existe em entradas de chefão (boss_reference_builds.json) e
+    // só desde a correção de 2026-09-11 - histórico de build antigo
+    // (BUILD_HISTORY) nunca teve IV de verdade pra guardar (é uma build do
+    // PRÓPRIO jogador). Sem o dado real, 31 fixo continua sendo o fallback
+    // honesto (não um valor inventado - é literalmente o padrão competitivo
+    // "perfect IV" que builds manuais também assumem).
+    var ivs = (Array.isArray(entry.ivsRaw) && entry.ivsRaw.length === 6)
+      ? entry.ivsRaw.slice()
+      : [31, 31, 31, 31, 31, 31];
     setOrReplaceActiveBuild(sp.sname, {
       ability: entry.ability || "",
       nature: entry.nature || "",
       item: entry.item || "",
       moves: (entry.moves || []).slice(0, 4),
-      ivs: [31, 31, 31, 31, 31, 31],
+      ivs: ivs,
       evs: evsTextToArray(entry.evs)
     }, "manual");
     persist();
