@@ -3258,6 +3258,24 @@
       evoHtml = '<div class="card"><h3>Linha evolutiva</h3><div class="evo-chain">' + nodes.join("") + '</div></div>';
     }
 
+    // Formas alternativas (sp.frm), 2026-09-11 - achado na varredura completa
+    // do jogo pedida pelo usuário (dado real, nunca extraído até agora: 41
+    // espécies têm isto populado - Deoxys, Rotom, Burmy/Wormadam, Shellos/
+    // Gastrodon, Darmanitan, Basculin, Deerling/Sawsbuck, Tornadus/Thundurus/
+    // Landorus, Shaymin, Pichu). Cada forma já é sua própria entrada completa
+    // na dex (mesmo padrão das variantes Mega/Regional/Redux) - isto é só
+    // navegação direta entre elas, reaproveitando a mesma classe .evo-node
+    // (peso visual já estabelecido) e o mesmo goToDexSpecies() da linha
+    // evolutiva, sem CSS novo.
+    var frmHtml = "";
+    if (sp.frm && sp.frm.length) {
+      var frmNodes = sp.frm.map(function (fx) {
+        var f = getSpeciesByX(fx);
+        return f ? '<div class="evo-node goto-species" data-x="' + f.x + '">' + escapeHtml(f.n) + '</div>' : "";
+      }).join("");
+      if (frmNodes) frmHtml = '<div class="card"><h3>Formas alternativas</h3><div class="evo-chain">' + frmNodes + '</div></div>';
+    }
+
     var lm = sp.lm.slice().sort(function (a, b) { return a[0] - b[0]; });
     var lmHtml = renderMovesTable(lm, "Golpes por Nível", "Sem golpes por nível registrados.");
 
@@ -3317,6 +3335,7 @@
         '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
           '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p></div>' +
         evoHtml +
+        frmHtml +
       '</div>' +
       '<details class="detail-group"><summary>Golpes (' + (lm.length + tuPairs.length) + ')</summary>' +
         lmHtml + tuHtml +

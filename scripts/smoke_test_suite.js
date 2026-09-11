@@ -1735,6 +1735,49 @@ async function runLiveTests() {
   setSearch("");
   await wait(120);
 
+  // --- 20. Formas alternativas (sp.frm) - varredura completa do jogo
+  // pedida pelo usuário, 2026-09-11 ---
+  // Rotom tem as 5 formas de eletrodoméstico reais (Heat/Wash/Frost/Fan/Mow)
+  // como fixture - dado nunca extraído até esta passagem. Charizard (sem
+  // formas alternativas neste hack) confirma que o card some quando a lista
+  // está vazia, não aparece sempre vazio.
+  setSearch("Rotom");
+  await wait(120);
+  const rotomRow = [...document.querySelectorAll("#species-list .species-row")].find(r => r.querySelector(".sname").textContent === "Rotom");
+  if (rotomRow) {
+    rotomRow.click();
+    await wait(30);
+    const frmCard = [...document.querySelectorAll(".card")].find(c => c.querySelector("h3") && c.querySelector("h3").textContent === "Formas alternativas");
+    check("card 'Formas alternativas' aparece pro Rotom com as 5 formas reais",
+      !!frmCard && ["Heat", "Wash", "Frost", "Fan", "Mow"].every(f => frmCard.textContent.indexOf("Rotom " + f) !== -1),
+      frmCard && frmCard.textContent);
+    const washNode = frmCard && [...frmCard.querySelectorAll(".goto-species")].find(n => n.textContent === "Rotom Wash");
+    if (washNode) {
+      washNode.click();
+      await wait(50);
+      check("clicar numa forma alternativa navega pra ficha real dela",
+        document.querySelector(".detail-titles h2").textContent === "Rotom Wash",
+        document.querySelector(".detail-titles h2").textContent);
+    } else {
+      check("nó de navegação do Rotom Wash encontrado no card", false);
+    }
+  } else {
+    check("Rotom encontrado pro teste de formas alternativas", false);
+  }
+  setSearch("Charizard");
+  await wait(120);
+  const charRowFrm = document.querySelector("#species-list .species-row");
+  if (charRowFrm) {
+    charRowFrm.click();
+    await wait(30);
+    const noFrmCard = [...document.querySelectorAll(".card")].find(c => c.querySelector("h3") && c.querySelector("h3").textContent === "Formas alternativas");
+    check("card 'Formas alternativas' NÃO aparece pra espécie sem formas (Charizard)", !noFrmCard);
+  } else {
+    check("Charizard encontrado pro teste de ausência de formas alternativas", false);
+  }
+  setSearch("");
+  await wait(120);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

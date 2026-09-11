@@ -128,6 +128,19 @@ for ($idx = 0; $idx -lt $data.species.Count; $idx++) {
     $hw = if ($dexInfo -and $dexInfo["hw"]) { @($dexInfo["hw"]) } else { @() }
     $dexId = if ($dexInfo) { $dexInfo["id"] } else { 0 }
 
+    # formas alternativas (species.forms), 2026-09-11, achado na varredura
+    # completa pedida pelo usuário: índices de OUTRAS entradas da dex que são
+    # formas alternativas desta espécie (Deoxys/Rotom/Burmy-Wormadam/Shellos-
+    # Gastrodon/Darmanitan/Basculin/Deerling-Sawsbuck/Tornadus-Thundurus-
+    # Landorus/Shaymin/Pichu - 41 espécies no total têm isto populado, o
+    # resto tem lista vazia). Cada forma JÁ é sua própria entrada completa e
+    # independente na dex (stats/tipos/habilidades próprios, mesmo padrão já
+    # usado pras variantes Mega/Regional/Redux) - isto é só a referência
+    # cruzada pra navegação direta, mesmo padrão de goToDexSpecies() já usado
+    # na linha evolutiva. Filtra 0 e auto-referência por segurança (não visto
+    # nos dados reais, mas mais barato que assumir).
+    $frm = @(@($s["forms"]) | Where-Object { $_ -and $_ -ne 0 -and $_ -ne $idx })
+
     $entry = [ordered]@{
         x = $idx
         i = $dexId
@@ -145,6 +158,7 @@ for ($idx = 0; $idx -lt $data.species.Count; $idx++) {
         hw = $hw
         senc = $senc.ToArray()
         wenc = if ($wildMapsBySpecies.ContainsKey($idx)) { $wildMapsBySpecies[$idx].ToArray() } else { @() }
+        frm = $frm
     }
     [void]$speciesOut.Add($entry)
 }
