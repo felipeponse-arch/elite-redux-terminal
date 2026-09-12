@@ -2149,6 +2149,33 @@ async function runLiveTests() {
   setSearch("");
   await wait(30);
 
+  // --- 26. Auditoria WCAG/eMAG (2026-09-12) - todo .notes-status precisa
+  // anunciar mensagens de status pra leitor de tela, mesmo padrão que o
+  // toast/sync-banner/storage-banner já seguiam. Regressão-guarda: confirma
+  // que as 5 ocorrências reais no DOM (mybuild-status só existe com uma
+  // build ativa, então não é checado aqui - mas os outros 4 sempre existem
+  // nas telas já visitadas nesta suíte) têm role="status" aria-live="polite".
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(30);
+  const teamStatusIds = ["archetype-status", "team-strategy-status"];
+  const missingAriaLiveTeam = teamStatusIds.filter(function (id) {
+    var el = document.getElementById(id);
+    return !el || el.getAttribute("aria-live") !== "polite" || el.getAttribute("role") !== "status";
+  });
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  setSearch("Bulbasaur");
+  await wait(120);
+  const bulbaRowAudit = document.querySelector("#species-list .species-row");
+  if (bulbaRowAudit) { bulbaRowAudit.click(); await wait(30); }
+  const speciesStatusEl = document.getElementById("species-notes-status");
+  const missingAriaLive = missingAriaLiveTeam.concat(
+    (!speciesStatusEl || speciesStatusEl.getAttribute("aria-live") !== "polite" || speciesStatusEl.getAttribute("role") !== "status") ? ["species-notes-status"] : []
+  );
+  check("spans de status (.notes-status) anunciam mudança pra leitor de tela (role=status aria-live=polite)",
+    missingAriaLive.length === 0, missingAriaLive);
+  setSearch("");
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
