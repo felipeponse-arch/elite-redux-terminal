@@ -156,6 +156,70 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   geração de build por IA (RF21-30) quanto para a leitura estratégica de time (RF44), como a mesma
   fonte de verdade — nunca duas implementações que possam divergir.
 
+### 1.13 Reposição e limpeza da aba Time (Fase 1, 2026-09-11/12)
+- RF46 — A leitura estratégica do time (RF44) deve aparecer como o PRIMEIRO item da aba Time, acima da
+  lista de membros — nunca como o último item da página.
+- RF47 — O Terminal NÃO deve manter histórico de saves anteriores nem oferecer desfazer uma alteração de
+  time/caixa. (Revoga RF13 da especificação original — o usuário considerou a feature sem utilidade real
+  e pediu remoção completa, não apenas ocultação.)
+- RF48 — O Terminal NÃO deve oferecer exportação do time inteiro em formato Showdown como um card
+  próprio. (Revoga a parte de RF17 relativa a exportação de TIME inteiro — a exportação de um set
+  individual por espécie, usada em "Meu build"/histórico/referência de chefão, continua existindo e não
+  é afetada por esta revogação.)
+
+### 1.14 PC Box (Fase 2, 2026-09-11/12)
+- RF49 — O Terminal deve exibir a caixa como uma grade paginada de até 30 slots por página, com
+  navegação anterior/próxima, no formato visual de um jogo Pokémon real (slots de tamanho fixo,
+  independente da largura da tela do jogador — nunca esticando para preencher o espaço disponível).
+- RF50 — O Terminal deve permitir buscar por nome dentro da caixa, saltando automaticamente para a
+  página e o slot correspondentes ao resultado, sem que o campo de busca perca o foco a cada tecla
+  digitada.
+- RF51 — Ao selecionar um slot preenchido da caixa, o Terminal deve exibir um painel de detalhe com:
+  nome, rank, tipos, as habilidades escolhíveis e as innates da espécie (a mesma informação já exibida
+  no card de cada membro na aba Time), e as ações de mandar para o time (ou trocar, se o time já estiver
+  completo) e remover da caixa.
+
+### 1.15 Rank robusto por simulação (Fase 3a, 2026-09-12)
+- RF52 — O rank geral e por estágio evolutivo de uma espécie deve ser calculado com a simulação de
+  defesa real contra os times de todos os chefões catalogados (incluindo variantes Insane/Hell) como
+  sinal PRINCIPAL (peso 0,70), e uma composição ponderada de BST/habilidade/movepool real/qualidade de
+  tipagem como desempate (peso 0,30) — substituindo o cálculo anterior baseado em uso-em-chefões e
+  velocidade isolada (RF36, revogado por este). O resultado final é normalizado por percentil antes de
+  ser convertido em tier (SS/S/A/B/C/D), nunca em valor absoluto direto.
+- RN12 — Toda simulação de defesa (RF52) deve considerar o multiplicador de tipo já ajustado por
+  habilidades reais que alteram efetividade (ex: Levitate anulando fraqueza a Ground), nunca a tabela de
+  tipos pura — um cálculo que ignore isso classifica espécies com defesa real baseada em habilidade
+  (ex: Probopass) de forma incorreta, achado e corrigido antes de publicar nesta mesma passagem.
+
+### 1.16 Arquétipo do time: montagem, não rotulagem (Fase 3b, redesenhada 2026-09-12)
+- RF53 — O Terminal deve permitir que o jogador escolha um Ritmo (Hyper Offense/Balance/Bulky
+  Offense/Stall/Semi-Stall) e/ou um Clima (Sand/Rain/Sun/Snow/Trick Room) como alvo — dois eixos
+  independentes, um time pode ser classificado nos dois ao mesmo tempo.
+- RF54 — Com um alvo escolhido (RF53), o Terminal deve permitir gerar, sob demanda, uma proposta de até
+  6 espécies — usando SOMENTE espécies que o jogador já possui (time + caixa combinados) — que formem o
+  melhor time possível para aquele alvo, com justificativa em português. (Revoga a versão anterior desta
+  feature, que apenas classificava o arquétipo do time JÁ montado sem sugerir uma composição melhor —
+  considerada pelo usuário como não-acionável: "ele falar que eu tenho X do mesmo papel não me ajuda de
+  forma objetiva".)
+- RF55 — O Terminal deve permitir aplicar a proposta (RF54) com uma única ação, substituindo o time
+  atual pela composição sugerida — quem sai do time volta para a caixa, nunca é descartado.
+- RN13 — Toda espécie de uma proposta de time (RF54) deve ser revalidada contra o time/caixa REAIS do
+  jogador tanto no momento em que a IA responde quanto no momento em que o jogador aplica a proposta
+  (não apenas uma vez) — uma espécie sugerida que não exista mais no time/caixa do jogador nesse
+  intervalo é descartada da proposta, nunca aplicada.
+
+### 1.17 Leitura estratégica: caixa inteira e troca acionável (Fase 4, 2026-09-12)
+- RF56 — Ao gerar a leitura estratégica do time (RF44), o Terminal deve fornecer à IA tanto o candidato
+  determinístico para a próxima luta (RF43) quanto a visão da caixa inteira (cada membro com rank/papel/
+  tipo reais), permitindo que ela proponha uma troca de encaixe geral para o time — não apenas para a
+  próxima luta específica.
+- RF57 — Quando a leitura estratégica (RF44) incluir uma troca sugerida, o Terminal deve exibir um botão
+  que aplica essa troca diretamente — sujeito à mesma regra de revalidação no momento do clique descrita
+  em RN13, aplicada aqui à sugestão de troca (não apenas à proposta de time inteiro).
+- RF58 — Ao selecionar um Pokémon da caixa, o Terminal deve exibir, quando aplicável, uma nota indicando
+  se aquele Pokémon resolve uma fraqueza de tipo que o time atual já compartilha — independente de qual
+  seja a próxima luta.
+
 ## 2. Requisitos não funcionais
 
 - RNF01 — **Portabilidade**: o Terminal deve funcionar como um único arquivo HTML autocontido (Claude
@@ -202,6 +266,10 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   numérico (percentil de bulk/ataque/velocidade) deve ser calibrado contra espécies reconhecíveis antes
   de confiar no resultado amplo, e um corte que falhe num caso conhecido (ex: Rotom-Wash não bater como
   Pivô) é motivo de ajuste, não de aceitar o resultado calado.
+- RN15 — Uma mesma espécie nunca está no time E na caixa ao mesmo tempo — adicionar ao time remove da
+  caixa (e vice-versa) sempre pela mesma rotina de mutação (`rosterMove`), nunca por uma escrita direta
+  que ignore esse invariante. Achado real em revisão de código, 2026-09-12: o botão "Adicionar à caixa"
+  da ficha da Dex só verificava se a espécie já estava na caixa, nunca se já estava no time — corrigido.
 
 ---
 

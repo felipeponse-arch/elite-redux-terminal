@@ -1196,26 +1196,16 @@ async function runLiveTests() {
   check("'Histórico de saves' foi removido (card, não só a lista vazia)",
     !document.getElementById("save-history-card") && !document.querySelector(".save-history-row"));
   check("er_terminal_history não é mais escrito no localStorage", localStorage.getItem("er_terminal_history") === null);
-  // "Time completo em formato Showdown" vira botão sem preview, 2026-09-11
-  // (pedido do usuário: "isso precisa sair não tem sentido" - a AÇÃO de
-  // copiar continua existindo, só o bloco de texto cru estático na tela não).
-  check("card do Showdown não tem mais o bloco de texto cru na tela (só o botão)",
-    !document.querySelector("#showdown-card pre"));
-  const sdCopyBtn = document.getElementById("showdown-copy");
-  if (sdCopyBtn && !sdCopyBtn.disabled) {
-    sdCopyBtn.click();
-    // copyText() usa navigator.clipboard.writeText(), que é assíncrono
-    // (.then()) - checar o status logo após o .click() sem esperar a
-    // Promise resolver falha sempre, mesmo quando o botão funciona
-    // perfeitamente. Achado real ao rodar de verdade, não bug do app.
-    await wait(50);
-    check("botão 'Copiar time inteiro' continua funcional (copia via showdownTeam() real)",
-      document.getElementById("showdown-status").textContent.indexOf("Copiado") !== -1);
-  } else {
-    check("botão 'Copiar time inteiro' habilitado com time real", false);
-  }
-  document.querySelector('.tab-btn[data-tab="dex"]').click();
-  await wait(30);
+  // "Time completo em formato Showdown" foi REMOVIDO por completo, 2026-09-12
+  // (pedido do usuário: "isso é pra excluir não vamos mais usar isso no
+  // projeto" - desta vez é a feature inteira, não só o preview cru que já
+  // tinha sido tirado em 2026-09-11). Regressão-guarda de remoção, mesmo
+  // padrão do "Histórico de saves": confirma que o card E a função
+  // showdownTeam() (só usada por ele) realmente sumiram, não só que ninguém
+  // testa mais. showdownSet() (por espécie, usado em "Meu build"/histórico/
+  // referência de chefão) continua existindo - é uma feature diferente.
+  check("card 'Time completo em formato Showdown' foi removido por completo",
+    !document.getElementById("showdown-card") && !document.getElementById("showdown-copy"));
 
   setSearch("Charizard");
   await wait(120);
@@ -1885,6 +1875,13 @@ async function runLiveTests() {
   check("grade da PC Box tem 30 slots (6x5, mesmo tamanho do print de referência)",
     !!pcGrid && pcGrid.querySelectorAll(".pcbox-slot").length === 30,
     pcGrid && pcGrid.querySelectorAll(".pcbox-slot").length);
+  // Tamanho FIXO (não mais 1fr esticando pra preencher a largura da tela) -
+  // achado real do usuário, 2026-09-12: numa tela larga cada slot virava um
+  // quadrado enorme com o sprite minúsculo boiando no meio.
+  const pcAnySlot = document.querySelector(".pcbox-slot:not(.empty)") || document.querySelector(".pcbox-slot.empty");
+  check("slots da PC Box têm largura fixa (60px), não esticam pra preencher a tela",
+    !!pcAnySlot && getComputedStyle(pcAnySlot).width === "60px",
+    pcAnySlot && getComputedStyle(pcAnySlot).width);
   const filledBefore = document.querySelectorAll(".pcbox-slot:not(.empty)").length;
   check("pelo menos 1 slot preenchido (caixa não está vazia nesta altura da suíte)", filledBefore > 0, filledBefore);
   // Seleciona o 1º slot preenchido, confirma painel de detalhe + navegação
@@ -1899,6 +1896,13 @@ async function runLiveTests() {
     const reQueriedSlot = document.querySelector('.pcbox-slot[data-x="' + pcFirstSlotX + '"]');
     check("selecionar um slot marca .selected e abre o painel de detalhe",
       !!reQueriedSlot && reQueriedSlot.classList.contains("selected") && !!document.querySelector(".pcbox-detail .bc-name-wrap"));
+    // Mesma informação que o card do Meu Time já mostra (Hab./Innate) -
+    // pedido explícito do usuário: "quero a mesma informação que temos
+    // aqui no time para cada poke" na caixa.
+    const pcAbisEl = document.querySelector(".pcbox-detail-abis");
+    check("painel de detalhe da PC Box mostra Hab./Innate, igual o card do Meu Time",
+      !!pcAbisEl && pcAbisEl.textContent.indexOf("Hab.:") !== -1 && pcAbisEl.textContent.indexOf("Innate:") !== -1,
+      pcAbisEl && pcAbisEl.textContent);
     const detailName = document.querySelector(".pcbox-detail .bc-name-wrap span:last-child").textContent;
     document.querySelector(".pcbox-detail .bc-name-wrap").click();
     await wait(50);
@@ -1951,10 +1955,14 @@ async function runLiveTests() {
   setSearch("");
   await wait(120);
 
-  // --- 23. Arquétipo de time + aviso de papel redundante (Fase 3b do
-  // roadmap, 2026-09-12) - último item da reunião: "não dá pra ter 4
-  // tanques no time mesmo que todos tenham vantagem" e "considere
-  // estratégias, um time de clima, trickroom, full ofensive ou stall".
+  // --- 23. Arquétipo de time: monta o melhor time pro arquétipo escolhido
+  // (Fase 3b, REDESENHADA 2026-09-12 por pedido direto do usuário: "a ideia
+  // não é analisar os poke que eu tenho no time e sim ao clicar ali ele me
+  // dar o melhor time possível dentro dos poke que eu tenho focado naquele
+  // arquétipo" - e "ele falar que eu tenho 6 tanque no time não me ajuda de
+  // forma objetiva". O antigo "Detectar automaticamente" (só rotulava o
+  // time atual) e o aviso de papel redundante (só constatava o problema)
+  // foram REMOVIDOS - esta seção substitui inteiramente a versão anterior).
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(50);
   const archCard = [...document.querySelectorAll(".card")].find(c => c.querySelector("h3") && c.querySelector("h3").textContent === "Arquétipo do time");
@@ -1966,40 +1974,82 @@ async function runLiveTests() {
     !!paceSel && !!weatherSel &&
     [...paceSel.options].some(o => o.value === "Balance") && [...paceSel.options].some(o => o.value === "Stall") &&
     [...weatherSel.options].some(o => o.value === "Sand") && [...weatherSel.options].some(o => o.value === "Trick Room"));
-  // Time seed desta suíte (Aerodactyl Mega/Probopass/Coalossal Mega/
-  // Terrakion/Avalugg Hisuian/Tyranitar Mega Redux) tem só 3 Tanque - não
-  // deve disparar aviso (o limiar real é 4+, confirmado com SPECIES_ROLE
-  // antes de escrever este teste).
-  check("SEM aviso de papel redundante pro time seed (só 3 de 6 são Tanque, abaixo do limiar de 4)",
+  check("aviso de papel redundante (versão antiga, só informativa) foi removido - não existe mais essa classe",
     !document.querySelector(".archetype-warning"));
-  // Seleção manual persiste de verdade (controle explícito - a IA só
-  // propõe, o <select> é a fonte de verdade real).
-  paceSel.value = "Stall";
-  paceSel.dispatchEvent(new Event("change", { bubbles: true }));
-  weatherSel.value = "Sand";
+
+  // Clicar sem escolher Ritmo/Clima dá uma mensagem construtiva, não chama
+  // a IA às cegas (ela precisaria de um alvo real pra montar algo focado).
+  const buildBtn = document.getElementById("archetype-build");
+  check("botão 'Montar melhor time' existe (substitui 'Detectar automaticamente')", !!buildBtn);
+  if (buildBtn) {
+    buildBtn.click();
+    await wait(30);
+    check("clicar sem Ritmo/Clima escolhido dá uma mensagem construtiva pedindo pra escolher um eixo primeiro",
+      document.getElementById("archetype-status").textContent.indexOf("Ritmo ou Clima") !== -1,
+      document.getElementById("archetype-status").textContent);
+  }
+
+  // Seleção manual persiste de verdade (controle explícito - a IA só monta
+  // o time pro alvo já escolhido, nunca decide o alvo sozinha).
+  weatherSel.value = "Rain";
   weatherSel.dispatchEvent(new Event("change", { bubbles: true }));
   await wait(30);
-  const savedArch = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").archetype;
-  check("selecionar Ritmo/Clima manualmente persiste em localStorage (arquétipo não é só decorativo)",
-    !!savedArch && savedArch.pace === "Stall" && savedArch.weather === "Sand", savedArch);
-  check("botão 'Detectar automaticamente' existe (proposta de IA, nunca decide sozinha - só preenche os mesmos <select>)",
-    !!document.getElementById("archetype-detect"));
+  const savedArch1 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").archetype;
+  check("selecionar Clima manualmente persiste em localStorage (arquétipo não é só decorativo)",
+    !!savedArch1 && savedArch1.weather === "Rain", savedArch1);
 
-  // Aviso real: troca o time pros 4 Tanque conhecidos (SPECIES_ROLE real,
-  // não um mock) e confirma que o limiar de 4 dispara de verdade.
-  document.querySelector('.tab-btn[data-tab="team"]').click();
-  await wait(30);
-  [...document.querySelectorAll(".team-slot .remove-btn")].forEach(b => b.click());
-  document.querySelector('.tab-btn[data-tab="dex"]').click();
-  await wait(30);
-  for (const n of ["Sandslash", "Clefable", "Wigglytuff", "Parasect"]) {
-    await addByName(n, false);
+  // Monta o roster real (time + caixa ATUAIS desta suíte) pra alimentar o
+  // mock com snames de verdade - o mock devolve 2 reais + 1 INVENTADO
+  // (sname que não existe no roster), confirmando que a validação defensiva
+  // filtra o inventado em vez de confiar cegamente na resposta da IA.
+  const saveForArch = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+  const rosterSnames = (saveForArch.team || []).concat(saveForArch.box || []);
+  window.__archToolCalls = [];
+  window.claude = {
+    use: async function (name) {
+      if (name !== "sample") return null;
+      return {
+        json: async function (prompt, opts) {
+          window.__archLastPrompt = prompt;
+          if (opts && Array.isArray(opts.tools)) {
+            for (const t of opts.tools) {
+              if (!t.inputSchema) { try { await t.execute({}); window.__archToolCalls.push(t.name); } catch (e) { } }
+            }
+          }
+          return {
+            team: rosterSnames.slice(0, 2).concat(["SPECIES_ISTO_NAO_EXISTE"]),
+            reasoning: "Mock: time de teste automatizado focado no arquétipo pedido."
+          };
+        }
+      };
+    }
+  };
+  buildBtn.click();
+  await wait(100);
+  check("'Montar melhor time' chama as ferramentas reais compartilhadas (buildStandardAiTools, Fase 4+)",
+    window.__archToolCalls.indexOf("getTeamWeaknesses") !== -1, window.__archToolCalls);
+  const recoBtn = document.getElementById("archetype-apply-team");
+  check("sugestão de time aparece com botão 'Usar este time' quando o mock devolve um team válido",
+    !!recoBtn, recoBtn && recoBtn.textContent);
+  check("chip do time sugerido mostra só os 2 reais - o sname inventado (SPECIES_ISTO_NAO_EXISTE) foi filtrado",
+    document.querySelectorAll(".archetype-reco-chip").length === 2,
+    document.querySelectorAll(".archetype-reco-chip").length);
+
+  if (recoBtn) {
+    recoBtn.click();
+    await wait(50);
+    const saveAfterArch = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+    check("'Usar este time' realmente aplica o time recomendado (só os 2 reais, não o inventado)",
+      saveAfterArch.team.length === 2 &&
+      rosterSnames.slice(0, 2).every(sn => saveAfterArch.team.indexOf(sn) !== -1),
+      saveAfterArch.team);
+    check("motivo da recomendação aplicada fica salvo em state.archetype.reasoning",
+      saveAfterArch.archetype && saveAfterArch.archetype.reasoning.indexOf("Mock") !== -1,
+      saveAfterArch.archetype);
+    check("a sugestão some sozinha depois de aplicada (mesmo padrão da troca acionável da Leitura estratégica)",
+      !document.getElementById("archetype-apply-team"));
   }
-  document.querySelector('.tab-btn[data-tab="team"]').click();
-  await wait(50);
-  check("aviso de papel redundante dispara com 4 Tanque reais (Sandslash/Clefable/Wigglytuff/Parasect)",
-    !!document.querySelector(".archetype-warning") && document.querySelector(".archetype-warning").textContent.indexOf("Tanque") !== -1,
-    document.querySelector(".archetype-warning") && document.querySelector(".archetype-warning").textContent);
+  delete window.claude;
 
   // --- 24. PC Box ganha sugestão geral de encaixe no time (Fase 4 do
   // roadmap, 2026-09-12) - "não só a sugestão única do próximo chefão".
@@ -2045,6 +2095,59 @@ async function runLiveTests() {
   } else {
     check("Charmander encontrado na PC Box pro teste de encaixe geral", false);
   }
+
+  // --- 25. Time e caixa nunca compartilham o mesmo Pokémon (achado real em
+  // revisão de código, 2026-09-12) - o botão "+ Caixa" na ficha da Dex só
+  // desabilitava por `inBox`, nunca por `inTeam`: dava pra clicar
+  // "Adicionar à caixa" com o Pokémon JÁ no time, deixando o mesmo x nos
+  // dois arrays ao mesmo tempo (quebra a garantia que rosterMove() dá em
+  // todo outro ponto de entrada - "nunca no time E na caixa"). Corrigido
+  // desabilitando também por `inTeam` + uma checagem de defesa em
+  // profundidade dentro do próprio handler de clique.
+  // Garante 1 vaga livre no time - se estiver 6/6 (comum a essa altura da
+  // suíte), clicar "+ Time" abriria o modal de troca em vez de adicionar
+  // direto, o que quebraria as checagens abaixo.
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(30);
+  const freeSlotBtn = document.querySelector(".team-slot .remove-btn");
+  if (freeSlotBtn) { freeSlotBtn.click(); await wait(30); }
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  // Meowth - espécie não usada em nenhuma fixture anterior desta suíte
+  // (Eevee/Forretress/Magcargo etc. já passaram por várias seções antes
+  // desta e podiam estar no time ou na caixa por causa disso, invalidando
+  // a checagem de "estado inicial limpo" que este teste precisa).
+  setSearch("Meowth");
+  await wait(120);
+  const meowthRow = document.querySelector("#species-list .species-row");
+  if (meowthRow) {
+    meowthRow.click();
+    await wait(30);
+    // Texto curto nos botões de ação da ficha (achado real do usuário,
+    // 2026-09-12: "+ Adicionar ao time" + "+ Adicionar à caixa" juntos
+    // empilhavam em vez de ficar lado a lado numa largura de painel comum,
+    // virando duas barras enormes). A frase completa mora no title/aria-label.
+    check("botões de ação da ficha usam texto curto ('+ Time'/'+ Caixa', não mais 'Adicionar ao time/à caixa')",
+      document.getElementById("add-team-btn").textContent === "+ Time" &&
+      document.getElementById("add-box-btn").textContent === "+ Caixa" &&
+      document.getElementById("add-team-btn").title.indexOf("Adicionar ao time") !== -1,
+      { team: document.getElementById("add-team-btn").textContent, box: document.getElementById("add-box-btn").textContent });
+    document.getElementById("add-team-btn").click();
+    await wait(50);
+    const addBoxBtnAfterTeam = document.getElementById("add-box-btn");
+    check("botão '+ Caixa' fica desabilitado quando a espécie já está no time (não só quando já está na caixa)",
+      !!addBoxBtnAfterTeam && addBoxBtnAfterTeam.disabled && addBoxBtnAfterTeam.textContent === "No time",
+      addBoxBtnAfterTeam && { disabled: addBoxBtnAfterTeam.disabled, text: addBoxBtnAfterTeam.textContent });
+    addBoxBtnAfterTeam.click(); // deveria ser um no-op de verdade, não só visual
+    await wait(30);
+    const saveAfterGuard = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+    check("clicar mesmo assim não escreve o Pokémon na caixa (defesa em profundidade no handler, não só no disabled do botão)",
+      (saveAfterGuard.box || []).indexOf("SPECIES_MEOWTH") === -1, saveAfterGuard.box);
+  } else {
+    check("Meowth encontrado pro teste de exclusividade time/caixa", false);
+  }
+  setSearch("");
+  await wait(30);
 
   localStorage.clear();
 

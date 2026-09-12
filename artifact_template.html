@@ -544,12 +544,18 @@
     flex: 1; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border);
     background: var(--surface-2); color: var(--text); font-size: 13px;
   }
+  /* Slots em tamanho FIXO (não mais 1fr esticando pra preencher a largura) -
+     achado real do usuário, 2026-09-12: numa tela larga cada slot virava um
+     quadrado enorme com o sprite minúsculo boiando no meio, quase não sobrava
+     espaço pra ver a informação de quem estava selecionado. 60px é o mesmo
+     tamanho não importa a largura da tela, igual o print de referência do
+     jogo real que motivou este redesenho (Fase 2 do roadmap). */
   .pcbox-grid {
-    display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;
+    display: grid; grid-template-columns: repeat(6, 60px); justify-content: center; gap: 6px;
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 10px;
   }
   .pcbox-slot {
-    aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--border);
+    width: 60px; height: 60px; border-radius: 8px; border: 1px solid var(--border);
     background: var(--surface); display: flex; align-items: center; justify-content: center;
     cursor: pointer; position: relative; padding: 4px;
   }
@@ -562,6 +568,11 @@
   .pcbox-detail .bc-name-wrap { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; }
   .pcbox-detail .box-chip-pips { display: flex; gap: 3px; }
   .pcbox-detail-actions { display: flex; gap: 8px; margin-left: auto; }
+  /* Hab./Innate do selecionado - mesma informação que o card do Meu Time já
+     mostra (.ts-abis), pedido explícito do usuário: "quero a mesma
+     informação que temos aqui no time para cada poke" na caixa. */
+  .pcbox-detail-abis { flex-basis: 100%; font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+  .pcbox-detail-abis b { color: var(--text); }
   /* Sugestão geral de encaixe (Fase 4, 2026-09-12) - linha própria (não
      cabe na fileira de nome/tipo/ações), mesmo tom de "dica" que
      .obtain-hint já usa no resto do app pra sinalizar "isto é contexto
@@ -962,18 +973,15 @@
     background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit;
     text-transform: none; letter-spacing: normal; font-weight: 400;
   }
-  /* Aviso de papel redundante (4+ do mesmo papel) - cor de alerta, não a
-     mesma cor de destaque da justificativa de IA, pra não parecer "dica
-     legal" e sim "atenção", que é a intenção real do aviso. */
-  .archetype-warning {
-    background: color-mix(in srgb, #e0a030 14%, transparent);
-    border-left: 3px solid #e0a030;
-    border-radius: 6px;
-    padding: 8px 12px;
-    margin: 8px 0 0;
-    font-size: 12.5px;
-    line-height: 1.5;
-    color: var(--text);
+  /* Lista de sprites do time recomendado (Fase 3b, redesenhado 2026-09-12) -
+     chip simples, só leitura, dentro do mesmo .ts-swap-suggestion usado
+     pela troca acionável da Leitura estratégica (mesma linguagem visual de
+     "proposta acionável, ainda não aplicada"). */
+  .archetype-reco-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .archetype-reco-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--border); background: var(--surface-2); border-radius: 999px;
+    padding: 3px 10px 3px 3px; font-size: 12px; font-weight: 600; color: var(--text);
   }
   .mybuild-moves-power { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
   .mybuild-move-power { font-size: 11.5px; color: var(--text-dim); line-height: 1.6; }
@@ -1318,15 +1326,6 @@
         <div>
           <h3 style="margin-bottom:10px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);">Meu time (máx. 6)</h3>
           <div class="team-slots" id="team-slots"></div>
-        </div>
-
-        <div class="card" id="showdown-card">
-          <h3>Time completo em formato Showdown</h3>
-          <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">O mesmo formato usado no Smogon / Pokémon Showdown — dá pra colar direto no teambuilder ou em qualquer análise.</p>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <button id="showdown-copy" class="add-team-btn" type="button">Copiar time inteiro</button>
-            <span id="showdown-status" style="font-size:11.5px;color:var(--accent-2);"></span>
-          </div>
         </div>
 
         <div class="card" id="saved-teams-card">
@@ -1985,10 +1984,11 @@
     // eixos INDEPENDENTES (fonte real trazida pelo usuário, r/VGC via
     // Reddit): ritmo (Hyper Offense/Balance/Bulky Offense/Stall/Semi-Stall)
     // e clima (Sand/Rain/Sun/Snow/Trick Room) - um time pode ser os dois ao
-    // mesmo tempo (ex: "Sand Balance"). null = ainda não definido. Nunca
-    // decidido escondido: a IA pode PROPOR (generateTeamArchetype), mas quem
-    // define de fato são os dois <select> - controle explícito sempre, mesmo
-    // padrão já usado em toda automação deste app (ver RN05, auto-evolução).
+    // mesmo tempo (ex: "Sand Balance"). null = ainda não definido. Os dois
+    // <select> são a fonte de verdade (controle explícito, RN05); a IA usa
+    // esse alvo pra MONTAR um time real (generateTeamForArchetype), nunca
+    // decide o alvo sozinha nem aplica sem o jogador clicar "Usar este time".
+    // `reasoning` guarda o motivo da ÚLTIMA recomendação aplicada de verdade.
     // Purely additive, mesmo padrão {} -> null-fields de notes/customBuilds.
     archetype: { pace: null, weather: null, reasoning: "" }
   };
@@ -3309,10 +3309,28 @@
         '<div class="detail-dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</div>' +
         '<div class="detail-sname mono">' + escapeHtml(sp.sname) + '</div>' +
       '</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-        '<button class="add-team-btn" id="add-team-btn" ' + (inTeam ? "disabled" : "") + '>' +
-          (inTeam ? "No time" : teamFull ? "⇄ Trocar com o time" : "+ Adicionar ao time") + '</button>' +
-        '<button class="add-team-btn" id="add-box-btn" style="background:var(--surface-3);color:var(--text);" ' + (inBox ? "disabled" : "") + '>' +
-          (inBox ? "Na caixa" : "+ Adicionar à caixa") + '</button>' +
+        // Texto curto + title/aria-label com a frase completa (mesmo padrão
+        // já usado no botão equivalente da PC Box) - achado real do usuário,
+        // 2026-09-12: "⇄ Trocar com o time" + "+ Adicionar à caixa" juntos
+        // eram longos o bastante pra empilhar em vez de ficar lado a lado
+        // numa largura de painel comum, virando duas barras enormes acima
+        // de qualquer informação real da espécie.
+        '<button class="add-team-btn" id="add-team-btn" ' + (inTeam ? "disabled" : "") +
+          ' title="' + (inTeam ? "Já está no time" : teamFull ? "Trocar por um do time" : "Adicionar ao time") + '"' +
+          ' aria-label="' + (inTeam ? "Já está no time" : teamFull ? "Trocar por um do time" : "Adicionar ao time") + '">' +
+          (inTeam ? "No time" : teamFull ? "⇄ Trocar" : "+ Time") + '</button>' +
+        // Achado real em revisão de código, 2026-09-12: este botão só
+        // desabilitava por `inBox`, nunca por `inTeam` - dava pra clicar
+        // "Adicionar à caixa" com o Pokémon JÁ no time, deixando o mesmo x
+        // presente nos dois arrays ao mesmo tempo (quebra a regra de sempre
+        // "nunca no time E na caixa simultaneamente" que rosterMove() já
+        // garante em todo outro ponto de entrada). Desabilita também quando
+        // já está no time - "já está no time" é motivo suficiente pra não
+        // oferecer "adicionar à caixa" (não faria sentido ter os dois).
+        '<button class="add-team-btn" id="add-box-btn" style="background:var(--surface-3);color:var(--text);" ' + ((inBox || inTeam) ? "disabled" : "") +
+          ' title="' + (inBox ? "Já está na caixa" : inTeam ? "Já está no time" : "Adicionar à caixa") + '"' +
+          ' aria-label="' + (inBox ? "Já está na caixa" : inTeam ? "Já está no time" : "Adicionar à caixa") + '">' +
+          (inBox ? "Na caixa" : inTeam ? "No time" : "+ Caixa") + '</button>' +
         // Only relevant once the Pokemon IS on the team: on mobile the species
         // list is hidden while a detail is open (.dex-shell.show-detail), so
         // without this the only way to see the team update is back -> scroll
@@ -3413,6 +3431,11 @@
     var addBoxBtn = document.getElementById("add-box-btn");
     if (addBoxBtn && !inBox) {
       addBoxBtn.addEventListener("click", function () {
+        // Defesa em profundidade: o próprio botão já vem desabilitado
+        // quando `inTeam`, mas confere de novo aqui (não confia só no
+        // estado do botão no momento do render) antes de escrever no
+        // array - mesmo x nunca deve estar em time E caixa ao mesmo tempo.
+        if (state.team.indexOf(x) !== -1) return;
         state.box.push(x);
         saveBox();
         updateBoxBadge();
@@ -3511,6 +3534,8 @@
     if (selectedSp) {
       var names = speciesTypeNames(selectedSp);
       var fitNote = boxFitNote(selectedSp, state.team.map(getSpeciesByX).filter(Boolean));
+      var abiNames = uniqueIds(selectedSp.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ");
+      var innNames = selectedSp.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ");
       detailHtml = '<div class="pcbox-detail">' +
         '<span class="bc-name-wrap goto-species" data-x="' + selectedSp.x + '" title="Ver na Dex">' + spriteImgHtml(selectedSp.x, selectedSp.n, 32) +
         '<span>' + escapeHtml(selectedSp.n) + '</span></span>' +
@@ -3521,6 +3546,7 @@
             (teamFull ? '&hArr;&nbsp;trocar' : '&rarr;&nbsp;time') + '</button>' +
           '<button class="remove-btn" data-x="' + selectedSp.x + '" title="remover da caixa">&times;</button>' +
         '</span>' +
+        '<div class="pcbox-detail-abis"><b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + '</div>' +
         (fitNote ? '<span class="pcbox-fit-note">' + fitNote + '</span>' : '') +
         '</div>';
     } else {
@@ -4332,6 +4358,51 @@
   // memória entre chamadas - ver skill artifact-capabilities), então isso
   // é o que dá pra fazer de real: raciocinar sobre o time e o momento do
   // jogo de verdade, em vez de inventar contexto que não existe.
+  // Fábrica única das ferramentas de IA compartilhadas entre os pontos que
+  // chamam sample.json() com `tools` - achado real em revisão de código,
+  // 2026-09-12: cada chamador colava os mesmos 6 objetos à mão, e as
+  // descrições já tinham divergido (getBoxCandidatesForBoss tinha um texto
+  // mais pobre aqui do que em generateTeamStrategy, mesma ferramenta). Cada
+  // chamador ainda soma o que for específico dele (ex: getBoxOverview só
+  // faz sentido pra quem raciocina sobre a caixa inteira).
+  function buildStandardAiTools() {
+    return [
+      {
+        name: "getTeamWeaknesses",
+        description: "Retorna o tamanho do time atual do jogador e quais tipos derrubam 2 ou mais membros ao mesmo tempo (fraqueza compartilhada real, ja calculada pelo app).",
+        execute: function () { return aiTool_getTeamWeaknesses(); }
+      },
+      {
+        name: "getSpeciesRank",
+        description: "Retorna o tier (SS/S/A/B/C/D) e a pontuacao real deste hack pra uma especie, dado o sname interno (ex: SPECIES_CHARIZARD), mais o(s) papel(is) ja calculado(s) (Pivo/Tanque/Wallbreaker/Sweeper) e a divisao fisico/especial/misto do ataque.",
+        inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
+        execute: function (input) { return aiTool_getSpeciesRank(input); }
+      },
+      {
+        name: "getRemainingBosses",
+        description: "Retorna os nomes dos lideres de ginasio/Alto Comando/Campeao que o jogador AINDA NAO enfrentou a partir do progresso atual dele, mais os tipos mais comuns nos times deles - usa o progresso ja configurado pelo jogador, nao pergunta nada.",
+        execute: function () { return aiTool_getRemainingBosses(); }
+      },
+      {
+        name: "getPriorityMoveOptions",
+        description: "Retorna os golpes de prioridade (prio > 0) que esta especie realmente aprende (nivel ou tutor - mesmo conjunto permitido nos 4 golpes da build), com nome/poder/prioridade reais. Lista vazia = esta especie nao tem golpe de prioridade viavel.",
+        inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
+        execute: function (input) { return aiTool_getPriorityMoveOptions(input); }
+      },
+      {
+        name: "getAbilityMovepoolSynergy",
+        description: "Retorna, pro sname informado, quais habilidades (escolhivel ou innate) desta especie realmente aumentam o poder de uma categoria de golpe ou tipo E a especie de fato aprende (nivel ou tutor) pelo menos um golpe real dessa categoria - com os nomes dos golpes reais que se beneficiam. Lista vazia = nenhuma sinergia confirmada pro movepool real desta especie.",
+        inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
+        execute: function (input) { return aiTool_getAbilityMovepoolSynergy(input); }
+      },
+      {
+        name: "getBoxCandidatesForBoss",
+        description: "Retorna o nome da proxima luta que falta (a partir do progresso atual do jogador) e, se existir, uma sugestao real de troca da caixa pra essa luta especifica (nunca alem dela), ja calculada pelo app (tipos de ataque reais do chefao x defesa real do candidato).",
+        execute: function () { return aiTool_getBoxCandidatesForBoss(); }
+      }
+    ];
+  }
+
   async function generateBuildWithAI(sp) {
     var statusEl = document.getElementById("mybuild-ai-status");
     if (statusEl) statusEl.textContent = "Consultando o Claude...";
@@ -4384,43 +4455,7 @@
       "rationale e uma frase curta em portugues explicando a escolha com base no time/rank/momento do jogo. " +
       "Nao invente golpes, habilidades ou items fora do que foi listado.";
     try {
-      var raw = await sample.json(prompt, {
-        tools: [
-          {
-            name: "getTeamWeaknesses",
-            description: "Retorna o tamanho do time atual do jogador e quais tipos derrubam 2 ou mais membros ao mesmo tempo (fraqueza compartilhada real, ja calculada pelo app).",
-            execute: function () { return aiTool_getTeamWeaknesses(); }
-          },
-          {
-            name: "getSpeciesRank",
-            description: "Retorna o tier (SS/S/A/B/C/D) e a pontuacao real deste hack pra uma especie, dado o sname interno (ex: SPECIES_CHARIZARD), mais o(s) papel(is) ja calculado(s) (Pivo/Tanque/Wallbreaker/Sweeper) e a divisao fisico/especial/misto do ataque.",
-            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
-            execute: function (input) { return aiTool_getSpeciesRank(input); }
-          },
-          {
-            name: "getRemainingBosses",
-            description: "Retorna os nomes dos lideres de ginasio/Alto Comando/Campeao que o jogador AINDA NAO enfrentou a partir do progresso atual dele, mais os tipos mais comuns nos times deles - usa o progresso ja configurado pelo jogador, nao pergunta nada.",
-            execute: function () { return aiTool_getRemainingBosses(); }
-          },
-          {
-            name: "getPriorityMoveOptions",
-            description: "Retorna os golpes de prioridade (prio > 0) que esta especie realmente aprende (nivel ou tutor - mesmo conjunto permitido nos 4 golpes da build), com nome/poder/prioridade reais. Lista vazia = esta especie nao tem golpe de prioridade viavel.",
-            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
-            execute: function (input) { return aiTool_getPriorityMoveOptions(input); }
-          },
-          {
-            name: "getAbilityMovepoolSynergy",
-            description: "Retorna, pro sname informado, quais habilidades (escolhivel ou innate) desta especie realmente aumentam o poder de uma categoria de golpe ou tipo E a especie de fato aprende (nivel ou tutor) pelo menos um golpe real dessa categoria - com os nomes dos golpes reais que se beneficiam. Lista vazia = nenhuma sinergia confirmada pro movepool real desta especie.",
-            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
-            execute: function (input) { return aiTool_getAbilityMovepoolSynergy(input); }
-          },
-          {
-            name: "getBoxCandidatesForBoss",
-            description: "Retorna o nome da proxima luta que falta (a partir do progresso atual do jogador) e, se existir, uma sugestao real de troca da caixa pra essa luta especifica (nunca alem dela), ja calculada pelo app.",
-            execute: function () { return aiTool_getBoxCandidatesForBoss(); }
-          }
-        ]
-      });
+      var raw = await sample.json(prompt, { tools: buildStandardAiTools() });
       var validated = validateAiBuild(sp, raw);
       if (!validated) {
         if (statusEl) statusEl.textContent = "A resposta não bateu com os dados reais deste Pokémon - tente de novo.";
@@ -4668,13 +4703,6 @@
     return BUILDS[sp.sname] || null;
   }
 
-  function showdownTeam() {
-    return state.team.map(getSpeciesByX).filter(Boolean).map(function (sp) {
-      var b = effectiveBuild(sp);
-      return b ? showdownSet(sp, b) : showdownName(sp.n) + "\n(sem build definida)";
-    }).join("\n\n");
-  }
-
   function renderTeam() {
     var slotsEl = document.getElementById("team-slots");
     var members = state.team.map(getSpeciesByX).filter(Boolean);
@@ -4766,19 +4794,12 @@
       document.querySelector('.tab-btn[data-tab="box"]').click();
     });
 
-    document.getElementById("showdown-copy").disabled = !showdownTeam();
-    document.getElementById("showdown-status").textContent = "";
-
     updateTeamBadge();
     renderClaudeExport(members);
     renderTeamStrategy(members);
     renderTeamAnalysis(members);
     renderSavedTeams();
   }
-
-  document.getElementById("showdown-copy").addEventListener("click", function () {
-    copyText(showdownTeam(), document.getElementById("showdown-status"), "Copiado! Cole no teambuilder do Showdown.");
-  });
 
   // ---- team <-> box swapping ----
   var teamSwapIdx = null;
@@ -5138,46 +5159,11 @@
       "arriscar.";
     try {
       var raw = await sample.json(prompt, {
-        tools: [
-          {
-            name: "getTeamWeaknesses",
-            description: "Retorna o tamanho do time atual do jogador e quais tipos derrubam 2 ou mais membros ao mesmo tempo (fraqueza compartilhada real, ja calculada pelo app).",
-            execute: function () { return aiTool_getTeamWeaknesses(); }
-          },
-          {
-            name: "getBoxCandidatesForBoss",
-            description: "Retorna o nome da proxima luta que falta (a partir do progresso atual do jogador) e, se existir, uma sugestao real de troca da caixa pra essa luta especifica (nunca alem dela), ja calculada pelo app (tipos de ataque reais do chefao x defesa real do candidato).",
-            execute: function () { return aiTool_getBoxCandidatesForBoss(); }
-          },
-          {
-            name: "getBoxOverview",
-            description: "Retorna a caixa inteira do jogador (nao so 1 candidato pra 1 luta) - cada membro com sname/nome/tipos/tier/papel reais, pra avaliar trocas de encaixe geral no time, alem da proxima luta.",
-            execute: function () { return aiTool_getBoxOverview(); }
-          },
-          {
-            name: "getSpeciesRank",
-            description: "Retorna o tier (SS/S/A/B/C/D) e a pontuacao real deste hack pra uma especie, dado o sname interno, mais o(s) papel(is) ja calculado(s) (Pivo/Tanque/Wallbreaker/Sweeper) e a divisao fisico/especial/misto do ataque.",
-            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
-            execute: function (input) { return aiTool_getSpeciesRank(input); }
-          },
-          {
-            name: "getRemainingBosses",
-            description: "Retorna os nomes dos lideres de ginasio/Alto Comando/Campeao que o jogador AINDA NAO enfrentou a partir do progresso atual dele, mais os tipos mais comuns nos times deles.",
-            execute: function () { return aiTool_getRemainingBosses(); }
-          },
-          {
-            name: "getPriorityMoveOptions",
-            description: "Retorna os golpes de prioridade (prio > 0) que esta especie realmente aprende (nivel ou tutor), com nome/poder/prioridade reais. Lista vazia = esta especie nao tem golpe de prioridade viavel.",
-            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
-            execute: function (input) { return aiTool_getPriorityMoveOptions(input); }
-          },
-          {
-            name: "getAbilityMovepoolSynergy",
-            description: "Retorna, pro sname informado, quais habilidades (escolhivel ou innate) desta especie realmente aumentam o poder de uma categoria de golpe ou tipo E a especie de fato aprende pelo menos um golpe real dessa categoria - com os nomes dos golpes reais que se beneficiam.",
-            inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
-            execute: function (input) { return aiTool_getAbilityMovepoolSynergy(input); }
-          }
-        ]
+        tools: buildStandardAiTools().concat([{
+          name: "getBoxOverview",
+          description: "Retorna a caixa inteira do jogador (nao so 1 candidato pra 1 luta) - cada membro com sname/nome/tipos/tier/papel reais, pra avaliar trocas de encaixe geral no time, alem da proxima luta.",
+          execute: function () { return aiTool_getBoxOverview(); }
+        }])
       });
       var text = (raw && typeof raw.text === "string") ? raw.text.trim() : "";
       // Sugestao acionavel (Fase 4) so vira botao real depois de confirmar
@@ -5202,12 +5188,20 @@
     }
   }
 
-  // Arquétipo do time (Fase 3b, 2026-09-12) - dois <select> são a fonte de
-  // verdade (controle explícito, RN05 - nunca decidido escondido); o botão
-  // "Detectar automaticamente" só PROPÕE valores nos mesmos <select>, o
-  // jogador ainda pode corrigir antes/depois. Aviso de papel redundante
-  // (item 7 do roadmap) mora no mesmo card por serem as duas coisas que
-  // olham "o time como um todo" antes de montar/trocar builds.
+  // Arquétipo do time (Fase 3b, redesenhado 2026-09-12 por pedido direto do
+  // usuário: "a ideia não é analisar os poke que eu tenho no time e sim ao
+  // clicar ali ele me dar o melhor time possível dentro dos poke que eu
+  // tenho focado naquele arquétipo" - e "ele falar que eu tenho 6 tanque no
+  // time não me ajuda de forma objetiva". Trocado de "detectar o arquétipo
+  // do time atual" (só informativo) pra "montar o melhor time possível pro
+  // arquétipo escolhido" (uma ação real). Os dois <select> continuam sendo
+  // a fonte de verdade explícita (RN05) - agora como o ALVO que o botão usa,
+  // não mais algo que a IA preenche a partir do time atual. O aviso de papel
+  // redundante (que só constatava o problema sem resolver nada) foi
+  // substituído pela própria recomendação, que evita concentração de papel
+  // sozinha quando faz sentido pro arquétipo pedido.
+  var teamRecommendation = null; // { snames, reasoning, forPace, forWeather }
+
   function archetypeCardHtml(members) {
     var pace = state.archetype.pace || "";
     var weather = state.archetype.weather || "";
@@ -5218,33 +5212,27 @@
       return '<option value="' + w + '"' + (weather === w ? " selected" : "") + '>' + w + '</option>';
     }).join("");
 
-    // Aviso de papel redundante: conta quantos do time compartilham CADA
-    // papel real (SPECIES_ROLE, já calculado no pipeline) - 4+ do mesmo
-    // papel é o exemplo literal que o usuário deu ("não dá pra ter 4
-    // tanques mesmo que todos tenham vantagem nesse modo").
-    var roleCounts = {};
-    members.forEach(function (sp) {
-      var role = SPECIES_ROLE[sp.sname];
-      (role && role.roles || []).forEach(function (r) { roleCounts[r] = (roleCounts[r] || 0) + 1; });
-    });
-    var warnings = Object.keys(roleCounts).filter(function (r) { return roleCounts[r] >= 4; })
-      .map(function (r) {
-        return '<p class="archetype-warning">⚠ ' + roleCounts[r] + ' de ' + members.length + ' do time são ' +
-          (ROLE_LABEL_PT[r] || r) + ' — considere diversificar papéis.</p>';
-      }).join("");
-
-    var reasoningHtml = state.archetype.reasoning
-      ? '<div class="mybuild-rationale">' + escapeHtml(state.archetype.reasoning) + '</div>' : "";
+    var recoHtml = "";
+    if (teamRecommendation && teamRecommendation.forPace === state.archetype.pace && teamRecommendation.forWeather === state.archetype.weather) {
+      var recoMembers = teamRecommendation.snames.map(getSpeciesBySname).filter(Boolean);
+      recoHtml = '<div class="ts-swap-suggestion">' +
+        (teamRecommendation.reasoning ? '<p class="mybuild-hint" style="margin:0 0 8px;">' + escapeHtml(teamRecommendation.reasoning) + '</p>' : "") +
+        '<div class="archetype-reco-list">' + recoMembers.map(function (sp) {
+          return '<span class="archetype-reco-chip">' + spriteImgHtml(sp.x, sp.n, 26) + escapeHtml(sp.n) + '</span>';
+        }).join("") + '</div>' +
+        '<button id="archetype-apply-team" type="button">Usar este time (' + recoMembers.length + '/6)</button>' +
+      '</div>';
+    }
 
     return '<div class="card"><h3>Arquétipo do time</h3>' +
-      '<p class="mybuild-hint">Ritmo e clima são dois eixos independentes — um time pode ser os dois ao mesmo tempo (ex: "Sand Balance").</p>' +
+      '<p class="mybuild-hint">Escolha um Ritmo e/ou Clima e peça o melhor time de até 6, usando só os Pokémon que você já tem (time + caixa).</p>' +
       '<div class="archetype-row">' +
         '<label>Ritmo <select id="archetype-pace">' + paceOptions + '</select></label>' +
         '<label>Clima <select id="archetype-weather">' + weatherOptions + '</select></label>' +
-        '<button id="archetype-detect" class="ts-build-copy" type="button">Detectar automaticamente</button>' +
+        '<button id="archetype-build" class="ts-build-copy" type="button">Montar melhor time</button>' +
       '</div>' +
       '<span id="archetype-status" class="notes-status"></span>' +
-      reasoningHtml + warnings +
+      recoHtml +
     '</div>';
   }
 
@@ -5253,65 +5241,138 @@
     var weatherSel = document.getElementById("archetype-weather");
     if (paceSel) paceSel.addEventListener("change", function () {
       state.archetype.pace = paceSel.value || null;
+      teamRecommendation = null; // alvo mudou, sugestão antiga não vale mais
       persist();
+      renderTeamStrategy(members);
     });
     if (weatherSel) weatherSel.addEventListener("change", function () {
       state.archetype.weather = weatherSel.value || null;
+      teamRecommendation = null;
       persist();
+      renderTeamStrategy(members);
     });
-    var detectBtn = document.getElementById("archetype-detect");
-    if (detectBtn) detectBtn.addEventListener("click", function () { generateTeamArchetype(members); });
+    var buildBtn = document.getElementById("archetype-build");
+    if (buildBtn) buildBtn.addEventListener("click", function () { generateTeamForArchetype(); });
+    var applyBtn = document.getElementById("archetype-apply-team");
+    if (applyBtn) applyBtn.addEventListener("click", function () { applyRecommendedTeam(); });
   }
 
-  // IA PROPÕE o arquétipo olhando o time real (tipo/habilidade/papel/build já
-  // escolhida quando existir) - nunca decide sozinha, só preenche os mesmos
-  // dois <select> que o jogador já podia mexer na mão (ver archetypeCardHtml
-  // acima). Taxonomia fixa (PACE_ARCHETYPES/WEATHER_ARCHETYPES) trazida pelo
-  // próprio usuário (fonte real, r/VGC) - a IA só pode escolher dessas
-  // opções ou "nenhum", nunca inventar uma categoria nova.
-  async function generateTeamArchetype(members) {
+  // IA monta o MELHOR TIME possível (até 6) usando só espécies que o
+  // jogador realmente possui (time ∪ caixa) - nunca decide sozinha: o
+  // resultado é uma proposta, só vira time real quando o jogador clica
+  // "Usar este time" (applyRecommendedTeam abaixo). Inclui a Velocidade
+  // base de cada um no roster (achado em revisão de código: faltava esse
+  // dado pra julgar Trick Room/Hyper Offense de verdade) e dá acesso real
+  // às mesmas ferramentas que generateBuildWithAI/generateTeamStrategy usam
+  // (buildStandardAiTools) - antes esta função não passava tools nenhuma,
+  // inconsistente com as outras duas chamadas de IA do app.
+  async function generateTeamForArchetype() {
     var statusEl = document.getElementById("archetype-status");
+    var pace = state.archetype.pace;
+    var weather = state.archetype.weather;
+    if (!pace && !weather) {
+      if (statusEl) statusEl.textContent = "Escolha um Ritmo ou Clima primeiro, pra eu focar o time em algo.";
+      return;
+    }
     if (statusEl) statusEl.textContent = "Consultando o Claude...";
     if (typeof claude === "undefined" || !claude.use) {
-      if (statusEl) statusEl.textContent = "Detecção por IA não disponível neste ambiente.";
+      if (statusEl) statusEl.textContent = "Montagem por IA não disponível neste ambiente.";
       return;
     }
     var sample = await claude.use("sample");
     if (!sample) {
-      if (statusEl) statusEl.textContent = "Detecção por IA não disponível (recurso não concedido).";
+      if (statusEl) statusEl.textContent = "Montagem por IA não disponível (recurso não concedido).";
       return;
     }
-    var teamDesc = members.map(function (sp) {
+    var rosterXs = state.team.concat(state.box).filter(function (x, i, arr) { return arr.indexOf(x) === i; });
+    var roster = rosterXs.map(getSpeciesByX).filter(Boolean);
+    if (!roster.length) {
+      if (statusEl) statusEl.textContent = "Nenhum Pokémon capturado ainda - pegue algo na Dex primeiro.";
+      return;
+    }
+    var validSnames = roster.map(function (sp) { return sp.sname; });
+    var rosterDesc = roster.map(function (sp) {
       var role = SPECIES_ROLE[sp.sname];
       var roleNames = (role && role.roles || []).map(function (r) { return ROLE_LABEL_PT[r] || r; });
+      var r = SPECIES_RANK[sp.sname];
       var build = effectiveBuild(sp);
       var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; });
       var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
-      return sp.n + " (" + speciesTypeNames(sp).join("/") + ") - innate: " + innNames.join(", ") +
-        (build ? "; habilidade escolhida: " + build.ability + "; golpes: " + build.moves.join(", ") : "; habilidades escolhíveis: " + abiNames.join(", ") + " (build ainda não definida)") +
-        (roleNames.length ? "; papel calculado: " + roleNames.join("/") : "");
+      return sp.sname + " " + sp.n + " (" + speciesTypeNames(sp).join("/") + "), Velocidade base " + sp.b[5] +
+        (r ? ", rank " + r.tier : "") + (roleNames.length ? ", papel " + roleNames.join("/") : "") +
+        ", innate: " + innNames.join(", ") +
+        (build ? ", habilidade escolhida: " + build.ability : ", habilidades escolhíveis: " + abiNames.join(", "));
     }).join("\n");
-    var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack). Olhe este time real de 6 e " +
-      "proponha o arquétipo dele em DOIS eixos independentes (um time pode ser os dois ao mesmo tempo):\n" +
-      "Ritmo - escolha exatamente UM destes ou null: " + PACE_ARCHETYPES.join(", ") + "\n" +
-      "Clima - escolha exatamente UM destes ou null: " + WEATHER_ARCHETYPES.join(", ") + "\n\n" +
-      "Time:\n" + teamDesc + "\n\n" +
+    var focusDesc = (pace ? "Ritmo: " + pace : "") + (pace && weather ? " + " : "") + (weather ? "Clima: " + weather : "");
+    var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack), build " +
+      (DATA.meta ? DATA.meta.version : "?") + ". Monte o MELHOR time possível de até 6 Pokémon, usando " +
+      "SOMENTE espécies desta lista real que o jogador já possui (time + caixa) - nunca invente nem sugira " +
+      "algo fora dela:\n" + rosterDesc + "\n\n" +
+      "Foco pedido: " + focusDesc + ".\n" +
+      "Use as ferramentas disponíveis pra checar rank/papel/sinergia real de candidatos específicos antes de " +
+      "decidir - não confie só no resumo acima. Evite concentrar o mesmo papel sem necessidade real (ex: 4 " +
+      "tanques só faz sentido pra um time Stall de verdade) - a menos que o foco pedido exija isso. Use a " +
+      "Velocidade base listada pra julgar times que dependem de controle de velocidade (Trick Room quer " +
+      "Velocidade baixa e uniforme; Hyper Offense/Sand-Rain-Sun times ofensivos geralmente querem Velocidade " +
+      "alta).\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
-      '{"pace":"..." ou null,"weather":"..." ou null,"reasoning":"..."}' +
-      ". reasoning é 1-2 frases curtas em português explicando o motivo real (ex: habilidade de clima real presente, " +
-      "movimentos de setup reais, bulk real alto com recuperação). Nunca invente uma categoria fora das listadas - " +
-      "use null pra qualquer eixo sem um encaixe real e claro, não force uma categoria só pra preencher.";
+      '{"team":["sname1","sname2",...],"reasoning":"..."}' +
+      ". team tem NO MÁXIMO 6 snames, todos da lista acima, sem repetir - se a lista tiver menos de 6 " +
+      "espécies que façam sentido pro foco pedido, devolva menos, nunca invente pra completar 6. reasoning " +
+      "é 2-4 frases curtas em português explicando as escolhas e, se relevante, o que foi deixado de fora e " +
+      "por quê.";
     try {
-      var raw = await sample.json(prompt);
-      var pace = PACE_ARCHETYPES.indexOf(raw && raw.pace) !== -1 ? raw.pace : null;
-      var weather = WEATHER_ARCHETYPES.indexOf(raw && raw.weather) !== -1 ? raw.weather : null;
-      state.archetype = { pace: pace, weather: weather, reasoning: (raw && typeof raw.reasoning === "string") ? raw.reasoning.slice(0, 500) : "" };
-      persist();
-      renderTeamStrategy(members);
-      flashToast("Arquétipo proposto - confira e corrija se precisar.");
+      var raw = await sample.json(prompt, { tools: buildStandardAiTools() });
+      var snames = Array.isArray(raw && raw.team)
+        ? raw.team.filter(function (sn) { return typeof sn === "string" && validSnames.indexOf(sn) !== -1; }).slice(0, 6)
+        : [];
+      if (!snames.length) {
+        if (statusEl) statusEl.textContent = "A resposta não trouxe nenhuma espécie real da sua caixa/time - tente de novo.";
+        return;
+      }
+      teamRecommendation = {
+        snames: snames,
+        reasoning: (raw && typeof raw.reasoning === "string") ? raw.reasoning.slice(0, 600) : "",
+        forPace: pace, forWeather: weather
+      };
+      renderTeamStrategy(state.team.map(getSpeciesByX).filter(Boolean));
+      flashToast("Time sugerido - confira e use se fizer sentido.");
     } catch (e) {
       if (statusEl) statusEl.textContent = sampleErrorMessage(e);
     }
+  }
+
+  // Aplica a recomendação: revalida CADA sname contra o time/caixa ATUAIS no
+  // momento do clique (mesma lição do bug de "Aplicar troca" - o jogador
+  // pode ter mexido no roster entre a geração e o clique), monta o novo
+  // time e manda pra caixa quem foi deixado de fora (mesma regra de
+  // "benching" que rosterMove() já usa em trocas individuais).
+  function applyRecommendedTeam() {
+    if (!teamRecommendation) return;
+    var ownedXs = state.team.concat(state.box);
+    var xs = [];
+    teamRecommendation.snames.forEach(function (sn) {
+      var sp = getSpeciesBySname(sn);
+      if (sp && ownedXs.indexOf(sp.x) !== -1 && xs.indexOf(sp.x) === -1) xs.push(sp.x);
+    });
+    if (!xs.length) {
+      flashToast("Nenhum dos sugeridos ainda está com você - monte de novo.");
+      teamRecommendation = null;
+      renderTeam();
+      return;
+    }
+    state.team.forEach(function (x) {
+      if (xs.indexOf(x) === -1 && state.box.indexOf(x) === -1) state.box.push(x);
+    });
+    state.box = state.box.filter(function (x) { return xs.indexOf(x) === -1; });
+    state.team = xs;
+    state.archetype.reasoning = teamRecommendation.reasoning;
+    teamRecommendation = null;
+    persist();
+    updateTeamBadge();
+    updateBoxBadge();
+    renderTeam();
+    flashToast("Time atualizado (" + xs.length + "/6).");
   }
 
   // Leitura estratégica, isolada de renderTeamAnalysis() e movida pro topo
@@ -5364,6 +5425,20 @@
     if (applySwapBtn) applySwapBtn.addEventListener("click", function () {
       var outX = parseInt(applySwapBtn.dataset.outX, 10);
       var inX = parseInt(applySwapBtn.dataset.inX, 10);
+      // Revalida NA HORA DO CLIQUE, não só quando a IA respondeu - achado
+      // real em revisão de código, 2026-09-12: a sugestão fica na tela até o
+      // TIME mudar (forTeamKey), mas o jogador podia ter deletado inX da
+      // caixa nesse meio-tempo (ex: aba PC Box, botão "remover da caixa")
+      // sem isso invalidar o card. rosterMove() sozinho não protege contra
+      // isso - ele só recusa se a espécie for inválida ou já estiver no
+      // time, nunca checa se ainda está na caixa - então sem esta checagem
+      // um Pokémon removido de propósito podia "ressuscitar" no time.
+      if (state.box.indexOf(inX) === -1 || state.team.indexOf(outX) === -1) {
+        flashToast("Essa sugestão não é mais válida - o time ou a caixa mudaram.");
+        if (teamAnalysisReport) teamAnalysisReport.swap = null;
+        renderTeamStrategy(state.team.map(getSpeciesByX).filter(Boolean));
+        return;
+      }
       var inSp = getSpeciesByX(inX);
       if (rosterMove(inX, outX)) {
         flashToast((inSp ? inSp.n : "Pokémon") + " entrou no time.");
