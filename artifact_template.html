@@ -4472,6 +4472,39 @@
     return items;
   }
 
+  // Orientação real de build por Ritmo/Clima do time (achado do usuário,
+  // 2026-09-13, com print do time montado via "Montar melhor time": a
+  // build gerada por IA pra um membro do time nunca considerava o
+  // arquétipo já escolhido - o mesmo Pokémon recebia um set genérico
+  // independente de o time ser Hyper Offense ou Stall). Cada entrada é uma
+  // implicação MECÂNICA real (EVs/nature/golpe/item), não só repetir o
+  // nome do arquétipo - a IA já recebe as ferramentas reais (rank, papel,
+  // sinergia) pra decidir os detalhes finos dentro dessa direção.
+  var PACE_BUILD_GUIDANCE = {
+    "Hyper Offense": "prioriza dano imediato - nature/EVs ofensivos (Atk ou SpA + Speed), os 4 golpes reais de maior dano/utilidade ofensiva direta, item ofensivo quando fizer sentido (ex: Life Orb, Choice Band/Specs/Scarf).",
+    "Balance": "não força um extremo - segue o papel real já calculado pra esta espécie (ofensivo, defensivo ou misto), misturando ataque com pelo menos uma opção de utilidade real (status/hazard/recuperação) quando o movepool permitir.",
+    "Bulky Offense": "EVs/nature que aguentam pelo menos um hit relevante mas ainda batem forte - geralmente HP + a defesa relevante junto com o stat ofensivo principal, não Speed puro.",
+    "Stall": "bulk máximo (EVs em HP + a defesa relevante) e golpes reais de recuperação/status/hazard quando o movepool tiver - evita golpe de setup ofensivo puro (Swords Dance etc.) a menos que não haja opção melhor no movepool real.",
+    "Semi-Stall": "meio-termo entre Stall e Balance - bulk real ainda é prioridade, mas pode incluir um golpe ofensivo mais forte que um Stall puro usaria."
+  };
+  var WEATHER_BUILD_GUIDANCE = {
+    "Sand": "se esta espécie tiver Sand Stream (ou outra habilidade real que ative areia) ou um golpe/tipo que se beneficia de areia real no movepool, prioriza isso - senão, mantém o papel calculado normalmente.",
+    "Rain": "se esta espécie tiver Drizzle, Swift Swim ou um golpe de Água real que se beneficia de chuva, prioriza isso - senão, mantém o papel calculado normalmente.",
+    "Sun": "se esta espécie tiver Drought, Chlorophyll ou um golpe de Fogo/Grama real que se beneficia de sol, prioriza isso - senão, mantém o papel calculado normalmente.",
+    "Snow": "se esta espécie tiver Snow Warning ou um golpe/habilidade real que se beneficia de neve, prioriza isso - senão, mantém o papel calculado normalmente.",
+    "Trick Room": "Trick Room inverte a ordem de turno - prioriza Velocidade BAIXA de propósito (EVs 0 em Speed, considera uma nature que reduz Speed) junto com golpes ofensivos reais, já que quem for mais lento ataca primeiro."
+  };
+  function archetypeBuildGuidance() {
+    var parts = [];
+    if (state.archetype.pace && PACE_BUILD_GUIDANCE[state.archetype.pace]) {
+      parts.push("Ritmo do time: " + state.archetype.pace + " - " + PACE_BUILD_GUIDANCE[state.archetype.pace]);
+    }
+    if (state.archetype.weather && WEATHER_BUILD_GUIDANCE[state.archetype.weather]) {
+      parts.push("Clima do time: " + state.archetype.weather + " - " + WEATHER_BUILD_GUIDANCE[state.archetype.weather]);
+    }
+    return parts;
+  }
+
   async function generateBuildWithAI(sp) {
     var statusEl = document.getElementById("mybuild-ai-status");
     if (statusEl) statusEl.textContent = "Consultando o Claude...";
@@ -4494,6 +4527,7 @@
     var allowedLm = sp.lm.filter(function (p) { return cap === null || cap === undefined || p[0] <= cap; });
     var moveNames = uniqueIds(allowedLm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return MOVES[id][0]; });
     var takenItems = teamItemsInUse(sp.x);
+    var archetypeParts = archetypeBuildGuidance();
     var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon). " +
       "Monte um set competitivo, formato Pokemon Showdown, para o Pokemon " + sp.n +
       " (build " + (DATA.meta ? DATA.meta.version : "?") + ").\n" +
@@ -4505,10 +4539,13 @@
       "Itens de batalha reais disponiveis - escolha UM destes (ou deixe vazio se nenhum fizer sentido): " + AI_ITEM_POOL.join(", ") + "\n" +
       (takenItems.length ? ("Itens JA EM USO por outros membros do time atual - NUNCA repita nenhum destes, escolha outro item ou deixe vazio: " + takenItems.join(", ") + "\n") : "") +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
+      (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
       "Antes de responder, use as ferramentas disponiveis pra ver as fraquezas reais do time atual " +
       "do jogador, o rank real desta especie, e quais chefoes/lideres de ginasio ainda faltam ate o " +
       "final do jogo a partir de onde o jogador esta agora - use tudo isso pra decidir o PAPEL que " +
-      "este Pokemon deve cumprir dai pra frente (ofensivo, defensivo, suporte, resposta a uma fraqueza " +
+      "este Pokemon deve cumprir dai pra frente" +
+      (archetypeParts.length ? " - SEMPRE alinhado ao Ritmo/Clima do time informado acima, isso pesa mais que qualquer outra consideracao de papel" : "") +
+      " (ofensivo, defensivo, suporte, resposta a uma fraqueza " +
       "especifica do time, ou resposta a uma ameaca recorrente nos chefoes que ainda vem pela frente), " +
       "nao so um set generico isolado pro momento atual. Use tambem getPriorityMoveOptions pra ver se " +
       "esta especie tem acesso a algum golpe de prioridade real e avalie se vale a pena incluir um " +
@@ -4528,7 +4565,8 @@
       '{"ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"rationale":"..."}' +
       ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
       "evs sao 6 numeros inteiros de 0 a 252, somando no maximo 510. " +
-      "rationale e uma frase curta em portugues explicando a escolha com base no time/rank/momento do jogo. " +
+      "rationale e uma frase curta em portugues explicando a escolha com base no time/rank/momento do jogo" +
+      (archetypeParts.length ? "/Ritmo ou Clima do time" : "") + ". " +
       "Nao invente golpes, habilidades ou items fora do que foi listado.";
     try {
       var raw = await sample.json(prompt, { tools: buildStandardAiTools() });

@@ -2284,6 +2284,64 @@ async function runLiveTests() {
   check("build por IA que insiste no item já usado por outro membro tem o item removido, não a build inteira rejeitada",
     !!charBuild27 && charBuild27.item === "" && charBuild27.ability === "Flame Body",
     charBuild27);
+
+  // Gerador de build ignorava o arquétipo escolhido (achado real do
+  // usuário, 2026-09-13, com print do time montado via "Montar melhor
+  // time": "a build tem que ser de acordo com o ritmo que nós escolhemos e
+  // a IA recomendou"). Define Clima=Trick Room (implicação mais concreta e
+  // fácil de checar num prompt: Velocidade baixa de propósito) e confirma
+  // que o prompt da build por IA passa a mencionar isso - depois limpa o
+  // arquétipo e confirma que a menção desaparece (condicional de verdade,
+  // não sempre presente).
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(30);
+  var weatherSel27 = document.getElementById("archetype-weather");
+  if (weatherSel27) { weatherSel27.value = "Trick Room"; weatherSel27.dispatchEvent(new Event("change", { bubbles: true })); }
+  await wait(30);
+  window.__genAiPrompts = [];
+  window.claude = {
+    use: async function (name) {
+      if (name !== "sample") return null;
+      return {
+        json: async function (prompt, opts) {
+          window.__genAiPrompts.push(prompt);
+          return { ability: "Overgrow", nature: "Brave", item: "", moves: ["Tackle", "Growl", "Vine Whip", "Sleep Powder"], evs: [252, 252, 0, 0, 0, 0], rationale: "teste arquétipo" };
+        }
+      };
+    }
+  };
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  setSearch("Bulbasaur");
+  await wait(120);
+  var bulbaRow27b = document.querySelector("#species-list .species-row");
+  if (bulbaRow27b) {
+    bulbaRow27b.click();
+    await wait(30);
+    var aiBtn27c = document.getElementById("mybuild-ai-generate");
+    if (aiBtn27c) { aiBtn27c.click(); await wait(150); }
+  }
+  var archPrompt = window.__genAiPrompts[0] || "";
+  check("prompt de build por IA menciona o Clima do time (Trick Room) quando um arquétipo está escolhido",
+    archPrompt.indexOf("Clima do time: Trick Room") !== -1 && archPrompt.indexOf("Velocidade BAIXA") !== -1,
+    archPrompt.slice(0, 500));
+
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(30);
+  if (weatherSel27) { weatherSel27.value = ""; weatherSel27.dispatchEvent(new Event("change", { bubbles: true })); }
+  await wait(30);
+  window.__genAiPrompts = [];
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  if (bulbaRow27b) {
+    var aiBtn27d = document.getElementById("mybuild-ai-generate");
+    if (aiBtn27d) { aiBtn27d.click(); await wait(150); }
+  }
+  var noArchPrompt = window.__genAiPrompts[0] || "";
+  check("sem arquétipo escolhido, o prompt NÃO menciona Ritmo/Clima do time (condicional de verdade)",
+    !!noArchPrompt && noArchPrompt.indexOf("Ritmo do time") === -1 && noArchPrompt.indexOf("Clima do time") === -1,
+    noArchPrompt.slice(0, 300));
+
   delete window.claude;
   setSearch("");
   await wait(30);
