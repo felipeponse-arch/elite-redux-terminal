@@ -928,6 +928,29 @@
     color: var(--text);
   }
   .mybuild-rationale strong { color: var(--accent-2); }
+  .archetype-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 6px; }
+  .archetype-row label {
+    display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--text-dim);
+    font-weight: 600; text-transform: uppercase; letter-spacing: .03em;
+  }
+  .archetype-row select {
+    padding: 8px 9px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit;
+    text-transform: none; letter-spacing: normal; font-weight: 400;
+  }
+  /* Aviso de papel redundante (4+ do mesmo papel) - cor de alerta, não a
+     mesma cor de destaque da justificativa de IA, pra não parecer "dica
+     legal" e sim "atenção", que é a intenção real do aviso. */
+  .archetype-warning {
+    background: color-mix(in srgb, #e0a030 14%, transparent);
+    border-left: 3px solid #e0a030;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 8px 0 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text);
+  }
   .mybuild-moves-power { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
   .mybuild-move-power { font-size: 11.5px; color: var(--text-dim); line-height: 1.6; }
   .mybuild-move-power b { color: var(--text); font-weight: 600; }
@@ -1617,6 +1640,14 @@
 
   var USABLE_TYPES = TYPES.filter(function (t) { return t !== "Mystery" && t !== "None" && t !== "Stellar"; });
 
+  // Arquétipo de time (Fase 3b, 2026-09-12) - taxonomia REAL trazida pelo
+  // usuário (fonte: r/VGC no Reddit, registrada na memória do projeto), dois
+  // eixos independentes - um time pode ser "Sand" (clima) E "Balance"
+  // (ritmo) ao mesmo tempo. Vazio ("") = não definido, sempre a primeira
+  // opção dos dois <select> - nunca chuta um valor padrão.
+  var PACE_ARCHETYPES = ["Hyper Offense", "Balance", "Bulky Offense", "Stall", "Semi-Stall"];
+  var WEATHER_ARCHETYPES = ["Sand", "Rain", "Sun", "Snow", "Trick Room"];
+
   var TYPE_META = {
     Normal:  { hex: "#8e8873", dark: false },
     Fighting:{ hex: "#c1432e", dark: false },
@@ -1925,7 +1956,17 @@
     // EVs as numbers - rendered as a Showdown block via the same
     // showdownSet() every other build source already uses. Purely
     // additive, same {} safe-default pattern as notes/orphans.
-    customBuilds: {}
+    customBuilds: {},
+    // Arquétipo do time (Fase 3b do roadmap de estratégia, 2026-09-12) - dois
+    // eixos INDEPENDENTES (fonte real trazida pelo usuário, r/VGC via
+    // Reddit): ritmo (Hyper Offense/Balance/Bulky Offense/Stall/Semi-Stall)
+    // e clima (Sand/Rain/Sun/Snow/Trick Room) - um time pode ser os dois ao
+    // mesmo tempo (ex: "Sand Balance"). null = ainda não definido. Nunca
+    // decidido escondido: a IA pode PROPOR (generateTeamArchetype), mas quem
+    // define de fato são os dois <select> - controle explícito sempre, mesmo
+    // padrão já usado em toda automação deste app (ver RN05, auto-evolução).
+    // Purely additive, mesmo padrão {} -> null-fields de notes/customBuilds.
+    archetype: { pace: null, weather: null, reasoning: "" }
   };
 
   // ---------------- persistence ----------------
@@ -2027,6 +2068,16 @@
         }
       });
     }
+    // Arquétipo do time (Fase 3b, 2026-09-12) - defensivo igual notes/
+    // customBuilds acima: só aceita valor que já é uma das opções reais
+    // (um save editado à mão ou de outra versão não pode injetar algo fora
+    // da taxonomia conhecida).
+    state.archetype = { pace: null, weather: null, reasoning: "" };
+    if (save.archetype && typeof save.archetype === "object") {
+      if (PACE_ARCHETYPES.indexOf(save.archetype.pace) !== -1) state.archetype.pace = save.archetype.pace;
+      if (WEATHER_ARCHETYPES.indexOf(save.archetype.weather) !== -1) state.archetype.weather = save.archetype.weather;
+      if (typeof save.archetype.reasoning === "string") state.archetype.reasoning = save.archetype.reasoning.slice(0, 500);
+    }
   }
 
   // ---------------- custom build list helpers ----------------
@@ -2101,7 +2152,8 @@
         typeFilter: Array.from(state.typeFilter)
       }),
       notes: state.notes,
-      customBuilds: state.customBuilds
+      customBuilds: state.customBuilds,
+      archetype: state.archetype
     };
   }
 
@@ -2185,7 +2237,7 @@
   // the banner (and any store write at all) now only fires when something
   // real actually differs.
   var syncDb = null, syncRef = null;
-  var SYNC_CONTENT_KEYS = ["team", "box", "savedTeams", "settings", "notes", "customBuilds"];
+  var SYNC_CONTENT_KEYS = ["team", "box", "savedTeams", "settings", "notes", "customBuilds", "archetype"];
   function syncContentDiffers(a, b) {
     if (!a || !b) return true;
     for (var i = 0; i < SYNC_CONTENT_KEYS.length; i++) {
@@ -5049,6 +5101,118 @@
     }
   }
 
+  // Arquétipo do time (Fase 3b, 2026-09-12) - dois <select> são a fonte de
+  // verdade (controle explícito, RN05 - nunca decidido escondido); o botão
+  // "Detectar automaticamente" só PROPÕE valores nos mesmos <select>, o
+  // jogador ainda pode corrigir antes/depois. Aviso de papel redundante
+  // (item 7 do roadmap) mora no mesmo card por serem as duas coisas que
+  // olham "o time como um todo" antes de montar/trocar builds.
+  function archetypeCardHtml(members) {
+    var pace = state.archetype.pace || "";
+    var weather = state.archetype.weather || "";
+    var paceOptions = '<option value="">— não definido —</option>' + PACE_ARCHETYPES.map(function (p) {
+      return '<option value="' + p + '"' + (pace === p ? " selected" : "") + '>' + p + '</option>';
+    }).join("");
+    var weatherOptions = '<option value="">— nenhum —</option>' + WEATHER_ARCHETYPES.map(function (w) {
+      return '<option value="' + w + '"' + (weather === w ? " selected" : "") + '>' + w + '</option>';
+    }).join("");
+
+    // Aviso de papel redundante: conta quantos do time compartilham CADA
+    // papel real (SPECIES_ROLE, já calculado no pipeline) - 4+ do mesmo
+    // papel é o exemplo literal que o usuário deu ("não dá pra ter 4
+    // tanques mesmo que todos tenham vantagem nesse modo").
+    var roleCounts = {};
+    members.forEach(function (sp) {
+      var role = SPECIES_ROLE[sp.sname];
+      (role && role.roles || []).forEach(function (r) { roleCounts[r] = (roleCounts[r] || 0) + 1; });
+    });
+    var warnings = Object.keys(roleCounts).filter(function (r) { return roleCounts[r] >= 4; })
+      .map(function (r) {
+        return '<p class="archetype-warning">⚠ ' + roleCounts[r] + ' de ' + members.length + ' do time são ' +
+          (ROLE_LABEL_PT[r] || r) + ' — considere diversificar papéis.</p>';
+      }).join("");
+
+    var reasoningHtml = state.archetype.reasoning
+      ? '<div class="mybuild-rationale">' + escapeHtml(state.archetype.reasoning) + '</div>' : "";
+
+    return '<div class="card"><h3>Arquétipo do time</h3>' +
+      '<p class="mybuild-hint">Ritmo e clima são dois eixos independentes — um time pode ser os dois ao mesmo tempo (ex: "Sand Balance").</p>' +
+      '<div class="archetype-row">' +
+        '<label>Ritmo <select id="archetype-pace">' + paceOptions + '</select></label>' +
+        '<label>Clima <select id="archetype-weather">' + weatherOptions + '</select></label>' +
+        '<button id="archetype-detect" class="ts-build-copy" type="button">Detectar automaticamente</button>' +
+      '</div>' +
+      '<span id="archetype-status" class="notes-status"></span>' +
+      reasoningHtml + warnings +
+    '</div>';
+  }
+
+  function wireArchetypeCard(members) {
+    var paceSel = document.getElementById("archetype-pace");
+    var weatherSel = document.getElementById("archetype-weather");
+    if (paceSel) paceSel.addEventListener("change", function () {
+      state.archetype.pace = paceSel.value || null;
+      persist();
+    });
+    if (weatherSel) weatherSel.addEventListener("change", function () {
+      state.archetype.weather = weatherSel.value || null;
+      persist();
+    });
+    var detectBtn = document.getElementById("archetype-detect");
+    if (detectBtn) detectBtn.addEventListener("click", function () { generateTeamArchetype(members); });
+  }
+
+  // IA PROPÕE o arquétipo olhando o time real (tipo/habilidade/papel/build já
+  // escolhida quando existir) - nunca decide sozinha, só preenche os mesmos
+  // dois <select> que o jogador já podia mexer na mão (ver archetypeCardHtml
+  // acima). Taxonomia fixa (PACE_ARCHETYPES/WEATHER_ARCHETYPES) trazida pelo
+  // próprio usuário (fonte real, r/VGC) - a IA só pode escolher dessas
+  // opções ou "nenhum", nunca inventar uma categoria nova.
+  async function generateTeamArchetype(members) {
+    var statusEl = document.getElementById("archetype-status");
+    if (statusEl) statusEl.textContent = "Consultando o Claude...";
+    if (typeof claude === "undefined" || !claude.use) {
+      if (statusEl) statusEl.textContent = "Detecção por IA não disponível neste ambiente.";
+      return;
+    }
+    var sample = await claude.use("sample");
+    if (!sample) {
+      if (statusEl) statusEl.textContent = "Detecção por IA não disponível (recurso não concedido).";
+      return;
+    }
+    var teamDesc = members.map(function (sp) {
+      var role = SPECIES_ROLE[sp.sname];
+      var roleNames = (role && role.roles || []).map(function (r) { return ROLE_LABEL_PT[r] || r; });
+      var build = effectiveBuild(sp);
+      var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; });
+      var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+      return sp.n + " (" + speciesTypeNames(sp).join("/") + ") - innate: " + innNames.join(", ") +
+        (build ? "; habilidade escolhida: " + build.ability + "; golpes: " + build.moves.join(", ") : "; habilidades escolhíveis: " + abiNames.join(", ") + " (build ainda não definida)") +
+        (roleNames.length ? "; papel calculado: " + roleNames.join("/") : "");
+    }).join("\n");
+    var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack). Olhe este time real de 6 e " +
+      "proponha o arquétipo dele em DOIS eixos independentes (um time pode ser os dois ao mesmo tempo):\n" +
+      "Ritmo - escolha exatamente UM destes ou null: " + PACE_ARCHETYPES.join(", ") + "\n" +
+      "Clima - escolha exatamente UM destes ou null: " + WEATHER_ARCHETYPES.join(", ") + "\n\n" +
+      "Time:\n" + teamDesc + "\n\n" +
+      "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
+      '{"pace":"..." ou null,"weather":"..." ou null,"reasoning":"..."}' +
+      ". reasoning é 1-2 frases curtas em português explicando o motivo real (ex: habilidade de clima real presente, " +
+      "movimentos de setup reais, bulk real alto com recuperação). Nunca invente uma categoria fora das listadas - " +
+      "use null pra qualquer eixo sem um encaixe real e claro, não force uma categoria só pra preencher.";
+    try {
+      var raw = await sample.json(prompt);
+      var pace = PACE_ARCHETYPES.indexOf(raw && raw.pace) !== -1 ? raw.pace : null;
+      var weather = WEATHER_ARCHETYPES.indexOf(raw && raw.weather) !== -1 ? raw.weather : null;
+      state.archetype = { pace: pace, weather: weather, reasoning: (raw && typeof raw.reasoning === "string") ? raw.reasoning.slice(0, 500) : "" };
+      persist();
+      renderTeamStrategy(members);
+      flashToast("Arquétipo proposto - confira e corrija se precisar.");
+    } catch (e) {
+      if (statusEl) statusEl.textContent = sampleErrorMessage(e);
+    }
+  }
+
   // Leitura estratégica, isolada de renderTeamAnalysis() e movida pro topo
   // da página (pedido do usuário, 2026-09-11 - era a última coisa da aba,
   // contradizendo "coisa mais importante primeiro"). SEM PESO nenhum até o
@@ -5074,7 +5238,8 @@
         '<button id="team-strategy-generate" class="ts-build-copy" type="button">Analisar meu time</button> ' +
         '<span id="team-strategy-status" class="notes-status"></span></div>';
     }
-    el.innerHTML = strategyHtml;
+    el.innerHTML = archetypeCardHtml(members) + strategyHtml;
+    wireArchetypeCard(members);
     var strategyBtn = document.getElementById("team-strategy-generate");
     if (strategyBtn) strategyBtn.addEventListener("click", function () { generateTeamStrategy(members); });
   }

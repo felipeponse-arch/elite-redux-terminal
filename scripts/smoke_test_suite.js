@@ -1891,6 +1891,56 @@ async function runLiveTests() {
   setSearch("");
   await wait(120);
 
+  // --- 23. Arquétipo de time + aviso de papel redundante (Fase 3b do
+  // roadmap, 2026-09-12) - último item da reunião: "não dá pra ter 4
+  // tanques no time mesmo que todos tenham vantagem" e "considere
+  // estratégias, um time de clima, trickroom, full ofensive ou stall".
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  const archCard = [...document.querySelectorAll(".card")].find(c => c.querySelector("h3") && c.querySelector("h3").textContent === "Arquétipo do time");
+  check("card 'Arquétipo do time' aparece acima da Leitura estratégica (primeiro item da #team-strategy)",
+    !!archCard && document.getElementById("team-strategy").firstElementChild === archCard);
+  const paceSel = document.getElementById("archetype-pace");
+  const weatherSel = document.getElementById("archetype-weather");
+  check("os dois <select> de arquétipo (ritmo/clima) existem e têm as opções da taxonomia real (Reddit r/VGC)",
+    !!paceSel && !!weatherSel &&
+    [...paceSel.options].some(o => o.value === "Balance") && [...paceSel.options].some(o => o.value === "Stall") &&
+    [...weatherSel.options].some(o => o.value === "Sand") && [...weatherSel.options].some(o => o.value === "Trick Room"));
+  // Time seed desta suíte (Aerodactyl Mega/Probopass/Coalossal Mega/
+  // Terrakion/Avalugg Hisuian/Tyranitar Mega Redux) tem só 3 Tanque - não
+  // deve disparar aviso (o limiar real é 4+, confirmado com SPECIES_ROLE
+  // antes de escrever este teste).
+  check("SEM aviso de papel redundante pro time seed (só 3 de 6 são Tanque, abaixo do limiar de 4)",
+    !document.querySelector(".archetype-warning"));
+  // Seleção manual persiste de verdade (controle explícito - a IA só
+  // propõe, o <select> é a fonte de verdade real).
+  paceSel.value = "Stall";
+  paceSel.dispatchEvent(new Event("change", { bubbles: true }));
+  weatherSel.value = "Sand";
+  weatherSel.dispatchEvent(new Event("change", { bubbles: true }));
+  await wait(30);
+  const savedArch = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").archetype;
+  check("selecionar Ritmo/Clima manualmente persiste em localStorage (arquétipo não é só decorativo)",
+    !!savedArch && savedArch.pace === "Stall" && savedArch.weather === "Sand", savedArch);
+  check("botão 'Detectar automaticamente' existe (proposta de IA, nunca decide sozinha - só preenche os mesmos <select>)",
+    !!document.getElementById("archetype-detect"));
+
+  // Aviso real: troca o time pros 4 Tanque conhecidos (SPECIES_ROLE real,
+  // não um mock) e confirma que o limiar de 4 dispara de verdade.
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(30);
+  [...document.querySelectorAll(".team-slot .remove-btn")].forEach(b => b.click());
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  for (const n of ["Sandslash", "Clefable", "Wigglytuff", "Parasect"]) {
+    await addByName(n, false);
+  }
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  check("aviso de papel redundante dispara com 4 Tanque reais (Sandslash/Clefable/Wigglytuff/Parasect)",
+    !!document.querySelector(".archetype-warning") && document.querySelector(".archetype-warning").textContent.indexOf("Tanque") !== -1,
+    document.querySelector(".archetype-warning") && document.querySelector(".archetype-warning").textContent);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
