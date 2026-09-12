@@ -1003,7 +1003,18 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(50);
   check("manual transfer card is gone (replaced by automatic sync)", !document.getElementById("transfer-card"));
-  check("Enviar para o Claude card is untouched (unrelated feature, still there)", !!document.getElementById("claude-export-card"));
+  // "Enviar para o Claude"/"Enviar caixa para o Claude" (o resumo de texto
+  // simples pra colar numa conversa) removidos por completo, 2026-09-13,
+  // pedido direto do usuário com print das duas telas - a sincronização
+  // automática e as chamadas de IA de dentro do próprio app (Meu build,
+  // Leitura estratégica, Arquétipo do time) já tornaram esse copy/paste
+  // manual redundante. O card de exportação do CHEFÃO (`#boss-export-*`,
+  // aba Chefões - "junta o time dele com o seu time e sua caixa") é uma
+  // feature DIFERENTE, mais específica, não mencionada no pedido - continua
+  // existindo (não tinha cobertura de teste dedicada antes desta remoção, e
+  // continua sem, já que não foi tocado nesta passagem).
+  check("cards 'Enviar para o Claude' (time) e 'Enviar caixa para o Claude' (caixa) foram removidos por completo",
+    !document.getElementById("claude-export-card") && !document.getElementById("claude-export-box-card"));
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 

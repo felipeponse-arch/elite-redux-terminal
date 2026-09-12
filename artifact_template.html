@@ -1344,16 +1344,6 @@
           <div class="saved-teams-grid" id="saved-teams-grid"></div>
         </div>
 
-        <div class="card" id="claude-export-card">
-          <h3>Enviar para o Claude</h3>
-          <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">O time fica salvo só neste navegador — o Claude não consegue ler isso sozinho. Copie o resumo abaixo e cole na conversa para pedir builds, sinergia e alertas de dificuldade.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <input id="claude-export-text" class="mono" type="text" readonly aria-label="Resumo do time para copiar" style="flex:1;min-width:220px;padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
-            <button id="claude-export-copy" class="add-team-btn" type="button">Copiar</button>
-          </div>
-          <div id="claude-export-status" style="font-size:11.5px;color:var(--accent-2);margin-top:6px;min-height:14px;"></div>
-        </div>
-
         <div class="team-analysis" id="team-analysis"></div>
       </div>
     </section>
@@ -1376,15 +1366,6 @@
             </div>
             <div id="pcbox-content"></div>
           </div>
-        </div>
-        <div class="card" id="claude-export-box-card">
-          <h3>Enviar caixa para o Claude</h3>
-          <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">Mesma ideia do time: isso fica só neste navegador. Copie e cole na conversa quando quiser perguntar "o que eu tenho na caixa que resolve X".</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
-            <textarea id="claude-export-box-text" class="mono" readonly rows="3" aria-label="Resumo da caixa para copiar" style="flex:1;min-width:220px;padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;resize:vertical;"></textarea>
-            <button id="claude-export-box-copy" class="add-team-btn" type="button">Copiar</button>
-          </div>
-          <div id="claude-export-box-status" style="font-size:11.5px;color:var(--accent-2);margin-top:6px;min-height:14px;"></div>
         </div>
       </div>
     </section>
@@ -1410,7 +1391,7 @@
 
     <section id="view-progress" class="view">
       <div class="types-shell">
-        <p class="hint">Isso define o que a ferramenta assume em toda a run: qual variante de time (Padrão/Insane/Hell) aparece por padrão na aba Chefões, qual coluna de level cap conta, e o que entra automaticamente nos textos de "Enviar para o Claude".</p>
+        <p class="hint">Isso define o que a ferramenta assume em toda a run: qual variante de time (Padrão/Insane/Hell) aparece por padrão na aba Chefões, qual coluna de level cap conta, e o que entra automaticamente no texto de "Enviar para o Claude" de cada chefão.</p>
         <div class="card" style="max-width:460px;">
           <h3>Dificuldade e progresso atual</h3>
           <div style="display:flex;flex-direction:column;gap:12px;">
@@ -3557,7 +3538,6 @@
     if (!members.length) {
       content.innerHTML = '<p class="pcbox-empty-note">Caixa vazia — abra um Pokémon na aba Dex e clique em "+ Adicionar à caixa".</p>';
       updateBoxBadge();
-      renderClaudeExportBox(members);
       return;
     }
 
@@ -3654,7 +3634,6 @@
     }
 
     updateBoxBadge();
-    renderClaudeExportBox(members);
   }
 
   // Busca da PC Box: salta pra caixa+slot certos e seleciona, em vez de
@@ -3682,29 +3661,6 @@
     var milestone = LEVELCAPS && LEVELCAPS.rows[state.settings.milestone] ? LEVELCAPS.rows[state.settings.milestone].milestone : "?";
     var diffLabel = { easy: "Easy", ace: "Ace", elite: "Elite" }[state.settings.difficulty] || state.settings.difficulty;
     return "Dificuldade " + diffLabel + ", progresso " + milestone + ", level cap atual " + (cap === null ? "sem limite" : cap) + ".";
-  }
-
-  function renderClaudeExportBox(members) {
-    var input = document.getElementById("claude-export-box-text");
-    if (!members.length) {
-      input.value = "Minha caixa no Elite Redux (build 2.65beta) ainda esta vazia. " + settingsSummaryText();
-    } else {
-      var names = members.map(function (sp) { return sp.n; }).join(", ");
-      input.value = "Minha caixa no Elite Redux (build 2.65beta) (" + members.length + "): " + names + ". " + settingsSummaryText();
-    }
-    document.getElementById("claude-export-box-status").textContent = "";
-  }
-
-  function renderClaudeExport(members) {
-    var input = document.getElementById("claude-export-text");
-    var status = document.getElementById("claude-export-status");
-    if (!members.length) {
-      input.value = "Meu time no Elite Redux (build 2.65beta) ainda esta vazio. " + settingsSummaryText();
-    } else {
-      var names = members.map(function (sp) { return sp.n; }).join(", ");
-      input.value = "Meu time no Elite Redux (build 2.65beta): " + names + ". " + settingsSummaryText();
-    }
-    status.textContent = "";
   }
 
   // Single clipboard path for the whole app. `srcEl` may be a field (its value
@@ -3736,18 +3692,6 @@
       fallback();
     }
   }
-
-  function wireCopyButton(btnId, inputId, statusId) {
-    var btn = document.getElementById(btnId);
-    if (!btn) return;
-    btn.addEventListener("click", function () {
-      var input = document.getElementById(inputId);
-      copyText(input.value, document.getElementById(statusId), "Copiado! Cole na conversa com o Claude.", input);
-    });
-  }
-
-  wireCopyButton("claude-export-copy", "claude-export-text", "claude-export-status");
-  wireCopyButton("claude-export-box-copy", "claude-export-box-text", "claude-export-box-status");
 
   // ---- Smogon / Pokemon Showdown set format ----
   // builds.json keeps human-readable notes in parentheses ("Tough Claws (única
@@ -4906,7 +4850,6 @@
     });
 
     updateTeamBadge();
-    renderClaudeExport(members);
     renderTeamStrategy(members);
     renderTeamAnalysis(members);
     renderSavedTeams();
