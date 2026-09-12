@@ -390,7 +390,7 @@ async function runLiveTests() {
     pcSearch.value = suggestedName || "";
     pcSearch.dispatchEvent(new Event("input", { bubbles: true }));
     await wait(50);
-    const foundDetailName = document.querySelector(".pcbox-detail .bc-name-wrap span:last-child");
+    const foundDetailName = document.querySelector(".pcbox-detail .pcbox-detail-name");
     check("a espécie sugerida na Fase 1 é mesmo um membro real da caixa (não inventado, não do time)",
       !!suggestedName && !!foundDetailName && foundDetailName.textContent === suggestedName,
       { suggestedName: suggestedName, foundInBox: foundDetailName && foundDetailName.textContent });
@@ -1677,13 +1677,13 @@ async function runLiveTests() {
     pcSearchEvo.value = "Charizard";
     pcSearchEvo.dispatchEvent(new Event("input", { bubbles: true }));
     await wait(50);
-    const foundCharizard = document.querySelector(".pcbox-detail .bc-name-wrap span:last-child");
+    const foundCharizard = document.querySelector(".pcbox-detail .pcbox-detail-name");
     check("a caixa mostra Charizard na tela, não só no localStorage (re-render real)",
       !!foundCharizard && foundCharizard.textContent === "Charizard", foundCharizard && foundCharizard.textContent);
     pcSearchEvo.value = "Charmander";
     pcSearchEvo.dispatchEvent(new Event("input", { bubbles: true }));
     await wait(50);
-    const stillOnCharizard = document.querySelector(".pcbox-detail .bc-name-wrap span:last-child");
+    const stillOnCharizard = document.querySelector(".pcbox-detail .pcbox-detail-name");
     check("a busca da PC Box não encontra mais Charmander (não ficou órfão parado em nome antigo)",
       !stillOnCharizard || stillOnCharizard.textContent !== "Charmander",
       stillOnCharizard && stillOnCharizard.textContent);
@@ -1906,7 +1906,7 @@ async function runLiveTests() {
     // fica órfão, precisa reconsultar o novo pra checar .selected nele.
     const reQueriedSlot = document.querySelector('.pcbox-slot[data-x="' + pcFirstSlotX + '"]');
     check("selecionar um slot marca .selected e abre o painel de detalhe",
-      !!reQueriedSlot && reQueriedSlot.classList.contains("selected") && !!document.querySelector(".pcbox-detail .bc-name-wrap"));
+      !!reQueriedSlot && reQueriedSlot.classList.contains("selected") && !!document.querySelector(".pcbox-detail .pcbox-detail-name"));
     // Mesma informação que o card do Meu Time já mostra (Hab./Innate) -
     // pedido explícito do usuário: "quero a mesma informação que temos
     // aqui no time para cada poke" na caixa.
@@ -1914,8 +1914,17 @@ async function runLiveTests() {
     check("painel de detalhe da PC Box mostra Hab./Innate, igual o card do Meu Time",
       !!pcAbisEl && pcAbisEl.textContent.indexOf("Hab.:") !== -1 && pcAbisEl.textContent.indexOf("Innate:") !== -1,
       pcAbisEl && pcAbisEl.textContent);
-    const detailName = document.querySelector(".pcbox-detail .bc-name-wrap span:last-child").textContent;
-    document.querySelector(".pcbox-detail .bc-name-wrap").click();
+    // "Análise de uso" (redesenho 2026-09-13, esboço do usuário) - reaproveita
+    // roleTagsHtml() (mesma função/dado real já usado na Dex), só apresentado
+    // aqui dentro de uma seção com nome próprio. Só checa presença/rótulo -
+    // o conteúdo exato (Papel/split) já é responsabilidade da própria função,
+    // testada indiretamente pelos testes de rank/papel da Dex.
+    const pcUsageEl = document.querySelector(".pcbox-detail-usage");
+    check("painel de detalhe da PC Box tem a seção 'Análise de uso' (reaproveita o papel/split real já calculado)",
+      !!pcUsageEl && pcUsageEl.textContent.indexOf("Análise de uso") !== -1 && pcUsageEl.textContent.indexOf("Papel") !== -1,
+      pcUsageEl && pcUsageEl.textContent);
+    const detailName = document.querySelector(".pcbox-detail .pcbox-detail-name").textContent;
+    document.querySelector(".pcbox-detail .pcbox-detail-name").click();
     await wait(50);
     check("clicar no nome do painel de detalhe navega pra ficha real dele na Dex",
       document.querySelector(".detail-titles h2").textContent === detailName,

@@ -561,23 +561,51 @@
   }
   .pcbox-slot.empty { background: transparent; border-style: dashed; opacity: .45; cursor: default; }
   .pcbox-slot.selected { border-color: var(--accent); border-width: 2px; box-shadow: var(--shadow); }
+  /* Redesenho do card de detalhe, 2026-09-13 - esboço do usuário: blocos
+     empilhados (identidade / Hab.+Innate / Análise de uso), não uma única
+     fileira com tudo misturado. Discutido com a equipe antes de mexer -
+     Frontend recusou reduzir tipo/rank a ícone mudo (afordância metafórica
+     que a Acessibilidade já vetou nesta sessão) e manteve os badges de
+     texto já testados, só reorganizando onde cada um mora. */
   .pcbox-detail {
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
   }
-  .pcbox-detail .bc-name-wrap { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; }
-  .pcbox-detail .box-chip-pips { display: flex; gap: 3px; }
-  .pcbox-detail-actions { display: flex; gap: 8px; margin-left: auto; }
+  .pcbox-detail-top { display: flex; align-items: flex-start; gap: 12px; }
+  .pcbox-detail-sprite { flex-shrink: 0; cursor: pointer; border-radius: 8px; }
+  .pcbox-detail-sprite:hover { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .pcbox-detail-identity { flex: 1; min-width: 0; }
+  .pcbox-detail-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
+  .pcbox-detail-name { font-weight: 700; font-size: 15.5px; cursor: pointer; }
+  .pcbox-detail-name:hover { color: var(--accent-2); }
+  .pcbox-detail-types { display: flex; gap: 4px; }
+  .pcbox-detail-actions { display: flex; gap: 6px; flex-shrink: 0; }
   /* Hab./Innate do selecionado - mesma informação que o card do Meu Time já
      mostra (.ts-abis), pedido explícito do usuário: "quero a mesma
-     informação que temos aqui no time para cada poke" na caixa. */
-  .pcbox-detail-abis { flex-basis: 100%; font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+     informação que temos aqui no time para cada poke" na caixa. Divisor
+     tracejado marca a transição "identidade" -> "detalhe", mesmo padrão já
+     usado em .mybuild-moves-power noutro lugar do app. */
+  .pcbox-detail-abis {
+    font-size: 12px; color: var(--text-dim); line-height: 1.6;
+    padding-top: 11px; border-top: 1px dashed var(--border);
+  }
   .pcbox-detail-abis b { color: var(--text); }
-  /* Sugestão geral de encaixe (Fase 4, 2026-09-12) - linha própria (não
-     cabe na fileira de nome/tipo/ações), mesmo tom de "dica" que
+  /* Análise de uso - reaproveita roleTagsHtml() (mesma função já usada na
+     Dex, mesmo dado real de papel/split), só apresentada aqui dentro de
+     uma seção com nome próprio, pedido explícito do usuário via esboço. */
+  .pcbox-detail-usage {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding-top: 11px; border-top: 1px dashed var(--border);
+  }
+  .pcbox-detail-usage-label {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--text-dim);
+  }
+  /* Sugestão geral de encaixe (Fase 4, 2026-09-12) - mesmo tom de "dica" que
      .obtain-hint já usa no resto do app pra sinalizar "isto é contexto
-     extra, não uma ação obrigatória". */
-  .pcbox-fit-note { flex-basis: 100%; color: var(--accent-2); font-size: 12px; font-weight: 600; }
+     extra, não uma ação obrigatória". Própria linha, depois do divisor de
+     Análise de uso quando os dois existem juntos. */
+  .pcbox-fit-note { display: block; color: var(--accent-2); font-size: 12px; font-weight: 600; }
   .pcbox-empty-note { color: var(--text-dim); font-size: 13px; }
 
   .saved-teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
@@ -3573,17 +3601,25 @@
       var fitNote = boxFitNote(selectedSp, state.team.map(getSpeciesByX).filter(Boolean));
       var abiNames = uniqueIds(selectedSp.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ");
       var innNames = selectedSp.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ");
+      var usageHtml = roleTagsHtml(selectedSp.sname);
       detailHtml = '<div class="pcbox-detail">' +
-        '<span class="bc-name-wrap goto-species" data-x="' + selectedSp.x + '" title="Ver na Dex">' + spriteImgHtml(selectedSp.x, selectedSp.n, 32) +
-        '<span>' + escapeHtml(selectedSp.n) + '</span></span>' +
-        rankBadgeHtml(selectedSp.sname) +
-        '<span class="box-chip-pips">' + names.map(typePip).join("") + '</span>' +
-        '<span class="pcbox-detail-actions">' +
-          '<button class="box-to-team' + (teamFull ? ' is-swap' : '') + '" data-x="' + selectedSp.x + '" type="button" title="' + title + '" aria-label="' + title + '">' +
-            (teamFull ? '&hArr;&nbsp;trocar' : '&rarr;&nbsp;time') + '</button>' +
-          '<button class="remove-btn" data-x="' + selectedSp.x + '" title="remover da caixa">&times;</button>' +
-        '</span>' +
+        '<div class="pcbox-detail-top">' +
+          '<span class="pcbox-detail-sprite goto-species" data-x="' + selectedSp.x + '" title="Ver na Dex">' + spriteImgHtml(selectedSp.x, selectedSp.n, 44) + '</span>' +
+          '<div class="pcbox-detail-identity">' +
+            '<div class="pcbox-detail-name-row">' +
+              '<span class="pcbox-detail-name goto-species" data-x="' + selectedSp.x + '" title="Ver na Dex">' + escapeHtml(selectedSp.n) + '</span>' +
+              rankBadgeHtml(selectedSp.sname) +
+            '</div>' +
+            '<div class="pcbox-detail-types">' + names.map(typePip).join("") + '</div>' +
+          '</div>' +
+          '<span class="pcbox-detail-actions">' +
+            '<button class="box-to-team' + (teamFull ? ' is-swap' : '') + '" data-x="' + selectedSp.x + '" type="button" title="' + title + '" aria-label="' + title + '">' +
+              (teamFull ? '&hArr;&nbsp;trocar' : '&rarr;&nbsp;time') + '</button>' +
+            '<button class="remove-btn" data-x="' + selectedSp.x + '" title="remover da caixa">&times;</button>' +
+          '</span>' +
+        '</div>' +
         '<div class="pcbox-detail-abis"><b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + '</div>' +
+        (usageHtml ? '<div class="pcbox-detail-usage"><span class="pcbox-detail-usage-label">Análise de uso</span>' + usageHtml + '</div>' : "") +
         (fitNote ? '<span class="pcbox-fit-note">' + fitNote + '</span>' : '') +
         '</div>';
     } else {
