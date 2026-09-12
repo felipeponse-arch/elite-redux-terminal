@@ -329,13 +329,14 @@ async function runLiveTests() {
   check("no crash rendering species detail with/without build-reference card", true);
 
   // --- 7. team coverage table sits in a titled .card (not a bare <h3>) ---
-  // 3 cards desde a Fase 2 do "leitor de caixa" (2026-09-11): Riscos
-  // compartilhados + Cobertura defensiva (originais) + Leitura estratégica
-  // (nova, card de IA sob demanda).
+  // 2 cards em #team-analysis (Riscos compartilhados + Cobertura defensiva)
+  // - "Leitura estratégica" morou aqui até a décima-nona/vigésima-primeira
+  // passagem (2026-09-11), quando subiu pro topo da página como seu próprio
+  // elemento #team-strategy (pedido do usuário - ver checagem 7c abaixo).
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(50);
   const analysisCards = document.querySelectorAll("#team-analysis .card");
-  check("team-analysis renders inside .card elements (not bare <h3>)", analysisCards.length === 3, "found " + analysisCards.length);
+  check("team-analysis renders inside .card elements (not bare <h3>)", analysisCards.length === 2, "found " + analysisCards.length);
   const scrollX = document.querySelector("#team-analysis .scroll-x");
   if (scrollX) {
     const cs = getComputedStyle(scrollX);
@@ -404,6 +405,14 @@ async function runLiveTests() {
   // capability, conforme sample.d.ts.
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(50);
+  // Reposicionamento pedido pelo usuário, 2026-09-11: "Leitura estratégica"
+  // era a ÚLTIMA coisa da aba - agora é a PRIMEIRA, acima até de "Meu time".
+  // DOCUMENT_POSITION_FOLLOWING = o 2º argumento vem DEPOIS do 1º no DOM.
+  const teamStrategyEl = document.getElementById("team-strategy");
+  const teamSlotsEl = document.getElementById("team-slots");
+  check("'Leitura estratégica' aparece ANTES de 'Meu time' no DOM (primeiro item da página)",
+    !!teamStrategyEl && !!teamSlotsEl &&
+    !!(teamStrategyEl.compareDocumentPosition(teamSlotsEl) & Node.DOCUMENT_POSITION_FOLLOWING));
   const strategyBtn = document.getElementById("team-strategy-generate");
   if (strategyBtn) {
     window.__strategyToolCalls = [];
@@ -444,7 +453,7 @@ async function runLiveTests() {
     // chamada aqui, não só na geração de build
     check("'Analisar meu time' também chamou getBoxCandidatesForBoss (Fase 3, ferramenta unificada)",
       window.__strategyToolCalls.some(function (c) { return c.name === "getBoxCandidatesForBoss"; }));
-    const rationaleBlock = document.querySelector("#team-analysis .mybuild-rationale");
+    const rationaleBlock = document.querySelector("#team-strategy .mybuild-rationale");
     check("a leitura estratégica (mock) aparece em destaque na tela",
       rationaleBlock && rationaleBlock.textContent.indexOf(mockText) !== -1);
     check("o botão vira 'Analisar de novo' depois de uma leitura já existir",
@@ -1103,44 +1112,33 @@ async function runLiveTests() {
   check("Escape backs out of the detail view (same as clicking 'Voltar')",
     !document.getElementById("dex-shell").classList.contains("show-detail"));
 
-  // --- Fase 2, 2026-09-09: save history / "desfazer" + "Comparar builds".
-  // History check reuses the team already seeded at the top of this suite
-  // (6 add-to-team calls, each its own persist() -> its own history entry).
+  // "Histórico de saves" foi REMOVIDO por pedido do usuário, 2026-09-11
+  // ("não tem por que ter" - segurança de uma migração que não existe mais).
+  // Regressão-guarda de remoção: confirma que a seção e a chave de
+  // localStorage realmente sumiram, não só que ninguém testa mais.
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(50);
-  const histRows = document.querySelectorAll(".save-history-row").length;
-  check("save history has entries after a real session of team changes", histRows > 0, histRows);
-  const firstRestoreBtn = document.querySelector(".save-history-restore");
-  if (firstRestoreBtn) {
-    // Originally this asserted a hardcoded outcome ("Eelektross leaves the
-    // box") on the assumption that the topmost history row was always a
-    // snapshot from just before THIS suite's own seed sequence finished.
-    // That broke once later sections (Fase 1/Fase 2/multi-build) started
-    // persisting their own changes before this check runs: with
-    // HISTORY_MAX capping the list at 5 entries, the seed-era snapshot
-    // rolls off entirely and the topmost row ends up identical to the
-    // current state - restoring it then correctly changes nothing, but
-    // the old assertion read that as a failure. Fixed to be assumption-
-    // free: read the actual entry that WILL be restored straight out of
-    // localStorage first, then assert the live state matches it
-    // afterward - true regardless of how many actions ran before this
-    // point in the suite.
-    var histBefore = JSON.parse(localStorage.getItem("er_terminal_history") || "[]");
-    var targetEntry = histBefore[histBefore.length - 1];
-    firstRestoreBtn.click();
+  check("'Histórico de saves' foi removido (card, não só a lista vazia)",
+    !document.getElementById("save-history-card") && !document.querySelector(".save-history-row"));
+  check("er_terminal_history não é mais escrito no localStorage", localStorage.getItem("er_terminal_history") === null);
+  // "Time completo em formato Showdown" vira botão sem preview, 2026-09-11
+  // (pedido do usuário: "isso precisa sair não tem sentido" - a AÇÃO de
+  // copiar continua existindo, só o bloco de texto cru estático na tela não).
+  check("card do Showdown não tem mais o bloco de texto cru na tela (só o botão)",
+    !document.querySelector("#showdown-card pre"));
+  const sdCopyBtn = document.getElementById("showdown-copy");
+  if (sdCopyBtn && !sdCopyBtn.disabled) {
+    sdCopyBtn.click();
+    // copyText() usa navigator.clipboard.writeText(), que é assíncrono
+    // (.then()) - checar o status logo após o .click() sem esperar a
+    // Promise resolver falha sempre, mesmo quando o botão funciona
+    // perfeitamente. Achado real ao rodar de verdade, não bug do app.
     await wait(50);
-    document.querySelector('.tab-btn[data-tab="box"]').click();
-    await wait(50);
-    const boxChipsAfter = [...document.querySelectorAll(".box-chip")].map(c => c.dataset.x || c.textContent).sort();
-    const targetBox = (targetEntry && targetEntry.box || []).slice().sort();
-    check("restoring a history entry applies that exact snapshot's box contents",
-      JSON.stringify(boxChipsAfter.length) === JSON.stringify(targetBox.length),
-      "afterCount=" + boxChipsAfter.length + " targetCount=" + targetBox.length);
-    document.querySelector('.tab-btn[data-tab="team"]').click();
-    await wait(50);
-    check("restoring is itself undoable (the pre-restore state got pushed back into history)",
-      document.querySelectorAll(".save-history-row").length > 0);
-  } else { check("at least one save-history restore button found", false); }
+    check("botão 'Copiar time inteiro' continua funcional (copia via showdownTeam() real)",
+      document.getElementById("showdown-status").textContent.indexOf("Copiado") !== -1);
+  } else {
+    check("botão 'Copiar time inteiro' habilitado com time real", false);
+  }
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
@@ -1190,26 +1188,28 @@ async function runLiveTests() {
     bulbaRow.click();
     await wait(30);
     function setSelMB(id, v) { const e = document.getElementById(id); e.value = v; e.dispatchEvent(new Event("change", { bubbles: true })); }
-    // These two asserted hardcoded counts (0 chips, then exactly 1) until
-    // 2026-09-10: the "#app height bug" section earlier in this same suite
-    // also uses Bulbasaur and clicks "mybuild-save" on it (to test that
-    // re-rendering the SAME species in place preserves scroll position) -
-    // that save has nothing filled in, but the app doesn't reject an empty
-    // build, so it silently leaves 1 real chip behind before this section
-    // ever runs. Not a regression from today's accessibility work (verified
-    // this already happened before touching anything here) and not this
-    // section's bug to fix (it doesn't own that other section's fixture
-    // choice) - made these two assertions relative to whatever the baseline
-    // actually is instead of hardcoding "0" and "1", which is what a "does
-    // saving add exactly one more chip" check should mean anyway.
+    // O botão "mybuild-save" chama setOrReplaceActiveBuild() - substitui a
+    // build ATIVA em vigor, nunca soma uma nova (só "mybuild-save-variant",
+    // via addBuildVariant(), realmente adiciona - ver os 2 cliques abaixo).
+    // Achado real ao remover "Histórico de saves" (2026-09-11): a asserção
+    // antiga aqui dizia "+1" e só "passava" porque o teste removido da
+    // seção de histórico restaurava um snapshot antigo bem antes desta
+    // seção rodar, o que sem querer ZERAVA de volta a build de Bulbasaur
+    // que a seção "#app height bug" já tinha salvo - com esse efeito
+    // colateral removido, "mybuild-save" clicado numa espécie que JÁ tem
+    // build ativa corretamente FICA no mesmo número de chips (substituiu,
+    // não somou). A invariante real e sem achismo de ordem de execução:
+    // depois de "mybuild-save", o número de chips é o que já havia (se >=1,
+    // porque substituiu) ou 1 (se era 0, porque criou a primeira).
     const chipsBeforeAnySave = document.querySelectorAll(".mybuild-chip").length;
     check("'Gerar build com IA' button is present", !!document.getElementById("mybuild-ai-generate"));
 
     setSelMB("mybuild-ability", "Overgrow");
     document.getElementById("mybuild-save").click();
     await wait(50);
-    check("saving a build adds exactly one more chip",
-      document.querySelectorAll(".mybuild-chip").length === chipsBeforeAnySave + 1,
+    const expectedAfterSave = Math.max(chipsBeforeAnySave, 1);
+    check("'mybuild-save' cria a 1ª build (se não havia nenhuma) ou substitui a ativa em vigor (se já havia)",
+      document.querySelectorAll(".mybuild-chip").length === expectedAfterSave,
       "before=" + chipsBeforeAnySave + " after=" + document.querySelectorAll(".mybuild-chip").length);
 
     setSelMB("mybuild-ability", "Overgrow");

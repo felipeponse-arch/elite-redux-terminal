@@ -561,17 +561,6 @@
   .saved-team-card .stc-actions button.stc-load { border-color: var(--accent); color: var(--accent); }
   .saved-team-card .stc-actions button.stc-delete { color: var(--sem-weak); }
   .stc-active-badge { font-size: 10px; font-weight: 700; color: var(--sem-resist); letter-spacing: .02em; }
-  .save-history-row {
-    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12.5px;
-  }
-  .save-history-row:last-child { border-bottom: none; }
-  .save-history-when { color: var(--text-dim); font-size: 11px; flex: none; }
-  .save-history-summary { flex: 1; min-width: 120px; }
-  .save-history-restore {
-    border: 1px solid var(--accent); color: var(--accent); background: none;
-    padding: 5px 10px; border-radius: 7px; font-size: 11.5px; font-weight: 700; cursor: pointer;
-  }
   .stc-rename-input {
     width: 100%;
     margin-bottom: 8px;
@@ -1250,6 +1239,15 @@
 
     <section id="view-team" class="view">
       <div class="team-shell">
+        <!-- Leitura estratégica sobe pro topo da página, 2026-09-11 (pedido
+             do usuário: era a ÚLTIMA coisa da aba, depois de slots/Showdown/
+             times salvos/histórico - contradizia o próprio critério de
+             "condução" (coisa mais importante primeiro) que o time já usa em
+             outros lugares). Elemento próprio (não mais dentro de
+             #team-analysis) porque é conceitualmente distinta das duas
+             cobertura estática de tipo - ver renderTeamStrategy(). -->
+        <div class="team-strategy" id="team-strategy"></div>
+
         <div>
           <h3 style="margin-bottom:10px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);">Meu time (máx. 6)</h3>
           <div class="team-slots" id="team-slots"></div>
@@ -1258,8 +1256,7 @@
         <div class="card" id="showdown-card">
           <h3>Time completo em formato Showdown</h3>
           <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">O mesmo formato usado no Smogon / Pokémon Showdown — dá pra colar direto no teambuilder ou em qualquer análise.</p>
-          <pre class="showdown-block" id="showdown-team"></pre>
-          <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
+          <div style="display:flex;gap:8px;align-items:center;">
             <button id="showdown-copy" class="add-team-btn" type="button">Copiar time inteiro</button>
             <span id="showdown-status" style="font-size:11.5px;color:var(--accent-2);"></span>
           </div>
@@ -1274,12 +1271,6 @@
           </div>
           <div id="saved-teams-status" style="font-size:11.5px;color:var(--accent-2);margin:0 0 10px;min-height:14px;"></div>
           <div class="saved-teams-grid" id="saved-teams-grid"></div>
-        </div>
-
-        <div class="card" id="save-history-card">
-          <h3>Histórico de saves</h3>
-          <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">Guarda automaticamente os últimos 5 estados anteriores do seu save inteiro (time, caixa, builds, anotações). Se algo der errado, restaure um deles.</p>
-          <div id="save-history-list"></div>
         </div>
 
         <div class="card" id="claude-export-card">
@@ -1912,26 +1903,9 @@
   //     settings: {difficulty, milestone}, dataVersion, savedAt }
   var STORE_KEY = "er_terminal_save";
   var SCHEMA_VERSION = 2;
-  // Save history / "desfazer" - Fase 2, 2026-09-09. Deliberately its OWN
-  // localStorage key, not part of the synced save blob - this is a
-  // per-device recovery net (each device's own recent-past states), not
-  // something that should sync or overwrite another device's history.
-  var HISTORY_KEY = "er_terminal_history";
-  var HISTORY_MAX = 5;
 
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
-
-  function loadHistory() {
-    try {
-      var arr = JSON.parse(lsGet(HISTORY_KEY) || "[]");
-      return Array.isArray(arr) ? arr : [];
-    } catch (e) { return []; }
-  }
-  function saveHistory(hist) {
-    if (hist.length > HISTORY_MAX) hist = hist.slice(hist.length - HISTORY_MAX);
-    lsSet(HISTORY_KEY, JSON.stringify(hist));
-  }
 
   function applySave(save) {
     if (!save || typeof save !== "object") return;
@@ -2100,34 +2074,7 @@
   }
 
   function persist() {
-    var prevRaw = lsGet(STORE_KEY);
     var save = buildSave();
-    // Save history / "desfazer", Fase 2, 2026-09-09: snapshot whatever was
-    // ABOUT TO BE overwritten, before overwriting it - this is what makes
-    // every persist() an undo point. Guarded on the previous save actually
-    // parsing (a corrupt/missing prior value just means there's nothing
-    // meaningful to snapshot, not an error worth surfacing here).
-    //
-    // Auditoria de performance, 2026-09-11: antes disto, TODA chamada de
-    // persist() empurrava mais uma cópia completa do save anterior pro
-    // histórico, mesmo quando o conteúdo não tinha mudado de verdade -
-    // cada snapshot cresce com state.notes/state.customBuilds, e
-    // HISTORY_MAX (5 cópias completas) já estava usando ~1MB de
-    // localStorage num teste de estresse real. syncContentDiffers() já
-    // existe pra essa exata comparação (usada na sincronização entre
-    // aparelhos) - reaproveitada aqui: só grava um novo ponto de desfazer
-    // quando team/box/savedTeams/settings/notes/customBuilds realmente
-    // mudaram, não a cada persist() disparado.
-    if (prevRaw) {
-      try {
-        var prev = JSON.parse(prevRaw);
-        if (syncContentDiffers(prev, save)) {
-          var hist = loadHistory();
-          hist.push(prev);
-          saveHistory(hist);
-        }
-      } catch (e) { /* corrupt prior save - nothing safe to snapshot */ }
-    }
     // lsSet() already swallows a quota/disabled-storage exception and
     // returns false - persist() used to just ignore that, so a full
     // localStorage (customBuilds/notes/build history all grow unbounded
@@ -2145,57 +2092,6 @@
     pushToSync(save);
   }
 
-  // Restoring a past state is itself just another persist()-like event -
-  // snapshot the CURRENT state first (so a restore is itself undoable, not
-  // a dead end), remove the restored entry from history (it's about to
-  // become "current", not "past" anymore, so showing it again as a history
-  // row would be confusing), then apply it for real.
-  function restoreHistoryEntry(idx) {
-    var hist = loadHistory();
-    var entry = hist[idx];
-    if (!entry) return;
-    hist.splice(idx, 1);
-    var curRaw = lsGet(STORE_KEY);
-    if (curRaw) {
-      try { hist.push(JSON.parse(curRaw)); } catch (e) {}
-    }
-    saveHistory(hist);
-    applySave(entry);
-    var freshSave = buildSave();
-    lsSet(STORE_KEY, JSON.stringify(freshSave));
-    pushToSync(freshSave);
-    renderTeam();
-    renderSaveHistory();
-    flashToast("Save restaurado.");
-  }
-
-  function renderSaveHistory() {
-    var out = document.getElementById("save-history-list");
-    if (!out) return;
-    var hist = loadHistory();
-    if (!hist.length) {
-      out.innerHTML = '<p class="hint" style="margin:0;">Nada para restaurar ainda - vai se preenchendo conforme você usa o app.</p>';
-      return;
-    }
-    // Newest first, but idx passed to restoreHistoryEntry must be the REAL
-    // index in the underlying (oldest-first) array, not the display order.
-    var rows = [];
-    for (var i = hist.length - 1; i >= 0; i--) {
-      var entry = hist[i];
-      var teamCount = Array.isArray(entry.team) ? entry.team.length : 0;
-      var boxCount = Array.isArray(entry.box) ? entry.box.length : 0;
-      var when = entry.savedAt ? escapeHtml(entry.savedAt) : "?";
-      rows.push('<div class="save-history-row"><span class="mono save-history-when">' + when + '</span>' +
-        '<span class="save-history-summary">' + teamCount + ' no time, ' + boxCount + ' na caixa</span>' +
-        '<button class="save-history-restore" data-idx="' + i + '" type="button">Restaurar</button></div>');
-    }
-    out.innerHTML = rows.join("");
-    out.querySelectorAll(".save-history-restore").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        restoreHistoryEntry(parseInt(btn.dataset.idx, 10));
-      });
-    });
-  }
   function showStorageBanner(text) {
     document.getElementById("storage-banner-text").textContent = text;
     document.getElementById("storage-banner").hidden = false;
@@ -4645,17 +4541,14 @@
       document.querySelector('.tab-btn[data-tab="box"]').click();
     });
 
-    var sdBlock = document.getElementById("showdown-team");
-    var sdText = showdownTeam();
-    sdBlock.textContent = sdText || "Time vazio — adicione Pokémon na aba Dex.";
-    document.getElementById("showdown-copy").disabled = !sdText;
+    document.getElementById("showdown-copy").disabled = !showdownTeam();
     document.getElementById("showdown-status").textContent = "";
 
     updateTeamBadge();
     renderClaudeExport(members);
+    renderTeamStrategy(members);
     renderTeamAnalysis(members);
     renderSavedTeams();
-    renderSaveHistory();
   }
 
   document.getElementById("showdown-copy").addEventListener("click", function () {
@@ -5029,10 +4922,40 @@
         ]
       });
       teamAnalysisReport = { text: (res && res.text || "").trim(), forTeamKey: teamKeyFor(members) };
-      renderTeamAnalysis(members);
+      renderTeamStrategy(members);
     } catch (e) {
       if (statusEl) statusEl.textContent = sampleErrorMessage(e);
     }
+  }
+
+  // Leitura estratégica, isolada de renderTeamAnalysis() e movida pro topo
+  // da página (pedido do usuário, 2026-09-11 - era a última coisa da aba,
+  // contradizendo "coisa mais importante primeiro"). SEM PESO nenhum até o
+  // jogador pedir: nada de texto/IA renderiza sozinho, só o botão.
+  // teamAnalysisReport só é reaproveitado se for pro MESMO time
+  // (teamKeyFor) - trocar um membro invalida a leitura antiga sozinho.
+  function renderTeamStrategy(members) {
+    var el = document.getElementById("team-strategy");
+    if (!el) return;
+    if (!members.length) {
+      el.innerHTML = "";
+      return;
+    }
+    var strategyHtml;
+    if (teamAnalysisReport && teamAnalysisReport.forTeamKey === teamKeyFor(members)) {
+      strategyHtml = '<div class="card"><h3>Leitura estratégica</h3>' +
+        '<div class="mybuild-rationale">' + escapeHtml(teamAnalysisReport.text) + '</div>' +
+        '<button id="team-strategy-generate" class="ts-build-copy" type="button">Analisar de novo</button> ' +
+        '<span id="team-strategy-status" class="notes-status"></span></div>';
+    } else {
+      strategyHtml = '<div class="card"><h3>Leitura estratégica</h3>' +
+        '<p class="mybuild-hint">Pede pra IA ler o time inteiro (papel, sinergia, fraqueza) e sugerir como jogar com esses ' + members.length + '.</p>' +
+        '<button id="team-strategy-generate" class="ts-build-copy" type="button">Analisar meu time</button> ' +
+        '<span id="team-strategy-status" class="notes-status"></span></div>';
+    }
+    el.innerHTML = strategyHtml;
+    var strategyBtn = document.getElementById("team-strategy-generate");
+    if (strategyBtn) strategyBtn.addEventListener("click", function () { generateTeamStrategy(members); });
   }
 
   function renderTeamAnalysis(members) {
@@ -5077,30 +5000,12 @@
     // in the tool, of all places (design review, 2026-09-09). Two separate
     // cards now, matching how every other section on this page is chunked
     // (Stats, Habilidades, Builds de referência...), not one mega-block.
-    // Fase 2 do "leitor de caixa" (reunião 2026-09-11) - card SEM PESO
-    // NENHUM até o jogador pedir: nada de texto/IA renderiza sozinho, só o
-    // botão. teamAnalysisReport só é reaproveitado se for pro MESMO time
-    // (teamKeyFor) - trocar um membro invalida a leitura antiga sozinho.
-    var strategyHtml;
-    if (teamAnalysisReport && teamAnalysisReport.forTeamKey === teamKeyFor(members)) {
-      strategyHtml = '<div class="card"><h3>Leitura estratégica</h3>' +
-        '<div class="mybuild-rationale">' + escapeHtml(teamAnalysisReport.text) + '</div>' +
-        '<button id="team-strategy-generate" class="ts-build-copy" type="button">Analisar de novo</button> ' +
-        '<span id="team-strategy-status" class="notes-status"></span></div>';
-    } else {
-      strategyHtml = '<div class="card"><h3>Leitura estratégica</h3>' +
-        '<p class="mybuild-hint">Pede pra IA ler o time inteiro (papel, sinergia, fraqueza) e sugerir como jogar com esses ' + members.length + '.</p>' +
-        '<button id="team-strategy-generate" class="ts-build-copy" type="button">Analisar meu time</button> ' +
-        '<span id="team-strategy-status" class="notes-status"></span></div>';
-    }
-
+    // "Leitura estratégica" morou aqui até 2026-09-11 - agora é
+    // renderTeamStrategy(), seu próprio elemento no topo da página.
     el.innerHTML = '<div class="card"><h3>Riscos compartilhados do time</h3><div class="risk-list">' + riskHtml + '</div></div>' +
       '<div class="card"><h3>Cobertura defensiva</h3>' +
       '<div class="scroll-x"><table class="cov-table"><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      abilityNote + '</div>' + strategyHtml;
-
-    var strategyBtn = document.getElementById("team-strategy-generate");
-    if (strategyBtn) strategyBtn.addEventListener("click", function () { generateTeamStrategy(members); });
+      abilityNote + '</div>';
   }
 
   // ---------------- bosses view ----------------
