@@ -2346,6 +2346,95 @@ async function runLiveTests() {
   setSearch("");
   await wait(30);
 
+  // --- 28. Botão "Gerar build com IA" direto no card do Meu Time (achado
+  // real do usuário, 2026-09-13: "não achei o botão de criar build na tela
+  // do time como eu pedi" - antes só existia na ficha da Dex, obrigando o
+  // jogador a trocar de aba). Chama a MESMA generateBuildWithAI() de sempre
+  // (agora com um id de status por espécie, já que até 6 cards existem ao
+  // mesmo tempo nesta tela - não dá pra reusar #mybuild-ai-status, que é
+  // único). Também confirma que o botão novo NÃO aciona o "copiar" que já
+  // existia (mesmo estilo visual, classe DIFERENTE de propósito). Usa
+  // Squirtle - mas Squirtle NÃO é "espécie nova" de verdade: o teste de
+  // mock da IA lá em cima (setSearch("Squirtle"), por volta da linha 1438)
+  // já roda o gerador nela e deixa uma build de verdade salva. Rodando só
+  // este trecho isolado isso não aparece (sem seção anterior pra sujar o
+  // localStorage), mas rodando a suíte inteira o card do time já nasce COM
+  // build salva e o botão "Gerar build com IA" nunca chega a existir -
+  // achado exatamente assim, suíte completa passando 202 checks menos este,
+  // isolado passando 100%. Em vez de caçar outra espécie "virgem" (o mesmo
+  // erro se repete assim que alguém mais usar essa espécie em outro teste
+  // futuro - já rotulamos Squirtle de "nova" uma vez e erramos), limpa de
+  // verdade qualquer build salva da espécie de teste ANTES de assumir que
+  // ela está vazia, usando o próprio botão real "Apagar esta"
+  // (#mybuild-clear) da Dex - nunca mexendo direto no localStorage por fora
+  // da UI.
+  setSearch("Squirtle");
+  await wait(120);
+  const rowSquirtlePre28 = document.querySelector("#species-list .species-row");
+  if (rowSquirtlePre28) {
+    rowSquirtlePre28.click();
+    await wait(30);
+    for (let clearTry = 0; clearTry < 4; clearTry++) {
+      const clearBtnPre28 = document.getElementById("mybuild-clear");
+      if (!clearBtnPre28) break;
+      clearBtnPre28.click();
+      await wait(30);
+    }
+  }
+  setSearch("");
+  await wait(30);
+  // Esvazia o time primeiro - garante vaga livre pro Squirtle independente
+  // de quantos membros o time seed desta seção já tinha acumulado.
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(30);
+  [...document.querySelectorAll(".team-slot .remove-btn")].forEach(function (b) { b.click(); });
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  await addByName("Squirtle", false);
+  const dexData28 = JSON.parse(document.getElementById("dexdata").textContent);
+  const abilitiesByIdx28 = {};
+  dexData28.abilities.forEach(function (a, i) { if (a) abilitiesByIdx28[i] = a[0]; });
+  const movesByIdx28 = {};
+  dexData28.moves.forEach(function (m, i) { if (m) movesByIdx28[i] = m[0]; });
+  const sp28 = dexData28.species.find(function (s) { return s && s.sname === "SPECIES_SQUIRTLE"; });
+  const squirtleOnTeam28 = (JSON.parse(localStorage.getItem("er_terminal_save") || "{}").team || []).indexOf("SPECIES_SQUIRTLE") !== -1;
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  const genBtn28 = sp28 && document.getElementById("ts-ai-generate-" + sp28.x);
+  check("card do Meu Time tem o botão 'Gerar build com IA' quando não há build salva",
+    !!genBtn28, { spFound: sp28 && sp28.n, squirtleOnTeam: squirtleOnTeam28 });
+  if (genBtn28 && sp28) {
+    const abiName28 = abilitiesByIdx28[sp28.ab[0]];
+    const moveNames28 = sp28.lm.slice(0, 4).map(function (p) { return movesByIdx28[p[1]]; });
+    window.claude = {
+      use: async function (name) {
+        if (name !== "sample") return null;
+        return {
+          json: async function () {
+            return { ability: abiName28, nature: "Modest", item: "", moves: moveNames28, evs: [0, 0, 0, 0, 0, 0], rationale: "teste botão do time" };
+          }
+        };
+      }
+    };
+    genBtn28.click();
+    await wait(150);
+    const saveAfter28 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+    const build28 = (saveAfter28.customBuilds[sp28.sname] || [])[0];
+    check("clicar no botão do card do time gera e salva a build de verdade (mesma validação de sempre)",
+      !!build28 && build28.ability === abiName28, build28);
+    check("o card do time atualiza sozinho pra mostrar a build nova, sem precisar trocar de aba",
+      !!document.querySelector('.ts-build-copy[data-x="' + sp28.x + '"]') && !document.getElementById("ts-ai-generate-" + sp28.x));
+    const copyBtn28 = document.querySelector('.ts-build-copy[data-x="' + sp28.x + '"]');
+    if (copyBtn28) {
+      copyBtn28.click();
+      await wait(50);
+      check("o botão 'copiar' ao lado continua funcionando (classes não colidiram)",
+        document.getElementById("toast").textContent.indexOf("copiado") !== -1,
+        document.getElementById("toast").textContent);
+    }
+    delete window.claude;
+  }
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

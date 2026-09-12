@@ -844,7 +844,12 @@
     color: var(--text);
   }
   .ts-build-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
-  .ts-build-copy {
+  /* .ts-ai-generate-btn precisa de classe própria (não pode reusar
+     .ts-build-copy) - o card do Meu Time já tem um listener delegado que
+     escuta TODO .ts-build-copy dentro de #team-slots pra copiar o set;
+     usar a mesma classe faria o botão de gerar build acionar o copiador
+     por engano. Mesma aparência visual, ação diferente. */
+  .ts-build-copy, .ts-ai-generate-btn {
     background: none;
     border: none;
     color: var(--accent-2);
@@ -4505,8 +4510,8 @@
     return parts;
   }
 
-  async function generateBuildWithAI(sp) {
-    var statusEl = document.getElementById("mybuild-ai-status");
+  async function generateBuildWithAI(sp, statusElId) {
+    var statusEl = document.getElementById(statusElId || "mybuild-ai-status");
     if (statusEl) statusEl.textContent = "Consultando o Claude...";
     if (typeof claude === "undefined" || !claude.use) {
       if (statusEl) statusEl.textContent = "Geração por IA não disponível neste ambiente.";
@@ -4602,6 +4607,13 @@
       // agora: só reabre/atualiza a ficha se o jogador ainda estiver
       // olhando pra esta mesma espécie na Dex.
       if (state.selected === sp.x) selectSpecies(sp.x);
+      // Achado real do usuário, 2026-09-13: "não achei o botão de criar
+      // build na tela do time" - agora existe um botão direto no card do
+      // Meu Time (ver renderTeam()), chamando esta mesma função. Sem
+      // atualizar o card aqui, a build salva só apareceria depois de trocar
+      // de aba e voltar - renderTeam() é barato de chamar mesmo se o
+      // jogador estiver noutra aba no momento.
+      if (state.team.indexOf(sp.x) !== -1) renderTeam();
     } catch (e) {
       if (statusEl) statusEl.textContent = sampleErrorMessage(e);
     }
@@ -4853,7 +4865,18 @@
             (build.note ? '<div class="ts-build-note">' + escapeHtml(build.note) + '</div>' : '') +
           '</div>'
         ) : (
-          '<div class="ts-build ts-build-empty">Sem build salva ainda — monte uma na ficha do Pokémon na Dex, ou peça uma ao Claude numa conversa.</div>'
+          // Achado real do usuário, 2026-09-13: "não achei o botão de criar
+          // build na tela do time" - o texto dizia pra ir pra Dex, mas nunca
+          // dava um jeito de gerar direto daqui. Botão real, chama a MESMA
+          // generateBuildWithAI() que a Dex já usa (mesmo prompt, mesmas
+          // validações, já ciente do arquétipo/level cap/item já em uso) -
+          // status por espécie (id próprio) porque até 6 cards existem ao
+          // mesmo tempo nesta tela, não dá pra reusar um id global único.
+          '<div class="ts-build ts-build-empty">' +
+            '<p style="margin:0 0 8px;">Sem build salva ainda.</p>' +
+            '<button class="ts-ai-generate-btn" id="ts-ai-generate-' + sp.x + '" data-x="' + sp.x + '" type="button">Gerar build com IA</button> ' +
+            '<span id="ts-ai-status-' + sp.x + '" class="notes-status" role="status" aria-live="polite"></span>' +
+          '</div>'
         );
         var swapOpen = teamSwapIdx === i;
         slots.push('<div class="team-slot' + (swapOpen ? ' swapping' : '') + '"><div>' +
@@ -4904,6 +4927,13 @@
         var sp = getSpeciesByX(parseInt(btn.dataset.x, 10));
         copyText(showdownSet(sp, effectiveBuild(sp)), null, "");
         flashToast("Set do " + sp.n + " copiado (formato Showdown)");
+      });
+    });
+    slotsEl.querySelectorAll(".ts-ai-generate-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var x = parseInt(btn.dataset.x, 10);
+        var sp = getSpeciesByX(x);
+        if (sp) generateBuildWithAI(sp, "ts-ai-status-" + x);
       });
     });
     slotsEl.querySelectorAll(".swap-pick").forEach(function (btn) {
