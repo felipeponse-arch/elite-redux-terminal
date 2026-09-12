@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "elite-redux-terminal",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8100"],
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": ["-NoProfile", "-File", "scripts/dev_server.ps1"],
       "port": 8100
     }
   ]

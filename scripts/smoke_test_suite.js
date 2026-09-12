@@ -2176,6 +2176,98 @@ async function runLiveTests() {
     missingAriaLive.length === 0, missingAriaLive);
   setSearch("");
 
+  // --- 27. Gerador de build por IA: trava por level cap + exclusividade de
+  // item no time (achados reais do usuário, 2026-09-12/13: "no gerador de
+  // build ele não está considerando os golpes que estão disponíveis por lv"
+  // + "todos os poke tem praticamente os mesmos itens... nenhum outro pode
+  // ter a build montada com life orb").
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
+  await wait(30);
+  var diffSel = document.getElementById("settings-difficulty");
+  var msSel27 = document.getElementById("settings-milestone");
+  if (diffSel) { diffSel.value = "ace"; diffSel.dispatchEvent(new Event("change", { bubbles: true })); }
+  if (msSel27) { msSel27.value = "0"; msSel27.dispatchEvent(new Event("change", { bubbles: true })); }
+  await wait(30);
+  // Milestone 0 + ace = level cap 18 (data/levelcaps.json), o mesmo "lv 18"
+  // do relato do usuário - Bulbasaur real tem golpes de nível 24 e 37
+  // (Bind, Giga Drain, Grass Whistle, Natural Gift, Power Whip, Synthesis,
+  // Petal Blizzard, Grassy Glide, Leaf Storm, Magical Leaf, Venoshock),
+  // todos ACIMA do cap 18 - conferido direto no dado bruto antes de
+  // escrever este teste, não chutado.
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  await addByName("Bulbasaur", false);
+  await addByName("Charmeleon", false);
+  window.__genAiPrompts = [];
+  window.claude = {
+    use: async function (name) {
+      if (name !== "sample") return null;
+      return {
+        json: async function (prompt, opts) {
+          window.__genAiPrompts.push(prompt);
+          return { ability: "Overgrow", nature: "Modest", item: "", moves: ["Tackle", "Growl", "Vine Whip", "Sleep Powder"], evs: [0, 0, 0, 252, 0, 4], rationale: "teste level cap" };
+        }
+      };
+    }
+  };
+  setSearch("Bulbasaur");
+  await wait(120);
+  var bulbaRow27 = document.querySelector("#species-list .species-row");
+  if (bulbaRow27) {
+    bulbaRow27.click();
+    await wait(30);
+    var aiBtn27 = document.getElementById("mybuild-ai-generate");
+    if (aiBtn27) { aiBtn27.click(); await wait(150); }
+  }
+  var capPrompt = window.__genAiPrompts[0] || "";
+  var aboveCapMoves = ["Bind", "Giga Drain", "Grass Whistle", "Natural Gift", "Power Whip", "Synthesis", "Petal Blizzard", "Grassy Glide", "Leaf Storm", "Magical Leaf", "Venoshock"];
+  var leakedMoves = aboveCapMoves.filter(function (m) { return capPrompt.indexOf(m) !== -1; });
+  check("prompt de build por IA não lista golpes de nível acima do level cap atual (18)",
+    !!capPrompt && leakedMoves.length === 0, leakedMoves);
+
+  // Salva manualmente uma build com Life Orb pro Bulbasaur (fonte de
+  // verdade real, não simulada) - depois gera pro Charmeleon tentando o
+  // MESMO item de propósito, pra confirmar que a validação descarta.
+  function setSel27(id, v) { var e = document.getElementById(id); e.value = v; e.dispatchEvent(new Event("change", { bubbles: true })); }
+  var abiSel = document.getElementById("mybuild-ability");
+  if (abiSel) setSel27("mybuild-ability", abiSel.options[1] ? abiSel.options[1].value : "");
+  var itemInput = document.getElementById("mybuild-item");
+  if (itemInput) { itemInput.value = "Life Orb"; itemInput.dispatchEvent(new Event("input", { bubbles: true })); }
+  var saveBtn27 = document.getElementById("mybuild-save");
+  if (saveBtn27) { saveBtn27.click(); await wait(50); }
+  setSearch("Charmeleon");
+  await wait(120);
+  var charRow27 = document.querySelector("#species-list .species-row");
+  window.__genAiPrompts = [];
+  window.claude = {
+    use: async function (name) {
+      if (name !== "sample") return null;
+      return {
+        json: async function (prompt, opts) {
+          window.__genAiPrompts.push(prompt);
+          return { ability: "Flame Body", nature: "Adamant", item: "Life Orb", moves: ["Scratch", "Smokescreen", "Fire Fang", "Slash"], evs: [0, 252, 0, 0, 0, 4], rationale: "teste item duplicado" };
+        }
+      };
+    }
+  };
+  if (charRow27) {
+    charRow27.click();
+    await wait(30);
+    var aiBtn27b = document.getElementById("mybuild-ai-generate");
+    if (aiBtn27b) { aiBtn27b.click(); await wait(150); }
+  }
+  var itemPrompt = window.__genAiPrompts[0] || "";
+  check("prompt de build por IA avisa quais itens já estão em uso por outros membros do time",
+    itemPrompt.indexOf("Life Orb") !== -1 && itemPrompt.indexOf("JA EM USO") !== -1, itemPrompt.slice(0, 400));
+  var saveAfter27 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+  var charBuild27 = (saveAfter27.customBuilds["SPECIES_CHARMELEON"] || [])[0];
+  check("build por IA que insiste no item já usado por outro membro tem o item removido, não a build inteira rejeitada",
+    !!charBuild27 && charBuild27.item === "" && charBuild27.ability === "Flame Body",
+    charBuild27);
+  delete window.claude;
+  setSearch("");
+  await wait(30);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;
@@ -2558,6 +2650,57 @@ localStorage.setItem("er_terminal_save", JSON.stringify(fakeSave));
   }
   const passed = results.filter(r => r.pass).length;
   console.log("=== smoke_test_suite PART E5: " + passed + "/" + results.length + " passed ===");
+  results.forEach(r => console.log((r.pass ? "PASS" : "FAIL") + "  " + r.name + (r.detail ? "  (" + r.detail + ")" : "")));
+  return results;
+})();
+*/
+
+// E6 - onSnapshot ao vivo, achado real do usuario 2026-09-12 (dois times
+// divergentes entre celular e navegador): ao contrario de E5 (remoto
+// genuinamente mais novo, deve aplicar), este cenario simula um remoto
+// ATRASADO chegando DEPOIS que este aparelho ja salvou algo mais novo -
+// antes desta correcao, o onSnapshot aceitava QUALQUER conteudo diferente
+// sem checar savedAt, entao o aparelho "vencedor" da corrida podia ser
+// silenciosamente revertido pelo eco atrasado do outro. Rode com a pagina
+// em QUALQUER estado de mock_db=1 ja carregado, igual E5.
+/*
+(async function E6_staleLiveSnapshotRejected() {
+  const results = [];
+  function check(name, cond, detail) { results.push({ name, pass: !!cond, detail: detail || "" }); }
+  if (typeof window.__fakeSyncPushRemote !== "function") {
+    check("mock de db (window.__fakeSyncPushRemote) disponivel nesta pagina", false);
+  } else {
+    // 1. Este aparelho salva algo novo AGORA (savedAt recente de verdade).
+    const el = document.getElementById("search-input");
+    el.value = "Squirtle";
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    await new Promise(r => setTimeout(r, 150));
+    const row = document.querySelector("#species-list .species-row");
+    if (row) {
+      row.click();
+      await new Promise(r => setTimeout(r, 50));
+      const btn = document.getElementById("add-team-btn");
+      if (btn && !btn.disabled) btn.click();
+      await new Promise(r => setTimeout(r, 100));
+    }
+    const localAfterOwnSave = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+    // 2. Simula o eco ATRASADO de outro aparelho - conteudo diferente, mas
+    // savedAt CLARAMENTE mais velho que o que este aparelho acabou de salvar.
+    const stale = JSON.parse(JSON.stringify(localAfterOwnSave));
+    stale.team = ["SPECIES_MAGIKARP"];
+    stale.savedAt = "2020-01-01T00:00:00.000Z";
+    window.__fakeSyncPushRemote("sync/save", stale);
+    await new Promise(r => setTimeout(r, 100));
+    const localAfterStalePush = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+    check("remoto ATRASADO/mais velho NAO sobrescreve o local mais novo",
+      JSON.stringify(localAfterStalePush.team) === JSON.stringify(localAfterOwnSave.team),
+      localAfterStalePush.team);
+    check("o remoto obsoleto e corrigido de volta pro valor local (nao fica divergente no servidor)",
+      JSON.stringify(window.__fakeSyncDocs["sync/save"].team) === JSON.stringify(localAfterOwnSave.team),
+      window.__fakeSyncDocs["sync/save"].team);
+  }
+  const passed = results.filter(r => r.pass).length;
+  console.log("=== smoke_test_suite PART E6: " + passed + "/" + results.length + " passed ===");
   results.forEach(r => console.log((r.pass ? "PASS" : "FAIL") + "  " + r.name + (r.detail ? "  (" + r.detail + ")" : "")));
   return results;
 })();
