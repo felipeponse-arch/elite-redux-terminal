@@ -1455,7 +1455,7 @@
   <!-- Cross-device sync banner (db capability), 2026-09-09: unlike the toast
        above, this must stay up until the user notices and acts, not
        auto-hide after 2.2s - a "your save changed elsewhere" notice that
-       vanished on its own would defeat the point. See wireSync() below. -->
+       vanished on its own would defeat the point. See connectSync() below. -->
   <div id="sync-banner" class="sync-banner" role="status" aria-live="polite" hidden>
     <span id="sync-banner-text"></span>
     <button id="sync-banner-reload" type="button">Atualizar</button>
@@ -2300,12 +2300,34 @@
     el.style.color = warn ? "var(--sem-weak)" : "";
   }
   setSyncStatusIndicator("sincronização: verificando...");
-  (async function wireSync() {
+  // Reconexão automática (achado real do usuário, 2026-09-13: viu "conexão
+  // de sincronização perdida" na tela e perguntou o que significava - o
+  // indicador já avisava certo, mas depois de avisar não fazia mais nada, o
+  // jogador tinha que lembrar de recarregar a página na mão toda vez que uma
+  // queda transitória de rede (comum em celular) derrubasse o listener ao
+  // vivo). Backoff exponencial (5s, 7.5s, 11s... até 30s), até 8 tentativas -
+  // depois disso, desiste e pede reload explícito em vez de tentar pra
+  // sempre numa aba esquecida em segundo plano.
+  var syncRetryCount = 0;
+  var syncRetryTimer = null;
+  function scheduleSyncRetry() {
+    if (syncRetryCount >= 8) {
+      setSyncStatusIndicator("só neste aparelho (não foi possível reconectar - recarregue a página)", true);
+      return;
+    }
+    syncRetryCount++;
+    var delay = Math.min(5000 * Math.pow(1.5, syncRetryCount - 1), 30000);
+    setSyncStatusIndicator("reconectando sincronização...", true);
+    if (syncRetryTimer) clearTimeout(syncRetryTimer);
+    syncRetryTimer = setTimeout(connectSync, delay);
+  }
+  async function connectSync() {
     if (typeof claude === "undefined" || !claude.use) { setSyncStatusIndicator("só neste aparelho (ambiente sem plataforma)", true); return; }
     var db = await claude.use("db");
     if (!db) { setSyncStatusIndicator("só neste aparelho (sincronização não concedida)", true); return; } // not served/granted/loaded in this view
     syncDb = db;
     syncRef = db.doc("sync/save");
+    syncRetryCount = 0; // conexão real de novo - zera o backoff pra próxima queda
     setSyncStatusIndicator("sincronizado entre aparelhos");
     try {
       var snap = await syncRef.get();
@@ -2365,8 +2387,13 @@
       applySave(remote);
       lsSet(STORE_KEY, JSON.stringify(remote));
       showSyncBanner("Seu time foi atualizado em outro aparelho agora.");
-    }, function () { syncDb = null; syncRef = null; setSyncStatusIndicator("só neste aparelho (conexão de sincronização perdida)", true); });
-  })();
+    }, function () {
+      syncDb = null; syncRef = null;
+      setSyncStatusIndicator("só neste aparelho (conexão de sincronização perdida)", true);
+      scheduleSyncRetry();
+    });
+  }
+  connectSync();
   document.getElementById("sync-banner-reload").addEventListener("click", function () { location.reload(); });
   document.getElementById("sync-banner-dismiss").addEventListener("click", function () {
     document.getElementById("sync-banner").hidden = true;

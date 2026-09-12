@@ -2705,3 +2705,36 @@ localStorage.setItem("er_terminal_save", JSON.stringify(fakeSave));
   return results;
 })();
 */
+
+// E7 - reconexao automatica depois de "conexao de sincronizacao perdida"
+// (achado real do usuario, 2026-09-13: viu esse aviso na tela e perguntou o
+// que significava - o app so avisava, nunca tentava reconectar sozinho,
+// deixando o jogador preso em "so neste aparelho" ate lembrar de recarregar
+// a pagina na mao). window.__fakeSyncTriggerError(path) (novo no mock,
+// nesta mesma correcao) dispara o error callback real do onSnapshot, o
+// mesmo caminho que uma queda de rede de verdade dispararia. Rode com a
+// pagina em QUALQUER estado de mock_db=1 ja carregado, igual E5/E6.
+/*
+(async function E7_autoReconnect() {
+  const results = [];
+  function check(name, cond, detail) { results.push({ name, pass: !!cond, detail: detail || "" }); }
+  if (typeof window.__fakeSyncTriggerError !== "function") {
+    check("mock de db (window.__fakeSyncTriggerError) disponivel nesta pagina", false);
+  } else {
+    const indicator = document.getElementById("sync-status-indicator");
+    window.__fakeSyncTriggerError("sync/save");
+    await new Promise(r => setTimeout(r, 50));
+    check("indicador avisa 'conexao perdida' na hora, depois 'reconectando' (nunca fica calado)",
+      indicator.textContent.indexOf("reconectando") !== -1, indicator.textContent);
+    // Primeiro retry agendado pra 5s (backoff exponencial comeca em 5000ms) -
+    // espera um pouco mais pra dar folga em maquina lenta.
+    await new Promise(r => setTimeout(r, 5500));
+    check("reconecta sozinho sem precisar recarregar a pagina (volta pra 'sincronizado')",
+      indicator.textContent === "sincronizado entre aparelhos", indicator.textContent);
+  }
+  const passed = results.filter(r => r.pass).length;
+  console.log("=== smoke_test_suite PART E7: " + passed + "/" + results.length + " passed ===");
+  results.forEach(r => console.log((r.pass ? "PASS" : "FAIL") + "  " + r.name + (r.detail ? "  (" + r.detail + ")" : "")));
+  return results;
+})();
+*/

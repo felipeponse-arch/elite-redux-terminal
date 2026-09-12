@@ -22,6 +22,7 @@ function Get-MockDbScript($query) {
   var seed = $seedJson;
   if (seed) { docs["sync/save"] = seed; }
   var listeners = {};
+  var errorListeners = {};
   var fakeDb = {
     doc: function (path) {
       return {
@@ -30,8 +31,13 @@ function Get-MockDbScript($query) {
           return Promise.resolve({ exists: has, data: function () { return docs[path]; } });
         },
         set: function (val) { docs[path] = val; return Promise.resolve(); },
-        onSnapshot: function (cb) {
+        onSnapshot: function (cb, errCb) {
           (listeners[path] = listeners[path] || []).push(cb);
+          // Guarda o error callback tambem (achado real do usuario,
+          // 2026-09-13: precisa testar a reconexao automatica depois de
+          // "conexao de sincronizacao perdida", e isso so dispara pelo
+          // segundo argumento de onSnapshot, que este mock nunca invocava).
+          if (errCb) (errorListeners[path] = errorListeners[path] || []).push(errCb);
           return function () {
             var arr = listeners[path];
             var i = arr ? arr.indexOf(cb) : -1;
@@ -47,6 +53,18 @@ function Get-MockDbScript($query) {
     (listeners[path] || []).forEach(function (cb) {
       cb({ exists: true, metadata: { hasPendingWrites: false }, data: function () { return val; } });
     });
+  };
+  // Simula a conexao ao vivo caindo (onSnapshot's error callback) - dispara
+  // o error callback MAIS RECENTE registrado pro path (a ultima chamada de
+  // connectSync() valida), depois limpa os listeners desse path, imitando
+  // uma conexao real que morreu de verdade (nenhum novo evento chega ate
+  // reconectar via connectSync()).
+  window.__fakeSyncTriggerError = function (path) {
+    var arr = errorListeners[path] || [];
+    var last = arr[arr.length - 1];
+    listeners[path] = [];
+    errorListeners[path] = [];
+    if (last) last(new Error("mock connection lost"));
   };
   window.claude = { use: function (name) { return Promise.resolve(name === "db" ? fakeDb : null); } };
 })();
