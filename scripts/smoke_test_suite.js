@@ -1863,6 +1863,34 @@ async function runLiveTests() {
   pcSearchBox.dispatchEvent(new Event("input", { bubbles: true }));
   await wait(30);
 
+  // --- 22. Rank robusto por simulação (vigésima-quarta passagem,
+  // 2026-09-12) - âncora de calibração pedida pela QA na própria reunião da
+  // equipe ("calibração roda ANTES de qualquer publish, com espécies de
+  // controle conhecidas"). Probopass é a âncora: SS estabelecido em VÁRIAS
+  // passagens anteriores (sexta passagem em diante) por causa de Levitate +
+  // Solid Rock - a primeira versão desta simulação (só tipagem crua, sem
+  // ajuste por habilidade) derrubava ele pra C, porque Rock/Steel sozinho é
+  // FRACO 4x a Ground - só a Levitate (habilidade) resolve isso de verdade.
+  // Este teste existe pra pegar exatamente essa classe de regressão se
+  // Get-AbilityAdjustedTypeMultiplier algum dia parar de ser chamado.
+  setSearch("Probopass");
+  await wait(120);
+  const probopassRow = document.querySelector("#species-list .species-row");
+  if (probopassRow) {
+    probopassRow.click();
+    await wait(30);
+    const rankBadge = document.querySelector(".rank-badge");
+    check("Probopass continua SS (âncora de calibração - Levitate anula a fraqueza 4x a Ground de Rock/Steel)",
+      !!rankBadge && rankBadge.textContent === "SS", rankBadge && rankBadge.textContent);
+    check("tooltip do rank badge menciona a simulação contra chefões (não a fórmula antiga de uso-em-chefão)",
+      !!rankBadge && rankBadge.title.indexOf("simulação de") !== -1 && rankBadge.title.indexOf("uso em chefões") === -1,
+      rankBadge && rankBadge.title);
+  } else {
+    check("Probopass encontrado pro teste de calibração do rank", false);
+  }
+  setSearch("");
+  await wait(120);
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

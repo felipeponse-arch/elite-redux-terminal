@@ -1,47 +1,71 @@
 <#
-Computes a fully automatic SS/S/A/B/C/D rank for every species, from three
-signals that need no per-Pokemon human review and no user interaction:
+Rank robusto por simulação (vigésima-quarta passagem, 2026-09-12) - reunião
+completa da equipe pedida pelo usuário depois de feedback pesado ("algo no
+rank não faz sentido"). A versão anterior deste script pesava só atributos
+ESTÁTICOS da espécie (BST/uso-em-chefão/habilidade/velocidade), sem nunca
+simular um confronto de verdade - exatamente o problema que a Especialista
+em Meta Pokémon levantou depois de pesquisar (WebSearch) o método real da
+PvPoke: em vez de somar atributos com pesos fixos, simular cada Pokémon
+contra o CAMPO REAL de oponentes. A vantagem de Elite Redux sobre PvPoke/
+Smogon: aqui o campo NÃO é hipotético - são os 107 chefões reais de
+`data/bosses.json`, com movesets/habilidades/EVs extraídos direto do jogo.
 
-  1. BST (base stat total) - percentile rank.
-  2. Boss usage - how many DISTINCT boss trainers (data/bosses.json, any
-     tier: party/insane/hell) use this species anywhere. Real signal (only
-     22% of species appear in any boss fight at all, only ~1% appear in 5+),
-     but a known limitation: this can't tell "genuinely weak" apart from
-     "late-game/postgame exclusive that just hasn't had a chance to appear
-     yet", or "used for type-theme flavor, not power". Documented, not
-     silently hidden.
-  3. Ability impact - Score-AbilityText (common.ps1) applied to every innate
-     (always active - summed) and the BEST of the 3 choosable slots (species'
-     ceiling with an ideal pick). Systematically computed for all 1033
-     translated abilities, not a sparse hand-picked subset - see
-     scripts/score_abilities.ps1 for the calibration pass this rubric came
-     from. Known limitation: the rubric only catches PERSONAL
-     damage/survivability impact from patterns common in this project's
-     translation style guide - it does not (cannot, from regex alone) judge
-     team-wide utility (weather-setting, hazard-setting) or movepool quality.
+Sinal PRINCIPAL (peso 0.70 do composto final): `bossDefenseScore` -
+simula, pra cada espécie, o quão bem ela resistiria aos tipos de ataque
+REAIS de cada chefão (todas as 3 dificuldades/tiers de cada um dos 107,
+como "encontros" separados - 289 encontros reais no total, cada chefão
+contando as vezes que tiver party/insane/hell populados). Usa só a
+tipagem PRÓPRIA da espécie contra o TYPE_CHART puro (common.ps1,
+Get-TypeMultiplier) - NÃO tenta simular habilidade (isso é por build/
+contexto de time, não da espécie no vácuo - ver TYPE_MOD_ABILITIES em
+artifact_template.html, que já cobre isso em tempo de execução) nem dano
+ofensivo (dependeria de golpe/nature/EV escolhidos, que não existem pra
+uma espécie ainda não montada). Limitação real, documentada aqui e na
+memória do projeto: isto mede "sobrevive bem ao que vai enfrentar", não
+"vence a luta" - metade da equação de combate, a metade que dá pra medir
+sem inventar um golpeset que a espécie ainda não tem.
 
-Produces TWO ranks per species, both from the same three signals and the
-same $WEIGHTS:
+Sinal de DESEMPATE (peso 0.30 do composto final) - fórmula de pesos fixos
+decidida pelo usuário depois de ver o material real que ele trouxe sobre
+como Smogon/VGC calculam viabilidade (usage rate + 4 pilares: Base Stats/
+Movepool/Ability/Type):
+  - BST (0.50 do desempate) - absorveu o peso que "uso em chefões" tinha
+    antes (pedido explícito do usuário: "trocar o peso do uso em chefões
+    pelo BST"). Uso-em-chefão (frequência, não desempenho) SAIU do rank -
+    o `bossDefenseScore` acima já mede desempenho de verdade contra os
+    mesmos 107 chefões, então frequência de aparição virou redundante/
+    pior sinal do que já temos.
+  - Ability (0.25) - Score-AbilityText, sem mudança da versão anterior.
+  - Movepool (0.15, NOVO) - cobertura real de tipo de ataque (golpe de
+    nível/tutor, NÃO TM/HM - mesmo critério de species_role.json, pra não
+    creditar golpe que a build por IA nem deixaria escolher), acesso a
+    STAB real, hazard/tela/prioridade.
+  - Tipagem (0.10, NOVO) - qualidade da tipagem própria: resistências
+    menos fraquezas (defensivo) + quantos dos 18 tipos ela acerta STAB
+    super efetivo (ofensivo). Mesmo TYPE_CHART do sinal principal.
+  - Velocidade SAIU do peso fixo (era 0.25 antes) - o usuário pediu pra
+    virar "contextual ao arquétipo do time" (Fase 3 do roadmap, arquétipo
+    ainda não implementado nesta passagem) - até isso existir, velocidade
+    simplesmente não entra no rank, documentado como lacuna conhecida e
+    temporária, não escondida.
 
-  - tier/score: percentile against ALL 1906 species. Answers "how strong is
-    this RIGHT NOW" - a first-stage Pokemon will almost always rank low here,
-    which is expected (it structurally has less BST than something fully
-    evolved), not a bug.
-  - stageTier/stageScore: percentile against only OTHER species at the same
-    evolution stage (see Get-Stage below - 1 = no predecessor, otherwise
-    predecessor's stage + 1; Mega/regional evolutions count as a further
-    stage same as a normal one). Answers "is this a GOOD example of a
-    Pokemon at this stage" - a first-stage mon that's simply strong for a
-    first-stage mon can show SS here even while showing D/C globally. This
-    is what a 2026-09-08 user request specifically asked for: rank each
-    evolution stage against its own peers, not against fully-evolved forms.
+Composto final = percentil(bossDefenseScore)*0.70 + percentil(desempate)*0.30,
+depois RE-percentil-ranqueado antes de virar tier - mesma correção já
+aplicada desde a sexta passagem (uma média ponderada de percentis não é
+ela mesma uniforme, senão o primeiro rank desta série toda deu ZERO SS).
 
-Output: data/species_rank.json, keyed by sname, keeping the full breakdown
-(not just the letters) so the UI can show its work.
+Produz DOIS ranks por espécie, mesmo composto, populações diferentes:
+  - tier/score: percentil contra TODAS as 1906 espécies.
+  - stageTier/stageScore: percentil só contra outras espécies do MESMO
+    estágio evolutivo (ver Get-Stage abaixo - inalterado desde a sétima
+    passagem).
 
-Run after transform.ps1, extract_bosses.ps1 and expand_combo_abilities.ps1
-(needs dex_compact.json, bosses.json, ability_translations_pt.json all
-present and current).
+Output: data/species_rank.json, chaveado por sname, guardando o
+detalhamento completo (não só as letras) pra UI mostrar o trabalho.
+
+Rodar depois de transform.ps1, extract_bosses.ps1 e
+expand_combo_abilities.ps1 (precisa de dex_compact.json, bosses.json e
+ability_translations_pt.json presentes e atuais).
 #>
 
 . (Join-Path $PSScriptRoot "common.ps1")
@@ -91,19 +115,137 @@ function Get-AbilityScore([int]$id) {
     return $abilityScoreCache[$key]
 }
 
-# --- boss usage: distinct boss names per species x, any tier ---
-$bossCountByX = @{}
+# --- move lookup: nome -> {typeName, splitName, prio} - bosses.json guarda
+# golpe por NOME (já resolvido por extract_bosses.ps1), então basta indexar
+# dex.moves (que guarda [nome, tipoIdx, splitIdx, pwr, acc, pp, desc, prio,
+# flags]) por nome uma vez. ---
+$moveInfoByName = @{}
+foreach ($m in $dex.moves) {
+    $n = $m[0]
+    if ($n -and -not $moveInfoByName.ContainsKey($n)) {
+        $moveInfoByName[$n] = @{ type = $dex.types[$m[1]]; split = $dex.splits[$m[2]]; prio = $m[7] }
+    }
+}
+$HAZARD_MOVES = @{ "Stealth Rock" = $true; "Spikes" = $true; "Toxic Spikes" = $true; "Sticky Web" = $true }
+$SCREEN_MOVES = @{ "Reflect" = $true; "Light Screen" = $true; "Aurora Veil" = $true }
+
+# --- bossDefenseScore: simula cada espécie contra os tipos de ataque REAIS
+# de cada "encontro" (chefão x tier). Um encontro = os tipos de ataque não-
+# Status distintos entre os golpes reais do time daquele tier - mesma lógica
+# de computeBossAttackTypes() em artifact_template.html, portada aqui pro
+# pipeline porque agora vira o SINAL PRINCIPAL do rank (precisa estar
+# pré-calculado, não recalculado a cada troca de time). ---
+$encounterAttackTypes = New-Object System.Collections.ArrayList
 foreach ($b in $bosses) {
-    $seen = @{}
     foreach ($tier in "party", "insane", "hell") {
-        foreach ($m in @($b[$tier])) {
-            if ($m -and $null -ne $m["x"]) { $seen[[string]$m["x"]] = 1 }
+        $party = @($b[$tier])
+        if (-not $party -or $party.Count -eq 0) { continue }
+        $types = @{}
+        foreach ($mon in $party) {
+            foreach ($moveName in @($mon["mv"])) {
+                if (-not $moveName -or -not $moveInfoByName.ContainsKey($moveName)) { continue }
+                $info = $moveInfoByName[$moveName]
+                if ($info.split -eq "Status") { continue }
+                $types[$info.type] = $true
+            }
+        }
+        if ($types.Keys.Count -gt 0) { [void]$encounterAttackTypes.Add(@($types.Keys)) }
+    }
+}
+Write-Output "compute_species_rank.ps1: $($encounterAttackTypes.Count) encontros reais (chefao x tier) pra simular defesa"
+
+function Get-BossDefenseScore($alwaysActiveIds, [string[]]$ownTypes) {
+    if ($encounterAttackTypes.Count -eq 0) { return 0 }
+    # Achado real na primeira rodada desta passagem (2026-09-12): usar só a
+    # tipagem CRUA aqui derrubava Probopass (SS estabelecido em várias
+    # passagens anteriores) pra C, porque a tipagem crua Rock/Steel é FRACA
+    # 4x a Ground - a defesa real dele vem inteira da Levitate (habilidade),
+    # não da tipagem em si. Get-AbilityAdjustedTypeMultiplier (mesma tabela
+    # TYPE_MOD_ABILITIES que o app já usa em tempo de execução) corrige isso.
+    $total = 0.0
+    foreach ($atkTypes in $encounterAttackTypes) {
+        $sumMult = 0.0
+        foreach ($t in $atkTypes) { $sumMult += (Get-AbilityAdjustedTypeMultiplier $t $ownTypes $alwaysActiveIds) }
+        $avgMult = $sumMult / $atkTypes.Count
+        # Multiplicador BAIXO (resiste/imune) é bom pra defesa - negativo aqui
+        # pra "maior é melhor" bater com o resto do pipeline (Get-PercentileRanks
+        # não assume direção, só ordena; a inversão é o que faz "sobrevive bem"
+        # virar percentil alto em vez de baixo).
+        $total += (-$avgMult)
+    }
+    return $total / $encounterAttackTypes.Count
+}
+
+# --- movepoolScore: cobertura real de golpe de ataque (nível + tutor, NÃO
+# TM/HM - mesmo critério de compute_species_role.ps1, pra não creditar golpe
+# que a build por IA nem deixaria a espécie escolher), STAB real, e acesso a
+# hazard/tela/prioridade. ---
+function Get-MovepoolScore($s, [string[]]$ownTypes) {
+    $realMoveNames = New-Object System.Collections.Generic.HashSet[string]
+    foreach ($mv in @($s["lm"])) {
+        $mid = $mv[1]
+        if ($mid -and $dex.moves[$mid]) { [void]$realMoveNames.Add($dex.moves[$mid][0]) }
+    }
+    foreach ($id in @($s["tu"])) {
+        if ($id -and $dex.moves[$id]) { [void]$realMoveNames.Add($dex.moves[$id][0]) }
+    }
+    $atkTypesCovered = @{}
+    $hasStab = $false
+    $hasHazard = $false
+    $hasScreen = $false
+    $hasPriority = $false
+    foreach ($name in $realMoveNames) {
+        if (-not $moveInfoByName.ContainsKey($name)) { continue }
+        $info = $moveInfoByName[$name]
+        if ($info.split -ne "Status") {
+            $atkTypesCovered[$info.type] = $true
+            if ($ownTypes -contains $info.type) { $hasStab = $true }
+        }
+        if ($HAZARD_MOVES.ContainsKey($name)) { $hasHazard = $true }
+        if ($SCREEN_MOVES.ContainsKey($name)) { $hasScreen = $true }
+        if ($info.prio -and [int]$info.prio -gt 0) { $hasPriority = $true }
+    }
+    $score = $atkTypesCovered.Keys.Count
+    if ($hasStab) { $score += 2 }
+    if ($hasHazard) { $score += 1 }
+    if ($hasScreen) { $score += 1 }
+    if ($hasPriority) { $score += 1 }
+    return $score
+}
+
+# --- typeScore: qualidade da tipagem própria - defensivo (resistências +
+# imunidades - fraquezas contra os 18 tipos reais) + ofensivo (quantos
+# desses 18 a própria tipagem acerta STAB super efetivo, >=2x). ---
+$ALL_REAL_TYPES = @($dex.types | Where-Object { $_ -and $_ -ne "Mystery" -and $_ -ne "None" -and $_ -ne "Stellar" })
+function Get-TypeScore($alwaysActiveIds, [string[]]$ownTypes) {
+    # Mesmo ajuste por habilidade do Get-BossDefenseScore acima (ver o
+    # comentário lá) - "qualidade da tipagem" tem que enxergar a mesma
+    # Levitate/Solid Rock/etc que já conta na defesa simulada, senão os
+    # dois pilares se contradizem (um diz "tipagem ruim", outro "defende
+    # bem") sobre a MESMA espécie.
+    $defScore = 0
+    foreach ($atk in $ALL_REAL_TYPES) {
+        $m = Get-AbilityAdjustedTypeMultiplier $atk $ownTypes $alwaysActiveIds
+        if ($m -eq 0) { $defScore += 2 }
+        elseif ($m -lt 1) { $defScore += 1 }
+        elseif ($m -gt 1) { $defScore -= 1 }
+    }
+    $offScore = 0
+    foreach ($own in $ownTypes) {
+        foreach ($def in $ALL_REAL_TYPES) {
+            if ((Get-TypeMultiplier $own @($def)) -ge 2) { $offScore += 1 }
         }
     }
-    foreach ($x in $seen.Keys) {
-        if (-not $bossCountByX.ContainsKey($x)) { $bossCountByX[$x] = 0 }
-        $bossCountByX[$x] = $bossCountByX[$x] + 1
+    # Tipo duplo compartilha o mesmo golpe ofensivo (Fire/Flying só precisa de
+    # 1 STAB de cada, não 2x a cobertura) - conta tipos ofensivos distintos
+    # que pelo menos UM dos tipos próprios acerta forte, não a soma dupla.
+    $offTypesHit = @{}
+    foreach ($own in $ownTypes) {
+        foreach ($def in $ALL_REAL_TYPES) {
+            if ((Get-TypeMultiplier $own @($def)) -ge 2) { $offTypesHit[$def] = $true }
+        }
     }
+    return $defScore + $offTypesHit.Keys.Count
 }
 
 # --- evolution stage: 1 = nothing REAL evolves into this species, otherwise
@@ -153,6 +295,7 @@ foreach ($s in $dex.species) {
     if (-not $s) { continue }
     $x = [string]$s["x"]
     $bst = (@($s["b"]) | Measure-Object -Sum).Sum
+    $ownTypes = @(@($s["t"]) | ForEach-Object { $dex.types[$_] } | Select-Object -Unique)
 
     $innIds = @($s["inn"]) | Where-Object { $_ -and $_ -ne 0 } | Select-Object -Unique
     $innScore = 0
@@ -162,7 +305,10 @@ foreach ($s in $dex.species) {
     foreach ($id in $abIds) { $sc = Get-AbilityScore $id; if ($sc -gt $abBest) { $abBest = $sc } }
     $abilityScore = $innScore + $abBest
 
-    $bossCount = if ($bossCountByX.ContainsKey($x)) { $bossCountByX[$x] } else { 0 }
+    $alwaysActiveIds = Get-AlwaysActiveAbilityIds $s
+    $bossDefense = Get-BossDefenseScore $alwaysActiveIds $ownTypes
+    $movepoolScore = Get-MovepoolScore $s $ownTypes
+    $typeScore = Get-TypeScore $alwaysActiveIds $ownTypes
 
     $stage = Get-Stage $x 0
     # Real evolution line = a real (non-Mega/Primal) edge on at least one
@@ -175,18 +321,10 @@ foreach ($s in $dex.species) {
     foreach ($ev in @($s["ev"])) { if ($megaKindIdx -notcontains $ev[0]) { $hasRealNextStage = $true; break } }
     $hasEvolutionLine = ($stage -gt 1) -or $hasRealNextStage
 
-    # Velocidade (índice 5 do array de stats base: HP/Atk/Def/SpA/SpD/Spe) como
-    # sinal próprio, 2026-09-11 - pedido do usuário: o rank até então só via
-    # velocidade dissolvida dentro do BST total (1/6 do peso, igual a
-    # qualquer outro stat), mas num formato 1x1 quem ataca primeiro com mais
-    # força geralmente vence a troca - dois Pokémon com o mesmo BST mas
-    # velocidades muito diferentes enfrentam realidades competitivas bem
-    # diferentes, o que o BST sozinho não captura.
-    $spe = if ($s["b"].Count -gt 5) { $s["b"][5] } else { 0 }
-
     [void]$rows.Add([ordered]@{
-        sname = $s["sname"]; bst = $bst; bossCount = $bossCount; abilityScore = $abilityScore
-        spe = $spe; stage = $stage; hasEvolutionLine = $hasEvolutionLine
+        sname = $s["sname"]; bst = $bst; abilityScore = $abilityScore
+        bossDefense = $bossDefense; movepoolScore = $movepoolScore; typeScore = $typeScore
+        stage = $stage; hasEvolutionLine = $hasEvolutionLine
     })
 }
 
@@ -208,21 +346,14 @@ function Get-PercentileRanks($values) {
     return $rankOf
 }
 
-# Ability gets real weight because it's now systematically computed for all
-# 1906 species (not a sparse hand-picked subset) - but BST still leads since
-# it's the most universally reliable signal, and boss usage is real but
-# noisier (see the doc-comment above). Same weights for the global rank and
-# every per-stage rank, so the two numbers stay comparable in spirit.
-#
-# Velocidade adicionada como 4º componente, 2026-09-11 (pedido do usuário,
-# formato 1x1 do hack: quem ataca primeiro com mais força tende a vencer a
-# troca). Pesada igual à habilidade (0.25 cada) porque, no 1x1, velocidade é
-# tão decisiva quanto o kit de habilidade pra decidir uma troca - não é
-# apenas "mais um dos seis stats". BST ainda lidera (0.30) por ser o sinal
-# mais universalmente confiável; uso em chefões cai de 0.25 pra 0.20 pra
-# abrir espaço, mantendo a mesma ordem relativa de confiança entre os sinais
-# que já existiam.
-$WEIGHTS = @{ bst = 0.30; boss = 0.20; ability = 0.25; spe = 0.25 }
+# Pesos do DESEMPATE (não o sinal principal - ver bossDefense abaixo).
+# BST absorveu o peso que "uso em chefão" tinha (pedido do usuário,
+# 2026-09-12: "trocar o peso do uso em chefões pelo BST"). Movepool/Tipagem
+# são novos - decisão do usuário depois do material real que trouxe sobre os
+# 4 pilares (Base Stats/Movepool/Ability/Type) usados por Smogon/VGC.
+$TIEBREAK_WEIGHTS = @{ bst = 0.50; ability = 0.25; movepool = 0.15; type = 0.10 }
+# Peso do sinal PRINCIPAL (simulação) vs o desempate, no composto final.
+$PRIMARY_WEIGHT = 0.70
 
 function Get-Tier([double]$pct) {
     if ($pct -ge 97) { return "SS" }
@@ -233,31 +364,33 @@ function Get-Tier([double]$pct) {
     return "D"
 }
 
-# Computes tier+score+the three percentiles for one population of rows
-# (either ALL species for the global rank, or one stage's worth for the
-# stage-relative rank). Returns sname -> breakdown. Percentile-ranks the
-# composite ITSELF before bucketing (not the raw weighted average) - a
-# weighted average of percentiles is not itself uniformly distributed
-# (species rarely top all three signals at once, so raw composites regress
-# toward the middle); measured on the first version of this script, which
-# applied Get-Tier's cutoffs directly to the raw composite and produced
-# ZERO SS-tier species. Fixed by percentile-ranking the composite before
-# bucketing, done here and reused for every group.
+# Computes tier+score+os percentis de cada sinal para UMA população (todas as
+# espécies pro rank global, ou as de um estágio só pro rank por estágio).
+# Percentile-ranks the composite ITSELF before bucketing (not the raw
+# weighted average) - a weighted average of percentiles is not itself
+# uniformly distributed (species rarely top every signal at once, so raw
+# composites regress toward the middle); medido desde a sexta passagem
+# (primeira versão deste script deu ZERO SS por aplicar os cortes direto no
+# composto cru). Corrigido percentile-rankeando o composto antes de balde-ar,
+# reaplicado aqui pro composto de dois níveis (principal + desempate).
 function Compute-Tiers($subsetRows) {
     $bstRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.bst })
-    $bossRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.bossCount })
     $abilityRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.abilityScore })
-    $speRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.spe })
+    $movepoolRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.movepoolScore })
+    $typeRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.typeScore })
+    $bossDefRanks = Get-PercentileRanks ($subsetRows | ForEach-Object { $_.bossDefense })
 
     $composites = @{}
     foreach ($r in $subsetRows) {
         $bstPct = $bstRanks[[string]$r.bst]
-        $bossPct = $bossRanks[[string]$r.bossCount]
         $abilityPct = $abilityRanks[[string]$r.abilityScore]
-        $spePct = $speRanks[[string]$r.spe]
+        $movepoolPct = $movepoolRanks[[string]$r.movepoolScore]
+        $typePct = $typeRanks[[string]$r.typeScore]
+        $bossDefPct = $bossDefRanks[[string]$r.bossDefense]
+        $tiebreak = $bstPct * $TIEBREAK_WEIGHTS.bst + $abilityPct * $TIEBREAK_WEIGHTS.ability + $movepoolPct * $TIEBREAK_WEIGHTS.movepool + $typePct * $TIEBREAK_WEIGHTS.type
         $composites[$r.sname] = @{
-            composite = $bstPct * $WEIGHTS.bst + $bossPct * $WEIGHTS.boss + $abilityPct * $WEIGHTS.ability + $spePct * $WEIGHTS.spe
-            bstPct = $bstPct; bossPct = $bossPct; abilityPct = $abilityPct; spePct = $spePct
+            composite = $bossDefPct * $PRIMARY_WEIGHT + $tiebreak * (1 - $PRIMARY_WEIGHT)
+            bstPct = $bstPct; abilityPct = $abilityPct; movepoolPct = $movepoolPct; typePct = $typePct; bossDefPct = $bossDefPct
         }
     }
     $compositeRanks = Get-PercentileRanks ($composites.Values | ForEach-Object { $_.composite })
@@ -269,7 +402,7 @@ function Compute-Tiers($subsetRows) {
         $result[$r.sname] = @{
             tier = Get-Tier $finalPct
             score = [math]::Round($finalPct, 1)
-            bstPct = $c.bstPct; bossPct = $c.bossPct; abilityPct = $c.abilityPct; spePct = $c.spePct
+            bstPct = $c.bstPct; abilityPct = $c.abilityPct; movepoolPct = $c.movepoolPct; typePct = $c.typePct; bossDefPct = $c.bossDefPct
         }
     }
     return $result
@@ -299,9 +432,10 @@ foreach ($r in $rows) {
         stageTier = if ($sg) { $sg.tier } else { $null }
         stageScore = if ($sg) { $sg.score } else { $null }
         bst = $r.bst; bstPct = $g.bstPct
-        bossCount = $r.bossCount; bossPct = $g.bossPct
         abilityScore = $r.abilityScore; abilityPct = $g.abilityPct
-        spe = $r.spe; spePct = $g.spePct
+        movepoolScore = $r.movepoolScore; movepoolPct = $g.movepoolPct
+        typeScore = $r.typeScore; typePct = $g.typePct
+        bossDefense = [math]::Round($r.bossDefense, 3); bossDefPct = $g.bossDefPct
     }
 }
 

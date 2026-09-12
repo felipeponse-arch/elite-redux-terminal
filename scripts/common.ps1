@@ -144,6 +144,142 @@ function Score-AbilityText([string]$desc) {
     return 0
 }
 
+# Tabela de efetividade de tipo (atacante -> {defensor: multiplicador}) -
+# porta EXATA do TYPE_CHART já usado em artifact_template.html (mesmos
+# valores, nunca reconferidos contra outra fonte porque já é a fonte real
+# usada pelo resto do app - qualquer divergência seria bug de digitação,
+# não de dado). Usado pela décima-terceira/vigésima-quarta passagem
+# (2026-09-12) pro rank robusto: simula cada espécie contra os tipos de
+# ataque reais dos 107 chefões (compute_species_rank.ps1), em vez de só
+# medir "quão grande é o BST" no vácuo.
+$TYPE_CHART = @{
+    Normal   = @{ Rock=0.5; Ghost=0; Steel=0.5 }
+    Fighting = @{ Normal=2; Ice=2; Poison=0.5; Flying=0.5; Psychic=0.5; Bug=0.5; Rock=2; Ghost=0; Dark=2; Steel=2; Fairy=0.5 }
+    Fire     = @{ Fire=0.5; Water=0.5; Grass=2; Ice=2; Bug=2; Rock=0.5; Dragon=0.5; Steel=2 }
+    Water    = @{ Fire=2; Water=0.5; Grass=0.5; Ground=2; Rock=2; Dragon=0.5 }
+    Electric = @{ Water=2; Electric=0.5; Grass=0.5; Ground=0; Flying=2; Dragon=0.5 }
+    Grass    = @{ Fire=0.5; Water=2; Grass=0.5; Poison=0.5; Ground=2; Flying=0.5; Bug=0.5; Rock=2; Dragon=0.5; Steel=0.5 }
+    Ice      = @{ Fire=0.5; Water=0.5; Grass=2; Ice=0.5; Ground=2; Flying=2; Dragon=2; Steel=0.5 }
+    Poison   = @{ Grass=2; Poison=0.5; Ground=0.5; Rock=0.5; Ghost=0.5; Steel=0; Fairy=2 }
+    Ground   = @{ Fire=2; Electric=2; Grass=0.5; Poison=2; Flying=0; Bug=0.5; Rock=2; Steel=2 }
+    Flying   = @{ Electric=0.5; Grass=2; Fighting=2; Bug=2; Rock=0.5; Steel=0.5 }
+    Psychic  = @{ Fighting=2; Poison=2; Psychic=0.5; Dark=0; Steel=0.5 }
+    Bug      = @{ Fire=0.5; Grass=2; Fighting=0.5; Poison=0.5; Flying=0.5; Psychic=2; Ghost=0.5; Dark=2; Steel=0.5; Fairy=0.5 }
+    Rock     = @{ Fire=2; Ice=2; Fighting=0.5; Ground=0.5; Flying=2; Bug=2; Steel=0.5 }
+    Ghost    = @{ Normal=0; Psychic=2; Ghost=2; Dark=0.5 }
+    Dragon   = @{ Dragon=2; Steel=0.5; Fairy=0 }
+    Dark     = @{ Fighting=0.5; Psychic=2; Ghost=2; Dark=0.5; Fairy=0.5 }
+    Steel    = @{ Fire=0.5; Water=0.5; Electric=0.5; Ice=2; Rock=2; Steel=0.5; Fairy=2 }
+    Fairy    = @{ Fire=0.5; Fighting=2; Poison=0.5; Dragon=2; Dark=2; Steel=0.5 }
+}
+
+# Multiplicador de dano de $atkType contra uma espécie com 1-2 tipos
+# ($defTypes, array de nomes). Multiplica cada tipo defensor separado -
+# mesma lógica de typeMultiplier() em artifact_template.html.
+function Get-TypeMultiplier([string]$atkType, [string[]]$defTypes) {
+    $row = $TYPE_CHART[$atkType]
+    $mult = 1.0
+    foreach ($d in $defTypes) {
+        if ($row -and $row.ContainsKey($d)) { $mult *= $row[$d] }
+    }
+    return $mult
+}
+
+# Porta EXATA de TYPE_MOD_ABILITIES em artifact_template.html (décima-oitava
+# passagem, 2026-09-11 - 37 entradas curadas contra o texto real de cada
+# habilidade, nunca inventadas). Usada pelo rank robusto (compute_species_
+# rank.ps1, vigésima-quarta passagem, 2026-09-12): sem isto, a simulação de
+# defesa julgava só a tipagem CRUA da espécie e derrubava Probopass de SS
+# (rank estabelecido em várias passagens anteriores) pra C, porque a defesa
+# real dele contra Ground vem inteira da Levitate (habilidade), não da
+# tipagem Rock/Steel em si (que sozinha é uma FRAQUEZA 4x a Ground). Mesma
+# tabela, nunca reconferida contra outra fonte porque já é a fonte real.
+$TYPE_MOD_ABILITIES = @{
+    26  = @{ immune = @("Ground") }                                   # Levitate
+    444 = @{ immune = @("Water") }                                    # Evaporate
+    450 = @{ immune = @("Ground") }                                   # Earth Eater
+    314 = @{ immune = @("Rock") }                                     # Mountaineer
+    116 = @{ seDamper = 0.65 }                                        # Solid Rock
+    318 = @{ seDamper = 0.5 }                                         # Primal Armor
+    303 = @{ resist = @{ Rock = 0.5 } }                               # Fossilized
+    17  = @{ resist = @{ Poison = 0.5 } }                             # Immunity
+    40  = @{ resist = @{ Water = 0.7; Ice = 0.7 } }                   # Magma Armor
+    47  = @{ resist = @{ Fire = 0.5; Ice = 0.5 } }                    # Thick Fat
+    85  = @{ resist = @{ Fire = 0.5 } }                                # Heatproof
+    134 = @{ resist = @{ Ghost = 0.5; Dark = 0.5 } }                  # Heavy Metal
+    195 = @{ resist = @{ Water = 0.5 } }                              # Water Compaction
+    199 = @{ resist = @{ Fire = 0.5 } }                               # Water Bubble
+    218 = @{ resist = @{ Fire = 2 } }                                 # Fluffy (fraqueza)
+    306 = @{ resist = @{ Dark = 0.75; Fairy = 0.75 } }                # Nocturnal
+    311 = @{ resist = @{ Water = 2 } }                                # Liquified (fraqueza)
+    337 = @{ resist = @{ Grass = 0.5 } }                              # Raw Wood
+    342 = @{ resist = @{ Fire = 0.5 } }                               # Seaweed
+    442 = @{ resist = @{ Fairy = 0.5 } }                              # Fae Hunter
+    445 = @{ resist = @{ Grass = 0.5 } }                              # Lumberjack
+    526 = @{ resist = @{ Dark = 0.5 } }                               # Monster Hunter
+    547 = @{ resist = @{ Ghost = 0.5 } }                              # Purifying Salt
+    754 = @{ resist = @{ Fire = 2 } }                                 # Puffy (fraqueza)
+    764 = @{ resist = @{ Fire = 0.5 } }                               # Deep Freeze
+    804 = @{ resist = @{ Fire = 0.5 } }                               # Firefighter
+    889 = @{ resist = @{ Fire = 0.25; Ice = 0.25 } }                  # Thick Blubber
+    904 = @{ resist = @{ Water = 0.5; Ground = 0.5 } }                # Strong Foundation
+    995 = @{ resist = @{ Fire = 0.5; Electric = 0.5; Water = 0.5 } }  # Elemental Aegis
+    996 = @{ resist = @{ Dark = 0.5; Ghost = 0.5; Psychic = 0.5 } }   # Aegis Ward
+    606 = @{ immune = @("Ground") }                                   # Aerialist
+    688 = @{ immune = @("Ground") }                                   # Imposing Wings
+    664 = @{ resist = @{ Fire = 0.5 } }                               # Flame Bubble
+    682 = @{ resist = @{ Fire = 0.5 } }                               # Iron Giant
+    936 = @{ resist = @{ Fire = 0.5; Ice = 0.5 } }                    # Sumo Guard
+    946 = @{ resist = @{ Fire = 2 } }                                 # Massive Pelt (fraqueza)
+    1010 = @{ resist = @{ Fire = 0.5 } }                              # Thermal Entropy
+    1015 = @{ resist = @{ Fire = 0.5 } }                              # Droideka
+}
+
+# Porta de alwaysActiveAbilities() - quais ids de habilidade desta espécie
+# são seguros de tratar como SEMPRE ativos sem saber a build escolhida:
+# innates (sempre ligadas, regra do próprio jogo) + uma habilidade
+# escolhível só quando os 3 slots são idênticos (sem alternativa real pra
+# escolher, então travada de fato). $s é uma entrada de dex.species (["inn"]
+# e ["ab"] já são arrays de ids, mesmo formato de dex_compact.json).
+# CHAMAR UMA VEZ POR ESPÉCIE, não por par (encontro x tipo) - achado real de
+# performance na vigésima-quarta passagem (2026-09-12): a primeira versão
+# chamava isto (com `Select-Object -Unique`, que sozinho já é caro em
+# PowerShell por invocar o pipeline inteiro) de dentro do loop mais interno
+# da simulação de chefão, ~900 vezes por espécie x 1906 espécies - a rodada
+# nem terminou em mais de 9 minutos. Resolvido calculando uma vez por
+# espécie no loop principal e passando o resultado já pronto adiante.
+function Get-AlwaysActiveAbilityIds($s) {
+    $ids = New-Object System.Collections.ArrayList
+    foreach ($id in @($s["inn"])) { [void]$ids.Add($id) }
+    $ab = @($s["ab"])
+    if ($ab.Count -gt 0) {
+        $allSame = $true
+        for ($i = 1; $i -lt $ab.Count; $i++) { if ($ab[$i] -ne $ab[0]) { $allSame = $false; break } }
+        if ($allSame) { [void]$ids.Add($ab[0]) }
+    }
+    return $ids
+}
+
+# Porta de abilityTypeMod() - multiplicador de dano de $atkType contra uma
+# espécie com tipos $defTypes, dado o array JÁ CALCULADO de ids sempre-ativos
+# (ver Get-AlwaysActiveAbilityIds acima - calcular uma vez por espécie, não
+# aqui dentro, que roda no loop mais quente da simulação).
+function Get-AbilityAdjustedTypeMultiplier([string]$atkType, [string[]]$defTypes, $alwaysActiveIds) {
+    $raw = Get-TypeMultiplier $atkType $defTypes
+    foreach ($id in $alwaysActiveIds) {
+        $mod = $TYPE_MOD_ABILITIES[$id]
+        if ($mod -and $mod.immune -and ($mod.immune -contains $atkType)) { return 0.0 }
+    }
+    $mult = $raw
+    foreach ($id in $alwaysActiveIds) {
+        $mod = $TYPE_MOD_ABILITIES[$id]
+        if (-not $mod) { continue }
+        if ($mod.resist -and $mod.resist.ContainsKey($atkType)) { $mult *= $mod.resist[$atkType] }
+        elseif ($mod.seDamper -and $raw -gt 1) { $mult *= $mod.seDamper }
+    }
+    return $mult
+}
+
 function Format-Evs($evsArr) {
     $labels = @("HP", "Atk", "Def", "SpA", "SpD", "Spe")
     $arr = @($evsArr)

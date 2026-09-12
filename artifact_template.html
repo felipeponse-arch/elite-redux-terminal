@@ -2993,13 +2993,23 @@
   // team slot, box chip) - the tooltip spells out the three inputs AND the
   // limitation (no moveset/synergy judgment) every time, not just once in a
   // help page nobody reads.
+  // Fórmula reescrita na vigésima-quarta passagem (2026-09-12, reunião da
+  // equipe depois do usuário reportar "algo no rank não faz sentido"): o
+  // sinal PRINCIPAL agora é uma simulação real de defesa contra os 107
+  // chefões do jogo (data/bosses.json), não mais um punhado de atributos
+  // estáticos - ver o comentário completo no topo de
+  // scripts/compute_species_rank.ps1. "Uso em chefão" (frequência) e
+  // "velocidade" saíram do rank (a primeira virou redundante com a
+  // simulação de defesa real; a segunda vai virar contextual ao arquétipo
+  // do time numa fase futura do roadmap, ainda não implementada).
   function rankBadgeHtml(sname) {
     var r = SPECIES_RANK[sname];
     if (!r) return "";
-    var title = "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100, calculado automaticamente a partir de " +
-      "BST (percentil " + r.bstPct + "), uso em chefões (percentil " + r.bossPct + "), impacto das habilidades " +
-      "(percentil " + r.abilityPct + ") e velocidade (percentil " + r.spePct + ") — formato 1x1, quem ataca primeiro " +
-      "com mais força tende a vencer a troca. Não avalia moveset nem sinergia com o resto do time.";
+    var title = "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100. Sinal principal: simulação de " +
+      "defesa contra os times reais dos 107 chefões do jogo (percentil " + r.bossDefPct + "). Desempate: BST (percentil " +
+      r.bstPct + "), habilidades (percentil " + r.abilityPct + "), movepool real (percentil " + r.movepoolPct + ") e " +
+      "qualidade de tipagem (percentil " + r.typePct + "). Mede só sobrevivência contra ataques reais - não avalia dano " +
+      "ofensivo (depende do build escolhido) nem sinergia com o resto do time.";
     return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.tier + '</span>';
   }
 
