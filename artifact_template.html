@@ -519,37 +519,50 @@
   .team-shell { flex: 1; min-width: 0; overflow-y: auto; padding: 24px 28px 60px; display: flex; flex-direction: column; gap: 20px; }
   .team-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
 
-  .box-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-  .box-grid .empty-note { color: var(--text-dim); font-size: 13px; }
-  .box-chip {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 5px 6px 5px 12px;
-    font-size: 12.5px;
-    font-weight: 600;
-    /* Auditoria de performance, 2026-09-11: só .species-row tinha essa
-       otimização - a caixa reconstrói TODOS os chips via innerHTML a cada
-       adicionar/remover/mover, sem teto de tamanho (ao contrário do time,
-       travado em 6). Medido ao vivo: ~20-25ms de bloqueio por clique numa
-       caixa com ~590 espécies, mais caro que renderizar a Dex INTEIRA
-       (1906 linhas) do zero. Altura é estável (38px, medido em espécies
-       reais de nome curtíssimo a longuíssimo - Muk a "Urshifu Rapid
-       Strike Style Mega"); largura varia bastante (206-374px na mesma
-       medição) porque o chip cresce com o nome - contain-intrinsic-size
-       aqui é só um palpite de largura MÉDIA pro placeholder de um chip
-       fora da tela, não uma medida exata; o layout se corrige sozinho
-       assim que o chip entra no viewport de verdade (o mesmo trade-off
-       aceito em qualquer grade de largura variável com content-visibility). */
-    content-visibility: auto;
-    contain-intrinsic-size: 240px 38px;
+  /* ---------- PC Box (Fase 2 do roadmap de estratégia, 2026-09-11/12) ----------
+     Redesenho pedido pelo usuário com print de referência do jogo real: grade
+     paginada em "caixas" numeradas (não mais lista fluida de chips), busca que
+     salta pra caixa certa, um slot selecionado por vez mostra ações num painel
+     abaixo (não um botão por chip - a grade fica limpa, do jeito que o PC de
+     verdade é). PCBOX_SIZE=30 (6x5) casa com o print mandado pelo usuário.
+     Paginar em blocos fixos também resolve de graça a preocupação de
+     performance que o antigo `.box-chip` precisava de content-visibility pra
+     mitigar (a auditoria de 2026-09-11 media ~20-25ms numa caixa de ~590 chips
+     TODOS na tela ao mesmo tempo) - agora só 30 nós de grade existem por vez,
+     não precisa de truque de virtualização nenhum. */
+  .pcbox-shell { display: flex; flex-direction: column; gap: 12px; }
+  .pcbox-nav { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .pcbox-arrow {
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+    width: 34px; height: 34px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer;
   }
-  .box-chip .box-chip-pips { display: flex; gap: 3px; }
-  .box-chip .bc-name-wrap { display: inline-flex; align-items: center; gap: 8px; }
-  .box-chip .remove-btn { font-size: 15px; line-height: 1; padding: 2px 4px; }
+  .pcbox-arrow:disabled { opacity: .35; cursor: default; }
+  .pcbox-title { font-family: "Chakra Petch", ui-sans-serif, system-ui, sans-serif; font-weight: 700; font-size: 15px; min-width: 160px; text-align: center; }
+  .pcbox-title small { display: block; font-family: "Figtree", sans-serif; font-weight: 600; color: var(--text-dim); font-size: 11px; margin-top: 1px; }
+  .pcbox-search-row { display: flex; gap: 8px; }
+  .pcbox-search-row input {
+    flex: 1; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-size: 13px;
+  }
+  .pcbox-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 10px;
+  }
+  .pcbox-slot {
+    aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; padding: 4px;
+  }
+  .pcbox-slot.empty { background: transparent; border-style: dashed; opacity: .45; cursor: default; }
+  .pcbox-slot.selected { border-color: var(--accent); border-width: 2px; box-shadow: var(--shadow); }
+  .pcbox-detail {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;
+  }
+  .pcbox-detail .bc-name-wrap { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; }
+  .pcbox-detail .box-chip-pips { display: flex; gap: 3px; }
+  .pcbox-detail-actions { display: flex; gap: 8px; margin-left: auto; }
+  .pcbox-empty-note { color: var(--text-dim); font-size: 13px; }
 
   .saved-teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
   .saved-team-card { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--surface-2); }
@@ -695,17 +708,24 @@
   .swap-pick:hover { border-color: var(--accent); background: var(--surface-3); }
   .swap-pick-name { font-size: 12.5px; font-weight: 600; }
 
-  .box-chip .box-to-team {
-    background: none;
-    border: none;
+  /* Botões vivem no painel de detalhe do slot selecionado agora (redesenho PC
+     Box, ver .pcbox-detail acima) - não mais um por chip. */
+  .pcbox-detail .box-to-team {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
     color: var(--accent-2);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
     cursor: pointer;
-    padding: 2px 4px;
+    padding: 6px 10px;
   }
-  .box-chip .box-to-team:disabled { color: var(--text-dim); cursor: default; }
-  .box-chip .box-to-team.is-swap { color: var(--accent); }
+  .pcbox-detail .box-to-team:disabled { color: var(--text-dim); cursor: default; }
+  .pcbox-detail .box-to-team.is-swap { color: var(--accent); border-color: var(--accent); }
+  .pcbox-detail .remove-btn {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px;
+    padding: 6px 10px; font-size: 15px; line-height: 1; cursor: pointer; color: var(--sem-weak);
+  }
 
   .row-add-btn {
     flex: none;
@@ -1158,7 +1178,7 @@
     <nav class="tabs" role="tablist" aria-label="Seções">
       <button class="tab-btn active" data-tab="dex" type="button" role="tab" aria-selected="true" aria-controls="view-dex">Dex</button>
       <button class="tab-btn" data-tab="team" type="button" role="tab" aria-selected="false" aria-controls="view-team">Meu Time <span id="team-count-badge" class="count-badge mono">0/6</span></button>
-      <button class="tab-btn" data-tab="box" type="button" role="tab" aria-selected="false" aria-controls="view-box">Caixa <span id="box-count-badge" class="count-badge mono">0</span></button>
+      <button class="tab-btn" data-tab="box" type="button" role="tab" aria-selected="false" aria-controls="view-box">PC Box <span id="box-count-badge" class="count-badge mono">0</span></button>
       <button class="tab-btn" data-tab="bosses" type="button" role="tab" aria-selected="false" aria-controls="view-bosses">Chefões <span id="boss-count-badge" class="count-badge mono"></span></button>
     </nav>
     <!--
@@ -1290,9 +1310,21 @@
     <section id="view-box" class="view">
       <div class="team-shell">
         <div>
-          <h3 style="margin-bottom:6px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);">Minha caixa (PC Box)</h3>
+          <h3 style="margin-bottom:6px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);">PC Box</h3>
           <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 12px;max-width:70ch;">Todo Pokémon que você já capturou, sem limite de 6. Use isso pra guardar o panorama geral: quanto mais completo, melhor eu consigo sugerir trocas quando um treinador específico estiver dando trabalho.</p>
-          <div class="box-grid" id="box-grid"></div>
+          <!-- Redesenho da caixa, Fase 2 do roadmap de estratégia (2026-09-11/12,
+               pedido do usuário com print de referência do jogo real): grade
+               paginada em caixas numeradas + busca, em vez da lista fluida de
+               chips que existia antes. Ver renderBox()/PCBOX_SIZE. O input de
+               busca fica FORA do que renderBox() reconstrói (mesmo padrão já
+               usado pelo #search-input da Dex) - senão cada tecla digitada
+               recriaria o próprio campo e derrubaria o foco/cursor. -->
+          <div class="pcbox-shell">
+            <div class="pcbox-search-row">
+              <input id="pcbox-search" type="search" placeholder="Buscar na caixa..." autocomplete="off" aria-label="Buscar Pokémon na caixa">
+            </div>
+            <div id="pcbox-content"></div>
+          </div>
         </div>
         <div class="card" id="claude-export-box-card">
           <h3>Enviar caixa para o Claude</h3>
@@ -3344,55 +3376,134 @@
     scheduleDashboardRefresh();
   }
 
+  // PC Box - Fase 2 do roadmap de estratégia (2026-09-11/12, redesenho pedido
+  // pelo usuário com print de referência do jogo real). 30 slots por caixa
+  // (grade 6x5, casa com o print) - membros da caixa são fatiados em páginas
+  // fixas por posição no array (não há "slot salvo" persistente por espécie,
+  // só ordem de captura), navegação com setas + salto direto por busca.
+  var PCBOX_SIZE = 30;
+  var pcBoxPage = 0;
+  var pcBoxSelectedX = null;
+
   function renderBox() {
-    var grid = document.getElementById("box-grid");
+    var content = document.getElementById("pcbox-content");
     var members = state.box.map(getSpeciesByX).filter(Boolean);
     if (!members.length) {
-      grid.innerHTML = '<p class="empty-note">Caixa vazia — abra um Pokémon na aba Dex e clique em "+ Adicionar à caixa".</p>';
-    } else {
-      var teamFull = state.team.length >= 6;
-      // The Dex tab never blocks this: a full team opens the swap modal
-      // instead of disabling the button (see openSwapModal / row-add-btn
-      // above). The Box used to be the odd one out - disabled and forcing
-      // the user to switch tabs to free a slot first. Same rule here now:
-      // the button is never disabled, it just swaps instead of appending
-      // once the team is full. See AUDITORIA-DOSSIE.md UX 1.
-      var title = teamFull ? "Trocar por um do time" : "Mandar para o time";
-      grid.innerHTML = members.map(function (sp) {
-        var names = speciesTypeNames(sp);
-        return '<div class="box-chip">' +
-          '<span class="bc-name-wrap goto-species" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 26) +
-          '<span>' + escapeHtml(sp.n) + '</span></span>' +
-          rankBadgeHtml(sp.sname) +
-          '<span class="box-chip-pips">' + names.map(typePip).join("") + '</span>' +
-          '<button class="box-to-team' + (teamFull ? ' is-swap' : '') + '" data-x="' + sp.x + '" type="button" title="' + title + '" aria-label="' + title + '">' +
+      content.innerHTML = '<p class="pcbox-empty-note">Caixa vazia — abra um Pokémon na aba Dex e clique em "+ Adicionar à caixa".</p>';
+      updateBoxBadge();
+      renderClaudeExportBox(members);
+      return;
+    }
+
+    var totalPages = Math.max(1, Math.ceil(members.length / PCBOX_SIZE));
+    if (pcBoxPage >= totalPages) pcBoxPage = totalPages - 1;
+    if (pcBoxPage < 0) pcBoxPage = 0;
+    // A espécie selecionada pode ter saído da caixa (removida/mandada pro
+    // time) desde a última renderização - solta a seleção em vez de apontar
+    // pra um x que não está mais lá.
+    if (pcBoxSelectedX !== null && state.box.indexOf(pcBoxSelectedX) === -1) pcBoxSelectedX = null;
+
+    var startIdx = pcBoxPage * PCBOX_SIZE;
+    var slotsHtml = "";
+    for (var i = 0; i < PCBOX_SIZE; i++) {
+      var sp = members[startIdx + i];
+      if (sp) {
+        var selected = sp.x === pcBoxSelectedX;
+        slotsHtml += '<button class="pcbox-slot' + (selected ? ' selected' : '') + '" data-x="' + sp.x + '" type="button" title="' + escapeHtml(sp.n) + '">' +
+          spriteImgHtml(sp.x, sp.n, 40) + '</button>';
+      } else {
+        slotsHtml += '<div class="pcbox-slot empty" aria-hidden="true"></div>';
+      }
+    }
+
+    // Mesma regra de sempre: o time cheio nunca desabilita a ação, só troca
+    // de "mandar" pra "trocar" (ver AUDITORIA-DOSSIE.md UX 1).
+    var teamFull = state.team.length >= 6;
+    var title = teamFull ? "Trocar por um do time" : "Mandar para o time";
+    var selectedSp = pcBoxSelectedX !== null ? getSpeciesByX(pcBoxSelectedX) : null;
+    var detailHtml;
+    if (selectedSp) {
+      var names = speciesTypeNames(selectedSp);
+      detailHtml = '<div class="pcbox-detail">' +
+        '<span class="bc-name-wrap goto-species" data-x="' + selectedSp.x + '" title="Ver na Dex">' + spriteImgHtml(selectedSp.x, selectedSp.n, 32) +
+        '<span>' + escapeHtml(selectedSp.n) + '</span></span>' +
+        rankBadgeHtml(selectedSp.sname) +
+        '<span class="box-chip-pips">' + names.map(typePip).join("") + '</span>' +
+        '<span class="pcbox-detail-actions">' +
+          '<button class="box-to-team' + (teamFull ? ' is-swap' : '') + '" data-x="' + selectedSp.x + '" type="button" title="' + title + '" aria-label="' + title + '">' +
             (teamFull ? '&hArr;&nbsp;trocar' : '&rarr;&nbsp;time') + '</button>' +
-          '<button class="remove-btn" data-x="' + sp.x + '" title="remover da caixa">&times;</button></div>';
-      }).join("");
-      grid.querySelectorAll(".remove-btn").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var x = parseInt(btn.dataset.x, 10);
-          state.box = state.box.filter(function (v) { return v !== x; });
-          saveBox();
-          updateBoxBadge();
-          renderBox();
-        });
+          '<button class="remove-btn" data-x="' + selectedSp.x + '" title="remover da caixa">&times;</button>' +
+        '</span></div>';
+    } else {
+      detailHtml = '<p class="pcbox-empty-note">Clique num Pokémon da grade pra ver detalhes e ações.</p>';
+    }
+
+    content.innerHTML =
+      '<div class="pcbox-nav">' +
+        '<button class="pcbox-arrow" id="pcbox-prev" type="button" aria-label="Caixa anterior"' + (pcBoxPage === 0 ? ' disabled' : '') + '>&larr;</button>' +
+        '<div class="pcbox-title">Box ' + (pcBoxPage + 1) + '<small>' + members.length + ' na caixa &middot; ' + totalPages + ' caixa' + (totalPages === 1 ? '' : 's') + '</small></div>' +
+        '<button class="pcbox-arrow" id="pcbox-next" type="button" aria-label="Próxima caixa"' + (pcBoxPage === totalPages - 1 ? ' disabled' : '') + '>&rarr;</button>' +
+      '</div>' +
+      '<div class="pcbox-grid">' + slotsHtml + '</div>' +
+      detailHtml;
+
+    document.getElementById("pcbox-prev").addEventListener("click", function () { pcBoxPage--; renderBox(); });
+    document.getElementById("pcbox-next").addEventListener("click", function () { pcBoxPage++; renderBox(); });
+    content.querySelectorAll(".pcbox-slot:not(.empty)").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var x = parseInt(btn.dataset.x, 10);
+        pcBoxSelectedX = (pcBoxSelectedX === x) ? null : x;
+        renderBox();
       });
-      grid.querySelectorAll(".box-to-team").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var x = parseInt(btn.dataset.x, 10);
-          if (state.team.length >= 6) { openSwapModal(x); return; }
-          var sp = getSpeciesByX(x);
-          if (rosterMove(x, null)) {
-            flashToast(sp.n + " foi para o time (" + state.team.length + "/6)");
-            renderBox();
-          }
-        });
+    });
+    var removeBtn = content.querySelector(".pcbox-detail .remove-btn");
+    if (removeBtn) {
+      removeBtn.addEventListener("click", function () {
+        var x = parseInt(removeBtn.dataset.x, 10);
+        state.box = state.box.filter(function (v) { return v !== x; });
+        pcBoxSelectedX = null;
+        saveBox();
+        updateBoxBadge();
+        renderBox();
       });
     }
+    var toTeamBtn = content.querySelector(".pcbox-detail .box-to-team");
+    if (toTeamBtn) {
+      toTeamBtn.addEventListener("click", function () {
+        var x = parseInt(toTeamBtn.dataset.x, 10);
+        if (state.team.length >= 6) { openSwapModal(x); return; }
+        var sp = getSpeciesByX(x);
+        if (rosterMove(x, null)) {
+          flashToast(sp.n + " foi para o time (" + state.team.length + "/6)");
+          pcBoxSelectedX = null;
+          renderBox();
+        }
+      });
+    }
+
     updateBoxBadge();
     renderClaudeExportBox(members);
   }
+
+  // Busca da PC Box: salta pra caixa+slot certos e seleciona, em vez de
+  // filtrar a grade (a grade representa POSIÇÃO real, filtrar quebraria a
+  // metáfora de "caixa numerada" que o pedido original era reproduzir).
+  // Campo fica fora do innerHTML que renderBox() reconstrói (ver comentário
+  // no HTML) - só troca o listener de teardown-safe, escutado uma vez aqui.
+  document.getElementById("pcbox-search").addEventListener("input", function (e) {
+    var q = e.target.value.trim().toLowerCase();
+    if (!q) return;
+    var members = state.box.map(getSpeciesByX).filter(Boolean);
+    var foundIdx = -1;
+    for (var i = 0; i < members.length; i++) {
+      if (members[i].n.toLowerCase().indexOf(q) !== -1) { foundIdx = i; break; }
+    }
+    if (foundIdx !== -1) {
+      pcBoxPage = Math.floor(foundIdx / PCBOX_SIZE);
+      pcBoxSelectedX = members[foundIdx].x;
+      renderBox();
+    }
+  });
 
   function settingsSummaryText() {
     var cap = getCurrentCap();

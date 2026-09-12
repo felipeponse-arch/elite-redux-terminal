@@ -116,9 +116,13 @@ async function runLiveTests() {
   await wait(30);
 
   // --- 1. box-to-team never disables, opens swap modal when team is full ---
+  // PC Box (Fase 2, 2026-09-11/12): o botão só existe no painel de detalhe
+  // depois de selecionar um slot preenchido - precisa clicar um antes.
   document.querySelector('.tab-btn[data-tab="box"]').click();
   await wait(50);
-  const boxBtn = document.querySelector("#box-grid .box-to-team");
+  const firstSlotForSwap = document.querySelector(".pcbox-slot:not(.empty)");
+  if (firstSlotForSwap) { firstSlotForSwap.click(); await wait(30); }
+  const boxBtn = document.querySelector(".pcbox-detail .box-to-team");
   check("box-to-team button exists", !!boxBtn);
   if (boxBtn) {
     check("box-to-team never disabled", boxBtn.disabled === false, "disabled=" + boxBtn.disabled);
@@ -378,9 +382,20 @@ async function runLiveTests() {
     const suggestedName = nextFightLine.querySelector(".goto-species") ? nextFightLine.querySelector(".goto-species").textContent : "";
     document.querySelector('.tab-btn[data-tab="box"]').click();
     await wait(50);
-    const boxNames = [...document.querySelectorAll(".box-chip .bc-name-wrap span:last-child")].map(function (s) { return s.textContent; });
+    // PC Box (Fase 2, 2026-09-11/12) só mostra sprite na grade, não nome de
+    // toda espécie ao mesmo tempo - usa a própria busca da PC Box (que já
+    // pula pra caixa+slot certo e seleciona) pra confirmar que a espécie
+    // sugerida é mesmo um membro real, em vez de listar todos os nomes.
+    const pcSearch = document.getElementById("pcbox-search");
+    pcSearch.value = suggestedName || "";
+    pcSearch.dispatchEvent(new Event("input", { bubbles: true }));
+    await wait(50);
+    const foundDetailName = document.querySelector(".pcbox-detail .bc-name-wrap span:last-child");
     check("a espécie sugerida na Fase 1 é mesmo um membro real da caixa (não inventado, não do time)",
-      suggestedName && boxNames.indexOf(suggestedName) !== -1, { suggestedName: suggestedName, boxNames: boxNames });
+      !!suggestedName && !!foundDetailName && foundDetailName.textContent === suggestedName,
+      { suggestedName: suggestedName, foundInBox: foundDetailName && foundDetailName.textContent });
+    pcSearch.value = "";
+    pcSearch.dispatchEvent(new Event("input", { bubbles: true }));
     document.querySelector('.tab-btn[data-tab="dex"]').click();
     await wait(30);
   } else {
@@ -1594,9 +1609,25 @@ async function runLiveTests() {
       saveAfter.notes);
     document.querySelector('.tab-btn[data-tab="box"]').click();
     await wait(50);
-    const boxGridText = document.getElementById("box-grid").textContent;
+    // PC Box (Fase 2, 2026-09-11/12) só mostra sprite na grade - usa a busca
+    // (que pula pra caixa+slot certo) pra confirmar que a tela realmente
+    // re-renderizou com o nome final, não só o localStorage.
+    const pcSearchEvo = document.getElementById("pcbox-search");
+    pcSearchEvo.value = "Charizard";
+    pcSearchEvo.dispatchEvent(new Event("input", { bubbles: true }));
+    await wait(50);
+    const foundCharizard = document.querySelector(".pcbox-detail .bc-name-wrap span:last-child");
     check("a caixa mostra Charizard na tela, não só no localStorage (re-render real)",
-      boxGridText.indexOf("Charizard") !== -1 && boxGridText.indexOf("Charmander") === -1 && boxGridText.indexOf("Charmeleon") === -1, boxGridText);
+      !!foundCharizard && foundCharizard.textContent === "Charizard", foundCharizard && foundCharizard.textContent);
+    pcSearchEvo.value = "Charmander";
+    pcSearchEvo.dispatchEvent(new Event("input", { bubbles: true }));
+    await wait(50);
+    const stillOnCharizard = document.querySelector(".pcbox-detail .bc-name-wrap span:last-child");
+    check("a busca da PC Box não encontra mais Charmander (não ficou órfão parado em nome antigo)",
+      !stillOnCharizard || stillOnCharizard.textContent !== "Charmander",
+      stillOnCharizard && stillOnCharizard.textContent);
+    pcSearchEvo.value = "";
+    pcSearchEvo.dispatchEvent(new Event("input", { bubbles: true }));
   } else { check("Charmander encontrado pro teste de level cap", false); }
 
   // --- Correção de exibição, 2026-09-10: achado ao construir a auto-
@@ -1691,7 +1722,11 @@ async function runLiveTests() {
   const dashBefore = document.querySelector("#dashboard .dashboard-card");
   document.querySelector('.tab-btn[data-tab="box"]').click();
   await wait(50);
-  const firstRemoveBtn = document.querySelector("#box-grid .remove-btn");
+  // PC Box (Fase 2, 2026-09-11/12): remover exige selecionar o slot primeiro
+  // - o botão só existe no painel de detalhe do slot selecionado.
+  const slotForRemoveTest = document.querySelector(".pcbox-slot:not(.empty)");
+  if (slotForRemoveTest) { slotForRemoveTest.click(); await wait(30); }
+  const firstRemoveBtn = document.querySelector(".pcbox-detail .remove-btn");
   if (firstRemoveBtn) {
     firstRemoveBtn.click();
     await wait(30);
@@ -1777,6 +1812,56 @@ async function runLiveTests() {
   }
   setSearch("");
   await wait(120);
+
+  // --- 21. PC Box (Fase 2 do roadmap de estratégia, 2026-09-11/12) ---
+  // Redesenho pedido pelo usuário com print de referência do jogo real:
+  // grade paginada (30 slots/caixa) + busca que salta pra caixa+slot certo +
+  // painel de detalhe por seleção, em vez da lista fluida de chips antiga.
+  document.querySelector('.tab-btn[data-tab="box"]').click();
+  await wait(50);
+  check("aba renomeada pra 'PC Box' (não mais 'Caixa')",
+    document.querySelector('.tab-btn[data-tab="box"]').textContent.indexOf("PC Box") !== -1);
+  const pcGrid = document.querySelector(".pcbox-grid");
+  check("grade da PC Box tem 30 slots (6x5, mesmo tamanho do print de referência)",
+    !!pcGrid && pcGrid.querySelectorAll(".pcbox-slot").length === 30,
+    pcGrid && pcGrid.querySelectorAll(".pcbox-slot").length);
+  const filledBefore = document.querySelectorAll(".pcbox-slot:not(.empty)").length;
+  check("pelo menos 1 slot preenchido (caixa não está vazia nesta altura da suíte)", filledBefore > 0, filledBefore);
+  // Seleciona o 1º slot preenchido, confirma painel de detalhe + navegação
+  // até a Dex real via o sprite/nome (mesmo goToDexSpecies de sempre).
+  const pcFirstSlot = document.querySelector(".pcbox-slot:not(.empty)");
+  if (pcFirstSlot) {
+    const pcFirstSlotX = pcFirstSlot.dataset.x;
+    pcFirstSlot.click();
+    await wait(30);
+    // renderBox() reconstrói o innerHTML no clique - o nó ANTIGO (pcFirstSlot)
+    // fica órfão, precisa reconsultar o novo pra checar .selected nele.
+    const reQueriedSlot = document.querySelector('.pcbox-slot[data-x="' + pcFirstSlotX + '"]');
+    check("selecionar um slot marca .selected e abre o painel de detalhe",
+      !!reQueriedSlot && reQueriedSlot.classList.contains("selected") && !!document.querySelector(".pcbox-detail .bc-name-wrap"));
+    const detailName = document.querySelector(".pcbox-detail .bc-name-wrap span:last-child").textContent;
+    document.querySelector(".pcbox-detail .bc-name-wrap").click();
+    await wait(50);
+    check("clicar no nome do painel de detalhe navega pra ficha real dele na Dex",
+      document.querySelector(".detail-titles h2").textContent === detailName,
+      document.querySelector(".detail-titles h2").textContent);
+    document.querySelector('.tab-btn[data-tab="box"]').click();
+    await wait(50);
+  } else {
+    check("slot preenchido encontrado pro teste de seleção/detalhe", false);
+  }
+  // Busca: foco não pode se perder a cada tecla (achado real ao testar isto
+  // manualmente antes de escrever o teste - ver comentário no HTML do input).
+  const pcSearchBox = document.getElementById("pcbox-search");
+  pcSearchBox.focus();
+  pcSearchBox.value = "z";
+  pcSearchBox.dispatchEvent(new Event("input", { bubbles: true }));
+  await wait(50);
+  check("campo de busca da PC Box não perde o foco a cada tecla digitada (não é recriado no innerHTML)",
+    document.activeElement === pcSearchBox);
+  pcSearchBox.value = "";
+  pcSearchBox.dispatchEvent(new Event("input", { bubbles: true }));
+  await wait(30);
 
   localStorage.clear();
 
