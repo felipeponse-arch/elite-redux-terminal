@@ -414,10 +414,11 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
-  // Fase 2 - "Analisar meu time": mesmo padrão de mock de window.claude já
-  // usado pra "Gerar build com IA", mas aqui sample() é chamado direto
-  // (devolve {text}), não sample.json() - contrato diferente pro mesmo
-  // capability, conforme sample.d.ts.
+  // Fase 2/4 - "Analisar meu time": mesmo padrão de mock de window.claude já
+  // usado pra "Gerar build com IA" (sample.json(), campos estruturados) -
+  // trocado de sample() puro (só {text}) pra sample.json() na Fase 4
+  // (2026-09-12) pra caber o campo extra `swap` (sugestão de troca
+  // acionável), mesmo contrato que "Gerar build com IA" já usa.
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(50);
   // Reposicionamento pedido pelo usuário, 2026-09-11: "Leitura estratégica"
@@ -432,30 +433,34 @@ async function runLiveTests() {
   if (strategyBtn) {
     window.__strategyToolCalls = [];
     const mockText = "Leitura de teste automatizado: time equilibrado, entra com o mais rápido primeiro.";
-    window.claude = {
-      use: async function (name) {
-        if (name !== "sample") return null;
-        var fn = async function (prompt, opts) {
-          window.__strategyLastPrompt = prompt;
-          if (opts && Array.isArray(opts.tools)) {
-            var teamSnames = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").team || [];
-            for (const t of opts.tools) {
-              if (t.inputSchema) {
-                for (const sname of teamSnames) {
-                  const result = await t.execute({ sname: sname });
-                  window.__strategyToolCalls.push({ name: t.name, sname: sname, result: result });
+    function mockStrategyClaude(swapPayload) {
+      window.claude = {
+        use: async function (name) {
+          if (name !== "sample") return null;
+          return {
+            json: async function (prompt, opts) {
+              window.__strategyLastPrompt = prompt;
+              if (opts && Array.isArray(opts.tools)) {
+                var teamSnames = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").team || [];
+                for (const t of opts.tools) {
+                  if (t.inputSchema) {
+                    for (const sname of teamSnames) {
+                      const result = await t.execute({ sname: sname });
+                      window.__strategyToolCalls.push({ name: t.name, sname: sname, result: result });
+                    }
+                  } else {
+                    const result = await t.execute({});
+                    window.__strategyToolCalls.push({ name: t.name, result: result });
+                  }
                 }
-              } else {
-                const result = await t.execute({});
-                window.__strategyToolCalls.push({ name: t.name, result: result });
               }
+              return { text: mockText, swap: swapPayload };
             }
-          }
-          return { text: mockText, truncated: false };
-        };
-        return fn;
-      }
-    };
+          };
+        }
+      };
+    }
+    mockStrategyClaude(null);
     strategyBtn.click();
     await wait(100);
     check("'Analisar meu time' chamou getTeamWeaknesses de verdade (não simulado por fora)",
@@ -468,11 +473,66 @@ async function runLiveTests() {
     // chamada aqui, não só na geração de build
     check("'Analisar meu time' também chamou getBoxCandidatesForBoss (Fase 3, ferramenta unificada)",
       window.__strategyToolCalls.some(function (c) { return c.name === "getBoxCandidatesForBoss"; }));
+    // Fase 4 - getBoxOverview (caixa inteira, não só 1 candidato pra 1 luta)
+    check("'Analisar meu time' também chamou getBoxOverview (Fase 4, caixa inteira)",
+      window.__strategyToolCalls.some(function (c) { return c.name === "getBoxOverview" && typeof c.result.boxSize === "number"; }),
+      window.__strategyToolCalls.map(function (c) { return c.name; }));
     const rationaleBlock = document.querySelector("#team-strategy .mybuild-rationale");
     check("a leitura estratégica (mock) aparece em destaque na tela",
       rationaleBlock && rationaleBlock.textContent.indexOf(mockText) !== -1);
     check("o botão vira 'Analisar de novo' depois de uma leitura já existir",
       document.getElementById("team-strategy-generate") && document.getElementById("team-strategy-generate").textContent.indexOf("de novo") !== -1);
+    check("SEM sugestão de troca acionável quando a IA (mock) devolveu swap:null",
+      !document.getElementById("team-strategy-apply-swap"));
+
+    // Fase 4 - sugestão de troca acionável: mock devolve um swap real (1
+    // membro do time atual + 1 da caixa atual, ambos lidos do save real, não
+    // inventados), confirma que o botão aplica a MESMA rosterMove() de
+    // sempre (não uma mutação de estado paralela).
+    const saveBeforeSwap = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+    const outSnameForSwap = (saveBeforeSwap.team || [])[0];
+    const inSnameForSwap = (saveBeforeSwap.box || [])[0];
+    if (outSnameForSwap && inSnameForSwap) {
+      mockStrategyClaude({ outSname: outSnameForSwap, inSname: inSnameForSwap, reason: "teste automatizado de troca" });
+      document.getElementById("team-strategy-generate").click();
+      await wait(100);
+      const applySwapBtn = document.getElementById("team-strategy-apply-swap");
+      check("sugestão de troca acionável aparece quando a IA (mock) devolve um swap válido",
+        !!applySwapBtn, applySwapBtn && applySwapBtn.outerHTML);
+      if (applySwapBtn) {
+        applySwapBtn.click();
+        await wait(50);
+        const saveAfterSwap = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+        check("'Aplicar troca' realmente moveu o Pokémon da caixa pro time (mesma rosterMove() de sempre)",
+          (saveAfterSwap.team || []).indexOf(inSnameForSwap) !== -1 && (saveAfterSwap.team || []).indexOf(outSnameForSwap) === -1,
+          saveAfterSwap.team);
+        check("'Aplicar troca' mandou quem saiu do time pra caixa (não descartou)",
+          (saveAfterSwap.box || []).indexOf(outSnameForSwap) !== -1, saveAfterSwap.box);
+        check("a sugestão de troca some sozinha depois de aplicada (time mudou, forTeamKey não bate mais)",
+          !document.getElementById("team-strategy-apply-swap"));
+
+        // Desfaz a troca (mesmo botão, sentido invertido) - nenhum teste
+        // depois deste nesta suíte deveria herdar um time diferente do seed
+        // original só por causa deste teste ter rodado. Dobra como um
+        // segundo check real: a troca funciona nos dois sentidos.
+        mockStrategyClaude({ outSname: inSnameForSwap, inSname: outSnameForSwap, reason: "desfazendo o teste" });
+        document.getElementById("team-strategy-generate").click();
+        await wait(100);
+        const undoBtn = document.getElementById("team-strategy-apply-swap");
+        if (undoBtn) {
+          undoBtn.click();
+          await wait(50);
+          const saveRestored = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+          check("troca desfeita com sucesso (time volta ao seed original desta suíte)",
+            (saveRestored.team || []).indexOf(outSnameForSwap) !== -1 && (saveRestored.box || []).indexOf(inSnameForSwap) !== -1,
+            saveRestored.team);
+        } else {
+          check("botão de desfazer a troca encontrado", false);
+        }
+      }
+    } else {
+      check("time/caixa reais disponíveis pro teste de sugestão de troca acionável", false, saveBeforeSwap);
+    }
     delete window.claude;
   } else {
     check("botão 'Analisar meu time' encontrado", false);
@@ -1940,6 +2000,51 @@ async function runLiveTests() {
   check("aviso de papel redundante dispara com 4 Tanque reais (Sandslash/Clefable/Wigglytuff/Parasect)",
     !!document.querySelector(".archetype-warning") && document.querySelector(".archetype-warning").textContent.indexOf("Tanque") !== -1,
     document.querySelector(".archetype-warning") && document.querySelector(".archetype-warning").textContent);
+
+  // --- 24. PC Box ganha sugestão geral de encaixe no time (Fase 4 do
+  // roadmap, 2026-09-12) - "não só a sugestão única do próximo chefão".
+  // Cenário determinístico (não depende de adivinhar tabela de tipos):
+  // Squirtle + Wartortle são Water puro, então compartilham fraqueza real a
+  // Grass E Electric (computeSharedRisks real, não simulado). Charmander é
+  // Fire puro, que resiste Grass (0.5x) em qualquer tabela de tipos padrão -
+  // boxFitNote() deve achar exatamente essa combinação e ignorar Electric
+  // (Fire é neutro contra Electric, não conta como resistência).
+  [...document.querySelectorAll(".team-slot .remove-btn")].forEach(b => b.click());
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  await addByName("Squirtle", false);
+  await addByName("Wartortle", false);
+  await addByName("Charmander", true);
+  document.querySelector('.tab-btn[data-tab="box"]').click();
+  await wait(50);
+  const charSlot = [...document.querySelectorAll(".pcbox-slot:not(.empty)")].find(function (b) {
+    return b.title === "Charmander";
+  });
+  if (charSlot) {
+    charSlot.click();
+    await wait(30);
+    const fitNoteEl = document.querySelector(".pcbox-fit-note");
+    check("PC Box mostra sugestão geral de encaixe (Charmander resiste a Grass, fraqueza real do time)",
+      !!fitNoteEl && fitNoteEl.textContent.indexOf("Charmander") !== -1 &&
+      fitNoteEl.textContent.indexOf("resiste bem a Grass") !== -1,
+      fitNoteEl && fitNoteEl.textContent);
+    check("sugestão geral NÃO menciona Electric (Fire é neutro contra Electric, não é resistência real)",
+      !fitNoteEl || fitNoteEl.textContent.indexOf("Electric") === -1, fitNoteEl && fitNoteEl.textContent);
+
+    // Sem time (nenhuma fraqueza compartilhada possível), a nota some -
+    // confirma que ela depende do time real, não é um texto fixo por espécie.
+    [...document.querySelectorAll(".team-slot .remove-btn")].forEach(b => b.click());
+    document.querySelector('.tab-btn[data-tab="box"]').click();
+    await wait(50);
+    const charSlotAgain = [...document.querySelectorAll(".pcbox-slot:not(.empty)")].find(function (b) {
+      return b.title === "Charmander";
+    });
+    if (charSlotAgain) { charSlotAgain.click(); await wait(30); }
+    check("SEM time, a sugestão geral de encaixe não aparece (nada pra 'encaixar' sem fraqueza compartilhada)",
+      !document.querySelector(".pcbox-fit-note"));
+  } else {
+    check("Charmander encontrado na PC Box pro teste de encaixe geral", false);
+  }
 
   localStorage.clear();
 
