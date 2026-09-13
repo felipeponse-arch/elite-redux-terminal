@@ -5,9 +5,12 @@
   "description": "Infraestrutura de CI do Elite Redux Terminal - não é dependência do artifact publicado, só do processo de build/teste local e no GitHub Actions.",
   "scripts": {
     "test:ci": "node tests/run_ci_smoke.mjs",
-    "test:fuzz": "node tests/run_fuzz_save_shapes.mjs"
+    "test:fuzz": "node tests/run_fuzz_save_shapes.mjs",
+    "test:visual": "node tests/run_visual_regression.mjs"
   },
   "devDependencies": {
-    "playwright": "1.63.0"
+    "playwright": "1.63.0",
+    "pixelmatch": "7.2.0",
+    "pngjs": "7.0.0"
   }
 }
