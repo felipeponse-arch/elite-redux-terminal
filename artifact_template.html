@@ -1656,6 +1656,15 @@
   var MAPS = DATA.maps || [];
   var SPECIES = DATA.species.filter(function (s) { return s; });
 
+  // ---------------- species lookup & type/ability calculation ----------------
+  // Banners de navegação, 2026-09-13 (Fase 1 do refactor de estrutura,
+  // achado real: 6063 linhas cresceram bastante desde que o sistema de
+  // banners `// ---------------- nome ----------------` foi criado, e boa
+  // parte das seções mais NOVAS - ferramentas de IA, geração de build,
+  // estratégia de time, notas, histórico - nunca ganhou um marcador
+  // próprio, deixando um trecho de quase 1600 linhas sem nenhum banner
+  // guiando. Preenche só os buracos reais no MESMO padrão já existente -
+  // nenhuma função mudou de lugar, nenhuma lógica mudou.
   // Two identifiers, on purpose:
   //   x     - the species' index in this build's data array. Fast, but it is
   //           NOT stable across game versions (comparing two builds, 1661 of
@@ -2458,6 +2467,7 @@
 
   var DIFF_TO_BOSSKEY = { easy: "party", ace: "insane", elite: "hell" };
 
+  // ---------------- level cap & auto-evolution ----------------
   function getCurrentCap() {
     if (!LEVELCAPS || !LEVELCAPS.rows[state.settings.milestone]) return null;
     return LEVELCAPS.rows[state.settings.milestone][state.settings.difficulty];
@@ -3744,6 +3754,7 @@
     return "Dificuldade " + diffLabel + ", progresso " + milestone + ", level cap atual " + (cap === null ? "sem limite" : cap) + ".";
   }
 
+  // ---------------- Showdown export & "Meu build" editor ----------------
   // Single clipboard path for the whole app. `srcEl` may be a field (its value
   // is copied and left selected, so the manual Ctrl+C fallback works) or null
   // when copying a plain string.
@@ -4149,6 +4160,7 @@
     }
   }
 
+  // ---------------- AI tools & build generation ----------------
   // Checks an AI-suggested build against this species' REAL data before
   // it's ever allowed to become a saved build - 2026-09-09, the Meta
   // Pokémon specialist's own non-negotiable rule: an LLM call can propose
@@ -4703,6 +4715,7 @@
     }
   }
 
+  // ---------------- compare card ----------------
   // "Comparar builds" - Fase 2, 2026-09-09. Deliberately scoped to stats +
   // types + rank + a one-line build summary, NOT a full damage/matchup
   // calculator - same scope discipline as the boss stat calculator and
@@ -4763,6 +4776,7 @@
   }
 
   // Used by the Dex detail card and the team-slot card (renderTeam).
+  // ---------------- notes, build history & boss references ----------------
   // "Minhas anotações" - free text per species, the user's own, saved
   // locally (see state.notes). Explicit Save button rather than
   // auto-save-on-blur, matching the same predictable pattern already used
@@ -4884,6 +4898,7 @@
     return BUILDS[sp.sname] || null;
   }
 
+  // ---------------- team roster rendering ----------------
   function renderTeam() {
     var slotsEl = document.getElementById("team-slots");
     var members = state.team.map(getSpeciesByX).filter(Boolean);
@@ -5178,6 +5193,7 @@
     document.getElementById("saved-teams-status").textContent = "Salvo como \"" + name + "\".";
   });
 
+  // ---------------- team coverage & dashboard risk ----------------
   // Shared by renderTeamAnalysis (the full table) and renderDashboard (the
   // one-line "biggest shared weakness" summary) - factored out so the two
   // can never quietly disagree about what the team's worst shared risk is.
@@ -5338,6 +5354,7 @@
     el.innerHTML = '<div class="dashboard-card">' + items + '</div>';
   }
 
+  // ---------------- team strategy & archetype ----------------
   // Fase 2 do "leitor de caixa"/análise de time (reunião 2026-09-11) -
   // cache efêmero, de propósito NÃO persistido em localStorage/state: é uma
   // leitura descartável desta sessão, não um dado curado como builds.json.
