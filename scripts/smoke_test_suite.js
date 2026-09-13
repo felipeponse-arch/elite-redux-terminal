@@ -45,6 +45,23 @@ async function runLiveTests() {
     results.push({ name, pass: !!cond, detail: detail || "" });
   }
   function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+  // Achado em auditoria de QA (2026-09-13): os 2 "flakes" documentados há
+  // muitas sessões (HP recomputado / anotação migrada) provavelmente vêm
+  // do mesmo padrão - um wait(ms) FIXO depois de disparar um evento,
+  // torcendo pra que o re-render/persist() já tenha terminado até lá.
+  // pollUntil() espera pela condição de verdade em vez de um tempo
+  // chutado - tenta a cada 10ms até `fn()` virar truthy ou o timeout
+  // estourar (aí faz uma última tentativa, caso o timeout bata bem na
+  // hora que a condição vira verdadeira).
+  async function pollUntil(fn, timeoutMs) {
+    var start = Date.now();
+    var limit = timeoutMs || 500;
+    while (Date.now() - start < limit) {
+      if (fn()) return true;
+      await wait(10);
+    }
+    return !!fn();
+  }
   // Reorganização em blocos colapsáveis (<details>), Fase 2, 2026-09-11:
   // "Golpes"/"Anotações e builds de referência"/"Comparar" ficam FECHADOS
   // por padrão (decisão da equipe - só "Auto Build" abre sozinho; "Conhecer
@@ -617,15 +634,33 @@ async function runLiveTests() {
     await wait(50);
     const levelInput = document.getElementById("boss-level-input");
     check("boss level input exists with a sensible default", levelInput && parseInt(levelInput.value, 10) >= 1);
-    check("stats render for at least one boss party member", !!document.querySelector(".bm-stats"));
+    check("stats render for at least one boss party member", !!document.querySelector("#boss-detail .bm-stats"));
     if (levelInput) {
-      var hpBefore = document.querySelector(".bm-stats .bm-stat .mono").textContent;
-      levelInput.value = "100";
+      // Achado em auditoria de QA (2026-09-13), causa raiz de verdade da
+      // flake documentada há muitas sessões (não era timing nenhum): o
+      // seletor `.bm-stats .bm-stat .mono` NÃO era escopado ao chefão -
+      // `.bm-stats`/`.bm-stat`/`.mono` são reusados também pelo card
+      // "Builds de referência" da Dex (buildHistoryHtml(), linha ~3980,
+      // nível FIXO, não bossState.level) e, por causa disso, dentro de
+      // CADA card do Meu Time que tem histórico de build
+      // (renderTeam() -> buildHistoryHtml(sp), linha ~4910). Como o time
+      // seed desta suíte (6 membros) já entra com histórico, e a aba Time
+      // vem ANTES da aba Chefões no HTML, um `document.querySelector`
+      // global pegava o PRIMEIRO desses blocos (de nível fixo, dentro de
+      // #team-slots, ainda no DOM mesmo com a aba escondida) em vez do
+      // card de verdade do chefão - por isso HP nunca "mudava", em
+      // qualquer nível. Escopar a `#boss-detail` resolve na causa raiz.
+      var hpBefore = document.querySelector("#boss-detail .bm-stats .bm-stat .mono").textContent;
+      var targetLevel = levelInput.value === "100" ? "50" : "100";
+      levelInput.value = targetLevel;
       levelInput.dispatchEvent(new Event("change", { bubbles: true }));
-      await wait(30);
-      var hpAfter = document.querySelector(".bm-stats .bm-stat .mono").textContent;
+      await pollUntil(function () {
+        var el = document.querySelector("#boss-detail .bm-stats .bm-stat .mono");
+        return !!el && el.textContent !== hpBefore;
+      });
+      var hpAfter = document.querySelector("#boss-detail .bm-stats .bm-stat .mono").textContent;
       check("changing level recomputes stats (HP changes) without losing the typed value",
-        document.getElementById("boss-level-input").value === "100" && hpAfter !== hpBefore,
+        document.getElementById("boss-level-input").value === targetLevel && hpAfter !== hpBefore,
         "before=" + hpBefore + " after=" + hpAfter);
     }
     document.getElementById("boss-shell").classList.remove("show-detail");
@@ -899,7 +934,15 @@ async function runLiveTests() {
   setSearch("");
   await wait(120);
   document.querySelector('.tab-btn[data-tab="team"]').click();
-  await wait(50);
+  // Achado em auditoria de QA (2026-09-13): era um wait(50) fixo - a
+  // classe de flakiness já documentada em memória ("aparece intermitente
+  // num primeiro load 'frio', some ao rodar de novo") desta seção 17.
+  // Espera renderTeam() de verdade ter terminado (o slot já existir no
+  // DOM) em vez de torcer por 50ms, que aparentemente nem sempre bastam
+  // logo depois do primeiro carregamento da página.
+  await pollUntil(function () {
+    return [...document.querySelectorAll(".team-slot")].some(s => s.textContent.indexOf("Tyranitar Mega Redux") !== -1);
+  });
   // Team order follows state.team's insertion order - Tyranitar Mega Redux
   // was added LAST in the seed at the top of this suite, so a bare
   // querySelector(".ts-build-label") would silently grab the FIRST slot's
@@ -1652,6 +1695,36 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
+  // Achado em auditoria de QA (2026-09-13), causa raiz de verdade da flake
+  // "anotação migrou" documentada há muitas sessões (não era timing): o
+  // comentário original acima afirma que Charizard "não há conflito de
+  // estado" por nunca ter sido posto no time/caixa antes - mas duas
+  // seções BEM mais acima ("Meu build status preview" e o teste de banner
+  // de armazenamento logo depois, que reusa a mesma espécie ainda
+  // selecionada) deixam uma anotação suja em memória em
+  // state.notes.SPECIES_CHARIZARD (o teste de quota simula a escrita
+  // falhando no disco, mas o valor em memória fica setado mesmo assim).
+  // A migração de anotação (artifact_template.html ~2484) DE PROPÓSITO só
+  // migra se o destino ainda não tem nota nenhuma
+  // (`if (state.notes[sp.sname] && !state.notes[target.sname])`) - pra
+  // nunca sobrescrever algo que o jogador já escreveu. Decisão de produto
+  // correta, não bug - mas quebra a suposição deste teste de que Charizard
+  // chegaria "vazio". Limpa a nota de Charizard de propósito antes de
+  // começar, em vez de assumir.
+  setSearch("Charizard");
+  await wait(120);
+  const charRowPreClear = document.querySelector("#species-list .species-row");
+  if (charRowPreClear) {
+    charRowPreClear.click();
+    await wait(30);
+    const notesAreaPreClear = document.getElementById("species-notes-input");
+    notesAreaPreClear.value = "";
+    document.getElementById("species-notes-save").click();
+    await wait(30);
+  }
+  setSearch("");
+  await wait(120);
+
   setSearch("Charmander");
   await wait(120);
   const charmanderRow = document.querySelector("#species-list .species-row");
@@ -1692,7 +1765,18 @@ async function runLiveTests() {
     await wait(50);
     document.getElementById("settings-milestone").value = "2";
     document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));
-    await wait(80);
+    // Achado em auditoria de QA (2026-09-13): era um wait(80) fixo - a
+    // outra das 2 flakes documentadas há muitas sessões (especificamente
+    // "anotação migrou", nunca os outros checks deste bloco - sinal de
+    // que a migração de notes acontece um passo depois da de box/
+    // customBuilds, não simultânea). Espera o sinal mais fundamental da
+    // cascata inteira (a caixa já mostrando Charizard) em vez de um tempo
+    // chutado - todo o resto (build, anotação) é escrito na mesma
+    // chamada de persist() que já colocou Charizard na caixa.
+    await pollUntil(function () {
+      var s = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+      return Array.isArray(s.box) && s.box.indexOf("SPECIES_CHARIZARD") !== -1;
+    });
     const toastText = document.getElementById("toast").textContent;
     const saveAfter = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
     check("auto-evolução dispara na hora, ao mudar o level cap (sem precisar de outro save manual)",
