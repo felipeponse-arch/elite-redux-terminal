@@ -1,6 +1,6 @@
 {
   "source": "https://eliteredux.net/level-caps/",
-  "note": "Se voce passar do cap, o Pokemon acima do nivel pode parar de obedecer. Dificuldade pode ser abaixada a qualquer Centro Pokemon, mas nao aumentada de novo depois.",
+  "note": "Se voce passar do cap, o Pokemon acima do nivel pode parar de obedecer. A dificuldade pode ser mudada em qualquer Centro Pokemon, nas duas direcoes - nao existe opcao pra desativar o level cap em si. Aumentar a dificuldade depois de ter abaixado marca seu Hall da Fama com um icone (anti-cheat pra challenge runs), mas o app permite normalmente.",
   "rows": [
     { "milestone": "Sem Badge (inicio)", "easy": 20, "ace": 18, "elite": 16 },
     { "milestone": "Stone Badge (1o ginasio)", "easy": 28, "ace": 25, "elite": 23 },
