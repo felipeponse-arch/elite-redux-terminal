@@ -1394,7 +1394,19 @@
         <div class="team-strategy" id="team-strategy"></div>
 
         <div>
-          <h3 style="margin-bottom:10px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);">Meu time (máx. 6)</h3>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            <h3 style="margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);">Meu time (máx. 6)</h3>
+            <!-- "Novo jogo" (pedido do usuário, 2026-09-13): reseta time E
+                 caixa de uma vez, a primeira ação de verdade destrutiva e
+                 sem banco-de-recuperação deste app (diferente de "remover"
+                 do time, que sempre banca pra caixa - aqui não há pra onde
+                 bancar). Único confirm() nativo do app de propósito: é a
+                 única ação com esse perfil de risco, não vale construir um
+                 modal customizado novo só pra este caso único. Builds/
+                 anotações/times salvos NÃO são apagados - só a composição
+                 atual de time/caixa, exatamente o que o usuário pediu. -->
+            <button id="reset-team-box-btn" class="text-action-btn" type="button" style="color:var(--sem-weak);" title="Remove todos os Pokémon do time e da caixa">Novo jogo (resetar time e caixa)</button>
+          </div>
           <div class="team-slots" id="team-slots"></div>
         </div>
 
@@ -3598,12 +3610,21 @@
     document.getElementById("team-count-badge").textContent = state.team.length + "/6";
     syncRowAddButtons();
     scheduleDashboardRefresh();
+    updateResetTeamBoxBtn();
   }
 
   // ---------------- box view ----------------
   function updateBoxBadge() {
     document.getElementById("box-count-badge").textContent = state.box.length;
     scheduleDashboardRefresh();
+    updateResetTeamBoxBtn();
+  }
+
+  // "Novo jogo" (2026-09-13) - desabilitado quando não há nada pra resetar,
+  // mesmo critério já usado em save-team-btn/etc.
+  function updateResetTeamBoxBtn() {
+    var btn = document.getElementById("reset-team-box-btn");
+    if (btn) btn.disabled = !state.team.length && !state.box.length;
   }
 
   // PC Box - Fase 2 do roadmap de estratégia (2026-09-11/12, redesenho pedido
@@ -4031,7 +4052,13 @@
       var withBuffs = Math.floor(base * (stab ? 1.5 : 1) * powerMult);
       var buffParts = [];
       if (stab) buffParts.push("STAB");
-      if (powerMult !== 1) buffParts.push(item);
+      // Achado em auditoria de segurança (2026-09-13): faltava escapeHtml
+      // aqui, ao contrário dos outros 2 usos de `item` nesta mesma função
+      // (linhas 4012/4036). Não era explorável hoje (ITEM_MOVE_POWER_MODS
+      // é um literal fixo, só bate com "Life Orb" exato) - mas é o
+      // padrão certo de defesa em profundidade, caso essa tabela ganhe
+      // uma entrada vinda de dado externo no futuro.
+      if (powerMult !== 1) buffParts.push(escapeHtml(item));
       var buffLabel = buffParts.length ? ' &middot; com ' + buffParts.join(" + ") + ': <span class="mono">' + withBuffs + '</span>' : "";
       return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> (' + escapeHtml(typeName) + ') poder base <span class="mono">' + base + '</span>' + buffLabel + '</div>';
     }).join("");
@@ -5191,6 +5218,29 @@
     nameInput.value = "";
     renderSavedTeams();
     document.getElementById("saved-teams-status").textContent = "Salvo como \"" + name + "\".";
+  });
+
+  // "Novo jogo" (pedido do usuário, 2026-09-13): reseta time E caixa de uma
+  // vez. Único confirm() nativo do app - é a única ação com esse perfil de
+  // risco (destrutiva, sem pra onde bancar), não justifica um modal
+  // customizado novo só pra este caso único. Builds/anotações/times salvos
+  // ficam intactos - só a composição atual de time/caixa é limpa, exatamente
+  // o que foi pedido, nada além disso.
+  document.getElementById("reset-team-box-btn").addEventListener("click", function () {
+    if (!state.team.length && !state.box.length) return;
+    var ok = confirm("Isso remove TODOS os Pokémon do time e da caixa, como se fosse começar um jogo novo. Builds, anotações e times salvos continuam guardados. Continuar?");
+    if (!ok) return;
+    state.team = [];
+    state.box = [];
+    teamSwapIdx = null;
+    pcBoxSelectedX = null;
+    saveTeam();
+    saveBox();
+    updateTeamBadge();
+    updateBoxBadge();
+    renderTeam();
+    renderBox();
+    flashToast("Time e caixa resetados - pronto pra um jogo novo.");
   });
 
   // ---------------- team coverage & dashboard risk ----------------

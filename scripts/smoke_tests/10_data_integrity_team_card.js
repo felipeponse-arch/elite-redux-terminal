@@ -362,4 +362,53 @@ async function section10() {
     } else { check("botão 'remover' encontrado no card do Meu Time", false); }
   } else { check("time tinha pelo menos 1 membro pro teste de 'remover'", false, teamBefore29); }
 
+  // --- 30. "Novo jogo" (reset de time e caixa) - pedido do usuário,
+  // 2026-09-13. Único confirm() nativo do app - mocka window.confirm pra
+  // testar os dois caminhos (cancelar preserva tudo; confirmar zera time E
+  // caixa, mas NÃO builds/anotações/times salvos). Semeia um Pikachu novo
+  // no time (não reusa fixture de seções anteriores) e uma anotação real
+  // pra confirmar que ela sobrevive ao reset.
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  setSearch("Pikachu");
+  await wait(120);
+  const pikaRow30 = document.querySelector("#species-list .species-row");
+  if (pikaRow30) {
+    pikaRow30.click();
+    await wait(30);
+    const notesArea30 = document.getElementById("species-notes-input");
+    notesArea30.value = "nota de teste - deve sobreviver ao reset";
+    document.getElementById("species-notes-save").click();
+    await wait(30);
+    document.getElementById("add-team-btn").click();
+    await wait(30);
+    document.querySelector('.tab-btn[data-tab="team"]').click();
+    await wait(50);
+
+    const resetBtn30 = document.getElementById("reset-team-box-btn");
+    check("botão 'Novo jogo' existe e fica habilitado quando há time/caixa", !!resetBtn30 && resetBtn30.disabled === false);
+
+    if (resetBtn30) {
+      const teamBeforeCancel30 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").team;
+      const origConfirm30 = window.confirm;
+      window.confirm = function () { return false; };
+      resetBtn30.click();
+      await wait(50);
+      const teamAfterCancel30 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").team;
+      check("cancelar a confirmação não muda nada", JSON.stringify(teamBeforeCancel30) === JSON.stringify(teamAfterCancel30));
+
+      window.confirm = function () { return true; };
+      resetBtn30.click();
+      await wait(80);
+      window.confirm = origConfirm30;
+      const saveAfterReset30 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+      check("confirmar 'Novo jogo' zera time E caixa",
+        saveAfterReset30.team.length === 0 && saveAfterReset30.box.length === 0,
+        { team: saveAfterReset30.team, box: saveAfterReset30.box });
+      check("anotação sobrevive ao reset (só a composição de time/caixa é limpa)",
+        saveAfterReset30.notes && saveAfterReset30.notes.SPECIES_PIKACHU === "nota de teste - deve sobreviver ao reset");
+      check("botão 'Novo jogo' fica desabilitado depois, sem nada pra resetar",
+        document.getElementById("reset-team-box-btn").disabled === true);
+    }
+  } else { check("Pikachu encontrado pro teste de 'Novo jogo'", false); }
 }
