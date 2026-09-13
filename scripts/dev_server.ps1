@@ -77,7 +77,12 @@ Add-Type -AssemblyName System.Web
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:8100/")
 $listener.Start()
-$root = "C:\Users\Ponse\Documents\Claude\teste\elite-redux-terminal"
+# Achado em auditoria de Arquitetura de Dados (2026-09-13): era um caminho
+# absoluto fixo (funciona só na máquina onde foi escrito). Derivado de
+# $PSScriptRoot (este arquivo vive em scripts/, a raiz do projeto é o pai),
+# mesmo padrão já usado em build.ps1 - necessário pro CI (checkout cai numa
+# pasta diferente a cada run) e pra qualquer outra máquina/clone.
+$root = Split-Path $PSScriptRoot -Parent
 while ($listener.IsListening) {
   $context = $listener.GetContext()
   $path = $context.Request.Url.LocalPath.TrimStart('/')
