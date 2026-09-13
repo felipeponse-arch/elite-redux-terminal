@@ -1,0 +1,14 @@
+[
+  "00_helpers.js",
+  "01_seed_and_dex_browsing.js",
+  "02_team_coverage_and_box_reader.js",
+  "03_dashboard_and_boss_calc.js",
+  "04_notes_and_held_items.js",
+  "05_mega_evo_and_my_build.js",
+  "06_ui_fixes_and_previews.js",
+  "07_multibuild_ai_accessibility.js",
+  "08_level_cap_and_evolution.js",
+  "09_dex_extras_archetype.js",
+  "10_data_integrity_team_card.js",
+  "99_runner.js"
+]
