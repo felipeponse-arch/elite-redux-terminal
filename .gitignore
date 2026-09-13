@@ -7,3 +7,11 @@ artifact_final.html
 # data/sprite_atlas.png (which IS tracked - it's the actual build input).
 # Regenerates automatically (re-downloads any missing file) if deleted.
 data/sprites_all/
+
+# CI infra (package.json/tests/, 2026-09-13): node_modules is reinstalled
+# fresh by `npm install` (both locally and in the GitHub Actions workflow),
+# never tracked, same reasoning as any other npm project. package-lock.json
+# is NOT ignored - it IS meant to be committed once generated - but doesn't
+# exist yet in this repo (no Node available to generate it in the session
+# that wrote this CI setup).
+node_modules/

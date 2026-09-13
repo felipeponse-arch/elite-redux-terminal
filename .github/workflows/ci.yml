@@ -1,0 +1,49 @@
+name: CI
+
+# Roda a suite completa (scripts/smoke_test_suite.js, Parte A) num Chromium
+# headless via Playwright, contra o MESMO artifact_final.html que seria
+# publicado - sem isso, nada garantia que os testes passassem antes de um
+# publish (achado real da auditoria completa da equipe, 2026-09-13).
+#
+# -SkipExtract de propósito: build.ps1 sem essa flag roda check_upstream.ps1
+# (chamada de rede pro NextDex oficial) - isso é uma preocupação separada
+# (dado desatualizado), não "o código atual funciona", e tornaria o CI
+# flaky por causa de rede externa em toda run. O check de drift periódico
+# é uma tarefa própria (scripts/check_upstream.ps1), não este workflow.
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch: {}
+
+jobs:
+  smoke-test:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instala dependências do CI (Playwright)
+        run: npm install
+
+      - name: Instala o Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Builda artifact_final.html (reusa data/*.json já commitado)
+        run: powershell -NoProfile -File scripts/build.ps1 -SkipExtract
+
+      - name: Sobe o dev server local em segundo plano
+        run: |
+          Start-Process powershell -ArgumentList "-NoProfile", "-File", "scripts/dev_server.ps1" -WindowStyle Hidden
+
+      - name: Roda a suíte de smoke test (Parte A) headless
+        run: npm run test:ci
