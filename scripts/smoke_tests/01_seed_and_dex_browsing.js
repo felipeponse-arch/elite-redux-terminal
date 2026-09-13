@@ -47,7 +47,9 @@ async function section01() {
     check("box-to-team shows swap state when team full", boxBtn.classList.contains("is-swap"));
     boxBtn.click();
     await wait(30);
-    check("swap modal opens on click", document.getElementById("swap-modal").hidden === false);
+    // <dialog> nativo desde 2026-09-13 - `.open` é o jeito certo de checar
+    // (o `.hidden` de antes era da <div> manual, não existe mais aqui).
+    check("swap modal opens on click", document.getElementById("swap-modal").open === true);
     document.getElementById("swap-modal-close").click();
     await wait(30);
   }

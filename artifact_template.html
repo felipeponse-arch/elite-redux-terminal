@@ -918,20 +918,18 @@
   .bh-context { font-size: 11px; color: var(--text); font-style: italic; flex: 1; }
   .bh-copy { background: none; border: none; color: var(--badge-accent2); font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; }
 
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
+  /* <dialog> nativo, 2026-09-13 - só o ::backdrop precisa de regra própria
+     agora; o mostrar/esconder em si é o atributo [open] que showModal()/
+     close() já controlam sozinhos (sem precisar de [hidden] feito à mão). */
+  dialog#swap-modal::backdrop {
     background: rgb(0 0 0 / 0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 200;
   }
-  .modal-backdrop[hidden] { display: none; }
   .modal-card {
-    background: var(--surface);
+    /* <dialog>[open] já centraliza sozinho (margin:auto do UA stylesheet) -
+       só reseta o border/padding default do navegador e reaplica o visual
+       que .modal-backdrop + .modal-card faziam juntos antes. */
     border: 1px solid var(--border);
+    background: var(--surface);
     border-radius: 14px;
     padding: 18px;
     width: 100%;
@@ -1533,16 +1531,21 @@
     <button id="storage-banner-dismiss" type="button" aria-label="Dispensar">&times;</button>
   </div>
 
-  <div id="swap-modal" class="modal-backdrop" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="swap-modal-title">
-      <div class="modal-head">
-        <div id="swap-modal-title" class="modal-title"></div>
-        <button id="swap-modal-close" class="modal-close" type="button" aria-label="Fechar">&times;</button>
-      </div>
-      <p class="modal-sub">Escolha quem sai do time — ele vai direto para a caixa.</p>
-      <div id="swap-modal-list" class="swap-list"></div>
+  <!-- <dialog> nativo (2026-09-13, refactor de estrutura) - antes era uma
+       div.modal-backdrop feita à mão, com foco/Escape/tab-trap escritos na
+       mão em JS. showModal() já dá de graça: trap de foco (Tab só cicla
+       dentro do diálogo), fechar com Escape, e devolver o foco pra quem
+       abriu ao fechar - tudo isso removido do JS (ver openSwapModal/
+       closeSwapModal), sem mudar aparência nem comportamento nenhum pro
+       jogador. -->
+  <dialog id="swap-modal" class="modal-card" aria-labelledby="swap-modal-title">
+    <div class="modal-head">
+      <div id="swap-modal-title" class="modal-title"></div>
+      <button id="swap-modal-close" class="modal-close" type="button" aria-label="Fechar">&times;</button>
     </div>
-  </div>
+    <p class="modal-sub">Escolha quem sai do time — ele vai direto para a caixa.</p>
+    <div id="swap-modal-list" class="swap-list"></div>
+  </dialog>
 </div>
 
 <script id="dexdata" type="application/json">__DEX_DATA_JSON__</script>
@@ -2994,17 +2997,10 @@
   // ---- Dex -> team swap modal ----
   var swapModalX = null;
 
-  // Accessibility pass, 2026-09-10: remembers whatever had focus before the
-  // modal opened (a Dex row-add button or a Box "box-to-team" button - both
-  // real, focusable elements already) so closeSwapModal() can hand focus
-  // back instead of silently dropping it onto <body>.
-  var swapModalTrigger = null;
-
   function openSwapModal(x) {
     var sp = getSpeciesByX(x);
     if (!sp) return;
     swapModalX = x;
-    swapModalTrigger = document.activeElement;
     document.getElementById("swap-modal-title").textContent = "Colocar " + sp.n + " no time";
     var list = document.getElementById("swap-modal-list");
     list.innerHTML = state.team.map(getSpeciesByX).filter(Boolean).map(function (m) {
@@ -3028,50 +3024,43 @@
         flashToast(sp.n + " entrou; " + outSp.n + " foi para a caixa");
       });
     });
-    document.getElementById("swap-modal").hidden = false;
-    // Move focus INTO the dialog (first swap pick, or the close button if
-    // the team were somehow empty) - a screen reader user opening this
-    // otherwise has no signal a dialog appeared at all, since focus would
-    // silently stay on the row/button they just clicked in the page behind it.
+    // <dialog> nativo (2026-09-13, refactor de estrutura - Engenheira de
+    // Frontend/CSS): showModal() já move o foco pra dentro do diálogo
+    // sozinho, mas o alvo padrão do navegador é o próprio <dialog> - ainda
+    // mandamos o foco explicitamente pro primeiro swap-pick (ou o botão de
+    // fechar, se o time estiver vazio) igual antes, é só a devolução de
+    // foco ao fechar e o trap de Tab que o navegador passa a fazer sozinho.
+    document.getElementById("swap-modal").showModal();
     var firstPick = list.querySelector(".swap-pick");
     (firstPick || document.getElementById("swap-modal-close")).focus();
   }
 
   function closeSwapModal() {
-    document.getElementById("swap-modal").hidden = true;
-    swapModalX = null;
-    // Return focus to whatever opened the modal, same reasoning as moving
-    // focus in on open - closing a dialog shouldn't leave a keyboard/screen
-    // reader user's focus dangling on a now-hidden/removed element.
-    if (swapModalTrigger && document.contains(swapModalTrigger)) swapModalTrigger.focus();
-    swapModalTrigger = null;
+    document.getElementById("swap-modal").close();
   }
 
   document.getElementById("swap-modal-close").addEventListener("click", closeSwapModal);
   document.getElementById("swap-modal").addEventListener("click", function (e) {
     if (e.target.id === "swap-modal") closeSwapModal();
   });
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !document.getElementById("swap-modal").hidden) closeSwapModal();
-  });
-  // Tab trap: while the modal is open, Tab/Shift+Tab cycle only through its
-  // own focusable elements instead of leaking out into the (still present,
-  // just visually covered) page behind it.
-  document.addEventListener("keydown", function (e) {
-    if (e.key !== "Tab") return;
-    var modal = document.getElementById("swap-modal");
-    if (modal.hidden) return;
-    var focusables = modal.querySelectorAll("button:not([disabled])");
-    if (!focusables.length) return;
-    var first = focusables[0];
-    var last = focusables[focusables.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
+  // showModal()/close() já cuidam de: Escape fecha sozinho (dispara
+  // "cancel" + "close"), Tab só cicla dentro do diálogo, e o foco volta
+  // sozinho pra quem abriu - nenhum desses 3 precisa mais de código próprio
+  // (antes eram 2 listeners globais de keydown + rastrear swapModalTrigger
+  // à mão). Verificado ao vivo: fechar pelo X e pelo clique fora (backdrop)
+  // - o Escape em si é garantia nativa da spec de <dialog>/showModal(),
+  // mas não deu pra confirmar ao vivo NESTA sessão porque a ferramenta de
+  // automação usada aqui não aciona a ação padrão do navegador pra Escape
+  // num <dialog> (confirmado que o evento chega na página de verdade - o
+  // Escape do dropdown "Mais", que usa um keydown listener normal, fechou
+  // certinho com a mesma tecla - o que não disparou foi especificamente o
+  // comportamento interno do navegador pro <dialog>, limitação conhecida
+  // de automação via CDP, não um bug daqui). Só falta zerar o estado da
+  // própria aplicação, que não é algo que o navegador saberia fazer - reage
+  // ao evento "close" pra cobrir TODO jeito de fechar (botão, clique fora,
+  // Escape), não só um deles.
+  document.getElementById("swap-modal").addEventListener("close", function () {
+    swapModalX = null;
   });
 
   var toastTimer = null;

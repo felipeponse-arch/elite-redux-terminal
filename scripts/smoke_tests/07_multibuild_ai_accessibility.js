@@ -155,17 +155,25 @@ async function section07() {
       addBtnA11y.click();
       await wait(50);
       const swapModal = document.getElementById("swap-modal");
+      // <dialog> nativo desde 2026-09-13 - `.open` no lugar de `.hidden`
+      // (a <div> manual de antes não existe mais).
       check("opening the swap modal moves focus inside it",
-        !swapModal.hidden && swapModal.contains(document.activeElement),
+        swapModal.open && swapModal.contains(document.activeElement),
         document.activeElement && document.activeElement.className);
-      const modalFocusables = swapModal.querySelectorAll("button:not([disabled])");
-      if (modalFocusables.length) {
-        modalFocusables[modalFocusables.length - 1].focus();
-        pressA11y("Tab");
-        await wait(20);
-        check("Tab from the last focusable in the modal wraps to the first (focus trap)",
-          document.activeElement === modalFocusables[0]);
-      }
+      // O teste de Tab-trap que existia aqui (focar o último elemento,
+      // disparar Tab sintético, checar que voltou pro primeiro) foi
+      // REMOVIDO ao trocar pro <dialog> nativo - pressA11y() só faz
+      // document.dispatchEvent(KeyboardEvent) sintético, sem nenhum
+      // listener nosso mais pra reagir a ele (o trap agora é o PRÓPRIO
+      // navegador tratando uma tecla Tab de verdade, nível de motor/input,
+      // não algo que um dispatchEvent de dentro da página consegue
+      // simular). Manter o teste antigo aqui seria exatamente a mesma
+      // classe de tautologia já achada e corrigida na seção 6 (QA,
+      // 2026-09-13) - passaria sempre, sem testar nada de verdade. Testar
+      // o trap de foco de verdade precisaria de um Tab real via Playwright
+      // (page.keyboard.press(), fora do escopo desta suíte in-page) - o
+      // comportamento em si é garantia nativa do navegador pra <dialog> +
+      // showModal(), documentada e usada por isso mesmo.
       document.getElementById("swap-modal-close").click();
       await wait(30);
     }
