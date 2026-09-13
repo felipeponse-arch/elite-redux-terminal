@@ -21,16 +21,21 @@
     --sem-immune: #6b3fa0;
     --focus: #1f9e93;
     --shadow: 0 8px 24px -12px rgb(32 29 22 / 0.35);
-    /* Badge-only text-safe variants of --accent/--accent-2/--sem-resist,
-       LIGHT mode only (dark mode reuses the plain tokens below unchanged -
-       they already clear AA there). Accessibility review, 2026-09-09:
-       measured that --accent/--accent-2/--sem-resist at full saturation
-       fall short of WCAG AA 4.5:1 as TEXT against a light surface (4.27,
-       4.45, 4.08) - not something tinting a background can fix, since a
-       fainter version of an already-too-light color only gets fainter.
-       These are ~10% darker (same hue), which alone clears 4.5:1 - not a
-       change to the actual brand/accent colors used everywhere else in the
-       app, scoped to rank badges only to keep the blast radius small. */
+    /* Text-safe variants of --accent/--accent-2/--sem-resist, LIGHT mode
+       only (dark mode reuses the plain tokens below unchanged - they
+       already clear AA there). Accessibility review, 2026-09-09: measured
+       that --accent/--accent-2/--sem-resist at full saturation fall short
+       of WCAG AA 4.5:1 as TEXT against a light surface (4.27, 4.45, 4.08) -
+       not something tinting a background can fix, since a fainter version
+       of an already-too-light color only gets fainter. These are ~10%
+       darker (same hue), which alone clears 4.5:1 - not a change to the
+       actual brand/accent colors used for borders/backgrounds/icons
+       elsewhere in the app. Originally scoped to rank badges only
+       (hence the name); accessibility audit 2026-09-13 found ~34 other
+       spots using the plain tokens as literal text color (active tab
+       label, links, .notes-status, the compare-card "win" tag, etc.) -
+       same failing contrast, so every `color:` declaration (never
+       `border-color`/`background`/`accent-color`) now uses these too. */
     --badge-accent: #c3421c;
     --badge-accent2: #10796e;
     --badge-resist: #1c8156;
@@ -105,7 +110,7 @@
     font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
     font-variant-numeric: tabular-nums;
   }
-  a { color: var(--accent-2); }
+  a { color: var(--badge-accent2); }
   button { font-family: inherit; }
   ::selection { background: var(--accent); color: var(--accent-ink); }
 
@@ -163,7 +168,7 @@
   }
   .brand-text h1 { font-size: 19px; font-weight: 700; letter-spacing: 0.01em; }
   .brand-sub { margin: 2px 0 0; font-size: 12.5px; color: var(--text-dim); }
-  .brand-sub .mono { color: var(--accent-2); }
+  .brand-sub .mono { color: var(--badge-accent2); }
 
   /* Groups .tabs + .tabs-more so .topbar's justify-content:space-between
      (brand <-> nav area) only fires once, between brand and this whole row -
@@ -186,7 +191,7 @@
     transition: background .15s, color .15s;
   }
   .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow); }
+  .tab-btn.active { background: var(--surface); color: var(--badge-accent); box-shadow: var(--shadow); }
   .count-badge {
     background: var(--accent);
     color: var(--accent-ink);
@@ -264,7 +269,7 @@
     cursor: pointer;
     white-space: nowrap;
   }
-  .chip-btn.active { border-color: var(--accent); color: var(--accent); }
+  .chip-btn.active { border-color: var(--accent); color: var(--badge-accent); }
   #sort-select {
     flex: 1;
     min-width: 0;
@@ -359,7 +364,7 @@
      da UX: informação real mas pequena o bastante pra não merecer sua
      própria seção). Cor de destaque (não --text-dim, pra não se misturar
      com o flavor text acima) mas sem peso de card. */
-  .obtain-hint { color: var(--accent-2); font-size: 12.5px; font-weight: 600; max-width: 65ch; margin: -8px 0 20px; }
+  .obtain-hint { color: var(--badge-accent2); font-size: 12.5px; font-weight: 600; max-width: 65ch; margin: -8px 0 20px; }
 
   .card {
     background: var(--surface);
@@ -383,7 +388,7 @@
     color: var(--text);
     list-style-position: outside;
   }
-  .detail-group > summary:hover { color: var(--accent); }
+  .detail-group > summary:hover { color: var(--badge-accent); }
   .detail-group[open] > summary { margin-bottom: 4px; border-bottom: 1px solid var(--border); }
   /* .card já tem margin-bottom próprio - dentro de um <details> aberto isso
      empilha certo; o último .card de um grupo não precisa do espaço extra
@@ -422,7 +427,7 @@
      the dashboard with a real 6-Pokemon team, not from a DOM assertion -
      the existing smoke check only looks for the word "fracos" in the
      text, which was still present and "passing" the whole time). */
-  .dash-suggestion .dash-value { color: var(--accent-2); display: inline; }
+  .dash-suggestion .dash-value { color: var(--badge-accent2); display: inline; }
   .dash-suggestion .goto-species { text-decoration: underline; text-decoration-style: dotted; }
 
   .stat-row { display: grid; grid-template-columns: 90px 40px 1fr; align-items: center; gap: 10px; margin-bottom: 7px; }
@@ -455,13 +460,13 @@
     border-radius: 999px;
     margin-bottom: 5px;
   }
-  .abi-kind.choosable { background: color-mix(in srgb, var(--accent-2) 22%, transparent); color: var(--accent-2); }
-  .abi-kind.innate { background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--accent); }
+  .abi-kind.choosable { background: color-mix(in srgb, var(--accent-2) 22%, transparent); color: var(--badge-accent2); }
+  .abi-kind.innate { background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--badge-accent); }
   /* Sinergia real habilidade x movepool (Fase 3 já calculava isso, só não
      mostrava na Dex - pedido do usuário, 2026-09-11). --accent-2 (não
      --accent, que já marca a innate acima) pra não competir visualmente com
      o rótulo escolhível/innate no mesmo card. */
-  .abi-synergy { font-size: 11.5px; color: var(--accent-2); font-weight: 600; margin-top: 6px; }
+  .abi-synergy { font-size: 11.5px; color: var(--badge-accent2); font-weight: 600; margin-top: 6px; }
 
   .evo-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .evo-node { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
@@ -477,7 +482,7 @@
   .compare-table th { text-align: left; font-size: 12px; font-weight: 700; padding: 6px 8px; border-bottom: 1px solid var(--border); }
   .compare-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
   .compare-table td:first-child { color: var(--text-dim); }
-  .cmp-win { color: var(--sem-resist); font-weight: 700; }
+  .cmp-win { color: var(--badge-resist); font-weight: 700; }
   .cmp-lose { color: var(--text-dim); }
   .moves-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   .moves-table th { text-align: left; color: var(--text-dim); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding: 5px 8px; border-bottom: 1px solid var(--border); }
@@ -577,7 +582,7 @@
   .pcbox-detail-identity { flex: 1; min-width: 0; }
   .pcbox-detail-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
   .pcbox-detail-name { font-weight: 700; font-size: 15.5px; cursor: pointer; }
-  .pcbox-detail-name:hover { color: var(--accent-2); }
+  .pcbox-detail-name:hover { color: var(--badge-accent2); }
   .pcbox-detail-types { display: flex; gap: 4px; }
   .pcbox-detail-actions { display: flex; gap: 6px; flex-shrink: 0; }
   /* Hab./Innate do selecionado - mesma informação que o card do Meu Time já
@@ -605,7 +610,7 @@
      .obtain-hint já usa no resto do app pra sinalizar "isto é contexto
      extra, não uma ação obrigatória". Própria linha, depois do divisor de
      Análise de uso quando os dois existem juntos. */
-  .pcbox-fit-note { display: block; color: var(--accent-2); font-size: 12px; font-weight: 600; }
+  .pcbox-fit-note { display: block; color: var(--badge-accent2); font-size: 12px; font-weight: 600; }
   .pcbox-empty-note { color: var(--text-dim); font-size: 13px; }
 
   .saved-teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
@@ -615,9 +620,9 @@
   .saved-team-card .stc-sprites { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
   .saved-team-card .stc-actions { display: flex; gap: 8px; }
   .saved-team-card .stc-actions button { flex: 1; padding: 6px 8px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 11.5px; font-weight: 700; cursor: pointer; }
-  .saved-team-card .stc-actions button.stc-load { border-color: var(--accent); color: var(--accent); }
+  .saved-team-card .stc-actions button.stc-load { border-color: var(--accent); color: var(--badge-accent); }
   .saved-team-card .stc-actions button.stc-delete { color: var(--sem-weak); }
-  .stc-active-badge { font-size: 10px; font-weight: 700; color: var(--sem-resist); letter-spacing: .02em; }
+  .stc-active-badge { font-size: 10px; font-weight: 700; color: var(--badge-resist); letter-spacing: .02em; }
   .stc-rename-input {
     width: 100%;
     margin-bottom: 8px;
@@ -649,7 +654,7 @@
   .boss-mon-card .bm-types { display: flex; gap: 5px; }
   .boss-mon-card .bm-row { font-size: 11.5px; color: var(--text-dim); line-height: 1.5; }
   .boss-mon-card .bm-row b { color: var(--text); font-weight: 600; }
-  .boss-mon-card .bm-transform { color: var(--accent-2); font-style: italic; margin-bottom: 4px; }
+  .boss-mon-card .bm-transform { color: var(--badge-accent2); font-style: italic; margin-bottom: 4px; }
   .boss-level-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 2px; }
   .boss-level-row label { font-size: 12.5px; color: var(--text-dim); }
   #boss-level-input, #mybuild-level {
@@ -710,7 +715,7 @@
   .ts-swap-btn {
     background: var(--surface-2);
     border: 1px solid var(--border);
-    color: var(--accent-2);
+    color: var(--badge-accent2);
     font-size: 11.5px;
     font-weight: 700;
     padding: 5px 10px;
@@ -721,7 +726,7 @@
   .ts-goto-dex {
     background: var(--surface-2);
     border: 1px solid var(--border);
-    color: var(--accent);
+    color: var(--badge-accent);
     font-size: 12px;
     font-weight: 700;
     padding: 7px 12px;
@@ -733,7 +738,7 @@
   .ts-goto-dex:hover { border-color: var(--accent); }
 
   .swap-panel { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--accent); }
-  .swap-title { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); font-weight: 700; margin-bottom: 8px; }
+  .swap-title { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--badge-accent); font-weight: 700; margin-bottom: 8px; }
   .swap-empty { font-size: 11.5px; color: var(--text-dim); }
   .swap-list { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
   .swap-pick {
@@ -758,14 +763,14 @@
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: 7px;
-    color: var(--accent-2);
+    color: var(--badge-accent2);
     font-size: 12.5px;
     font-weight: 700;
     cursor: pointer;
     padding: 6px 10px;
   }
   .pcbox-detail .box-to-team:disabled { color: var(--text-dim); cursor: default; }
-  .pcbox-detail .box-to-team.is-swap { color: var(--accent); border-color: var(--accent); }
+  .pcbox-detail .box-to-team.is-swap { color: var(--badge-accent); border-color: var(--accent); }
   .pcbox-detail .remove-btn {
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px;
     padding: 6px 10px; font-size: 15px; line-height: 1; cursor: pointer; color: var(--sem-weak);
@@ -784,9 +789,9 @@
     cursor: pointer;
     padding: 0;
   }
-  .row-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .row-add-btn:hover { border-color: var(--accent); color: var(--badge-accent); }
   .row-add-btn:disabled { opacity: .35; cursor: default; }
-  .row-add-btn.is-swap { color: var(--accent-2); border-color: color-mix(in srgb, var(--accent-2) 45%, transparent); }
+  .row-add-btn.is-swap { color: var(--badge-accent2); border-color: color-mix(in srgb, var(--accent-2) 45%, transparent); }
 
   #toast {
     position: fixed;
@@ -848,11 +853,20 @@
      .ts-build-copy) - o card do Meu Time já tem um listener delegado que
      escuta TODO .ts-build-copy dentro de #team-slots pra copiar o set;
      usar a mesma classe faria o botão de gerar build acionar o copiador
-     por engano. Mesma aparência visual, ação diferente. */
-  .ts-build-copy, .ts-ai-generate-btn {
+     por engano. Mesma aparência visual, ação diferente.
+     Achado em auditoria de frontend (2026-09-13): .ts-build-copy (ts- =
+     team-slot) tinha virado o nome genérico de fato pra este estilo,
+     reusado em 7+ botões fora do Time (editor "Meu build", anotações,
+     arquétipo, estratégia de time, builds de referência) - todos com seu
+     próprio listener por id, então não colidem HOJE, mas um futuro
+     listener delegado em .ts-build-copy escopado a `document` (uma
+     "simplificação" natural) dispararia em todos eles por engano. Só o
+     botão real de copiar dentro de #team-slots usa .ts-build-copy agora;
+     todo o resto usa .text-action-btn, puramente visual. */
+  .ts-build-copy, .ts-ai-generate-btn, .text-action-btn {
     background: none;
     border: none;
-    color: var(--accent-2);
+    color: var(--badge-accent2);
     font-size: 11px;
     font-weight: 700;
     cursor: pointer;
@@ -869,7 +883,7 @@
     cursor: pointer;
     font-size: 12.5px;
     font-weight: 700;
-    color: var(--accent-2);
+    color: var(--badge-accent2);
     list-style: none;
     padding: 9px 12px;
     border-radius: 8px;
@@ -884,7 +898,7 @@
   .bh-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
   .bh-date { font-size: 10.5px; color: var(--text-dim); }
   .bh-context { font-size: 11px; color: var(--text); font-style: italic; flex: 1; }
-  .bh-copy { background: none; border: none; color: var(--accent-2); font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; }
+  .bh-copy { background: none; border: none; color: var(--badge-accent2); font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; }
 
   .modal-backdrop {
     position: fixed;
@@ -940,7 +954,7 @@
      visualmente (build salvo, erro de IA, "escolha um Ritmo primeiro") nunca
      eram anunciadas pra quem usa leitor de tela, ao contrário do toast/
      sync-banner/storage-banner, que já tinham isso desde muito antes. */
-  .notes-status { font-size: 11.5px; color: var(--accent-2); }
+  .notes-status { font-size: 11.5px; color: var(--badge-accent2); }
   .mybuild-hint { color: var(--text-dim); font-size: 12px; margin: 0 0 12px; }
   .mybuild-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
   .mybuild-field {
@@ -966,7 +980,7 @@
     border: 1px solid var(--border); background: var(--surface-2); color: var(--text-dim);
     padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; cursor: pointer;
   }
-  .mybuild-chip.active { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .mybuild-chip.active { border-color: var(--accent); color: var(--badge-accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
   .mybuild-ai-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
   /* Justificativa da build gerada por IA, em destaque - pedido da UX,
      2026-09-10: cor de acento + borda esquerda pra chamar atenção, distinto
@@ -981,7 +995,7 @@
     line-height: 1.5;
     color: var(--text);
   }
-  .mybuild-rationale strong { color: var(--accent-2); }
+  .mybuild-rationale strong { color: var(--badge-accent2); }
   /* Sugestão de troca acionável dentro da Leitura estratégica (Fase 4,
      2026-09-12) - borda tracejada pra distinguir de .mybuild-rationale
      (texto só-leitura) logo acima: isto tem uma ação real dentro. */
@@ -995,7 +1009,7 @@
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: 7px;
-    color: var(--accent-2);
+    color: var(--badge-accent2);
     font-size: 12.5px;
     font-weight: 700;
     cursor: pointer;
@@ -1048,7 +1062,7 @@
     letter-spacing: .04em;
     font-size: 9.5px;
     font-weight: 700;
-    color: var(--accent-2);
+    color: var(--badge-accent2);
   }
   .ts-build-empty { color: var(--text-dim); font-style: italic; font-size: 11.5px; }
   .remove-btn {
@@ -1165,7 +1179,7 @@
     color: var(--text-dim);
     background: var(--surface);
   }
-  .footer a { color: var(--accent-2); text-decoration: none; }
+  .footer a { color: var(--badge-accent2); text-decoration: none; }
   .footer a:hover { text-decoration: underline; }
 
   @media (max-width: 860px) {
@@ -1207,7 +1221,7 @@
       gap: 5px;
       background: none;
       border: none;
-      color: var(--accent-2);
+      color: var(--badge-accent2);
       font-weight: 700;
       font-size: 13px;
       cursor: pointer;
@@ -1373,7 +1387,7 @@
             <input id="save-team-name" type="text" placeholder="Nome do time (opcional)" aria-label="Nome do time a salvar" style="flex:1;min-width:180px;padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
             <button id="save-team-btn" class="add-team-btn" type="button">Salvar time atual</button>
           </div>
-          <div id="saved-teams-status" style="font-size:11.5px;color:var(--accent-2);margin:0 0 10px;min-height:14px;"></div>
+          <div id="saved-teams-status" style="font-size:11.5px;color:var(--badge-accent2);margin:0 0 10px;min-height:14px;"></div>
           <div class="saved-teams-grid" id="saved-teams-grid"></div>
         </div>
 
@@ -2383,7 +2397,15 @@
       if (!snap.exists || snap.metadata.hasPendingWrites) return;
       var remote = snap.data();
       var localRaw3 = lsGet(STORE_KEY);
-      var local3 = localRaw3 ? JSON.parse(localRaw3) : null;
+      var local3 = null;
+      try { local3 = localRaw3 ? JSON.parse(localRaw3) : null; } catch (e) {
+        // Achado em auditoria (2026-09-13): ao contrário das outras 2 leituras
+        // deste mesmo fluxo (get() inicial e o "sem save local" acima), esta
+        // não tinha try/catch - um localStorage corrompido faria o remoto
+        // legítimo ser perdido em silêncio (exceção não tratada dentro do
+        // callback do onSnapshot). local3 = null cai no mesmo caminho já
+        // existente pra "sem local válido" logo abaixo - aplica o remoto.
+      }
       if (!syncContentDiffers(local3, remote)) return;
       // Achado real, 2026-09-13 (usuário reportou times divergentes entre
       // celular e navegador): ao contrário da reconciliação de carga inicial
@@ -3776,7 +3798,7 @@
       '<button class="bh-copy" ' + copyAttrs + ' type="button" title="Copiar este set">copiar</button></div>' +
       '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, entry)) + '</pre>' +
       (entry.note ? '<div class="ts-build-note">' + escapeHtml(entry.note) + '</div>' : '') +
-      '<button class="ts-build-copy use-entry-build-btn" ' + copyAttrs + ' type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
+      '<button class="text-action-btn use-entry-build-btn" ' + copyAttrs + ' type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
     '</div>';
   }
 
@@ -3860,10 +3882,10 @@
     var itemDatalist = '<datalist id="mybuild-item-list">' + ITEMS.map(function (n) { return '<option value="' + escapeHtml(n) + '">'; }).join("") + '</datalist>';
     var ivEvHeader = '<span></span>' + STAT_LABELS_SHORT.map(function (l) { return '<span>' + l + '</span>'; }).join("");
     var ivRow = '<span>IV</span>' + [0, 1, 2, 3, 4, 5].map(function (i) {
-      return '<input type="number" class="mybuild-num" id="mybuild-iv-' + i + '" min="0" max="31">';
+      return '<input type="number" class="mybuild-num" id="mybuild-iv-' + i + '" min="0" max="31" aria-label="IV de ' + STAT_LABELS_SHORT[i] + '">';
     }).join("");
     var evRow = '<span>EV</span>' + [0, 1, 2, 3, 4, 5].map(function (i) {
-      return '<input type="number" class="mybuild-num" id="mybuild-ev-' + i + '" min="0" max="252" step="4">';
+      return '<input type="number" class="mybuild-num" id="mybuild-ev-' + i + '" min="0" max="252" step="4" aria-label="EV de ' + STAT_LABELS_SHORT[i] + '">';
     }).join("");
     var hasBuild = list.length > 0;
     var preview = hasBuild ? showdownSet(sp, {
@@ -3893,9 +3915,9 @@
         '<input type="number" id="mybuild-level" min="1" max="100" value="' + (myBuildLevel || mbCap || 50) + '"></div>' +
       '<div id="mybuild-status-preview"></div>' +
       '<p class="mybuild-hint" style="margin:2px 0 12px;">Preenchido a partir do level cap configurado em Progresso - pode digitar outro valor pra simular, mas volta a seguir o cap sempre que ele mudar. Poder de golpe considera STAB e Life Orb quando presente - não é uma calculadora de dano (sem efetividade de tipo, sem status de campo, sem outras habilidades de golpe).</p>' +
-      '<div class="notes-actions"><button id="mybuild-save" class="ts-build-copy" type="button">Salvar build</button>' +
-        (list.length < 3 ? '<button id="mybuild-save-variant" class="ts-build-copy" type="button">Salvar como nova variante</button>' : '') +
-        (hasBuild ? '<button id="mybuild-clear" class="ts-build-copy" type="button" style="color:var(--sem-weak);">Apagar esta</button>' : '') +
+      '<div class="notes-actions"><button id="mybuild-save" class="text-action-btn" type="button">Salvar build</button>' +
+        (list.length < 3 ? '<button id="mybuild-save-variant" class="text-action-btn" type="button">Salvar como nova variante</button>' : '') +
+        (hasBuild ? '<button id="mybuild-clear" class="text-action-btn" type="button" style="color:var(--sem-weak);">Apagar esta</button>' : '') +
         '<span id="mybuild-status" class="notes-status" role="status" aria-live="polite"></span></div>' +
       // Justificativa em destaque, 2026-09-10 (pedido da UX na reunião da
       // equipe: "a linha precisa ser em destaque") - só aparece pra build
@@ -3906,7 +3928,7 @@
       (hasBuild && b.source === "ia" && b.rationale
         ? '<div class="mybuild-rationale"><strong>Por que essa escolha:</strong> ' + escapeHtml(b.rationale) + '</div>'
         : '') +
-      (hasBuild ? '<pre class="showdown-block">' + escapeHtml(preview) + '</pre><button id="mybuild-copy" class="ts-build-copy" type="button">Copiar</button>' : '') +
+      (hasBuild ? '<pre class="showdown-block">' + escapeHtml(preview) + '</pre><button id="mybuild-copy" class="text-action-btn" type="button">Copiar</button>' : '') +
       // "Gerar build com IA" - 2026-09-09, user's own rule: quando não tem
       // build salva (ou quando quer uma diferente das já salvas), chama o
       // Claude pra montar uma nova, em vez de exigir que o usuário venha
@@ -3916,7 +3938,7 @@
       '<div class="mybuild-ai-row">' +
         (list.length >= 3
           ? '<p class="hint" style="margin:0;">Limite de 3 builds atingido - apague uma antes de gerar outra.</p>'
-          : '<button id="mybuild-ai-generate" class="ts-build-copy" type="button">Gerar build com IA</button>') +
+          : '<button id="mybuild-ai-generate" class="text-action-btn" type="button">Gerar build com IA</button>') +
         '<span id="mybuild-ai-status" class="notes-status" role="status" aria-live="polite"></span>' +
       '</div>' +
     '</div>';
@@ -4732,7 +4754,7 @@
     var val = state.notes[sp.sname] || "";
     return '<div class="card"><h3>Minhas anotações</h3>' +
       '<textarea id="species-notes-input" class="notes-textarea" rows="3" placeholder="Sua própria anotação sobre este Pokémon - build que testou, estratégia, o que funcionou numa luta...">' + escapeHtml(val) + '</textarea>' +
-      '<div class="notes-actions"><button id="species-notes-save" class="ts-build-copy" type="button">Salvar</button>' +
+      '<div class="notes-actions"><button id="species-notes-save" class="text-action-btn" type="button">Salvar</button>' +
       '<span id="species-notes-status" class="notes-status" role="status" aria-live="polite"></span></div>' +
     '</div>';
   }
@@ -5055,8 +5077,29 @@
         var idx = parseInt(btn.dataset.idx, 10);
         var slot = state.savedTeams[idx];
         if (!slot) return;
-        state.team = snamesToXs(slot.team).slice(0, 6);
+        // Achado em auditoria (2026-09-13): esta troca costumava substituir
+        // state.team direto, ao contrário de rosterMove()/
+        // applyRecommendedTeam() - quem estava no time atual e não pertence
+        // ao slot salvo simplesmente sumia (nunca ia pra caixa), e qualquer
+        // sname do slot que a build de dados atual não reconhece (ex: um
+        // save sincronizado de um aparelho com dado de versão diferente)
+        // era descartado sem rastro. Agora segue o MESMO critério dos
+        // outros dois: quem sai do time é banido pra caixa, nunca
+        // descartado, e órfãos entram em state.orphans pra sobreviver ao
+        // próximo persist() (mesmo mecanismo do save principal, ver
+        // snamesToXs()/state.orphans acima).
+        var loadOrphans = [];
+        var xs = snamesToXs(slot.team, loadOrphans).slice(0, 6);
+        state.team.forEach(function (x) {
+          if (xs.indexOf(x) === -1 && state.box.indexOf(x) === -1) state.box.push(x);
+        });
+        state.box = state.box.filter(function (x) { return xs.indexOf(x) === -1; });
+        state.team = xs;
+        loadOrphans.forEach(function (sn) {
+          if (state.orphans.team.indexOf(sn) === -1) state.orphans.team.push(sn);
+        });
         saveTeam();
+        updateBoxBadge();
         renderTeam();
         document.getElementById("saved-teams-status").textContent = "Time \"" + (slot.name || ("Time " + (idx + 1))) + "\" carregado.";
       });
@@ -5387,7 +5430,7 @@
       '<div class="archetype-row">' +
         '<label>Ritmo <select id="archetype-pace">' + paceOptions + '</select></label>' +
         '<label>Clima <select id="archetype-weather">' + weatherOptions + '</select></label>' +
-        '<button id="archetype-build" class="ts-build-copy" type="button">Montar melhor time</button>' +
+        '<button id="archetype-build" class="text-action-btn" type="button">Montar melhor time</button>' +
       '</div>' +
       '<span id="archetype-status" class="notes-status" role="status" aria-live="polite"></span>' +
       recoHtml +
@@ -5576,12 +5619,12 @@
       strategyHtml = '<div class="card"><h3>Leitura estratégica</h3>' +
         '<div class="mybuild-rationale">' + escapeHtml(teamAnalysisReport.text) + '</div>' +
         swapHtml +
-        '<button id="team-strategy-generate" class="ts-build-copy" type="button">Analisar de novo</button> ' +
+        '<button id="team-strategy-generate" class="text-action-btn" type="button">Analisar de novo</button> ' +
         '<span id="team-strategy-status" class="notes-status" role="status" aria-live="polite"></span></div>';
     } else {
       strategyHtml = '<div class="card"><h3>Leitura estratégica</h3>' +
         '<p class="mybuild-hint">Pede pra IA ler o time inteiro (papel, sinergia, fraqueza) e sugerir como jogar com esses ' + members.length + '.</p>' +
-        '<button id="team-strategy-generate" class="ts-build-copy" type="button">Analisar meu time</button> ' +
+        '<button id="team-strategy-generate" class="text-action-btn" type="button">Analisar meu time</button> ' +
         '<span id="team-strategy-status" class="notes-status" role="status" aria-live="polite"></span></div>';
     }
     el.innerHTML = archetypeCardHtml(members) + strategyHtml;
@@ -5895,7 +5938,7 @@
         // transform the same way. Only offered when the base species and
         // its raw EV/IV arrays actually resolve (same guard as statsHtml).
         (sp && m.evsRaw && m.ivsRaw
-          ? '<button class="ts-build-copy use-boss-build-btn" data-idx="' + idx + '" type="button" style="margin-top:8px;">+ Usar como meu build (' + escapeHtml(m.n) + ')</button>'
+          ? '<button class="text-action-btn use-boss-build-btn" data-idx="' + idx + '" type="button" style="margin-top:8px;">+ Usar como meu build (' + escapeHtml(m.n) + ')</button>'
           : "") +
       '</div>';
     }).join("");
@@ -5920,7 +5963,7 @@
           '<textarea id="boss-export-text" class="mono" readonly rows="5" style="flex:1;min-width:220px;padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12px;resize:vertical;">' + escapeHtml(exportText) + '</textarea>' +
           '<button id="boss-export-copy" class="add-team-btn" type="button">Copiar</button>' +
         '</div>' +
-        '<div id="boss-export-status" style="font-size:11.5px;color:var(--accent-2);margin-top:6px;min-height:14px;"></div>' +
+        '<div id="boss-export-status" style="font-size:11.5px;color:var(--badge-accent2);margin-top:6px;min-height:14px;"></div>' +
       '</div>';
 
     var backBtn = document.getElementById("boss-back-to-list");

@@ -326,11 +326,36 @@ async function runLiveTests() {
   await wait(120);
 
   // --- 6. build-reference card has a real title (not a bare <details>) ---
-  const buildCard = [...document.querySelectorAll("#species-detail .card h3")]
+  // Achado em auditoria de QA (2026-09-13): esta checagem sempre passava
+  // (`check(..., true)`) - `buildCard` era calculado e nunca usado na
+  // asserção. Nidoking (espécie atual nesta seção) não tem build de
+  // chefão real (não está em data/boss_reference_builds.json), então o
+  // card nem deveria renderizar aqui - testa esse caminho de verdade, e
+  // depois troca pra uma espécie que TEM dado real (Eelektross) pra testar
+  // o caminho positivo também.
+  const buildCardAbsent = [...document.querySelectorAll("#species-detail .card h3")]
     .find(h => h.textContent === "Builds de referência");
-  // Only assert this if the currently shown species actually has boss-reference
-  // data - not every species does, so absence alone isn't a failure here.
-  check("no crash rendering species detail with/without build-reference card", true);
+  check("espécie sem build de chefão real (Nidoking) não mostra o card 'Builds de referência'", !buildCardAbsent);
+
+  setSearch("Eelektross");
+  await wait(120);
+  const eelektrossRow6 = document.querySelector("#species-list .species-row");
+  if (eelektrossRow6) {
+    eelektrossRow6.click();
+    await wait(30);
+    const buildCard = [...document.querySelectorAll("#species-detail .card h3")]
+      .find(h => h.textContent === "Builds de referência");
+    // .closest("details") É esperado (a seção inteira "Golpes/Anotações e
+    // builds de referência/Comparar" vive dentro de um <details
+    // class="detail-group"> colapsável de propósito, Fase 2 2026-09-11) -
+    // o que este teste verifica é só que o TÍTULO em si é um <h3> de
+    // verdade dentro de um .card, não texto solto ou um <summary> fazendo
+    // o papel de cabeçalho.
+    check("espécie com build de chefão real (Eelektross) mostra o card 'Builds de referência' com título de verdade",
+      !!buildCard && !!buildCard.closest(".card"));
+  } else { check("Eelektross encontrado pro teste do card de builds de referência", false); }
+  setSearch("");
+  await wait(120);
 
   // --- 7. team coverage table sits in a titled .card (not a bare <h3>) ---
   // 2 cards em #team-analysis (Riscos compartilhados + Cobertura defensiva)
@@ -923,7 +948,14 @@ async function runLiveTests() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
-  // --- 18. "+ Usar como meu build" on Dex-side reference entries -
+  // --- 17b. "+ Usar como meu build" on Dex-side reference entries -
+  // (renumbered from a duplicate "18" in a QA audit, 2026-09-13 - this
+  // section and the "18b" one right after it are direct continuations of
+  // section 17 above, same "usar como meu build" copy mechanism, just the
+  // Dex-side entry point instead of the boss tab's. A LATER, unrelated
+  // section also claimed "18" - see the "TYPE_MOD_ABILITIES coverage"
+  // section further down - and a project-memory note already got the two
+  // confused once, see its own comment for that story.)
   // 2026-09-09, user caught that "Builds vistas em chefões" (and build
   // history) on the Dex detail had a "copiar" button that only ever put
   // text on the clipboard, never touched state.customBuilds or the Team
@@ -963,7 +995,8 @@ async function runLiveTests() {
   setSearch("");
   await wait(120);
 
-  // --- 18b. IVs reais de referência de chefão não podem virar 31 fixo -
+  // --- 17c. IVs reais de referência de chefão não podem virar 31 fixo -
+  // (renumbered from "18b" alongside 17b above, same reason - see its comment)
   // bug real achado em auditoria (2026-09-11): scripts/extract_boss_builds.ps1
   // reconstruía a entrada por campo nomeado e descartava ivsRaw/evsRaw
   // (mesmo dado que extract_bosses.ps1 já extraía de verdade), então o
@@ -1606,6 +1639,13 @@ async function runLiveTests() {
   await wait(20);
   document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
   await wait(50);
+  // Achado em auditoria de QA (2026-09-13): este bloco mudava o milestone
+  // e nunca restaurava, ao contrário do padrão disciplinado já usado mais
+  // acima (milestoneSelBefore/restauração perto da linha 383) - inofensivo
+  // só porque nada depois deste bloco, até agora, precisava de "sem
+  // limite" pra travar golpe por nível. Captura e restaura pelo mesmo
+  // motivo, antes que uma seção futura dependa disso sem perceber.
+  const milestoneSelBeforeCharm = document.getElementById("settings-milestone").value;
   document.getElementById("settings-milestone").value = "1"; // Stone Badge, cap 25 nesta dificuldade
   document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));
   await wait(50);
@@ -1690,6 +1730,15 @@ async function runLiveTests() {
     pcSearchEvo.value = "";
     pcSearchEvo.dispatchEvent(new Event("input", { bubbles: true }));
   } else { check("Charmander encontrado pro teste de level cap", false); }
+  document.getElementById("tabs-more-toggle").click();
+  await wait(20);
+  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  await wait(50);
+  document.getElementById("settings-milestone").value = milestoneSelBeforeCharm;
+  document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));
+  await wait(50);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
 
   // --- Correção de exibição, 2026-09-10: achado ao construir a auto-
   // evolução (mesma classe de bug - rs vem como STRING no dado bruto, não
@@ -2205,6 +2254,14 @@ async function runLiveTests() {
   await wait(30);
   var diffSel = document.getElementById("settings-difficulty");
   var msSel27 = document.getElementById("settings-milestone");
+  // Achado em auditoria de QA (2026-09-13): esta seção mudava
+  // dificuldade/milestone e nunca restaurava - mesma classe de bug do
+  // bloco de auto-evolução do Charmander mais acima (agora com
+  // milestoneSelBeforeCharm). Inofensivo só porque nada depois desta
+  // seção, até agora, dependia do valor anterior - captura e restaura no
+  // fim da seção antes que isso mude.
+  var diffSelBefore27 = diffSel ? diffSel.value : null;
+  var msSelBefore27 = msSel27 ? msSel27.value : null;
   if (diffSel) { diffSel.value = "ace"; diffSel.dispatchEvent(new Event("change", { bubbles: true })); }
   if (msSel27) { msSel27.value = "0"; msSel27.dispatchEvent(new Event("change", { bubbles: true })); }
   await wait(30);
@@ -2344,6 +2401,13 @@ async function runLiveTests() {
 
   delete window.claude;
   setSearch("");
+  await wait(30);
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
+  await wait(30);
+  if (diffSel && diffSelBefore27 !== null) { diffSel.value = diffSelBefore27; diffSel.dispatchEvent(new Event("change", { bubbles: true })); }
+  if (msSel27 && msSelBefore27 !== null) { msSel27.value = msSelBefore27; msSel27.dispatchEvent(new Event("change", { bubbles: true })); }
+  await wait(30);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
   // --- 28. Botão "Gerar build com IA" direto no card do Meu Time (achado
