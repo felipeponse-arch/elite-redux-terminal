@@ -19,8 +19,24 @@
     --sem-weak: #c23b3b;
     --sem-resist: #1f8f5f;
     --sem-immune: #6b3fa0;
-    --focus: #1f9e93;
+    /* Achado em auditoria de UX/Acessibilidade (2026-09-13): --focus a
+       #1f9e93 media 2.94:1 contra --bg (#f4f2ec) - abaixo do mínimo de
+       3:1 do WCAG 2.2 (2.4.11) pra indicador não-textual, quando o
+       elemento focado fica direto sobre o fundo da página em vez de um
+       .card/--surface (aí já media 3.3:1, sem problema). ~5% mais escuro
+       (mesmo tom) resolve os dois casos - diferente do --accent/
+       --accent-2/--sem-resist, o anel de foco não é identidade de marca,
+       então dá pra escurecer o token de verdade em vez de criar uma
+       variante -safe só pra um contexto. */
+    --focus: #1d968c;
     --shadow: 0 8px 24px -12px rgb(32 29 22 / 0.35);
+    /* Badge-text-safe variant de --text-dim, LIGHT mode só (dark mode já
+       clara AA aqui, 4.81:1, sem precisar de nada). Achado na mesma
+       auditoria: .count-badge das abas inativas usava --text-dim sobre
+       --surface-3, medindo 4.07:1 - abaixo de 4.5:1 pra texto pequeno
+       (11px). ~9% mais escuro (mesmo tom), mesmo raciocínio das outras
+       variantes -safe acima. */
+    --badge-text-dim: #655e4c;
     /* Text-safe variants of --accent/--accent-2/--sem-resist, LIGHT mode
        only (dark mode reuses the plain tokens below unchanged - they
        already clear AA there). Accessibility review, 2026-09-09: measured
@@ -64,6 +80,7 @@
       --badge-accent: #ff7a45;
       --badge-accent2: #3fd8c8;
       --badge-resist: #4fce93;
+      --badge-text-dim: #93a19c;
       color-scheme: dark;
     }
   }
@@ -87,6 +104,7 @@
     --badge-accent: #ff7a45;
     --badge-accent2: #3fd8c8;
     --badge-resist: #4fce93;
+    --badge-text-dim: #93a19c;
     color-scheme: dark;
   }
 
@@ -200,7 +218,7 @@
     padding: 1px 7px;
     font-family: "IBM Plex Mono", monospace;
   }
-  .tab-btn:not(.active) .count-badge { background: var(--surface-3); color: var(--text-dim); }
+  .tab-btn:not(.active) .count-badge { background: var(--surface-3); color: var(--badge-text-dim); }
 
   /* "Mais" dropdown (Progresso/Tipos) - design review, 2026-09-09. The
      toggle reuses .tab-btn/.tab-btn.active as-is (same class), so it looks
