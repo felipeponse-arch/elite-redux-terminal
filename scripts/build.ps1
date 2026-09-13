@@ -126,7 +126,28 @@ foreach ($placeholder in $dataFiles.Keys) {
         throw "Placeholder $placeholder not found in template - did the template change?"
     }
 
-    $safeJson = $json.Replace("</script", "<\/script")
+    # Achado real em revisão de segurança (2026-09-13, Especialista em
+    # Segurança): .Replace() do .NET é case-SENSITIVE, mas o tokenizer
+    # HTML de um navegador de verdade fecha uma tag </script> em qualquer
+    # combinação de maiúsculas/minúsculas (</SCRIPT>, </Script> etc.) -
+    # confirmado empiricamente que "</SCRIPT>".Replace("</script", ...)
+    # não casava e vazava intacto. Como esses 15 blocos JSON vêm (via
+    # data/gameData_265beta.json) de um site externo não totalmente
+    # confiável (NextDex), um nome/descrição de espécie/habilidade/golpe
+    # contendo qualquer variação de maiúscula de "</script" quebraria pra
+    # fora do <script type="application/json"> e teria o resto da string
+    # interpretado como HTML/script real pelo navegador - regex
+    # case-insensitive fecha essa lacuna sem mudar o mecanismo (mesma
+    # ideia: insere uma barra invertida no meio de "</script" pra
+    # neutralizar o fechamento de tag, sem tocar no ">" nem no resto).
+    $safeJson = [regex]::Replace($json, "</script", "<\/script", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    # Trava de regressão pro achado acima - se o escaping alguma vez voltar
+    # a ser quebrado (ex: alguém trocar de volta pro .Replace() case-
+    # sensitive), o build falha alto em vez de publicar silenciosamente
+    # com uma tag </script (qualquer case) real ainda escondida no JSON.
+    if ($safeJson -imatch "</script") {
+        throw "Escaping de </script falhou pra $path - ainda ha uma ocorrencia nao escapada, publicar isto quebraria o HTML."
+    }
     $final = $final.Replace($placeholder, $safeJson)
 }
 
