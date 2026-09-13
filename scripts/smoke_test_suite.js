@@ -2583,6 +2583,33 @@ async function runLiveTests() {
     delete window.claude;
   }
 
+  // --- 29. "remover" do Meu Time banca pra caixa, não descarta (achado em
+  // auditoria completa da equipe, 2026-09-13) - antes disto,
+  // state.team = state.team.filter(...) sozinho fazia o Pokémon sumir de
+  // verdade (nem ia pra caixa), inconsistente com rosterMove()/
+  // applyRecommendedTeam()/renderSavedTeams() "Carregar", que sempre banem
+  // quem sai do time. Não assume QUEM está no time neste ponto da suíte
+  // (muitas seções anteriores já mexeram nele) - só que há pelo menos 1
+  // membro, e testa a remoção do primeiro encontrado.
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  const saveBefore29 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+  const teamBefore29 = saveBefore29.team || [];
+  if (teamBefore29.length) {
+    const removedSname29 = teamBefore29[0];
+    const removeBtn29 = document.querySelector(".remove-btn");
+    if (removeBtn29) {
+      removeBtn29.click();
+      await wait(50);
+      const saveAfter29 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+      const stillInTeam29 = (saveAfter29.team || []).indexOf(removedSname29) !== -1;
+      const nowInBox29 = (saveAfter29.box || []).indexOf(removedSname29) !== -1;
+      check("'remover' do Meu Time manda o Pokémon pra caixa em vez de descartar",
+        !stillInTeam29 && nowInBox29,
+        { removedSname29, teamAfter: saveAfter29.team, boxHasIt: nowInBox29 });
+    } else { check("botão 'remover' encontrado no card do Meu Time", false); }
+  } else { check("time tinha pelo menos 1 membro pro teste de 'remover'", false, teamBefore29); }
+
   localStorage.clear();
 
   const passed = results.filter(r => r.pass).length;

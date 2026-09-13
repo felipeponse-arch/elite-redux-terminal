@@ -4929,7 +4929,7 @@
           (swapOpen ? swapPanelHtml(i, sp) : "") +
           '</div><div class="ts-actions">' +
             '<button class="ts-swap-btn" data-idx="' + i + '" type="button">' + (swapOpen ? 'Cancelar' : '⇄ Trocar') + '</button>' +
-            '<button class="remove-btn" data-x="' + sp.x + '">remover</button>' +
+            '<button class="remove-btn" data-x="' + sp.x + '" type="button" title="Manda de volta pra caixa">remover</button>' +
           '</div></div>');
       }
     }
@@ -4948,10 +4948,19 @@
     slotsEl.querySelectorAll(".remove-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var x = parseInt(btn.dataset.x, 10);
+        // Achado em auditoria completa da equipe (2026-09-13): isto
+        // descartava o Pokémon direto, ao contrário de
+        // rosterMove()/applyRecommendedTeam()/renderSavedTeams() "Carregar",
+        // que sempre banem quem sai do time pra caixa - inconsistente com a
+        // filosofia "nada se perde, só se move" usada em todo o resto do
+        // app. Time e Caixa não têm médo comum aqui (não é rosterMove(),
+        // que troca um POR outro) - só garante que quem sai não desaparece.
         state.team = state.team.filter(function (v) { return v !== x; });
+        if (state.box.indexOf(x) === -1) state.box.push(x);
         teamSwapIdx = null;
         saveTeam();
         updateTeamBadge();
+        updateBoxBadge();
         renderTeam();
       });
     });
