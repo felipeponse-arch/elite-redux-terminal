@@ -16,6 +16,10 @@ isso este arquivo fica aqui, versionado, e .git/hooks/pre-commit e só um
 shim de 2 linhas que chama ele - ver o comentário no shim).
 #>
 $ErrorActionPreference = "Stop"
+# Achado testando o hook ao vivo pela primeira vez: mensagens com acento
+# saiam corrompidas no terminal do git-bash sem isto (encoding padrao do
+# console do PowerShell não bate com o que o git-bash espera).
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $root = Split-Path $PSScriptRoot -Parent
 Set-Location $root
 
