@@ -1,7 +1,8 @@
 // Orquestrador da Parte A - chama cada seção em ordem (a mesma ordem que
-// elas tinham dentro do runLiveTests() monolítico original) e devolve o
-// mesmo array `results` de sempre. Fica por último no manifest.json de
-// propósito (precisa que section01..section10 já estejam definidas).
+// elas tinham dentro do runLiveTests() monolítico original, mais as seções
+// novas criadas depois da divisão em arquivos) e devolve o mesmo array
+// `results` de sempre. Fica por último no manifest.json de propósito
+// (precisa que todas as seções já estejam definidas).
 async function runAllSections() {
   results.length = 0;
 
@@ -15,6 +16,7 @@ async function runAllSections() {
   await section08();
   await section09();
   await section10();
+  await section11();
 
   localStorage.clear();
 

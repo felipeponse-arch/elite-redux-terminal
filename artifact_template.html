@@ -108,6 +108,48 @@
     color-scheme: dark;
   }
 
+  /* Alto contraste (checklist eMAG 3.1, achado em auditoria de UX/
+     Acessibilidade 2026-09-13 - "não atendido de jeito nenhum" até aqui).
+     Paleta PRÓPRIA, independente de claro/escuro (preto/branco puro +
+     cores bem saturadas, convenção padrão de modo de alto contraste) -
+     não é uma variação do tema atual, é o eixo ortogonal de propósito:
+     o jogador liga isto por cima de qualquer tema, não troca um pelo
+     outro. As variantes badge-accent/badge-resist/text-dim não precisam
+     de uma variante "-safe" separada aqui - já nascem clareando AAA
+     (7:1+) contra #000/#fff, então reusam os mesmos valores. */
+  :root[data-high-contrast="true"] {
+    --bg: #000000;
+    --surface: #0a0a0a;
+    --surface-2: #1a1a1a;
+    --surface-3: #2a2a2a;
+    --border: #ffffff;
+    --text: #ffffff;
+    --text-dim: #e6e6e6;
+    --accent: #ffcc00;
+    --accent-strong: #ffdd44;
+    --accent-ink: #000000;
+    --accent-2: #00e5ff;
+    --sem-weak: #ff6666;
+    --sem-resist: #66ff66;
+    --sem-immune: #d9a3ff;
+    --focus: #ffffff;
+    --shadow: 0 0 0 1px #ffffff;
+    --badge-accent: #ffcc00;
+    --badge-accent2: #00e5ff;
+    --badge-resist: #66ff66;
+    --badge-text-dim: #e6e6e6;
+    color-scheme: dark;
+  }
+
+  /* "Aumentar fonte" (mesma auditoria) - zoom em vez de reescrever toda
+     regra de font-size do arquivo pra rem (a maioria já usa px fixo,
+     então uma variável de font-size no :root sozinha não escalaria nada).
+     zoom não é padrão W3C, mas é suportado de sobra no Chromium - o único
+     motor que importa aqui, já que um Artifact só roda nesse contexto -
+     e escala layout inteiro (não só texto) sem quebrar position:fixed
+     como transform:scale() quebraria. */
+  body { zoom: var(--user-font-scale, 1); }
+
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body {
@@ -1488,6 +1530,27 @@
           <h3>Novidades</h3>
           <div id="changelog-list"></div>
         </div>
+        <!-- Checklist eMAG 3.1 (achado em auditoria de UX/Acessibilidade,
+             2026-09-13): "alto contraste" e "aumentar fonte" não eram
+             atendidos de jeito nenhum - só documentados como gap, nunca
+             virados feature. Card próprio, mesmo lugar que já reúne as
+             outras configurações persistidas do jogador. -->
+        <div class="card" style="max-width:460px;">
+          <h3>Acessibilidade</h3>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;cursor:pointer;">
+              <input type="checkbox" id="settings-high-contrast" style="width:16px;height:16px;">
+              Alto contraste
+            </label>
+            <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Tamanho da fonte
+              <select id="settings-font-scale" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;">
+                <option value="1">Padrão</option>
+                <option value="1.15">Grande</option>
+                <option value="1.3">Extra grande</option>
+              </select>
+            </label>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -2285,6 +2348,30 @@
   function saveBox() { persist(); }
   function saveSettings() { persist(); }
   function saveSavedTeams() { persist(); }
+
+  // Preferências de acessibilidade (alto contraste / tamanho da fonte),
+  // 2026-09-13 - chave PRÓPRIA, separada de er_terminal_save de propósito:
+  // são preferências de EXIBIÇÃO deste aparelho específico (um jogador
+  // pode querer alto contraste no celular e não no notebook), não dado de
+  // jogo - não fazem parte do que a sincronização entre aparelhos
+  // propaga. Aplicado aqui, no boot, antes da sync/loadSave, pra nunca
+  // piscar sem o ajuste entre o primeiro paint e o JS rodar.
+  var A11Y_KEY = "er_terminal_a11y";
+  function loadA11yPrefs() {
+    try {
+      var raw = lsGet(A11Y_KEY);
+      return raw ? JSON.parse(raw) : { highContrast: false, fontScale: 1 };
+    } catch (e) { return { highContrast: false, fontScale: 1 }; }
+  }
+  function applyA11yPrefs(prefs) {
+    document.documentElement.setAttribute("data-high-contrast", prefs.highContrast ? "true" : "false");
+    document.documentElement.style.setProperty("--user-font-scale", String(prefs.fontScale || 1));
+  }
+  function saveA11yPrefs(prefs) {
+    lsSet(A11Y_KEY, JSON.stringify(prefs));
+    applyA11yPrefs(prefs);
+  }
+  applyA11yPrefs(loadA11yPrefs());
 
   (function loadSave() {
     var raw = lsGet(STORE_KEY);
@@ -6148,6 +6235,23 @@
       afterCapChange();
     });
     renderCapDisplay();
+
+    // Acessibilidade (checklist eMAG, 2026-09-13) - reflete o que já foi
+    // aplicado no boot (applyA11yPrefs, ver perto de loadSave()) nos
+    // próprios controles, e salva/reaplica a cada mudança.
+    var a11yPrefs = loadA11yPrefs();
+    var hcCheckbox = document.getElementById("settings-high-contrast");
+    var fontSelect = document.getElementById("settings-font-scale");
+    hcCheckbox.checked = !!a11yPrefs.highContrast;
+    fontSelect.value = String(a11yPrefs.fontScale || 1);
+    hcCheckbox.addEventListener("change", function () {
+      a11yPrefs.highContrast = hcCheckbox.checked;
+      saveA11yPrefs(a11yPrefs);
+    });
+    fontSelect.addEventListener("change", function () {
+      a11yPrefs.fontScale = parseFloat(fontSelect.value);
+      saveA11yPrefs(a11yPrefs);
+    });
   }
 
   // ---------------- types view ----------------

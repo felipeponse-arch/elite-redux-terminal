@@ -10,5 +10,6 @@
   "08_level_cap_and_evolution.js",
   "09_dex_extras_archetype.js",
   "10_data_integrity_team_card.js",
+  "11_accessibility_settings.js",
   "99_runner.js"
 ]
