@@ -1625,6 +1625,7 @@
 <script id="bossbuilds" type="application/json">__BOSS_BUILDS_JSON__</script>
 <script id="howtoobtain" type="application/json">__HOW_TO_OBTAIN_JSON__</script>
 <script id="itemdesc" type="application/json">__ITEM_DESC_JSON__</script>
+<script id="itempt" type="application/json">__ITEM_PT_JSON__</script>
 <script id="speciesrank" type="application/json">__SPECIES_RANK_JSON__</script>
 <script id="speciesrole" type="application/json">__SPECIES_ROLE_JSON__</script>
 <script id="abilitysynergy" type="application/json">__ABILITY_SYNERGY_JSON__</script>
@@ -1718,6 +1719,11 @@
   // commit). Cobre 821 dos 929 itens (TMs/HMs não têm descrição própria,
   // só ensinam o golpe).
   var ITEM_DESC = JSON.parse(document.getElementById("itemdesc").textContent || "{}");
+  // Tradução PT-BR (mesmo padrão de ABILITY_PT/MOVE_PT) - 818 dos 818 itens
+  // traduzidos, sem exceção (regra do projeto: tudo em português, nomes
+  // próprios de espécie/golpe/tipo/item continuam em inglês, igual nas
+  // outras 2 traduções).
+  var ITEM_PT = JSON.parse(document.getElementById("itempt").textContent || "{}");
   // Held-item name -> sname of the Mega/Primal species it turns the holder
   // into (e.g. "Miloticite" -> SPECIES_MILOTIC_MEGA). Built once from this
   // hack's own Pokemon Showdown fork (megaStone/megaEvolves fields in
@@ -3952,7 +3958,7 @@
   // trouxe descrição nenhuma antes desta pesquisa (2026-09-13).
   function itemDescHtml(item) {
     var clean = stripNote(item);
-    var desc = clean && ITEM_DESC[clean];
+    var desc = clean && (ITEM_PT[clean] || ITEM_DESC[clean]);
     if (!desc) return "";
     return '<div class="ts-item-desc"><b>' + escapeHtml(clean) + ':</b> ' + escapeHtml(desc) + '</div>';
   }
@@ -4479,8 +4485,9 @@
   // recomendar (ou explicar) errado. Cobre 821 dos 929 itens do jogo.
   function aiTool_getItemInfo(input) {
     var name = input && input.name;
-    var desc = name && ITEM_DESC[stripNote(name)];
-    return desc ? { name: stripNote(name), description: desc } : { name: name || null, description: null, aviso: "sem descrição conhecida pra este item - não invente o efeito" };
+    var clean = name && stripNote(name);
+    var desc = clean && (ITEM_PT[clean] || ITEM_DESC[clean]);
+    return desc ? { name: clean, description: desc } : { name: name || null, description: null, aviso: "sem descrição conhecida pra este item - não invente o efeito" };
   }
 
   // "Estou no 2º badge, o que faz sentido daqui até o final?" - pedido do
