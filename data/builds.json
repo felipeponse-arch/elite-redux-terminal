@@ -119,6 +119,22 @@
     "moves": ["Cosmic Power", "Nasty Plot", "Stored Power", "Wish"],
     "note": "Mega permanente (Gothitite só necessária na 1a evolução, depois libera o slot — a fonte não indica item substituto). As 3 innates combinam: Low Visibility invoca Eerie Fog ao entrar, o que deixa Madness Enhancement enfurecido (metade do dano recebido) — e Magic Guard cobre veneno/queimadura/etc. Bad Luck bloqueia critico e reduz ainda mais o dano recebido. Suba Cosmic Power (defesas) e Nasty Plot (SpA) até +6, aí varra o time todo com Stored Power. Fonte: comunidade oficial (Discord, canal #movesets, post de Kukaibo, 2026-08-13) — habilidades/innates conferidos contra o dado real do jogo."
   },
+  "SPECIES_GROTOM": {
+    "ability": "Neurotoxin",
+    "nature": "Jolly",
+    "evs": "252 HP / 252 Spe / 6 Def",
+    "item": "Covert Cloak",
+    "moves": ["Mortal Spin", "Venom Drench", "Mat Block", "Ally Switch"],
+    "note": "Suporte de duplas: Mortal Spin remove hazards E envenena os DOIS oponentes de uma vez (Corrosion faz o veneno pegar até em Steel/Poison), e Neurotoxin transforma esse envenenamento em -1 Atk/SpAtk/Speed nos dois — tudo no mesmo turno. Venom Drench reforça a queda de stats depois. Covert Cloak protege dos efeitos secundários desses próprios golpes vindo do adversário. Fonte: comunidade oficial (Discord, canal #movesets) — ability e as 3 innates conferidas contra o dado real do jogo; o post original também citava Memento como alternativa ao último golpe."
+  },
+  "SPECIES_HELIOSUNNY": {
+    "ability": "Drought",
+    "nature": "Timid",
+    "evs": "252 SpA / 252 Spe / 6 HP",
+    "item": "Focus Sash",
+    "moves": ["Fire Blast", "Thunder", "Solar Beam", "Shock Wave"],
+    "note": "Drought põe sol sozinho ao entrar em campo, o que ativa Solar Power (1.5x no SpAtk) e libera Solar Beam sem turno de carga. Shiny Lightning garante +20% de acerto e faz o Thunder NUNCA errar — some com a única inconsistência real do set. Electrocytes ainda potencializa os golpes elétricos em 1.25x. Não precisa de Life Orb/Choice Specs: o SpAtk já é altíssimo com sol + Solar Power, e Focus Sash garante pelo menos 1 turno de ataque mesmo se for pego de surpresa. Fonte: comunidade oficial (Discord, canal #movesets, post de Sagi) — as 3 innates e a ability conferidas contra o dado real do jogo."
+  },
   "SPECIES_RUNERIGUS": {
     "ability": "Ancient Idol",
     "nature": "Impish",
