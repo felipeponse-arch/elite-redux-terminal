@@ -933,6 +933,8 @@
     padding: 2px 4px;
   }
   .ts-build-note { font-size: 11px; color: var(--text-dim); margin-top: 6px; font-style: italic; }
+  .ts-item-desc { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+  .ts-item-desc b { color: var(--text); }
 
   .bh-details { margin-top: 10px; }
   .bh-details + .bh-details { margin-top: 8px; }
@@ -1622,6 +1624,7 @@
 <script id="buildhistory" type="application/json">__BUILD_HISTORY_JSON__</script>
 <script id="bossbuilds" type="application/json">__BOSS_BUILDS_JSON__</script>
 <script id="howtoobtain" type="application/json">__HOW_TO_OBTAIN_JSON__</script>
+<script id="itemdesc" type="application/json">__ITEM_DESC_JSON__</script>
 <script id="speciesrank" type="application/json">__SPECIES_RANK_JSON__</script>
 <script id="speciesrole" type="application/json">__SPECIES_ROLE_JSON__</script>
 <script id="abilitysynergy" type="application/json">__ABILITY_SYNERGY_JSON__</script>
@@ -1705,6 +1708,16 @@
   // usuário) - cada entrada exige fonte verificada, cresce aos poucos como
   // builds.json, nunca por lote/adivinhação.
   var HOW_TO_OBTAIN = JSON.parse(document.getElementById("howtoobtain").textContent || "{}");
+  // Descrição real de item (nome -> efeito em inglês, texto original do
+  // jogo) - 2026-09-13, achado real de pesquisa: o NextDex nunca expôs
+  // esse campo no JSON que baixamos (o pipeline dele usa a chave "desc",
+  // não "description", então nosso parser sempre viu 0 de 929 itens com
+  // descrição). A fonte de verdade é o próprio repositório de config do
+  // jogo (github.com/Elite-Redux/er-config, arquivos .textproto) - extraído
+  // e convertido por scripts/parse_item_descriptions... (ver histórico do
+  // commit). Cobre 821 dos 929 itens (TMs/HMs não têm descrição própria,
+  // só ensinam o golpe).
+  var ITEM_DESC = JSON.parse(document.getElementById("itemdesc").textContent || "{}");
   // Held-item name -> sname of the Mega/Primal species it turns the holder
   // into (e.g. "Miloticite" -> SPECIES_MILOTIC_MEGA). Built once from this
   // hack's own Pokemon Showdown fork (megaStone/megaEvolves fields in
@@ -3933,6 +3946,17 @@
     return lines.join("\n");
   }
 
+  // Descrição real do item segurado, quando existe (ver ITEM_DESC acima) -
+  // resolve um gap real: nem todo item novo deste hack (ex. Swirly Glasses,
+  // Tactical Vest) é reconhecível de cabeça, e o dado bruto do jogo nunca
+  // trouxe descrição nenhuma antes desta pesquisa (2026-09-13).
+  function itemDescHtml(item) {
+    var clean = stripNote(item);
+    var desc = clean && ITEM_DESC[clean];
+    if (!desc) return "";
+    return '<div class="ts-item-desc"><b>' + escapeHtml(clean) + ':</b> ' + escapeHtml(desc) + '</div>';
+  }
+
   // Shared by buildHistoryHtml and bossReferenceHtml below - same entry
   // markup either way, just a different meta line and copy-button attrs.
   // Two DISTINCT actions, not one repurposed button, 2026-09-09 (user
@@ -3947,6 +3971,7 @@
       '<div class="bh-meta">' + metaHtml +
       '<button class="bh-copy" ' + copyAttrs + ' type="button" title="Copiar este set">copiar</button></div>' +
       '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, entry)) + '</pre>' +
+      itemDescHtml(entry.item) +
       (entry.note ? '<div class="ts-build-note">' + escapeHtml(entry.note) + '</div>' : '') +
       '<button class="text-action-btn use-entry-build-btn" ' + copyAttrs + ' type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
     '</div>';
@@ -4163,7 +4188,7 @@
       return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> (' + escapeHtml(typeName) + ') poder base <span class="mono">' + base + '</span>' + buffLabel + '</div>';
     }).join("");
 
-    out.innerHTML = statsHtml + (movesHtml ? '<div class="mybuild-moves-power">' + movesHtml + '</div>' : "");
+    out.innerHTML = itemDescHtml(item) + statsHtml + (movesHtml ? '<div class="mybuild-moves-power">' + movesHtml + '</div>' : "");
   }
 
   // Sets initial <select>/<input> values from saved state (kept out of the
@@ -4447,6 +4472,17 @@
     };
   }
 
+  // Descrição real de item, sourced do próprio config do jogo (ver
+  // ITEM_DESC acima) - achado real de pesquisa, 2026-09-13: sem isso a IA
+  // só via o NOME do item (ex. "Swirly Glasses", "Tactical Vest") e tinha
+  // que adivinhar o efeito de itens exclusivos deste hack, arriscando
+  // recomendar (ou explicar) errado. Cobre 821 dos 929 itens do jogo.
+  function aiTool_getItemInfo(input) {
+    var name = input && input.name;
+    var desc = name && ITEM_DESC[stripNote(name)];
+    return desc ? { name: stripNote(name), description: desc } : { name: name || null, description: null, aviso: "sem descrição conhecida pra este item - não invente o efeito" };
+  }
+
   // "Estou no 2º badge, o que faz sentido daqui até o final?" - pedido do
   // usuário, 2026-09-10: sem NENHUMA pergunta nova pro jogador - usa só o
   // milestone que ele já configura em Progresso (state.settings.milestone),
@@ -4633,6 +4669,12 @@
         name: "getBoxCandidatesForBoss",
         description: "Retorna o nome da proxima luta que falta (a partir do progresso atual do jogador) e, se existir, uma sugestao real de troca da caixa pra essa luta especifica (nunca alem dela), ja calculada pelo app (tipos de ataque reais do chefao x defesa real do candidato).",
         execute: function () { return aiTool_getBoxCandidatesForBoss(); }
+      },
+      {
+        name: "getItemInfo",
+        description: "Retorna a descricao real (em ingles, texto original do jogo) do efeito de um item pelo nome exato (ex: 'Swirly Glasses', 'Tactical Vest', 'Iron Pill'). Use SEMPRE antes de recomendar ou explicar um item que nao seja obviamente vanilla/conhecido - nao adivinhe o efeito de item exclusivo deste hack. Retorna description=null quando nao ha descricao conhecida (nesse caso, nao invente o efeito).",
+        inputSchema: { type: "object", properties: { name: { type: "string" } }, required: ["name"] },
+        execute: function (input) { return aiTool_getItemInfo(input); }
       }
     ];
   }
@@ -5044,6 +5086,7 @@
             '<div class="ts-build-head"><span class="ts-build-label">' + buildLabel + '</span>' +
               '<button class="ts-build-copy" data-x="' + sp.x + '" type="button" title="Copiar este set">copiar</button></div>' +
             '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
+            itemDescHtml(build.item) +
             (build.note ? '<div class="ts-build-note">' + escapeHtml(build.note) + '</div>' : '') +
           '</div>'
         ) : (
