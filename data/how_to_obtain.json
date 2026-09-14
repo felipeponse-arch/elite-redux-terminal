@@ -2,11 +2,76 @@
   "SPECIES_GRENINJA_BATTLE_BOND": {
     "method": "Presente (Mystery Gift em NPC)",
     "note": "Depois de vencer Flannery (4o ginasio), fale com o senhor de qualquer Centro Pokemon e escolha \"Mystery Gift\".",
-    "source": "https://www.pokecommunity.com/threads/pok%C3%A9mon-elite-redux-v2-65-beta-complete-%E2%80%94-unique-multi-ability-difficulty-hack.499227/ (resposta confirmada por 2 usuarios independentes)"
+    "source": "https://www.pokecommunity.com/threads/pok%C3%A9mon-elite-redux-v2-65-beta-complete-%E2%80%94-unique-multi-ability-difficulty-hack.499227/ (resposta do proprio criador do hack, darkyy92)"
   },
   "SPECIES_TOXEL": {
     "method": "Presente (NPC)",
     "note": "Dado de presente ao derrotar treinadores depois de Slateport City.",
     "source": "https://www.pokecommunity.com/threads/pok%C3%A9mon-elite-redux-v2-65-beta-complete-%E2%80%94-unique-multi-ability-difficulty-hack.499227/"
+  },
+  "SPECIES_SILVALLY": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Liberado no pos-jogo (apos ser Campeao) na versao atual do jogo.",
+    "source": "Discord oficial do Elite Redux (canal frequently-asked-questions, mantido por Amogus [ER]) + changelog oficial (eliteredux.net/full-changelog/) + confirmado de forma independente por multiplos jogadores em datas diferentes (canal strategy-and-game-help)"
+  },
+  "SPECIES_MELOETTA": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Liberado no pos-jogo (apos ser Campeao) na versao atual do jogo.",
+    "source": "Discord oficial do Elite Redux, mesma fonte do Silvally - changelog oficial + confirmado por multiplos jogadores independentes"
+  },
+  "SPECIES_VOLCANION": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Liberado no pos-jogo (apos ser Campeao) na versao atual do jogo.",
+    "source": "Discord oficial do Elite Redux, mesma fonte do Silvally - changelog oficial + confirmado por multiplos jogadores independentes"
+  },
+  "SPECIES_TERAPAGOS": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Um dos varios lendarios/miticos liberados via Mystery Gift ao longo da progressao.",
+    "source": "Discord oficial do Elite Redux (canal strategy-and-game-help) - mensagem repostada de forma independente por varios jogadores em datas diferentes"
+  },
+  "SPECIES_CALYREX": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Forma base via Mystery Gift - as formas Ice Rider/Shadow Rider exigem fundir com Glastrier/Spectrier, mecanismo separado nao confirmado nesta pesquisa.",
+    "source": "Discord oficial do Elite Redux (canal strategy-and-game-help) - mensagem repostada de forma independente por varios jogadores em datas diferentes"
+  },
+  "SPECIES_REGIELEKI": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Um dos \"Regis de Galar\", liberado via Mystery Gift apos a luta contra Tate & Liza (7o ginasio nesta hack).",
+    "source": "Discord oficial do Elite Redux (canal strategy-and-game-help) - \"Like they did for draco and eleki who you get from mystery gifts\", confirmado por resposta direta de outro jogador na mesma conversa"
+  },
+  "SPECIES_REGIDRAGO": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Um dos \"Regis de Galar\", liberado via Mystery Gift apos a luta contra Tate & Liza (7o ginasio nesta hack).",
+    "source": "Discord oficial do Elite Redux (canal strategy-and-game-help) - \"Like they did for draco and eleki who you get from mystery gifts\", confirmado por resposta direta de outro jogador na mesma conversa"
+  },
+  "SPECIES_AGGRON": {
+    "method": "Presente (NPC)",
+    "note": "Dado por um NPC \"funcionario da Devon Corp\".",
+    "source": "Changelog oficial (eliteredux.net/full-changelog/, epoca da v0.9.7) - versao antiga, nao reconfirmada numa build recente; usuario relatou que bate com o proprio save em 2026-09-13"
+  },
+  "SPECIES_GALLADE": {
+    "method": "Presente (NPC, shiny)",
+    "note": "Dado shiny pela NPC \"Mrs. Cozmo\" em Fallarbor Town (antes dava a Galladite, mudou para dar o Gallade em si).",
+    "source": "Changelog oficial (eliteredux.net/full-changelog/) - versao antiga, nao reconfirmada numa build recente; usuario relatou que bate com o proprio save em 2026-09-13"
+  },
+  "SPECIES_GARDEVOIR": {
+    "method": "Presente (NPC, shiny)",
+    "note": "Dado shiny pela NPC \"Wanda\" em Verdanturf Town (antes dava a Gardevoirite).",
+    "source": "Changelog oficial (eliteredux.net/full-changelog/) - versao antiga, nao reconfirmada numa build recente; usuario relatou que bate com o proprio save em 2026-09-13"
+  },
+  "SPECIES_ALTARIA": {
+    "method": "Presente (NPC)",
+    "note": "NPC \"Maniac\" do lado de fora do Fã-Clube em Lilycove City ensina golpes exclusivos a este Altaria.",
+    "source": "Changelog oficial (eliteredux.net/full-changelog/), citado de forma consistente em varias versoes (v0.9.5 a v1.6); usuario relatou que bate com o proprio save em 2026-09-13"
+  },
+  "SPECIES_LANTURN": {
+    "method": "Presente (NPC)",
+    "note": "Dado pelo Wattson ao completar a missao de New Mauville.",
+    "source": "Changelog oficial (eliteredux.net/full-changelog/) - versao antiga, nao reconfirmada numa build recente; usuario relatou que bate com o proprio save em 2026-09-13"
+  },
+  "SPECIES_PIKACHU_PH_D": {
+    "method": "Presente (NPC)",
+    "note": "Dado pelo Prof. Cozmo em Fallarbor Town.",
+    "source": "Changelog oficial (eliteredux.net/full-changelog/) - versao antiga, nao reconfirmada numa build recente; usuario relatou que bate com o proprio save em 2026-09-13"
   }
 }

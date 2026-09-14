@@ -40,6 +40,24 @@ async function section12() {
     }
   }
 
+  // Amostra das entradas novas (pesquisa mais funda no Discord oficial,
+  // 2026-09-13) - não testa as 14 uma a uma, só confirma que o mecanismo
+  // genérico (card só aparece pra quem está no data/how_to_obtain.json)
+  // segue funcionando com o arquivo maior.
+  setSearch("Regidrago");
+  await wait(120);
+  var regidragoRow = document.querySelector("#species-list .species-row");
+  if (regidragoRow) {
+    regidragoRow.click();
+    await wait(60);
+    var cardRegi = [...document.querySelectorAll(".detail-group .card h3")].find(function (h) { return h.textContent === "Como obter"; });
+    check("card \"Como obter\" aparece pro Regidrago (Mystery Gift, achado na varredura do Discord oficial)", !!cardRegi);
+    check("card cita Mystery Gift pro Regidrago",
+      !!cardRegi && cardRegi.parentElement.textContent.indexOf("Mystery Gift") !== -1);
+    document.getElementById("back-to-list").click();
+    await wait(30);
+  }
+
   // Nota de level cap corrigida (achado real: FAQ oficial diz que dá pra
   // AUMENTAR a dificuldade de novo depois de abaixar, só marca o Hall da
   // Fama - nossa nota antiga dizia o oposto, "nao aumentada de novo depois").
