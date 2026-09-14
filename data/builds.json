@@ -110,5 +110,21 @@
     "item": "Life Orb",
     "moves": ["Surf", "Thunderbolt", "Earth Power", "Amnesia"],
     "note": "Transistor (innate) potencializa Thunderbolt em 1.5x — dá ao time uma resposta a Water que os outros 3 membros Water/Ground não têm. Water Absorb cobre o próprio Whiscash contra Water."
+  },
+  "SPECIES_GOTHITELLE_MEGA": {
+    "ability": "Bad Luck",
+    "nature": "Modest",
+    "evs": "252 HP / 252 SpA / 4 SpD",
+    "item": "Gothitite",
+    "moves": ["Cosmic Power", "Nasty Plot", "Stored Power", "Wish"],
+    "note": "Mega permanente (Gothitite só necessária na 1a evolução, depois libera o slot — a fonte não indica item substituto). As 3 innates combinam: Low Visibility invoca Eerie Fog ao entrar, o que deixa Madness Enhancement enfurecido (metade do dano recebido) — e Magic Guard cobre veneno/queimadura/etc. Bad Luck bloqueia critico e reduz ainda mais o dano recebido. Suba Cosmic Power (defesas) e Nasty Plot (SpA) até +6, aí varra o time todo com Stored Power. Fonte: comunidade oficial (Discord, canal #movesets, post de Kukaibo, 2026-08-13) — habilidades/innates conferidos contra o dado real do jogo."
+  },
+  "SPECIES_RUNERIGUS": {
+    "ability": "Ancient Idol",
+    "nature": "Impish",
+    "evs": "252 HP / 252 Def / 4 SpD",
+    "item": "Leftovers",
+    "moves": ["Earthquake", "Poltergeist", "Will-O-Wisp", "Body Press"],
+    "note": "Ancient Idol usa Defesa/SpDef em vez de Ataque/SpAtk pra atacar — Runerigus tem Def base 145 contra Atk 95, então vira um tanque físico que também ataca bem. Will-O-Wisp queima o alvo (reduzindo o dano físico dele) e Leftovers sustenta o HP ao longo da luta. Fonte: comunidade oficial (Discord, canal #movesets) — ability conferida contra o dado real do jogo (id 286, \"Uses Def and Sp. Def instead of Atk and Sp. Atk when attacking\")."
   }
 }
