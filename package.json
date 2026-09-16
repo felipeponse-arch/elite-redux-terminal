@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Infraestrutura de CI do Elite Redux Terminal - não é dependência do artifact publicado, só do processo de build/teste local e no GitHub Actions.",
   "scripts": {
+    "test:unit": "node --test \"tests/unit/*.test.mjs\"",
     "test:ci": "node tests/run_ci_smoke.mjs",
     "test:fuzz": "node tests/run_fuzz_save_shapes.mjs",
     "test:visual": "node tests/run_visual_regression.mjs"

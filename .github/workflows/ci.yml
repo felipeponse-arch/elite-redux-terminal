@@ -43,6 +43,11 @@ jobs:
       - name: Auditoria de dependências (npm audit)
         run: npm audit --audit-level=high
 
+      # Etapa 2 da pauta técnica (Q3): regras do jogo testadas no Node, sem
+      # build nem navegador - falha em segundos, antes dos minutos de Chromium.
+      - name: Testes unitários das regras (src/regras)
+        run: npm run test:unit
+
       - name: Instala o Chromium do Playwright
         run: npx playwright install --with-deps chromium
 

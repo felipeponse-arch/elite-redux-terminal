@@ -23,6 +23,22 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 Set-Location $root
 
+# Testes unitarios das regras (src/regras) primeiro: rodam em milissegundos e
+# nao precisam de build nem de navegador (item Q3 da pauta tecnica).
+$nodeCmdUnit = Get-Command node -ErrorAction SilentlyContinue
+if (-not $nodeCmdUnit) {
+  $portableRootUnit = Join-Path $env:LOCALAPPDATA "node-portable"
+  $foundUnit = Get-ChildItem $portableRootUnit -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($foundUnit) { $env:PATH = "$($foundUnit.FullName);$env:PATH" }
+}
+Write-Output "--- testes unitarios das regras ---"
+npm run test:unit --silent
+if ($LASTEXITCODE -ne 0) {
+  Write-Output ""
+  Write-Output "Testes unitarios falharam - commit bloqueado."
+  exit 1
+}
+
 Write-Output "--- build (SkipExtract - so testa o template/dados ja commitados) ---"
 & powershell -NoProfile -File scripts/build.ps1 -SkipExtract
 if ($LASTEXITCODE -ne 0) {
