@@ -1,6 +1,7 @@
 // Seções 19 a 24: dashboardDirty/scheduleDashboardRefresh, formas alternativas, PC Box, rank robusto por simulação, arquétipo de time e sugestão geral de encaixe na PC Box.
 // Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
 async function section09() {
+  await prepararRunPadrao();
   // --- 19. dashboardDirty / scheduleDashboardRefresh() (décima-sétima
   // passagem, 2026-09-11 - fix de performance, commit 1c4b3c9) ---
   // Gap real: aquele fix nunca ganhou cobertura de teste na hora (uma nota

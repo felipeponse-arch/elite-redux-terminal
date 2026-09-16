@@ -1,6 +1,7 @@
 // Seções o pacote 'level cap' (auto-evolução do Charmander), a correção de exibição (evoConditionText) e a seção 18 (TYPE_MOD_ABILITIES).
 // Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
 async function section08() {
+  await prepararRunPadrao();
   // --- Pacote "level cap", 2026-09-10: 3 ideias interligadas, decisões
   // confirmadas pelo usuário antes de construir (build/nota carrega pro
   // nome novo; encadeia quantas evoluções o cap libere de uma vez; roda na

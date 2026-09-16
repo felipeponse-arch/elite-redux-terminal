@@ -1,6 +1,7 @@
 // Seções 8, 9 e 10: dropdown 'Mais', resumo do dashboard e a calculadora de stat final de chefão.
 // Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
 async function section03() {
+  await prepararRunPadrao();
   // --- 8. "Mais" dropdown (Progresso/Tipos) - design proposal A, 2026-09-09 ---
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);

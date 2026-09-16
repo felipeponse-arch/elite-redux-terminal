@@ -1,6 +1,7 @@
 // Seções remoção do card de transferência, bug de CSS da faixa de sync, bug de altura do #app, preview de status do 'Meu build', aviso de storage cheio e o lote de qualidade de vida da Fase 1 (changelog + teclado).
 // Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
 async function section06() {
+  await prepararRunPadrao();
   // --- transfer card removal - 2026-09-09, replaced by the db-capability
   // sync above and confirmed working on real devices the same day, so the
   // manual copy/paste/download UI was removed to keep the page lighter

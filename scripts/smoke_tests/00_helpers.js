@@ -66,6 +66,45 @@ function setSearch(q) {
   el.value = q;
   el.dispatchEvent(new Event("input", { bubbles: true }));
 }
+// Estado padrão da suíte (item Q1 da pauta técnica, 2026-09-16): o mesmo que a
+// seção 01 monta - 6 no time, Eelektross na caixa, dificuldade Ace, sem level
+// cap (Campeão), mega temporária, aba Dex. Antes as seções 02-09 e 15 só
+// passavam porque herdavam isso da 01: rodando sozinhas (npm run
+// test:isolated), 9 de 17 quebravam. Cada seção que precisa desse ponto de
+// partida chama isto no começo, pelos mesmos controles que o jogador usa.
+var TIME_PADRAO = ["Aerodactyl Mega", "Probopass", "Coalossal Mega", "Terrakion", "Avalugg Hisuian", "Tyranitar Mega Redux"];
+async function prepararRunPadrao() {
+  var confirmOriginal = window.confirm;
+  window.confirm = function () { return true; };
+  try {
+    document.querySelector('.tab-btn[data-tab="team"]').click();
+    await wait(30);
+    document.getElementById("reset-team-box-btn").click();
+    await wait(30);
+  } finally {
+    window.confirm = confirmOriginal;
+  }
+  document.getElementById("tabs-more-toggle").click();
+  await wait(20);
+  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  await wait(50);
+  function escolher(id, valor) {
+    var el = document.getElementById(id);
+    if (el.value === String(valor)) return;
+    el.value = String(valor);
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  escolher("settings-difficulty", "ace");
+  escolher("settings-milestone", 9);
+  escolher("settings-mega-mode", "temporaria");
+  await wait(50);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  for (var i = 0; i < TIME_PADRAO.length; i++) await addByName(TIME_PADRAO[i], false);
+  await addByName("Eelektross", true);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+}
 async function addByName(name, toBox) {
   setSearch(name);
   await wait(120);

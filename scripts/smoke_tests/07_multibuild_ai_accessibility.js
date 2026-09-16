@@ -1,6 +1,7 @@
 // Seções Multi-build (até 3 por espécie) + 'Gerar build com IA', passe de acessibilidade da Fase 2 e 'Resolve o problema do QA' (leitor de caixa/dashboard).
 // Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
 async function section07() {
+  await prepararRunPadrao();
   // --- Multi-build (up to 3 per species) + "Gerar build com IA" -
   // 2026-09-09, user's own rule: check for a saved build first, ask if a
   // different one is wanted, cap at 3; call Claude to generate a new one

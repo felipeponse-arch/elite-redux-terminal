@@ -6,6 +6,7 @@
 // Funções puras via ponte; o modo é trocado direto no state e restaurado no
 // fim de cada bloco pra não vazar pra outras checagens.
 async function section15() {
+  await prepararRunPadrao();
   var T = window.__erTest;
   check("ponte expõe as funções do modo de mega", !!T && typeof T.battleUnitsOf === "function" && typeof T.megaStoneRuleFor === "function");
   if (!T) return;

@@ -61,6 +61,12 @@ jobs:
       - name: Roda a suíte de smoke test (Parte A) headless
         run: npm run test:ci
 
+      # Etapa 2 da pauta técnica (Q1): cada seção roda sozinha, em navegador
+      # limpo. Pega teste que só passa porque herdou estado da seção anterior.
+      - name: Seções da suíte isoladas
+        if: ${{ !cancelled() }}
+        run: npm run test:isolated
+
       # Etapa 1 da pauta técnica (I2): as duas camadas existiam desde 13/09 mas
       # não rodavam em lugar nenhum. Ficam só aqui, fora do pre-commit, que
       # precisa continuar rápido.

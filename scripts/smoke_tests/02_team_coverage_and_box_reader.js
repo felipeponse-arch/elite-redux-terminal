@@ -1,6 +1,7 @@
 // Seções 6, 7 e 7b: card de builds de referência, tabela de cobertura do time e o 'leitor de caixa' (sugestão de próxima luta + Analisar meu time).
 // Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
 async function section02() {
+  await prepararRunPadrao();
   // --- 6. build-reference card has a real title (not a bare <details>) ---
   // Achado em auditoria de QA (2026-09-13): esta checagem sempre passava
   // (`check(..., true)`) - `buildCard` era calculado e nunca usado na
@@ -9,6 +10,13 @@ async function section02() {
   // card nem deveria renderizar aqui - testa esse caminho de verdade, e
   // depois troca pra uma espécie que TEM dado real (Eelektross) pra testar
   // o caminho positivo também.
+  // Seleciona o Nidoking aqui mesmo - antes a seção herdava a seleção deixada
+  // pela 01 e, rodando sozinha, testava a espécie errada (Q1, 2026-09-16).
+  setSearch("Nidoking");
+  await wait(120);
+  const nidokingRow = [...document.querySelectorAll("#species-list .species-row")]
+    .find(function (r) { return r.textContent.indexOf("Nidoking") !== -1 && r.textContent.indexOf("Redux") === -1; });
+  if (achou("Nidoking na busca", nidokingRow)) { nidokingRow.click(); await wait(30); }
   const buildCardAbsent = [...document.querySelectorAll("#species-detail .card h3")]
     .find(h => h.textContent === "Builds de referência");
   check("espécie sem build de chefão real (Nidoking) não mostra o card 'Builds de referência'", !buildCardAbsent);

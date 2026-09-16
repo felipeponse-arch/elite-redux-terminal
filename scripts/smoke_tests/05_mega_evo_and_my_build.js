@@ -1,6 +1,7 @@
 // Seções 15, 16, 17, 17b e 17c: Mega Evolution/Primal Reversion na calculadora de chefão, editor interativo 'Meu build' e IVs reais de referência.
 // Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
 async function section05() {
+  await prepararRunPadrao();
   // --- 15. Mega Evolution / Primal Reversion in the boss stat calculator -
   // 2026-09-09, user's follow-up on the held-item pass ("como devemos
   // aplicar da melhor forma"). Lucy Lavaridge (Insane tier) has a Milotic

@@ -1,6 +1,7 @@
 // Seções 11, 12, 13 e 14: 'Minhas anotações' + tint de tipo, modificadores de item segurado de chefão (2 rodadas) e o passe de usabilidade.
 // Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
 async function section04() {
+  await prepararRunPadrao();
   // --- 11. "Minhas anotações" + move-row type tint - 2026-09-09, third field-research follow-up ---
   setSearch("Charizard");
   await wait(120);

@@ -85,6 +85,17 @@ async function section17() {
   // ---- D3: uma fonte só pro movepool liberado ----
   // O seletor de golpes do "Meu build" tem que oferecer exatamente o que
   // availableMovesFor() diz - é a mesma lista que a validação da IA aceita.
+  // Precisa de um level cap ativo pra existir golpe travado - configura aqui,
+  // pelo seletor de verdade, em vez de herdar o cap da seção 14 (Q1).
+  document.getElementById("tabs-more-toggle").click();
+  await wait(20);
+  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  await wait(50);
+  var msSelD3 = document.getElementById("settings-milestone");
+  var msOriginalD3 = msSelD3.value;
+  msSelD3.value = "2";
+  msSelD3.dispatchEvent(new Event("change", { bubbles: true }));
+  await wait(50);
   var spD3 = T.SPECIES.find(function (sp) {
     if (!sp) return false;
     var av = T.availableMovesFor(sp);
@@ -110,4 +121,7 @@ async function section17() {
       }
     }
   }
+  msSelD3.value = msOriginalD3;
+  msSelD3.dispatchEvent(new Event("change", { bubbles: true }));
+  await wait(30);
 }
