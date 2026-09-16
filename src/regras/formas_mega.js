@@ -1,0 +1,116 @@
+  // ===== src/regras/formas_mega.js =====
+  // Família de formas (base <-> mega), modo de Mega Evolução, pedras e unidades de batalha.
+  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // @regras formas_mega.js), no mesmo escopo do resto do código - sem module,
+  // sem wrapper. Só lógica pura: nada aqui lê a página (item D1 da pauta
+  // técnica, 2026-09-16), o que permite carregar este arquivo no Node pros
+  // testes unitários (tests/unit/).
+
+  // Família de formas (2026-09-16, pedido do usuário: "quando o Poke entra no
+  // time ou na box deve considerar que ele pode tanto ter a forma normal
+  // quanto a forma mega - isso também deve se estender a todos os raciocínios
+  // que usam as duas bases como referência"). Mega/Primal é a MESMA criatura
+  // que o jogador já tem, não uma captura nova - então qualquer leitura de
+  // time/caixa precisa enxergar as duas. Liga nos dois sentidos: da base
+  // chega nas megas (evoluções EVO_*MEGA*/PRIMAL do dado), e de uma mega
+  // colocada direto no roster chega de volta na base.
+  // Nunca mistura dado ENTRE formas (habilidade de uma com golpe de outra) -
+  // foi exatamente isso que gerou 29 builds inválidas em 2026-09-16. Cada
+  // forma continua sendo avaliada com o próprio dado; a família só diz
+  // "estas são as opções desta criatura".
+  var MEGA_BASE_BY_X = Object.create(null);
+  function isMegaEvoKind(kindIdx) {
+    var k = EVOKINDS[kindIdx];
+    return EVO_MEGA_KINDS.indexOf(k) !== -1 || k === EVO_PRIMAL;
+  }
+  SPECIES.forEach(function (s) {
+    (s.ev || []).forEach(function (ev) {
+      if (isMegaEvoKind(ev[0]) && SPECIES_BY_X[ev[2]]) MEGA_BASE_BY_X[ev[2]] = s.x;
+    });
+  });
+  function megaFormsOf(sp) {
+    if (!sp) return [];
+    return (sp.ev || []).filter(function (ev) { return isMegaEvoKind(ev[0]); })
+      .map(function (ev) { return getSpeciesByX(ev[2]); })
+      .filter(function (m) { return m && m.x !== sp.x; });
+  }
+  // Trecho de prompt: ", outras formas: Mega Charizard X (SPECIES_..., Fire/Dragon, Vel 100, innates ...)".
+  // Cada forma com o próprio dado, nunca misturado.
+  function formFamilyPromptNote(sp) {
+    var others = formFamilyOf(sp).filter(function (f) { return f.x !== sp.x; });
+    if (!others.length) return "";
+    return ", outras formas desta MESMA criatura (cada uma com dado proprio, nunca misture): " + others.map(function (f) {
+      var r = SPECIES_RANK[f.sname];
+      var stones = stonesOf(f);
+      return f.n + " [sname " + f.sname + ", " + speciesTypeNames(f).join("/") + ", status base " + f.b.join("/") +
+        (r ? ", rank " + r.tier : "") +
+        ", habilidades escolhiveis: " + uniqueIds(f.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ") +
+        ", innate: " + f.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ") +
+        (stones.length ? ", pedra: " + stones.join(" ou ") : "") + "]";
+    }).join("; ");
+  }
+  // Regra do modo de mega pra qualquer prompt que raciocine sobre time/caixa.
+  function megaModePromptLine() {
+    return megaMode() === "permanente"
+      ? "MODO DE MEGA EVOLUCAO: PERMANENTE - o Pokemon fica na forma mega depois da batalha, ate o jogador trocar a forma manualmente fora da batalha. Base e mega sao escolhas separadas e trocaveis entre lutas; a pedra so e necessaria na primeira mega (depois o slot de item fica livre)."
+      : "MODO DE MEGA EVOLUCAO: TEMPORARIA (padrao) - o Pokemon volta a forma base ao fim de CADA batalha. Toda luta comeca na forma base (habilidades de entrada, tipos e status da base valem ao entrar) e so depois vira mega; a pedra mega ocupa o slot de item o tempo todo. Avalie a criatura pelas DUAS formas juntas.";
+  }
+  function formFamilyOf(sp) {
+    if (!sp) return [];
+    var baseX = MEGA_BASE_BY_X[sp.x];
+    var base = baseX !== undefined ? getSpeciesByX(baseX) : sp;
+    return [base].concat(megaFormsOf(base));
+  }
+  function isMegaForm(sp) { return !!sp && MEGA_BASE_BY_X[sp.x] !== undefined; }
+
+  // Modo de Mega Evolução (regra de jogo passada pelo usuário, 2026-09-16) -
+  // o jogo tem DOIS modos e eles mudam o raciocínio:
+  //   - Temporária (padrão): o Pokémon volta à forma base ao fim de cada
+  //     batalha. Toda luta começa na base e vira mega no meio - então a
+  //     criatura precisa ser avaliada pelas DUAS formas juntas, e a pedra
+  //     ocupa o slot de item o tempo todo.
+  //   - Permanente: fica mega até o jogador trocar a forma manualmente fora
+  //     da batalha. Cada forma é uma escolha separada (e trocável), e a pedra
+  //     só é necessária na primeira mega - o slot fica livre depois.
+  function megaMode() { return state.settings.megaMode === "permanente" ? "permanente" : "temporaria"; }
+
+  // Pedras de cada forma mega, a partir de data/mega_forms.json (pedra ->
+  // forma, cruzado com o fork de Showdown do próprio jogo). Não usa o código
+  // de item da evolução no dado bruto: em 19 megas ele não bate com o nome do
+  // item (ex: ITEM_VENUSAURITE vs "Venusaurite X"/"Venusaurite Y").
+  var STONES_BY_MEGA_SNAME = Object.create(null);
+  Object.keys(MEGA_FORMS).forEach(function (stone) {
+    if (ITEMS.indexOf(stone) === -1) return;
+    var sn = MEGA_FORMS[stone];
+    (STONES_BY_MEGA_SNAME[sn] = STONES_BY_MEGA_SNAME[sn] || []).push(stone);
+  });
+  function stonesOf(megaSp) { return (megaSp && STONES_BY_MEGA_SNAME[megaSp.sname]) || []; }
+
+  // Como a criatura realmente LUTA, conforme o modo. Cada "unidade" tem as
+  // formas que ela ocupa numa mesma batalha (`forms`) e a forma principal
+  // (`main`, a que dá nome e rank):
+  //   - permanente: uma unidade por forma (base OU mega - o jogador escolhe);
+  //   - temporária: a base sozinha (sem mega-evoluir) e, pra cada mega,
+  //     base+mega juntas (entra base, termina mega).
+  // Cada forma continua avaliada com o próprio dado - a unidade só diz quais
+  // formas contam juntas.
+  function battleUnitsOf(owned) {
+    var fam = formFamilyOf(owned);
+    if (!fam.length) return [];
+    var base = fam[0];
+    var megas = fam.slice(1);
+    if (megaMode() === "permanente") return fam.map(function (f) { return { forms: [f], main: f, owned: owned }; });
+    return [{ forms: [base], main: base, owned: owned }].concat(megas.map(function (m) {
+      return { forms: [base, m], main: m, owned: owned };
+    }));
+  }
+  // Multiplicador de um tipo de ataque contra a unidade: o PIOR entre as
+  // formas dela - no modo temporário a criatura passa parte da luta em cada.
+  function unitTypeMult(unit, atk) {
+    var worst = null;
+    unit.forms.forEach(function (f) {
+      var m = abilityTypeMod(atk, f).mult;
+      if (worst === null || m > worst) worst = m;
+    });
+    return worst;
+  }

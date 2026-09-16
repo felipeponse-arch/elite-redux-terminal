@@ -126,6 +126,28 @@ Write-Output "--- validando invariantes dos dados ---"
 
 Write-Output "--- splicing ---"
 $final = Get-Content $templatePath -Raw -Encoding UTF8
+
+# Regras do jogo (item D1 da pauta técnica, 2026-09-16): lógica pura mora em
+# src/regras/*.js e é colada no ponto exato do marcador /*@regras NOME*/, no
+# mesmo escopo do <script> principal. O artifact publicado continua sendo um
+# arquivo só. Todo arquivo de src/regras precisa ter marcador, e todo marcador
+# precisa de arquivo - senão o build aborta.
+$regrasDir = Join-Path $root "src\regras"
+$marcadores = [regex]::Matches($final, "/\*@regras ([A-Za-z0-9_.]+)\*/")
+$usados = @{}
+foreach ($m in $marcadores) {
+    $nome = $m.Groups[1].Value
+    if ($usados.ContainsKey($nome)) { throw "Marcador /*@regras $nome*/ aparece mais de uma vez no template." }
+    $arq = Join-Path $regrasDir $nome
+    if (-not (Test-Path $arq)) { throw "Marcador /*@regras $nome*/ sem arquivo em src/regras." }
+    $usados[$nome] = $true
+    $final = $final.Replace($m.Value, (Get-Content $arq -Raw -Encoding UTF8).TrimEnd())
+}
+foreach ($f in (Get-ChildItem $regrasDir -Filter "*.js" -File)) {
+    if (-not $usados.ContainsKey($f.Name)) { throw "src/regras/$($f.Name) nao tem marcador /*@regras $($f.Name)*/ no template - nunca chegaria no app." }
+}
+if ($final -match "/\*@regras ") { throw "Sobrou marcador /*@regras ...*/ depois da colagem." }
+Write-Output "  regras coladas: $($usados.Count) arquivo(s) de src/regras"
 $ser = New-GameDataParser
 
 foreach ($placeholder in $dataFiles.Keys) {
