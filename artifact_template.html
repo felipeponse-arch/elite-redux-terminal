@@ -1239,8 +1239,31 @@
     color: var(--text-dim);
     background: var(--surface);
   }
+  /* O <p> do rodapé herdava a margem default do navegador (~1em em cima E
+     embaixo, ~24px de altura pura) porque este projeto não tem reset global
+     de `p` - somada aos 28px de padding, era a maior parte da altura do
+     rodapé. Achado ao investigar o relato "rodapé é muito grande",
+     2026-09-15. */
+  .footer p { margin: 0; }
+  .footer-compact { display: none; }
   .footer a { color: var(--badge-accent2); text-decoration: none; }
   .footer a:hover { text-decoration: underline; }
+
+  /* Janela flutuante do Android (tipicamente baixa, não só estreita) e tela
+     de celular: a frase inteira quebrava em 3+ linhas e comia uma fatia
+     grande de uma altura já escassa, espremendo lista/ficha. Troca a frase
+     completa por uma linha só com os mesmos 3 links - nenhum destino se
+     perde, só o texto explicativo.
+     A condição de altura exige também largura pequena de propósito: com OR
+     puro, uma janela de desktop larga e baixa (1400x580, ou 1366x768 com
+     barras) caía no compacto sem precisar - nessa largura a frase inteira
+     cabe em UMA linha (47px), então esconder o contexto não comprava nada.
+     Janela flutuante de verdade é pequena nas duas dimensões. */
+  @media (max-width: 620px), (max-height: 600px) and (max-width: 900px) {
+    .footer { padding: 7px 14px; font-size: 11.5px; }
+    .footer-full { display: none; }
+    .footer-compact { display: block; }
+  }
 
   @media (max-width: 860px) {
     /* #view-dex is the only view with two direct children (#dashboard +
@@ -1569,7 +1592,8 @@
   </main>
 
   <footer class="footer">
-    <p>Dados extraídos do <a href="https://forwardfeed.github.io/ER-nextdex/static/" target="_blank" rel="noopener">Elite Redux NextDex</a> oficial (build 2.65beta), mantido por ForwardFeed. Para encontros selvagens, times de treinadores e rotas de mono run, veja a <a href="https://eliteredux.net/full-documentation/" target="_blank" rel="noopener">documentação completa</a> e o <a href="https://discord.elite-redux.com" target="_blank" rel="noopener">Discord oficial</a>.</p>
+    <p class="footer-full">Dados extraídos do <a href="https://forwardfeed.github.io/ER-nextdex/static/" target="_blank" rel="noopener">Elite Redux NextDex</a> oficial (build 2.65beta), mantido por ForwardFeed. Para encontros selvagens, times de treinadores e rotas de mono run, veja a <a href="https://eliteredux.net/full-documentation/" target="_blank" rel="noopener">documentação completa</a> e o <a href="https://discord.elite-redux.com" target="_blank" rel="noopener">Discord oficial</a>.</p>
+    <p class="footer-compact"><a href="https://forwardfeed.github.io/ER-nextdex/static/" target="_blank" rel="noopener">NextDex</a> · <a href="https://eliteredux.net/full-documentation/" target="_blank" rel="noopener">Documentação</a> · <a href="https://discord.elite-redux.com" target="_blank" rel="noopener">Discord</a></p>
   </footer>
   <div id="toast" role="status" aria-live="polite"></div>
 
@@ -4330,7 +4354,11 @@
   // usable build - unlike one with a fabricated move); EVs are clamped/
   // scaled to the real 510 cap rather than rejected outright for a minor
   // overage.
-  function validateAiBuild(sp, raw) {
+  // `motivo` é opcional: um objeto onde a validação escreve, em `motivo.txt`,
+  // uma explicação específica pra mostrar ao usuário quando rejeita. Sem ele
+  // o comportamento é o de antes (retorna null e quem chamou mostra a
+  // mensagem genérica).
+  function validateAiBuild(sp, raw, motivo) {
     if (!raw || typeof raw !== "object") return null;
     var validAbilities = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
     if (typeof raw.ability !== "string" || validAbilities.indexOf(raw.ability) === -1) return null;
@@ -4346,6 +4374,34 @@
     var validMoves = uniqueIds(vabAllowedLm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return MOVES[id][0]; });
     if (!Array.isArray(raw.moves) || raw.moves.length !== 4) return null;
     for (var i = 0; i < 4; i++) { if (validMoves.indexOf(raw.moves[i]) === -1) return null; }
+    // Regra do Especialista em Meta, pedida pelo usuário em 2026-09-15: uma
+    // build sugerida tem que APROVEITAR o que torna esta espécie especial
+    // neste hack - pelo menos um dos 4 golpes precisa ser potencializado por
+    // uma habilidade escolhível ou innate dela. Vale a mesma disciplina de
+    // todo o resto daqui: o prompt já pede isso, mas pedir não é garantir -
+    // a checagem é feita contra ABILITY_SYNERGY (o mesmo dado pré-calculado
+    // que a ficha da espécie e a ferramenta getAbilityMovepoolSynergy usam),
+    // nunca contra a palavra do modelo. A sinergia só conta se estiver ATIVA:
+    // innate vale sempre; sinergia de habilidade escolhível só vale se for
+    // justamente a habilidade escolhida nesta build. Espécie sem nenhuma
+    // sinergia conhecida não é penalizada - a regra é inaplicável, não
+    // violada.
+    var synergyHitsAi = ABILITY_SYNERGY[sp.sname];
+    if (synergyHitsAi && synergyHitsAi.length) {
+      var ativas = synergyHitsAi.filter(function (h) {
+        return h.kind === "inn" || h.name === raw.ability;
+      });
+      var temSinergia = ativas.some(function (h) {
+        return (h.golpes || []).some(function (g) { return raw.moves.indexOf(g) !== -1; });
+      });
+      if (!temSinergia) {
+        if (motivo) {
+          motivo.txt = "A build sugerida não usa nenhum golpe potencializado por uma habilidade ou innate do " +
+            sp.n + " - pela regra do especialista, ela foi rejeitada. Tente gerar de novo.";
+        }
+        return null;
+      }
+    }
     var item = (typeof raw.item === "string" && ITEMS.indexOf(raw.item) !== -1) ? raw.item : "";
     var evs = Array.isArray(raw.evs) && raw.evs.length === 6 ? raw.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0];
     var evSum = evs.reduce(function (a, v) { return a + v; }, 0);
@@ -4787,10 +4843,13 @@
       "de prioridade do que um sweeper que ja e mais rapido que a maioria).\n" +
       "Use tambem getAbilityMovepoolSynergy pra ver se alguma das habilidades desta especie (escolhivel " +
       "ou innate) aumenta de verdade o poder de golpes que ela REALMENTE aprende (ex: Mighty Horn com um " +
-      "golpe de chifre/broca real no movepool) - quando existir uma sinergia dessas, priorize incluir " +
-      "um desses golpes reais entre os 4 escolhidos e escolha a habilidade que ativa a sinergia, em vez " +
-      "de um set generico que ignora esse potencial. Lista vazia = nenhuma sinergia real confirmada, " +
-      "escolha normalmente.\n" +
+      "golpe de chifre/broca real no movepool).\n" +
+      "REGRA OBRIGATORIA (pedido do usuario, 2026-09-15): se getAbilityMovepoolSynergy retornar QUALQUER " +
+      "sinergia real pra esta especie, a build PRECISA incluir pelo menos um desses golpes entre os 4, e a " +
+      "sinergia precisa estar ATIVA - ou seja, ou ela vem de uma innate (sempre ativa), ou a habilidade " +
+      "escolhivel que voce escolher tem que ser exatamente a que ativa essa sinergia. Uma build que ignore " +
+      "isso vai ser REJEITADA pela validacao e o usuario tera que pedir de novo, entao confira antes de " +
+      "responder. Lista vazia = nenhuma sinergia real confirmada, escolha normalmente.\n" +
       "Use tambem getBoxCandidatesForBoss - se ela sugerir ESTA MESMA especie como o melhor candidato da " +
       "caixa pra proxima luta que falta, pode citar isso na rationale (ex: 'bom encaixe pra proxima luta, " +
       "contra X'), mas so se for esta especie mesmo, senao ignore.\n" +
@@ -4803,9 +4862,10 @@
       "Nao invente golpes, habilidades ou items fora do que foi listado.";
     try {
       var raw = await sample.json(prompt, { tools: buildStandardAiTools() });
-      var validated = validateAiBuild(sp, raw);
+      var motivoRejeicao = {};
+      var validated = validateAiBuild(sp, raw, motivoRejeicao);
       if (!validated) {
-        if (statusEl) statusEl.textContent = "A resposta não bateu com os dados reais deste Pokémon - tente de novo.";
+        if (statusEl) statusEl.textContent = motivoRejeicao.txt || "A resposta não bateu com os dados reais deste Pokémon - tente de novo.";
         return;
       }
       // Defesa em profundidade (achado real do usuário, 2026-09-12): o
@@ -6363,5 +6423,21 @@
   updateBoxBadge();
   renderCapBadge();
   renderList();
+
+  // Ponte mínima e explícita pra suíte de fumaça (scripts/smoke_tests/), que
+  // roda no escopo global da página, FORA deste IIFE - sem isto não há como
+  // testar uma regra que só existe aqui dentro. Criada em 2026-09-15 pra
+  // travar a regra de sinergia de validateAiBuild (build sugerida precisa ter
+  // pelo menos um golpe potencializado por habilidade/innate), que antes só
+  // seria verificável gastando uma chamada de IA de verdade. Expõe apenas
+  // leitura de dados já embutidos na página e funções PURAS de validação -
+  // nada aqui altera estado do app, salva build ou toca localStorage.
+  window.__erTest = {
+    validateAiBuild: validateAiBuild,
+    ABILITY_SYNERGY: ABILITY_SYNERGY,
+    SPECIES: SPECIES,
+    MOVES: MOVES,
+    uniqueIds: uniqueIds
+  };
 })();
 </script>

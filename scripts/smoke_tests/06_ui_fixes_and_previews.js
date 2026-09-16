@@ -253,4 +253,91 @@ async function section06() {
   setSearch("");
   await wait(120);
 
+  // --- rodapé responsivo, 2026-09-15: o rodapé virou duas versões do mesmo
+  // conteúdo (.footer-full com a frase inteira, .footer-compact só com os
+  // links, servida em celular e em janela flutuante). Os mesmos 3 destinos
+  // passaram a existir duplicados no HTML, e este projeto JÁ teve um
+  // incidente de link morto no rodapé (wiki.elite-redux.com) - sem trava,
+  // alguém corrige a URL numa versão e esquece a outra, e só quem está no
+  // celular continua indo pro link errado, sem nenhum teste reclamando.
+  const fFull = document.querySelector(".footer-full");
+  const fCompact = document.querySelector(".footer-compact");
+  check("rodapé tem as duas versões (completa e compacta)", !!fFull && !!fCompact);
+  if (fFull && fCompact) {
+    const hrefsFull = [...fFull.querySelectorAll("a")].map(a => a.href).sort();
+    const hrefsCompact = [...fCompact.querySelectorAll("a")].map(a => a.href).sort();
+    check("rodapé compacto aponta exatamente pros mesmos destinos da versão completa",
+      hrefsFull.length > 0 && hrefsFull.join("|") === hrefsCompact.join("|"),
+      "completa: " + hrefsFull.join(", ") + " / compacta: " + hrefsCompact.join(", "));
+    // Exatamente uma das duas visível: se as duas aparecessem, o rodapé
+    // duplicaria os links na tela E no leitor de tela.
+    const fullShown = getComputedStyle(fFull).display !== "none";
+    const compactShown = getComputedStyle(fCompact).display !== "none";
+    check("exatamente uma versão do rodapé fica visível por vez", fullShown !== compactShown);
+  }
+
+  // Trava de regressão pro bug de comentário CSS que ESTE projeto já teve
+  // duas vezes: alto contraste (2026-09-13) e o próprio rodapé compacto
+  // (2026-09-15, pego na revisão da mesma passagem que o criou). Um `*/`
+  // sobrando fecha o comentário cedo, o texto vira lixo pro parser e o
+  // navegador descarta o bloco @media INTEIRO - sem erro nenhum no console.
+  // As checagens de "está visível?" acima NÃO pegam isso: no estado
+  // quebrado o rodapé só nunca compacta, e continua com exatamente uma
+  // versão visível. Por isso esta olha o CSSOM direto.
+  let mediaRodapeViva = false;
+  for (const sheet of document.styleSheets) {
+    let rules;
+    try { rules = sheet.cssRules; } catch (e) { continue; }
+    for (const rule of rules) {
+      if (rule.type === CSSRule.MEDIA_RULE && rule.conditionText.indexOf("max-height") !== -1 &&
+          [...rule.cssRules].some(r => r.selectorText === ".footer-compact")) {
+        mediaRodapeViva = true;
+      }
+    }
+  }
+  check("a media query do rodapé compacto existe de verdade no CSSOM (nenhum comentário a engoliu)", mediaRodapeViva);
+
+  // --- regra do Especialista em Meta, 2026-09-15 (pedido do usuário): toda
+  // build SUGERIDA precisa ter pelo menos um golpe potencializado por uma
+  // habilidade escolhível ou innate. A validação é feita contra
+  // ABILITY_SYNERGY, não contra a palavra do modelo - então dá pra testar
+  // aqui sem gastar chamada de IA nenhuma, montando respostas falsas e
+  // conferindo que a validação aceita/rejeita cada uma.
+  var T = window.__erTest;
+  check("a ponte de teste do app está exposta (window.__erTest)", !!(T && T.validateAiBuild && T.ABILITY_SYNERGY));
+  var spSinergia = null;
+  for (var si = 0; T && si < T.SPECIES.length && !spSinergia; si++) {
+    var cand = T.SPECIES[si];
+    if (!cand || !T.ABILITY_SYNERGY[cand.sname] || !T.ABILITY_SYNERGY[cand.sname].length) continue;
+    // precisa de uma sinergia cuja habilidade seja ESCOLHÍVEL, pra dar pra
+    // montar tanto o caso que cumpre quanto o que não cumpre
+    var hitEsc = T.ABILITY_SYNERGY[cand.sname].find(function (h) { return h.kind !== "inn" && h.golpes && h.golpes.length; });
+    if (hitEsc) spSinergia = { sp: cand, hit: hitEsc };
+  }
+  check("achou uma espécie com sinergia de habilidade escolhível pra testar a regra", !!spSinergia);
+  if (spSinergia) {
+    var spS = spSinergia.sp;
+    var golpeSinergico = spSinergia.hit.golpes[0];
+    var movesReais = T.uniqueIds(spS.lm.map(function (p) { return p[1]; }).concat(spS.tu)).map(function (id) { return T.MOVES[id][0]; });
+    var semSinergia = movesReais.filter(function (m) {
+      return !T.ABILITY_SYNERGY[spS.sname].some(function (h) { return (h.golpes || []).indexOf(m) !== -1; });
+    });
+    var base = { ability: spSinergia.hit.name, nature: "Adamant", item: "", evs: [4, 252, 0, 0, 0, 252], rationale: "teste" };
+
+    if (movesReais.indexOf(golpeSinergico) !== -1 && semSinergia.length >= 4) {
+      var cumpre = Object.assign({}, base, { moves: [golpeSinergico, semSinergia[0], semSinergia[1], semSinergia[2]] });
+      check("build COM golpe potencializado pela habilidade escolhida é aceita",
+        !!T.validateAiBuild(spS, cumpre), spS.n + " / " + golpeSinergico);
+
+      var naoCumpre = Object.assign({}, base, { moves: semSinergia.slice(0, 4) });
+      var motivo = {};
+      check("build SEM nenhum golpe potencializado é rejeitada pela regra",
+        T.validateAiBuild(spS, naoCumpre, motivo) === null);
+      check("a rejeição explica o motivo real (não a mensagem genérica)",
+        !!motivo.txt && motivo.txt.indexOf("potencializado") !== -1, motivo.txt || "(sem motivo)");
+    } else {
+      check("fixture de sinergia utilizável (golpe no movepool + 4 golpes sem sinergia)", false,
+        spS.n + " golpeSinergico=" + golpeSinergico + " semSinergia=" + semSinergia.length);
+    }
+  }
 }
