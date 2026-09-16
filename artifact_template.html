@@ -2816,6 +2816,25 @@
     return LEVELCAPS.rows[state.settings.milestone][state.settings.difficulty];
   }
 
+  // Golpes que o jogador pode usar AGORA (item D3 da pauta técnica,
+  // 2026-09-16): nível até o level cap atual + todo golpe de tutor (tutor não
+  // tem trava de nível no jogo). Sem cap (Campeão) libera tudo. Antes este
+  // filtro estava copiado em 4 lugares - editor "Meu build", validação da
+  // build por IA, golpes de prioridade e prompt da IA - e já tinha divergido
+  // uma vez (2026-09-12: a validação ficou sem o filtro que o editor tinha).
+  function availableMovesFor(sp) {
+    var cap = getCurrentCap();
+    var semCap = cap === null || cap === undefined;
+    var allowedLm = sp.lm.filter(function (pair) { return semCap || pair[0] <= cap; });
+    var ids = uniqueIds(allowedLm.map(function (pair) { return pair[1]; }).concat(sp.tu));
+    return {
+      cap: cap,
+      ids: ids,
+      names: ids.map(function (id) { return MOVES[id][0]; }),
+      lockedCount: sp.lm.length - allowedLm.length
+    };
+  }
+
   // Auto-evolução por level cap, 2026-09-10 (pedido do usuário, decisões
   // confirmadas por ele antes de construir): assume que todo Pokémon do
   // time/caixa já está no nível liberado pelo cap atual - qualquer evolução
@@ -4363,10 +4382,10 @@
     // Golpes de tutor ficam sempre disponíveis de propósito - não há gate
     // por nível pra eles no jogo. Sem cap configurado (null), não filtra
     // nada - não há base pra travar.
-    var mbCap = getCurrentCap();
-    var mbAllowedLm = sp.lm.filter(function (p) { return mbCap === null || mbCap === undefined || p[0] <= mbCap; });
-    var mbLockedCount = sp.lm.length - mbAllowedLm.length;
-    var moveIds = uniqueIds(mbAllowedLm.map(function (p) { return p[1]; }).concat(sp.tu));
+    var mbAvail = availableMovesFor(sp);
+    var mbCap = mbAvail.cap;
+    var mbLockedCount = mbAvail.lockedCount;
+    var moveIds = mbAvail.ids;
     var moveOptionsHtml = '<option value="">(nenhum)</option>' + moveIds.map(function (id) {
       var m = MOVES[id];
       return m ? '<option value="' + escapeHtml(m[0]) + '">' + escapeHtml(m[0]) + '</option>' : "";
@@ -4680,9 +4699,7 @@
     // recebeu o mesmo filtro, então uma build por IA sugerindo um golpe só
     // aprendido num nível acima do cap atual passava direto). Mesmo
     // critério de myBuildEditorHtml: golpe de tutor nunca trava por nível.
-    var vabCap = getCurrentCap();
-    var vabAllowedLm = sp.lm.filter(function (p) { return vabCap === null || vabCap === undefined || p[0] <= vabCap; });
-    var validMoves = uniqueIds(vabAllowedLm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return MOVES[id][0]; });
+    var validMoves = availableMovesFor(sp).names;
     if (!Array.isArray(raw.moves) || raw.moves.length !== 4) return rejeita("A build precisa de exatamente 4 golpes.");
     for (var i = 0; i < 4; i++) {
       if (validMoves.indexOf(raw.moves[i]) === -1) {
@@ -4867,9 +4884,7 @@
     // Mesma trava por level cap de validateAiBuild/generateBuildWithAI
     // (achado real, 2026-09-12) - sem isso, esta ferramenta podia sugerir
     // pra IA um golpe de prioridade real mas ainda fora do nível atual.
-    var pmoCap = getCurrentCap();
-    var pmoAllowedLm = sp.lm.filter(function (p) { return pmoCap === null || pmoCap === undefined || p[0] <= pmoCap; });
-    var ids = uniqueIds(pmoAllowedLm.map(function (p) { return p[1]; }).concat(sp.tu));
+    var ids = availableMovesFor(sp).ids;
     var priorityMoves = [];
     ids.forEach(function (id) {
       var m = MOVES[id];
@@ -5189,8 +5204,7 @@
     // esta lista ia pra IA sem filtro nenhum, e como é só nome de golpe -
     // sem o nível junto - a IA nem tinha como inferir sozinha que um golpe
     // estava fora do alcance atual). Golpe de tutor nunca trava por nível.
-    var allowedLm = sp.lm.filter(function (p) { return cap === null || cap === undefined || p[0] <= cap; });
-    var movepoolLines = uniqueIds(allowedLm.map(function (p) { return p[1]; }).concat(sp.tu)).map(movePromptLine);
+    var movepoolLines = availableMovesFor(sp).ids.map(movePromptLine);
     var takenItems = teamItemsInUse(sp.x);
     var megaNames = megaFormsOf(sp).map(function (m) { return m.n; });
     var megaStoneRule = megaStoneRuleFor(sp);
@@ -6946,6 +6960,7 @@
     megaStoneRuleFor: megaStoneRuleFor,
     megaModeBuildNoteHtml: megaModeBuildNoteHtml,
     buildContextNotesHtml: buildContextNotesHtml,
+    availableMovesFor: availableMovesFor,
     stonesOf: stonesOf,
     abilityTypeMod: abilityTypeMod,
     USABLE_TYPES: USABLE_TYPES,

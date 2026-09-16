@@ -81,4 +81,33 @@ async function section17() {
     T.state.settings.difficulty = settingsOriginais.difficulty;
     T.state.settings.milestone = settingsOriginais.milestone;
   }
+
+  // ---- D3: uma fonte só pro movepool liberado ----
+  // O seletor de golpes do "Meu build" tem que oferecer exatamente o que
+  // availableMovesFor() diz - é a mesma lista que a validação da IA aceita.
+  var spD3 = T.SPECIES.find(function (sp) {
+    if (!sp) return false;
+    var av = T.availableMovesFor(sp);
+    return av.lockedCount > 0 && sp.tu.length > 0 && av.ids.length >= 4;
+  });
+  if (achou("espécie com golpe travado pelo cap e golpe de tutor", spD3)) {
+    document.querySelector('.tab-btn[data-tab="dex"]').click();
+    await wait(30);
+    setSearch(spD3.n);
+    await wait(120);
+    var rowD3 = document.querySelector('#species-list .species-row[data-x="' + spD3.x + '"]');
+    if (achou("linha de " + spD3.n + " na busca", rowD3)) {
+      rowD3.click();
+      await wait(60);
+      var sel = document.getElementById("mybuild-move-0");
+      if (achou("seletor de golpe do Meu build", sel)) {
+        var noSeletor = [].slice.call(sel.options).map(function (o) { return o.value; }).filter(Boolean).sort();
+        var esperado = T.availableMovesFor(spD3).names.slice().sort();
+        check("seletor do Meu build oferece exatamente os golpes de availableMovesFor()",
+          JSON.stringify(noSeletor) === JSON.stringify(esperado), spD3.n + ": seletor " + noSeletor.length + ", função " + esperado.length);
+        check("golpe travado pelo cap fica fora e tutor fica dentro",
+          spD3.tu.every(function (id) { return noSeletor.indexOf(T.MOVES[id][0]) !== -1; }), spD3.n);
+      }
+    }
+  }
 }
