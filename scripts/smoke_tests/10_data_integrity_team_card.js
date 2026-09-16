@@ -173,7 +173,11 @@ async function section10() {
   check("prompt de build por IA avisa quais itens já estão em uso por outros membros do time",
     itemPrompt.indexOf("Life Orb") !== -1 && itemPrompt.indexOf("JA EM USO") !== -1, itemPrompt.slice(0, 400));
   var saveAfter27 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
-  var charBuild27 = (saveAfter27.customBuilds["SPECIES_CHARMELEON"] || [])[0];
+  // Busca pela origem, não pela posição: desde 2026-09-16 a auto-evolução é
+  // reversível, e o Charizard que a seção 08 evoluiu volta a Charmeleon quando
+  // o cap cai pra 18 - trazendo a build salva dele junto (mesma criatura).
+  var charBuild27 = (saveAfter27.customBuilds["SPECIES_CHARMELEON"] || []).filter(function (b) { return b.source === "ia"; })[0];
+
   check("build por IA que insiste no item já usado por outro membro tem o item removido, não a build inteira rejeitada",
     !!charBuild27 && charBuild27.item === "" && charBuild27.ability === "Flame Body",
     charBuild27);

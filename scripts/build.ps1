@@ -72,6 +72,10 @@ if (-not $SkipExtract) {
     # (expand_combo_abilities.ps1), por isso roda depois dos dois.
     Write-Output "--- computing ability x movepool synergy (Fase 3) ---"
     & (Join-Path $PSScriptRoot "compute_ability_movepool_synergy.ps1")
+    # Papel de cada golpe de status (cura/setup/pivo...) a partir do efeito
+    # real do jogo - usado pela coerencia papel x golpe da build por IA.
+    Write-Output "--- classificando golpes de status pelo efeito real ---"
+    & (Join-Path $PSScriptRoot "compute_move_roles.ps1")
 } else {
     Write-Output "--- skipping extraction, reusing existing data/dex_compact.json and data/bosses.json ---"
 }
@@ -98,6 +102,8 @@ $dataFiles = @{
     "__SPECIES_ROLE_JSON__" = Join-Path $dataDir "species_role.json"
     "__ABILITY_SYNERGY_JSON__" = Join-Path $dataDir "species_ability_synergy.json"
     "__MEGA_FORMS_JSON__" = Join-Path $dataDir "mega_forms.json"
+    "__MOVE_ROLES_JSON__" = Join-Path $dataDir "move_roles.json"
+
     "__CHANGELOG_JSON__" = Join-Path $dataDir "changelog.json"
     "__HOW_TO_OBTAIN_JSON__" = Join-Path $dataDir "how_to_obtain.json"
     "__ITEM_DESC_JSON__" = Join-Path $dataDir "item_descriptions.json"

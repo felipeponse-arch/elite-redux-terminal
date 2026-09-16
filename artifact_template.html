@@ -1654,6 +1654,7 @@
 <script id="speciesrole" type="application/json">__SPECIES_ROLE_JSON__</script>
 <script id="abilitysynergy" type="application/json">__ABILITY_SYNERGY_JSON__</script>
 <script id="megaforms" type="application/json">__MEGA_FORMS_JSON__</script>
+<script id="moveroles" type="application/json">__MOVE_ROLES_JSON__</script>
 <script id="changelog" type="application/json">__CHANGELOG_JSON__</script>
 <script>
 (function () {
@@ -1819,7 +1820,79 @@
   // preview (2026-09-09) needs the reverse direction of what MOVES[id]
   // already gives everywhere else.
   var MOVE_BY_NAME = Object.create(null);
-  MOVES.forEach(function (m) { if (m && m[0]) MOVE_BY_NAME[m[0]] = m; });
+  var MOVE_ID_BY_NAME = Object.create(null);
+  MOVES.forEach(function (m, id) { if (m && m[0]) { MOVE_BY_NAME[m[0]] = m; MOVE_ID_BY_NAME[m[0]] = id; } });
+
+  // O que cada golpe de status FAZ (2026-09-16, pedido do usuário: "verificar
+  // se estamos considerando o que um move faz - notei que está sugerindo Roost
+  // em uma build super ofensiva"). Classificado a partir do efeito real do
+  // jogo por scripts/compute_move_roles.ps1, nunca pelo nome - neste hack
+  // Heal Bell e Refresh curam HP do usuário, por exemplo. Golpe de dano não
+  // aparece aqui: moveRoleOf() devolve "dano" pra ele.
+  var MOVE_ROLES = JSON.parse(document.getElementById("moveroles").textContent || "{}");
+  var MOVE_ROLE_LABEL_PT = { dano: "dano", cura: "cura", setup: "setup", pivo: "pivô", hazard: "hazard", protecao: "proteção", suporte: "suporte" };
+  function movePromptLine(id) {
+    var mv = MOVES[id];
+    var role = moveRoleOf(mv[0]);
+    var split = DATA.splits[mv[2]] || "";
+    var desc = MOVE_PT[String(id)] || mv[6] || "";
+    return "- " + mv[0] + " [" + (TYPES[mv[1]] || "?") + ", " + split +
+      (mv[3] ? ", poder " + mv[3] : "") + (mv[7] ? ", prioridade " + mv[7] : "") +
+      ", papel " + role + "]" + (desc ? ": " + desc : "");
+  }
+  function moveRoleOf(moveName) {
+    var id = MOVE_ID_BY_NAME[moveName];
+    if (id === undefined) return null;
+    if ((DATA.splits[MOVES[id][2]] || "") !== "STATUS") return "dano";
+    return MOVE_ROLES[String(id)] || "suporte";
+  }
+
+  // Família de formas (2026-09-16, pedido do usuário: "quando o Poke entra no
+  // time ou na box deve considerar que ele pode tanto ter a forma normal
+  // quanto a forma mega - isso também deve se estender a todos os raciocínios
+  // que usam as duas bases como referência"). Mega/Primal é a MESMA criatura
+  // que o jogador já tem, não uma captura nova - então qualquer leitura de
+  // time/caixa precisa enxergar as duas. Liga nos dois sentidos: da base
+  // chega nas megas (evoluções EVO_*MEGA*/PRIMAL do dado), e de uma mega
+  // colocada direto no roster chega de volta na base.
+  // Nunca mistura dado ENTRE formas (habilidade de uma com golpe de outra) -
+  // foi exatamente isso que gerou 29 builds inválidas em 2026-09-16. Cada
+  // forma continua sendo avaliada com o próprio dado; a família só diz
+  // "estas são as opções desta criatura".
+  var MEGA_BASE_BY_X = Object.create(null);
+  function isMegaEvoKind(kindIdx) {
+    var k = DATA.evoKinds[kindIdx] || "";
+    return k.indexOf("MEGA") !== -1 || k.indexOf("PRIMAL") !== -1;
+  }
+  SPECIES.forEach(function (s) {
+    (s.ev || []).forEach(function (ev) {
+      if (isMegaEvoKind(ev[0]) && SPECIES_BY_X[ev[2]]) MEGA_BASE_BY_X[ev[2]] = s.x;
+    });
+  });
+  function megaFormsOf(sp) {
+    if (!sp) return [];
+    return (sp.ev || []).filter(function (ev) { return isMegaEvoKind(ev[0]); })
+      .map(function (ev) { return getSpeciesByX(ev[2]); })
+      .filter(function (m) { return m && m.x !== sp.x; });
+  }
+  // Trecho de prompt: ", outras formas: Mega Charizard X (SPECIES_..., Fire/Dragon, Vel 100, innates ...)".
+  // Cada forma com o próprio dado, nunca misturado.
+  function formFamilyPromptNote(sp) {
+    var others = formFamilyOf(sp).filter(function (f) { return f.x !== sp.x; });
+    if (!others.length) return "";
+    return ", outras formas desta MESMA criatura que o jogador pode usar: " + others.map(function (f) {
+      var r = SPECIES_RANK[f.sname];
+      return f.n + " [sname " + f.sname + ", " + speciesTypeNames(f).join("/") + ", Velocidade base " + f.b[5] +
+        (r ? ", rank " + r.tier : "") + ", innate: " + f.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ") + "]";
+    }).join("; ");
+  }
+  function formFamilyOf(sp) {
+
+    if (!sp) return [];
+    var baseX = MEGA_BASE_BY_X[sp.x];
+    var base = baseX !== undefined ? getSpeciesByX(baseX) : sp;
+    return [base].concat(megaFormsOf(base));
+  }
 
   // Species lookup by exact display name - "Comparar builds" (Fase 2,
   // 2026-09-09) takes free text from a <input list=...> datalist, which
@@ -2160,6 +2233,15 @@
     // safe default {} for any save saved before this existed - no
     // SCHEMA_VERSION bump needed, same pattern as adding `orphans` earlier.
     notes: {},
+    // Evoluções feitas SOZINHAS pela auto-evolução por level cap, keyed pelo
+    // sname de destino: { from: snameDeOrigem, lvl: nivelExigido }. Existe
+    // pra poder DESFAZER (ver devolveChainByX) - achado real do usuário,
+    // 2026-09-16: "eu ainda estava no lv 55 e vc evoluiu pra Selenumbra, mas
+    // no jogo ele só evolui no 56". O dado está certo (Volcarona Redux ->
+    // Selenumbra no 56); o furo era a evolução ser irreversível: passar por
+    // um cap maior nem que por um instante (ex: trocar a dificuldade antes
+    // do marco) evoluía e nunca mais voltava.
+    autoEvolved: {},
     // Interactive "meu build" per species, sname-keyed - 2026-09-09, user
     // feedback: the free-text notes field above has "no interaction with
     // the Pokemon", the user has to type everything by hand instead of
@@ -2240,6 +2322,15 @@
     if (save.notes && typeof save.notes === "object") {
       Object.keys(save.notes).forEach(function (k) {
         if (typeof save.notes[k] === "string" && save.notes[k]) state.notes[k] = save.notes[k];
+      });
+    }
+    state.autoEvolved = {};
+    if (save.autoEvolved && typeof save.autoEvolved === "object") {
+      Object.keys(save.autoEvolved).forEach(function (k) {
+        var rec = save.autoEvolved[k];
+        if (rec && typeof rec.from === "string" && typeof rec.lvl === "number" && getSpeciesBySname(k) && getSpeciesBySname(rec.from)) {
+          state.autoEvolved[k] = { from: rec.from, lvl: rec.lvl };
+        }
       });
     }
     // Same defensive-import discipline as notes above: only accept a build
@@ -2366,6 +2457,7 @@
         typeFilter: Array.from(state.typeFilter)
       }),
       notes: state.notes,
+      autoEvolved: state.autoEvolved,
       customBuilds: state.customBuilds,
       archetype: state.archetype
     };
@@ -2659,16 +2751,42 @@
       if (!applicable) return x;
       var target = getSpeciesByX(applicable[2]);
       if (!target || target.x === x) return x;
-      if (state.customBuilds[sp.sname] && !state.customBuilds[target.sname]) {
-        state.customBuilds[target.sname] = state.customBuilds[sp.sname];
-      }
-      delete state.customBuilds[sp.sname];
-      if (state.notes[sp.sname] && !state.notes[target.sname]) {
-        state.notes[target.sname] = state.notes[sp.sname];
-      }
-      delete state.notes[sp.sname];
+      carryUserData(sp.sname, target.sname);
+      state.autoEvolved[target.sname] = { from: sp.sname, lvl: reqLevel };
       messages.push(sp.n + " → " + target.n);
       x = target.x;
+      steps++;
+    }
+    return x;
+  }
+  // Build/anotação acompanham a criatura quando ela muda de espécie (nos dois
+  // sentidos) - nunca sobrescreve algo que o destino já tenha próprio.
+  function carryUserData(fromSname, toSname) {
+    if (state.customBuilds[fromSname] && !state.customBuilds[toSname]) {
+      state.customBuilds[toSname] = state.customBuilds[fromSname];
+    }
+    delete state.customBuilds[fromSname];
+    if (state.notes[fromSname] && !state.notes[toSname]) {
+      state.notes[toSname] = state.notes[fromSname];
+    }
+    delete state.notes[fromSname];
+  }
+  // Desfaz, etapa por etapa, evoluções que ESTE app aplicou sozinho e que o
+  // cap atual não libera mais (ex: cap voltou de 60 pra 55 -> Selenumbra
+  // volta a ser Volcarona Redux). Só mexe no que está em state.autoEvolved:
+  // um Pokémon que o jogador adicionou já evoluído pela Dex nunca é tocado.
+  function devolveChainByX(x, cap, messages) {
+    var steps = 0;
+    while (steps < 10) {
+      var sp = getSpeciesByX(x);
+      var rec = sp ? state.autoEvolved[sp.sname] : null;
+      if (!rec || rec.lvl <= cap) return x;
+      var prev = getSpeciesBySname(rec.from);
+      if (!prev) return x;
+      carryUserData(sp.sname, prev.sname);
+      delete state.autoEvolved[sp.sname];
+      messages.push(sp.n + " voltou a " + prev.n + " (evolui no nível " + rec.lvl + ")");
+      x = prev.x;
       steps++;
     }
     return x;
@@ -2681,8 +2799,9 @@
     var cap = getCurrentCap();
     if (cap === null || cap === undefined) return false;
     var messages = [];
-    var newTeam = state.team.map(function (x) { return evolveChainByX(x, cap, messages); });
-    var newBox = state.box.map(function (x) { return evolveChainByX(x, cap, messages); });
+    var step = function (x) { return evolveChainByX(devolveChainByX(x, cap, messages), cap, messages); };
+    var newTeam = state.team.map(step);
+    var newBox = state.box.map(step);
     if (!messages.length) return false;
     state.team = newTeam;
     state.box = newBox;
@@ -4451,6 +4570,28 @@
       var scale = 510 / evSum;
       evs = evs.map(function (v) { return Math.floor((v * scale) / 4) * 4; });
     }
+    // Coerência papel x golpe (pedido do usuário, 2026-09-16: "notei que está
+    // sugerindo Roost em uma build super ofensiva"). Uma build com EVs 100%
+    // ofensivos (ataque e velocidade maxados, nada em HP/Def/SpD) não aguenta
+    // ficar em campo pra aproveitar cura - o slot vale mais como golpe de
+    // dano. O papel do golpe vem do efeito real do jogo (MOVE_ROLES), não da
+    // palavra do modelo. Só vale aqui, na build por IA - mesma assimetria da
+    // regra de sinergia acima: build curada da comunidade que faça isso (ex:
+    // Mega Talonflame com Roost) tem um jogador real respondendo por ela.
+    var fullOffense = Math.max(evs[1], evs[3]) >= 200 && evs[5] >= 200 && (evs[0] + evs[2] + evs[4]) <= 12;
+    if (fullOffense) {
+      var curaMove = raw.moves.filter(function (m) { return moveRoleOf(m) === "cura"; })[0];
+      var danoCount = raw.moves.filter(function (m) { return moveRoleOf(m) === "dano"; }).length;
+      if (curaMove || danoCount < 2) {
+        if (motivo) {
+          motivo.txt = curaMove
+            ? "A build sugerida é 100% ofensiva (EVs em ataque e velocidade) mas gastou um slot com " + curaMove +
+              ", que só cura - esse slot rende mais como golpe de dano. Rejeitada; tente gerar de novo."
+            : "A build sugerida é 100% ofensiva mas tem menos de 2 golpes de dano. Rejeitada; tente gerar de novo.";
+        }
+        return null;
+      }
+    }
     // Justificativa, 2026-09-10 (revisão da equipe sobre "Gerar build com
     // IA"): uma frase livre, NÃO validada contra dados reais como tudo
     // acima - não há o que checar, é texto corrido, não uma referência de
@@ -4683,6 +4824,7 @@
       suggestion: suggestion ? {
         sname: suggestion.sp.sname,
         name: suggestion.sp.n,
+        megaDe: suggestion.owned.x !== suggestion.sp.x ? suggestion.owned.n : null,
         motivo: (suggestion.reasonMult === 0 ? "imune a " : "resiste bem a ") + suggestion.reasonType
       } : null
     };
@@ -4694,21 +4836,28 @@
   // luta específica; isto dá a ela a caixa INTEIRA com os mesmos dados reais
   // (rank/papel/tipo) que o resto do app usa, pra poder sugerir uma troca de
   // médio prazo mesmo quando não é sobre a próxima luta.
+  function speciesOverviewEntry(sp) {
+    var r = SPECIES_RANK[sp.sname];
+    var role = SPECIES_ROLE[sp.sname];
+    return {
+      sname: sp.sname,
+      name: sp.n,
+      types: speciesTypeNames(sp),
+      tier: r ? r.tier : null,
+      score: r ? r.score : null,
+      roles: role ? role.roles.map(function (x) { return ROLE_LABEL_PT[x] || x; }) : []
+    };
+  }
   function aiTool_getBoxOverview() {
     var boxMembers = state.box.map(getSpeciesByX).filter(Boolean);
     return {
       boxSize: boxMembers.length,
       box: boxMembers.map(function (sp) {
-        var r = SPECIES_RANK[sp.sname];
-        var role = SPECIES_ROLE[sp.sname];
-        return {
-          sname: sp.sname,
-          name: sp.n,
-          types: speciesTypeNames(sp),
-          tier: r ? r.tier : null,
-          score: r ? r.score : null,
-          roles: role ? role.roles.map(function (x) { return ROLE_LABEL_PT[x] || x; }) : []
-        };
+        var entry = speciesOverviewEntry(sp);
+        // Formas mega da mesma criatura (formFamilyOf, 2026-09-16) - o
+        // jogador pode usar qualquer uma delas, então a IA precisa ver as duas.
+        entry.outrasFormas = formFamilyOf(sp).filter(function (f) { return f.x !== sp.x; }).map(speciesOverviewEntry);
+        return entry;
       })
     };
   }
@@ -4856,8 +5005,9 @@
     // sem o nível junto - a IA nem tinha como inferir sozinha que um golpe
     // estava fora do alcance atual). Golpe de tutor nunca trava por nível.
     var allowedLm = sp.lm.filter(function (p) { return cap === null || cap === undefined || p[0] <= cap; });
-    var moveNames = uniqueIds(allowedLm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return MOVES[id][0]; });
+    var movepoolLines = uniqueIds(allowedLm.map(function (p) { return p[1]; }).concat(sp.tu)).map(movePromptLine);
     var takenItems = teamItemsInUse(sp.x);
+    var megaNames = megaFormsOf(sp).map(function (m) { return m.n; });
     var archetypeParts = archetypeBuildGuidance();
     var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon). " +
       "Monte um set competitivo, formato Pokemon Showdown, para o Pokemon " + sp.n +
@@ -4866,7 +5016,14 @@
       "Status base (HP/Atk/Def/SpA/SpD/Spe): " + sp.b.join("/") + "\n" +
       "Habilidades escolhiveis - escolha exatamente UMA destas, escrita EXATAMENTE assim: " + abiNames.join(", ") + "\n" +
       "Innates sempre ativas (nao escolhiveis, so contexto): " + innNames.join(", ") + "\n" +
-      "Movepool real - escolha exatamente 4 desta lista, nenhum golpe fora dela: " + moveNames.join(", ") + "\n" +
+      "Movepool real - escolha exatamente 4 desta lista, nenhum golpe fora dela. Cada linha traz o que o golpe " +
+      "FAZ NESTE HACK (tipo, categoria, poder, prioridade, papel e descricao do proprio jogo) - leia a descricao, " +
+      "nao assuma pelo nome, golpes deste hack podem ser diferentes do jogo original:\n" + movepoolLines.join("\n") + "\n" +
+      "COERENCIA PAPEL x GOLPE: cada um dos 4 golpes precisa servir ao papel escolhido. Build 100% ofensiva " +
+      "(EVs em ataque e velocidade, nada em HP/Def/SpD) NAO leva golpe de papel 'cura' e leva pelo menos 2 golpes " +
+      "de dano - uma build assim que ignore isso vai ser REJEITADA. Se quiser cura, invista em bulk e explique na rationale.\n" +
+      (megaNames.length ? ("Esta especie tambem pode Mega-evoluir para: " + megaNames.join(", ") + ". Esta build e para a forma " +
+        sp.n + " - use so habilidades e golpes desta forma, nunca misture com os da mega.\n") : "") +
       "Itens de batalha reais disponiveis - escolha UM destes (ou deixe vazio se nenhum fizer sentido): " + AI_ITEM_POOL.join(", ") + "\n" +
       (takenItems.length ? ("Itens JA EM USO por outros membros do time atual - NUNCA repita nenhum destes, escolha outro item ou deixe vazio: " + takenItems.join(", ") + "\n") : "") +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
@@ -5176,7 +5333,18 @@
     return BUILDS[sp.sname] || null;
   }
 
+  // Linha "Outra forma: Mega X" no card do time (2026-09-16) - lembra que a
+  // mesma criatura tem outra forma disponível, com link pra ficha dela.
+  function otherFormsHtml(sp) {
+    var others = formFamilyOf(sp).filter(function (f) { return f.x !== sp.x; });
+    if (!others.length) return "";
+    return '<br><b>' + (others.length > 1 ? 'Outras formas' : 'Outra forma') + ':</b> ' + others.map(function (f) {
+      return '<span class="goto-species" data-x="' + f.x + '">' + escapeHtml(f.n) + '</span>';
+    }).join(", ");
+  }
+
   // ---------------- team roster rendering ----------------
+
   function renderTeam() {
     var slotsEl = document.getElementById("team-slots");
     var members = state.team.map(getSpeciesByX).filter(Boolean);
@@ -5218,7 +5386,7 @@
           '<div class="ts-head goto-species" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 40) +
           '<div><div class="ts-name">' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + '</div>' +
           '<div class="ts-types">' + names.map(function (n) { return typePill(n, true); }).join("") + '</div></div></div>' +
-          '<div class="ts-abis"><b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + '</div>' +
+          '<div class="ts-abis"><b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + otherFormsHtml(sp) + '</div>' +
           buildHtml +
           buildHistoryHtml(sp) +
           (swapOpen ? swapPanelHtml(i, sp) : "") +
@@ -5526,7 +5694,10 @@
       (m.mv || []).forEach(function (moveName) {
         var mv = MOVE_BY_NAME[moveName];
         if (!mv) return;
-        if ((DATA.splits[mv[2]] || "") === "Status") return;
+        // Bug real achado em 2026-09-16: comparava com "Status", mas o dado
+        // escreve "STATUS" - a condição nunca batia e golpe de status do
+        // chefão (Roost, Toxic...) contava como tipo de ataque na sugestão.
+        if (moveRoleOf(moveName) !== "dano") return;
         types[TYPES[mv[1]]] = true;
       });
     });
@@ -5555,20 +5726,29 @@
     var boxMembers = state.box.map(getSpeciesByX).filter(Boolean);
     if (!teamMembers.length || !boxMembers.length) return null;
 
+    // Cada membro (time e caixa) é avaliado na MELHOR das suas formas (base
+    // ou mega - ver formFamilyOf, 2026-09-16): um Charizard na caixa que
+    // resiste mal ao chefão na forma base pode ser justamente a resposta como
+    // Mega Charizard Y. Do lado do time vale o mesmo, senão a comparação
+    // sugeriria trocar um membro que já resolve a luta mega-evoluindo.
     var teamBestScore = null;
-    teamMembers.forEach(function (sp) {
-      var s = bossSafetyScore(sp, atkTypes);
-      if (teamBestScore === null || s < teamBestScore) teamBestScore = s;
+    teamMembers.forEach(function (owned) {
+      formFamilyOf(owned).forEach(function (sp) {
+        var s = bossSafetyScore(sp, atkTypes);
+        if (teamBestScore === null || s < teamBestScore) teamBestScore = s;
+      });
     });
 
     var boxBest = null;
-    boxMembers.forEach(function (sp) {
-      var s = bossSafetyScore(sp, atkTypes);
-      var r = SPECIES_RANK[sp.sname];
-      var rankScore = r ? r.score : 0;
-      if (!boxBest || s < boxBest.score || (s === boxBest.score && rankScore > boxBest.rankScore)) {
-        boxBest = { sp: sp, score: s, rankScore: rankScore };
-      }
+    boxMembers.forEach(function (owned) {
+      formFamilyOf(owned).forEach(function (sp) {
+        var s = bossSafetyScore(sp, atkTypes);
+        var r = SPECIES_RANK[sp.sname];
+        var rankScore = r ? r.score : 0;
+        if (!boxBest || s < boxBest.score || (s === boxBest.score && rankScore > boxBest.rankScore)) {
+          boxBest = { sp: sp, owned: owned, score: s, rankScore: rankScore };
+        }
+      });
     });
     if (!boxBest || boxBest.score >= teamBestScore) return null;
 
@@ -5577,7 +5757,7 @@
       var mult = abilityTypeMod(t, boxBest.sp).mult;
       if (!reason || mult < reason.mult) reason = { t: t, mult: mult };
     });
-    return { sp: boxBest.sp, reasonType: reason.t, reasonMult: reason.mult };
+    return { sp: boxBest.sp, owned: boxBest.owned, reasonType: reason.t, reasonMult: reason.mult };
   }
 
   // Fase 4 do roadmap (2026-09-12) - "PC Box ganha sugestões gerais de
@@ -5585,18 +5765,38 @@
   // computeSharedRisks() (mesma conta de "Cobertura defensiva"/dashboard,
   // não uma nova fórmula) pra ver se este membro da caixa resolve alguma
   // fraqueza que o time JÁ tem, independente de qual for a próxima luta.
-  function boxFitNote(sp, teamMembers) {
+  function boxFitNote(owned, teamMembers) {
     if (!teamMembers.length) return null;
     var risks = computeSharedRisks(teamMembers);
     if (!risks.length) return null;
     var best = null;
-    risks.forEach(function (r) {
-      var mult = abilityTypeMod(r.t, sp).mult;
-      if (mult < 1 && (!best || mult < best.mult)) best = { t: r.t, mult: mult, n: r.n };
+    // Base e mega da mesma criatura (formFamilyOf, 2026-09-16) - a nota cita
+    // a forma que de fato resolve a fraqueza.
+    formFamilyOf(owned).forEach(function (sp) {
+      risks.forEach(function (r) {
+        var mult = abilityTypeMod(r.t, sp).mult;
+        if (mult < 1 && (!best || mult < best.mult)) best = { sp: sp, t: r.t, mult: mult, n: r.n };
+      });
     });
     if (!best) return null;
     var verb = best.mult === 0 ? "é imune a" : "resiste bem a";
-    return escapeHtml(sp.n) + " " + verb + " " + best.t + " (fraqueza compartilhada por " + best.n + " do time atual)";
+    var who = best.sp.x === owned.x ? escapeHtml(owned.n) : escapeHtml(best.sp.n) + " (mega-evoluindo)";
+    return who + " " + verb + " " + best.t + " (fraqueza compartilhada por " + best.n + " do time atual)";
+  }
+
+  // " (seu Charizard mega-evoluído)" quando a sugestão é a forma mega de quem
+  // está no roster, "" quando é a própria forma que está lá.
+  function megaOfNote(s) {
+    return s.owned && s.owned.x !== s.sp.x ? " (seu " + escapeHtml(s.owned.n) + " mega-evoluído)" : "";
+  }
+  // Melhor rank entre as formas da criatura - mesma ideia de formFamilyOf.
+  function bestRankForm(owned) {
+    var best = null;
+    formFamilyOf(owned).forEach(function (sp) {
+      var r = SPECIES_RANK[sp.sname];
+      if (r && (!best || r.score > best.score)) best = { sp: sp, owned: owned, score: r.score, tier: r.tier };
+    });
+    return best;
   }
 
   // Dashboard summary at the top of the Dex - design proposal B, 2026-09-09.
@@ -5625,17 +5825,19 @@
     // difference isn't worth interrupting the user over every session.
     if (boxMembers.length) {
       var worstTeam = null, bestBox = null;
+      // Compara cada criatura pela melhor forma (base ou mega): um membro do
+      // time com rank baixo na base mas alto como mega não é "o pior do time".
       teamMembers.forEach(function (sp) {
-        var r = SPECIES_RANK[sp.sname];
-        if (r && (!worstTeam || r.score < worstTeam.score)) worstTeam = { sp: sp, score: r.score, tier: r.tier };
+        var r = bestRankForm(sp);
+        if (r && (!worstTeam || r.score < worstTeam.score)) worstTeam = r;
       });
       boxMembers.forEach(function (sp) {
-        var r = SPECIES_RANK[sp.sname];
-        if (r && (!bestBox || r.score > bestBox.score)) bestBox = { sp: sp, score: r.score, tier: r.tier };
+        var r = bestRankForm(sp);
+        if (r && (!bestBox || r.score > bestBox.score)) bestBox = r;
       });
       if (worstTeam && bestBox && bestBox.score - worstTeam.score >= 15) {
         items += '<div class="dash-item dash-suggestion"><span class="dash-label">Sugestão</span><span class="dash-value">' +
-          '<span class="goto-species" data-x="' + bestBox.sp.x + '">' + escapeHtml(bestBox.sp.n) + '</span> (' + bestBox.tier + ') na caixa rende mais que ' +
+          '<span class="goto-species" data-x="' + bestBox.sp.x + '">' + escapeHtml(bestBox.sp.n) + '</span>' + megaOfNote(bestBox) + ' (' + bestBox.tier + ') na caixa rende mais que ' +
           '<span class="goto-species" data-x="' + worstTeam.sp.x + '">' + escapeHtml(worstTeam.sp.n) + '</span> (' + worstTeam.tier + ') no time</span></div>';
       }
     }
@@ -5650,7 +5852,7 @@
       if (boxSuggestion) {
         var reasonText = boxSuggestion.reasonMult === 0 ? "imune a " + boxSuggestion.reasonType : "resiste bem a " + boxSuggestion.reasonType;
         items += '<div class="dash-item dash-suggestion dash-suggestion-boss"><span class="dash-label">Próxima luta</span><span class="dash-value">' +
-          escapeHtml(nextBoss.name) + ': <span class="goto-species" data-x="' + boxSuggestion.sp.x + '">' + escapeHtml(boxSuggestion.sp.n) + '</span> na caixa ' + reasonText + '</span></div>';
+          escapeHtml(nextBoss.name) + ': <span class="goto-species" data-x="' + boxSuggestion.sp.x + '">' + escapeHtml(boxSuggestion.sp.n) + '</span>' + megaOfNote(boxSuggestion) + ' na caixa ' + reasonText + '</span></div>';
       }
     }
 
@@ -5679,7 +5881,9 @@
       if (statusEl) statusEl.textContent = "Geração por IA não disponível (recurso não concedido).";
       return;
     }
-    var teamList = members.map(function (sp) { return sp.n + " (" + speciesTypeNames(sp).join("/") + ", sname " + sp.sname + ")"; }).join("; ");
+    var teamList = members.map(function (sp) {
+      return sp.n + " (" + speciesTypeNames(sp).join("/") + ", sname " + sp.sname + formFamilyPromptNote(sp) + ")";
+    }).join("; ");
     var teamSnames = members.map(function (sp) { return sp.sname; });
     var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon), formato 1x1, " +
       "build " + (DATA.meta ? DATA.meta.version : "?") + ".\n" +
@@ -5838,7 +6042,11 @@
       if (statusEl) statusEl.textContent = "Nenhum Pokémon capturado ainda - pegue algo na Dex primeiro.";
       return;
     }
-    var validSnames = roster.map(function (sp) { return sp.sname; });
+    // Formas mega de quem o jogador tem também valem (formFamilyOf).
+    var validSnames = [];
+    roster.forEach(function (sp) {
+      formFamilyOf(sp).forEach(function (f) { if (validSnames.indexOf(f.sname) === -1) validSnames.push(f.sname); });
+    });
     var rosterDesc = roster.map(function (sp) {
       var role = SPECIES_ROLE[sp.sname];
       var roleNames = (role && role.roles || []).map(function (r) { return ROLE_LABEL_PT[r] || r; });
@@ -5846,7 +6054,7 @@
       var build = effectiveBuild(sp);
       var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; });
       var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
-      return sp.sname + " " + sp.n + " (" + speciesTypeNames(sp).join("/") + "), Velocidade base " + sp.b[5] +
+      return sp.sname + " " + sp.n + " (" + speciesTypeNames(sp).join("/") + formFamilyPromptNote(sp) + "), Velocidade base " + sp.b[5] +
         (r ? ", rank " + r.tier : "") + (roleNames.length ? ", papel " + roleNames.join("/") : "") +
         ", innate: " + innNames.join(", ") +
         (build ? ", habilidade escolhida: " + build.ability : ", habilidades escolhíveis: " + abiNames.join(", "));
@@ -5908,9 +6116,21 @@
     if (!teamRecommendation) return;
     var ownedXs = state.team.concat(state.box);
     var xs = [];
+    // Quem do roster foi "usado" por cada escolha - a IA pode escolher a forma
+    // mega de alguém que está como base (ou o contrário): é a MESMA criatura,
+    // então entra a forma escolhida e sai a outra, sem duplicar.
+    var consumed = [];
     teamRecommendation.snames.forEach(function (sn) {
       var sp = getSpeciesBySname(sn);
-      if (sp && ownedXs.indexOf(sp.x) !== -1 && xs.indexOf(sp.x) === -1) xs.push(sp.x);
+      if (!sp || xs.indexOf(sp.x) !== -1) return;
+      var ownedX = null;
+      ownedXs.forEach(function (ox) {
+        if (ownedX !== null || consumed.indexOf(ox) !== -1) return;
+        if (formFamilyOf(getSpeciesByX(ox)).some(function (f) { return f.x === sp.x; })) ownedX = ox;
+      });
+      if (ownedX === null || xs.length >= 6) return;
+      consumed.push(ownedX);
+      xs.push(sp.x);
     });
     if (!xs.length) {
       flashToast("Nenhum dos sugeridos ainda está com você - monte de novo.");
@@ -5919,9 +6139,9 @@
       return;
     }
     state.team.forEach(function (x) {
-      if (xs.indexOf(x) === -1 && state.box.indexOf(x) === -1) state.box.push(x);
+      if (xs.indexOf(x) === -1 && consumed.indexOf(x) === -1 && state.box.indexOf(x) === -1) state.box.push(x);
     });
-    state.box = state.box.filter(function (x) { return xs.indexOf(x) === -1; });
+    state.box = state.box.filter(function (x) { return xs.indexOf(x) === -1 && consumed.indexOf(x) === -1; });
     state.team = xs;
     state.archetype.reasoning = teamRecommendation.reasoning;
     teamRecommendation = null;
@@ -6486,7 +6706,20 @@
     },
     SPECIES: SPECIES,
     MOVES: MOVES,
-    uniqueIds: uniqueIds
+    uniqueIds: uniqueIds,
+    moveRoleOf: moveRoleOf,
+    formFamilyOf: formFamilyOf,
+    bestRankForm: bestRankForm,
+    computeBossAttackTypes: computeBossAttackTypes,
+    getCurrentCap: getCurrentCap,
+    getSpeciesByX: getSpeciesByX,
+    ABILITIES: ABILITIES,
+    BOSSES: BOSSES,
+    MOVE_BY_NAME: MOVE_BY_NAME,
+    TYPES: TYPES,
+    SPECIES_RANK: SPECIES_RANK,
+    state: state
   };
+
 })();
 </script>

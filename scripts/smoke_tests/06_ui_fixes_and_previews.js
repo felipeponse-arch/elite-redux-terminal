@@ -367,7 +367,10 @@ async function section06() {
     var golpeSinergico = spSinergia.hit.golpes[0];
     var movesReais = T.uniqueIds(spS.lm.map(function (p) { return p[1]; }).concat(spS.tu)).map(function (id) { return T.MOVES[id][0]; });
     var semSinergia = movesReais.filter(function (m) {
-      return !T.ABILITY_SYNERGY[spS.sname].some(function (h) { return (h.golpes || []).indexOf(m) !== -1; });
+      // só golpes de DANO: a fixture usa EVs 100% ofensivos, e desde 2026-09-16
+      // build assim com golpe de cura é rejeitada por outra regra (seção 14).
+      return T.moveRoleOf(m) === "dano" && !T.ABILITY_SYNERGY[spS.sname].some(function (h) { return (h.golpes || []).indexOf(m) !== -1; });
+
     });
     var base = { ability: spSinergia.hit.name, nature: "Adamant", item: "", evs: [4, 252, 0, 0, 0, 252], rationale: "teste" };
 
