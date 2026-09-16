@@ -38,6 +38,13 @@ if ($LASTEXITCODE -ne 0) {
   Write-Output "Testes unitarios falharam - commit bloqueado."
   exit 1
 }
+Write-Output "--- sabotagem das regras (todo defeito do catalogo tem que ser pego) ---"
+npm run test:sabotage --silent
+if ($LASTEXITCODE -ne 0) {
+  Write-Output ""
+  Write-Output "Alguma sabotagem sobreviveu (ou o catalogo esta desatualizado) - commit bloqueado."
+  exit 1
+}
 
 Write-Output "--- build (SkipExtract - so testa o template/dados ja commitados) ---"
 & powershell -NoProfile -File scripts/build.ps1 -SkipExtract

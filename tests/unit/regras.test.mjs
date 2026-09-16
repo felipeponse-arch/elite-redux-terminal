@@ -1,6 +1,6 @@
 // Testes unitários das regras do jogo (item Q3 da pauta técnica, 2026-09-16).
 // Rodam no Node em milissegundos, sem build e sem navegador:
-//   node --test tests/unit/
+//   npm run test:unit
 // Fixtures sempre achadas no dado real, nunca nomes inventados.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -137,4 +137,41 @@ test("build por IA de forma mega no modo temporário recebe a pedra", () => {
   R.state.settings.megaMode = "permanente";
   assert.equal(R.validateAiBuild(sp, raw).item, "Life Orb");
   R.state.settings.megaMode = "temporaria";
+});
+
+test("build por IA com golpe que só funciona em dupla é rejeitada, citando o golpe", () => {
+  const sp = R.SPECIES.find((s) => {
+    if (!s.ab.length || (R.ABILITY_SYNERGY[s.sname] || []).length || R.formFamilyOf(s).length > 1) return false;
+    const nomes = R.availableMovesFor(s).names;
+    return nomes.some((m) => R.moveRoleOf(m) === "dupla") && nomes.filter((m) => R.moveRoleOf(m) === "dano").length >= 3;
+  });
+  assert.ok(sp, "fixture: espécie com golpe de dupla e 3 de dano liberados");
+  const nomes = R.availableMovesFor(sp).names;
+  const dupla = nomes.find((m) => R.moveRoleOf(m) === "dupla");
+  const dano = nomes.filter((m) => R.moveRoleOf(m) === "dano");
+  const motivo = {};
+  const raw = { ability: R.ABILITIES[R.uniqueIds(sp.ab)[0]][0], nature: "Bold", item: "", moves: [...dano.slice(0, 3), dupla], evs: [252, 0, 252, 0, 4, 0] };
+  assert.equal(R.validateAiBuild(sp, raw, motivo), null);
+  assert.match(motivo.txt, new RegExp(dupla));
+  assert.match(motivo.txt, /dupla/);
+});
+
+test("build por IA precisa usar a sinergia ativa quando a espécie tem uma", () => {
+  // espécie cuja sinergia vem de habilidade ESCOLHÍVEL, com golpes com e sem sinergia liberados
+  let f = null;
+  for (const s of R.SPECIES) {
+    const hit = (R.ABILITY_SYNERGY[s.sname] || []).find((h) => h.kind !== "inn" && h.golpes && h.golpes.length);
+    if (!hit || (R.ABILITY_SYNERGY[s.sname] || []).some((h) => h.kind === "inn") || R.formFamilyOf(s).length > 1) continue;
+    const nomes = R.availableMovesFor(s).names;
+    const todosComSinergia = new Set((R.ABILITY_SYNERGY[s.sname] || []).flatMap((h) => h.golpes || []));
+    const comSinergia = hit.golpes.find((g) => nomes.includes(g) && R.moveRoleOf(g) === "dano");
+    const semSinergia = nomes.filter((m) => !todosComSinergia.has(m) && R.moveRoleOf(m) === "dano");
+    if (comSinergia && semSinergia.length >= 4) { f = { s, hit, comSinergia, semSinergia }; break; }
+  }
+  assert.ok(f, "fixture: espécie com sinergia de habilidade escolhível");
+  const base = { ability: f.hit.name, nature: "Bold", item: "", evs: [252, 0, 252, 0, 4, 0] };
+  assert.ok(R.validateAiBuild(f.s, { ...base, moves: [f.comSinergia, ...f.semSinergia.slice(0, 3)] }), "com o golpe potencializado: aceita");
+  const motivo = {};
+  assert.equal(R.validateAiBuild(f.s, { ...base, moves: f.semSinergia.slice(0, 4) }, motivo), null, "sem golpe potencializado: rejeita");
+  assert.match(motivo.txt, /potencializado/);
 });

@@ -31,8 +31,17 @@ export function carregarRegras({ difficulty = "ace", milestone = 0, megaMode = "
   const template = readFileSync(join(root, "artifact_template.html"), "utf8");
   const nomes = [...template.matchAll(/\/\*@regras ([A-Za-z0-9_.]+)\*\//g)].map((m) => m[1]);
   if (!nomes.length) throw new Error("nenhum marcador /*@regras NOME*/ no template");
+  // Sabotagem controlada (tests/run_sabotage.mjs): MUTACAO_ARQUIVO/DE/PARA
+  // trocam um trecho exato de um arquivo só nesta carga, nunca no disco.
+  const mutacao = process.env.MUTACAO_ARQUIVO
+    ? { arquivo: process.env.MUTACAO_ARQUIVO, de: process.env.MUTACAO_DE, para: process.env.MUTACAO_PARA || "" }
+    : null;
   for (const nome of nomes) {
-    const codigo = readFileSync(join(root, "src", "regras", nome), "utf8");
+    let codigo = readFileSync(join(root, "src", "regras", nome), "utf8");
+    if (mutacao && mutacao.arquivo === nome) {
+      if (codigo.split(mutacao.de).length !== 2) throw new Error("trecho da sabotagem não encontrado (ou repetido) em " + nome + ": " + mutacao.de);
+      codigo = codigo.replace(mutacao.de, () => mutacao.para);
+    }
     vm.runInContext(codigo, contexto, { filename: "src/regras/" + nome });
   }
   return contexto;

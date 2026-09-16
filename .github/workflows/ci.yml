@@ -48,6 +48,11 @@ jobs:
       - name: Testes unitários das regras (src/regras)
         run: npm run test:unit
 
+      # Q5: cada defeito do catálogo (tests/unit/mutacoes.mjs) tem que derrubar
+      # algum teste unitário - defeito que sobrevive = regra sem proteção.
+      - name: Teste de sabotagem das regras
+        run: npm run test:sabotage
+
       - name: Instala o Chromium do Playwright
         run: npx playwright install --with-deps chromium
 
