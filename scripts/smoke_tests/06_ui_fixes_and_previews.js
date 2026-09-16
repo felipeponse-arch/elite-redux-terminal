@@ -342,14 +342,22 @@ async function section06() {
       !!semSinergia, semSinergia ? semSinergia.sp.n : "(todas tinham selo)");
     // A sinergia de habilidade ESCOLHÍVEL só vale se for a escolhida: troca a
     // habilidade por uma inexistente e o selo de origem "abi" tem que sumir.
-    if (comSinergia) {
-      var hitsC = T.ABILITY_SYNERGY[comSinergia.sp.sname] || [];
-      var soEscolhivel = hitsC.length > 0 && hitsC.every(function (h) { return h.kind !== "inn"; });
-      if (soEscolhivel) {
-        var trocada = { ability: "Habilidade Que Nao Existe", moves: comSinergia.b.moves };
-        check("sinergia de habilidade escolhível não conta se a build escolheu outra habilidade",
-          T.buildSynergyHtml(comSinergia.sp, trocada) === "");
+    // Antes este teste só rodava se a PRIMEIRA build com selo tivesse sinergia
+    // só de habilidade escolhível - senão pulava em silêncio (achado da Q4,
+    // 2026-09-16). Agora procura uma build que sirva.
+    var soEscolhivel = null;
+    for (var ei = 0; ei < snames.length && !soEscolhivel; ei++) {
+      var spE = T.getSpeciesBySname(snames[ei]);
+      if (!spE) continue;
+      var hitsE = T.ABILITY_SYNERGY[spE.sname] || [];
+      if (hitsE.length && hitsE.every(function (h) { return h.kind !== "inn"; }) && T.buildSynergyHtml(spE, T.BUILDS[snames[ei]])) {
+        soEscolhivel = { sp: spE, b: T.BUILDS[snames[ei]] };
       }
+    }
+    if (achou("build curada com sinergia só de habilidade escolhível", soEscolhivel)) {
+      var trocada = { ability: "Habilidade Que Nao Existe", moves: soEscolhivel.b.moves };
+      check("sinergia de habilidade escolhível não conta se a build escolheu outra habilidade",
+        T.buildSynergyHtml(soEscolhivel.sp, trocada) === "", soEscolhivel.sp.n);
     }
   }
   var spSinergia = null;

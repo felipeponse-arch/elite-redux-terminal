@@ -43,7 +43,7 @@ async function section13() {
   setSearch("Grotom");
   await wait(120);
   var grotomRow = document.querySelector("#species-list .species-row");
-  if (grotomRow) {
+  if (achou("Grotom na busca", grotomRow)) {
     grotomRow.click();
     await wait(60);
     document.getElementById("add-team-btn").click();

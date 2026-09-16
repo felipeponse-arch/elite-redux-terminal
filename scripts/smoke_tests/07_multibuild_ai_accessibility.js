@@ -146,7 +146,7 @@ async function section07() {
   setSearch("Bulbasaur");
   await wait(120);
   const bulbaRowA11y = document.querySelector("#species-list .species-row");
-  if (bulbaRowA11y) {
+  if (achou("Bulbasaur na busca (teste de acessibilidade)", bulbaRowA11y)) {
     bulbaRowA11y.click();
     await wait(30);
     const addBtnA11y = document.getElementById("add-team-btn");

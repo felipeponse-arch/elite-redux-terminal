@@ -13,6 +13,15 @@ function check(name, cond, detail) {
   results.push({ name, pass: !!cond, detail: detail || "" });
 }
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+// Fixture obrigatória (item Q4 da pauta técnica, 2026-09-16): registra uma
+// checagem de que o dado/elemento do teste foi encontrado e devolve o valor.
+// Uso: if (achou("Grotom na busca", row)) { ... } - se a fixture sumir, o
+// teste FALHA com esse nome, em vez de pular o bloco em silêncio e deixar o
+// total de aprovados parecendo verde.
+function achou(nome, valor, detalhe) {
+  check("fixture encontrada: " + nome, !!valor, detalhe);
+  return valor;
+}
 // Achado em auditoria de QA (2026-09-13): os 2 "flakes" documentados há
 // muitas sessões (HP recomputado / anotação migrada) provavelmente vêm
 // do mesmo padrão - um wait(ms) FIXO depois de disparar um evento,

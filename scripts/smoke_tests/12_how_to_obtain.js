@@ -30,7 +30,7 @@ async function section12() {
     await wait(120);
     rows = [...document.querySelectorAll("#species-list .species-row")];
     baseRow = rows.find(function (r) { return r.textContent.indexOf("Battle Bond") === -1 && r.textContent.indexOf("Mega") === -1 && r.textContent.indexOf("Ash") === -1; });
-    if (baseRow) {
+    if (achou("Greninja base na segunda busca", baseRow)) {
       baseRow.click();
       await wait(60);
       var cardBase = [...document.querySelectorAll(".detail-group .card h3")].find(function (h) { return h.textContent === "Como obter"; });
@@ -47,7 +47,7 @@ async function section12() {
   setSearch("Regidrago");
   await wait(120);
   var regidragoRow = document.querySelector("#species-list .species-row");
-  if (regidragoRow) {
+  if (achou("Regidrago na busca", regidragoRow)) {
     regidragoRow.click();
     await wait(60);
     var cardRegi = [...document.querySelectorAll(".detail-group .card h3")].find(function (h) { return h.textContent === "Como obter"; });
