@@ -15,3 +15,8 @@ data/sprites_all/
 # exist yet in this repo (no Node available to generate it in the session
 # that wrote this CI setup).
 node_modules/
+
+# Saída da regressão visual (tests/run_visual_regression.mjs) - imagem atual e
+# diferença de cada execução. Só as baselines em tests/visual_baselines/ são
+# fonte; isto é gerado de novo toda vez.
+tests/visual_diffs/

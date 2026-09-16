@@ -32,8 +32,16 @@ jobs:
         with:
           node-version: "20"
 
+      # npm ci instala exatamente o que está no package-lock.json - npm install
+      # podia resolver versões diferentes das testadas localmente.
       - name: Instala dependências do CI (Playwright)
-        run: npm install
+        run: npm ci
+
+      # Etapa 1 da pauta técnica (S2): dependência com vulnerabilidade alta ou
+      # crítica bloqueia o CI. As dependências são só do processo de teste,
+      # nunca do artifact publicado.
+      - name: Auditoria de dependências (npm audit)
+        run: npm audit --audit-level=high
 
       - name: Instala o Chromium do Playwright
         run: npx playwright install --with-deps chromium
@@ -47,3 +55,27 @@ jobs:
 
       - name: Roda a suíte de smoke test (Parte A) headless
         run: npm run test:ci
+
+      # Etapa 1 da pauta técnica (I2): as duas camadas existiam desde 13/09 mas
+      # não rodavam em lugar nenhum. Ficam só aqui, fora do pre-commit, que
+      # precisa continuar rápido.
+      - name: Fuzz de formatos de save
+        if: ${{ !cancelled() }}
+        run: npm run test:fuzz
+
+      # Não bloqueia: as imagens de referência são geradas no Windows local, e
+      # o runner do GitHub renderiza fonte com antialiasing diferente - falha
+      # aqui é sinal pra olhar as imagens, não prova de regressão. As
+      # diferenças sobem como artefato da execução.
+      - name: Regressão visual (informativa)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: npm run test:visual
+
+      - name: Guarda as diferenças visuais
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: tests/visual_diffs/
+          if-no-files-found: ignore
