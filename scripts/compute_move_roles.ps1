@@ -56,6 +56,12 @@ $SETUP = @("Attack Up 2", "Attack Accuracy Up", "Attack Spatk Up", "Bulk Up", "C
 $PIVO = @("Switch Argument", "Parting Shot", "Baton Pass", "Shed Tail", "Chilly Reception", "Septic Switch")
 $HAZARD = @("Spikes", "Toxic Spikes", "Stealth Rock", "Sticky Web", "Caltrops")
 $PROTECAO = @("Protect", "Endure", "Substitute")
+# So tem efeito em batalha DUPLA (item P3 da pauta tecnica, 2026-09-16) - o
+# alvo e um aliado, ou a funcao e redirecionar/reordenar entre 4 Pokemon.
+# Conferido pela descricao real de cada golpe neste hack: Protect, Wide Guard,
+# Quick Guard, Aromatic Mist e Gear Up ficaram FORA porque aqui tambem afetam
+# o proprio usuario e funcionam no 1x1.
+$DUPLA = @("Follow Me", "Helping Hand", "Ally Switch", "After You", "Instruct", "Quash", "Coaching", "Heal Pulse")
 
 # Chave = POSICAO do golpe na lista, nao o campo `id`. E a posicao que as
 # especies usam pra referenciar golpes (e o que o NextDex oficial faz:
@@ -76,7 +82,8 @@ for ($idx = 0; $idx -lt $moves.Count; $idx++) {
     $desc = ([string]$m["desc"] + " " + [string]$m["lDesc"])
 
     $role = $null
-    if ($CURA -contains $eff) { $role = "cura" }
+    if ($DUPLA -contains $eff) { $role = "dupla" }
+    elseif ($CURA -contains $eff) { $role = "cura" }
     elseif ($SETUP -contains $eff) { $role = "setup" }
     elseif ($PIVO -contains $eff) { $role = "pivo" }
     elseif ($HAZARD -contains $eff) { $role = "hazard" }

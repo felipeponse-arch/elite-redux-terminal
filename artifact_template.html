@@ -1862,7 +1862,7 @@
   // Heal Bell e Refresh curam HP do usuário, por exemplo. Golpe de dano não
   // aparece aqui: moveRoleOf() devolve "dano" pra ele.
   var MOVE_ROLES = JSON.parse(document.getElementById("moveroles").textContent || "{}");
-  var MOVE_ROLE_LABEL_PT = { dano: "dano", cura: "cura", setup: "setup", pivo: "pivô", hazard: "hazard", protecao: "proteção", suporte: "suporte" };
+  var MOVE_ROLE_LABEL_PT = { dano: "dano", cura: "cura", setup: "setup", pivo: "pivô", hazard: "hazard", protecao: "proteção", suporte: "suporte", dupla: "só em batalha dupla" };
   function movePromptLine(id) {
     var mv = MOVES[id];
     var role = moveRoleOf(mv[0]);
@@ -4249,6 +4249,32 @@
   // escritas pro modo permanente ("a pedra só é necessária na 1a evolução,
   // depois libera o slot") - no temporário esse item nunca entra em campo.
   // Não bloqueia nada: explica em qual modo a build funciona.
+  // Observações de contexto numa build (itens P2 e P3 da pauta técnica,
+  // 2026-09-16), só informativas - nunca bloqueiam nem escondem a build:
+  //   - golpe aprendido só por nível ACIMA do level cap atual (as builds do
+  //     Discord são afinadas pro fim de jogo; 36 delas usam golpe acima do
+  //     nível 55). Golpe de tutor nunca conta como acima do cap;
+  //   - golpe que só funciona em batalha dupla, num app pensado pra 1x1.
+  function buildContextNotesHtml(sp, build) {
+    if (!sp || !build || !Array.isArray(build.moves)) return "";
+    var cap = getCurrentCap();
+    var notas = [];
+    if (cap !== null && cap !== undefined) {
+      var acima = [];
+      build.moves.forEach(function (name) {
+        var id = MOVE_ID_BY_NAME[name];
+        if (id === undefined || sp.tu.indexOf(id) !== -1) return;
+        var niveis = sp.lm.filter(function (p) { return p[1] === id; }).map(function (p) { return p[0]; });
+        if (!niveis.length) return;
+        var nivel = Math.min.apply(null, niveis);
+        if (nivel > cap) acima.push(escapeHtml(name) + " (nível " + nivel + ")");
+      });
+      if (acima.length) notas.push("Acima do seu level cap atual (" + cap + "): " + acima.join(", ") + ".");
+    }
+    var dupla = build.moves.filter(function (m) { return moveRoleOf(m) === "dupla"; });
+    if (dupla.length) notas.push("Só funciona em batalha dupla: " + dupla.map(escapeHtml).join(", ") + ".");
+    return notas.map(function (n) { return '<div class="ts-build-note">' + n + '</div>'; }).join("");
+  }
   function megaModeBuildNoteHtml(sp, build) {
     var rule = megaStoneRuleFor(sp);
     if (!rule || !build || rule.stones.indexOf(build.item) !== -1) return "";
@@ -4264,6 +4290,7 @@
       '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, entry)) + '</pre>' +
       itemDescHtml(entry.item) +
       megaModeBuildNoteHtml(sp, entry) +
+      buildContextNotesHtml(sp, entry) +
       buildSynergyHtml(sp, entry) +
       (entry.note ? '<div class="ts-build-note">' + escapeHtml(entry.note) + '</div>' : '') +
       '<button class="text-action-btn use-entry-build-btn" ' + copyAttrs + ' type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
@@ -4729,6 +4756,13 @@
     // palavra do modelo. Só vale aqui, na build por IA - mesma assimetria da
     // regra de sinergia acima: build curada da comunidade que faça isso (ex:
     // Mega Talonflame com Roost) tem um jogador real respondendo por ela.
+    // Formato 1x1 (item P3, 2026-09-16): golpe que só funciona em batalha
+    // dupla é slot desperdiçado aqui. Dura na IA, informativa nas curadas
+    // (buildContextNotesHtml) - mesma assimetria das outras regras.
+    var golpeDupla = raw.moves.filter(function (m) { return moveRoleOf(m) === "dupla"; })[0];
+    if (golpeDupla) {
+      return rejeita("O golpe \"" + golpeDupla + "\" só tem efeito em batalha dupla - o app monta sets pra 1x1.");
+    }
     var fullOffense = Math.max(evs[1], evs[3]) >= 200 && evs[5] >= 200 && (evs[0] + evs[2] + evs[4]) <= 12;
     if (fullOffense) {
       var curaMove = raw.moves.filter(function (m) { return moveRoleOf(m) === "cura"; })[0];
@@ -5174,6 +5208,7 @@
       "COERENCIA PAPEL x GOLPE: cada um dos 4 golpes precisa servir ao papel escolhido. Build 100% ofensiva " +
       "(EVs em ataque e velocidade, nada em HP/Def/SpD) NAO leva golpe de papel 'cura' e leva pelo menos 2 golpes " +
       "de dano - uma build assim que ignore isso vai ser REJEITADA. Se quiser cura, invista em bulk e explique na rationale.\n" +
+      "FORMATO 1x1: golpe de papel 'dupla' (Follow Me, Helping Hand, Ally Switch...) nao faz nada numa batalha de um contra um e e REJEITADO.\n" +
       ((megaNames.length || isMegaForm(sp)) ? (megaModePromptLine() + "\n" +
         "Esta build e para a forma " + sp.n + " - habilidade e golpes SO desta forma, nunca misture com os de outra." +
         formFamilyPromptNote(sp) + "\n") : "") +
@@ -5530,6 +5565,7 @@
             '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
             itemDescHtml(build.item) +
             megaModeBuildNoteHtml(sp, build) +
+            buildContextNotesHtml(sp, build) +
             buildSynergyHtml(sp, build) +
             (build.note ? '<div class="ts-build-note">' + escapeHtml(build.note) + '</div>' : '') +
           '</div>'
@@ -6909,6 +6945,7 @@
     unitTypeMult: unitTypeMult,
     megaStoneRuleFor: megaStoneRuleFor,
     megaModeBuildNoteHtml: megaModeBuildNoteHtml,
+    buildContextNotesHtml: buildContextNotesHtml,
     stonesOf: stonesOf,
     abilityTypeMod: abilityTypeMod,
     USABLE_TYPES: USABLE_TYPES,
