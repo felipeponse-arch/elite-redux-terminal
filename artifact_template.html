@@ -4637,8 +4637,16 @@
   function validateAiBuild(sp, raw, motivo) {
     if (!raw || typeof raw !== "object") return null;
     var validAbilities = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
-    if (typeof raw.ability !== "string" || validAbilities.indexOf(raw.ability) === -1) return null;
-    if (typeof raw.nature !== "string" || ALL_NATURES.indexOf(raw.nature) === -1) return null;
+    // Motivo específico em cada rejeição (2026-09-16): a nova tentativa
+    // automática (U3) repassa o motivo à IA - "golpe inválido" genérico a faz
+    // corrigir às cegas; o nome exato do que falhou, não.
+    function rejeita(txt) { if (motivo) motivo.txt = txt; return null; }
+    if (typeof raw.ability !== "string" || validAbilities.indexOf(raw.ability) === -1) {
+      return rejeita("A habilidade \"" + raw.ability + "\" não é uma das escolhíveis do " + sp.n + " (" + validAbilities.join(", ") + ").");
+    }
+    if (typeof raw.nature !== "string" || ALL_NATURES.indexOf(raw.nature) === -1) {
+      return rejeita("A natureza \"" + raw.nature + "\" não existe.");
+    }
     // Trava por level cap (achado real, 2026-09-12: o editor manual de "Meu
     // build" já filtrava golpes de nível acima do cap desde 2026-09-10, mas
     // esta validação - a mesma usada pra build gerada por IA - nunca
@@ -4648,8 +4656,12 @@
     var vabCap = getCurrentCap();
     var vabAllowedLm = sp.lm.filter(function (p) { return vabCap === null || vabCap === undefined || p[0] <= vabCap; });
     var validMoves = uniqueIds(vabAllowedLm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return MOVES[id][0]; });
-    if (!Array.isArray(raw.moves) || raw.moves.length !== 4) return null;
-    for (var i = 0; i < 4; i++) { if (validMoves.indexOf(raw.moves[i]) === -1) return null; }
+    if (!Array.isArray(raw.moves) || raw.moves.length !== 4) return rejeita("A build precisa de exatamente 4 golpes.");
+    for (var i = 0; i < 4; i++) {
+      if (validMoves.indexOf(raw.moves[i]) === -1) {
+        return rejeita("O golpe \"" + raw.moves[i] + "\" não está no movepool do " + sp.n + " liberado até o level cap atual.");
+      }
+    }
     // ASSIMETRIA DELIBERADA (decisão do usuário, 2026-09-16) - esta regra é
     // DURA aqui, nas builds geradas por IA, e apenas INFORMATIVA nas builds
     // curadas de builds.json (lá ela vira o selo de buildSynergyHtml(), que
@@ -5205,8 +5217,20 @@
       var raw = await sample.json(prompt, { tools: buildStandardAiTools() });
       var motivoRejeicao = {};
       var validated = validateAiBuild(sp, raw, motivoRejeicao);
+      // Uma nova tentativa automática, já dizendo à IA por que a primeira foi
+      // rejeitada (item U3 da pauta técnica, 2026-09-16) - antes o trabalho de
+      // "tente de novo" ficava com o jogador. Só UMA: cada chamada custa, e se
+      // a segunda também falha o problema provavelmente não é azar.
       if (!validated) {
-        if (statusEl) statusEl.textContent = motivoRejeicao.txt || "A resposta não bateu com os dados reais deste Pokémon - tente de novo.";
+        if (statusEl) statusEl.textContent = "A primeira sugestão não passou na validação - pedindo outra...";
+        var motivoAnterior = motivoRejeicao.txt || "a build citou habilidade, golpe, natureza ou formato fora do permitido para esta espécie.";
+        raw = await sample.json(prompt + "\n\nSUA RESPOSTA ANTERIOR FOI REJEITADA pela validacao automatica. Motivo: " + motivoAnterior +
+          " Corrija isso e responda de novo, no mesmo formato JSON.", { tools: buildStandardAiTools() });
+        motivoRejeicao = {};
+        validated = validateAiBuild(sp, raw, motivoRejeicao);
+      }
+      if (!validated) {
+        if (statusEl) statusEl.textContent = (motivoRejeicao.txt || "A resposta não bateu com os dados reais deste Pokémon.") + " (já tentei 2 vezes)";
         return;
       }
       // Defesa em profundidade (achado real do usuário, 2026-09-12): o

@@ -21,6 +21,7 @@ async function runAllSections() {
   await section13();
   await section14();
   await section15();
+  await section16();
 
   localStorage.clear();
 
