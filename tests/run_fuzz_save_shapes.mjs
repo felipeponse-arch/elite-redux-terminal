@@ -81,6 +81,11 @@ async function waitForServer(url) {
   while (Date.now() - start < SERVER_WAIT_TIMEOUT_MS) {
     try {
       const resp = await fetch(url);
+      // Lê o corpo inteiro: o dev_server.ps1 atende UMA requisição por vez, e
+      // uma resposta de 5,6 MB deixada sem ler trava o servidor escrevendo nela
+      // - a navegação do navegador logo depois nunca era atendida (CI #1
+      // morreu assim, page.goto em timeout de 30s, no Node 20 do GitHub).
+      await resp.arrayBuffer();
       if (resp.ok) return;
     } catch (e) {}
     await new Promise((r) => setTimeout(r, SERVER_WAIT_INTERVAL_MS));
