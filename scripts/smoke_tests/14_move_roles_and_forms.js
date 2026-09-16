@@ -64,7 +64,6 @@ async function section14() {
   var vazou = null;
   (T.BOSSES || []).some(function (b) {
     var tipos = T.computeBossAttackTypes(b);
-
     var tiposDeDano = {};
     ["party", "insane", "hell"].forEach(function (k) {
       (b[k] || []).forEach(function (m) {

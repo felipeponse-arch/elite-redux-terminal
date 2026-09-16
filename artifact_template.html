@@ -1547,6 +1547,13 @@
             <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Último badge conquistado
               <select id="settings-milestone" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;"></select>
             </label>
+            <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Mega Evolução
+              <select id="settings-mega-mode" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;">
+                <option value="temporaria">Temporária (padrão)</option>
+                <option value="permanente">Permanente</option>
+              </select>
+              <span style="font-weight:400;font-size:11px;color:var(--text-dim);">Temporária: volta à forma base ao fim de cada batalha, e a pedra fica no item. Permanente: fica Mega até você trocar a forma fora da batalha.</span>
+            </label>
           </div>
           <div class="stat-total" style="margin-top:16px;">Level cap atual <b class="mono" id="cap-display" style="font-size:16px;"></b></div>
           <p style="color:var(--text-dim);font-size:11px;margin-top:10px;" id="settings-note"></p>
@@ -1880,18 +1887,80 @@
   function formFamilyPromptNote(sp) {
     var others = formFamilyOf(sp).filter(function (f) { return f.x !== sp.x; });
     if (!others.length) return "";
-    return ", outras formas desta MESMA criatura que o jogador pode usar: " + others.map(function (f) {
+    return ", outras formas desta MESMA criatura (cada uma com dado proprio, nunca misture): " + others.map(function (f) {
       var r = SPECIES_RANK[f.sname];
-      return f.n + " [sname " + f.sname + ", " + speciesTypeNames(f).join("/") + ", Velocidade base " + f.b[5] +
-        (r ? ", rank " + r.tier : "") + ", innate: " + f.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ") + "]";
+      var stones = stonesOf(f);
+      return f.n + " [sname " + f.sname + ", " + speciesTypeNames(f).join("/") + ", status base " + f.b.join("/") +
+        (r ? ", rank " + r.tier : "") +
+        ", habilidades escolhiveis: " + uniqueIds(f.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ") +
+        ", innate: " + f.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ") +
+        (stones.length ? ", pedra: " + stones.join(" ou ") : "") + "]";
     }).join("; ");
   }
+  // Regra do modo de mega pra qualquer prompt que raciocine sobre time/caixa.
+  function megaModePromptLine() {
+    return megaMode() === "permanente"
+      ? "MODO DE MEGA EVOLUCAO: PERMANENTE - o Pokemon fica na forma mega depois da batalha, ate o jogador trocar a forma manualmente fora da batalha. Base e mega sao escolhas separadas e trocaveis entre lutas; a pedra so e necessaria na primeira mega (depois o slot de item fica livre)."
+      : "MODO DE MEGA EVOLUCAO: TEMPORARIA (padrao) - o Pokemon volta a forma base ao fim de CADA batalha. Toda luta comeca na forma base (habilidades de entrada, tipos e status da base valem ao entrar) e so depois vira mega; a pedra mega ocupa o slot de item o tempo todo. Avalie a criatura pelas DUAS formas juntas.";
+  }
   function formFamilyOf(sp) {
-
     if (!sp) return [];
     var baseX = MEGA_BASE_BY_X[sp.x];
     var base = baseX !== undefined ? getSpeciesByX(baseX) : sp;
     return [base].concat(megaFormsOf(base));
+  }
+  function isMegaForm(sp) { return !!sp && MEGA_BASE_BY_X[sp.x] !== undefined; }
+
+  // Modo de Mega Evolução (regra de jogo passada pelo usuário, 2026-09-16) -
+  // o jogo tem DOIS modos e eles mudam o raciocínio:
+  //   - Temporária (padrão): o Pokémon volta à forma base ao fim de cada
+  //     batalha. Toda luta começa na base e vira mega no meio - então a
+  //     criatura precisa ser avaliada pelas DUAS formas juntas, e a pedra
+  //     ocupa o slot de item o tempo todo.
+  //   - Permanente: fica mega até o jogador trocar a forma manualmente fora
+  //     da batalha. Cada forma é uma escolha separada (e trocável), e a pedra
+  //     só é necessária na primeira mega - o slot fica livre depois.
+  function megaMode() { return state.settings.megaMode === "permanente" ? "permanente" : "temporaria"; }
+
+  // Pedras de cada forma mega, a partir de data/mega_forms.json (pedra ->
+  // forma, cruzado com o fork de Showdown do próprio jogo). Não usa o código
+  // de item da evolução no dado bruto: em 19 megas ele não bate com o nome do
+  // item (ex: ITEM_VENUSAURITE vs "Venusaurite X"/"Venusaurite Y").
+  var STONES_BY_MEGA_SNAME = Object.create(null);
+  Object.keys(MEGA_FORMS).forEach(function (stone) {
+    if (ITEMS.indexOf(stone) === -1) return;
+    var sn = MEGA_FORMS[stone];
+    (STONES_BY_MEGA_SNAME[sn] = STONES_BY_MEGA_SNAME[sn] || []).push(stone);
+  });
+  function stonesOf(megaSp) { return (megaSp && STONES_BY_MEGA_SNAME[megaSp.sname]) || []; }
+
+  // Como a criatura realmente LUTA, conforme o modo. Cada "unidade" tem as
+  // formas que ela ocupa numa mesma batalha (`forms`) e a forma principal
+  // (`main`, a que dá nome e rank):
+  //   - permanente: uma unidade por forma (base OU mega - o jogador escolhe);
+  //   - temporária: a base sozinha (sem mega-evoluir) e, pra cada mega,
+  //     base+mega juntas (entra base, termina mega).
+  // Cada forma continua avaliada com o próprio dado - a unidade só diz quais
+  // formas contam juntas.
+  function battleUnitsOf(owned) {
+    var fam = formFamilyOf(owned);
+    if (!fam.length) return [];
+    var base = fam[0];
+    var megas = fam.slice(1);
+    if (megaMode() === "permanente") return fam.map(function (f) { return { forms: [f], main: f, owned: owned }; });
+    return [{ forms: [base], main: base, owned: owned }].concat(megas.map(function (m) {
+      return { forms: [base, m], main: m, owned: owned };
+    }));
+  }
+  // Multiplicador de um tipo de ataque contra a unidade: o PIOR entre as
+  // formas dela - no modo temporário a criatura passa parte da luta em cada.
+  function unitTypeMult(unit, atk) {
+    var worst = null;
+    unit.forms.forEach(function (f) {
+      var m = abilityTypeMod(atk, f).mult;
+      if (worst === null || m > worst) worst = m;
+    });
+    return worst;
   }
 
   // Species lookup by exact display name - "Comparar builds" (Fase 2,
@@ -2217,7 +2286,9 @@
     selected: null,
     team: [],
     box: [],
-    settings: { difficulty: "ace", milestone: 0 },
+    // megaMode (2026-09-16, regra de jogo passada pelo usuário): o Elite Redux
+    // tem dois modos de Mega Evolução - ver megaMode() e battleUnitsOf().
+    settings: { difficulty: "ace", milestone: 0, megaMode: "temporaria" },
     savedTeams: [],
     // snames from the last loaded save that this data build doesn't
     // recognise (e.g. a save made on a newer game version). Kept verbatim
@@ -2295,6 +2366,7 @@
     }
     if (save.settings && typeof save.settings === "object") {
       if (save.settings.difficulty) state.settings.difficulty = save.settings.difficulty;
+      if (save.settings.megaMode === "permanente" || save.settings.megaMode === "temporaria") state.settings.megaMode = save.settings.megaMode;
       if (typeof save.settings.milestone === "number") state.settings.milestone = save.settings.milestone;
       // Fase 1 quality-of-life, 2026-09-09: remember sort order + type
       // filter between sessions - both used to silently reset on reload.
@@ -4144,12 +4216,26 @@
   // silently overwritten as a side effect), "+ Usar como meu build" is the
   // new, explicit write into state.customBuilds, same button/label
   // convention already shipped on the boss party card.
+  // Aviso em build (curada ou salva) de forma mega que NÃO segura a pedra,
+  // quando o jogador joga no modo temporário. Várias builds do Discord foram
+  // escritas pro modo permanente ("a pedra só é necessária na 1a evolução,
+  // depois libera o slot") - no temporário esse item nunca entra em campo.
+  // Não bloqueia nada: explica em qual modo a build funciona.
+  function megaModeBuildNoteHtml(sp, build) {
+    var rule = megaStoneRuleFor(sp);
+    if (!rule || !build || rule.stones.indexOf(build.item) !== -1) return "";
+    return '<div class="ts-build-note">Mega temporária: a ' + escapeHtml(sp.n) + ' precisa segurar ' +
+      escapeHtml(rule.stones.join(" ou ")) + ' o tempo todo, então ' +
+      (build.item ? escapeHtml(build.item) + ' só funciona' : 'esta build só funciona') +
+      ' no modo permanente. Troque o modo em Progresso se for o seu caso.</div>';
+  }
   function buildEntryHtml(sp, entry, metaHtml, copyAttrs) {
     return '<div class="bh-entry">' +
       '<div class="bh-meta">' + metaHtml +
       '<button class="bh-copy" ' + copyAttrs + ' type="button" title="Copiar este set">copiar</button></div>' +
       '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, entry)) + '</pre>' +
       itemDescHtml(entry.item) +
+      megaModeBuildNoteHtml(sp, entry) +
       buildSynergyHtml(sp, entry) +
       (entry.note ? '<div class="ts-build-note">' + escapeHtml(entry.note) + '</div>' : '') +
       '<button class="text-action-btn use-entry-build-btn" ' + copyAttrs + ' type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
@@ -4507,6 +4593,20 @@
   // uma explicação específica pra mostrar ao usuário quando rejeita. Sem ele
   // o comportamento é o de antes (retorna null e quem chamou mostra a
   // mensagem genérica).
+  // No modo temporário, uma forma mega só existe na luta se estiver segurando
+  // a pedra - o slot de item é dela. No permanente (ou pra forma base, que
+  // pode lutar sem mega-evoluir) não há regra. Mega sem pedra conhecida
+  // (Primal por orbe fora do mega_forms, Rayquaza por golpe) também fica sem
+  // regra - nunca inventar item.
+  function megaStoneRuleFor(sp) {
+    if (megaMode() !== "temporaria" || !isMegaForm(sp)) return null;
+    var stones = stonesOf(sp);
+    if (!stones.length) return null;
+    return {
+      stones: stones,
+      prompt: "ITEM OBRIGATORIO: no modo temporario esta forma so existe segurando a pedra - item tem que ser " + stones.join(" ou ") + "."
+    };
+  }
   function validateAiBuild(sp, raw, motivo) {
     if (!raw || typeof raw !== "object") return null;
     var validAbilities = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
@@ -4564,6 +4664,18 @@
       }
     }
     var item = (typeof raw.item === "string" && ITEMS.indexOf(raw.item) !== -1) ? raw.item : "";
+    // Modo de mega temporária: build de forma mega PRECISA segurar a pedra
+    // (ver megaStoneRuleFor). Com uma pedra só, corrige sozinho em vez de
+    // rejeitar - mesmo espírito "soft" do resto do item.
+    var stoneRule = megaStoneRuleFor(sp);
+    if (stoneRule && stoneRule.stones.indexOf(item) === -1) {
+      if (stoneRule.stones.length === 1) {
+        item = stoneRule.stones[0];
+      } else {
+        if (motivo) motivo.txt = "No modo de mega temporária a " + sp.n + " precisa segurar a pedra (" + stoneRule.stones.join(" ou ") + ") - a build sugerida usou outro item. Tente gerar de novo.";
+        return null;
+      }
+    }
     var evs = Array.isArray(raw.evs) && raw.evs.length === 6 ? raw.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0];
     var evSum = evs.reduce(function (a, v) { return a + v; }, 0);
     if (evSum > 510) {
@@ -5008,6 +5120,7 @@
     var movepoolLines = uniqueIds(allowedLm.map(function (p) { return p[1]; }).concat(sp.tu)).map(movePromptLine);
     var takenItems = teamItemsInUse(sp.x);
     var megaNames = megaFormsOf(sp).map(function (m) { return m.n; });
+    var megaStoneRule = megaStoneRuleFor(sp);
     var archetypeParts = archetypeBuildGuidance();
     var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon). " +
       "Monte um set competitivo, formato Pokemon Showdown, para o Pokemon " + sp.n +
@@ -5022,8 +5135,10 @@
       "COERENCIA PAPEL x GOLPE: cada um dos 4 golpes precisa servir ao papel escolhido. Build 100% ofensiva " +
       "(EVs em ataque e velocidade, nada em HP/Def/SpD) NAO leva golpe de papel 'cura' e leva pelo menos 2 golpes " +
       "de dano - uma build assim que ignore isso vai ser REJEITADA. Se quiser cura, invista em bulk e explique na rationale.\n" +
-      (megaNames.length ? ("Esta especie tambem pode Mega-evoluir para: " + megaNames.join(", ") + ". Esta build e para a forma " +
-        sp.n + " - use so habilidades e golpes desta forma, nunca misture com os da mega.\n") : "") +
+      ((megaNames.length || isMegaForm(sp)) ? (megaModePromptLine() + "\n" +
+        "Esta build e para a forma " + sp.n + " - habilidade e golpes SO desta forma, nunca misture com os de outra." +
+        formFamilyPromptNote(sp) + "\n") : "") +
+      (megaStoneRule ? (megaStoneRule.prompt + "\n") : "") +
       "Itens de batalha reais disponiveis - escolha UM destes (ou deixe vazio se nenhum fizer sentido): " + AI_ITEM_POOL.join(", ") + "\n" +
       (takenItems.length ? ("Itens JA EM USO por outros membros do time atual - NUNCA repita nenhum destes, escolha outro item ou deixe vazio: " + takenItems.join(", ") + "\n") : "") +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
@@ -5344,7 +5459,6 @@
   }
 
   // ---------------- team roster rendering ----------------
-
   function renderTeam() {
     var slotsEl = document.getElementById("team-slots");
     var members = state.team.map(getSpeciesByX).filter(Boolean);
@@ -5364,6 +5478,7 @@
               '<button class="ts-build-copy" data-x="' + sp.x + '" type="button" title="Copiar este set">copiar</button></div>' +
             '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
             itemDescHtml(build.item) +
+            megaModeBuildNoteHtml(sp, build) +
             buildSynergyHtml(sp, build) +
             (build.note ? '<div class="ts-build-note">' + escapeHtml(build.note) + '</div>' : '') +
           '</div>'
@@ -5709,10 +5824,12 @@
   // do chefão o candidato resiste/é imune, menos quantos ele é fraco.
   // Nunca sugere uma troca lateral ou pior - só quando a caixa tem alguém
   // genuinamente mais seguro que o melhor que já está no time.
-  function bossSafetyScore(sp, atkTypes) {
+  // Aceita uma espécie ou uma unidade de batalha (battleUnitsOf).
+  function bossSafetyScore(spOrUnit, atkTypes) {
+    var unit = spOrUnit.forms ? spOrUnit : { forms: [spOrUnit] };
     var score = 0;
     atkTypes.forEach(function (t) {
-      var mult = abilityTypeMod(t, sp).mult;
+      var mult = unitTypeMult(unit, t);
       if (mult === 0) score -= 2;
       else if (mult < 1) score -= 1;
       else if (mult >= 2) score += 1;
@@ -5726,27 +5843,28 @@
     var boxMembers = state.box.map(getSpeciesByX).filter(Boolean);
     if (!teamMembers.length || !boxMembers.length) return null;
 
-    // Cada membro (time e caixa) é avaliado na MELHOR das suas formas (base
-    // ou mega - ver formFamilyOf, 2026-09-16): um Charizard na caixa que
-    // resiste mal ao chefão na forma base pode ser justamente a resposta como
-    // Mega Charizard Y. Do lado do time vale o mesmo, senão a comparação
-    // sugeriria trocar um membro que já resolve a luta mega-evoluindo.
+    // Cada membro (time e caixa) é avaliado pelas unidades de batalha dele
+    // (battleUnitsOf, conforme o modo de mega): um Charizard na caixa que
+    // resiste mal ao chefão na base pode ser a resposta como Mega Charizard Y.
+    // No modo temporário a unidade mega inclui a base (toda luta começa nela).
+    // Do lado do time vale o mesmo, senão a comparação sugeriria trocar um
+    // membro que já resolve a luta mega-evoluindo.
     var teamBestScore = null;
     teamMembers.forEach(function (owned) {
-      formFamilyOf(owned).forEach(function (sp) {
-        var s = bossSafetyScore(sp, atkTypes);
+      battleUnitsOf(owned).forEach(function (unit) {
+        var s = bossSafetyScore(unit, atkTypes);
         if (teamBestScore === null || s < teamBestScore) teamBestScore = s;
       });
     });
 
     var boxBest = null;
     boxMembers.forEach(function (owned) {
-      formFamilyOf(owned).forEach(function (sp) {
-        var s = bossSafetyScore(sp, atkTypes);
-        var r = SPECIES_RANK[sp.sname];
+      battleUnitsOf(owned).forEach(function (unit) {
+        var s = bossSafetyScore(unit, atkTypes);
+        var r = SPECIES_RANK[unit.main.sname];
         var rankScore = r ? r.score : 0;
         if (!boxBest || s < boxBest.score || (s === boxBest.score && rankScore > boxBest.rankScore)) {
-          boxBest = { sp: sp, owned: owned, score: s, rankScore: rankScore };
+          boxBest = { unit: unit, sp: unit.main, owned: owned, score: s, rankScore: rankScore };
         }
       });
     });
@@ -5754,7 +5872,7 @@
 
     var reason = null;
     atkTypes.forEach(function (t) {
-      var mult = abilityTypeMod(t, boxBest.sp).mult;
+      var mult = unitTypeMult(boxBest.unit, t);
       if (!reason || mult < reason.mult) reason = { t: t, mult: mult };
     });
     return { sp: boxBest.sp, owned: boxBest.owned, reasonType: reason.t, reasonMult: reason.mult };
@@ -5770,31 +5888,35 @@
     var risks = computeSharedRisks(teamMembers);
     if (!risks.length) return null;
     var best = null;
-    // Base e mega da mesma criatura (formFamilyOf, 2026-09-16) - a nota cita
-    // a forma que de fato resolve a fraqueza.
-    formFamilyOf(owned).forEach(function (sp) {
+    // Unidades de batalha da criatura (battleUnitsOf, conforme o modo de
+    // mega) - a nota cita a forma que de fato resolve a fraqueza.
+    battleUnitsOf(owned).forEach(function (unit) {
       risks.forEach(function (r) {
-        var mult = abilityTypeMod(r.t, sp).mult;
-        if (mult < 1 && (!best || mult < best.mult)) best = { sp: sp, t: r.t, mult: mult, n: r.n };
+        var mult = unitTypeMult(unit, r.t);
+        if (mult < 1 && (!best || mult < best.mult)) best = { sp: unit.main, owned: owned, t: r.t, mult: mult, n: r.n };
       });
     });
     if (!best) return null;
     var verb = best.mult === 0 ? "é imune a" : "resiste bem a";
-    var who = best.sp.x === owned.x ? escapeHtml(owned.n) : escapeHtml(best.sp.n) + " (mega-evoluindo)";
+    var who = best.sp.x === owned.x ? escapeHtml(owned.n) : escapeHtml(best.sp.n) + megaOfNote(best);
     return who + " " + verb + " " + best.t + " (fraqueza compartilhada por " + best.n + " do time atual)";
   }
 
-  // " (seu Charizard mega-evoluído)" quando a sugestão é a forma mega de quem
-  // está no roster, "" quando é a própria forma que está lá.
+  // Nota curta quando a sugestão é outra forma de quem está no roster -
+  // texto muda com o modo de mega, porque a situação real é diferente.
   function megaOfNote(s) {
-    return s.owned && s.owned.x !== s.sp.x ? " (seu " + escapeHtml(s.owned.n) + " mega-evoluído)" : "";
+    if (!s.owned || s.owned.x === s.sp.x) return "";
+    if (!isMegaForm(s.sp)) return " (seu " + escapeHtml(s.owned.n) + " na forma base)";
+    return megaMode() === "permanente"
+      ? " (seu " + escapeHtml(s.owned.n) + " mega-evoluído)"
+      : " (seu " + escapeHtml(s.owned.n) + ", que entra na forma base e mega-evolui na luta)";
   }
-  // Melhor rank entre as formas da criatura - mesma ideia de formFamilyOf.
+  // Melhor rank entre as unidades de batalha da criatura.
   function bestRankForm(owned) {
     var best = null;
-    formFamilyOf(owned).forEach(function (sp) {
-      var r = SPECIES_RANK[sp.sname];
-      if (r && (!best || r.score > best.score)) best = { sp: sp, owned: owned, score: r.score, tier: r.tier };
+    battleUnitsOf(owned).forEach(function (unit) {
+      var r = SPECIES_RANK[unit.main.sname];
+      if (r && (!best || r.score > best.score)) best = { sp: unit.main, owned: owned, score: r.score, tier: r.tier };
     });
     return best;
   }
@@ -6631,6 +6753,18 @@
       state.settings.milestone = parseInt(msSel.value, 10);
       afterCapChange();
     });
+    var megaSel = document.getElementById("settings-mega-mode");
+    megaSel.value = megaMode();
+    megaSel.addEventListener("change", function () {
+      state.settings.megaMode = megaSel.value === "permanente" ? "permanente" : "temporaria";
+      saveSettings();
+      renderTeam();
+      scheduleDashboardRefresh();
+      if (document.getElementById("dex-shell").classList.contains("show-detail") && state.selected !== null) {
+        selectSpecies(state.selected);
+      }
+      flashToast("Mega Evolução: modo " + (megaMode() === "permanente" ? "permanente" : "temporário"));
+    });
     renderCapDisplay();
 
     // Acessibilidade (checklist eMAG, 2026-09-13) - reflete o que já foi
@@ -6718,8 +6852,14 @@
     MOVE_BY_NAME: MOVE_BY_NAME,
     TYPES: TYPES,
     SPECIES_RANK: SPECIES_RANK,
+    battleUnitsOf: battleUnitsOf,
+    unitTypeMult: unitTypeMult,
+    megaStoneRuleFor: megaStoneRuleFor,
+    megaModeBuildNoteHtml: megaModeBuildNoteHtml,
+    stonesOf: stonesOf,
+    abilityTypeMod: abilityTypeMod,
+    USABLE_TYPES: USABLE_TYPES,
     state: state
   };
-
 })();
 </script>

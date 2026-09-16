@@ -64,7 +64,6 @@ async function main() {
     if (process.env.CI_SMOKE_VERBOSE) {
       for (const r of results) console.log(`${r.pass ? "PASS" : "FAIL"}  ${r.name}${r.detail ? "  (" + JSON.stringify(r.detail) + ")" : ""}`);
     }
-
     console.log(`\n=== smoke_test_suite Parte A: ${results.length - fails.length}/${results.length} passaram ===\n`);
 
     if (fails.length) {

@@ -177,7 +177,6 @@ async function section10() {
   // reversível, e o Charizard que a seção 08 evoluiu volta a Charmeleon quando
   // o cap cai pra 18 - trazendo a build salva dele junto (mesma criatura).
   var charBuild27 = (saveAfter27.customBuilds["SPECIES_CHARMELEON"] || []).filter(function (b) { return b.source === "ia"; })[0];
-
   check("build por IA que insiste no item já usado por outro membro tem o item removido, não a build inteira rejeitada",
     !!charBuild27 && charBuild27.item === "" && charBuild27.ability === "Flame Body",
     charBuild27);
