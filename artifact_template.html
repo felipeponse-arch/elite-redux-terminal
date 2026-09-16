@@ -3261,6 +3261,35 @@
       '<div class="abi-desc">' + escapeHtml(desc) + '</div>' + synergyHtml + '</div>';
   }
 
+  // Selo de sinergia ATIVA de uma build concreta - 2026-09-16, ideia do
+  // Playtester de Build. Diferente de abilityCard() acima (que mostra o
+  // potencial da ESPÉCIE, habilidade por habilidade), este olha a build que
+  // está na tela: cruza os 4 golpes escolhidos com a habilidade escolhida +
+  // as innates, e só fala quando a combinação de fato acontece.
+  // Decisão de UX (mesma passagem): quando não há sinergia, não mostra NADA -
+  // nunca um aviso de ausência. Das 189 builds curadas, 99 pertencem a
+  // espécies sem nenhuma sinergia possível, então um aviso ali leria como
+  // defeito onde não existe defeito. Silêncio é neutro; o selo é só ganho.
+  function buildSynergyHtml(sp, build) {
+    if (!sp || !build || !build.moves) return "";
+    var hits = ABILITY_SYNERGY[sp.sname];
+    if (!hits || !hits.length) return "";
+    for (var i = 0; i < hits.length; i++) {
+      var h = hits[i];
+      // innate está sempre ativa; habilidade escolhível só conta se for
+      // justamente a que esta build escolheu (mesmo critério da regra dura
+      // aplicada às builds de IA em validateAiBuild).
+      if (h.kind !== "inn" && h.name !== build.ability) continue;
+      var casados = (h.golpes || []).filter(function (g) { return build.moves.indexOf(g) !== -1; });
+      if (!casados.length) continue;
+      var texto = casados.length <= 2 ? casados.join(" e ") : casados.slice(0, 2).join(", ") + " e mais " + (casados.length - 2);
+      var via = h.kind === "inn" ? "innate " + h.name : h.name;
+      return '<div class="abi-synergy" title="Combo real confirmado nesta build: ' + escapeHtml(h.categoria) + '">' +
+        '&#9889; ' + escapeHtml(via) + ' potencializa ' + escapeHtml(texto) + '</div>';
+    }
+    return "";
+  }
+
   function evoConditionText(ev) {
     var kind = EVOKINDS[ev[0]] || "";
     var rs = ev[1];
@@ -4002,6 +4031,7 @@
       '<button class="bh-copy" ' + copyAttrs + ' type="button" title="Copiar este set">copiar</button></div>' +
       '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, entry)) + '</pre>' +
       itemDescHtml(entry.item) +
+      buildSynergyHtml(sp, entry) +
       (entry.note ? '<div class="ts-build-note">' + escapeHtml(entry.note) + '</div>' : '') +
       '<button class="text-action-btn use-entry-build-btn" ' + copyAttrs + ' type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
     '</div>';
@@ -4374,6 +4404,18 @@
     var validMoves = uniqueIds(vabAllowedLm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return MOVES[id][0]; });
     if (!Array.isArray(raw.moves) || raw.moves.length !== 4) return null;
     for (var i = 0; i < 4; i++) { if (validMoves.indexOf(raw.moves[i]) === -1) return null; }
+    // ASSIMETRIA DELIBERADA (decisão do usuário, 2026-09-16) - esta regra é
+    // DURA aqui, nas builds geradas por IA, e apenas INFORMATIVA nas builds
+    // curadas de builds.json (lá ela vira o selo de buildSynergyHtml(), que
+    // nunca bloqueia nada). O critério não é conveniência, é PROCEDÊNCIA: numa
+    // build curada, um jogador real da comunidade já se responsabilizou por
+    // ela na thread do Discord; numa gerada por IA, ninguém se responsabilizou.
+    // A trava existe pra suprir a ausência de quem responda pela build, não
+    // porque set sem sinergia seja necessariamente ruim - o Playtester de Build
+    // mostrou o contrário com dado: das 17 builds curadas que não cumprem a
+    // regra, 9 são sets defensivos/utilitários legítimos (Duelumber e Luxzero
+    // Mega têm 4 golpes de status), e forçar a regra neles mataria build boa.
+    //
     // Regra do Especialista em Meta, pedida pelo usuário em 2026-09-15: uma
     // build sugerida tem que APROVEITAR o que torna esta espécie especial
     // neste hack - pelo menos um dos 4 golpes precisa ser potencializado por
@@ -5154,6 +5196,7 @@
               '<button class="ts-build-copy" data-x="' + sp.x + '" type="button" title="Copiar este set">copiar</button></div>' +
             '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
             itemDescHtml(build.item) +
+            buildSynergyHtml(sp, build) +
             (build.note ? '<div class="ts-build-note">' + escapeHtml(build.note) + '</div>' : '') +
           '</div>'
         ) : (
@@ -6434,7 +6477,13 @@
   // nada aqui altera estado do app, salva build ou toca localStorage.
   window.__erTest = {
     validateAiBuild: validateAiBuild,
+    buildSynergyHtml: buildSynergyHtml,
     ABILITY_SYNERGY: ABILITY_SYNERGY,
+    BUILDS: BUILDS,
+    getSpeciesBySname: function (sname) {
+      for (var i = 0; i < SPECIES.length; i++) { if (SPECIES[i].sname === sname) return SPECIES[i]; }
+      return null;
+    },
     SPECIES: SPECIES,
     MOVES: MOVES,
     uniqueIds: uniqueIds

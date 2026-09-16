@@ -305,6 +305,53 @@ async function section06() {
   // conferindo que a validação aceita/rejeita cada uma.
   var T = window.__erTest;
   check("a ponte de teste do app está exposta (window.__erTest)", !!(T && T.validateAiBuild && T.ABILITY_SYNERGY));
+  // --- selo de sinergia da build, 2026-09-16 (ideia do Playtester de Build;
+  // decisão do usuário pela assimetria: a regra é DURA na build gerada por IA
+  // e apenas INFORMATIVA na curada, onde vira este selo e nunca bloqueia).
+  // Testado pela função pura via ponte, sem tocar no time: a primeira versão
+  // deste teste adicionava um Pokémon ao time e foi um FALSO POSITIVO - na
+  // suíte o time seed já está cheio (6/6), o "+ Adicionar" ficava desabilitado,
+  // e o selo que ele encontrava era de OUTRO membro. Ainda por cima sujava o
+  // estado e derrubava a navegação por teclado da seção 07. Fixture é derivada
+  // do dado em tempo de execução, não escrita à mão, pra não apodrecer quando
+  // builds.json mudar.
+  if (T && T.BUILDS && T.buildSynergyHtml) {
+    var comSinergia = null, semSinergia = null;
+    var snames = Object.keys(T.BUILDS);
+    for (var bi = 0; bi < snames.length && !(comSinergia && semSinergia); bi++) {
+      var spB = T.getSpeciesBySname(snames[bi]);
+      if (!spB) continue;
+      var bld = T.BUILDS[snames[bi]];
+      var html = T.buildSynergyHtml(spB, bld);
+      if (html && !comSinergia) comSinergia = { sp: spB, b: bld, html: html };
+      if (!html && !semSinergia) semSinergia = { sp: spB, b: bld };
+    }
+    check("existe build curada com sinergia ativa pra servir de fixture", !!comSinergia);
+    if (comSinergia) {
+      check("selo aparece quando a habilidade/innate da build potencializa um golpe DELA",
+        comSinergia.html.indexOf("potencializa") !== -1 && comSinergia.html.indexOf("abi-synergy") !== -1,
+        comSinergia.sp.n + ": " + comSinergia.html.replace(/<[^>]+>/g, ""));
+      // O selo tem que citar um golpe que está mesmo nos 4 da build - senão
+      // estaria mostrando potencial da espécie, não desta build.
+      var citaGolpeDaBuild = comSinergia.b.moves.some(function (m) {
+        return comSinergia.html.indexOf(m) !== -1;
+      });
+      check("o selo cita um golpe que está de fato nesta build (não o potencial genérico da espécie)", citaGolpeDaBuild);
+    }
+    check("build sem sinergia ativa não gera selo nenhum - silêncio, nunca aviso de ausência",
+      !!semSinergia, semSinergia ? semSinergia.sp.n : "(todas tinham selo)");
+    // A sinergia de habilidade ESCOLHÍVEL só vale se for a escolhida: troca a
+    // habilidade por uma inexistente e o selo de origem "abi" tem que sumir.
+    if (comSinergia) {
+      var hitsC = T.ABILITY_SYNERGY[comSinergia.sp.sname] || [];
+      var soEscolhivel = hitsC.length > 0 && hitsC.every(function (h) { return h.kind !== "inn"; });
+      if (soEscolhivel) {
+        var trocada = { ability: "Habilidade Que Nao Existe", moves: comSinergia.b.moves };
+        check("sinergia de habilidade escolhível não conta se a build escolheu outra habilidade",
+          T.buildSynergyHtml(comSinergia.sp, trocada) === "");
+      }
+    }
+  }
   var spSinergia = null;
   for (var si = 0; T && si < T.SPECIES.length && !spSinergia; si++) {
     var cand = T.SPECIES[si];
