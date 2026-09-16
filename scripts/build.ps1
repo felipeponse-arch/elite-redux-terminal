@@ -120,6 +120,9 @@ foreach ($path in $dataFiles.Values) {
 # aqui vira conselho errado na tela do jogador.
 Write-Output "--- validando builds.json contra os dados reais ---"
 & (Join-Path $PSScriptRoot "validate_builds.ps1")
+# Mesma ideia pros outros dados derivados (item Q2 da pauta técnica).
+Write-Output "--- validando invariantes dos dados ---"
+& (Join-Path $PSScriptRoot "validate_data_invariants.ps1")
 
 Write-Output "--- splicing ---"
 $final = Get-Content $templatePath -Raw -Encoding UTF8

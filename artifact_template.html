@@ -1781,6 +1781,30 @@
   var MOVES = DATA.moves;
   var ITEMS = DATA.items || [];
   var EVOKINDS = DATA.evoKinds;
+
+  // Rótulos dos dados usados em comparação (item D2 da pauta técnica,
+  // 2026-09-16). Toda comparação com um rótulo do jogo passa por aqui, nunca
+  // por texto digitado solto no meio do código: o bug "Status" x "STATUS"
+  // (golpe de status contando como ataque em 91 times de chefão) e o
+  // indexOf("MALE") que também casava com "FEMALE" (evolução só de fêmea
+  // mostrada com ♂ em 15 espécies) eram a mesma classe de erro. dataLabel()
+  // confere o rótulo contra o próprio dado ao carregar - um nome errado falha
+  // na hora, nos testes, em vez de nunca bater em silêncio.
+  function dataLabel(list, name, listName) {
+    if (!list || list.indexOf(name) === -1) {
+      throw new Error("Rótulo \"" + name + "\" não existe em " + listName + " - o dado mudou ou o nome está errado.");
+    }
+    return name;
+  }
+  var SPLIT_STATUS = dataLabel(DATA.splits, "STATUS", "splits");
+  var EVO_LEVEL = dataLabel(EVOKINDS, "EVO_LEVEL", "evoKinds");
+  var EVO_LEVEL_MALE = dataLabel(EVOKINDS, "EVO_LEVEL_MALE", "evoKinds");
+  var EVO_LEVEL_FEMALE = dataLabel(EVOKINDS, "EVO_LEVEL_FEMALE", "evoKinds");
+  var EVO_PRIMAL = dataLabel(EVOKINDS, "EVO_PRIMAL_REVERSION", "evoKinds");
+  var EVO_MEGA_KINDS = [
+    dataLabel(EVOKINDS, "EVO_MEGA_EVOLUTION", "evoKinds"),
+    dataLabel(EVOKINDS, "EVO_MOVE_MEGA_EVOLUTION", "evoKinds")
+  ];
   // Flags reais de golpe (Faz Contato, Baseado em Som, Baseado em Chifre...
   // 18 categorias, ver scripts/transform.ps1) - MOVES[id][8] é um array de
   // índices aqui. Pré-requisito da Fase 3 (cruzar habilidade x movepool
@@ -1851,7 +1875,7 @@
   function moveRoleOf(moveName) {
     var id = MOVE_ID_BY_NAME[moveName];
     if (id === undefined) return null;
-    if ((DATA.splits[MOVES[id][2]] || "") !== "STATUS") return "dano";
+    if (DATA.splits[MOVES[id][2]] !== SPLIT_STATUS) return "dano";
     return MOVE_ROLES[String(id)] || "suporte";
   }
 
@@ -1869,8 +1893,8 @@
   // "estas são as opções desta criatura".
   var MEGA_BASE_BY_X = Object.create(null);
   function isMegaEvoKind(kindIdx) {
-    var k = DATA.evoKinds[kindIdx] || "";
-    return k.indexOf("MEGA") !== -1 || k.indexOf("PRIMAL") !== -1;
+    var k = EVOKINDS[kindIdx];
+    return EVO_MEGA_KINDS.indexOf(k) !== -1 || k === EVO_PRIMAL;
   }
   SPECIES.forEach(function (s) {
     (s.ev || []).forEach(function (ev) {
@@ -2819,7 +2843,7 @@
         // puramente numérico - por isso Number(...) em vez de checar
         // typeof === "number", que falharia silenciosamente sempre.
         var reqLevel = Number(ev[1]);
-        if (EVOKINDS[ev[0]] === "EVO_LEVEL" && !isNaN(reqLevel) && reqLevel <= cap) { applicable = ev; break; }
+        if (EVOKINDS[ev[0]] === EVO_LEVEL && !isNaN(reqLevel) && reqLevel <= cap) { applicable = ev; break; }
       }
       if (!applicable) return x;
       var target = getSpeciesByX(applicable[2]);
@@ -3485,8 +3509,8 @@
   function evoConditionText(ev) {
     var kind = EVOKINDS[ev[0]] || "";
     var rs = ev[1];
-    if (kind.indexOf("MEGA") !== -1) return "Mega Evolução &middot; " + prettify(rs);
-    if (kind.indexOf("PRIMAL") !== -1) return "Reversão Primal &middot; " + prettify(rs);
+    if (EVO_MEGA_KINDS.indexOf(kind) !== -1) return "Mega Evolução &middot; " + prettify(rs);
+    if (kind === EVO_PRIMAL) return "Reversão Primal &middot; " + prettify(rs);
     // Bug real, achado e corrigido em 2026-09-10 construindo a auto-evolução
     // por level cap: o nível de evolução vem como STRING no dado bruto (ex:
     // "16", não 16 - confirmado direto em data/dex_compact.json), então
@@ -3496,7 +3520,10 @@
     // de tipo já corrigido em evolveChainByX() com Number(rs).
     var numRs = Number(rs);
     if (rs !== "" && rs !== null && rs !== undefined && !isNaN(numRs)) {
-      var suffix = kind.indexOf("MALE") !== -1 ? " (♂)" : kind.indexOf("FEMALE") !== -1 ? " (♀)" : "";
+      // Comparação exata: "EVO_LEVEL_FEMALE" contém "MALE", e o indexOf antigo
+      // marcava evolução só de fêmea com ♂ (Snorunt -> Froslass, Combee ->
+      // Vespiquen e mais 13).
+      var suffix = kind === EVO_LEVEL_MALE ? " (♂)" : kind === EVO_LEVEL_FEMALE ? " (♀)" : "";
       return "Nível " + numRs + suffix;
     }
     return prettify(rs);
@@ -4433,8 +4460,7 @@
       if (!name) return "";
       var mv = MOVE_BY_NAME[name];
       if (!mv) return "";
-      var splitName = DATA.splits[mv[2]] || "";
-      if (splitName === "STATUS" || !mv[3]) {
+      if (DATA.splits[mv[2]] === SPLIT_STATUS || !mv[3]) {
         return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> <span style="color:var(--text-dim);">golpe de status, sem poder de ataque</span></div>';
       }
       var typeName = TYPES[mv[1]];
@@ -6842,6 +6868,8 @@
     SPECIES: SPECIES,
     MOVES: MOVES,
     uniqueIds: uniqueIds,
+    evoConditionText: evoConditionText,
+    EVOKINDS: EVOKINDS,
     moveRoleOf: moveRoleOf,
     formFamilyOf: formFamilyOf,
     bestRankForm: bestRankForm,

@@ -57,9 +57,16 @@ $PIVO = @("Switch Argument", "Parting Shot", "Baton Pass", "Shed Tail", "Chilly 
 $HAZARD = @("Spikes", "Toxic Spikes", "Stealth Rock", "Sticky Web", "Caltrops")
 $PROTECAO = @("Protect", "Endure", "Substitute")
 
+# Chave = POSICAO do golpe na lista, nao o campo `id`. E a posicao que as
+# especies usam pra referenciar golpes (e o que o NextDex oficial faz:
+# gameData.moves[moveID]); o `id` bruto diverge em 3 golpes (Jetstream Burst,
+# Sky Quake, Toxic Terrain). A primeira versao deste script usou `id` - achado
+# por scripts/validate_data_invariants.ps1 no mesmo dia.
 $out = [ordered]@{}
 $counts = @{}
-foreach ($m in $raw["moves"]) {
+$moves = @($raw["moves"])
+for ($idx = 0; $idx -lt $moves.Count; $idx++) {
+    $m = $moves[$idx]
     if (-not $m) { continue }
     if ($m["split"] -ne $statusSplit) { continue }
     $name = [string]$m["name"]
@@ -80,7 +87,7 @@ foreach ($m in $raw["moves"]) {
     elseif ($target -eq "USER" -and $desc -match "(?i)\b(raises?|boosts?|increases?)\b") { $role = "setup" }
     else { $role = "suporte" }
 
-    $out[[string]$m["id"]] = $role
+    $out[[string]$idx] = $role
     $counts[$role] = 1 + [int]$counts[$role]
 }
 

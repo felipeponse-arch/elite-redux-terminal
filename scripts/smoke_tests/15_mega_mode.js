@@ -105,6 +105,21 @@ async function section15() {
     check("fixture Mega Aerodactyl curada com item fora da pedra", false, JSON.stringify(aeroBuild));
   }
 
+  // ---- rótulo de evolução por gênero (item D2, 2026-09-16) ----
+  // indexOf("MALE") também casava com "EVO_LEVEL_FEMALE": evolução só de
+  // fêmea aparecia com ♂. Fixtures achadas no dado, não nomes chumbados.
+  var femea = null, macho = null;
+  T.SPECIES.some(function (sp) {
+    (sp && sp.ev || []).forEach(function (ev) {
+      var txt = T.evoConditionText(ev);
+      if (!femea && /FEMALE$/.test(T.EVOKINDS[ev[0]])) femea = { sp: sp, txt: txt };
+      if (!macho && /_MALE$/.test(T.EVOKINDS[ev[0]])) macho = { sp: sp, txt: txt };
+    });
+    return femea && macho;
+  });
+  check("evolução só de fêmea mostra ♀ (não ♂)", !!femea && femea.txt.indexOf("♀") !== -1 && femea.txt.indexOf("♂") === -1, femea ? femea.sp.n + ": " + femea.txt : "sem fixture");
+  check("evolução só de macho mostra ♂", !!macho && macho.txt.indexOf("♂") !== -1, macho ? macho.sp.n + ": " + macho.txt : "sem fixture");
+
   // ---- configuração na tela de Progresso ----
   var sel = document.getElementById("settings-mega-mode");
   check("tela de Progresso tem o seletor de modo de mega", !!sel);
