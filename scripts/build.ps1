@@ -180,6 +180,22 @@ foreach ($placeholder in $dataFiles.Keys) {
 }
 if ($final.Contains("__SPRITE_ATLAS_DATAURI__")) { throw "Sprite atlas placeholder still present after splice." }
 
+# Versão no cabeçalho do app (2026-09-16, item I3 da pauta técnica): o commit do
+# código que gerou este arquivo, pra saber o que está no ar. "-modificado"
+# quando a pasta tem mudança não commitada - um build assim nunca devia ser
+# publicado (scripts/prepare_publish.ps1 recusa).
+$appVersion = "local"
+try {
+    $hash = (& git -C $root rev-parse --short HEAD 2>$null)
+    if ($LASTEXITCODE -eq 0 -and $hash) {
+        $appVersion = $hash.Trim()
+        $dirty = (& git -C $root status --porcelain 2>$null)
+        if ($dirty) { $appVersion += "-modificado" }
+    }
+} catch {}
+if ($final -notmatch [regex]::Escape("__APP_VERSION__")) { throw "Placeholder __APP_VERSION__ not found in template." }
+$final = $final.Replace("__APP_VERSION__", $appVersion)
+
 [System.IO.File]::WriteAllText($outPath, $final, (New-Object System.Text.UTF8Encoding($false)))
 
 $bytes = (Get-Item $outPath).Length
@@ -188,5 +204,5 @@ if ($bytes -lt 500000) { throw "Output file is suspiciously small ($bytes bytes)
 if ($bytes -gt 14000000) { throw "Output is ${bytes} bytes, too close to the 16MB artifact limit." }
 
 Write-Output "--- done ---"
-Write-Output "artifact_final.html: $bytes bytes ($([math]::Round($bytes/1MB,2)) MB)"
+Write-Output "artifact_final.html: $bytes bytes ($([math]::Round($bytes/1MB,2)) MB), versao $appVersion"
 Write-Output "Publish it with the Artifact tool (file_path=$outPath, keep the same artifact url to update in place)."
