@@ -233,20 +233,20 @@
     ],
     "note": "Ancient Idol usa Defesa/SpDef em vez de Ataque/SpAtk pra atacar — Runerigus tem Def base 145 contra Atk 95, então vira um tanque físico que também ataca bem. Will-O-Wisp queima o alvo (reduzindo o dano físico dele) e Leftovers sustenta o HP ao longo da luta. Fonte: comunidade oficial (Discord, canal #movesets) — ability conferida contra o dado real do jogo (id 286, \"Uses Def and Sp. Def instead of Atk and Sp. Atk when attacking\")."
   },
-  "SPECIES_SCIZOR_REDUX_MEGA": {
-    "ability": "Mind Crunch",
-    "nature": "Modest",
-    "evs": "252 HP / 252 SpA / 6 SpD",
-    "item": "",
+  "SPECIES_SCIZOR_REDUX": {
+    "ability": "Mega Launcher",
+    "nature": "Timid",
+    "evs": "252 SpA / 4 SpD / 252 Spe",
+    "item": "Shell Bell",
     "moves": [
-      "Poison Fang",
-      "Dragon Pulse",
+      "Sludge Bomb",
       "Flash Cannon",
-      "Mud Shot"
+      "Dragon Pulse",
+      "Mystic Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
-  "SPECIES_GARDEVOIR_REDUX_MEGA": {
+  "SPECIES_GARDEVOIR_REDUX": {
     "ability": "Moxie",
     "nature": "Adamant",
     "evs": "252 Atk / 6 SpD / 252 Spe",
@@ -257,22 +257,9 @@
       "Poltergeist",
       "Poison Jab"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Choice Scarf / Gardevoirite-R."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Choice Scarf / Gardevoirite-R."
   },
-  "SPECIES_GARDEVOIR_REDUX": {
-    "ability": "Moxie",
-    "nature": "Jolly",
-    "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "Swirly Glasses",
-    "moves": [
-      "Surf",
-      "Shadow Ball",
-      "Hidden Power",
-      "Water Gun"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_GALLADE_REDUX_MEGA": {
+  "SPECIES_GALLADE_REDUX": {
     "ability": "Best Offense",
     "nature": "Modest",
     "evs": "6 HP / 252 SpA / 252 SpD*",
@@ -283,7 +270,7 @@
       "Nasty Plot",
       "Water Gun"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Choice Specs / Galladite-R."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Choice Specs / Galladite-R."
   },
   "SPECIES_SCOLIPEDE_MEGA": {
     "ability": "Tinted Lens",
@@ -296,7 +283,7 @@
       "Drill Run",
       "Swords Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Poison Barb / Silver Powder."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Poison Barb / Silver Powder."
   },
   "SPECIES_FALINKS_MEGA": {
     "ability": "Mold Breaker",
@@ -309,7 +296,7 @@
       "Drill Run",
       "No Retreat"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_CHANDELURE_MEGA_Y": {
     "ability": "Purgatory",
@@ -322,7 +309,7 @@
       "Giga Drain",
       "Calm Mind"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Spell Tag / Life Orb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Spell Tag / Life Orb."
   },
   "SPECIES_MALAMAR_MEGA": {
     "ability": "Entrance",
@@ -333,9 +320,9 @@
       "Dream Eater",
       "Dark Pulse",
       "Hypnosis",
-      "Hidden Power"
+      "Substitute"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Life Orb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Life Orb."
   },
   "SPECIES_BARBARACLE_MEGA": {
     "ability": "Anticipation",
@@ -348,7 +335,7 @@
       "Liquidation",
       "Shell Smash"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: White Herb / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: White Herb / Shell Bell."
   },
   "SPECIES_TATSUGIRI_MEGA": {
     "ability": "Reservoir",
@@ -361,7 +348,7 @@
       "Mystic Dance",
       "Ice Beam"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Life Orb / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Life Orb / Shell Bell."
   },
   "SPECIES_BENICCINO": {
     "ability": "Perfectionist",
@@ -374,7 +361,7 @@
       "Rock Blast",
       "Tidy Up"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Focus Sash / King's Rock / Salac Berry / Liechi Berry / Protective Pads."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Focus Sash / King's Rock / Salac Berry / Liechi Berry / Protective Pads."
   },
   "SPECIES_RATIKING": {
     "ability": "Pressure",
@@ -387,7 +374,7 @@
       "Fake Out",
       "Substitute"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Binding Band / Grip Claw / Leftovers."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Binding Band / Grip Claw / Leftovers."
   },
   "SPECIES_BREEZING": {
     "ability": "Lightning Rod",
@@ -400,7 +387,7 @@
       "Hurricane",
       "Thunder"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_CACJACK": {
     "ability": "Prankster",
@@ -413,7 +400,7 @@
       "Black Magic",
       "Destiny Bond"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Life Orb / Focus Sash."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Life Orb / Focus Sash."
   },
   "SPECIES_TORRENTULA": {
     "ability": "Foamy Web",
@@ -426,7 +413,7 @@
       "Flip Turn",
       "Aqua Jet"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_REXCADRILL": {
     "ability": "Tough Claws",
@@ -439,20 +426,20 @@
       "Seismic Slam",
       "Dragon Rush"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SCYTHER_REDUX": {
-    "ability": "Hyper Aggressive",
+    "ability": "Merciless",
     "nature": "Adamant",
-    "evs": "252 HP / 252 Atk / 4 Spe",
-    "item": "Eviolite",
+    "evs": "252 Atk / 6 Def / 252 Spe",
+    "item": "Scytherite R",
     "moves": [
-      "Dire Claw",
-      "Ceaseless Edge",
-      "Seismic Blade",
-      "Roost"
+      "Dragon Claw",
+      "Gunk Shot",
+      "Swords Dance",
+      "Diamond Blade"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Scytherite-R / Focus Sash / Eviolite."
   },
   "SPECIES_KLEAVOR_REDUX_MEGA": {
     "ability": "Dual Wield",
@@ -465,7 +452,7 @@
       "Sharpen",
       "Glaive Rush"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Kleavorite-R / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Kleavorite-R / Shell Bell."
   },
   "SPECIES_DUDUDUNSPARCE_MEGA": {
     "ability": "Unaware",
@@ -478,7 +465,7 @@
       "Hurricane",
       "Mystic Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SEERKAT": {
     "ability": "Pretentious",
@@ -491,7 +478,7 @@
       "Earthquake",
       "Starburst"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Liechi Berry."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Liechi Berry."
   },
   "SPECIES_RATFIOSO": {
     "ability": "Low Blow",
@@ -504,20 +491,7 @@
       "Lovely Bite",
       "Crunch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Liechi Berry / Focus Sash."
-  },
-  "SPECIES_PYROAR_MEGA": {
-    "ability": "Adaptability",
-    "nature": "Timid",
-    "evs": "252 SpA / 6 SpD / 252 Spe",
-    "item": "Silk Scarf",
-    "moves": [
-      "Fire Blast",
-      "Echoed Voice",
-      "Nasty Plot",
-      "Hidden Power"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Silk Scarf / Charcoal / Life Orb / Focus Sash / Heat Rock / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Liechi Berry / Focus Sash."
   },
   "SPECIES_SANDSLASH_ALOLAN_MEGA": {
     "ability": "Whiteout",
@@ -530,7 +504,7 @@
       "Hail",
       "Earthquake"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_HARIYAMA_MEGA": {
     "ability": "Fighting Spirit",
@@ -543,7 +517,7 @@
       "Bullet Punch",
       "Knock Off"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SCOVILLAIN_MEGA": {
     "ability": "Big Leaves",
@@ -556,7 +530,7 @@
       "Sunny Day",
       "Swords Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SCRAFTY_MEGA": {
     "ability": "Backstreet Boy",
@@ -569,7 +543,7 @@
       "Iron Head",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Wide Lens."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Wide Lens."
   },
   "SPECIES_CLEFABLE_MEGA": {
     "ability": "Fairy Aura",
@@ -578,11 +552,11 @@
     "item": "Shell Bell",
     "moves": [
       "Moonblast",
-      "Secret Power",
+      "Psychic",
       "Calm Mind",
       "Moonlight"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_HIPPOTATON": {
     "ability": "Well Baked Body",
@@ -595,7 +569,7 @@
       "Karma",
       "Yawn"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_MAMOSWINE_REDUX": {
     "ability": "Grassy Surge",
@@ -608,7 +582,7 @@
       "Stuff Cheeks",
       "Strength Sap"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Liechi / Sitrus Berry."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Liechi / Sitrus Berry."
   },
   "SPECIES_ERATICATE": {
     "ability": "Hustle",
@@ -621,7 +595,7 @@
       "Noxious Torque",
       "Poison Sting"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / King's Rock."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / King's Rock."
   },
   "SPECIES_ARBOK": {
     "ability": "Merciless",
@@ -634,7 +608,7 @@
       "Poison Sting",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Black Sludge / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Black Sludge / Shell Bell."
   },
   "SPECIES_ARBOK_MEGA": {
     "ability": "Merciless",
@@ -647,7 +621,7 @@
       "Poison Sting",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Arbokite / Shell Bell (Perm) / Black Sludge (Perm)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Arbokite / Shell Bell (Perm) / Black Sludge (Perm)."
   },
   "SPECIES_HAWLUCHA_MEGA": {
     "ability": "Wrestle Showman",
@@ -660,7 +634,7 @@
       "Stone Edge",
       "Victory Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_GOOSCHASE": {
     "ability": "Restraining Order",
@@ -673,7 +647,7 @@
       "Parting Shot",
       "Lunge"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_GROTOM_GLASS": {
     "ability": "Deep Cuts",
@@ -686,7 +660,7 @@
       "Toxic",
       "Poison Sting"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Black Sludge."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Black Sludge."
   },
   "SPECIES_GROTOM_ROLL": {
     "ability": "Speed Boost",
@@ -699,7 +673,7 @@
       "Bulk Up",
       "Poison Sting"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Black Sludge / Shell Bell / Bright Powder."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Black Sludge / Shell Bell / Bright Powder."
   },
   "SPECIES_GROTOM_KICK": {
     "ability": "Roundhouse",
@@ -712,7 +686,7 @@
       "Rock Polish",
       "Poison Sting"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Black Sludge / Frost Orb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Black Sludge / Frost Orb."
   },
   "SPECIES_AEGISLASH_REDUX": {
     "ability": "Soul Eater",
@@ -725,33 +699,7 @@
       "Vacuum Wave",
       "Excalibur"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Life Orb / Aegislashite."
-  },
-  "SPECIES_AEGISLASH": {
-    "ability": "Shadow Shield",
-    "nature": "Adamant",
-    "evs": "252 HP / 252 Atk / 6 SpD",
-    "item": "Weakness Policy",
-    "moves": [
-      "Excalibur",
-      "King's Shield",
-      "Shadow Sneak",
-      "Shadow Claw"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Weakness Policy / Shell Bell."
-  },
-  "SPECIES_MEOWSTIC_MEGA": {
-    "ability": "Psychic Surge",
-    "nature": "Timid",
-    "evs": "252 SpA / 6 SpD / 252 Spe",
-    "item": "Meowsticite",
-    "moves": [
-      "Expanding Force",
-      "Shadow Ball",
-      "Nasty Plot",
-      "Hidden Power"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Life Orb / Aegislashite."
   },
   "SPECIES_MACHAMP_REDUX": {
     "ability": "Multiscale",
@@ -764,7 +712,7 @@
       "Earthsplitter",
       "Bullet Punch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_HONCHKROW": {
     "ability": "Super Luck",
@@ -777,7 +725,7 @@
       "Night Slash",
       "Parting Shot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_VICTREEBEL_REDUX": {
     "ability": "Predator",
@@ -787,10 +735,10 @@
     "moves": [
       "Shadow Fangs",
       "Power Whip",
-      "Secret Power",
+      "Ice Fang",
       "Shadow Sneak"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_CHANDELURE_MEGA": {
     "ability": "Hellblaze",
@@ -803,7 +751,7 @@
       "Giga Drain",
       "Nasty Plot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Spell Tag / Life Orb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Spell Tag / Life Orb."
   },
   "SPECIES_GOLURK_MEGA": {
     "ability": "Unstable Core",
@@ -816,7 +764,7 @@
       "Bulk Up",
       "One-Inch Punch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Golurkite / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Golurkite / Shell Bell."
   },
   "SPECIES_SCEPTILE": {
     "ability": "Protean",
@@ -829,7 +777,7 @@
       "Dragon Dance",
       "Cut"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Life Orb / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Life Orb / Shell Bell."
   },
   "SPECIES_SWAMPAGE": {
     "ability": "Regenerator",
@@ -842,20 +790,7 @@
       "Dragon Rush",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Black Sludge."
-  },
-  "SPECIES_SALAMENCE_MEGA": {
-    "ability": "Anger Point",
-    "nature": "Jolly",
-    "evs": "252 Atk / 4 SpD / 252 Spe",
-    "item": "Salamencite",
-    "moves": [
-      "Dragon Rush",
-      "Zephyr Rush",
-      "Iron Head",
-      "Dragon Dance"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Black Sludge."
   },
   "SPECIES_SALAMENCE": {
     "ability": "Moxie",
@@ -868,7 +803,7 @@
       "Iron Head",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SAWK_REDUX": {
     "ability": "Scrappy",
@@ -881,7 +816,7 @@
       "Brutal Swing",
       "Crackle Slam"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_GOODRA_MEGA": {
     "ability": "Overcoat",
@@ -894,7 +829,7 @@
       "Hydro Pump",
       "Mystic Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Goodranite / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Goodranite / Shell Bell."
   },
   "SPECIES_KECLEON": {
     "ability": "Klutz",
@@ -907,7 +842,7 @@
       "Trick",
       "Zen Headbutt"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Toxic Orb / Iron Ball / Lagging Tail / Any Orb / Any Choice Item."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Toxic Orb / Iron Ball / Lagging Tail / Any Orb / Any Choice Item."
   },
   "SPECIES_SNEASLER": {
     "ability": "Unburden",
@@ -920,7 +855,7 @@
       "Dire Claw",
       "Fling"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_ALTARIA_REDUX": {
     "ability": "Evaporate",
@@ -931,24 +866,11 @@
       "Searing Shot",
       "Hydro Pump",
       "Air Slash",
-      "Hidden Power"
+      "Flame Charge"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Choice Scarf / Shell Bell / Vest."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Choice Scarf / Shell Bell / Vest."
   },
-  "SPECIES_KINGLER_REDUX_MEGA": {
-    "ability": "Twisted Dimension",
-    "nature": "Quiet",
-    "evs": "252 HP / 252 SpA / 6 Def",
-    "item": "Twisted Spoon",
-    "moves": [
-      "Psycho Wave",
-      "Dazzling Gleam",
-      "Calm Mind",
-      "Searing Shot"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Twisted Spoon / Vest / Shell Bell / Focus Sash."
-  },
-  "SPECIES_TYRANITAR_MEGA": {
+  "SPECIES_TYRANITAR": {
     "ability": "Moxie",
     "nature": "Adamant",
     "evs": "252 HP / 252 Atk / 6 SpD",
@@ -959,7 +881,7 @@
       "Crunch",
       "Earthquake"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_RABSCA": {
     "ability": "Stall",
@@ -972,72 +894,33 @@
       "Power Swap",
       "Power Gem"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Leppa Berry / Focus Sash / Shell Bell."
-  },
-  "SPECIES_SILVALLY_BUG": {
-    "ability": "Unaware",
-    "nature": "Jolly",
-    "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "Bug Memory",
-    "moves": [
-      "Multi-Attack",
-      "Parting Shot",
-      "Extreme Speed",
-      "Secret Power"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Leppa Berry / Focus Sash / Shell Bell."
   },
   "SPECIES_TYRANITAR_REDUX": {
     "ability": "Drought",
     "nature": "Modest",
     "evs": "252 HP/ 252 SpA / 6 SpD",
-    "item": "",
+    "item": "Tyranitarite R",
     "moves": [
       "Fire Blast",
       "Diamond Storm",
       "Solar Beam",
       "Stealth Rock"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_REUNICLUS_MEGA": {
-    "ability": "Twisted Dimension",
-    "nature": "Brave",
-    "evs": "252 HP / 252 Atk / 6 SpA",
-    "item": "Reuniclusite",
-    "moves": [
-      "Astral Hand",
-      "Drain Punch",
-      "Energy Ball",
-      "Fire Punch"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_MANTINE": {
     "ability": "Drizzle",
     "nature": "Bold",
     "evs": "252 HP / 252 Def / 4 Spe (Play around with the Def and Spe EVs)",
-    "item": "",
+    "item": "Heavy-Duty Boots",
     "moves": [
       "Hurricane",
       "Roost",
       "Defog",
       "Take Flight"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_FROSLASS_REDUX_MEGA": {
-    "ability": "Aurora Borealis",
-    "nature": "Timid",
-    "evs": "252 SpA / 6 SpD / 252 Spe",
-    "item": "",
-    "moves": [
-      "Ominous Wind",
-      "Blizzard",
-      "Hidden Power",
-      "Astonish"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_WOOLY_WORM": {
     "ability": "Drought",
@@ -1050,7 +933,7 @@
       "Flash Cannon",
       "Sticky Web"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SWANNA": {
     "ability": "Overcoat",
@@ -1063,7 +946,7 @@
       "Victory Dance",
       "Aqua Jet"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_UNFEZANT": {
     "ability": "Unburden",
@@ -1076,7 +959,7 @@
       "Return",
       "Berserker Horn"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SAWSBUCK": {
     "ability": "Skill Link",
@@ -1089,7 +972,7 @@
       "Peck",
       "Rock Slide"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Silk Scarf / Shell Bell / Loaded Dice."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Silk Scarf / Shell Bell / Loaded Dice."
   },
   "SPECIES_WHIMSICOTT": {
     "ability": "Prankster",
@@ -1102,7 +985,7 @@
       "Light Screen",
       "Reflect"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Light Clay / Leftovers."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Light Clay / Leftovers."
   },
   "SPECIES_PINSIR_MEGA": {
     "ability": "Hyper Aggressive",
@@ -1115,7 +998,7 @@
       "Vise Grip",
       "Earthquake"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Pinsirite / Scope Lens / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Pinsirite / Scope Lens / Shell Bell."
   },
   "SPECIES_GIGALITH": {
     "ability": "Sand Stream",
@@ -1128,7 +1011,7 @@
       "Thunderbolt",
       "Outburst"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_TYRANTRUM": {
     "ability": "Rock Head",
@@ -1141,7 +1024,7 @@
       "Flare Blitz",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Life Orb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Life Orb."
   },
   "SPECIES_KLEAVOR_MEGA": {
     "ability": "Mineralize",
@@ -1154,7 +1037,7 @@
       "Swords Dance",
       "Cross Chop"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Smooth Stone / Loaded Dice."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Smooth Stone / Loaded Dice."
   },
   "SPECIES_GYAREVALRY": {
     "ability": "Soundproof",
@@ -1167,7 +1050,7 @@
       "Clanging Scales",
       "Mystic Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Throat Spray."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Throat Spray."
   },
   "SPECIES_KELDEO": {
     "ability": "Mystic Blades",
@@ -1180,7 +1063,7 @@
       "Excalibur",
       "Water Gun"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Mystic Water."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Mystic Water."
   },
   "SPECIES_GOLEM": {
     "ability": "Rock Head",
@@ -1193,7 +1076,7 @@
       "Explosion",
       "Accelerock"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_BEEFENDER": {
     "ability": "Beast Boost",
@@ -1206,7 +1089,7 @@
       "Drill Run",
       "Victory Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Focus Sash / Life Orb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Focus Sash / Life Orb."
   },
   "SPECIES_POLTEAGEIST_REDUX": {
     "ability": "Long Reach",
@@ -1219,7 +1102,7 @@
       "Excalibur",
       "Dragon Jab"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_PERSIAN": {
     "ability": "Perfectionist",
@@ -1232,7 +1115,7 @@
       "Play Rough",
       "Fake Out"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Loaded Dice / Choice Band / Shell Bell / Silk Scarf."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Loaded Dice / Choice Band / Shell Bell / Silk Scarf."
   },
   "SPECIES_PENTAWUG": {
     "ability": "Accelerate",
@@ -1245,7 +1128,7 @@
       "Ice Spinner",
       "Aqua Jet"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SCYTHER": {
     "ability": "Technician",
@@ -1258,7 +1141,7 @@
       "Sacred Sword",
       "Swords Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Focus Sash / Heavy Duty Boots / Shell Bell / Loaded Dice."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Focus Sash / Heavy Duty Boots / Shell Bell / Loaded Dice."
   },
   "SPECIES_BAXCALIBUR_MEGA": {
     "ability": "Keen Edge",
@@ -1271,20 +1154,7 @@
       "Seismic Blade",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Baxcaliburite / Shell Bell."
-  },
-  "SPECIES_CRAMORANT": {
-    "ability": "Swift Swim",
-    "nature": "Jolly",
-    "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "Shell Bell",
-    "moves": [
-      "Triple Dive",
-      "Zephyr Rush",
-      "Secret Power",
-      "Rain Dance"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Damp Rock."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Baxcaliburite / Shell Bell."
   },
   "SPECIES_CHARIZARD": {
     "ability": "Tough Claws",
@@ -1297,7 +1167,7 @@
       "Dual Wingbeat",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_DUELUMBER": {
     "ability": "Raging Boxer",
@@ -1308,9 +1178,9 @@
       "Drain Punch",
       "Seismic Fist",
       "Jagged Punch",
-      "Power-up Punch"
+      "Power-Up Punch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_ROSERADE_MEGA": {
     "ability": "Corrosion",
@@ -1323,20 +1193,20 @@
       "Venoshock",
       "Victory Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_XATU": {
     "ability": "Unnerve",
     "nature": "Timid",
     "evs": "252 HP / 4 SpA / 252 Spe",
-    "item": "",
+    "item": "Heavy-Duty Boots",
     "moves": [
       "Hurricane",
       "Roost",
       "Eerie Spell",
       "Take Flight"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_MEOWSCARADA": {
     "ability": "Magic Guard",
@@ -1349,7 +1219,7 @@
       "Triple Axel",
       "Play Rough"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Life Orb / Focus Sash."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Life Orb / Focus Sash."
   },
   "SPECIES_COFAGRIGUS": {
     "ability": "Shadow Shield",
@@ -1362,7 +1232,7 @@
       "Shadow Ball",
       "Flash Cannon"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Chesto Berry."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Chesto Berry."
   },
   "SPECIES_PLUNDERTOW": {
     "ability": "Vengeful Spirit",
@@ -1375,33 +1245,7 @@
       "Triple Dive",
       "Swords Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Focus Sash / Shell Bell / Damp Rock / Choice Band."
-  },
-  "SPECIES_MAGNEZONE_MEGA": {
-    "ability": "Download",
-    "nature": "Timid",
-    "evs": "252 SpA / 6 SpD / 252 Spe",
-    "item": "Life Orb",
-    "moves": [
-      "Thunderbolt",
-      "Flash Cannon",
-      "Autotomize",
-      "Hidden Power"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Life Orb / Choice Specs / Magnezonite."
-  },
-  "SPECIES_DREDWOOD": {
-    "ability": "Grassy Surge",
-    "nature": "Adamant",
-    "evs": "252 HP / 252 Atk / 6 SpD",
-    "item": "Shell Bell",
-    "moves": [
-      "Wood Hammer",
-      "Poltergeist",
-      "Secret Power",
-      "Drain Punch"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Choice Band."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Focus Sash / Shell Bell / Damp Rock / Choice Band."
   },
   "SPECIES_IRON_SABER": {
     "ability": "Merciless",
@@ -1414,7 +1258,7 @@
       "Shift Gear",
       "Leech Blade"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_PIKACHU_PARTNER_MEGA": {
     "ability": "Overcharge",
@@ -1427,20 +1271,7 @@
       "Splishy Splash",
       "Zippy Zap"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_SCIZOR_REDUX": {
-    "ability": "Mega Launcher",
-    "nature": "Timid",
-    "evs": "252 SpA / 4 SpD / 252 Spe",
-    "item": "Shell Bell",
-    "moves": [
-      "Sludge Bomb",
-      "Flash Cannon",
-      "Dragon Pulse",
-      "Mystic Dance"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_KLEAVOR_REDUX": {
     "ability": "Dual Wield",
@@ -1453,33 +1284,7 @@
       "Mighty Cleave",
       "Ceaseless Edge"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Assault Vest / Black Sludge."
-  },
-  "SPECIES_FLOATZEL": {
-    "ability": "Water Veil",
-    "nature": "Jolly",
-    "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "Focus Sash",
-    "moves": [
-      "Triple Dive",
-      "Ice Spinner",
-      "Secret Power",
-      "Bulk Up"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Focus Sash / Choice Band."
-  },
-  "SPECIES_GUARDOZEL": {
-    "ability": "Hydrate",
-    "nature": "Modest",
-    "evs": "252 SpA / 6 SpD / 252 Spe",
-    "item": "Shell Bell",
-    "moves": [
-      "Hydro Pump",
-      "Blizzard",
-      "Hidden Power",
-      "Flip Turn"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Tactical Vest / Assault Vest / Choice Specs."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Assault Vest / Black Sludge."
   },
   "SPECIES_IRON_SCYTHE": {
     "ability": "Sweeping Edge",
@@ -1492,7 +1297,7 @@
       "Leaf Blade",
       "Coil"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Booster Energy / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Booster Energy / Shell Bell."
   },
   "SPECIES_DRAGALGE_MEGA": {
     "ability": "Contrary",
@@ -1505,22 +1310,9 @@
       "Clanging Scales",
       "Sludge Wave"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Dragalgite."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Dragalgite."
   },
   "SPECIES_HAXORUS": {
-    "ability": "Keen Edge",
-    "nature": "Jolly",
-    "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "Scope Lens",
-    "moves": [
-      "Dual Chop",
-      "Excalibur",
-      "Sacred Sword",
-      "Dragon Dance"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_HAXORUS_MEGA": {
     "ability": "Sheer Force",
     "nature": "Jolly",
     "evs": "252 Atk / 6 SpD / 252 Spe",
@@ -1531,7 +1323,7 @@
       "Sacred Sword",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Haxorusite / Scope Lens."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Haxorusite / Scope Lens."
   },
   "SPECIES_VILEPLUME": {
     "ability": "Poison Absorb",
@@ -1544,7 +1336,7 @@
       "Venoshock",
       "Strength Sap"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Rocky Helmet / Toxic Seed (When added) / Black Sludge."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Rocky Helmet / Toxic Seed (When added) / Black Sludge."
   },
   "SPECIES_FUJIFLAP": {
     "ability": "Air Blower",
@@ -1555,22 +1347,22 @@
       "Dragon Claw",
       "Grav Apple",
       "Victory Dance",
-      "Secret Power"
+      "Gunk Shot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell (Any) / Wide Lens (With Hustle) / Salac Berry (with Berry Smash) / Liechi Berry (with Berry Smash)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell (Any) / Wide Lens (With Hustle) / Salac Berry (with Berry Smash) / Liechi Berry (with Berry Smash)."
   },
   "SPECIES_LUXZERO_MEGA": {
     "ability": "Hyper Aggressive",
-    "nature": "Timid",
-    "evs": "4 Def / 252 SpA / 252 Spe",
-    "item": "Throat Spray",
+    "nature": "Adamant",
+    "evs": "252 Atk / 4 Def / 252 Spe",
+    "item": "",
     "moves": [
-      "Thunder",
-      "Focus Blast",
-      "Sheer Cold",
-      "Snarl"
+      "Supercell Slam",
+      "Close Combat",
+      "Glacier Crash",
+      "Trailblaze"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Throat Spray / Expert Belt."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Tactical/Assault Vest."
   },
   "SPECIES_ELECTIVIRE": {
     "ability": "Transistor",
@@ -1583,7 +1375,7 @@
       "Close Combat",
       "Volt Switch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_DODRIO_REDUX": {
     "ability": "Big Pecks",
@@ -1596,20 +1388,7 @@
       "Crunch",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_HYDRAPPLE": {
-    "ability": "Regenerator",
-    "nature": "Modest",
-    "evs": "252 HP / 252 SpA / 6 SpD",
-    "item": "",
-    "moves": [
-      "Fickle Beam",
-      "Giga Drain",
-      "Hidden Power",
-      "Tri Attack"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Vest / Leftovers / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_GARBODOR_MEGA": {
     "ability": "Permanence",
@@ -1619,23 +1398,23 @@
     "moves": [
       "Barb Barrage",
       "Meteor Mash",
-      "Secret Power",
+      "Seed Bomb",
       "Protect"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Garbodorite / Black Sludge / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Garbodorite / Black Sludge / Shell Bell."
   },
   "SPECIES_VANILLUXE_REDUX_MEGA": {
-    "ability": "Sugar Rush",
+    "ability": "Deep Fried",
     "nature": "Adamant",
-    "evs": "252 HP / 252 Atk / 6 Def",
-    "item": "White Herb",
+    "evs": "252 HP / 4 Atk / 252 SpD",
+    "item": "Vanilluxeite-R",
     "moves": [
       "Molten Strike",
+      "Milk Drink",
       "Ice Hammer",
-      "Shell Smash",
-      "Ice Shard"
+      "Burning Bulwark"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Vanilluxeite R / Leftovers (Ω)."
   },
   "SPECIES_RILLABOOM": {
     "ability": "Grass Pelt",
@@ -1646,9 +1425,9 @@
       "Grassy Glide",
       "Brick Break",
       "Frenzy Plant",
-      "U-Turn"
+      "U-turn"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_AMOONGUSS": {
     "ability": "Mycelium Might",
@@ -1661,7 +1440,7 @@
       "Clear Smog",
       "Spore"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_MAGMENOUS": {
     "ability": "Violent Rush",
@@ -1674,7 +1453,7 @@
       "U-turn",
       "Swords Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Choice Band / Life Orb / Air Balloon / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Choice Band / Life Orb / Air Balloon / Shell Bell."
   },
   "SPECIES_CLAWITZER_REDUX": {
     "ability": "Elemental Charge",
@@ -1687,20 +1466,7 @@
       "Plasma Pulse",
       "Flame Burst"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_ARCANINE_HISUIAN": {
-    "ability": "Rock Head",
-    "nature": "Adamant",
-    "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "Shell Bell",
-    "moves": [
-      "Flare Blitz",
-      "Head Smash",
-      "Seismic Slam",
-      "Secret Power"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Choice Band."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_PHANFERNAL": {
     "ability": "Speed Boost",
@@ -1713,7 +1479,7 @@
       "Energy Ball",
       "Nasty Plot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Choice Specs."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Choice Specs."
   },
   "SPECIES_FLAIRGRANCE": {
     "ability": "Fairy Aura",
@@ -1726,7 +1492,7 @@
       "Sludge Wave",
       "Mystical Fire"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Leftovers."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Leftovers."
   },
   "SPECIES_SIMIPOUR_REDUX": {
     "ability": "Forewarn",
@@ -1739,7 +1505,7 @@
       "Steam Eruption",
       "Psywave"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Life Orb / Choice Specs / Choice Scarf."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Life Orb / Choice Specs / Choice Scarf."
   },
   "SPECIES_AUDINO_MEGA": {
     "ability": "Pastel Veil",
@@ -1752,35 +1518,22 @@
       "Fake Out",
       "Wish"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Audinite / Rocky Helmet / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Audinite / Rocky Helmet / Shell Bell."
   },
-  "SPECIES_DRAGONITE_MEGA_Y": {
+  "SPECIES_DRAGONITE": {
     "ability": "Dragon's Maw",
-    "nature": "Timid",
-    "evs": "252 SpA / 4 Def / 252 Spe",
-    "item": "Dragoninite Y",
+    "nature": "Adamant",
+    "evs": "252 Atk / 6 SpD / 252 Spe",
+    "item": "Shell Bell",
     "moves": [
-      "Air Slash",
-      "Roost",
-      "Blizzard",
-      "Mystic Dance"
+      "Dragon Claw",
+      "Extreme Speed",
+      "Dragon Dance",
+      "Earthquake"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Dragoninite Y / Wide Lens (Ω) / Leftovers (Ω)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Yache Berry."
   },
   "SPECIES_DRAMPA": {
-    "ability": "Huge Power",
-    "nature": "Adamant",
-    "evs": "252 HP / 252 Atk / 6 SpD",
-    "item": "Swirly Glasses",
-    "moves": [
-      "Draco Meteor",
-      "Echoed Voice",
-      "Fire Blast",
-      "Air Slash"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_DRAMPA_MEGA": {
     "ability": "Berserk",
     "nature": "Modest",
     "evs": "252 HP / 252 SpA / 6 SpD",
@@ -1791,7 +1544,7 @@
       "Thunder",
       "Air Slash"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Drampanite / Shell Bell / Choice Specs / Assault Vest."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Drampanite / Shell Bell / Choice Specs / Assault Vest."
   },
   "SPECIES_GRENINJA_MEGA": {
     "ability": "Protean",
@@ -1804,10 +1557,10 @@
       "Ice Beam",
       "Spikes"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Greninjite / Shell Bell / Choice Specs / Life Orb / Focus Sash."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Greninjite / Shell Bell / Choice Specs / Life Orb / Focus Sash."
   },
   "SPECIES_BRONTONANA": {
-    "ability": "Dragon’s Maw",
+    "ability": "Dragon's Maw",
     "nature": "Modest",
     "evs": "4 HP / 252 SpA / 252 Spe",
     "item": "Choice Specs",
@@ -1817,7 +1570,7 @@
       "Earth Power",
       "Wyrm Wind"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Choice Specs / Wise Glasses / Choice Scarf."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Choice Specs / Wise Glasses / Choice Scarf."
   },
   "SPECIES_GARCHOMP_MEGA": {
     "ability": "Overwhelm",
@@ -1830,7 +1583,7 @@
       "Seismic Blade",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Garchompite X / Scope Lens / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Garchompite X / Scope Lens / Shell Bell."
   },
   "SPECIES_SNEASLER_MEGA": {
     "ability": "Weak Armor",
@@ -1843,7 +1596,7 @@
       "Close Combat",
       "Swords Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Sneaslerite / Focus Sash (Ω)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Sneaslerite / Focus Sash (Ω)."
   },
   "SPECIES_WEAVILE_MEGA": {
     "ability": "Technician",
@@ -1856,20 +1609,7 @@
       "Beatdown",
       "Hone Claws"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Weavileite / Focus Sash (Ω) / Loaded Dice (Ω)."
-  },
-  "SPECIES_MOTHIM": {
-    "ability": "Protean",
-    "nature": "Adamant",
-    "evs": "4 HP / 252 Atk / 252 Spe",
-    "item": "Shell Bell",
-    "moves": [
-      "Leech Life",
-      "Victory Dance",
-      "Aerial Ace",
-      "Secret Power"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Life Orb / Focus Sash."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Weavileite / Focus Sash (Ω) / Loaded Dice (Ω)."
   },
   "SPECIES_WORMADAM_TRASH_CLOAK": {
     "ability": "Overcoat",
@@ -1882,7 +1622,7 @@
       "Roost",
       "Toxic"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Leftovers / Rocky Helmet / Light Clay."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Leftovers / Rocky Helmet / Light Clay."
   },
   "SPECIES_WORMADAM_SANDY_CLOAK": {
     "ability": "Rock Head",
@@ -1895,7 +1635,7 @@
       "Web Shot",
       "Stealth Rock"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_EXPLOUD_REDUX": {
     "ability": "Lightning Rod",
@@ -1908,7 +1648,7 @@
       "Requiem",
       "Ghastly Echo"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Tactical Vest / Throat Spray / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Tactical Vest / Throat Spray / Shell Bell."
   },
   "SPECIES_BELLOSSOM": {
     "ability": "Energy Tap",
@@ -1917,11 +1657,11 @@
     "item": "Leftovers",
     "moves": [
       "Giga Drain",
-      "Hidden Power",
+      "Sleep Powder",
       "Quiver Dance",
       "Strength Sap"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SKUNTANK": {
     "ability": "Unburden",
@@ -1934,35 +1674,9 @@
       "Dark Pulse",
       "Flamethrower"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Petaya Berry / Salac if you REALLY want speed."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Petaya Berry / Salac if you REALLY want speed."
   },
-  "SPECIES_CARNIVINE": {
-    "ability": "Strong Jaw",
-    "nature": "Adamant",
-    "evs": "252 HP / 252 Atk / 6 SpD",
-    "item": "Shell Bell",
-    "moves": [
-      "Fertile Fangs",
-      "Secret Power",
-      "Swords Dance",
-      "Sleep Powder"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Choice Band."
-  },
-  "SPECIES_BEEDRILL_REDUX": {
-    "ability": "Freezing Point",
-    "nature": "Jolly",
-    "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "Choice Band",
-    "moves": [
-      "Icicle Spear",
-      "Toxic Needles",
-      "Secret Power",
-      "Pin Missile"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Choice Band / Focus Sash."
-  },
-  "SPECIES_GYARADOS_MEGA_Y": {
+  "SPECIES_GYARADOS": {
     "ability": "Sea Guardian",
     "nature": "Timid",
     "evs": "4 HP / 252 SpA / 252 Spe",
@@ -1973,7 +1687,7 @@
       "Hydro Pump",
       "Mystic Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Gyaradosite Y / Life Orb (Ω) / Choice Scarf (Ω)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Gyaradosite Y / Life Orb (Ω) / Choice Scarf (Ω)."
   },
   "SPECIES_TYPHLOSION_HISUIAN": {
     "ability": "Early Grave",
@@ -1986,33 +1700,20 @@
       "Fire Blast",
       "Earth Power"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Choice Specs (A) / Petaya Perry (B) / Leftovers (C)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Choice Specs (A) / Petaya Perry (B) / Leftovers (C)."
   },
   "SPECIES_VOLCARONA": {
     "ability": "Drought",
     "nature": "Timid",
     "evs": "4 Def / 252 SpA / 252 Spe",
-    "item": "",
+    "item": "Heavy-Duty Boots",
     "moves": [
       "Fiery Dance",
-      "U-Turn",
+      "U-turn",
       "Bug Buzz",
       "Quiver Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_CRABOMINABLE": {
-    "ability": "Raging Boxer",
-    "nature": "Adamant",
-    "evs": "252 HP / 252 Atk / 4 Def",
-    "item": "Assault Vest",
-    "moves": [
-      "Ice Hammer",
-      "Torrent Fist",
-      "Drain Punch",
-      "Power-up Punch"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_CRABOMINABLE_MEGA": {
     "ability": "Icicle Fist",
@@ -2025,7 +1726,7 @@
       "Hammer Arm",
       "Bulk Up"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_BARIONG": {
     "ability": "Clear Body",
@@ -2038,20 +1739,7 @@
       "Draco Meteor",
       "Glaciate"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_PIKACHU_ROCK_STAR": {
-    "ability": "Electrocytes",
-    "nature": "Jolly",
-    "evs": "252 Atk / 6 Def / 252 Spe",
-    "item": "Light Ball",
-    "moves": [
-      "Smite",
-      "Meteor Mash",
-      "Secret Power",
-      "Spark"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_EMPOLEON": {
     "ability": "Competitive",
@@ -2064,7 +1752,7 @@
       "Steel Beam",
       "Air Slash"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Assault Vest / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Assault Vest / Shell Bell."
   },
   "SPECIES_VIKAVOLT": {
     "ability": "Speed Boost",
@@ -2077,7 +1765,7 @@
       "Soil Drain",
       "Volt Switch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Assault Vest / Tactical Vest / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Assault Vest / Tactical Vest / Shell Bell."
   },
   "SPECIES_BISHARP": {
     "ability": "Opportunist",
@@ -2090,7 +1778,7 @@
       "Swords Dance",
       "Sucker Punch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Scope Lens / Eviolite / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Scope Lens / Eviolite / Shell Bell."
   },
   "SPECIES_PECHARUNT": {
     "ability": "Corrosion",
@@ -2103,7 +1791,7 @@
       "Body Press",
       "Parting Shot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_VESPIQUEN": {
     "ability": "Regenerator",
@@ -2116,7 +1804,7 @@
       "Quash",
       "Protect"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Leftovers / Sitrus Berry."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Leftovers / Sitrus Berry."
   },
   "SPECIES_MURKROW": {
     "ability": "Prankster",
@@ -2129,7 +1817,7 @@
       "Quash",
       "Take Flight"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_CHESNAUGHT_MEGA": {
     "ability": "Chestnut Shield",
@@ -2142,7 +1830,7 @@
       "Swords Dance",
       "Stone Edge"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Chesnaughtite / Life Orb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Chesnaughtite / Life Orb."
   },
   "SPECIES_DEWGONG": {
     "ability": "Arctic Fur",
@@ -2150,12 +1838,12 @@
     "evs": "252 HP / 252 Def / 4 Def",
     "item": "Light Clay",
     "moves": [
-      "Scald",
+      "Freeze-Dry",
       "Slack Off",
       "Knock Off",
       "Flip Turn"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_PINCURCHIN": {
     "ability": "Sap Sipper",
@@ -2168,7 +1856,7 @@
       "Scald",
       "Spiky Shield"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_FERROTHORN": {
     "ability": "Rough Skin",
@@ -2181,7 +1869,7 @@
       "Needle Arm",
       "Leech Seed"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_QUEENGAMBIT": {
     "ability": "Mythical Arrows",
@@ -2194,9 +1882,9 @@
       "Nasty Plot",
       "Blitz Arrow"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
-  "SPECIES_HYDREIGON_MEGA": {
+  "SPECIES_HYDREIGON": {
     "ability": "Scare",
     "nature": "Modest",
     "evs": "6 HP / 252 SpA / 252 Spe",
@@ -2207,7 +1895,7 @@
       "Nasty Plot",
       "Flash Cannon"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Hydreigonite / Shell Bell / Life Orb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Hydreigonite / Shell Bell / Life Orb."
   },
   "SPECIES_PENTADUG": {
     "ability": "Stamina",
@@ -2220,7 +1908,7 @@
       "Swords Dance",
       "Gunk Shot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SNORLAX": {
     "ability": "Let's Roll",
@@ -2233,7 +1921,7 @@
       "Heat Crash",
       "Belly Drum"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Apicot Berry / Custap Berry."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Apicot Berry / Custap Berry."
   },
   "SPECIES_KOMMO_O": {
     "ability": "Bulletproof",
@@ -2242,13 +1930,13 @@
     "item": "Throat Spray",
     "moves": [
       "Clanging Scales",
-      "Hidden Power",
+      "Boomburst",
       "Drain Punch",
       "Clangorous Soul"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
-  "SPECIES_LANTURN_MEGA": {
+  "SPECIES_LANTURN": {
     "ability": "Drizzle",
     "nature": "Modest",
     "evs": "252 HP / 252 SpA / 6 SpD",
@@ -2259,20 +1947,20 @@
       "Ice Beam",
       "Water Gun"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Lanturnite / Life Orb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Lanturnite / Life Orb."
   },
   "SPECIES_GARCHOMP_MEGA_REDUX": {
     "ability": "Haunting Frenzy",
     "nature": "Jolly",
     "evs": "252 Atk / 4 Def / 252 Spe",
-    "item": "",
+    "item": "Shell Bell",
     "moves": [
       "Wave Crash",
       "Guillotine",
       "Shadow Claw",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell (Ω) / King's Rock (Ω)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell (Ω) / King's Rock (Ω)."
   },
   "SPECIES_SIGILYPH": {
     "ability": "Low Visibility",
@@ -2285,22 +1973,9 @@
       "Protect",
       "Roost"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Leftovers / Sitrus Berry."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Leftovers / Sitrus Berry."
   },
-  "SPECIES_SPECTRIER_CLOUD": {
-    "ability": "Adrenaline Rush",
-    "nature": "Modest",
-    "evs": "252 SpA / 6 SpD / 252 Spe",
-    "item": "Focus Sash",
-    "moves": [
-      "Jetstream Burst",
-      "Secret Power",
-      "Gust",
-      "Heat Wave"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_LUCARIO_MEGA_Z": {
+  "SPECIES_LUCARIO": {
     "ability": "Justified",
     "nature": "Timid",
     "evs": "252 SpA / 4 SpD / 252 Spe",
@@ -2311,7 +1986,7 @@
       "Flash Cannon",
       "Nasty Plot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Lucarionite Z / Shell Bell (Ω)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Lucarionite Z / Shell Bell (Ω)."
   },
   "SPECIES_SABLEYE_MEGA": {
     "ability": "Prankster",
@@ -2324,7 +1999,7 @@
       "Recover",
       "Parting Shot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Sablenite / Leftovers (Ω)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Sablenite / Leftovers (Ω)."
   },
   "SPECIES_ZAPDOS_GALARIAN": {
     "ability": "Aerodynamics",
@@ -2337,7 +2012,7 @@
       "Whirling Strikes",
       "Baton Pass"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_ESCARGINITE": {
     "ability": "Simple",
@@ -2347,10 +2022,10 @@
     "moves": [
       "Fire Blast",
       "Shell Smash",
-      "Hidden Power",
+      "Solar Beam",
       "Power Gem"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_GARGABLOX": {
     "ability": "Fort Knox",
@@ -2363,9 +2038,9 @@
       "Bulk Up",
       "Recover"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
-  "SPECIES_INCINEROAR_MEGA": {
+  "SPECIES_INCINEROAR": {
     "ability": "Scare",
     "nature": "Adamant",
     "evs": "252 HP or Spe / 252 Atk / 6 SpD",
@@ -2376,9 +2051,9 @@
       "Bulk Up",
       "Jump Kick"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Incineroarite / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Incineroarite / Shell Bell."
   },
-  "SPECIES_PRIMARINA_MEGA": {
+  "SPECIES_PRIMARINA": {
     "ability": "Competitive",
     "nature": "Modest",
     "evs": "252 HP / 6 Def / 252 SpA",
@@ -2389,7 +2064,7 @@
       "Calm Mind",
       "Psychic Noise"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Primarinite / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Primarinite / Shell Bell."
   },
   "SPECIES_DECIDUEYE_MEGA": {
     "ability": "Hunter's Mark",
@@ -2402,7 +2077,7 @@
       "Sharpen",
       "Devious Shot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Deciduite / Scope Lens."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Deciduite / Scope Lens."
   },
   "SPECIES_ORICORIO_MEGA": {
     "ability": "Dancer",
@@ -2415,7 +2090,7 @@
       "Zap Jive",
       "Fiery Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Oricorionite / Shell Bell / Focus Sash."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Oricorionite / Shell Bell / Focus Sash."
   },
   "SPECIES_FERALIGATR": {
     "ability": "Intimidate",
@@ -2428,7 +2103,7 @@
       "Blizzard",
       "Flip Turn"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Feraligite / Shell Bell / Choice Specs."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Feraligite / Shell Bell / Choice Specs."
   },
   "SPECIES_KINGLER_MEGA": {
     "ability": "Swift Swim",
@@ -2441,7 +2116,7 @@
       "X-Scissor",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Kinglerite / Scope Lens (Ω)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Kinglerite / Scope Lens (Ω)."
   },
   "SPECIES_ROTOM_MOW": {
     "ability": "Hyper Aggressive",
@@ -2454,7 +2129,7 @@
       "Shadow Ball",
       "Energy Ball"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_HITMONCHAN_MEGA": {
     "ability": "Parry",
@@ -2467,33 +2142,7 @@
       "Seismic Fist",
       "Power-Up Punch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Hitmonchanite / Assault Vest (Ω)."
-  },
-  "SPECIES_DRAGONITE": {
-    "ability": "Dragon's Maw",
-    "nature": "Adamant",
-    "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "Shell Bell",
-    "moves": [
-      "Dragon Claw",
-      "Extreme Speed",
-      "Dragon Dance",
-      "Secret Power"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Yache Berry."
-  },
-  "SPECIES_EMPOLEON_REDUX_MEGA": {
-    "ability": "Snow Warning",
-    "nature": "Timid",
-    "evs": "252 Spa / 4 SpD / 252 Spe",
-    "item": "Empoleonite R",
-    "moves": [
-      "Fire Blast",
-      "Hidden Power",
-      "Sheer Cold",
-      "Nasty Plot"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Hitmonchanite / Assault Vest (Ω)."
   },
   "SPECIES_MUK_ALOLAN": {
     "ability": "Regenerator",
@@ -2506,7 +2155,7 @@
       "Bad Egg",
       "Sucker Punch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_BLASTOISE": {
     "ability": "Regenerator",
@@ -2519,7 +2168,7 @@
       "Ice Beam",
       "Aura Sphere"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_EXEGGUTOR_REDUX": {
     "ability": "Triage",
@@ -2532,7 +2181,7 @@
       "Calm Mind",
       "Speed Swap"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_ALTARIA": {
     "ability": "Cotton Down",
@@ -2545,7 +2194,7 @@
       "Steel Wing",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SPINDAZE": {
     "ability": "Contrary",
@@ -2558,35 +2207,22 @@
       "Dizzy Punch",
       "Teeter Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_RIBOMBEE_REDUX_MEGA": {
     "ability": "Sniper",
     "nature": "Jolly",
     "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "",
+    "item": "Ribombite R",
     "moves": [
       "Web Shot",
       "Volt Bolt",
       "Merculight",
       "Sparkling Barrage"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Ribombite-R / Focus Sash / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Ribombite-R / Focus Sash / Shell Bell."
   },
-  "SPECIES_INFERNAPE_REDUX_MEGA": {
-    "ability": "Blitz Bixer",
-    "nature": "Adamant",
-    "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "",
-    "moves": [
-      "Torrent Fist",
-      "One-Inch Punch",
-      "Ice Punch",
-      "Jet Punch"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Infernapite-R / Shell Bell / Punching Gloves / Choice Band."
-  },
-  "SPECIES_TINKATON_REDUX_MEGA": {
+  "SPECIES_TINKATON_REDUX": {
     "ability": "Intimidate",
     "nature": "Adamant",
     "evs": "252 Atk / 6 SpD / 252 Spe",
@@ -2597,33 +2233,7 @@
       "Protect",
       "Bonk"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_SINISTCHA": {
-    "ability": "Self Sufficient",
-    "nature": "Timid",
-    "evs": "252 HP or Spe / 252 SpA / 6 SpD",
-    "item": "White Herb",
-    "moves": [
-      "Matcha Gotcha",
-      "Shell Smash",
-      "Hidden Power",
-      "Hex"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_POLTEAGEIST": {
-    "ability": "Weak Armor",
-    "nature": "Modest",
-    "evs": "252 HP / 252 SpA / 6 SpD",
-    "item": "White Herb",
-    "moves": [
-      "Hex Trot",
-      "Shell Smash",
-      "Hidden Power",
-      "Stored Power"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_MUK": {
     "ability": "Poison Touch",
@@ -2636,7 +2246,7 @@
       "Drain Punch",
       "Shadow Sneak"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Tactical Vest."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Tactical Vest."
   },
   "SPECIES_ARMAROUGE": {
     "ability": "Weak Armor",
@@ -2647,9 +2257,9 @@
       "Armor Cannon",
       "Calm Mind",
       "Twin Beam",
-      "Hidden Power"
+      "Focus Blast"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Heavy Duty Boots / White Herb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Heavy Duty Boots / White Herb."
   },
   "SPECIES_CRABRUISER_REDUX": {
     "ability": "Denting Blows",
@@ -2660,9 +2270,9 @@
       "Hammer Arm",
       "Mach Punch",
       "Earthsplitter",
-      "Brutal Swing"
+      "Smashin' Realities"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Shell Bell / Choice Band."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Choice Band."
   },
   "SPECIES_TALONFLAME_MEGA": {
     "ability": "Galeforce Wings",
@@ -2673,9 +2283,9 @@
       "Whirling Strikes",
       "Swords Dance",
       "Blaze Kick",
-      "Secret Power"
+      "Roost"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Talonflameite / Shell Bell."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Talonflameite / Shell Bell."
   },
   "SPECIES_IRON_VALIANT": {
     "ability": "Equinox",
@@ -2688,7 +2298,7 @@
       "Fleur Cannon",
       "Swords Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Booster Energy / Life Orb."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Booster Energy / Life Orb."
   },
   "SPECIES_VICTREEBEL_MEGA": {
     "ability": "Hyper Aggressive",
@@ -2701,7 +2311,7 @@
       "Sludge Wave",
       "Trailblaze"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Victreebelite / Black Sludge (Ω)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Victreebelite / Black Sludge (Ω)."
   },
   "SPECIES_FEAROW_REDUX_EVO": {
     "ability": "Blood Bath",
@@ -2714,20 +2324,7 @@
       "Axe Kick",
       "Rolling Kick"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_HYDREIGON_REDUX": {
-    "ability": "Mega Launcher",
-    "nature": "Modest",
-    "evs": "252 HP / 252 SpA / 4 Spe",
-    "item": "Shell Bell",
-    "moves": [
-      "Dragon Pulse",
-      "Terrain Pulse",
-      "Fairy Wind",
-      "Protect"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_PIKACHU_POP_STAR": {
     "ability": "Electrocytes",
@@ -2740,7 +2337,7 @@
       "Surf",
       "Shock Wave"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_AGGRON_REDUX_MEGA": {
     "ability": "Sheer Force",
@@ -2753,7 +2350,7 @@
       "Drill Peck",
       "Spikes"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Life Orb / Shell Bell / Aggronite-R."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Life Orb / Shell Bell / Aggronite-R."
   },
   "SPECIES_PORYGON_Z": {
     "ability": "Download",
@@ -2766,7 +2363,7 @@
       "Ice Beam",
       "Shock Wave"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_BEWARDEN": {
     "ability": "Scrappy",
@@ -2774,25 +2371,12 @@
     "evs": "252 HP / 252 Atk / 4 SpD",
     "item": "Shell Bell",
     "moves": [
-      "Return",
+      "Double-Edge",
       "Drain Punch",
       "Bulk Up",
       "First Impression"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
-  },
-  "SPECIES_BEWARDEN_REDUX": {
-    "ability": "Serene Grace",
-    "nature": "Adamant",
-    "evs": "252 HP / 252 Atk / 4 SpD",
-    "item": "Shell Bell",
-    "moves": [
-      "Dizzy Punch",
-      "Cutsie Slap",
-      "Teeter Dance",
-      "Slack Off"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_MISMAGIUS": {
     "ability": "Ectoplasm",
@@ -2805,7 +2389,7 @@
       "Eerie Spell",
       "Nasty Plot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_FERROSEED": {
     "ability": "Impenetrable",
@@ -2818,7 +2402,7 @@
       "Leech Seed",
       "Creeping Thorns"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_MEW": {
     "ability": "Magic Guard",
@@ -2826,12 +2410,12 @@
     "evs": "252 HP / 152 Def / 104 SpD",
     "item": "Rocky Helmet",
     "moves": [
-      "Light of Ruin",
+      "Light Of Ruin",
       "King's Shield",
       "Follow Me",
       "Dark Void"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende."
   },
   "SPECIES_SCREAM_TAIL": {
     "ability": "Huge Power",
@@ -2844,7 +2428,7 @@
       "Star Crash",
       "Leech Life"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Booster Energy / Shell Bell / Leftovers."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Booster Energy / Shell Bell / Leftovers."
   },
   "SPECIES_LOPUNNY_MEGA": {
     "ability": "Scrappy",
@@ -2857,7 +2441,7 @@
       "Mega Kick",
       "Victory Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Lopunnite / Loaded Dice (Ω)."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Lopunnite / Loaded Dice (Ω)."
   },
   "SPECIES_IRON_THORNS": {
     "ability": "Light Metal",
@@ -2870,6 +2454,6 @@
       "Asteroid Shot",
       "Shift Gear"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuario). Habilidade, golpes e forma conferidos contra os dados do jogo 2.65beta; onde o post dava varias opcoes por slot, ficou a primeira que esta especie realmente aprende. Alternativas de item citadas no post: Booster Energy / Life Orb / Electric Seed."
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Booster Energy / Life Orb / Electric Seed."
   }
 }

@@ -108,6 +108,14 @@ foreach ($path in $dataFiles.Values) {
     if (-not (Test-Path $path)) { throw "Missing required data file: $path" }
 }
 
+# Trava de dado (2026-09-16): builds.json é curado à mão/por script a partir do
+# Discord, e já shipou 29 entradas citando habilidade/golpe que a espécie não
+# tem. Roda em TODO build (inclusive -SkipExtract, que é justamente o caminho
+# usado quando só builds.json muda) e aborta em vez de avisar - dado inválido
+# aqui vira conselho errado na tela do jogador.
+Write-Output "--- validando builds.json contra os dados reais ---"
+& (Join-Path $PSScriptRoot "validate_builds.ps1")
+
 Write-Output "--- splicing ---"
 $final = Get-Content $templatePath -Raw -Encoding UTF8
 $ser = New-GameDataParser
