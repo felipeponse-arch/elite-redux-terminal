@@ -1,0 +1,89 @@
+{
+  "source": "https://github.com/Elite-Redux/eliteredux-source (branch upcoming), scripts de cada ginasio em data/maps/<Ginasio>/scripts.pory, funcao EventScript_CheckTrainers - conferido linha a linha em 2026-09-17",
+  "note": "Cada buff listado aqui e removido da luta contra o lider quando voce vence o treinador de apoio correspondente daquele ginasio, ANTES de desafiar o lider - confirmado no proprio script do ginasio (registerbattleevent so roda pros treinadores que o jogo ainda nao marcou como derrotados), sem trava de dificuldade. So Sootopolis (Juan/Wallace) foge desse padrao: la nao ha buffs progressivos, e uma trava total (so da pra desafiar o lider depois de vencer os 10 treinadores do ginasio). O rotulo de cada buff nunca cita o treinador que o concede, so o efeito em si - o app so guarda se voce ja tirou aquele buff ou nao.",
+  "leaders": {
+    "Roxanne": {
+      "milestone": 1,
+      "buffs": [
+        { "id": "roxanne_laststand", "label": "Resistência de virada", "detail": "Quando sobrarem poucos Pokémon pro time dela, os stats do Pokémon ativo sobem bastante de uma vez (o jogo mesmo avisa: \"não vou aceitar a derrota\")." },
+        { "id": "roxanne_hazard_bleed", "label": "Stealth Rock + sangramento", "detail": "Pedras pontiagudas cercam seu time (dano ao trocar de Pokémon), e os 2 últimos Pokémon do SEU time começam a luta sangrando." },
+        { "id": "roxanne_defense", "label": "Defesa reforçada", "detail": "A Defesa do Pokémon ativo dela sobe de uma vez ao entrar em campo, e continua subindo um pouco a cada turno." }
+      ]
+    },
+    "Brawly": {
+      "milestone": 2,
+      "buffs": [
+        { "id": "brawly_foresight", "label": "Foresight no seu ativo", "detail": "Seu Pokémon ativo recebe Foresight: perde o bônus defensivo de esquiva e a imunidade Fantasma contra golpes Normal/Lutador." },
+        { "id": "brawly_paralysis", "label": "Paralisia nos últimos 2", "detail": "Os 2 últimos Pokémon do seu time começam a luta paralisados." },
+        { "id": "brawly_spikes", "label": "Spikes (2 camadas)", "detail": "2 camadas de Spikes cercam seu time, causando dano toda vez que você troca de Pokémon." },
+        { "id": "brawly_matblock", "label": "Mat Block ao trocar", "detail": "O Pokémon dele bloqueia o primeiro golpe direto toda vez que ele entra em campo." },
+        { "id": "brawly_attack", "label": "Ataque reforçado", "detail": "O Ataque do Pokémon ativo dele sobe de uma vez, numa porcentagem, ao entrar em campo." }
+      ]
+    },
+    "Wattson": {
+      "milestone": 3,
+      "buffs": [
+        { "id": "wattson_burn", "label": "Queimadura nos últimos 3", "detail": "Os 3 últimos Pokémon do seu time começam a luta queimados." },
+        { "id": "wattson_stickyweb", "label": "Sticky Web", "detail": "Uma teia gruda no chão do seu lado do campo, baixando a Velocidade de quem entra." },
+        { "id": "wattson_speed", "label": "Velocidade sobe aos poucos", "detail": "A Velocidade do Pokémon ativo dele aumenta um pouco a cada turno." },
+        { "id": "wattson_magnetrise_spdef", "label": "Magnet Rise + Def. Especial", "detail": "O Pokémon ativo dele fica imune a golpes de Terra (Magnet Rise) e ganha Defesa Especial de uma vez ao entrar." }
+      ]
+    },
+    "Flannery": {
+      "milestone": 4,
+      "buffs": [
+        { "id": "flannery_spatk_steady", "label": "Atq. Especial sobe aos poucos", "detail": "O Ataque Especial do Pokémon ativo dela aumenta um pouco a cada turno." },
+        { "id": "flannery_toxic", "label": "Veneno grave nos últimos 2", "detail": "Os 2 últimos Pokémon do seu time começam a luta com veneno grave (piora a cada turno)." },
+        { "id": "flannery_healblock", "label": "Heal Block permanente", "detail": "Seus Pokémon não conseguem usar golpes nem itens de cura a luta inteira." },
+        { "id": "flannery_accuracy", "label": "Precisão sobe aos poucos", "detail": "A Precisão do Pokémon ativo dela aumenta um pouco a cada turno." },
+        { "id": "flannery_burn", "label": "Queimadura nos últimos 2", "detail": "Os 2 últimos Pokémon do seu time começam a luta queimados." },
+        { "id": "flannery_defense", "label": "Defesa reforçada", "detail": "A Defesa do Pokémon ativo dela sobe de uma vez, numa porcentagem, ao entrar em campo." },
+        { "id": "flannery_copystats", "label": "Herda status ao entrar", "detail": "Quando um Pokémon dela desmaia, o substituto já entra com os mesmos status de batalha (stat stages) dele." },
+        { "id": "flannery_spatk_posture", "label": "Atq. Especial reforçado", "detail": "O Ataque Especial do Pokémon ativo dela sobe de uma vez, numa porcentagem, ao entrar em campo." }
+      ]
+    },
+    "Norman": {
+      "milestone": 5,
+      "buffs": [
+        { "id": "norman_speed", "label": "Velocidade reforçada", "detail": "A Velocidade do Pokémon ativo dele sobe de uma vez, numa porcentagem, ao entrar em campo." },
+        { "id": "norman_accuracy_laststand", "label": "Precisão + resistência de virada", "detail": "A Precisão do Pokémon ativo dele aumenta um pouco a cada turno, e quando sobrarem poucos Pokémon os stats sobem bastante de uma vez." },
+        { "id": "norman_spikes", "label": "Spikes (2 camadas)", "detail": "2 camadas de Spikes cercam seu time, causando dano toda vez que você troca de Pokémon." },
+        { "id": "norman_defense", "label": "Defesa reforçada", "detail": "A Defesa do Pokémon ativo dele sobe de uma vez, numa porcentagem, ao entrar em campo." },
+        { "id": "norman_leechseed", "label": "Leech Seed no seu ativo", "detail": "Seu Pokémon ativo é grudado com Leech Seed: perde HP por turno, que vai pro time dele." },
+        { "id": "norman_attack", "label": "Ataque reforçado", "detail": "O Ataque do Pokémon ativo dele sobe de uma vez, numa porcentagem, ao entrar em campo." },
+        { "id": "norman_substitute", "label": "Substituto", "detail": "O Pokémon ativo dele entra em campo já usando Substituto." }
+      ]
+    },
+    "Winona": {
+      "milestone": 6,
+      "buffs": [
+        { "id": "winona_spdef", "label": "Def. Especial reforçada", "detail": "A Defesa Especial do Pokémon ativo dela sobe de uma vez, numa porcentagem, ao entrar em campo." },
+        { "id": "winona_frostbite", "label": "Frostbite nos últimos 4", "detail": "Os 4 últimos Pokémon do seu time começam a luta com frostbite: perdem HP por turno e ficam com Ataque Especial reduzido." },
+        { "id": "winona_embargo", "label": "Embargo", "detail": "Seus Pokémon ficam impedidos de usar o item que estão segurando por um tempo." },
+        { "id": "winona_defense", "label": "Defesa reforçada", "detail": "A Defesa do Pokémon ativo dela sobe de uma vez, numa porcentagem, ao entrar em campo." }
+      ]
+    },
+    "Tate And Liza": {
+      "milestone": 7,
+      "note": "Aqui os buffs não são por treinador individual, e sim por QUANTAS das 6 duplas de apoio você já venceu - cada dupla vencida tira exatamente um buff desta lista, sempre nesta ordem (o 1º some ao vencer a 1ª dupla, e assim por diante).",
+      "buffs": [
+        { "id": "tateliza_lightscreen", "label": "Light Screen", "detail": "O time deles começa a luta protegido por Light Screen, reduzindo o dano de golpes especiais." },
+        { "id": "tateliza_reflect", "label": "Reflect", "detail": "O time deles começa a luta protegido por Reflect, reduzindo o dano de golpes físicos." },
+        { "id": "tateliza_luckychant", "label": "Lucky Chant", "detail": "O time deles fica livre de sofrer acertos críticos por um tempo." },
+        { "id": "tateliza_wideguard", "label": "Wide Guard permanente", "detail": "O time deles fica protegido de golpes em área a luta inteira." },
+        { "id": "tateliza_sleep", "label": "Sono no último Pokémon", "detail": "O último Pokémon do seu time começa a luta dormindo." },
+        { "id": "tateliza_noprotect", "label": "Sem Protect/Detect", "detail": "Você não pode usar Protect nem Detect nessa luta." }
+      ]
+    },
+    "Juan": {
+      "milestone": 8,
+      "gateOnly": true,
+      "gateNote": "Este ginásio não usa buffs progressivos no líder. Em vez disso, você só consegue desafiar Juan/Wallace depois de vencer os 10 treinadores do ginásio inteiro (ou já ter a badge) - não tem meio-termo."
+    },
+    "Wallace": {
+      "milestone": 8,
+      "gateOnly": true,
+      "gateNote": "Este ginásio não usa buffs progressivos no líder. Em vez disso, você só consegue desafiar Juan/Wallace depois de vencer os 10 treinadores do ginásio inteiro (ou já ter a badge) - não tem meio-termo."
+    }
+  }
+}

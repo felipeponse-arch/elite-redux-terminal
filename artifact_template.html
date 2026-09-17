@@ -891,6 +891,10 @@
   .sync-banner[hidden] { display: none; }
   .dash-caveat { color: var(--text-dim); font-size: 11.5px; }
   .auto-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; }
+  .gym-skill-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+  .gym-skill-list label { display: flex; gap: 9px; align-items: flex-start; cursor: pointer; }
+  .gym-skill-list input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; width: 15px; height: 15px; }
+  .gym-skill-list .gs-detail { color: var(--text-dim); font-weight: 400; }
   .auto-log time { display: block; font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
   .sync-banner button {
     border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700;
@@ -1682,6 +1686,7 @@
 <script id="builds" type="application/json">__BUILDS_JSON__</script>
 <script id="bossdata" type="application/json">__BOSSES_JSON__</script>
 <script id="levelcapdata" type="application/json">__LEVELCAPS_JSON__</script>
+<script id="gymskillsdata" type="application/json">__GYM_SKILLS_JSON__</script>
 <script id="savedteamsseed" type="application/json">__SAVEDTEAMS_JSON__</script>
 <script id="abilitypt" type="application/json">__ABILITY_PT_JSON__</script>
 <script id="movept" type="application/json">__MOVE_PT_JSON__</script>
@@ -1805,6 +1810,13 @@
   var CHANGELOG = JSON.parse(document.getElementById("changelog").textContent || "[]");
   var BOSSES = JSON.parse(document.getElementById("bossdata").textContent || "[]");
   var LEVELCAPS = JSON.parse(document.getElementById("levelcapdata").textContent || "null");
+  // Gym Skills (item pedido pelo usuario, 2026-09-17): buffs que o lider de
+  // cada ginasio perde quando voce vence o treinador de apoio correspondente,
+  // ANTES de desafia-lo. Confirmado linha a linha no script de cada ginasio
+  // do codigo-fonte oficial (eliteredux-source, EventScript_CheckTrainers) -
+  // sem trava de dificuldade, ao contrario do sistema separado (e nao usado
+  // aqui) que so vale no modo Hell. Fonte completa em data/gym_skills.json.
+  var GYM_SKILLS = JSON.parse(document.getElementById("gymskillsdata").textContent || "null");
   var SAVEDTEAMS_SEED = JSON.parse(document.getElementById("savedteamsseed").textContent || "[]");
   var ABILITY_PT = JSON.parse(document.getElementById("abilitypt").textContent || "{}");
   var MOVE_PT = JSON.parse(document.getElementById("movept").textContent || "{}");
@@ -2176,6 +2188,12 @@
     // Registro do que o app mudou sozinho (item U4 da pauta, 2026-09-16) -
     // o aviso passageiro (toast) some em segundos; aqui fica guardado.
     autoLog: [],
+    // Quais buffs de Gym Skill o jogador ja "tirou" de cada lider (venceu o
+    // treinador de apoio correspondente) - sname-agnostico, chaveado pelo
+    // nome-base do lider (mesma chave de GYM_LEADER_MILESTONE). O app NUNCA
+    // pede pra dizer qual treinador, so se o efeito ja saiu ou nao (pedido
+    // explicito do usuario).
+    gymSkillsCleared: {},
     // Interactive "meu build" per species, sname-keyed - 2026-09-09, user
     // feedback: the free-text notes field above has "no interaction with
     // the Pokemon", the user has to type everything by hand instead of
@@ -2266,6 +2284,21 @@
     state.autoLog = Array.isArray(save.autoLog) ? save.autoLog.filter(function (e) {
       return e && typeof e.at === "string" && typeof e.text === "string";
     }).slice(0, AUTO_LOG_MAX).map(function (e) { return { at: e.at, text: e.text }; }) : [];
+    // Mesma disciplina defensiva das notas/builds acima: so aceita chave de
+    // lider e id de buff que realmente existem no GYM_SKILLS carregado agora -
+    // um save de uma versao futura/editada a mao nao injeta lixo aqui.
+    state.gymSkillsCleared = {};
+    if (save.gymSkillsCleared && typeof save.gymSkillsCleared === "object" && GYM_SKILLS) {
+      Object.keys(save.gymSkillsCleared).forEach(function (leaderName) {
+        var leaderData = GYM_SKILLS.leaders[leaderName];
+        var validIds = leaderData && leaderData.buffs ? leaderData.buffs.map(function (b) { return b.id; }) : [];
+        var arr = save.gymSkillsCleared[leaderName];
+        if (leaderData && Array.isArray(arr)) {
+          var kept = arr.filter(function (id) { return typeof id === "string" && validIds.indexOf(id) !== -1; });
+          if (kept.length) state.gymSkillsCleared[leaderName] = kept;
+        }
+      });
+    }
     if (teamOrphans.length || boxOrphans.length) {
       logAutoAction((teamOrphans.length + boxOrphans.length) + " Pokémon do save não existem nesta versão dos dados (" + teamOrphans.concat(boxOrphans).join(", ") + ") - guardados no save sem aparecer, pra não serem apagados.");
     }
@@ -2398,6 +2431,7 @@
       notes: state.notes,
       autoEvolved: state.autoEvolved,
       autoLog: state.autoLog,
+      gymSkillsCleared: state.gymSkillsCleared,
       customBuilds: state.customBuilds,
       archetype: state.archetype
     };
@@ -2651,7 +2685,16 @@
     document.getElementById("storage-banner").hidden = true;
   });
 
-  var DIFF_TO_BOSSKEY = { easy: "party", ace: "insane", elite: "hell" };
+  // Bug achado em 2026-09-17, conferido linha a linha contra o codigo-fonte
+  // oficial (src/battle_main.c da eliteredux-source): o jogo usa o campo
+  // "party" (mesmo time) pra Easy E Ace - a diferenca entre elas e so EVs
+  // habilitados, nao o time - e so troca de time em Elite ("insane"/
+  // partyInsane) e Hell ("hell"/partyHell), que o app nem modela como
+  // dificuldade selecionavel. Antes disto Ace mostrava o time de Elite
+  // (insane) e Elite mostrava o de Hell - o seletor manual de chips
+  // (Padrao/Insane/Hell) continua disponivel pra quem quiser conferir os
+  // outros tiers na mesma tela.
+  var DIFF_TO_BOSSKEY = { easy: "party", ace: "party", elite: "insane" };
 
   // ---------------- level cap & auto-evolution ----------------
 
@@ -4613,6 +4656,10 @@
     "Roxanne": 1, "Brawly": 2, "Wattson": 3, "Flannery": 4,
     "Norman": 5, "Winona": 6, "Tate And Liza": 7, "Juan": 8, "Wallace": 8
   };
+  // "Roxanne 1"/"Roxanne 2"... -> "Roxanne". Mesmo corte usado no dedup de
+  // rebatalha abaixo e na chave de GYM_SKILLS.leaders - promovido a funcao
+  // pra nao divergir entre os dois lugares que precisam dele.
+  function gymLeaderBaseName(name) { return String(name || "").replace(/\s+\d+$/, "").trim(); }
   // Cada líder aparece várias vezes em bosses.json (Wattson 1, 2, 3...) -
   // são rebatalhas em pontos diferentes do jogo, não dificuldades; só a
   // PRIMEIRA ocorrência de cada nome-base é o encontro real que concede o
@@ -4633,7 +4680,7 @@
       // mesmo desafio final) - por isso o Campeão usa uma regra própria em
       // vez do mesmo dedup por nome-base.
       if (b.cat === "Lider de Ginasio") {
-        var baseName = b.name.replace(/\s+\d+$/, "").trim();
+        var baseName = gymLeaderBaseName(b.name);
         var milestone = GYM_LEADER_MILESTONE[baseName];
         if (milestone === undefined || milestone <= curMilestone) return;
         // Dedup pelo BADGE, não pelo nome: Juan e Wallace são o mesmo 8º
@@ -6333,6 +6380,49 @@
     renderBossDetail();
   }
 
+  // Resumo puro (nao mexe no DOM) de quantos buffs de Gym Skill ainda
+  // restam pro lider `leaderName` - usado no render do card e exposto na
+  // ponte de teste. Retorna null quando o lider nao esta em GYM_SKILLS
+  // (ainda nao e um chefao que o app reconhece como lider de ginasio).
+  function gymSkillsSummaryFor(leaderName) {
+    if (!GYM_SKILLS || !GYM_SKILLS.leaders) return null;
+    var leaderData = GYM_SKILLS.leaders[leaderName];
+    if (!leaderData) return null;
+    if (leaderData.gateOnly) return { gateOnly: true, gateNote: leaderData.gateNote };
+    var clearedIds = state.gymSkillsCleared[leaderName] || [];
+    var buffs = leaderData.buffs.map(function (b) {
+      return { id: b.id, label: b.label, detail: b.detail, cleared: clearedIds.indexOf(b.id) !== -1 };
+    });
+    var remaining = buffs.filter(function (b) { return !b.cleared; }).length;
+    return { gateOnly: false, note: leaderData.note || null, buffs: buffs, remaining: remaining, total: buffs.length };
+  }
+
+  // Card "Buffs do ginásio" (item pedido pelo usuário, 2026-09-17): só
+  // aparece pra chefões que são líderes de ginásio (boss.cat), e só quando
+  // GYM_SKILLS tem dado pra esse líder - nunca inventa lista vazia como se
+  // fosse "0 buffs confirmados". A interface não pergunta QUAL treinador,
+  // só se aquele efeito já saiu ou não (pedido explícito do usuário).
+  function renderGymSkillsCardHtml(boss) {
+    if (!boss || boss.cat !== "Lider de Ginasio") return "";
+    var leaderName = gymLeaderBaseName(boss.name);
+    var summary = gymSkillsSummaryFor(leaderName);
+    if (!summary) return "";
+    if (summary.gateOnly) {
+      return '<div class="card" data-gym-leader="' + escapeHtml(leaderName) + '"><h3>Buffs do ginásio</h3>' +
+        '<p class="hint" style="margin:0;">' + escapeHtml(summary.gateNote) + '</p></div>';
+    }
+    var itemsHtml = summary.buffs.map(function (b) {
+      return '<li><label><input type="checkbox" data-gymskill="' + escapeHtml(b.id) + '"' + (b.cleared ? " checked" : "") + '>' +
+        '<span><b>' + escapeHtml(b.label) + '</b><span class="gs-detail"> — ' + escapeHtml(b.detail) + '</span></span></label></li>';
+    }).join("");
+    return '<div class="card" data-gym-leader="' + escapeHtml(leaderName) + '"><h3>Buffs do ginásio</h3>' +
+      '<p class="hint" style="margin:0 0 10px;">Cada treinador de apoio deste ginásio tira um desses buffs de ' + escapeHtml(leaderName) + ' quando você o vence, antes de desafiá-la(o). Marque os que você já tirou — não precisa dizer qual treinador, só o efeito.</p>' +
+      (summary.note ? '<p class="hint" style="margin:0 0 10px;">' + escapeHtml(summary.note) + '</p>' : "") +
+      '<ul class="gym-skill-list">' + itemsHtml + '</ul>' +
+      '<div class="gym-skill-summary mono" style="margin-top:10px;font-size:12.5px;">Restam ' + summary.remaining + ' de ' + summary.total + ' buff' + (summary.total === 1 ? "" : "s") + ' ativo' + (summary.remaining === 1 ? "" : "s") + ' antes da luta.</div>' +
+    '</div>';
+  }
+
   var STAT_LABELS_SHORT = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
   function renderBossDetail() {
     var boss = BOSSES[bossState.selected];
@@ -6453,6 +6543,7 @@
           '<input type="number" id="boss-level-input" min="1" max="100" value="' + bossState.level + '"></div>' +
         '<p style="color:var(--text-dim);font-size:11px;margin:4px 0 12px;max-width:65ch;">Você digita o nível — não temos como saber o nível real de um treinador nos dados do jogo (por isso não existe uma calculadora de dano completa aqui, só isso). EVs/IVs são reais, extraídos do jogo. Considera o item quando é Choice Band/Specs/Scarf, Assault Vest, Tactical Vest, Thick Club ou Light Ball (marcado com *). Quando é Mega Stone ou orbe de reversão primal, os status já são calculados na forma transformada (types e stats reais dessa forma) — mas não sabemos qual das habilidades escolhíveis DA FORMA MEGA fica ativa (os dados não dizem), e não simulamos clima/campo/Trick Room já ativos antes da transformação (isso exigiria simular a ordem dos turnos, que este cálculo não faz). Efeito de habilidade em geral e itens ainda não identificados também não entram na conta.</p>' +
         '<div class="boss-mon-grid">' + monsHtml + '</div></div>' +
+      renderGymSkillsCardHtml(boss) +
       '<div class="card"><h3>Enviar para o Claude</h3>' +
         '<p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">Junta o time dele com o seu time e sua caixa num texto só. Copie e cole na conversa pra eu montar a contra-estratégia.</p>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">' +
@@ -6485,6 +6576,23 @@
       bossState.level = Math.min(100, v);
       renderBossDetail();
     });
+
+    var gymCard = document.querySelector("#boss-detail [data-gym-leader]");
+    if (gymCard) {
+      var leaderName = gymCard.dataset.gymLeader;
+      gymCard.querySelectorAll("[data-gymskill]").forEach(function (cb) {
+        cb.addEventListener("change", function () {
+          var id = cb.dataset.gymskill;
+          var cleared = state.gymSkillsCleared[leaderName] || [];
+          if (cb.checked) { if (cleared.indexOf(id) === -1) cleared = cleared.concat([id]); }
+          else { cleared = cleared.filter(function (x) { return x !== id; }); }
+          if (cleared.length) state.gymSkillsCleared[leaderName] = cleared;
+          else delete state.gymSkillsCleared[leaderName];
+          persist();
+          renderBossDetail();
+        });
+      });
+    }
   }
 
   // ---------------- progress / settings view ----------------
@@ -6697,6 +6805,9 @@
     computeBossAttackTypes: computeBossAttackTypes,
     bossSpeedSummary: bossSpeedSummary,
     getRemainingBossEntries: getRemainingBossEntries,
+    GYM_SKILLS: GYM_SKILLS,
+    gymLeaderBaseName: gymLeaderBaseName,
+    gymSkillsSummaryFor: gymSkillsSummaryFor,
     getCurrentCap: getCurrentCap,
     levelCapMode: levelCapMode,
     getSpeciesByX: getSpeciesByX,

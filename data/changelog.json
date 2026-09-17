@@ -1,5 +1,12 @@
 [
   {
+    "date": "2026-09-17",
+    "items": [
+      "Novo card \"Buffs do ginásio\" na luta contra cada líder: mostra os buffs que ele ainda tem, e você marca os que já tirou vencendo os treinadores de apoio - sem precisar dizer qual treinador",
+      "Corrigido: a aba Chefões mostrava o time errado por padrão em Ace (mostrava o de Elite) e Elite (mostrava o de Hell), que não existe como dificuldade no app"
+    ]
+  },
+  {
     "date": "2026-09-16",
     "items": [
       "Novo seletor Level Cap (Easy/More/Elite), separado da Dificuldade: a Dificuldade muda só os times dos chefões",
