@@ -49,9 +49,9 @@ async function section17() {
   }
 
   // ---- P2: golpe acima do level cap ----
-  var settingsOriginais = { difficulty: T.state.settings.difficulty, milestone: T.state.settings.milestone };
+  var settingsOriginais = { levelCapMode: T.state.settings.levelCapMode, milestone: T.state.settings.milestone };
   try {
-    T.state.settings.difficulty = "elite";
+    T.state.settings.levelCapMode = "elite";
     T.state.settings.milestone = 0;
     var capBaixo = T.getCurrentCap();
     var acima = null;
@@ -78,7 +78,7 @@ async function section17() {
       check("sem level cap (Campeão), a observação de golpe acima do cap some", semCap.indexOf("Acima do seu level cap") === -1, semCap.replace(/<[^>]+>/g, ""));
     }
   } finally {
-    T.state.settings.difficulty = settingsOriginais.difficulty;
+    T.state.settings.levelCapMode = settingsOriginais.levelCapMode;
     T.state.settings.milestone = settingsOriginais.milestone;
   }
 

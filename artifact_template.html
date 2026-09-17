@@ -1533,7 +1533,7 @@
 
     <section id="view-progress" class="view">
       <div class="types-shell">
-        <p class="hint">Isso define o que a ferramenta assume em toda a run: qual variante de time (Padrão/Insane/Hell) aparece por padrão na aba Chefões, qual coluna de level cap conta, e o que entra automaticamente no texto de "Enviar para o Claude" de cada chefão.</p>
+        <p class="hint">Isso define o que a ferramenta assume em toda a run: qual variante de time (Padrão/Insane/Hell) aparece por padrão na aba Chefões (Dificuldade), qual coluna de level cap conta (Level Cap), e o que entra automaticamente no texto de "Enviar para o Claude" de cada chefão. Use os mesmos valores da tela de setup do jogo.</p>
         <div class="card" style="max-width:460px;">
           <h3>Dificuldade e progresso atual</h3>
           <div style="display:flex;flex-direction:column;gap:12px;">
@@ -1543,6 +1543,15 @@
                 <option value="ace">Ace</option>
                 <option value="elite">Elite</option>
               </select>
+              <span style="font-weight:400;font-size:11px;color:var(--text-dim);">Muda os times dos chefões. Não muda o level cap.</span>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Level Cap
+              <select id="settings-level-cap" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;">
+                <option value="easy">Easy</option>
+                <option value="more">More</option>
+                <option value="elite">Elite</option>
+              </select>
+              <span style="font-weight:400;font-size:11px;color:var(--text-dim);">Opção "Level Cap" do setup do jogo. Define o nível máximo a cada badge.</span>
             </label>
             <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Último badge conquistado
               <select id="settings-milestone" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;"></select>
@@ -2115,7 +2124,7 @@
     box: [],
     // megaMode (2026-09-16, regra de jogo passada pelo usuário): o Elite Redux
     // tem dois modos de Mega Evolução - ver megaMode() e battleUnitsOf().
-    settings: { difficulty: "ace", milestone: 0, megaMode: "temporaria" },
+    settings: { difficulty: "ace", levelCapMode: "more", milestone: 0, megaMode: "temporaria" },
     savedTeams: [],
     // snames from the last loaded save that this data build doesn't
     // recognise (e.g. a save made on a newer game version). Kept verbatim
@@ -2193,6 +2202,8 @@
     }
     if (save.settings && typeof save.settings === "object") {
       if (save.settings.difficulty) state.settings.difficulty = save.settings.difficulty;
+      if (LEVEL_CAP_MODES.indexOf(save.settings.levelCapMode) !== -1) state.settings.levelCapMode = save.settings.levelCapMode;
+      else state.settings.levelCapMode = levelCapModeFromDifficulty(save.settings.difficulty);
       if (save.settings.megaMode === "permanente" || save.settings.megaMode === "temporaria") state.settings.megaMode = save.settings.megaMode;
       if (typeof save.settings.milestone === "number") state.settings.milestone = save.settings.milestone;
       // Fase 1 quality-of-life, 2026-09-09: remember sort order + type
@@ -3927,7 +3938,8 @@
     var cap = getCurrentCap();
     var milestone = LEVELCAPS && LEVELCAPS.rows[state.settings.milestone] ? LEVELCAPS.rows[state.settings.milestone].milestone : "?";
     var diffLabel = { easy: "Easy", ace: "Ace", elite: "Elite" }[state.settings.difficulty] || state.settings.difficulty;
-    return "Dificuldade " + diffLabel + ", progresso " + milestone + ", level cap atual " + (cap === null ? "sem limite" : cap) + ".";
+    var capLabel = { easy: "Easy", more: "More", elite: "Elite" }[levelCapMode()];
+    return "Dificuldade " + diffLabel + ", Level Cap " + capLabel + ", progresso " + milestone + ", level cap atual " + (cap === null ? "sem limite" : cap) + ".";
   }
 
   // ---------------- Showdown export & "Meu build" editor ----------------
@@ -6411,6 +6423,8 @@
     renderChangelog();
     var diffSel = document.getElementById("settings-difficulty");
     diffSel.value = state.settings.difficulty;
+    var capSel = document.getElementById("settings-level-cap");
+    capSel.value = levelCapMode();
     var msSel = document.getElementById("settings-milestone");
     if (LEVELCAPS) {
       msSel.innerHTML = LEVELCAPS.rows.map(function (r, idx) {
@@ -6441,8 +6455,15 @@
         selectSpecies(state.selected);
       }
     }
+    // Dificuldade só escolhe a variante dos chefões - não mexe no cap, então
+    // não dispara auto-evolução nem destrava golpes.
     diffSel.addEventListener("change", function () {
       state.settings.difficulty = diffSel.value;
+      saveSettings();
+      scheduleDashboardRefresh();
+    });
+    capSel.addEventListener("change", function () {
+      state.settings.levelCapMode = LEVEL_CAP_MODES.indexOf(capSel.value) !== -1 ? capSel.value : "more";
       afterCapChange();
     });
     msSel.addEventListener("change", function () {
@@ -6500,10 +6521,10 @@
 
     if (LEVELCAPS) {
       document.getElementById("levelcap-note").textContent = LEVELCAPS.note + " Fonte: " + LEVELCAPS.source;
-      var lcHead = '<tr><th class="rowhead">Marco</th><th>Fácil</th><th>Ace</th><th>Elite</th></tr>';
+      var lcHead = '<tr><th class="rowhead">Marco</th><th>Easy</th><th>More</th><th>Elite</th></tr>';
       var lcRows = LEVELCAPS.rows.map(function (r) {
         var fmt = function (v) { return v === null ? "—" : v; };
-        return '<tr><td class="rowhead">' + escapeHtml(r.milestone) + '</td><td class="mono">' + fmt(r.easy) + '</td><td class="mono">' + fmt(r.ace) + '</td><td class="mono">' + fmt(r.elite) + '</td></tr>';
+        return '<tr><td class="rowhead">' + escapeHtml(r.milestone) + '</td><td class="mono">' + fmt(r.easy) + '</td><td class="mono">' + fmt(r.more) + '</td><td class="mono">' + fmt(r.elite) + '</td></tr>';
       }).join("");
       document.getElementById("levelcap-table").innerHTML = '<thead>' + lcHead + '</thead><tbody>' + lcRows + '</tbody>';
     }

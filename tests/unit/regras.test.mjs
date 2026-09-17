@@ -70,7 +70,7 @@ test("pedra obrigatória só pra forma mega no modo temporário", () => {
 test("golpes liberados respeitam o level cap e sempre incluem tutor", () => {
   const sp = R.SPECIES.find((s) => s.tu.length && s.lm.some((p) => p[0] > 30));
   assert.ok(sp, "fixture: espécie com tutor e golpe acima do nível 30");
-  R.state.settings.difficulty = "elite"; R.state.settings.milestone = 0; // cap 16
+  R.state.settings.levelCapMode = "elite"; R.state.settings.milestone = 0; // cap 16
   const baixo = R.availableMovesFor(sp);
   assert.equal(baixo.cap, 16);
   assert.ok(sp.tu.every((id) => baixo.ids.includes(id)), "tutor nunca trava");
@@ -79,7 +79,21 @@ test("golpes liberados respeitam o level cap e sempre incluem tutor", () => {
   const semCap = R.availableMovesFor(sp);
   assert.equal(semCap.cap, null);
   assert.equal(semCap.lockedCount, 0);
-  R.state.settings.difficulty = "ace"; R.state.settings.milestone = 0;
+  R.state.settings.levelCapMode = "more"; R.state.settings.milestone = 0;
+});
+
+test("level cap vem da opção Level Cap, não da dificuldade", () => {
+  R.state.settings.milestone = 0;
+  R.state.settings.levelCapMode = "elite"; R.state.settings.difficulty = "easy";
+  assert.equal(R.getCurrentCap(), 16, "Dificuldade Easy + Level Cap Elite = cap da coluna Elite");
+  R.state.settings.levelCapMode = "easy"; R.state.settings.difficulty = "elite";
+  assert.equal(R.getCurrentCap(), 20, "Dificuldade Elite + Level Cap Easy = cap da coluna Easy");
+  R.state.settings.levelCapMode = undefined;
+  assert.equal(R.getCurrentCap(), 18, "valor inválido cai no padrão More");
+  assert.equal(R.levelCapModeFromDifficulty("ace"), "more");
+  assert.equal(R.levelCapModeFromDifficulty("easy"), "easy");
+  assert.equal(R.levelCapModeFromDifficulty("elite"), "elite");
+  R.state.settings.levelCapMode = "more"; R.state.settings.difficulty = "ace";
 });
 
 // ---- validação da build por IA ----

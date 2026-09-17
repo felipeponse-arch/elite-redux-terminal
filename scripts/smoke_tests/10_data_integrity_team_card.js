@@ -88,7 +88,7 @@ async function section10() {
   // ter a build montada com life orb").
   document.querySelector('.tab-btn[data-tab="progress"]').click();
   await wait(30);
-  var diffSel = document.getElementById("settings-difficulty");
+  var diffSel = document.getElementById("settings-level-cap");
   var msSel27 = document.getElementById("settings-milestone");
   // Achado em auditoria de QA (2026-09-13): esta seção mudava
   // dificuldade/milestone e nunca restaurava - mesma classe de bug do
@@ -98,10 +98,10 @@ async function section10() {
   // fim da seção antes que isso mude.
   var diffSelBefore27 = diffSel ? diffSel.value : null;
   var msSelBefore27 = msSel27 ? msSel27.value : null;
-  if (diffSel) { diffSel.value = "ace"; diffSel.dispatchEvent(new Event("change", { bubbles: true })); }
+  if (diffSel) { diffSel.value = "more"; diffSel.dispatchEvent(new Event("change", { bubbles: true })); }
   if (msSel27) { msSel27.value = "0"; msSel27.dispatchEvent(new Event("change", { bubbles: true })); }
   await wait(30);
-  // Milestone 0 + ace = level cap 18 (data/levelcaps.json), o mesmo "lv 18"
+  // Milestone 0 + Level Cap More = level cap 18 (data/levelcaps.json), o mesmo "lv 18"
   // do relato do usuário - Bulbasaur real tem golpes de nível 24 e 37
   // (Bind, Giga Drain, Grass Whistle, Natural Gift, Power Whip, Synthesis,
   // Petal Blizzard, Grassy Glide, Leaf Storm, Magical Leaf, Venoshock),

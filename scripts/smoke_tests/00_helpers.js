@@ -95,6 +95,7 @@ async function prepararRunPadrao() {
     el.dispatchEvent(new Event("change", { bubbles: true }));
   }
   escolher("settings-difficulty", "ace");
+  escolher("settings-level-cap", "more");
   escolher("settings-milestone", 9);
   escolher("settings-mega-mode", "temporaria");
   await wait(50);

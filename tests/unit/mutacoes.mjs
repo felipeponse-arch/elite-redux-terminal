@@ -28,6 +28,13 @@ export const MUTACOES = [
     para: "return [base];",
   },
   {
+    id: "cap-pela-dificuldade",
+    descricao: "level cap volta a sair da dificuldade",
+    arquivo: "level_cap.js",
+    de: "[state.settings.milestone][levelCapMode()]",
+    para: "[state.settings.milestone][levelCapModeFromDifficulty(state.settings.difficulty)]",
+  },
+  {
     id: "cap-ignorado",
     descricao: "golpes liberados ignoram o level cap",
     arquivo: "level_cap.js",

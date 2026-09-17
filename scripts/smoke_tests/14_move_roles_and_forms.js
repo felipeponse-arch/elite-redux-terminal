@@ -118,7 +118,7 @@ async function section14() {
     await wait(20);
     document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
     await wait(50);
-    var diff = document.getElementById("settings-difficulty");
+    var diff = document.getElementById("settings-level-cap");
     var ms = document.getElementById("settings-milestone");
     function setCap(d, m) {
       diff.value = d; diff.dispatchEvent(new Event("change", { bubbles: true }));

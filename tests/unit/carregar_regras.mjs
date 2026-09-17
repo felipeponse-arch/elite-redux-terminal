@@ -11,7 +11,7 @@ import vm from "node:vm";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const lerJson = (nome) => JSON.parse(readFileSync(join(root, "data", nome), "utf8"));
 
-export function carregarRegras({ difficulty = "ace", milestone = 0, megaMode = "temporaria" } = {}) {
+export function carregarRegras({ difficulty = "ace", levelCapMode = "more", milestone = 0, megaMode = "temporaria" } = {}) {
   const contexto = {
     console,
     DATA: lerJson("dex_compact.json"),
@@ -25,7 +25,7 @@ export function carregarRegras({ difficulty = "ace", milestone = 0, megaMode = "
     ITEM_DESC: lerJson("item_descriptions.json"),
     ITEM_PT: lerJson("item_translations_pt.json"),
     MOVE_ROLES: lerJson("move_roles.json"),
-    state: { settings: { difficulty, milestone, megaMode }, customBuilds: {}, notes: {} },
+    state: { settings: { difficulty, levelCapMode, milestone, megaMode }, customBuilds: {}, notes: {} },
   };
   vm.createContext(contexto);
   const template = readFileSync(join(root, "artifact_template.html"), "utf8");

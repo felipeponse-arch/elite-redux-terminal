@@ -1,16 +1,16 @@
 {
   "source": "https://eliteredux.net/level-caps/",
-  "note": "Se voce passar do cap, o Pokemon acima do nivel pode parar de obedecer. A dificuldade pode ser mudada em qualquer Centro Pokemon, nas duas direcoes - nao existe opcao pra desativar o level cap em si. Aumentar a dificuldade depois de ter abaixado marca seu Hall da Fama com um icone (anti-cheat pra challenge runs), mas o app permite normalmente.",
+  "note": "As colunas seguem a opcao Level Cap do setup do jogo (Easy/More/Elite), que e separada da Dificuldade (Easy/Ace/Elite) - a Dificuldade muda os times dos chefoes, nao o cap. Se voce passar do cap, o Pokemon acima do nivel pode parar de obedecer. A dificuldade pode ser mudada em qualquer Centro Pokemon, nas duas direcoes - nao existe opcao pra desativar o level cap em si. Aumentar a dificuldade depois de ter abaixado marca seu Hall da Fama com um icone (anti-cheat pra challenge runs), mas o app permite normalmente.",
   "rows": [
-    { "milestone": "Sem Badge (inicio)", "easy": 20, "ace": 18, "elite": 16 },
-    { "milestone": "Stone Badge (1o ginasio)", "easy": 28, "ace": 25, "elite": 23 },
-    { "milestone": "Knuckle Badge (2o ginasio)", "easy": 44, "ace": 40, "elite": 36 },
-    { "milestone": "Dynamo Badge (3o ginasio)", "easy": 55, "ace": 50, "elite": 45 },
-    { "milestone": "Heat Badge (4o ginasio)", "easy": 65, "ace": 55, "elite": 50 },
-    { "milestone": "Balance Badge (5o ginasio)", "easy": 80, "ace": 70, "elite": 55 },
-    { "milestone": "Feather Badge (6o ginasio)", "easy": 90, "ace": 85, "elite": 60 },
-    { "milestone": "Mind Badge (7o ginasio)", "easy": null, "ace": 92, "elite": 70 },
-    { "milestone": "Rain Badge (8o ginasio)", "easy": null, "ace": 95, "elite": 80 },
-    { "milestone": "Champion / Alto Comando", "easy": null, "ace": null, "elite": null }
+    { "milestone": "Sem Badge (inicio)", "easy": 20, "more": 18, "elite": 16 },
+    { "milestone": "Stone Badge (1o ginasio)", "easy": 28, "more": 25, "elite": 23 },
+    { "milestone": "Knuckle Badge (2o ginasio)", "easy": 44, "more": 40, "elite": 36 },
+    { "milestone": "Dynamo Badge (3o ginasio)", "easy": 55, "more": 50, "elite": 45 },
+    { "milestone": "Heat Badge (4o ginasio)", "easy": 65, "more": 55, "elite": 50 },
+    { "milestone": "Balance Badge (5o ginasio)", "easy": 80, "more": 70, "elite": 55 },
+    { "milestone": "Feather Badge (6o ginasio)", "easy": 90, "more": 85, "elite": 60 },
+    { "milestone": "Mind Badge (7o ginasio)", "easy": null, "more": 92, "elite": 70 },
+    { "milestone": "Rain Badge (8o ginasio)", "easy": null, "more": 95, "elite": 80 },
+    { "milestone": "Champion / Alto Comando", "easy": null, "more": null, "elite": null }
   ]
 }

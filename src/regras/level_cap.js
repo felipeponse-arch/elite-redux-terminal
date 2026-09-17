@@ -6,9 +6,26 @@
   // técnica, 2026-09-16), o que permite carregar este arquivo no Node pros
   // testes unitários (tests/unit/).
 
+  // Level Cap e Dificuldade são opções SEPARADAS no setup do jogo (item U1
+  // da pauta, 2026-09-16, conferido nas fotos da tela de setup e na página
+  // oficial de level caps): Level Cap = Easy/More/Elite e define o nível
+  // máximo; Dificuldade = Easy/Ace/Elite e define os times dos chefões. O
+  // app usava a dificuldade pra escolher a coluna do cap - só batia por
+  // coincidência na combinação Ace + More.
+  var LEVEL_CAP_MODES = ["easy", "more", "elite"];
+  function levelCapMode() {
+    var m = state.settings.levelCapMode;
+    return LEVEL_CAP_MODES.indexOf(m) !== -1 ? m : "more";
+  }
+  // Save antigo (sem levelCapMode): herda da dificuldade, que era o que o
+  // app usava pro cap - o jogador continua vendo o mesmo cap de antes.
+  function levelCapModeFromDifficulty(d) {
+    return d === "easy" ? "easy" : d === "elite" ? "elite" : "more";
+  }
+
   function getCurrentCap() {
     if (!LEVELCAPS || !LEVELCAPS.rows[state.settings.milestone]) return null;
-    return LEVELCAPS.rows[state.settings.milestone][state.settings.difficulty];
+    return LEVELCAPS.rows[state.settings.milestone][levelCapMode()];
   }
 
   // Golpes que o jogador pode usar AGORA (item D3 da pauta técnica,
