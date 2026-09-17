@@ -4036,6 +4036,7 @@
       if (acima.length) notas.push("Acima do seu level cap atual (" + cap + "): " + acima.join(", ") + ".");
     }
     var dupla = build.moves.filter(function (m) { return moveRoleOf(m) === "dupla"; });
+    if (build.formato === "dupla") notas.push("A fonte descreve este set como pensado pra batalha dupla.");
     if (dupla.length) notas.push("Só funciona em batalha dupla: " + dupla.map(escapeHtml).join(", ") + ".");
     return notas.map(function (n) { return '<div class="ts-build-note">' + n + '</div>'; }).join("");
   }

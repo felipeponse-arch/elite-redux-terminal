@@ -52,9 +52,28 @@ foreach ($s in $dex["species"]) {
     $golpePorSname[$sname] = $golpes
 }
 
+# Campos de procedencia (item M1 da pauta tecnica, 2026-09-16) - so fatos que
+# NAO saem do proprio dado: de onde a build veio, contra qual versao do jogo
+# foi validada, e o formato quando a fonte deixa explicito. Modo de mega e
+# nivel-alvo ficaram de fora de proposito: saem do item e do movepool, e uma
+# copia guardada so abriria espaco pra divergir.
+$FONTES = @("discord-build-workshop-2.65", "discord-movesets", "curadoria-do-projeto")
+$FORMATOS = @("1x1", "dupla")
+$versaoDoDado = [string]$dex["meta"]["version"]
 $problemas = New-Object System.Collections.ArrayList
 foreach ($sname in $builds.Keys) {
     $b = $builds[$sname]
+    if ($FONTES -notcontains [string]$b["fonte"]) {
+        [void]$problemas.Add("$sname : fonte '$($b["fonte"])' invalida (use: $($FONTES -join ', '))")
+    }
+    if (-not $b["versao"]) {
+        [void]$problemas.Add("$sname : sem campo versao (contra qual versao do jogo a build foi validada)")
+    } elseif ([string]$b["versao"] -ne $versaoDoDado) {
+        [void]$problemas.Add("$sname : validada contra $($b["versao"]), mas o dado atual e $versaoDoDado - revisar a build antes de atualizar o campo")
+    }
+    if ($b.ContainsKey("formato") -and ($FORMATOS -notcontains [string]$b["formato"])) {
+        [void]$problemas.Add("$sname : formato '$($b["formato"])' invalido (use: $($FORMATOS -join ', '))")
+    }
     if (-not $habPorSname.ContainsKey($sname)) {
         [void]$problemas.Add("$sname : especie nao existe em dex_compact.json")
         continue
@@ -82,4 +101,4 @@ if ($problemas.Count -gt 0) {
     throw "validate_builds.ps1: $($problemas.Count) problema(s) em data/builds.json - build abortado. Nenhuma build pode citar habilidade/golpe que a especie nao tem."
 }
 
-Write-Output ("validate_builds.ps1: OK ({0} builds, todas com habilidade e golpes reais da propria especie)" -f $builds.Count)
+Write-Output ("validate_builds.ps1: OK ({0} builds, todas com habilidade e golpes reais da propria especie, fonte e versao {1})" -f $builds.Count, $versaoDoDado)
