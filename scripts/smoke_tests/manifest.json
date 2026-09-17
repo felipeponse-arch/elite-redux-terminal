@@ -17,5 +17,6 @@
   "15_mega_mode.js",
   "16_ai_build_retry.js",
   "17_build_context_notes.js",
+  "18_run_setup_and_auto_log.js",
   "99_runner.js"
 ]

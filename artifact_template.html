@@ -889,11 +889,14 @@
      fix alongside this one was real too, but this CSS bug alone explains
      the reported symptom on its own. */
   .sync-banner[hidden] { display: none; }
+  .dash-caveat { color: var(--text-dim); font-size: 11.5px; }
+  .auto-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; }
+  .auto-log time { display: block; font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
   .sync-banner button {
     border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700;
     cursor: pointer; background: rgba(0,0,0,.15); color: inherit;
   }
-  #sync-banner-dismiss, #storage-banner-dismiss { background: none; font-size: 16px; padding: 0 4px; line-height: 1; }
+  #sync-banner-dismiss, #storage-banner-dismiss, #run-setup-dismiss { background: none; font-size: 16px; padding: 0 4px; line-height: 1; }
 
   .showdown-block {
     font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
@@ -1535,7 +1538,7 @@
       <div class="types-shell">
         <p class="hint">Isso define o que a ferramenta assume em toda a run: qual variante de time (Padrão/Insane/Hell) aparece por padrão na aba Chefões (Dificuldade), qual coluna de level cap conta (Level Cap), e o que entra automaticamente no texto de "Enviar para o Claude" de cada chefão. Use os mesmos valores da tela de setup do jogo.</p>
         <div class="card" style="max-width:460px;">
-          <h3>Dificuldade e progresso atual</h3>
+          <h3 id="run-setup-title">Sua run</h3>
           <div style="display:flex;flex-direction:column;gap:12px;">
             <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Dificuldade
               <select id="settings-difficulty" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;">
@@ -1565,7 +1568,17 @@
             </label>
           </div>
           <div class="stat-total" style="margin-top:16px;">Level cap atual <b class="mono" id="cap-display" style="font-size:16px;"></b></div>
+          <p class="hint" style="margin:12px 0 0;">O app assume <b>Ability, Innate, Move e Type Randomizer desativados</b>. Com algum deles ligado, as habilidades, golpes ou tipos da Dex não valem pra sua run. Boss Rush e Encounter Randomizer não mudam nada aqui.</p>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px;">
+            <button id="settings-run-confirm" type="button" class="add-team-btn">Confirmar: bate com o meu jogo</button>
+            <span id="settings-run-status" class="hint" style="margin:0;" role="status"></span>
+          </div>
           <p style="color:var(--text-dim);font-size:11px;margin-top:10px;" id="settings-note"></p>
+        </div>
+        <div class="card" style="max-width:460px;">
+          <h3>O que o app fez sozinho</h3>
+          <p class="hint" style="margin:0 0 10px;">Mudanças que o app aplicou sem você clicar, as mais recentes primeiro.</p>
+          <ul id="auto-log-list" class="auto-log"></ul>
         </div>
         <div class="card" style="max-width:460px;">
           <h3>Novidades</h3>
@@ -1632,6 +1645,17 @@
        as sync-banner above, reusing its CSS (background color differs via
        --sem-weak instead of --accent-2, so it visually reads as an error,
        not a routine sync notice) - stays up until dismissed by hand. -->
+  <!-- Conferência da run (item U1 da pauta, 2026-09-16): Dificuldade e Level
+       Cap são opções separadas no setup do jogo, e o modo de Mega Evolução
+       muda as builds - o app não tem como ler isso do jogo, então pede pra
+       conferir uma vez. Some quando o jogador confirma no Progresso; o "x"
+       só esconde até a próxima abertura. -->
+  <div id="run-setup-banner" class="sync-banner" role="status" hidden>
+    <span>Confira sua run: Dificuldade, Level Cap, último badge e Mega Evolução precisam bater com o seu jogo.</span>
+    <button id="run-setup-open" type="button">Conferir</button>
+    <button id="run-setup-dismiss" type="button" aria-label="Lembrar na próxima abertura">&times;</button>
+  </div>
+
   <div id="storage-banner" class="sync-banner" style="background:var(--sem-weak);" role="alert" hidden>
     <span id="storage-banner-text"></span>
     <button id="storage-banner-dismiss" type="button" aria-label="Dispensar">&times;</button>
@@ -2124,7 +2148,7 @@
     box: [],
     // megaMode (2026-09-16, regra de jogo passada pelo usuário): o Elite Redux
     // tem dois modos de Mega Evolução - ver megaMode() e battleUnitsOf().
-    settings: { difficulty: "ace", levelCapMode: "more", milestone: 0, megaMode: "temporaria" },
+    settings: { difficulty: "ace", levelCapMode: "more", milestone: 0, megaMode: "temporaria", runConfirmedAt: null },
     savedTeams: [],
     // snames from the last loaded save that this data build doesn't
     // recognise (e.g. a save made on a newer game version). Kept verbatim
@@ -2149,6 +2173,9 @@
     // um cap maior nem que por um instante (ex: trocar a dificuldade antes
     // do marco) evoluía e nunca mais voltava.
     autoEvolved: {},
+    // Registro do que o app mudou sozinho (item U4 da pauta, 2026-09-16) -
+    // o aviso passageiro (toast) some em segundos; aqui fica guardado.
+    autoLog: [],
     // Interactive "meu build" per species, sname-keyed - 2026-09-09, user
     // feedback: the free-text notes field above has "no interaction with
     // the Pokemon", the user has to type everything by hand instead of
@@ -2177,6 +2204,7 @@
   // migrated, exported and imported as a unit. Schema:
   //   { v: 2, team: [sname], box: [sname], savedTeams: [{name, team:[sname]}],
   //     settings: {difficulty, milestone}, dataVersion, savedAt }
+  var AUTO_LOG_MAX = 30;
   var STORE_KEY = "er_terminal_save";
   var SCHEMA_VERSION = 2;
 
@@ -2206,6 +2234,7 @@
       else state.settings.levelCapMode = levelCapModeFromDifficulty(save.settings.difficulty);
       if (save.settings.megaMode === "permanente" || save.settings.megaMode === "temporaria") state.settings.megaMode = save.settings.megaMode;
       if (typeof save.settings.milestone === "number") state.settings.milestone = save.settings.milestone;
+      if (typeof save.settings.runConfirmedAt === "string") state.settings.runConfirmedAt = save.settings.runConfirmedAt;
       // Fase 1 quality-of-life, 2026-09-09: remember sort order + type
       // filter between sessions - both used to silently reset on reload.
       // typeFilter is validated against USABLE_TYPES so a hand-edited or
@@ -2233,6 +2262,12 @@
       Object.keys(save.notes).forEach(function (k) {
         if (typeof save.notes[k] === "string" && save.notes[k]) state.notes[k] = save.notes[k];
       });
+    }
+    state.autoLog = Array.isArray(save.autoLog) ? save.autoLog.filter(function (e) {
+      return e && typeof e.at === "string" && typeof e.text === "string";
+    }).slice(0, AUTO_LOG_MAX).map(function (e) { return { at: e.at, text: e.text }; }) : [];
+    if (teamOrphans.length || boxOrphans.length) {
+      logAutoAction((teamOrphans.length + boxOrphans.length) + " Pokémon do save não existem nesta versão dos dados (" + teamOrphans.concat(boxOrphans).join(", ") + ") - guardados no save sem aparecer, pra não serem apagados.");
     }
     state.autoEvolved = {};
     if (save.autoEvolved && typeof save.autoEvolved === "object") {
@@ -2362,6 +2397,7 @@
       }),
       notes: state.notes,
       autoEvolved: state.autoEvolved,
+      autoLog: state.autoLog,
       customBuilds: state.customBuilds,
       archetype: state.archetype
     };
@@ -2695,6 +2731,25 @@
   // hora, conforme pedido do usuário) - não em toda renderização, já que
   // percorre time+caixa inteiros. Retorna true se algo mudou, pra quem
   // chamou saber se precisa re-renderizar/persistir de novo.
+  // Repetição da mesma mensagem seguida (ex: órfãos a cada abertura) não
+  // empilha - só atualiza a data da entrada que já existe.
+  function logAutoAction(text) {
+    var now = new Date().toISOString();
+    if (state.autoLog.length && state.autoLog[0].text === text) { state.autoLog[0].at = now; return; }
+    state.autoLog.unshift({ at: now, text: text });
+    if (state.autoLog.length > AUTO_LOG_MAX) state.autoLog.length = AUTO_LOG_MAX;
+  }
+  function renderAutoLog() {
+    var out = document.getElementById("auto-log-list");
+    if (!out) return;
+    if (!state.autoLog.length) { out.innerHTML = '<li class="hint" style="margin:0;">Nada até agora.</li>'; return; }
+    out.innerHTML = state.autoLog.map(function (e) {
+      var d = new Date(e.at);
+      var quando = isNaN(d.getTime()) ? "" : d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+      return '<li><time datetime="' + escapeHtml(e.at) + '">' + escapeHtml(quando) + '</time>' + escapeHtml(e.text) + '</li>';
+    }).join("");
+  }
+
   function autoEvolveRoster(announce) {
     var cap = getCurrentCap();
     if (cap === null || cap === undefined) return false;
@@ -2705,6 +2760,8 @@
     if (!messages.length) return false;
     state.team = newTeam;
     state.box = newBox;
+    logAutoAction(messages.join("; ") + " (level cap " + cap + ")");
+    renderAutoLog();
     if (announce) flashToast(messages.join("; ") + " (level cap " + cap + ")");
     return true;
   }
@@ -4577,10 +4634,12 @@
       // vez do mesmo dedup por nome-base.
       if (b.cat === "Lider de Ginasio") {
         var baseName = b.name.replace(/\s+\d+$/, "").trim();
-        if (seenLeader[baseName]) return;
         var milestone = GYM_LEADER_MILESTONE[baseName];
         if (milestone === undefined || milestone <= curMilestone) return;
-        seenLeader[baseName] = true;
+        // Dedup pelo BADGE, não pelo nome: Juan e Wallace são o mesmo 8º
+        // ginásio e apareciam como duas lutas restantes (achado 2026-09-16).
+        if (seenLeader[milestone]) return;
+        seenLeader[milestone] = true;
         remaining.push(b);
       } else if (b.cat === "Alto Comando") {
         if (curMilestone >= 9) return; // 9 = "Champion / Alto Comando", já não falta mais nada
@@ -4597,7 +4656,19 @@
       // Equipe Aqua/Magma, Frontier Brain etc. ficam fora de propósito -
       // não são pontos fixos e ordenados da progressão de badges.
     });
-    return remaining;
+    // Bug real achado em 2026-09-16 (item P4): bosses.json lista o Alto
+    // Comando ANTES dos líderes, e "próxima luta" é remaining[0] - no
+    // começo do jogo o dashboard apontava Sidney em vez de Roxanne. Ordena
+    // pela progressão real: ginásios pelo badge, depois Alto Comando na
+    // ordem do arquivo, depois o Campeão.
+    var ordem = function (b, idx) {
+      if (b.cat === "Lider de Ginasio") return GYM_LEADER_MILESTONE[b.name.replace(/\s+\d+$/, "").trim()] * 1000 + idx;
+      if (b.cat === "Alto Comando") return 9000 + idx;
+      return 99000 + idx;
+    };
+    return remaining.map(function (b, idx) { return { b: b, k: ordem(b, idx) }; })
+      .sort(function (a, c) { return a.k - c.k; })
+      .map(function (e) { return e.b; });
   }
   function aiTool_getRemainingBosses() {
     var remaining = getRemainingBossEntries();
@@ -5509,6 +5580,26 @@
   // partir do movepool real do time dele (bosses.json), no mesmo tier que
   // o resto do app já usa pra essa dificuldade (DIFF_TO_BOSSKEY, igual
   // selectBoss()). Golpes de status não contam - não causam dano de tipo.
+  // Velocidade base do seu mais rápido contra o time da próxima luta (item
+  // P4 da pauta, 2026-09-16). Mesma trava do resto do dashboard: só a
+  // próxima luta. Compara só Velocidade BASE - nível, EVs/IVs, nature, item
+  // (Choice Scarf), habilidade e clima mudam a ordem real, e o texto diz isso.
+  // Usa cada Pokémon na forma em que está salvo no time.
+  function bossSpeedSummary(boss, teamMembers) {
+    var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
+    var party = (boss[tier] && boss[tier].length) ? boss[tier] : boss.party;
+    var fastest = null;
+    teamMembers.forEach(function (sp) { if (!fastest || sp.b[5] > fastest.b[5]) fastest = sp; });
+    var foes = (party || []).map(function (m) { return getSpeciesByX(m.x); }).filter(Boolean);
+    if (!fastest || !foes.length) return null;
+    return {
+      fastest: fastest,
+      total: foes.length,
+      faster: foes.filter(function (f) { return f.b[5] > fastest.b[5]; }).length,
+      tied: foes.filter(function (f) { return f.b[5] === fastest.b[5]; }).length
+    };
+  }
+
   function computeBossAttackTypes(boss) {
     var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
     var party = (boss[tier] && boss[tier].length) ? boss[tier] : boss.party;
@@ -5683,6 +5774,14 @@
         var reasonText = boxSuggestion.reasonMult === 0 ? "imune a " + boxSuggestion.reasonType : "resiste bem a " + boxSuggestion.reasonType;
         items += '<div class="dash-item dash-suggestion dash-suggestion-boss"><span class="dash-label">Próxima luta</span><span class="dash-value">' +
           escapeHtml(nextBoss.name) + ': <span class="goto-species" data-x="' + boxSuggestion.sp.x + '">' + escapeHtml(boxSuggestion.sp.n) + '</span>' + megaOfNote(boxSuggestion) + ' na caixa ' + reasonText + '</span></div>';
+      }
+      var speed = bossSpeedSummary(nextBoss, teamMembers);
+      if (speed) {
+        items += '<div class="dash-item dash-speed"><span class="dash-label">Velocidade</span><span class="dash-value">' +
+          '<span class="mono">' + speed.faster + '/' + speed.total + '</span> do time de ' + escapeHtml(nextBoss.name) + ' têm Velocidade base maior que ' +
+          '<span class="goto-species" data-x="' + speed.fastest.x + '">' + escapeHtml(speed.fastest.n) + '</span> (<span class="mono">' + speed.fastest.b[5] + '</span>), seu mais rápido' +
+          (speed.tied ? ' (' + speed.tied + ' empatado' + (speed.tied > 1 ? 's' : '') + ')' : '') +
+          '. <span class="dash-caveat">Só base: nível, EVs, nature, item e habilidade mudam a ordem.</span></span></div>';
       }
     }
 
@@ -6390,6 +6489,14 @@
 
   // ---------------- progress / settings view ----------------
   var progressInited = false;
+  function renderRunStatus() {
+    var el = document.getElementById("settings-run-status");
+    if (!el) return;
+    var d = state.settings.runConfirmedAt ? new Date(state.settings.runConfirmedAt) : null;
+    el.textContent = d && !isNaN(d.getTime())
+      ? "Confirmado em " + d.toLocaleDateString("pt-BR") + ". Mudou algo no jogo? Ajuste e confirme de novo."
+      : "Ainda não confirmado.";
+  }
   function renderCapBadge() {
     var cap = getCurrentCap();
     document.getElementById("cap-badge").textContent = cap === null ? "s/ limite" : "Lv " + cap;
@@ -6483,6 +6590,17 @@
       flashToast("Mega Evolução: modo " + (megaMode() === "permanente" ? "permanente" : "temporário"));
     });
     renderCapDisplay();
+    renderAutoLog();
+
+    var runBtn = document.getElementById("settings-run-confirm");
+    renderRunStatus();
+    runBtn.addEventListener("click", function () {
+      state.settings.runConfirmedAt = new Date().toISOString();
+      saveSettings();
+      renderRunStatus();
+      document.getElementById("run-setup-banner").hidden = true;
+      flashToast("Configuração da run confirmada");
+    });
 
     // Acessibilidade (checklist eMAG, 2026-09-13) - reflete o que já foi
     // aplicado no boot (applyA11yPrefs, ver perto de loadSave()) nos
@@ -6538,6 +6656,19 @@
   renderCapBadge();
   renderList();
 
+  if (!state.settings.runConfirmedAt) document.getElementById("run-setup-banner").hidden = false;
+  document.getElementById("run-setup-dismiss").addEventListener("click", function () {
+    document.getElementById("run-setup-banner").hidden = true;
+  });
+  document.getElementById("run-setup-open").addEventListener("click", function () {
+    document.getElementById("run-setup-banner").hidden = true;
+    var tab = document.querySelector('#tabs-more-panel [data-tab="progress"]');
+    if (tab) tab.click();
+    var title = document.getElementById("run-setup-title");
+    if (title) title.scrollIntoView({ block: "start" });
+    document.getElementById("settings-difficulty").focus();
+  });
+
   // Ponte mínima e explícita pra suíte de fumaça (scripts/smoke_tests/), que
   // roda no escopo global da página, FORA deste IIFE - sem isto não há como
   // testar uma regra que só existe aqui dentro. Criada em 2026-09-15 pra
@@ -6564,7 +6695,10 @@
     formFamilyOf: formFamilyOf,
     bestRankForm: bestRankForm,
     computeBossAttackTypes: computeBossAttackTypes,
+    bossSpeedSummary: bossSpeedSummary,
+    getRemainingBossEntries: getRemainingBossEntries,
     getCurrentCap: getCurrentCap,
+    levelCapMode: levelCapMode,
     getSpeciesByX: getSpeciesByX,
     ABILITIES: ABILITIES,
     BOSSES: BOSSES,

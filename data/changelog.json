@@ -1,5 +1,17 @@
 [
   {
+    "date": "2026-09-16",
+    "items": [
+      "Novo seletor Level Cap (Easy/More/Elite), separado da Dificuldade: a Dificuldade muda só os times dos chefões",
+      "Aviso pra conferir sua run (Dificuldade, Level Cap, badge e Mega Evolução) até você confirmar no Progresso",
+      "Novo card \"O que o app fez sozinho\" no Progresso, com as evoluções automáticas e outras mudanças",
+      "Modo de Mega Evolução (Temporária ou Permanente) muda as análises e as builds sugeridas",
+      "Evolução automática agora é desfeita se o level cap voltar abaixo do nível de evolução",
+      "Builds sugeridas pela IA não recebem mais golpe de cura em set 100% ofensivo nem golpe que só funciona em dupla",
+      "Builds mostram quando um golpe está acima do seu level cap ou é pensado pra batalha dupla"
+    ]
+  },
+  {
     "date": "2026-09-09",
     "items": [
       "Aviso de armazenamento cheio agora fica visível até você dispensar, não some sozinho",

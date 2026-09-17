@@ -55,6 +55,7 @@ const SCENARIOS = [
     async setup(page) {
       await page.evaluate(() => localStorage.clear());
       await page.reload({ waitUntil: "load" });
+      await page.evaluate(() => { const b = document.getElementById("run-setup-banner"); if (b) b.hidden = true; });
       await page.click('.tab-btn[data-tab="dex"]');
       await wait(200);
       await page.fill("#search-input", "Charizard");
@@ -68,6 +69,7 @@ const SCENARIOS = [
     async setup(page) {
       await page.evaluate(() => localStorage.clear());
       await page.reload({ waitUntil: "load" });
+      await page.evaluate(() => { const b = document.getElementById("run-setup-banner"); if (b) b.hidden = true; });
       await page.click('.tab-btn[data-tab="dex"]');
       await wait(200);
       await page.fill("#search-input", "Pikachu");
@@ -85,6 +87,7 @@ const SCENARIOS = [
     async setup(page) {
       await page.evaluate(() => localStorage.clear());
       await page.reload({ waitUntil: "load" });
+      await page.evaluate(() => { const b = document.getElementById("run-setup-banner"); if (b) b.hidden = true; });
       await page.click('.tab-btn[data-tab="dex"]');
       await wait(200);
       await page.fill("#search-input", "Eevee");
@@ -102,6 +105,7 @@ const SCENARIOS = [
     async setup(page) {
       await page.evaluate(() => localStorage.clear());
       await page.reload({ waitUntil: "load" });
+      await page.evaluate(() => { const b = document.getElementById("run-setup-banner"); if (b) b.hidden = true; });
       await page.click('.tab-btn[data-tab="bosses"]');
       await wait(250);
     },
