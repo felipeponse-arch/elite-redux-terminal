@@ -40,6 +40,33 @@ async function section18() {
   escolher(capSel, "more");
   await wait(30);
   check("trocar o Level Cap pra More muda o cap (18)", T.getCurrentCap() === 18, String(T.getCurrentCap()));
+
+  // ---- Trilha visual da jornada (redesign 2026-09-18) - deriva de
+  // LEVELCAPS/state.settings.milestone, tem que acompanhar o <select>
+  // #settings-milestone nos dois sentidos (ela nunca escreve estado). ----
+  var trailNodes = document.querySelectorAll("#progress-trail .trail-node");
+  check("trilha renderiza 1 nó por linha de LEVELCAPS.rows",
+    trailNodes.length === T.LEVELCAPS.rows.length, trailNodes.length + " vs " + T.LEVELCAPS.rows.length);
+  escolher(ms, 0);
+  await wait(30);
+  trailNodes = document.querySelectorAll("#progress-trail .trail-node");
+  check("milestone 0: nó 0 é 'active', o resto 'locked' (nenhum 'done' ainda)",
+    trailNodes[0].querySelector(".trail-dot").classList.contains("active") &&
+    trailNodes[1].querySelector(".trail-dot").classList.contains("locked") &&
+    document.querySelectorAll("#progress-trail .trail-dot.done").length === 0);
+  escolher(ms, 3);
+  await wait(30);
+  trailNodes = document.querySelectorAll("#progress-trail .trail-node");
+  check("milestone 3: nós 0-2 viram 'done', nó 3 é 'active', dali pra frente 'locked'",
+    trailNodes[0].querySelector(".trail-dot").classList.contains("done") &&
+    trailNodes[2].querySelector(".trail-dot").classList.contains("done") &&
+    trailNodes[3].querySelector(".trail-dot").classList.contains("active") &&
+    trailNodes[4].querySelector(".trail-dot").classList.contains("locked"),
+    trailNodes[3].querySelector(".trail-dot").className);
+  check("rótulo do nó ativo usa o texto real de LEVELCAPS.rows (nunca inventado)",
+    trailNodes[3].querySelector(".trail-label").textContent.trim() === T.LEVELCAPS.rows[3].milestone,
+    trailNodes[3].querySelector(".trail-label").textContent);
+
   document.querySelector('#tabs-more-panel [data-tab="types"]').click();
   await wait(50);
   var cabecalho = document.querySelector("#levelcap-table thead");

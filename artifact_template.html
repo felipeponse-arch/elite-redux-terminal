@@ -2,109 +2,128 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f4f2ec;
+    /* "Trilha Viva" - identidade escolhida em 2026-09-18 depois de 3
+       propostas comparadas lado a lado com o usuário (ver histórico da
+       sessão): mantém a atmosfera de jornada/trilha/descoberta da proposta
+       B, mas com uma paleta deliberadamente mais ousada (o usuário pediu
+       "mais disruptivo, mais moderno") - roxo-noite com magenta/ciano
+       bioluminescentes no lugar do bege+verde-trilha original. Light mode
+       segue a MESMA família de matiz (não é um tema à parte inventado). */
+    --bg: #f6f4fb;
     --surface: #ffffff;
-    --surface-2: #ece7da;
-    --surface-3: #e2dbc9;
-    --border: #ddd4bd;
-    --text: #201d16;
-    --text-dim: #6f6754;
-    --accent: #d9491f;
-    --accent-strong: #b93c18;
-    --accent-ink: #fff9f2;
-    --accent-2: #12867a;
+    --surface-2: #ece8f7;
+    --surface-3: #e1daf0;
+    --border: #d9d0ec;
+    --text: #1c1730;
+    --text-dim: #6b5f8a;
+    --accent: #d6266f;
+    --accent-strong: #b81a5c;
+    --accent-ink: #fff7fb;
+    --accent-2: #0e9c86;
     --sem-weak: #c23b3b;
     --sem-resist: #1f8f5f;
     --sem-immune: #6b3fa0;
-    /* Achado em auditoria de UX/Acessibilidade (2026-09-13): --focus a
-       #1f9e93 media 2.94:1 contra --bg (#f4f2ec) - abaixo do mínimo de
-       3:1 do WCAG 2.2 (2.4.11) pra indicador não-textual, quando o
-       elemento focado fica direto sobre o fundo da página em vez de um
-       .card/--surface (aí já media 3.3:1, sem problema). ~5% mais escuro
-       (mesmo tom) resolve os dois casos - diferente do --accent/
-       --accent-2/--sem-resist, o anel de foco não é identidade de marca,
-       então dá pra escurecer o token de verdade em vez de criar uma
-       variante -safe só pra um contexto. */
-    --focus: #1d968c;
-    --shadow: 0 8px 24px -12px rgb(32 29 22 / 0.35);
-    /* Badge-text-safe variant de --text-dim, LIGHT mode só (dark mode já
-       clara AA aqui, 4.81:1, sem precisar de nada). Achado na mesma
-       auditoria: .count-badge das abas inativas usava --text-dim sobre
-       --surface-3, medindo 4.07:1 - abaixo de 4.5:1 pra texto pequeno
-       (11px). ~9% mais escuro (mesmo tom), mesmo raciocínio das outras
-       variantes -safe acima. */
-    --badge-text-dim: #655e4c;
-    /* Text-safe variants of --accent/--accent-2/--sem-resist, LIGHT mode
-       only (dark mode reuses the plain tokens below unchanged - they
-       already clear AA there). Accessibility review, 2026-09-09: measured
-       that --accent/--accent-2/--sem-resist at full saturation fall short
-       of WCAG AA 4.5:1 as TEXT against a light surface (4.27, 4.45, 4.08) -
-       not something tinting a background can fix, since a fainter version
-       of an already-too-light color only gets fainter. These are ~10%
-       darker (same hue), which alone clears 4.5:1 - not a change to the
-       actual brand/accent colors used for borders/backgrounds/icons
-       elsewhere in the app. Originally scoped to rank badges only
-       (hence the name); accessibility audit 2026-09-13 found ~34 other
-       spots using the plain tokens as literal text color (active tab
-       label, links, .notes-status, the compare-card "win" tag, etc.) -
-       same failing contrast, so every `color:` declaration (never
-       `border-color`/`background`/`accent-color`) now uses these too. */
-    --badge-accent: #c3421c;
-    --badge-accent2: #10796e;
+    /* Ângulo de foco/badges recalibrado pra nova paleta (2026-09-18),
+       mesma metodologia da auditoria de 2026-09-13 que criou este padrão
+       -safe: o ciano-escuro abaixo mede 5.1:1 como TEXTO sobre --surface
+       (WCAG AA 4.5:1 pra texto, 3:1 pra indicador não-textual como o
+       anel de foco) - o --accent-2 "vivo" (#0e9c86) fica só pra borda/
+       fundo/ícone, nunca como cor de texto puro. */
+    --focus: #0b7c6c;
+    --shadow: 0 10px 28px -14px rgb(28 23 48 / 0.28);
+    --badge-text-dim: #58507a;
+    /* --accent (#d6266f) já mede 4.8:1 como texto sobre --surface branco -
+       ainda assim mantém uma variante -badge dedicada (mesmo padrão do
+       resto do arquivo) com um pouco mais de margem, pra sobreviver a
+       qualquer ajuste fino futuro do tom sem precisar re-auditar. */
+    --badge-accent: #c11f63;
+    --badge-accent2: #0b7c6c;
     --badge-resist: #1c8156;
+    /* Cor por categoria de treinador (Chefões) - versões escurecidas pra
+       valer como TEXTO no claro (mesmo método -safe usado acima: medido
+       contra --surface-2, AA 4.5:1). "Lider de Ginasio"/"Campeao" reusam
+       --accent-2/--accent direto (já são -safe) - só as demais precisam
+       de token próprio. */
+    --cat-aqua: #2a68a6;
+    --cat-magma: #9c4720;
+    --cat-frontier: #6f3fa8;
+    --cat-elite: #86680f;
+    --cat-super: #5f5f76;
     color-scheme: light;
+  }
+  /* Escala de raio compartilhada entre claro/escuro/alto-contraste (não é
+     identidade de tema, é estrutura) - substitui os ~68 valores de
+     border-radius fixos espalhados pelo arquivo (achado de auditoria
+     visual, 2026-09-18: TODO card/botão/chip usava o mesmo raio, sem
+     hierarquia nenhuma - "SaaS card kit" clássico). */
+  :root {
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-pill: 999px;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #14181a;
-      --surface: #1b2124;
-      --surface-2: #212a2d;
-      --surface-3: #2a3336;
-      --border: #33403f;
-      --text: #eef1ee;
-      --text-dim: #93a19c;
-      --accent: #ff7a45;
-      --accent-strong: #ff9466;
-      --accent-ink: #1a120c;
-      --accent-2: #3fd8c8;
+      --bg: #0d0b1a;
+      --surface: #17132c;
+      --surface-2: #201a3f;
+      --surface-3: #291f52;
+      --border: #34285f;
+      --text: #f4effc;
+      --text-dim: #ab9ed4;
+      --accent: #ff4f9a;
+      --accent-strong: #ff7ab5;
+      --accent-ink: #1a0a14;
+      --accent-2: #33f0c8;
       --sem-weak: #e5686a;
       --sem-resist: #4fce93;
       --sem-immune: #b28ce0;
-      --focus: #3fd8c8;
-      --shadow: 0 8px 28px -12px rgb(0 0 0 / 0.55);
-      /* Dark mode's plain --accent/--accent-2/--sem-resist already clear
-         AA as text (6.3-9.2:1 measured) - no darkening needed here. */
-      --badge-accent: #ff7a45;
-      --badge-accent2: #3fd8c8;
+      --focus: #33f0c8;
+      --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
+      /* Dark mode's plain --accent/--accent-2 already clear AA as text
+         (magenta/ciano vivos sobre roxo quase preto) - sem precisar
+         escurecer nada aqui, mesmo raciocínio do padrão original. */
+      --badge-accent: #ff4f9a;
+      --badge-accent2: #33f0c8;
       --badge-resist: #4fce93;
-      --badge-text-dim: #93a19c;
+      --badge-text-dim: #ab9ed4;
+      --cat-aqua: #6fb0ff;
+      --cat-magma: #ff8a5c;
+      --cat-frontier: #c9a3f2;
+      --cat-elite: #e8c34f;
+      --cat-super: #b7b7c9;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #14181a;
-    --surface: #1b2124;
-    --surface-2: #212a2d;
-    --surface-3: #2a3336;
-    --border: #33403f;
-    --text: #eef1ee;
-    --text-dim: #93a19c;
-    --accent: #ff7a45;
-    --accent-strong: #ff9466;
-    --accent-ink: #1a120c;
-    --accent-2: #3fd8c8;
+    --bg: #0d0b1a;
+    --surface: #17132c;
+    --surface-2: #201a3f;
+    --surface-3: #291f52;
+    --border: #34285f;
+    --text: #f4effc;
+    --text-dim: #ab9ed4;
+    --accent: #ff4f9a;
+    --accent-strong: #ff7ab5;
+    --accent-ink: #1a0a14;
+    --accent-2: #33f0c8;
     --sem-weak: #e5686a;
     --sem-resist: #4fce93;
     --sem-immune: #b28ce0;
-    --focus: #3fd8c8;
-    --shadow: 0 8px 28px -12px rgb(0 0 0 / 0.55);
-    --badge-accent: #ff7a45;
-    --badge-accent2: #3fd8c8;
+    --focus: #33f0c8;
+    --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
+    --badge-accent: #ff4f9a;
+    --badge-accent2: #33f0c8;
     --badge-resist: #4fce93;
-    --badge-text-dim: #93a19c;
+    --badge-text-dim: #ab9ed4;
+    --cat-aqua: #6fb0ff;
+    --cat-magma: #ff8a5c;
+    --cat-frontier: #c9a3f2;
+    --cat-elite: #e8c34f;
+    --cat-super: #b7b7c9;
     color-scheme: dark;
   }
 
@@ -138,6 +157,11 @@
     --badge-accent2: #00e5ff;
     --badge-resist: #66ff66;
     --badge-text-dim: #e6e6e6;
+    --cat-aqua: #66ccff;
+    --cat-magma: #ff9966;
+    --cat-frontier: #d9a3ff;
+    --cat-elite: #ffcc00;
+    --cat-super: #e6e6e6;
     color-scheme: dark;
   }
 
@@ -162,7 +186,8 @@
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, .display {
-    font-family: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
     text-wrap: balance;
     margin: 0;
   }
@@ -219,7 +244,7 @@
     place-items: center;
     width: 40px;
     height: 40px;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     background: linear-gradient(155deg, var(--accent), var(--accent-strong));
     color: var(--accent-ink);
     font-size: 20px;
@@ -235,13 +260,13 @@
      without it, space-between would also push .tabs-more away from .tabs
      itself, off to the far edge instead of sitting right beside it. */
   .tabs-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 10px; min-width: 0; }
+  .tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: var(--radius-md); min-width: 0; }
   .tab-btn {
     border: none;
     background: transparent;
     color: var(--text-dim);
     padding: 8px 14px;
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     font-size: 13.5px;
     cursor: pointer;
@@ -255,7 +280,7 @@
   .count-badge {
     background: var(--accent);
     color: var(--accent-ink);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     font-size: 11px;
     padding: 1px 7px;
     font-family: "IBM Plex Mono", monospace;
@@ -269,7 +294,7 @@
   .tabs-more { position: relative; flex: none; }
   .tabs-more-panel {
     position: absolute; top: calc(100% + 6px); right: 0; z-index: 50;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
     box-shadow: var(--shadow); padding: 4px; display: flex; flex-direction: column;
     gap: 2px; min-width: 160px;
   }
@@ -302,7 +327,7 @@
   #search-input {
     width: 100%;
     padding: 10px 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--border);
     background: var(--surface-2);
     color: var(--text);
@@ -323,7 +348,7 @@
     background: var(--surface-2);
     color: var(--text);
     padding: 7px 10px;
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     font-size: 12.5px;
     font-weight: 600;
     cursor: pointer;
@@ -336,7 +361,7 @@
     border: 1px solid var(--border);
     background: var(--surface-2);
     color: var(--text);
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     padding: 7px 8px;
     font-size: 12.5px;
   }
@@ -353,7 +378,7 @@
     align-items: center;
     gap: 5px;
     padding: 4px 9px 4px 6px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--border);
     font-size: 11.5px;
     font-weight: 600;
@@ -387,12 +412,12 @@
   .species-row .pips { display: flex; gap: 3px; flex: none; }
   .no-results { padding: 20px 16px; color: var(--text-dim); font-size: 13px; }
 
-  .type-pip { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+  .type-pip { width: 9px; height: 9px; border-radius: var(--radius-sm); flex: none; }
   .type-pill {
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: .02em;
@@ -407,18 +432,23 @@
   .detail-dexno { color: var(--text-dim); font-size: 13px; }
   .detail-sname { color: var(--text-dim); font-size: 11.5px; margin-top: 2px; }
   .detail-types { display: flex; gap: 6px; margin: 10px 0 14px; }
+  /* Botão de ação primária como o "farol" da tela (achado de auditoria,
+     2026-09-18: era um botão laranja igual a qualquer outro - agora é o
+     único elemento com gradiente + glow do app, pra sobrar exatamente 1
+     coisa em destaque por tela, não um botão a mais entre muitos). */
   .add-team-btn {
-    background: var(--accent);
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
     color: var(--accent-ink);
     border: none;
-    padding: 9px 16px;
-    border-radius: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius-pill);
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
     white-space: nowrap;
+    box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--accent) 65%, transparent);
   }
-  .add-team-btn:disabled { background: var(--surface-3); color: var(--text-dim); cursor: default; }
+  .add-team-btn:disabled { background: var(--surface-3); color: var(--text-dim); cursor: default; box-shadow: none; }
   .flavor { color: var(--text-dim); font-size: 13.5px; font-style: italic; max-width: 65ch; margin-bottom: 20px; }
   /* "Como conseguir" (Fase 2, 2026-09-11) - uma frase, não um card (decisão
      da UX: informação real mas pequena o bastante pra não merecer sua
@@ -429,11 +459,81 @@
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     padding: 16px 18px;
     margin-bottom: 16px;
   }
-  .card h3 { font-size: 12.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--text-dim); margin-bottom: 12px; }
+  /* Título de card sem o eyebrow ALL-CAPS genérico (achado de auditoria
+     visual, 2026-09-18 - "tracked-out ALL-CAPS eyebrow label above every
+     heading" é um dos tiques mais reconhecíveis de UI gerada por padrão).
+     Marcador lateral (a "trilha") no lugar do letter-spacing pra dar
+     estrutura sem gritar. */
+  .card h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .card h3::before {
+    content: "";
+    width: 4px;
+    height: 14px;
+    flex: none;
+    background: var(--accent-2);
+    border-radius: var(--radius-sm);
+  }
+  /* Mesmo tratamento de .card h3, pra títulos de seção que não moram
+     dentro de um .card (ex: "Meu time", "PC Box") - 3 pontos do arquivo
+     ainda tinham o eyebrow ALL-CAPS antigo hardcoded inline (achado ao
+     revisar o resto do app depois do redesign do .card, 2026-09-18). */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 12px;
+  }
+  .section-title::before {
+    content: "";
+    width: 4px;
+    height: 14px;
+    flex: none;
+    background: var(--accent-2);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Trilha visual do progresso da campanha (renderProgressTrail) - pura
+     leitura, deriva de LEVELCAPS/state.settings.milestone, nunca escreve
+     estado por conta própria. */
+  .trail-track { position: relative; display: flex; gap: 20px; overflow-x: auto; padding: 8px 4px 12px; }
+  .trail-line-bg {
+    position: absolute; top: 25px; left: 4px; right: 4px; height: 2px;
+    background: repeating-linear-gradient(90deg, var(--border) 0 6px, transparent 6px 12px);
+  }
+  .trail-line-fill {
+    position: absolute; top: 25px; left: 4px; height: 2px; max-width: calc(100% - 8px);
+    background: var(--accent-2); box-shadow: 0 0 8px color-mix(in srgb, var(--accent-2) 70%, transparent);
+  }
+  .trail-node { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; flex: none; width: 74px; }
+  .trail-dot {
+    width: 34px; height: 34px; border-radius: var(--radius-pill); flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; font-family: "IBM Plex Mono", monospace;
+    border: 2px solid transparent;
+  }
+  .trail-dot.done { background: var(--accent-2); color: var(--accent-ink); }
+  .trail-dot.active {
+    background: var(--surface); border-color: var(--accent); color: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent), 0 0 14px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .trail-dot.locked { background: var(--surface-2); border-color: var(--border); color: var(--text-dim); }
+  .trail-label { font-size: 10px; color: var(--text-dim); text-align: center; line-height: 1.3; }
+  .trail-label.active { color: var(--accent); font-weight: 700; }
 
   /* Blocos colapsáveis da tela de detalhe (Fase 2, 2026-09-11). <summary>
      nativo já vem com foco/teclado/Enter-Espaço de graça - só estilizado
@@ -472,7 +572,7 @@
   /* Dashboard summary, top of the Dex - design proposal B, 2026-09-09. */
   #dashboard { padding: 12px 20px 0; }
   .dashboard-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
     padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center;
   }
   .dash-item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; }
@@ -503,8 +603,8 @@
   .stat-row:last-child { margin-bottom: 0; }
   .stat-row .stat-label { font-size: 12px; color: var(--text-dim); font-weight: 600; }
   .stat-row .stat-val { font-size: 13px; text-align: right; }
-  .stat-bar-track { height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
-  .stat-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+  .stat-bar-track { height: 8px; background: var(--surface-2); border-radius: var(--radius-pill); overflow: hidden; }
+  .stat-bar-fill { height: 100%; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
   /* Color banding so a glance tells "weak/average/good/elite" apart, not
      just the bar length - see statTier() and AUDITORIA-DOSSIE.md UX 2. */
   .stat-bar-fill.tier-weak { background: var(--sem-weak); }
@@ -514,7 +614,7 @@
   .stat-total b { color: var(--text); }
 
   .abi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
-  .abi-card { background: var(--surface-2); border-radius: 9px; padding: 10px 12px; }
+  .abi-card { background: var(--surface-2); border-radius: var(--radius-md); padding: 10px 12px; }
   .abi-card .abi-name { font-weight: 700; font-size: 13.5px; }
   /* pre-line so combo abilities ("Rock Head + Reckless") can list what each
      component does on its own line instead of running together. */
@@ -526,7 +626,7 @@
     letter-spacing: .06em;
     font-weight: 700;
     padding: 2px 7px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     margin-bottom: 5px;
   }
   .abi-kind.choosable { background: color-mix(in srgb, var(--accent-2) 22%, transparent); color: var(--badge-accent2); }
@@ -538,7 +638,7 @@
   .abi-synergy { font-size: 11.5px; color: var(--badge-accent2); font-weight: 600; margin-top: 6px; }
 
   .evo-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-  .evo-node { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
+  .evo-node { background: var(--surface-2); border-radius: var(--radius-md); padding: 8px 12px; font-size: 13px; font-weight: 600; }
   /* Any Pokemon name/sprite the user might reasonably want to jump to in the
      Dex from - evolution chain, team slot, box chip, saved-team sprite, boss
      party member. See goToDexSpecies(). */
@@ -567,14 +667,14 @@
     font-weight: 700;
     color: var(--sem-weak);
     border: 1px solid var(--sem-weak);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     padding: 0 5px;
     margin-left: 3px;
     vertical-align: middle;
   }
   .move-detail-row td { background: var(--surface-2); color: var(--text-dim); font-size: 12px; padding: 8px 12px; }
   .move-detail-row.hidden { display: none; }
-  .move-type-tag { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+  .move-type-tag { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: var(--radius-pill); }
   /* Same edge-fade already used for the mobile tab bar (see .tabs) - used
      here without a media-query gate because both tables that rely on this
      (cov-table, the type matrix) stretch far enough (up to 18 type columns)
@@ -587,7 +687,7 @@
     -webkit-mask-image: linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%);
   }
   .tutor-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .tutor-chip { background: var(--surface-2); border-radius: 999px; padding: 4px 10px; font-size: 12px; cursor: default; }
+  .tutor-chip { background: var(--surface-2); border-radius: var(--radius-pill); padding: 4px 10px; font-size: 12px; cursor: default; }
 
   /* ---------- Team view ---------- */
   .team-shell { flex: 1; min-width: 0; overflow-y: auto; padding: 24px 28px 60px; display: flex; flex-direction: column; gap: 20px; }
@@ -608,14 +708,14 @@
   .pcbox-nav { display: flex; align-items: center; justify-content: center; gap: 14px; }
   .pcbox-arrow {
     border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
-    width: 34px; height: 34px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer;
+    width: 34px; height: 34px; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer;
   }
   .pcbox-arrow:disabled { opacity: .35; cursor: default; }
-  .pcbox-title { font-family: "Chakra Petch", ui-sans-serif, system-ui, sans-serif; font-weight: 700; font-size: 15px; min-width: 160px; text-align: center; }
+  .pcbox-title { font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif; font-weight: 700; font-size: 15px; min-width: 160px; text-align: center; }
   .pcbox-title small { display: block; font-family: "Figtree", sans-serif; font-weight: 600; color: var(--text-dim); font-size: 11px; margin-top: 1px; }
   .pcbox-search-row { display: flex; gap: 8px; }
   .pcbox-search-row input {
-    flex: 1; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border);
+    flex: 1; padding: 9px 10px; border-radius: var(--radius-md); border: 1px solid var(--border);
     background: var(--surface-2); color: var(--text); font-size: 13px;
   }
   /* Slots em tamanho FIXO (não mais 1fr esticando pra preencher a largura) -
@@ -626,10 +726,10 @@
      jogo real que motivou este redesenho (Fase 2 do roadmap). */
   .pcbox-grid {
     display: grid; grid-template-columns: repeat(6, 60px); justify-content: center; gap: 6px;
-    background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 10px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 10px;
   }
   .pcbox-slot {
-    width: 60px; height: 60px; border-radius: 8px; border: 1px solid var(--border);
+    width: 60px; height: 60px; border-radius: var(--radius-md); border: 1px solid var(--border);
     background: var(--surface); display: flex; align-items: center; justify-content: center;
     cursor: pointer; position: relative; padding: 4px;
   }
@@ -643,10 +743,10 @@
      texto já testados, só reorganizando onde cada um mora. */
   .pcbox-detail {
     display: flex; flex-direction: column; gap: 12px;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px;
   }
   .pcbox-detail-top { display: flex; align-items: flex-start; gap: 12px; }
-  .pcbox-detail-sprite { flex-shrink: 0; cursor: pointer; border-radius: 8px; }
+  .pcbox-detail-sprite { flex-shrink: 0; cursor: pointer; border-radius: var(--radius-md); }
   .pcbox-detail-sprite:hover { outline: 2px solid var(--accent); outline-offset: 2px; }
   .pcbox-detail-identity { flex: 1; min-width: 0; }
   .pcbox-detail-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
@@ -683,12 +783,12 @@
   .pcbox-empty-note { color: var(--text-dim); font-size: 13px; }
 
   .saved-teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-  .saved-team-card { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--surface-2); }
+  .saved-team-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px; background: var(--surface-2); }
   .saved-team-card.empty { display: flex; align-items: center; justify-content: center; min-height: 90px; color: var(--text-dim); font-size: 12.5px; border-style: dashed; }
   .saved-team-card .stc-name { font-weight: 700; font-size: 13.5px; margin-bottom: 8px; }
   .saved-team-card .stc-sprites { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
   .saved-team-card .stc-actions { display: flex; gap: 8px; }
-  .saved-team-card .stc-actions button { flex: 1; padding: 6px 8px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 11.5px; font-weight: 700; cursor: pointer; }
+  .saved-team-card .stc-actions button { flex: 1; padding: 6px 8px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 11.5px; font-weight: 700; cursor: pointer; }
   .saved-team-card .stc-actions button.stc-load { border-color: var(--accent); color: var(--badge-accent); }
   .saved-team-card .stc-actions button.stc-delete { color: var(--sem-weak); }
   .stc-active-badge { font-size: 10px; font-weight: 700; color: var(--badge-resist); letter-spacing: .02em; }
@@ -696,7 +796,7 @@
     width: 100%;
     margin-bottom: 8px;
     padding: 6px 8px;
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--accent);
     background: var(--surface);
     color: var(--text);
@@ -712,12 +812,12 @@
     letter-spacing: .03em;
     color: var(--text-dim);
     background: var(--surface-2);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     padding: 2px 8px;
     white-space: nowrap;
   }
   .boss-mon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-  .boss-mon-card { background: var(--surface-2); border-radius: 9px; padding: 10px 12px; }
+  .boss-mon-card { background: var(--surface-2); border-radius: var(--radius-md); padding: 10px 12px; }
   .boss-mon-card .bm-head { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
   .boss-mon-card .bm-name { font-weight: 700; font-size: 13.5px; margin-bottom: 4px; }
   .boss-mon-card .bm-types { display: flex; gap: 5px; }
@@ -727,7 +827,7 @@
   .boss-level-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 2px; }
   .boss-level-row label { font-size: 12.5px; color: var(--text-dim); }
   #boss-level-input, #mybuild-level {
-    width: 62px; padding: 5px 8px; border-radius: 7px; border: 1px solid var(--border);
+    width: 62px; padding: 5px 8px; border-radius: var(--radius-md); border: 1px solid var(--border);
     background: var(--surface-2); color: var(--text); font-size: 13px;
   }
   .bm-stats {
@@ -738,7 +838,7 @@
   .bm-stat-label { color: var(--text-dim); }
   .team-slot {
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     padding: 14px;
     background: var(--surface);
     min-height: 96px;
@@ -761,7 +861,7 @@
   .spr {
     display: inline-block;
     flex: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background-color: var(--surface-2);
     background-image: url("__SPRITE_ATLAS_DATAURI__");
     background-repeat: no-repeat;
@@ -772,7 +872,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--surface-3);
     color: var(--text-dim);
     font-weight: 700;
@@ -788,7 +888,7 @@
     font-size: 11.5px;
     font-weight: 700;
     padding: 5px 10px;
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     cursor: pointer;
   }
   .ts-swap-btn:hover { border-color: var(--accent-2); }
@@ -799,7 +899,7 @@
     font-size: 12px;
     font-weight: 700;
     padding: 7px 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     margin-top: 8px;
   }
@@ -818,7 +918,7 @@
     text-align: left;
     background: var(--surface-2);
     border: 1px solid transparent;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     padding: 4px 8px;
     cursor: pointer;
     color: var(--text);
@@ -831,7 +931,7 @@
   .pcbox-detail .box-to-team {
     background: var(--surface-2);
     border: 1px solid var(--border);
-    border-radius: 7px;
+    border-radius: var(--radius-md);
     color: var(--badge-accent2);
     font-size: 12.5px;
     font-weight: 700;
@@ -841,7 +941,7 @@
   .pcbox-detail .box-to-team:disabled { color: var(--text-dim); cursor: default; }
   .pcbox-detail .box-to-team.is-swap { color: var(--badge-accent); border-color: var(--accent); }
   .pcbox-detail .remove-btn {
-    background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);
     padding: 6px 10px; font-size: 15px; line-height: 1; cursor: pointer; color: var(--sem-weak);
   }
 
@@ -852,7 +952,7 @@
     color: var(--text-dim);
     width: 24px;
     height: 24px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     font-size: 14px;
     line-height: 1;
     cursor: pointer;
@@ -872,7 +972,7 @@
     font-size: 13px;
     font-weight: 700;
     padding: 10px 18px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     box-shadow: var(--shadow);
     opacity: 0;
     pointer-events: none;
@@ -911,7 +1011,7 @@
   .gym-skill-list .gs-detail { color: var(--text-dim); font-weight: 400; }
   .auto-log time { display: block; font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
   .sync-banner button {
-    border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700;
+    border: none; border-radius: var(--radius-sm); padding: 4px 10px; font-size: 12px; font-weight: 700;
     cursor: pointer; background: rgba(0,0,0,.15); color: inherit;
   }
   #sync-banner-dismiss, #storage-banner-dismiss, #run-setup-dismiss { background: none; font-size: 16px; padding: 0 4px; line-height: 1; }
@@ -922,7 +1022,7 @@
     line-height: 1.55;
     background: var(--surface-2);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     padding: 10px 12px;
     margin: 0;
     white-space: pre;
@@ -969,7 +1069,7 @@
     color: var(--badge-accent2);
     list-style: none;
     padding: 9px 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--surface-2);
     border: 1px solid var(--border);
   }
@@ -995,7 +1095,7 @@
        que .modal-backdrop + .modal-card faziam juntos antes. */
     border: 1px solid var(--border);
     background: var(--surface);
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
     padding: 18px;
     width: 100%;
     max-width: 420px;
@@ -1004,7 +1104,7 @@
     box-shadow: var(--shadow);
   }
   .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-  .modal-title { font-family: "Chakra Petch", sans-serif; font-weight: 700; font-size: 16px; }
+  .modal-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 16px; }
   .modal-sub { color: var(--text-dim); font-size: 12.5px; margin: 4px 0 12px; }
   .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
   .modal-close {
@@ -1021,7 +1121,7 @@
   .notes-textarea {
     width: 100%;
     padding: 9px 10px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--border);
     background: var(--surface-2);
     color: var(--text);
@@ -1044,7 +1144,7 @@
     font-size: 11px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: .03em;
   }
   .mybuild-field select, .mybuild-field input {
-    padding: 8px 9px; border-radius: 8px; border: 1px solid var(--border);
+    padding: 8px 9px; border-radius: var(--radius-md); border: 1px solid var(--border);
     background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit;
     text-transform: none; letter-spacing: normal; font-weight: 400;
   }
@@ -1053,14 +1153,14 @@
   .mybuild-ivev-header { font-size: 10.5px; color: var(--text-dim); font-weight: 600; text-align: center; }
   .mybuild-ivev-row > span { font-size: 11px; color: var(--text-dim); font-weight: 600; }
   .mybuild-num {
-    width: 100%; padding: 6px 4px; text-align: center; border-radius: 6px; border: 1px solid var(--border);
+    width: 100%; padding: 6px 4px; text-align: center; border-radius: var(--radius-sm); border: 1px solid var(--border);
     background: var(--surface-2); color: var(--text); font-size: 12.5px; font-family: inherit;
   }
   .mybuild-ev-total { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
   .mybuild-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
   .mybuild-chip {
     border: 1px solid var(--border); background: var(--surface-2); color: var(--text-dim);
-    padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+    padding: 5px 10px; border-radius: var(--radius-pill); font-size: 11.5px; font-weight: 700; cursor: pointer;
   }
   .mybuild-chip.active { border-color: var(--accent); color: var(--badge-accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
   .mybuild-ai-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
@@ -1070,7 +1170,7 @@
   .mybuild-rationale {
     background: color-mix(in srgb, var(--accent-2) 12%, transparent);
     border-left: 3px solid var(--accent-2);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     padding: 10px 12px;
     margin: 10px 0;
     font-size: 12.5px;
@@ -1084,7 +1184,7 @@
     font-weight: 600; text-transform: uppercase; letter-spacing: .03em;
   }
   .archetype-row select {
-    padding: 8px 9px; border-radius: 8px; border: 1px solid var(--border);
+    padding: 8px 9px; border-radius: var(--radius-md); border: 1px solid var(--border);
     background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit;
     text-transform: none; letter-spacing: normal; font-weight: 400;
   }
@@ -1132,7 +1232,7 @@
   .cov-table { border-collapse: collapse; font-size: 12px; }
   .cov-table th, .cov-table td { padding: 6px 7px; text-align: center; border-bottom: 1px solid var(--border); }
   .cov-table th.rowhead, .cov-table td.rowhead { text-align: left; font-weight: 600; }
-  .cov-cell { border-radius: 5px; padding: 3px 0; font-weight: 700; font-family: "IBM Plex Mono", monospace; }
+  .cov-cell { border-radius: var(--radius-sm); padding: 3px 0; font-weight: 700; font-family: "IBM Plex Mono", monospace; }
   /* Fundo sólido + texto --accent-ink, 2026-09-11 - pass dedicado prometido
      desde a auditoria de contraste dos badges de rank (2026-09-09): mesmo
      problema, texto tintado sobre fundo translúcido nunca clareia o
@@ -1166,7 +1266,7 @@
      see the comment right above their rule. */
   .rank-badge {
     display: inline-flex; align-items: center; justify-content: center;
-    min-width: 20px; height: 17px; padding: 0 4px; border-radius: 5px;
+    min-width: 20px; height: 17px; padding: 0 4px; border-radius: var(--radius-sm);
     font-size: 10px; font-weight: 800; font-family: "IBM Plex Mono", monospace;
     letter-spacing: .02em; cursor: help; flex: none;
     color: var(--accent-ink);
@@ -1187,7 +1287,7 @@
      4.5:1 as text without adjustment. */
   .rank-badge-stage {
     display: inline-flex; align-items: center; justify-content: center;
-    min-width: 20px; height: 17px; padding: 0 4px; border-radius: 5px;
+    min-width: 20px; height: 17px; padding: 0 4px; border-radius: var(--radius-sm);
     font-size: 9.5px; font-weight: 800; font-family: "IBM Plex Mono", monospace;
     letter-spacing: .02em; cursor: help; flex: none; background: none;
     border: 1.5px solid currentColor;
@@ -1207,7 +1307,7 @@
 
   .risk-list { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
   .risk-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .risk-item .risk-bar-track { flex: 1; height: 7px; background: var(--surface-2); border-radius: 999px; overflow: hidden; max-width: 240px; }
+  .risk-item .risk-bar-track { flex: 1; height: 7px; background: var(--surface-2); border-radius: var(--radius-pill); overflow: hidden; max-width: 240px; }
   .risk-item .risk-bar-fill { height: 100%; background: var(--sem-weak); }
 
   /* ---------- Types view ---------- */
@@ -1313,7 +1413,7 @@
      reachable — at 375px all six no longer fit on one row. */
   @media (max-width: 620px) {
     .brand-sub { display: none; }
-    .brand-mark { width: 32px; height: 32px; font-size: 16px; border-radius: 8px; }
+    .brand-mark { width: 32px; height: 32px; font-size: 16px; border-radius: var(--radius-md); }
     .brand-text h1 { font-size: 16px; }
     .topbar { padding: 8px 10px; gap: 8px; }
     .tabs-row { width: 100%; }
@@ -1453,7 +1553,7 @@
 
         <div>
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-            <h3 style="margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);">Meu time (máx. 6)</h3>
+            <h3 class="section-title" style="margin:0;">Meu time (máx. 6)</h3>
             <!-- "Novo jogo" (pedido do usuário, 2026-09-13): reseta time E
                  caixa de uma vez, a primeira ação de verdade destrutiva e
                  sem banco-de-recuperação deste app (diferente de "remover"
@@ -1472,7 +1572,7 @@
           <h3>Times salvos (máx. 3)</h3>
           <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">Guarde até 3 composições completas — inclusive as que eu recomendar depois de analisar um chefão — e carregue de volta quando quiser sem remontar tudo na mão.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
-            <input id="save-team-name" type="text" placeholder="Nome do time (opcional)" aria-label="Nome do time a salvar" style="flex:1;min-width:180px;padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
+            <input id="save-team-name" type="text" placeholder="Nome do time (opcional)" aria-label="Nome do time a salvar" style="flex:1;min-width:180px;padding:9px 10px;border-radius: var(--radius-md);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
             <button id="save-team-btn" class="add-team-btn" type="button">Salvar time atual</button>
           </div>
           <div id="saved-teams-status" style="font-size:11.5px;color:var(--badge-accent2);margin:0 0 10px;min-height:14px;"></div>
@@ -1486,7 +1586,7 @@
     <section id="view-box" class="view">
       <div class="team-shell">
         <div>
-          <h3 style="margin-bottom:6px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);">PC Box</h3>
+          <h3 class="section-title" style="margin-bottom:6px;">PC Box</h3>
           <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 12px;max-width:70ch;">Todo Pokémon que você já capturou, sem limite de 6. Use isso pra guardar o panorama geral: quanto mais completo, melhor eu consigo sugerir trocas quando um treinador específico estiver dando trabalho.</p>
           <!-- Redesenho da caixa, Fase 2 do roadmap de estratégia (2026-09-11/12,
                pedido do usuário com print de referência do jogo real): grade
@@ -1512,7 +1612,7 @@
             <input id="boss-search-input" type="search" placeholder="Buscar treinador..." autocomplete="off" aria-label="Buscar chefão por nome">
           </div>
           <div class="filter-row">
-            <select id="boss-cat-select" aria-label="Filtrar chefões por categoria" style="flex:1;border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:7px 8px;font-size:12.5px;">
+            <select id="boss-cat-select" aria-label="Filtrar chefões por categoria" style="flex:1;border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius: var(--radius-md);padding:7px 8px;font-size:12.5px;">
               <option value="">Todas as categorias</option>
             </select>
           </div>
@@ -1527,11 +1627,21 @@
     <section id="view-progress" class="view">
       <div class="types-shell">
         <p class="hint">Isso define o que a ferramenta assume em toda a run: qual variante de time (Padrão/Insane/Hell) aparece por padrão na aba Chefões (Dificuldade), qual coluna de level cap conta (Level Cap), e o que entra automaticamente no texto de "Enviar para o Claude" de cada chefão. Use os mesmos valores da tela de setup do jogo.</p>
+        <!-- Trilha visual da jornada (achado de auditoria, 2026-09-18: "Progresso"
+             era só um formulário de selects, sem nenhuma sensação de jornada -
+             pedido explícito do usuário no briefing de redesign). Puramente
+             derivada de LEVELCAPS/state.settings.milestone - o select
+             #settings-milestone abaixo continua sendo a única fonte de
+             verdade/edição, isto é só a mesma informação, visível. -->
+        <div class="card" id="progress-trail-card">
+          <h3>Sua jornada</h3>
+          <div id="progress-trail"></div>
+        </div>
         <div class="card" style="max-width:460px;">
           <h3 id="run-setup-title">Sua run</h3>
           <div style="display:flex;flex-direction:column;gap:12px;">
             <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Dificuldade
-              <select id="settings-difficulty" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;">
+              <select id="settings-difficulty" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius: var(--radius-md);padding:8px 9px;font-size:13px;">
                 <option value="easy">Easy</option>
                 <option value="ace">Ace</option>
                 <option value="elite">Elite</option>
@@ -1539,7 +1649,7 @@
               <span style="font-weight:400;font-size:11px;color:var(--text-dim);">Muda os times dos chefões. Não muda o level cap.</span>
             </label>
             <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Level Cap
-              <select id="settings-level-cap" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;">
+              <select id="settings-level-cap" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius: var(--radius-md);padding:8px 9px;font-size:13px;">
                 <option value="easy">Easy</option>
                 <option value="more">More</option>
                 <option value="elite">Elite</option>
@@ -1547,10 +1657,10 @@
               <span style="font-weight:400;font-size:11px;color:var(--text-dim);">Opção "Level Cap" do setup do jogo. Define o nível máximo a cada badge.</span>
             </label>
             <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Último badge conquistado
-              <select id="settings-milestone" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;"></select>
+              <select id="settings-milestone" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius: var(--radius-md);padding:8px 9px;font-size:13px;"></select>
             </label>
             <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Mega Evolução
-              <select id="settings-mega-mode" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;">
+              <select id="settings-mega-mode" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius: var(--radius-md);padding:8px 9px;font-size:13px;">
                 <option value="temporaria">Temporária (padrão)</option>
                 <option value="permanente">Permanente</option>
               </select>
@@ -1588,7 +1698,7 @@
               Alto contraste
             </label>
             <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;">Tamanho da fonte
-              <select id="settings-font-scale" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:7px;padding:8px 9px;font-size:13px;">
+              <select id="settings-font-scale" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius: var(--radius-md);padding:8px 9px;font-size:13px;">
                 <option value="1">Padrão</option>
                 <option value="1.15">Grande</option>
                 <option value="1.3">Extra grande</option>
@@ -1604,7 +1714,7 @@
         <p class="hint">Multiplicador de dano do tipo atacante (linhas) contra o tipo defensor (colunas). Tabela padrão da franquia — no Elite Redux, habilidades individuais podem alterar matchups específicos; o texto de cada habilidade aparece na ficha do Pokémon na aba Dex.</p>
         <div class="scroll-x"><table id="type-matrix"></table></div>
 
-        <h3 style="margin-top:26px;margin-bottom:8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);">Level caps</h3>
+        <h3 class="section-title" style="margin-top:26px;margin-bottom:8px;">Level caps</h3>
         <p class="hint" id="levelcap-note"></p>
         <div class="scroll-x"><table id="levelcap-table" class="cov-table"></table></div>
       </div>
@@ -5136,7 +5246,7 @@
   function compareCardHtml(sp) {
     return '<div class="card"><h3>Comparar com outro Pokémon</h3>' +
       '<input type="text" id="compare-input" list="compare-species-list" placeholder="Nome de outro Pokémon..." autocomplete="off" ' +
-      'style="width:100%;max-width:320px;padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:13px;">' +
+      'style="width:100%;max-width:320px;padding:9px 10px;border-radius: var(--radius-md);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:13px;">' +
       '<div id="compare-result" style="margin-top:12px;"></div>' +
     '</div>';
   }
@@ -6411,6 +6521,24 @@
     });
   }
 
+  // Cor por categoria de treinador (achado de auditoria visual, 2026-09-18:
+  // "Chefões" era uma lista de texto puro, sem nenhuma pista visual do que
+  // cada treinador É - Equipe Aqua/Magma, Líder de Ginásio, Alto Comando...
+  // Categorias reais de data/bosses.json (BOSSES[].cat), nunca inventadas.
+  var BOSS_CAT_COLOR = {
+    "Equipe Aqua": "var(--cat-aqua)",
+    "Equipe Aqua (Admin)": "var(--cat-aqua)",
+    "Equipe Magma": "var(--cat-magma)",
+    "Equipe Magma (Admin)": "var(--cat-magma)",
+    "Frontier Brain": "var(--cat-frontier)",
+    "Lider de Ginasio": "var(--accent-2)",
+    "Alto Comando": "var(--cat-elite)",
+    "Campeao": "var(--accent)",
+    "Superchefao": "var(--cat-super)",
+    "Superchefao (Monotype)": "var(--cat-super)"
+  };
+  function bossCatColor(cat) { return BOSS_CAT_COLOR[cat] || "var(--text-dim)"; }
+
   function renderBossList() {
     var ul = document.getElementById("boss-list");
     var rows = getFilteredBosses();
@@ -6425,9 +6553,10 @@
       var isSel = bossState.selected === row.i;
       var sel = isSel ? " selected" : "";
       var isTabStop = isSel || (!hasSelectedBossRow && idx === 0);
+      var catColor = bossCatColor(row.b.cat);
       return '<li class="species-row' + sel + '" data-i="' + row.i + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
         '<span class="sname">' + escapeHtml(row.b.name) + (row.b.db ? " (dupla)" : "") + '</span>' +
-        '<span class="boss-cat-tag">' + escapeHtml(row.b.cat) + '</span></li>';
+        '<span class="boss-cat-tag" style="color:' + catColor + ';background:color-mix(in srgb, ' + catColor + ' 16%, var(--surface-2));">' + escapeHtml(row.b.cat) + '</span></li>';
     }).join("");
     ul.querySelectorAll(".species-row").forEach(function (li) {
       li.addEventListener("click", function () { selectBoss(parseInt(li.dataset.i, 10)); });
@@ -6634,7 +6763,7 @@
       '<div class="card"><h3>Enviar para o Claude</h3>' +
         '<p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">Junta o time dele com o seu time e sua caixa num texto só. Copie e cole na conversa pra eu montar a contra-estratégia.</p>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">' +
-          '<textarea id="boss-export-text" class="mono" readonly rows="5" style="flex:1;min-width:220px;padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12px;resize:vertical;">' + escapeHtml(exportText) + '</textarea>' +
+          '<textarea id="boss-export-text" class="mono" readonly rows="5" style="flex:1;min-width:220px;padding:9px 10px;border-radius: var(--radius-md);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12px;resize:vertical;">' + escapeHtml(exportText) + '</textarea>' +
           '<button id="boss-export-copy" class="add-team-btn" type="button">Copiar</button>' +
         '</div>' +
         '<div id="boss-export-status" style="font-size:11.5px;color:var(--badge-accent2);margin-top:6px;min-height:14px;"></div>' +
@@ -6701,6 +6830,29 @@
     document.getElementById("cap-display").textContent = cap === null ? "Sem limite" : "Nível " + cap;
     if (LEVELCAPS) document.getElementById("settings-note").textContent = LEVELCAPS.note;
   }
+  // Trilha visual da jornada (redesign 2026-09-18) - só lê LEVELCAPS e
+  // state.settings.milestone, nunca escreve; #settings-milestone continua
+  // sendo o único jeito de mudar o valor.
+  function renderProgressTrail() {
+    var el = document.getElementById("progress-trail");
+    if (!el || !LEVELCAPS || !Array.isArray(LEVELCAPS.rows) || !LEVELCAPS.rows.length) return;
+    var current = state.settings.milestone;
+    var last = LEVELCAPS.rows.length - 1;
+    var nodes = LEVELCAPS.rows.map(function (r, idx) {
+      var st = idx < current ? "done" : idx === current ? "active" : "locked";
+      var dotContent = idx < current ? "&check;" : String(idx);
+      return '<div class="trail-node">' +
+        '<div class="trail-dot ' + st + '">' + dotContent + '</div>' +
+        '<span class="trail-label' + (idx === current ? " active" : "") + '">' + escapeHtml(r.milestone) + '</span>' +
+        '</div>';
+    }).join("");
+    var pct = last > 0 ? Math.max(0, Math.min(100, (current / last) * 100)) : 0;
+    el.innerHTML = '<div class="trail-track">' +
+      '<div class="trail-line-bg"></div>' +
+      '<div class="trail-line-fill" style="width: ' + pct + '%;"></div>' +
+      nodes +
+      '</div>';
+  }
   // "Novidades" - Fase 1 quality-of-life item, 2026-09-09: the user asked
   // to see what changed without having to ask. Static, hand-authored list
   // (data/changelog.json) - no attempt to auto-generate from git log, which
@@ -6720,7 +6872,7 @@
   }
 
   function initProgress() {
-    if (progressInited) { renderCapDisplay(); renderChangelog(); return; }
+    if (progressInited) { renderCapDisplay(); renderChangelog(); renderProgressTrail(); return; }
     progressInited = true;
     renderChangelog();
     var diffSel = document.getElementById("settings-difficulty");
@@ -6734,6 +6886,7 @@
       }).join("");
     }
     msSel.value = String(state.settings.milestone);
+    renderProgressTrail();
     // Auto-evolução por level cap, 2026-09-10: dispara na hora, junto com a
     // mudança que acabou de alterar o cap - exatamente o que o usuário pediu
     // ("na hora, ao mudar o level cap"), não só no próximo save manual.
@@ -6741,6 +6894,7 @@
       saveSettings();
       renderCapDisplay();
       renderCapBadge();
+      renderProgressTrail();
       if (autoEvolveRoster(true)) {
         persist();
         renderTeam();
@@ -6898,6 +7052,7 @@
     MONOTYPE_ARCHETYPES: MONOTYPE_ARCHETYPES,
     computeTeamGenerationValidation: computeTeamGenerationValidation,
     generateTeamForArchetype: generateTeamForArchetype,
+    LEVELCAPS: LEVELCAPS,
     getCurrentCap: getCurrentCap,
     levelCapMode: levelCapMode,
     getSpeciesByX: getSpeciesByX,
