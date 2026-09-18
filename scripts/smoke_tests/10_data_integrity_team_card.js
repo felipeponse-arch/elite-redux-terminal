@@ -192,8 +192,7 @@ async function section10() {
   // não sempre presente).
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(30);
-  var weatherSel27 = document.getElementById("archetype-weather");
-  if (weatherSel27) { weatherSel27.value = "Trick Room"; weatherSel27.dispatchEvent(new Event("change", { bubbles: true })); }
+  var weatherChip27 = selecionarArquetipo("weather", "Trick Room");
   await wait(30);
   window.__genAiPrompts = [];
   window.claude = {
@@ -225,7 +224,7 @@ async function section10() {
 
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(30);
-  if (weatherSel27) { weatherSel27.value = ""; weatherSel27.dispatchEvent(new Event("change", { bubbles: true })); }
+  if (weatherChip27) selecionarArquetipo("weather", "");
   await wait(30);
   window.__genAiPrompts = [];
   document.querySelector('.tab-btn[data-tab="dex"]').click();

@@ -239,12 +239,12 @@ async function section09() {
   const archCard = [...document.querySelectorAll(".card")].find(c => c.querySelector("h3") && c.querySelector("h3").textContent === "Arquétipo do time");
   check("card 'Arquétipo do time' é o primeiro item da #team-strategy (não tem mais Leitura estratégica abaixo)",
     !!archCard && document.getElementById("team-strategy").firstElementChild === archCard);
-  const paceSel = document.getElementById("archetype-pace");
-  const weatherSel = document.getElementById("archetype-weather");
-  check("os dois <select> de arquétipo (ritmo/clima) existem e têm as opções da taxonomia real (Reddit r/VGC)",
-    !!paceSel && !!weatherSel &&
-    [...paceSel.options].some(o => o.value === "Balance") && [...paceSel.options].some(o => o.value === "Stall") &&
-    [...weatherSel.options].some(o => o.value === "Sand") && [...weatherSel.options].some(o => o.value === "Trick Room"));
+  // <select> viraram chips (.arch-chip) no redesign de 2026-09-18.
+  const paceChips = [...document.querySelectorAll('.arch-chip[data-axis="pace"]')];
+  const weatherChips = [...document.querySelectorAll('.arch-chip[data-axis="weather"]')];
+  check("os chips de arquétipo (ritmo/clima) existem e têm as opções da taxonomia real (Reddit r/VGC)",
+    paceChips.some(c => c.dataset.value === "Balance") && paceChips.some(c => c.dataset.value === "Stall") &&
+    weatherChips.some(c => c.dataset.value === "Sand") && weatherChips.some(c => c.dataset.value === "Trick Room"));
   check("aviso de papel redundante (versão antiga, só informativa) foi removido - não existe mais essa classe",
     !document.querySelector(".archetype-warning"));
   check("botão avulso 'Montar melhor time' foi removido (achado de UX, 2026-09-18)",
@@ -256,8 +256,7 @@ async function section09() {
 
   // Seleção manual persiste de verdade (controle explícito - a IA só monta
   // o time pro alvo já escolhido, nunca decide o alvo sozinha).
-  weatherSel.value = "Rain";
-  weatherSel.dispatchEvent(new Event("change", { bubbles: true }));
+  selecionarArquetipo("weather", "Rain");
   await wait(30);
   const savedArch1 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").archetype;
   check("selecionar Clima manualmente persiste em localStorage (arquétipo não é só decorativo)",

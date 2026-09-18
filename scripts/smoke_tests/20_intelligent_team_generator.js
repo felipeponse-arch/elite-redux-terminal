@@ -109,9 +109,7 @@ async function section20() {
     document.getElementById("archetype-status").textContent);
 
   // ---- roda o pipeline completo, com Ritmo escolhido ----
-  var paceSel = document.getElementById("archetype-pace");
-  paceSel.value = "Hyper Offense";
-  paceSel.dispatchEvent(new Event("change", { bubbles: true }));
+  selecionarArquetipo("pace", "Hyper Offense");
   await wait(30);
 
   buildBtnCompleto.click();
@@ -153,12 +151,9 @@ async function section20() {
     .find(function (ty) { return speciesTemTipo(fx1.sp, ty) && !speciesTemTipo(fx2.sp, ty); });
   if (achou("um tipo que só a fixture 1 tem, pra testar o filtro de Monotype", tipoAlvo)) {
     estagios.length = 0;
-    document.getElementById("archetype-pace").value = "";
-    document.getElementById("archetype-pace").dispatchEvent(new Event("change", { bubbles: true }));
+    selecionarArquetipo("pace", "");
     await wait(30);
-    var monoSel = document.getElementById("archetype-monotype");
-    monoSel.value = tipoAlvo;
-    monoSel.dispatchEvent(new Event("change", { bubbles: true }));
+    selecionarArquetipo("monotype", tipoAlvo);
     await wait(30);
     // O botão avulso "Montar melhor time" foi removido (2026-09-18, junto
     // com a Leitura estratégica) - generateTeamForArchetype agora só roda
