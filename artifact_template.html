@@ -680,15 +680,28 @@
      o rótulo escolhível/innate no mesmo card. */
   .abi-synergy { font-size: 11.5px; color: var(--badge-accent2); font-weight: 600; margin-top: 6px; }
 
-  .evo-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-  .evo-node { background: var(--surface-2); border-radius: var(--radius-md); padding: 8px 12px; font-size: 13px; font-weight: 600; }
+  .evo-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  /* "Nó de trilha" (redesign 2026-09-18) - mesma linguagem do waypoint do
+     Progresso, aplicada à linha evolutiva/formas alternativas: pill com
+     sprite, e um anel de destaque na espécie atual (evo-node-current). */
+  .evo-node {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-pill);
+    padding: 5px 14px 5px 5px; font-size: 13px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .evo-node-current { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
   /* Any Pokemon name/sprite the user might reasonably want to jump to in the
      Dex from - evolution chain, team slot, box chip, saved-team sprite, boss
      party member. See goToDexSpecies(). */
   .goto-species { cursor: pointer; }
   .goto-species:hover { opacity: .8; }
-  .evo-arrow { color: var(--text-dim); font-size: 13px; display: flex; flex-direction: column; align-items: center; }
-  .evo-arrow small { font-size: 10.5px; color: var(--text-dim); font-weight: 600; }
+  .evo-arrow { color: var(--text-dim); font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 44px; padding: 0 2px; }
+  .evo-arrow-line { width: 100%; height: 2px; background: repeating-linear-gradient(90deg, var(--border) 0 4px, transparent 4px 8px); position: relative; flex: none; }
+  .evo-arrow-line::after {
+    content: ""; position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+    border: 4px solid transparent; border-left-color: var(--border);
+  }
+  .evo-arrow small { font-size: 10px; color: var(--text-dim); font-weight: 600; white-space: nowrap; }
 
   .compare-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   .compare-table th { text-align: left; font-size: 12px; font-weight: 700; padding: 6px 8px; border-bottom: 1px solid var(--border); }
@@ -3908,11 +3921,14 @@
 
     var evoHtml = "";
     if (sp.ev.length) {
-      var nodes = ['<div class="evo-node goto-species" data-x="' + sp.x + '">' + escapeHtml(sp.n) + '</div>'];
+      // Waypoint da trilha (redesign 2026-09-18) - mesma linguagem visual do
+      // Progresso: nó atual com anel de destaque, conector tracejado com
+      // seta no lugar da flechinha de texto solta.
+      var nodes = ['<div class="evo-node evo-node-current goto-species" data-x="' + sp.x + '">' + spriteImgHtml(sp.x, sp.n, 26) + escapeHtml(sp.n) + '</div>'];
       sp.ev.forEach(function (ev) {
         var target = getSpeciesByX(ev[2]);
-        nodes.push('<span class="evo-arrow">&rarr;<small>' + evoConditionText(ev) + '</small></span>');
-        nodes.push('<div class="evo-node' + (target ? ' goto-species" data-x="' + target.x : '') + '">' + escapeHtml(target ? target.n : "?") + '</div>');
+        nodes.push('<span class="evo-arrow"><span class="evo-arrow-line"></span><small>' + evoConditionText(ev) + '</small></span>');
+        nodes.push('<div class="evo-node' + (target ? ' goto-species" data-x="' + target.x : '') + '">' + (target ? spriteImgHtml(target.x, target.n, 26) : "") + escapeHtml(target ? target.n : "?") + '</div>');
       });
       evoHtml = '<div class="card"><h3>Linha evolutiva</h3><div class="evo-chain">' + nodes.join("") + '</div></div>';
     }
@@ -3930,7 +3946,7 @@
     if (sp.frm && sp.frm.length) {
       var frmNodes = sp.frm.map(function (fx) {
         var f = getSpeciesByX(fx);
-        return f ? '<div class="evo-node goto-species" data-x="' + f.x + '">' + escapeHtml(f.n) + '</div>' : "";
+        return f ? '<div class="evo-node goto-species" data-x="' + f.x + '">' + spriteImgHtml(f.x, f.n, 26) + escapeHtml(f.n) + '</div>' : "";
       }).join("");
       if (frmNodes) frmHtml = '<div class="card"><h3>Formas alternativas</h3><div class="evo-chain">' + frmNodes + '</div></div>';
     }
