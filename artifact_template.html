@@ -1213,6 +1213,8 @@
     background: var(--surface-2); color: var(--text); font-size: 12.5px; font-family: inherit;
   }
   .mybuild-ev-total { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+  .mybuild-ev-bar-track { height: 5px; background: var(--surface-2); border-radius: var(--radius-pill); overflow: hidden; margin-top: 5px; }
+  .mybuild-ev-bar-fill { height: 100%; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--accent-2), var(--accent)); transition: width .15s; }
   .mybuild-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
   .mybuild-chip {
     border: 1px solid var(--border); background: var(--surface-2); color: var(--text-dim);
@@ -4580,6 +4582,7 @@
         '<div class="mybuild-ivev-row">' + ivRow + '</div>' +
         '<div class="mybuild-ivev-row">' + evRow + '</div>' +
         '<div class="mybuild-ev-total" id="mybuild-ev-total"></div>' +
+        '<div class="mybuild-ev-bar-track"><div class="mybuild-ev-bar-fill" id="mybuild-ev-bar"></div></div>' +
       '</div>' +
       '<div class="boss-level-row"><label for="mybuild-level">Status calculados pro nível (level cap atual' + (mbCap ? ": " + mbCap : "") + ')</label>' +
         '<input type="number" id="mybuild-level" min="1" max="100" value="' + (myBuildLevel || mbCap || 50) + '"></div>' +
@@ -4623,7 +4626,16 @@
     var out = document.getElementById("mybuild-ev-total");
     if (!out) return;
     out.textContent = "Total de EVs: " + total + " / 510";
-    out.style.color = total > 510 ? "var(--sem-weak)" : "var(--text-dim)";
+    var over = total > 510;
+    out.style.color = over ? "var(--sem-weak)" : "var(--text-dim)";
+    // Barra visual do orçamento de EVs (redesign 2026-09-18) - o mesmo dado
+    // que o texto já dizia, só mais rápido de ler de relance; nunca a
+    // única fonte da informação (o texto continua ao lado).
+    var bar = document.getElementById("mybuild-ev-bar");
+    if (bar) {
+      bar.style.width = Math.min(100, (total / 510) * 100) + "%";
+      bar.style.background = over ? "var(--sem-weak)" : "linear-gradient(90deg, var(--accent-2), var(--accent))";
+    }
   }
 
   // Status preview for "Meu build" - 2026-09-09, urgent user request: after
