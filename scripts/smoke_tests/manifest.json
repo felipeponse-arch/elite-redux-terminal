@@ -19,5 +19,6 @@
   "17_build_context_notes.js",
   "18_run_setup_and_auto_log.js",
   "19_boss_difficulty_tier_and_gym_skills.js",
+  "20_intelligent_team_generator.js",
   "99_runner.js"
 ]

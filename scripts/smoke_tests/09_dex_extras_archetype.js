@@ -238,8 +238,8 @@ async function section09() {
   if (buildBtn) {
     buildBtn.click();
     await wait(30);
-    check("clicar sem Ritmo/Clima escolhido dá uma mensagem construtiva pedindo pra escolher um eixo primeiro",
-      document.getElementById("archetype-status").textContent.indexOf("Ritmo ou Clima") !== -1,
+    check("clicar sem Ritmo/Clima/Monotype escolhido dá uma mensagem construtiva pedindo pra escolher um eixo primeiro",
+      document.getElementById("archetype-status").textContent.indexOf("Ritmo, Clima ou Monotype") !== -1,
       document.getElementById("archetype-status").textContent);
   }
 
