@@ -157,5 +157,19 @@
     // usuário. A ausência dela não é motivo de rejeição - uma build
     // válida sem justificativa ainda assim é salva.
     var rationale = typeof raw.rationale === "string" ? raw.rationale.trim().slice(0, 280) : "";
+    // Corte de EV desperdiçado, direto na build que a IA propõe (pedido do
+    // usuário, 2026-09-18: "esse negócio do ev aí devia estar na calculadora
+    // do montador de build", em vez de só um aviso depois em "Meu build").
+    // trimAndReallocateEvs (src/regras/calc_stat.js) tira o EV que não muda
+    // stat nenhum no nível/nature/item atual - mecânica vanilla desde o Gen
+    // 3, ver hpEvEfficiencyNote/evBreakpointNote - e reinveste o que sobrar
+    // no(s) stat(s) que a própria build já mais investiu, sempre dentro do
+    // mesmo orçamento de 510. Roda por ÚLTIMO, DEPOIS de toda checagem de
+    // coerência acima (achado real ao testar: reinvestir a sobra pode
+    // empurrar HP+Def+SpD de <=12 pra >12, tirando a build da classificação
+    // "100% ofensiva" e escapando da checagem de Roost-em-build-ofensiva -
+    // a classificação tem que julgar a INTENÇÃO original da IA, só o número
+    // final salvo é otimizado).
+    evs = trimAndReallocateEvs(sp, evs, getCurrentCap() || 50, raw.nature, item);
     return { ability: raw.ability, nature: raw.nature, item: item, moves: raw.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: evs, rationale: rationale };
   }

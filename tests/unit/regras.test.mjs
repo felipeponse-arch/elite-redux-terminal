@@ -189,3 +189,105 @@ test("build por IA precisa usar a sinergia ativa quando a espécie tem uma", () 
   assert.equal(R.validateAiBuild(f.s, { ...base, moves: f.semSinergia.slice(0, 4) }, motivo), null, "sem golpe potencializado: rejeita");
   assert.match(motivo.txt, /potencializado/);
 });
+
+// ---- calc_stat.js: fórmula de status + breakpoints de EV (2026-09-18,
+// "esse negócio do ev aí devia estar na calculadora do montador de build") ----
+test("calcFinalStat segue a fórmula padrão desde o Gen 3 (HP, nature, monotonia em EV)", () => {
+  const sp = R.SPECIES.find((s) => R.formFamilyOf(s).length === 1);
+  assert.ok(sp, "fixture: qualquer espécie sem forma múltipla");
+  const hpEsperado = Math.floor(((2 * sp.b[0] + 31 + Math.floor(252 / 4)) * 50 / 100) + 50 + 10);
+  assert.equal(R.calcFinalStat(sp.b[0], 31, 252, 50, 0), hpEsperado);
+  // Nature +10%/-10% muda o stat na direção certa (não testa o número exato -
+  // isso já é fórmula fixa - só a direção do efeito).
+  const atkNeutro = R.calcFinalStat(sp.b[1], 31, 100, 50, 1, "");
+  const atkAdamant = R.calcFinalStat(sp.b[1], 31, 100, 50, 1, "Adamant"); // boost em Atk (idx 1)
+  const atkModest = R.calcFinalStat(sp.b[1], 31, 100, 50, 1, "Modest"); // penaliza Atk (idx 1)
+  assert.ok(atkAdamant >= atkNeutro && atkNeutro >= atkModest, "Adamant >= neutro >= Modest em Atk");
+  // Monotonia: EV nunca pode DIMINUIR o stat final.
+  let anterior = -1;
+  for (let ev = 0; ev <= 252; ev += 4) {
+    const v = R.calcFinalStat(sp.b[5], 31, ev, 50, 5);
+    assert.ok(v >= anterior, "EV " + ev + " não pode dar um stat menor que o EV anterior");
+    anterior = v;
+  }
+});
+
+test("minEvSameStat/nextEvBreakpoint: acham o mínimo real e o próximo salto real (cruzado com varredura manual)", () => {
+  const sp = R.SPECIES.find((s) => R.formFamilyOf(s).length === 1);
+  const cap = R.getCurrentCap(); // 18 no estado padrão da suíte (ace/more/milestone 0)
+  assert.ok(cap, "fixture precisa de um level cap real configurado");
+  for (const statIdx of [0, 1, 5]) {
+    const base = sp.b[statIdx];
+    const porEv = [];
+    for (let ev = 0; ev <= 252; ev += 4) porEv.push(R.calcFinalStat(base, 31, ev, cap, statIdx));
+    // minEvSameStat em CADA EV da varredura tem que achar o primeiro índice
+    // com o mesmo valor - a definição exata de "platô" do próprio algoritmo.
+    for (let ev = 0; ev <= 252; ev += 4) {
+      const alvo = porEv[ev / 4];
+      const minimoEsperado = 4 * porEv.findIndex((v) => v === alvo);
+      assert.equal(R.minEvSameStat(base, 31, ev, cap, statIdx), minimoEsperado, "stat " + statIdx + " EV " + ev);
+    }
+    // nextEvBreakpoint a partir de um EV qualquer tem que achar o primeiro
+    // EV maior cujo valor É DIFERENTE - ou null se não existir nenhum.
+    for (let ev = 0; ev <= 252; ev += 4) {
+      const alvo = porEv[ev / 4];
+      let esperado = null;
+      for (let e2 = ev + 4; e2 <= 252; e2 += 4) {
+        if (porEv[e2 / 4] !== alvo) { esperado = e2; break; }
+      }
+      assert.equal(R.nextEvBreakpoint(base, 31, ev, cap, statIdx), esperado, "stat " + statIdx + " EV " + ev);
+    }
+  }
+});
+
+test("trimAndReallocateEvs: tira o desperdício e reinveste no stat que a build já mais investiu, sem estourar o total original", () => {
+  const sp = R.SPECIES.find((s) => R.formFamilyOf(s).length === 1);
+  const cap = R.getCurrentCap();
+  const evsOriginais = [4, 252, 0, 0, 0, 252]; // spread "padrão" 252/252/4
+  const ajustado = R.trimAndReallocateEvs(sp, evsOriginais, cap, "", "");
+  const totalOriginal = evsOriginais.reduce((a, v) => a + v, 0);
+  const totalAjustado = ajustado.reduce((a, v) => a + v, 0);
+  assert.ok(totalAjustado <= totalOriginal, "nunca gasta mais EV do que a build original tinha");
+  for (let i = 0; i < 6; i++) assert.ok(ajustado[i] <= 252 && ajustado[i] >= 0, "stat " + i + " dentro de 0..252");
+  // Todo stat ajustado precisa dar EXATAMENTE o mesmo resultado (ou melhor,
+  // se ganhou reforço) que o original - nunca um stat final PIOR.
+  for (let i = 0; i < 6; i++) {
+    const antes = R.calcFinalStat(sp.b[i], 31, evsOriginais[i], cap, i, "", "", sp.n);
+    const depois = R.calcFinalStat(sp.b[i], 31, ajustado[i], cap, i, "", "", sp.n);
+    assert.ok(depois >= antes, "stat " + i + " nunca pode piorar (" + antes + " -> " + depois + ")");
+  }
+  // Nenhum EV do resultado final é, ele mesmo, desperdiçado (ajustado[i] já
+  // é o mínimo do próprio platô em que caiu).
+  for (let i = 0; i < 6; i++) {
+    assert.equal(R.minEvSameStat(sp.b[i], 31, ajustado[i], cap, i, "", "", sp.n), ajustado[i], "stat " + i + " não devia sobrar desperdício no resultado");
+  }
+});
+
+test("validateAiBuild: EVs salvos já saem sem desperdício, mas a classificação ofensiva usa a INTENÇÃO original da IA", () => {
+  const f = fixtureValidacao();
+  const cap = R.getCurrentCap();
+  // Regressão real (achada ao implementar): reinvestir a sobra ANTES da
+  // checagem de coerência podia empurrar HP+Def+SpD de <=12 pra >12,
+  // tirando a build da classificação "100% ofensiva" e deixando passar um
+  // golpe de cura que devia ser rejeitado. evs=[0,252,0,0,4,252] é
+  // exatamente esse caso: 100% ofensivo (bulk=4<=12) segundo a INTENÇÃO
+  // original, mesmo que o resultado final otimizado mude os números.
+  const motivo = {};
+  const comCura = R.validateAiBuild(f.sp, {
+    ability: f.abi, nature: "Jolly", item: "", evs: [0, 252, 0, 0, 4, 252],
+    moves: [...f.dano.slice(0, 3), "Roost"],
+  }, motivo);
+  assert.equal(comCura, null, "build 100% ofensiva com Roost continua rejeitada mesmo depois da otimização de EV");
+  assert.match(motivo.txt, /Roost.*cura|ofensiva/);
+
+  const valida = R.validateAiBuild(f.sp, {
+    ability: f.abi, nature: "Jolly", item: "", evs: [4, 252, 0, 0, 0, 252],
+    moves: f.dano.slice(0, 4),
+  });
+  assert.ok(valida, f.sp.n);
+  for (let i = 0; i < 6; i++) {
+    assert.equal(R.minEvSameStat(f.sp.b[i], 31, valida.evs[i], cap, i, valida.nature, valida.item, f.sp.n), valida.evs[i],
+      "stat " + i + " da build salva não devia ter desperdício (" + valida.evs.join("/") + ")");
+  }
+  assert.ok(valida.evs.reduce((a, v) => a + v, 0) <= 510);
+});

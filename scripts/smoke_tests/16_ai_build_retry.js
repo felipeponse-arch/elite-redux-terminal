@@ -60,6 +60,19 @@ async function section16() {
   check("a build da segunda tentativa é salva sem o jogador pedir de novo",
     salvo.some(function (b) { return b.source === "ia" && b.rationale === "teste retry"; }), JSON.stringify(salvo).slice(0, 200));
 
+  // ---- EV já sai otimizado da build por IA (2026-09-18, "esse negócio do
+  // ev aí devia estar na calculadora do montador de build") - validateAiBuild
+  // já corta desperdício de breakpoint antes de salvar; confere que a build
+  // de verdade salva no passo acima não tem nenhum EV desperdiçado. ----
+  var buildSalva = salvo.filter(function (b) { return b.source === "ia" && b.rationale === "teste retry"; })[0];
+  if (achou("build da tentativa 2 está mesmo salva, pra checar os EVs", buildSalva)) {
+    var semDesperdicio = buildSalva.evs.every(function (ev, i) {
+      return T.minEvSameStat(fx.sp.b[i], 31, ev, cap || 50, i, buildSalva.nature, buildSalva.item, fx.sp.n) === ev;
+    });
+    check("os EVs da build por IA já saem sem desperdício de breakpoint (corrigido em validateAiBuild, não só avisado depois)",
+      semDesperdicio, buildSalva.evs.join("/") + " no nível " + (cap || 50));
+  }
+
   // ---- S3: texto de fonte externa vai como dado, não como instrução ----
   var prompt0 = p1[0] || "";
   // O aviso cita as tags por escrito; o bloco de verdade fica em linha própria.
