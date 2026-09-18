@@ -19,6 +19,14 @@ Checa:
      - o app manda essas descricoes pra IA dentro de <dados_do_jogo>, e um
      texto com esses caracteres poderia imitar o delimitador (item S3).
      Nomes ficam de fora: existe habilidade chamada "3 > 1".
+  7. data/species_rank.json e data/species_role.json tem exatamente uma
+     entrada por especie de dex_compact.json, nem mais nem menos (achado em
+     auditoria, 2026-09-18: os dois so sao regenerados no branch "extracao
+     completa" de build.ps1 - o hook de pre-commit roda com -SkipExtract por
+     padrao, entao editar dex_compact.json a mao sem rebuild completo nunca
+     era pego por nada. species_rank e percentil sobre a populacao inteira -
+     um arquivo desatualizado distorce o percentil de TODA especie, nao so
+     a que mudou).
 
 Literais em ASCII (PowerShell 5.1 le .ps1 sem BOM na codepage do sistema).
 #>
@@ -120,9 +128,19 @@ foreach ($f in @("move_translations_pt.json", "ability_translations_pt.json", "i
 }
 foreach ($d in $descricoes) { if ($d[1] -match "[<>]") { Erro "descricao externa com < ou > ($($d[0])) - poderia imitar o delimitador do prompt da IA" } }
 
+# 7. species_rank/species_role sincronizados 1:1 com as especies reais
+$rank = Load "species_rank.json"
+$role = Load "species_role.json"
+foreach ($sn in $speciesBySname.Keys) {
+    if (-not $rank.ContainsKey($sn)) { Erro "species_rank.json: falta a especie $sn (existe em dex_compact.json)" }
+    if (-not $role.ContainsKey($sn)) { Erro "species_role.json: falta a especie $sn (existe em dex_compact.json)" }
+}
+foreach ($sn in $rank.Keys) { if (-not $speciesBySname.ContainsKey($sn)) { Erro "species_rank.json: cita $sn, que nao existe (mais) em dex_compact.json" } }
+foreach ($sn in $role.Keys) { if (-not $speciesBySname.ContainsKey($sn)) { Erro "species_role.json: cita $sn, que nao existe (mais) em dex_compact.json" } }
+
 if ($erros.Count) {
     Write-Output "validate_data_invariants.ps1: $($erros.Count) problema(s):"
     $erros | Select-Object -First 30 | ForEach-Object { Write-Output "  - $_" }
     throw "Invariantes de dados quebradas - build abortado."
 }
-Write-Output ("validate_data_invariants.ps1: OK (" + $descricoes.Count + " descricoes externas sem < ou >, " + $statusIds.Count + " golpes de status com papel, " + $megaForms.Count + " pedras mega validas, " + $synergy.Count + " especies com sinergia; " + $megaSemPedra + " formas mega/primal sem pedra conhecida - regra de pedra nao se aplica a elas; " + $destinoAusenteNaFonte + " evolucoes cuja forma de destino nao existe na fonte)")
+Write-Output ("validate_data_invariants.ps1: OK (" + $descricoes.Count + " descricoes externas sem < ou >, " + $statusIds.Count + " golpes de status com papel, " + $megaForms.Count + " pedras mega validas, " + $synergy.Count + " especies com sinergia; " + $megaSemPedra + " formas mega/primal sem pedra conhecida - regra de pedra nao se aplica a elas; " + $destinoAusenteNaFonte + " evolucoes cuja forma de destino nao existe na fonte; species_rank/species_role sincronizados 1:1 com " + $speciesBySname.Count + " especies)")

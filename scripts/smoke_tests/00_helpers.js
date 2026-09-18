@@ -39,6 +39,15 @@ async function pollUntil(fn, timeoutMs) {
   }
   return !!fn();
 }
+// CONVENÇÃO (achado em auditoria, 2026-09-18): várias seções escritas DEPOIS
+// de pollUntil() já existir (11-13, 17-19, 21-23) voltaram a usar só
+// wait(ms) fixo depois de um evento que muda o DOM - exatamente a classe de
+// bug que motivou criar pollUntil() em primeiro lugar. Nenhuma reescrita em
+// massa agora (as seções existentes passam de forma estável, sem flake
+// observado) - mas toda seção NOVA que espera um efeito de evento
+// DOM-mutating (persist()/re-render/chamada assíncrona) deve usar
+// pollUntil(), não wait() fixo. wait() continua certo só pra uma pausa sem
+// condição nenhuma pra checar (ex: dar tempo de um debounce vencer).
 // Reorganização em blocos colapsáveis (<details>), Fase 2, 2026-09-11:
 // "Golpes"/"Anotações e builds de referência"/"Comparar" ficam FECHADOS
 // por padrão (decisão da equipe - só "Auto Build" abre sozinho; "Conhecer

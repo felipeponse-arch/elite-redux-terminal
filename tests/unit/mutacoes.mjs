@@ -76,4 +76,32 @@ export const MUTACOES = [
     de: "if (evSum > 510) {",
     para: "if (false) {",
   },
+  {
+    id: "hp-sem-nivel",
+    descricao: "fórmula de HP ignora o nível (calcFinalStat)",
+    arquivo: "calc_stat.js",
+    de: "return Math.floor(((2 * base + iv + Math.floor(ev / 4)) * level / 100) + level + 10);",
+    para: "return Math.floor(((2 * base + iv + Math.floor(ev / 4)) * level / 100) + 10);",
+  },
+  {
+    id: "breakpoint-pula-zero",
+    descricao: "minEvSameStat nunca considera EV 0 como o mínimo",
+    arquivo: "calc_stat.js",
+    de: "for (var e = 0; e < evAtual; e += 4) {",
+    para: "for (var e = 4; e < evAtual; e += 4) {",
+  },
+  {
+    id: "proximo-breakpoint-perde-252",
+    descricao: "nextEvBreakpoint nunca considera EV 252 como próximo salto",
+    arquivo: "calc_stat.js",
+    de: "for (var e = evAtual + 4; e <= 252; e += 4) {",
+    para: "for (var e = evAtual + 4; e < 252; e += 4) {",
+  },
+  {
+    id: "realocacao-prioridade-invertida",
+    descricao: "trimAndReallocateEvs reinveste a sobra no stat MENOS investido, não no mais",
+    arquivo: "calc_stat.js",
+    de: "return evs[b] - evs[a] || a - b;",
+    para: "return evs[a] - evs[b] || a - b;",
+  },
 ];

@@ -183,13 +183,22 @@
   // estoura 252 por stat nem o total original (só redistribui o que já era
   // orçamento da própria build) - sempre assume IV 31 (mesma convenção de
   // toda build por IA neste app).
+  // Extraída em função própria (achado em auditoria, 2026-09-18): antes era
+  // uma expressão anônima dentro de trimAndReallocateEvs - impossível de
+  // testar sozinha, então um teste de unidade que só olhasse o RESULTADO
+  // final não pegava com confiança uma ordem de prioridade invertida (a
+  // sobra às vezes acaba no mesmo lugar por coincidência de custo de
+  // breakpoint). Maior EV original primeiro (empate: menor índice primeiro).
+  function priorityOrderForEvs(evs) {
+    return [0, 1, 2, 3, 4, 5].sort(function (a, b) { return evs[b] - evs[a] || a - b; });
+  }
   function trimAndReallocateEvs(sp, evs, level, natureName, itemName) {
     var ajustado = evs.map(function (v, i) {
       return minEvSameStat(sp.b[i], 31, v, level, i, natureName, itemName, sp.n);
     });
     var liberado = evs.reduce(function (acc, v, i) { return acc + (v - ajustado[i]); }, 0);
     if (liberado <= 0) return ajustado;
-    var ordem = [0, 1, 2, 3, 4, 5].sort(function (a, b) { return evs[b] - evs[a] || a - b; });
+    var ordem = priorityOrderForEvs(evs);
     for (var k = 0; k < ordem.length && liberado > 0; k++) {
       var i = ordem[k];
       while (liberado > 0) {

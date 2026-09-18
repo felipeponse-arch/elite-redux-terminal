@@ -90,16 +90,19 @@ async function section18() {
   var expectedScarf = T.calcFinalStat(fastest.base, 31, 252, stResult.level, 5, "Jolly", "Choice Scarf", fastest.sp.n);
   check("'+ Choice Scarf' empilha 1.5x em cima do investido (não é o mesmo número)",
     fastest.scarf === expectedScarf && fastest.scarf > fastest.invested, { scarf: fastest.scarf, invested: fastest.invested });
+  // debounce de 80ms adicionado em auditoria (2026-09-18) - pollUntil em
+  // vez de wait(ms) fixo, exatamente a convenção documentada no mesmo dia
+  // (00_helpers.js), pra não travar num número mágico maior que o debounce.
   var stSearch = document.getElementById("speedtier-search");
   stSearch.value = "Ninjask";
   stSearch.dispatchEvent(new Event("input", { bubbles: true }));
-  await wait(30);
+  await pollUntil(function () { return document.querySelectorAll("#speedtier-table tbody tr").length <= 1; }, 500);
   var filteredRows = document.querySelectorAll("#speedtier-table tbody tr");
   check("busca da tabela de Speed tiers filtra por nome (1 resultado pra 'Ninjask')",
     filteredRows.length === 1 && filteredRows[0].textContent.indexOf("Ninjask") !== -1, filteredRows.length);
   stSearch.value = "";
   stSearch.dispatchEvent(new Event("input", { bubbles: true }));
-  await wait(30);
+  await pollUntil(function () { return document.querySelectorAll("#speedtier-table tbody tr").length > 1; }, 500);
 
   // ---- Glossário de papéis (referência do Smogon "SV OU Role
   // Compendium") - os 4 papéis reais já calculados por

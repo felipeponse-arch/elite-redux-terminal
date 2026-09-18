@@ -1864,7 +1864,7 @@
              nunca um número novo inventado. -->
         <h3 class="section-title" style="margin-top:26px;margin-bottom:8px;">Speed tiers</h3>
         <p class="hint" id="speedtier-note"></p>
-        <div class="search-row" style="padding:0 0 10px;"><input type="text" id="speedtier-search" placeholder="Buscar por nome..."></div>
+        <div class="search-row" style="padding:0 0 10px;"><input type="search" id="speedtier-search" placeholder="Buscar por nome..." aria-label="Buscar Pokémon por nome"></div>
         <div class="scroll-x"><table id="speedtier-table" class="cov-table speedtier-table"></table></div>
         <p class="hint" id="speedtier-empty" hidden>Nenhum Pokémon encontrado.</p>
 
@@ -3801,6 +3801,18 @@
     var x = parseInt(el.dataset.x, 10);
     if (!isNaN(x)) goToDexSpecies(x);
   });
+  // Teclado (achado real em auditoria, 2026-09-18): .goto-species sempre foi
+  // só clicável - agora leva tabindex="0" role="button" em todo lugar onde
+  // aparece (mesma classe, ~15 pontos diferentes), e este listener cobre
+  // todos eles de uma vez, do mesmo jeito que o de clique já cobre.
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var el = e.target.closest && e.target.closest(".goto-species");
+    if (!el) return;
+    e.preventDefault();
+    var x = parseInt(el.dataset.x, 10);
+    if (!isNaN(x)) goToDexSpecies(x);
+  });
 
   function selectSpecies(x) {
     // Only reset scroll when the species actually CHANGES - selectSpecies()
@@ -3843,11 +3855,11 @@
       // Waypoint da trilha (redesign 2026-09-18) - mesma linguagem visual do
       // Progresso: nó atual com anel de destaque, conector tracejado com
       // seta no lugar da flechinha de texto solta.
-      var nodes = ['<div class="evo-node evo-node-current goto-species" data-x="' + sp.x + '">' + spriteImgHtml(sp.x, sp.n, 26) + escapeHtml(sp.n) + '</div>'];
+      var nodes = ['<div class="evo-node evo-node-current goto-species" tabindex="0" role="button" data-x="' + sp.x + '">' + spriteImgHtml(sp.x, sp.n, 26) + escapeHtml(sp.n) + '</div>'];
       sp.ev.forEach(function (ev) {
         var target = getSpeciesByX(ev[2]);
         nodes.push('<span class="evo-arrow"><span class="evo-arrow-line"></span><small>' + evoConditionText(ev) + '</small></span>');
-        nodes.push('<div class="evo-node' + (target ? ' goto-species" data-x="' + target.x : '') + '">' + (target ? spriteImgHtml(target.x, target.n, 26) : "") + escapeHtml(target ? target.n : "?") + '</div>');
+        nodes.push('<div class="evo-node' + (target ? ' goto-species" tabindex="0" role="button" data-x="' + target.x : '') + '">' + (target ? spriteImgHtml(target.x, target.n, 26) : "") + escapeHtml(target ? target.n : "?") + '</div>');
       });
       evoHtml = '<div class="card"><h3>Linha evolutiva</h3><div class="evo-chain">' + nodes.join("") + '</div></div>';
     }
@@ -3865,7 +3877,7 @@
     if (sp.frm && sp.frm.length) {
       var frmNodes = sp.frm.map(function (fx) {
         var f = getSpeciesByX(fx);
-        return f ? '<div class="evo-node goto-species" data-x="' + f.x + '">' + spriteImgHtml(f.x, f.n, 26) + escapeHtml(f.n) + '</div>' : "";
+        return f ? '<div class="evo-node goto-species" tabindex="0" role="button" data-x="' + f.x + '">' + spriteImgHtml(f.x, f.n, 26) + escapeHtml(f.n) + '</div>' : "";
       }).join("");
       if (frmNodes) frmHtml = '<div class="card"><h3>Formas alternativas</h3><div class="evo-chain">' + frmNodes + '</div></div>';
     }
@@ -4146,10 +4158,10 @@
       var usageHtml = roleTagsHtml(selectedSp.sname);
       detailHtml = '<div class="pcbox-detail">' +
         '<div class="pcbox-detail-top">' +
-          '<span class="pcbox-detail-sprite goto-species" data-x="' + selectedSp.x + '" title="Ver na Dex">' + spriteImgHtml(selectedSp.x, selectedSp.n, 44) + '</span>' +
+          '<span class="pcbox-detail-sprite goto-species" tabindex="0" role="button" data-x="' + selectedSp.x + '" title="Ver na Dex">' + spriteImgHtml(selectedSp.x, selectedSp.n, 44) + '</span>' +
           '<div class="pcbox-detail-identity">' +
             '<div class="pcbox-detail-name-row">' +
-              '<span class="pcbox-detail-name goto-species" data-x="' + selectedSp.x + '" title="Ver na Dex">' + escapeHtml(selectedSp.n) + '</span>' +
+              '<span class="pcbox-detail-name goto-species" tabindex="0" role="button" data-x="' + selectedSp.x + '" title="Ver na Dex">' + escapeHtml(selectedSp.n) + '</span>' +
               rankBadgeHtml(selectedSp.sname) +
             '</div>' +
             '<div class="pcbox-detail-types">' + names.map(typePip).join("") + '</div>' +
@@ -4409,12 +4421,29 @@
     return '<div class="ts-build-note">No nível ' + level + ', os saltos de EV ficam mais espaçados que no nível 100 (cada ponto de stat pode custar mais de 4 EV - regra vanilla, não é bug daqui): ' +
       partes + '. ' + totalSobra + ' EV no total dá pra realocar sem perder nada nesses stats.</div>';
   }
+  // Junta as duas notas de EV num só lugar (achado em auditoria, 2026-09-18:
+  // a cadeia hpEvEfficiencyNote(...) + evBreakpointNote(...) era escrita à
+  // mão duas vezes - "Meu build" e "Estratégias" - com a forma do array de
+  // IV montada separadamente em cada uma, já tendo divergido uma vez sem
+  // ninguém notar). Um lugar só decide quais notas de EV aparecem; os dois
+  // chamadores só passam os dados de verdade da build.
+  function buildEvNotesHtml(sp, ivs, evs, level, nature, item) {
+    return hpEvEfficiencyNote(sp, evs[0], item, level) + evBreakpointNote(sp, ivs, evs, level, nature, item);
+  }
   // Observações de contexto numa build (itens P2 e P3 da pauta técnica,
   // 2026-09-16), só informativas - nunca bloqueiam nem escondem a build:
   //   - golpe aprendido só por nível ACIMA do level cap atual (as builds do
   //     Discord são afinadas pro fim de jogo; 36 delas usam golpe acima do
   //     nível 55). Golpe de tutor nunca conta como acima do cap;
   //   - golpe que só funciona em batalha dupla, num app pensado pra 1x1.
+  // Wrapper único pra nota de build (achado em auditoria, 2026-09-18): o
+  // mesmo `'<div class="ts-build-note">' + texto + '</div>'` era escrito à
+  // mão em 5 lugares diferentes. Texto vazio/falsy devolve "" - cada
+  // chamador continua decidindo SE mostra a nota, este helper só decide
+  // COMO ela vira HTML.
+  function buildNoteHtml(texto) {
+    return texto ? '<div class="ts-build-note">' + texto + '</div>' : "";
+  }
   function buildContextNotesHtml(sp, build) {
     if (!sp || !build || !Array.isArray(build.moves)) return "";
     var cap = getCurrentCap();
@@ -4434,15 +4463,15 @@
     var dupla = build.moves.filter(function (m) { return moveRoleOf(m) === "dupla"; });
     if (build.formato === "dupla") notas.push("A fonte descreve este set como pensado pra batalha dupla.");
     if (dupla.length) notas.push("Só funciona em batalha dupla: " + dupla.map(escapeHtml).join(", ") + ".");
-    return notas.map(function (n) { return '<div class="ts-build-note">' + n + '</div>'; }).join("");
+    return notas.map(buildNoteHtml).join("");
   }
   function megaModeBuildNoteHtml(sp, build) {
     var rule = megaStoneRuleFor(sp);
     if (!rule || !build || rule.stones.indexOf(build.item) !== -1) return "";
-    return '<div class="ts-build-note">Mega temporária: a ' + escapeHtml(sp.n) + ' precisa segurar ' +
+    return buildNoteHtml('Mega temporária: a ' + escapeHtml(sp.n) + ' precisa segurar ' +
       escapeHtml(rule.stones.join(" ou ")) + ' o tempo todo, então ' +
       (build.item ? escapeHtml(build.item) + ' só funciona' : 'esta build só funciona') +
-      ' no modo permanente. Troque o modo em Progresso se for o seu caso.</div>';
+      ' no modo permanente. Troque o modo em Progresso se for o seu caso.');
   }
   function buildEntryHtml(sp, entry, metaHtml, copyAttrs) {
     return '<div class="bh-entry">' +
@@ -4453,7 +4482,7 @@
       megaModeBuildNoteHtml(sp, entry) +
       buildContextNotesHtml(sp, entry) +
       buildSynergyHtml(sp, entry) +
-      (entry.note ? '<div class="ts-build-note">' + escapeHtml(entry.note) + '</div>' : '') +
+      buildNoteHtml(entry.note && escapeHtml(entry.note)) +
       '<button class="text-action-btn use-entry-build-btn" ' + copyAttrs + ' type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
     '</div>';
   }
@@ -4693,8 +4722,7 @@
       return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> (' + escapeHtml(typeName) + ') poder base <span class="mono">' + base + '</span>' + buffLabel + accLabel + '</div>';
     }).join("");
 
-    out.innerHTML = itemDescHtml(item) + statsHtml + hpEvEfficiencyNote(sp, evs[0], item, level) +
-      evBreakpointNote(sp, ivs, evs, level, nature, item) +
+    out.innerHTML = itemDescHtml(item) + statsHtml + buildEvNotesHtml(sp, ivs, evs, level, nature, item) +
       (movesHtml ? '<div class="mybuild-moves-power">' + movesHtml + '</div>' : "");
   }
 
@@ -4722,10 +4750,9 @@
         itemDescHtml(set.item) +
         megaModeBuildNoteHtml(sp, set) +
         buildContextNotesHtml(sp, set) +
-        hpEvEfficiencyNote(sp, set.evs[0], set.item, strategyLevel) +
-        evBreakpointNote(sp, [31, 31, 31, 31, 31, 31], set.evs, strategyLevel, set.nature, set.item) +
+        buildEvNotesHtml(sp, [31, 31, 31, 31, 31, 31], set.evs, strategyLevel, set.nature, set.item) +
         buildSynergyHtml(sp, set) +
-        (set.rationale ? '<div class="ts-build-note">' + escapeHtml(set.rationale) + '</div>' : "") +
+        buildNoteHtml(set.rationale && escapeHtml(set.rationale)) +
         '<button class="text-action-btn strategy-set-use" data-idx="' + idx + '" type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
       '</div>';
     }).join("") : "";
@@ -5416,6 +5443,19 @@
     var movepoolLines = availableMovesFor(sp).ids.map(movePromptLine);
     var megaNames = megaFormsOf(sp).map(function (m) { return m.n; });
     var megaStoneRule = megaStoneRuleFor(sp);
+    // Achado em auditoria, 2026-09-18: "Estratégias" gerava sets sem NUNCA
+    // olhar se já existe um build curado real (data/builds.json) pra esta
+    // espécie - risco de redundância (ou pior, contradição) com um set que
+    // já foi verificado por um jogador de verdade. Só avisa e pede
+    // diferenciação - nunca bloqueia nem repete a regra "dura" de
+    // validateAiBuild (a mesma assimetria de sempre: builds curadas têm
+    // gente real respondendo por elas, "Estratégias" não pode se impor).
+    var curado = BUILDS[sp.sname];
+    var curadoPromptLine = curado
+      ? ("Já existe um build CURADO real (verificado pela comunidade, fonte: " + curado.fonte + ") pra " + sp.n +
+         ": habilidade " + curado.ability + ", item " + (curado.item || "nenhum") + ", golpes " + curado.moves.join("/") +
+         ". Os sets que você montar aqui devem ser DIFERENTES desse - não repita a mesma combinação de papel.\n")
+      : "";
     var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon). " + PROMPT_DADOS_AVISO + " " +
       "Monte de 2 a 3 sets competitivos DISTINTOS (formato Pokemon Showdown), estilo dex do Smogon, para o Pokemon " +
       sp.n + " (build " + (DATA.meta ? DATA.meta.version : "?") + "). Cada set precisa ter um PAPEL real e diferente " +
@@ -5433,6 +5473,7 @@
       (megaStoneRule ? (megaStoneRule.prompt + "\n") : "") +
       "Itens de batalha reais disponiveis - cada set escolhe UM destes (ou deixa vazio): " + AI_ITEM_POOL.join(", ") + "\n" +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
+      curadoPromptLine +
       "Antes de responder, use getSpeciesRank e getAbilityMovepoolSynergy pra fundamentar os papeis escolhidos - " +
       "se getAbilityMovepoolSynergy retornar sinergia real, PELO MENOS UM dos sets precisa usar um golpe dela com " +
       "a habilidade que ativa a sinergia (innate conta sempre).\n" +
@@ -5710,7 +5751,7 @@
     var others = formFamilyOf(sp).filter(function (f) { return f.x !== sp.x; });
     if (!others.length) return "";
     return '<br><b>' + (others.length > 1 ? 'Outras formas' : 'Outra forma') + ':</b> ' + others.map(function (f) {
-      return '<span class="goto-species" data-x="' + f.x + '">' + escapeHtml(f.n) + '</span>';
+      return '<span class="goto-species" tabindex="0" role="button" data-x="' + f.x + '">' + escapeHtml(f.n) + '</span>';
     }).join(", ");
   }
 
@@ -5737,7 +5778,7 @@
             megaModeBuildNoteHtml(sp, build) +
             buildContextNotesHtml(sp, build) +
             buildSynergyHtml(sp, build) +
-            (build.note ? '<div class="ts-build-note">' + escapeHtml(build.note) + '</div>' : '') +
+            buildNoteHtml(build.note && escapeHtml(build.note)) +
           '</div>'
         ) : (
           // Achado real do usuário, 2026-09-13: "não achei o botão de criar
@@ -5755,7 +5796,7 @@
         );
         var swapOpen = teamSwapIdx === i;
         slots.push('<div class="team-slot' + (swapOpen ? ' swapping' : '') + '"><div>' +
-          '<div class="ts-head goto-species" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 40) +
+          '<div class="ts-head goto-species" tabindex="0" role="button" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 40) +
           '<div><div class="ts-name">' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + '</div>' +
           '<div class="ts-types">' + names.map(function (n) { return typePill(n, true); }).join("") + '</div></div></div>' +
           '<div class="ts-abis"><b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + otherFormsHtml(sp) + '</div>' +
@@ -5914,7 +5955,7 @@
         cards.push('<div class="saved-team-card">' +
           nameHtml +
           '<div class="stc-sprites">' + members.map(function (sp) {
-            return '<span class="goto-species" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 32) + '</span>';
+            return '<span class="goto-species" tabindex="0" role="button" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 32) + '</span>';
           }).join("") + '</div>' +
           '<div class="stc-actions">' +
             (savedTeamEditingIdx === i
@@ -6264,8 +6305,8 @@
       });
       if (worstTeam && bestBox && bestBox.score - worstTeam.score >= 15) {
         items += '<div class="dash-item dash-suggestion"><span class="dash-label">Sugestão</span><span class="dash-value">' +
-          '<span class="goto-species" data-x="' + bestBox.sp.x + '">' + escapeHtml(bestBox.sp.n) + '</span>' + megaOfNote(bestBox) + ' (' + bestBox.tier + ') na caixa rende mais que ' +
-          '<span class="goto-species" data-x="' + worstTeam.sp.x + '">' + escapeHtml(worstTeam.sp.n) + '</span> (' + worstTeam.tier + ') no time</span></div>';
+          '<span class="goto-species" tabindex="0" role="button" data-x="' + bestBox.sp.x + '">' + escapeHtml(bestBox.sp.n) + '</span>' + megaOfNote(bestBox) + ' (' + bestBox.tier + ') na caixa rende mais que ' +
+          '<span class="goto-species" tabindex="0" role="button" data-x="' + worstTeam.sp.x + '">' + escapeHtml(worstTeam.sp.n) + '</span> (' + worstTeam.tier + ') no time</span></div>';
       }
     }
 
@@ -6279,13 +6320,13 @@
       if (boxSuggestion) {
         var reasonText = boxSuggestion.reasonMult === 0 ? "imune a " + boxSuggestion.reasonType : "resiste bem a " + boxSuggestion.reasonType;
         items += '<div class="dash-item dash-suggestion dash-suggestion-boss"><span class="dash-label">Próxima luta</span><span class="dash-value">' +
-          escapeHtml(nextBoss.name) + ': <span class="goto-species" data-x="' + boxSuggestion.sp.x + '">' + escapeHtml(boxSuggestion.sp.n) + '</span>' + megaOfNote(boxSuggestion) + ' na caixa ' + reasonText + '</span></div>';
+          escapeHtml(nextBoss.name) + ': <span class="goto-species" tabindex="0" role="button" data-x="' + boxSuggestion.sp.x + '">' + escapeHtml(boxSuggestion.sp.n) + '</span>' + megaOfNote(boxSuggestion) + ' na caixa ' + reasonText + '</span></div>';
       }
       var speed = bossSpeedSummary(nextBoss, teamMembers);
       if (speed) {
         items += '<div class="dash-item dash-speed"><span class="dash-label">Velocidade</span><span class="dash-value">' +
           '<span class="mono">' + speed.faster + '/' + speed.total + '</span> do time de ' + escapeHtml(nextBoss.name) + ' têm Velocidade base maior que ' +
-          '<span class="goto-species" data-x="' + speed.fastest.x + '">' + escapeHtml(speed.fastest.n) + '</span> (<span class="mono">' + speed.fastest.b[5] + '</span>), seu mais rápido' +
+          '<span class="goto-species" tabindex="0" role="button" data-x="' + speed.fastest.x + '">' + escapeHtml(speed.fastest.n) + '</span> (<span class="mono">' + speed.fastest.b[5] + '</span>), seu mais rápido' +
           (speed.tied ? ' (' + speed.tied + ' empatado' + (speed.tied > 1 ? 's' : '') + ')' : '') +
           '. <span class="dash-caveat">Só base: nível, EVs, nature, item e habilidade mudam a ordem.</span></span></div>';
       }
@@ -6588,7 +6629,30 @@
       var raw = await sample.json(prompt, { tools: buildStandardAiTools() });
       if (!raw || typeof raw !== "object") return null;
       var pick = function (k) { return (typeof raw[k] === "string") ? raw[k].slice(0, 500) : ""; };
-      return { concept: pick("concept"), opening: pick("opening"), development: pick("development"), winCondition: pick("winCondition"), threats: pick("threats") };
+      var guide = { concept: pick("concept"), opening: pick("opening"), development: pick("development"), winCondition: pick("winCondition"), threats: pick("threats") };
+      // Confere se "threats" citou mesmo um chefão/líder real (achado em
+      // auditoria, 2026-09-18): o prompt já EXIGIA isso, mas a resposta
+      // nunca era checada contra o getRemainingBosses de verdade - mesma
+      // disciplina de validateAiBuild (nunca confiar cegamente numa
+      // alegação da IA). 1 nova tentativa, só do campo threats (mais barato
+      // que refazer o guia inteiro) - mesmo espírito de generateBuildWithAI.
+      var remainingNames = aiTool_getRemainingBosses().remainingBossNames;
+      if (remainingNames.length && !remainingNames.some(function (n) { return guide.threats.indexOf(n) !== -1; })) {
+        try {
+          var raw2 = await sample.json(
+            "Você escreveu um guia de uso pra este time do Pokemon Elite Redux, mas o campo 'threats' não citou " +
+            "nenhum chefão/líder real da lista abaixo, e a regra que você recebeu exigia isso.\n" +
+            "Chefões/líderes que ainda faltam enfrentar: " + remainingNames.join(", ") + "\n" +
+            "Time:\n" + teamList + "\n" +
+            "Reescreva SÓ o campo threats (2-3 frases, português): cite pelo menos um desses nomes exatos, diga " +
+            "qual integrante do time segura ele e por quê (tipo, golpe ou stat real dele). " +
+            "Responda SOMENTE com {\"threats\":\"...\"}, sem texto ao redor.",
+            { tools: buildStandardAiTools() }
+          );
+          if (raw2 && typeof raw2.threats === "string") guide.threats = raw2.threats.slice(0, 500);
+        } catch (e2) { /* tentativa extra falhou - fica com o threats original, mesmo sem citação confirmada */ }
+      }
+      return guide;
     } catch (e) {
       if (statusEl) statusEl.textContent = sampleErrorMessage(e);
       return null;
@@ -7017,7 +7081,7 @@
         abiHtml = '<div class="bm-row"><b>Habilidade:</b> ' + escapeHtml(m.abi || "?") + '</div>';
       }
       return '<div class="boss-mon-card">' +
-        '<div class="bm-head goto-species" data-x="' + displayX + '" title="Ver na Dex">' + spriteImgHtml(displayX, displayName, 36) +
+        '<div class="bm-head goto-species" tabindex="0" role="button" data-x="' + displayX + '" title="Ver na Dex">' + spriteImgHtml(displayX, displayName, 36) +
         '<div><div class="bm-name">' + escapeHtml(displayName) + '</div>' +
         '<div class="bm-types">' + typesHtml + '</div></div></div>' +
         transformNote +
@@ -7326,7 +7390,7 @@
     var body = result.rows.map(function (r, idx) {
       return '<tr>' +
         '<td class="rowhead"><span class="speedtier-name-cell"><span class="speedtier-rank mono">' + (idx + 1) + '</span>' + spriteImgHtml(r.sp.x, r.sp.n, 24) +
-          '<span class="goto-species" data-x="' + r.sp.x + '">' + escapeHtml(r.sp.n) + '</span></span></td>' +
+          '<span class="goto-species" tabindex="0" role="button" data-x="' + r.sp.x + '">' + escapeHtml(r.sp.n) + '</span></span></td>' +
         '<td class="mono">' + r.base + '</td>' +
         '<td class="mono">' + r.neutral + '</td>' +
         '<td class="mono speedtier-invested">' + r.invested + '</td>' +
@@ -7341,7 +7405,11 @@
   function wireSpeedTiersOnce() {
     if (speedTierWired) return;
     speedTierWired = true;
-    document.getElementById("speedtier-search").addEventListener("input", renderSpeedTiers);
+    // debounce (mesmo padrão e mesmo valor da busca da Dex, linha ~3181) -
+    // achado real em auditoria, 2026-09-18: renderSpeedTiers reconstrói a
+    // tabela inteira (até 1906 linhas) a cada tecla; medido ao vivo em
+    // ~40ms sem filtro, ~2,5 frames de trabalho síncrono por tecla.
+    document.getElementById("speedtier-search").addEventListener("input", debounce(renderSpeedTiers, 80));
   }
 
   // ---------------- Role compendium ----------------
@@ -7378,7 +7446,7 @@
     var groups = computeRoleCompendium();
     document.getElementById("role-compendium").innerHTML = groups.map(function (g) {
       var chips = g.examples.map(function (m) {
-        return '<span class="role-chip goto-species" data-x="' + m.sp.x + '">' + spriteImgHtml(m.sp.x, m.sp.n, 24) +
+        return '<span class="role-chip goto-species" tabindex="0" role="button" data-x="' + m.sp.x + '">' + spriteImgHtml(m.sp.x, m.sp.n, 24) +
           escapeHtml(m.sp.n) + rankBadgeHtml(m.sp.sname) + '</span>';
       }).join("");
       return '<div class="card"><h3>' + escapeHtml(g.label) + ' <span class="role-count">(' + g.total + ' espécie(s))</span></h3>' +
@@ -7453,6 +7521,7 @@
     minEvSameStat: minEvSameStat,
     nextEvBreakpoint: nextEvBreakpoint,
     trimAndReallocateEvs: trimAndReallocateEvs,
+    priorityOrderForEvs: priorityOrderForEvs,
     getCurrentCap: getCurrentCap,
     levelCapMode: levelCapMode,
     getSpeciesByX: getSpeciesByX,

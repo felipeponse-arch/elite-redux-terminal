@@ -263,6 +263,19 @@ test("trimAndReallocateEvs: tira o desperdício e reinveste no stat que a build 
   }
 });
 
+test("priorityOrderForEvs: maior EV original primeiro, empate por índice menor", () => {
+  // Teste direto e determinístico da função de prioridade sozinha - os 3
+  // testes acima (que só olham o resultado FINAL de trimAndReallocateEvs)
+  // passariam mesmo com a ordem invertida em alguns casos reais (achado ao
+  // tentar montar uma fixture de regressão: o custo de breakpoint às vezes
+  // coincide entre a ordem certa e a invertida, por acaso). Testar a
+  // ordenação isolada elimina essa ambiguidade de vez.
+  assert.deepEqual([...R.priorityOrderForEvs([4, 252, 0, 0, 0, 252])], [1, 5, 0, 2, 3, 4],
+    "Atk e Spe empatados em 252 (índice menor primeiro), depois HP(4), depois os zerados em ordem de índice");
+  assert.deepEqual([...R.priorityOrderForEvs([0, 0, 0, 0, 0, 0])], [0, 1, 2, 3, 4, 5], "tudo empatado em 0 - ordem de índice pura");
+  assert.deepEqual([...R.priorityOrderForEvs([0, 0, 0, 0, 0, 100])], [5, 0, 1, 2, 3, 4], "único investido vai primeiro não importa o índice");
+});
+
 test("validateAiBuild: EVs salvos já saem sem desperdício, mas a classificação ofensiva usa a INTENÇÃO original da IA", () => {
   const f = fixtureValidacao();
   const cap = R.getCurrentCap();
