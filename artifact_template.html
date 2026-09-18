@@ -4663,8 +4663,18 @@
       if (!name) return "";
       var mv = MOVE_BY_NAME[name];
       if (!mv) return "";
+      // Precisão junto do poder (referência do Smogon: "Mastering the
+      // Maison" - reduzir variância é o conselho mais repetido do artigo
+      // pra sequência longa de lutas sem cura, tipo Elite Four/Campeão -
+      // "avoid moves that regularly need to use inaccurate attacks"). O
+      // dado já existia (mv[4], mesmo usado na tabela de golpes da Dex,
+      // coluna "Acc") só nunca tinha chegado até aqui, o lugar onde o
+      // jogador de fato ESCOLHE o golpe - até agora só dava pra ver a
+      // precisão saindo desta tela e conferindo a Dex à parte. Mesmo
+      // fallback "nunca erra" da tabela da Dex (mv[4] falsy = sem número).
+      var accLabel = mv[4] ? ' &middot; precisão <span class="mono">' + mv[4] + '%</span>' : ' &middot; nunca erra';
       if (DATA.splits[mv[2]] === SPLIT_STATUS || !mv[3]) {
-        return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> <span style="color:var(--text-dim);">golpe de status, sem poder de ataque</span></div>';
+        return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> <span style="color:var(--text-dim);">golpe de status, sem poder de ataque</span>' + accLabel + '</div>';
       }
       var typeName = TYPES[mv[1]];
       var base = mv[3];
@@ -4680,7 +4690,7 @@
       // uma entrada vinda de dado externo no futuro.
       if (powerMult !== 1) buffParts.push(escapeHtml(item));
       var buffLabel = buffParts.length ? ' &middot; com ' + buffParts.join(" + ") + ': <span class="mono">' + withBuffs + '</span>' : "";
-      return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> (' + escapeHtml(typeName) + ') poder base <span class="mono">' + base + '</span>' + buffLabel + '</div>';
+      return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> (' + escapeHtml(typeName) + ') poder base <span class="mono">' + base + '</span>' + buffLabel + accLabel + '</div>';
     }).join("");
 
     out.innerHTML = itemDescHtml(item) + statsHtml + hpEvEfficiencyNote(sp, evs[0], item, level) +

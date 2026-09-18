@@ -123,6 +123,21 @@ async function section06() {
       preview4.indexOf("120") !== -1 && preview4.indexOf("234") !== -1, preview4);
     check("status move shows no power, not a fabricated number",
       preview4.indexOf("Swords Dance") !== -1 && preview4.indexOf("sem poder de ataque") !== -1, preview4);
+    // Precisão junto do golpe (2026-09-18, referência ao artigo "Mastering
+    // the Maison" do Smogon - "minimize variância, olhe a precisão ANTES de
+    // escolher o golpe") - a Dex já mostrava isso na tabela de golpes, só
+    // nunca tinha chegado nesta tela, o lugar onde o jogador de fato
+    // escolhe. Confere contra o dado real (T.MOVE_BY_NAME), não um número
+    // chutado - Elite Redux pode ter rebalanceado a precisão de qualquer
+    // golpe em relação ao vanilla.
+    var accFlareBlitz = window.__erTest.MOVE_BY_NAME["Flare Blitz"][4];
+    var accSwordsDance = window.__erTest.MOVE_BY_NAME["Swords Dance"][4];
+    check("golpe de dano mostra a precisão real do dado (não um número chutado)",
+      preview4.indexOf(accFlareBlitz ? "precisão " + accFlareBlitz + "%" : "nunca erra") !== -1,
+      "esperado precisão " + accFlareBlitz + " em: " + preview4);
+    check("golpe de status também mostra a precisão real (não só golpe de dano)",
+      preview4.indexOf(accSwordsDance ? "precisão " + accSwordsDance + "%" : "nunca erra") !== -1,
+      "esperado precisão " + accSwordsDance + " em: " + preview4);
     // Changing the level live (no page reload, no button click) must
     // recompute the stats shown, proving it isn't a one-shot snapshot.
     document.getElementById("mybuild-level").value = 50;
