@@ -36,9 +36,9 @@ async function section22() {
 
   // ---- função pura: sem item de cura de 1/16, nunca mostra nota ----
   check("sem Leftovers/Black Sludge, hpEvEfficiencyNote nunca aparece (mesmo com EV ruim)",
-    T.hpEvEfficiencyNote(fx, 0, "") === "" && T.hpEvEfficiencyNote(fx, 0, "Choice Scarf") === "");
+    T.hpEvEfficiencyNote(fx, 0, "", cap) === "" && T.hpEvEfficiencyNote(fx, 0, "Choice Scarf", cap) === "");
   check("sem espécie válida, hpEvEfficiencyNote não quebra e devolve vazio",
-    T.hpEvEfficiencyNote(null, 0, "Leftovers") === "");
+    T.hpEvEfficiencyNote(null, 0, "Leftovers", cap) === "");
 
   // ---- função pura: varre 0..252 (de 4 em 4) e confere CADA resultado
   // contra o cálculo real - os números citados na nota precisam bater com
@@ -53,7 +53,7 @@ async function section22() {
   var falhasVarredura = [];
   for (var ev2 = 0; ev2 <= 252; ev2 += 4) {
     var hpAtual = T.calcFinalStat(baseHp, 31, ev2, cap, 0);
-    var nota = T.hpEvEfficiencyNote(fx, ev2, "Leftovers");
+    var nota = T.hpEvEfficiencyNote(fx, ev2, "Leftovers", cap);
     if (hpAtual % 16 === 1) {
       if (nota !== "") falhasVarredura.push("EV " + ev2 + ": HP já ideal mas mostrou nota");
       continue;
@@ -88,7 +88,7 @@ async function section22() {
       evHpEl.value = "0";
       evHpEl.dispatchEvent(new Event("input", { bubbles: true }));
       await wait(50);
-      var notaEsperada = T.hpEvEfficiencyNote(fx, 0, "Leftovers");
+      var notaEsperada = T.hpEvEfficiencyNote(fx, 0, "Leftovers", cap);
       check("com Leftovers e EV 0 (fixture escolhida pra não ser ideal), a nota aparece na tela de 'Meu build'",
         notaEsperada !== "" && out.innerHTML.indexOf(notaEsperada) !== -1,
         "esperado: " + notaEsperada.slice(0, 120));

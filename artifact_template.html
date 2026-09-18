@@ -4482,9 +4482,13 @@
   // desperdiça parte dessa cura no arredondamento pra baixo. Só informativo,
   // nunca bloqueia nada - mesmo espírito de buildContextNotesHtml abaixo.
   var HP_FRACTION_16_ITEMS = ["Leftovers", "Black Sludge"];
-  function hpEvEfficiencyNote(sp, hpEv, item) {
+  // `level` é obrigatório (não recalcula getCurrentCap() sozinha) - "Meu
+  // build" deixa simular outro nível digitando em #mybuild-level, e a nota
+  // precisa citar o MESMO nível que os status mostrados na tela usam, não
+  // sempre o level cap real (bug achado ao escrever evBreakpointNote logo
+  // abaixo, que tem exatamente essa mesma necessidade).
+  function hpEvEfficiencyNote(sp, hpEv, item, level) {
     if (!sp || HP_FRACTION_16_ITEMS.indexOf(stripNote(item)) === -1) return "";
-    var level = getCurrentCap() || 50;
     var base = sp.b[0];
     var currentHp = calcFinalStat(base, 31, hpEv, level, 0);
     if (currentHp % 16 === 1) return "";
@@ -4503,6 +4507,38 @@
       hpEv + ' EV em HP dá ' + currentHp + ' HP no nível ' + level + ', desperdiçando parte da cura no ' +
       'arredondamento. ' + best.ev + ' EV renderia ' + bestHp + ' HP' +
       (best.ideal ? ' (múltiplo de 16+1, o ideal pra Leftovers)' : ' (múltiplo de 16)') + '.</div>';
+  }
+  // Breakpoints de EV (referência do Smogon: "A Beginner's Guide to
+  // Understanding EVs" - "at level 50, EVs are worked with in multiples of
+  // 8" em vez de 4). calcFinalStat já usa a fórmula padrão desde o Gen 3
+  // (floor((2*base+iv+floor(ev/4)) * level/100) + 5) - textbook, igual ao
+  // raciocínio já usado pra Leftovers/Life Orb acima - e essa fórmula fica
+  // cada vez mais grosseira quanto MENOR o nível: só no nível 100 cada +4
+  // EV garante +1 no stat final; em níveis mais baixos (a norma no Elite
+  // Redux, que trava tudo por level cap) vários EVs seguidos podem não
+  // mudar nada no stat mostrado. Acha, pra cada stat investido, o menor EV
+  // que já dá o MESMO stat final (mesmo nature/item, pra não confundir
+  // arredondamento de nature com arredondamento de nível) - se for menor
+  // que o EV atual, sinaliza o excesso. Só informativo, nunca bloqueia.
+  function evBreakpointNote(sp, ivs, evs, level, nature, item) {
+    if (!sp) return "";
+    var desperdicio = [];
+    for (var i = 0; i < 6; i++) {
+      if (!evs[i]) continue;
+      var alvo = calcFinalStat(sp.b[i], ivs[i], evs[i], level, i, nature, item, sp.n);
+      var minEv = evs[i];
+      for (var ev = 0; ev < evs[i]; ev += 4) {
+        if (calcFinalStat(sp.b[i], ivs[i], ev, level, i, nature, item, sp.n) === alvo) { minEv = ev; break; }
+      }
+      if (minEv < evs[i]) desperdicio.push({ stat: i, atual: evs[i], minimo: minEv });
+    }
+    if (!desperdicio.length) return "";
+    var partes = desperdicio.map(function (w) {
+      return STAT_LABELS_SHORT[w.stat] + ' (' + w.atual + ' EV &rarr; ' + w.minimo + ' já dá o mesmo)';
+    }).join(", ");
+    var totalSobra = desperdicio.reduce(function (a, w) { return a + (w.atual - w.minimo); }, 0);
+    return '<div class="ts-build-note">No nível ' + level + ', os saltos de EV ficam mais espaçados que no nível 100 (cada ponto de stat pode custar mais de 4 EV - regra vanilla, não é bug daqui): ' +
+      partes + '. ' + totalSobra + ' EV no total dá pra realocar sem perder nada nesses stats.</div>';
   }
   // Observações de contexto numa build (itens P2 e P3 da pauta técnica,
   // 2026-09-16), só informativas - nunca bloqueiam nem escondem a build:
@@ -4598,6 +4634,11 @@
   }
 
   function myBuildEditorHtml(sp) {
+    // Resincroniza ANTES de montar o HTML (o valor inicial do campo
+    // #mybuild-level abaixo é escrito aqui, direto no innerHTML - só
+    // resincronizar depois, dentro de wireMyBuildEditor(), não adianta:
+    // essa função já roda depois do innerHTML ter sido inserido no DOM).
+    if (!myBuildLevelIsCustom) myBuildLevel = getCurrentCap() || 50;
     var list = getBuildList(sp.sname);
     var b = getActiveBuild(sp.sname) || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
     var abiIds = uniqueIds(sp.ab);
@@ -4773,7 +4814,8 @@
       return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> (' + escapeHtml(typeName) + ') poder base <span class="mono">' + base + '</span>' + buffLabel + '</div>';
     }).join("");
 
-    out.innerHTML = itemDescHtml(item) + statsHtml + hpEvEfficiencyNote(sp, evs[0], item) +
+    out.innerHTML = itemDescHtml(item) + statsHtml + hpEvEfficiencyNote(sp, evs[0], item, level) +
+      evBreakpointNote(sp, ivs, evs, level, nature, item) +
       (movesHtml ? '<div class="mybuild-moves-power">' + movesHtml + '</div>' : "");
   }
 
@@ -4788,6 +4830,7 @@
   // validateAiBuild() que "Meu build" usa - nenhuma garantia a menos.
   function strategySetsHtml(sp) {
     var cached = strategySetsCache[sp.sname];
+    var strategyLevel = getCurrentCap() || 50;
     var cardsHtml = cached ? cached.sets.map(function (set, idx) {
       // showdownSet() quer EVs já formatado ("252 Atk / 4 SpD"), não o
       // array cru que validateAiBuild devolve - mesma conversão que
@@ -4800,7 +4843,8 @@
         itemDescHtml(set.item) +
         megaModeBuildNoteHtml(sp, set) +
         buildContextNotesHtml(sp, set) +
-        hpEvEfficiencyNote(sp, set.evs[0], set.item) +
+        hpEvEfficiencyNote(sp, set.evs[0], set.item, strategyLevel) +
+        evBreakpointNote(sp, [31, 31, 31, 31, 31, 31], set.evs, strategyLevel, set.nature, set.item) +
         buildSynergyHtml(sp, set) +
         (set.rationale ? '<div class="ts-build-note">' + escapeHtml(set.rationale) + '</div>' : "") +
         '<button class="text-action-btn strategy-set-use" data-idx="' + idx + '" type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
@@ -4847,7 +4891,7 @@
   // and wires the save/clear/copy buttons + the live EV-total counter.
   function wireMyBuildEditor(sp) {
     var b = getActiveBuild(sp.sname) || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
-    myBuildLevel = myBuildLevel || getCurrentCap() || 50;
+    if (!myBuildLevelIsCustom) myBuildLevel = getCurrentCap() || 50;
     var abiEl = document.getElementById("mybuild-ability");
     if (abiEl) abiEl.value = b.ability || "";
     var natEl = document.getElementById("mybuild-nature");
@@ -4877,6 +4921,7 @@
     var levelEl = document.getElementById("mybuild-level");
     if (levelEl) levelEl.addEventListener("input", function () {
       myBuildLevel = clampInt(levelEl.value, 1, 100, myBuildLevel);
+      myBuildLevelIsCustom = true;
       updateMyBuildStatus(sp);
     });
     updateMyBuildStatus(sp);
@@ -6820,6 +6865,18 @@
   // switch" idiom as the boss calculator's level), defaulted the same way:
   // the current level cap if one is set, else 50.
   var myBuildLevel = null;
+  // Sem isto, "sticky" virava "travado errado pra sempre": se o jogador
+  // abrisse "Meu build" ANTES de configurar o level cap em Progresso (cap
+  // null -> cai no fallback 50), myBuildLevel ficava preso em 50 mesmo
+  // depois do cap ser configurado de verdade - só um settings change que
+  // muda de VALOR (não idempotente) reseta myBuildLevel=null lá embaixo, e
+  // por acaso nenhum aconteceu depois. Achado ao escrever o teste de
+  // evBreakpointNote (2026-09-18): a nota citava um nível diferente do que
+  // a varredura real esperava. Com a flag, o valor só fica "travado" depois
+  // que o JOGADOR digita algo no campo - sem isso, toda vez que "Meu build"
+  // abre ele repuxa o cap atual de verdade, exatamente como o texto de
+  // ajuda da tela já promete ("volta a seguir o cap sempre que ele mudar").
+  var myBuildLevelIsCustom = false;
 
   function initBosses() {
     document.getElementById("boss-count-badge").textContent = BOSSES.length;
@@ -7262,11 +7319,11 @@
         scheduleDashboardRefresh();
         syncRowAddButtons();
       }
-      // "Meu build" fica linkado ao level cap (pedido do usuário): zera o
-      // valor manual que o campo de nível guardava, então a próxima
-      // renderização volta a puxar do cap - e se a Dex já estiver mostrando
-      // um Pokémon agora mesmo, atualiza na hora, não só na próxima visita.
-      myBuildLevel = null;
+      // "Meu build" fica linkado ao level cap (pedido do usuário): derruba
+      // a flag de valor manual, então a próxima renderização volta a puxar
+      // do cap - e se a Dex já estiver mostrando um Pokémon agora mesmo,
+      // atualiza na hora, não só na próxima visita.
+      myBuildLevelIsCustom = false;
       if (document.getElementById("dex-shell").classList.contains("show-detail") && state.selected !== null) {
         selectSpecies(state.selected);
       }
@@ -7513,6 +7570,7 @@
     computeRoleCompendium: computeRoleCompendium,
     SPECIES_ROLE: SPECIES_ROLE,
     hpEvEfficiencyNote: hpEvEfficiencyNote,
+    evBreakpointNote: evBreakpointNote,
     getCurrentCap: getCurrentCap,
     levelCapMode: levelCapMode,
     getSpeciesByX: getSpeciesByX,

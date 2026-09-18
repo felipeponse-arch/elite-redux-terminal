@@ -22,5 +22,6 @@
   "20_intelligent_team_generator.js",
   "21_auditoria_times_salvos.js",
   "22_hp_ev_efficiency.js",
+  "23_ev_breakpoints.js",
   "99_runner.js"
 ]
