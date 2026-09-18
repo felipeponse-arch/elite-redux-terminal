@@ -489,6 +489,15 @@
      text, which was still present and "passing" the whole time). */
   .dash-suggestion .dash-value { color: var(--badge-accent2); display: inline; }
   .dash-suggestion .goto-species { text-decoration: underline; text-decoration-style: dotted; }
+  /* Mesmo bug, achado de novo em 2026-09-19 (print do usuário: "Velocidade"
+     quebrando em pedaços minúsculos no celular, e com espaço extra sobrando
+     em "( 175 )" até no PC) - a linha "Velocidade" (item P4, criada depois
+     desta regra já existir) tem a MESMA estrutura de frase-com-links-
+     embutidos que ".dash-suggestion" já resolvia, só que a regra acima não
+     cobria ".dash-speed". Não repete a cor (fica com a var(--text) padrão
+     de .dash-value, que já estava certa) - só o display: inline que resolve
+     o empacotamento em flex-item por trecho de texto. */
+  .dash-speed .dash-value { display: inline; }
 
   .stat-row { display: grid; grid-template-columns: 90px 40px 1fr; align-items: center; gap: 10px; margin-bottom: 7px; }
   .stat-row:last-child { margin-bottom: 0; }
