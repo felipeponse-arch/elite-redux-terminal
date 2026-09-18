@@ -997,6 +997,7 @@
   .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
   .modal-title { font-family: "Chakra Petch", sans-serif; font-weight: 700; font-size: 16px; }
   .modal-sub { color: var(--text-dim); font-size: 12.5px; margin: 4px 0 12px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
   .modal-close {
     background: none;
     border: none;
@@ -1684,6 +1685,30 @@
     </div>
     <p class="modal-sub">Escolha quem sai do time — ele vai direto para a caixa.</p>
     <div id="swap-modal-list" class="swap-list"></div>
+  </dialog>
+
+  <!-- Diálogo de confirmação genérico (achado da auditoria, 2026-09-18: o
+       botão "Novo jogo" usava window.confirm() nativo, que os iframes
+       sandboxed onde um Artifact publicado roda tipicamente bloqueiam -
+       "allow-modals" precisa estar no atributo sandbox do iframe pra
+       confirm()/alert()/prompt() funcionarem, e o app não controla esse
+       atributo. <dialog>.showModal() é uma API de DOM normal, não um dos
+       diálogos síncronos que "allow-modals" restringe, e é o mesmo padrão
+       que já funciona em #swap-modal - por isso a troca resolve o problema
+       nos dois cenários possíveis (era mesmo o bloqueio, ou não era, mas o
+       app fica mais robusto de qualquer forma). Genérico de propósito
+       (openConfirmModal), pra qualquer ação destrutiva futura reusar em vez
+       de reintroduzir confirm() nativo. -->
+  <dialog id="confirm-modal" class="modal-card" aria-labelledby="confirm-modal-title">
+    <div class="modal-head">
+      <div id="confirm-modal-title" class="modal-title"></div>
+      <button id="confirm-modal-close" class="modal-close" type="button" aria-label="Fechar">&times;</button>
+    </div>
+    <p class="modal-sub" id="confirm-modal-message"></p>
+    <div class="modal-actions">
+      <button id="confirm-modal-cancel" class="text-action-btn" type="button">Cancelar</button>
+      <button id="confirm-modal-ok" class="add-team-btn" type="button"></button>
+    </div>
   </dialog>
 </div>
 
@@ -3322,6 +3347,39 @@
   // Escape), não só um deles.
   document.getElementById("swap-modal").addEventListener("close", function () {
     swapModalX = null;
+  });
+
+  // Substitui window.confirm() nativo (achado da auditoria, 2026-09-18 -
+  // ver comentário no <dialog id="confirm-modal"> sobre o motivo). Genérico
+  // pra qualquer confirmação destrutiva futura: openConfirmModal(titulo,
+  // mensagem, texto do botão de confirmar, callback executado só se
+  // confirmar). Foco inicial vai pro Cancelar de propósito (não pro botão
+  // de confirmar) - numa ação destrutiva, um Enter querendo só fechar o
+  // diálogo não pode virar uma confirmação sem querer.
+  var confirmModalCallback = null;
+  function openConfirmModal(title, message, confirmLabel, onConfirm) {
+    document.getElementById("confirm-modal-title").textContent = title;
+    document.getElementById("confirm-modal-message").textContent = message;
+    document.getElementById("confirm-modal-ok").textContent = confirmLabel;
+    confirmModalCallback = onConfirm;
+    document.getElementById("confirm-modal").showModal();
+    document.getElementById("confirm-modal-cancel").focus();
+  }
+  function closeConfirmModal() {
+    document.getElementById("confirm-modal").close();
+  }
+  document.getElementById("confirm-modal-close").addEventListener("click", closeConfirmModal);
+  document.getElementById("confirm-modal-cancel").addEventListener("click", closeConfirmModal);
+  document.getElementById("confirm-modal").addEventListener("click", function (e) {
+    if (e.target.id === "confirm-modal") closeConfirmModal();
+  });
+  document.getElementById("confirm-modal-ok").addEventListener("click", function () {
+    var cb = confirmModalCallback;
+    closeConfirmModal();
+    if (cb) cb();
+  });
+  document.getElementById("confirm-modal").addEventListener("close", function () {
+    confirmModalCallback = null;
   });
 
   var toastTimer = null;
@@ -5598,26 +5656,39 @@
   });
 
   // "Novo jogo" (pedido do usuário, 2026-09-13): reseta time E caixa de uma
-  // vez. Único confirm() nativo do app - é a única ação com esse perfil de
-  // risco (destrutiva, sem pra onde bancar), não justifica um modal
-  // customizado novo só pra este caso único. Builds/anotações/times salvos
-  // ficam intactos - só a composição atual de time/caixa é limpa, exatamente
-  // o que foi pedido, nada além disso.
+  // vez - a ação destrutiva e sem banco-de-recuperação deste app (diferente
+  // de "remover" do time, que sempre banca pra caixa - aqui não há pra onde
+  // bancar). Builds/anotações/times salvos ficam intactos - só a composição
+  // atual de time/caixa é limpa, exatamente o que foi pedido, nada além
+  // disso.
+  // BUG achado na auditoria de 2026-09-18 (relatado pelo usuário: "o botão
+  // não funciona"): isto usava window.confirm() nativo. Artifact publicado
+  // roda num iframe cujo atributo sandbox o app não controla - sem
+  // "allow-modals" nesse atributo, confirm()/alert()/prompt() são
+  // bloqueados pelo navegador (não dá erro nenhum, só nunca aparece nada e
+  // a função segue com `ok` falso) - o clique parecia não fazer nada. Trocado
+  // pro <dialog>.showModal() já usado em #swap-modal, que não é um dos
+  // diálogos síncronos que esse atributo restringe.
   document.getElementById("reset-team-box-btn").addEventListener("click", function () {
     if (!state.team.length && !state.box.length) return;
-    var ok = confirm("Isso remove TODOS os Pokémon do time e da caixa, como se fosse começar um jogo novo. Builds, anotações e times salvos continuam guardados. Continuar?");
-    if (!ok) return;
-    state.team = [];
-    state.box = [];
-    teamSwapIdx = null;
-    pcBoxSelectedX = null;
-    saveTeam();
-    saveBox();
-    updateTeamBadge();
-    updateBoxBadge();
-    renderTeam();
-    renderBox();
-    flashToast("Time e caixa resetados - pronto pra um jogo novo.");
+    openConfirmModal(
+      "Começar um jogo novo?",
+      "Isso remove TODOS os Pokémon do time e da caixa, como se fosse começar um jogo novo. Builds, anotações e times salvos continuam guardados.",
+      "Remover time e caixa",
+      function () {
+        state.team = [];
+        state.box = [];
+        teamSwapIdx = null;
+        pcBoxSelectedX = null;
+        saveTeam();
+        saveBox();
+        updateTeamBadge();
+        updateBoxBadge();
+        renderTeam();
+        renderBox();
+        flashToast("Time e caixa resetados - pronto pra um jogo novo.");
+      }
+    );
   });
 
   // ---------------- team coverage & dashboard risk ----------------

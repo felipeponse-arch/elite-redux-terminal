@@ -366,11 +366,14 @@ async function section10() {
   } else { check("time tinha pelo menos 1 membro pro teste de 'remover'", false, teamBefore29); }
 
   // --- 30. "Novo jogo" (reset de time e caixa) - pedido do usuário,
-  // 2026-09-13. Único confirm() nativo do app - mocka window.confirm pra
-  // testar os dois caminhos (cancelar preserva tudo; confirmar zera time E
-  // caixa, mas NÃO builds/anotações/times salvos). Semeia um Pikachu novo
-  // no time (não reusa fixture de seções anteriores) e uma anotação real
-  // pra confirmar que ela sobrevive ao reset.
+  // 2026-09-13, reescrito na auditoria de 2026-09-18 (bug real: usava
+  // window.confirm() nativo, que o iframe sandboxed de um Artifact
+  // publicado bloqueia sem erro nenhum - o botão "não fazia nada" pro
+  // usuário). Agora usa o <dialog> #confirm-modal - testa os dois caminhos
+  // de verdade, clicando nos botões reais do diálogo, não mockando window.
+  // confirm. Semeia um Pikachu novo no time (não reusa fixture de seções
+  // anteriores) e uma anotação real pra confirmar que ela sobrevive ao
+  // reset.
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
   setSearch("Pikachu");
@@ -393,17 +396,21 @@ async function section10() {
 
     if (resetBtn30) {
       const teamBeforeCancel30 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").team;
-      const origConfirm30 = window.confirm;
-      window.confirm = function () { return false; };
       resetBtn30.click();
       await wait(50);
-      const teamAfterCancel30 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").team;
-      check("cancelar a confirmação não muda nada", JSON.stringify(teamBeforeCancel30) === JSON.stringify(teamAfterCancel30));
+      const dialog30 = document.getElementById("confirm-modal");
+      check("clicar em 'Novo jogo' abre o diálogo de confirmação (não window.confirm)", dialog30 && dialog30.open);
+      check("diálogo explica o que será perdido e o que sobrevive",
+        document.getElementById("confirm-modal-message").textContent.indexOf("Builds, anotações e times salvos continuam guardados") !== -1);
+      document.getElementById("confirm-modal-cancel").click();
+      await wait(50);
+      check("cancelar fecha o diálogo sem mudar nada",
+        !dialog30.open && JSON.stringify(teamBeforeCancel30) === JSON.stringify(JSON.parse(localStorage.getItem("er_terminal_save") || "{}").team));
 
-      window.confirm = function () { return true; };
       resetBtn30.click();
+      await wait(50);
+      document.getElementById("confirm-modal-ok").click();
       await wait(80);
-      window.confirm = origConfirm30;
       const saveAfterReset30 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
       check("confirmar 'Novo jogo' zera time E caixa",
         saveAfterReset30.team.length === 0 && saveAfterReset30.box.length === 0,

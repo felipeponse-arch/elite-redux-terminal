@@ -74,15 +74,18 @@ function setSearch(q) {
 // partida chama isto no começo, pelos mesmos controles que o jogador usa.
 var TIME_PADRAO = ["Aerodactyl Mega", "Probopass", "Coalossal Mega", "Terrakion", "Avalugg Hisuian", "Tyranitar Mega Redux"];
 async function prepararRunPadrao() {
-  var confirmOriginal = window.confirm;
-  window.confirm = function () { return true; };
-  try {
-    document.querySelector('.tab-btn[data-tab="team"]').click();
+  // "Novo jogo" trocou de window.confirm() pro <dialog> #confirm-modal
+  // (auditoria de 2026-09-18, bug real do usuário) - o clique só abre o
+  // diálogo agora, precisa confirmar de verdade clicando no botão dele.
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(30);
+  var resetBtn = document.getElementById("reset-team-box-btn");
+  if (!resetBtn.disabled) {
+    resetBtn.click();
     await wait(30);
-    document.getElementById("reset-team-box-btn").click();
+    var okBtn = document.getElementById("confirm-modal-ok");
+    if (okBtn) okBtn.click();
     await wait(30);
-  } finally {
-    window.confirm = confirmOriginal;
   }
   document.getElementById("tabs-more-toggle").click();
   await wait(20);
