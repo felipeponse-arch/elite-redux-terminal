@@ -72,6 +72,71 @@ async function section18() {
   var cabecalho = document.querySelector("#levelcap-table thead");
   check("tabela de level caps usa as colunas do jogo (Easy/More/Elite)",
     !!cabecalho && /Easy[\s\S]*More[\s\S]*Elite/.test(cabecalho.textContent), cabecalho ? cabecalho.textContent : "(sem tabela)");
+
+  // ---- Speed tiers (referência do Smogon "SV OU Speed Tiers", pedido do
+  // usuário 2026-09-18) - velocidade calculada no level cap ATUAL, não
+  // nível 100 fixo como lá. Confere geometria real (ordenação/contagem) E
+  // que o número bate exatamente com calcFinalStat - nunca confia só na
+  // presença do texto na tela. ----
+  var speedRows = document.querySelectorAll("#speedtier-table tbody tr");
+  check("tabela de Speed tiers renderiza 1 linha por espécie real", speedRows.length === T.SPECIES.length, speedRows.length + " vs " + T.SPECIES.length);
+  var stResult = T.computeSpeedTiers("");
+  check("Speed tiers vem ordenada por 'Investido' decrescente (o mais rápido primeiro)",
+    stResult.rows.every(function (r, i) { return i === 0 || stResult.rows[i - 1].invested >= r.invested; }));
+  var fastest = stResult.rows[0];
+  var expectedInvested = T.calcFinalStat(fastest.base, 31, 252, stResult.level, 5, "Jolly", null, fastest.sp.n);
+  check("o número 'Investido' do mais rápido bate exatamente com calcFinalStat (mesma fórmula de 'Meu build'/chefão)",
+    fastest.invested === expectedInvested, fastest.invested + " vs " + expectedInvested);
+  var expectedScarf = T.calcFinalStat(fastest.base, 31, 252, stResult.level, 5, "Jolly", "Choice Scarf", fastest.sp.n);
+  check("'+ Choice Scarf' empilha 1.5x em cima do investido (não é o mesmo número)",
+    fastest.scarf === expectedScarf && fastest.scarf > fastest.invested, { scarf: fastest.scarf, invested: fastest.invested });
+  var stSearch = document.getElementById("speedtier-search");
+  stSearch.value = "Ninjask";
+  stSearch.dispatchEvent(new Event("input", { bubbles: true }));
+  await wait(30);
+  var filteredRows = document.querySelectorAll("#speedtier-table tbody tr");
+  check("busca da tabela de Speed tiers filtra por nome (1 resultado pra 'Ninjask')",
+    filteredRows.length === 1 && filteredRows[0].textContent.indexOf("Ninjask") !== -1, filteredRows.length);
+  stSearch.value = "";
+  stSearch.dispatchEvent(new Event("input", { bubbles: true }));
+  await wait(30);
+
+  // ---- Glossário de papéis (referência do Smogon "SV OU Role
+  // Compendium") - os 4 papéis reais já calculados por
+  // compute_species_role.ps1 (Pivô/Tanque/Wallbreaker/Sweeper), nunca uma
+  // lista nova. Confere que CADA exemplo mostrado realmente tem aquele
+  // papel em SPECIES_ROLE - nunca confia só no card ter renderizado algo. ----
+  var roleCards = [...document.querySelectorAll("#role-compendium .card")];
+  check("glossário de papéis renderiza os 4 papéis reais (Pivô/Tanque/Wallbreaker/Sweeper)", roleCards.length === 4, roleCards.length);
+  var roleGroups = T.computeRoleCompendium();
+  check("todo exemplo mostrado em cada papel realmente tem esse papel em SPECIES_ROLE (nunca um exemplo fora do critério)",
+    roleGroups.every(function (g) {
+      return g.examples.every(function (ex) {
+        var real = T.SPECIES_ROLE[ex.sp.sname];
+        return real && real.roles.indexOf(g.role) !== -1;
+      });
+    }));
+  check("a contagem no título de cada papel bate com quantas espécies reais têm aquele papel",
+    roleGroups.every(function (g) {
+      var realCount = T.SPECIES.filter(function (sp) {
+        var r = T.SPECIES_ROLE[sp.sname];
+        return r && r.roles.indexOf(g.role) !== -1;
+      }).length;
+      return realCount === g.total;
+    }), roleGroups.map(function (g) { return g.role + ":" + g.total; }));
+  var firstChip = document.querySelector("#role-compendium .role-chip");
+  if (achou("pelo menos 1 chip de exemplo no glossário de papéis", firstChip)) {
+    var chipName = firstChip.querySelector(".goto-species") ? firstChip.querySelector(".goto-species").textContent : firstChip.textContent;
+    firstChip.click();
+    await wait(50);
+    check("clicar num chip do glossário de papéis navega pra ficha real dele na Dex",
+      document.querySelector('.tab-btn[data-tab="dex"]').classList.contains("active") &&
+      document.querySelector(".detail-titles h2") && chipName.indexOf(document.querySelector(".detail-titles h2").textContent) !== -1,
+      document.querySelector(".detail-titles h2") && document.querySelector(".detail-titles h2").textContent);
+    document.getElementById("back-to-list") && document.getElementById("back-to-list").click();
+    await wait(30);
+  }
+
   document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
   await wait(30);
   escolher(diff, "ace");

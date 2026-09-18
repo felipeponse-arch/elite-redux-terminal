@@ -367,7 +367,7 @@
     background: var(--surface);
   }
   .search-row { padding: 14px 14px 8px; }
-  #search-input {
+  #search-input, #speedtier-search {
     width: 100%;
     padding: 10px 12px;
     border-radius: var(--radius-md);
@@ -376,7 +376,7 @@
     color: var(--text);
     font-size: 14px;
   }
-  #search-input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+  #search-input:focus, #speedtier-search:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
   /* Accessibility pass, 2026-09-10: a global visible-focus ring for every
      interactive element, not just the search box. Most custom controls here
      (chip-btn, type-check, tab-btn, box-chip buttons...) reset the browser's
@@ -1322,6 +1322,30 @@
      grade). Sprite no cabeçalho ajuda a reconhecer o membro sem precisar
      ler o nome truncado. */
   .cov-table { border-collapse: separate; border-spacing: 3px; font-size: 11.5px; }
+  /* Speed tiers (redesign 2026-09-18) - lista de verdade, não mapa de
+     calor: volta pro border-collapse tradicional + linha divisória fina,
+     mais legível pra 1900+ linhas de texto/nome do que blocos separados
+     por gap. content-visibility mantém a rolagem leve com tantas linhas. */
+  .speedtier-table { border-collapse: collapse; border-spacing: 0; font-size: 12.5px; width: 100%; }
+  .speedtier-table th, .speedtier-table td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--border); }
+  .speedtier-table th.rowhead, .speedtier-table td.rowhead { text-align: left; }
+  .speedtier-table tbody tr { content-visibility: auto; contain-intrinsic-size: 40px; }
+  .speedtier-table tbody tr:hover { background: var(--surface-2); }
+  .speedtier-name-cell { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  /* .speedtier-name-cell above styles the <span> wrapper inside the <td>,
+     never the <td> itself - a table cell needs to keep display:table-cell
+     for the row layout to work (same lesson as .cov-head next to it). */
+  .speedtier-invested { color: var(--badge-accent2); font-weight: 700; }
+  .speedtier-rank { color: var(--text-dim); min-width: 24px; text-align: right; font-size: 11px; }
+  /* Glossário de papéis (redesign 2026-09-18). */
+  .role-count { font-size: 11px; font-weight: 400; color: var(--text-dim); }
+  .role-chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .role-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-pill);
+    padding: 4px 10px 4px 4px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  }
+  .role-chip:hover { border-color: var(--accent-2); }
   .cov-table th, .cov-table td { padding: 0; text-align: center; }
   .cov-table th.rowhead, .cov-table td.rowhead { text-align: left; font-weight: 600; padding: 0 8px 0 0; }
   .cov-head { display: flex; flex-direction: column; align-items: center; gap: 2px; padding-bottom: 4px; }
@@ -1830,6 +1854,29 @@
         <h3 class="section-title" style="margin-top:26px;margin-bottom:8px;">Level caps</h3>
         <p class="hint" id="levelcap-note"></p>
         <div class="scroll-x"><table id="levelcap-table" class="cov-table"></table></div>
+
+        <!-- Speed Tiers (referência do Smogon: "SV OU Speed Tiers", pedido do
+             usuário 2026-09-18 - "entenda o que podemos aproveitar pro nosso
+             montador de builds e playtester"). Adaptação real, não cópia: lá
+             é sempre nível 100; aqui é sempre o LEVEL CAP ATUAL (o que
+             importa de verdade numa campanha) - calculado com calcFinalStat,
+             a mesma função que "Meu build"/calculadora de chefão já usam,
+             nunca um número novo inventado. -->
+        <h3 class="section-title" style="margin-top:26px;margin-bottom:8px;">Speed tiers</h3>
+        <p class="hint" id="speedtier-note"></p>
+        <div class="search-row" style="padding:0 0 10px;"><input type="text" id="speedtier-search" placeholder="Buscar por nome..."></div>
+        <div class="scroll-x"><table id="speedtier-table" class="cov-table speedtier-table"></table></div>
+        <p class="hint" id="speedtier-empty" hidden>Nenhum Pokémon encontrado.</p>
+
+        <!-- Glossário de papéis (referência do Smogon: "SV OU Role
+             Compendium", mesmo pedido do usuário). Os 4 papéis e critérios
+             SÃO os que compute_species_role.ps1 já calcula de verdade
+             (bulk/ataque/velocidade em percentil + movepool real de pivô/
+             recuperação/setup) - nada inventado pra esta tela, só um lugar
+             novo pra explicar o que já existe espalhado ficha por ficha. -->
+        <h3 class="section-title" style="margin-top:26px;margin-bottom:8px;">Glossário de papéis</h3>
+        <p class="hint">O que cada papel (Pivô/Tanque/Wallbreaker/Sweeper) realmente exige, e alguns exemplos reais de cada um.</p>
+        <div id="role-compendium"></div>
       </div>
     </section>
   </main>
@@ -3211,7 +3258,7 @@
       if (btn.dataset.tab === "box") renderBox();
       if (btn.dataset.tab === "bosses") initBosses();
       if (btn.dataset.tab === "progress") initProgress();
-      if (btn.dataset.tab === "types") renderTypeMatrix();
+      if (btn.dataset.tab === "types") { renderTypeMatrix(); wireSpeedTiersOnce(); renderSpeedTiers(); }
       // dashboardDirty (auditoria de performance, 2026-09-11): o dashboard só
       // recalcula de verdade quando o jogador volta pra Dex depois de mexer
       // no time/caixa noutra aba - ver scheduleDashboardRefresh().
@@ -7271,6 +7318,101 @@
       }).join("");
       document.getElementById("levelcap-table").innerHTML = '<thead>' + lcHead + '</thead><tbody>' + lcRows + '</tbody>';
     }
+    renderRoleCompendium();
+  }
+
+  // ---------------- Speed tiers ----------------
+  // Timid/Jolly dão o MESMO +10% em Velocidade (só muda qual outro stat cai
+  // 10%, irrelevante pra este cálculo) - Jolly é só o rótulo escolhido pra
+  // representar "qualquer natureza +Velocidade" na coluna "Investido".
+  var SPEEDTIER_NATURE = "Jolly";
+  function computeSpeedTiers(query) {
+    var level = getCurrentCap() || 50;
+    var q = (query || "").trim().toLowerCase();
+    var rows = SPECIES.filter(function (sp) {
+      return !q || sp.n.toLowerCase().indexOf(q) !== -1;
+    }).map(function (sp) {
+      var base = sp.b[5];
+      return {
+        sp: sp,
+        base: base,
+        neutral: calcFinalStat(base, 31, 0, level, 5, null, null, sp.n),
+        invested: calcFinalStat(base, 31, 252, level, 5, SPEEDTIER_NATURE, null, sp.n),
+        scarf: calcFinalStat(base, 31, 252, level, 5, SPEEDTIER_NATURE, "Choice Scarf", sp.n)
+      };
+    });
+    rows.sort(function (a, b) { return b.invested - a.invested || b.base - a.base; });
+    return { level: level, rows: rows };
+  }
+  function renderSpeedTiers() {
+    var query = document.getElementById("speedtier-search").value;
+    var result = computeSpeedTiers(query);
+    document.getElementById("speedtier-note").textContent =
+      "Velocidade calculada no seu level cap atual (" + result.level + "), IVs 31. \"Investido\" = 252 EV + natureza " +
+      SPEEDTIER_NATURE + " (mesmo +10% de qualquer natureza +Velocidade). \"+ Choice Scarf\" empilha 1.5x em cima do investido, quando o item existe neste hack.";
+    var body = result.rows.map(function (r, idx) {
+      return '<tr>' +
+        '<td class="rowhead"><span class="speedtier-name-cell"><span class="speedtier-rank mono">' + (idx + 1) + '</span>' + spriteImgHtml(r.sp.x, r.sp.n, 24) +
+          '<span class="goto-species" data-x="' + r.sp.x + '">' + escapeHtml(r.sp.n) + '</span></span></td>' +
+        '<td class="mono">' + r.base + '</td>' +
+        '<td class="mono">' + r.neutral + '</td>' +
+        '<td class="mono speedtier-invested">' + r.invested + '</td>' +
+        '<td class="mono">' + r.scarf + '</td>' +
+      '</tr>';
+    }).join("");
+    document.getElementById("speedtier-table").innerHTML =
+      '<thead><tr><th class="rowhead">Pokémon</th><th>Base</th><th>Neutro</th><th>Investido</th><th>+ Choice Scarf</th></tr></thead><tbody>' + body + '</tbody>';
+    document.getElementById("speedtier-empty").hidden = result.rows.length > 0;
+  }
+  var speedTierWired = false;
+  function wireSpeedTiersOnce() {
+    if (speedTierWired) return;
+    speedTierWired = true;
+    document.getElementById("speedtier-search").addEventListener("input", renderSpeedTiers);
+  }
+
+  // ---------------- Role compendium ----------------
+  // Descrições fiéis ao critério REAL de scripts/compute_species_role.ps1
+  // (nunca uma definição de manual genérica) - qualquer mudança na fórmula
+  // do script precisa atualizar este texto junto.
+  var ROLE_DESCRIPTIONS_PT = {
+    Pivo: "Tem um golpe de pivô real no movepool (U-turn, Volt Switch, Flip Turn, Teleport, Parting Shot ou Baton Pass) e bulk fora do quartil mais frágil do jogo (percentil 25 ou mais) - aguenta pelo menos um hit antes de trocar, mantendo controle de quem entra em campo.",
+    Tanque: "Bulk entre os 25% mais altos do jogo (percentil 75+) E tem um golpe de recuperação real (Recover, Roost, Wish, Slack Off...) - bulk sozinho, sem recuperação, se desgasta em poucos turnos.",
+    Wallbreaker: "Ataque - físico ou especial, o maior dos dois - entre os 25% mais altos do jogo (percentil 75+), mas SEM bulk alto (percentil abaixo de 60) - fura muralhas sem depender de golpe de setup pra isso.",
+    Sweeper: "Velocidade entre as 25% mais altas do jogo (percentil 75+), ataque acima da mediana (percentil 60+) E tem um golpe de setup real (Swords Dance, Dragon Dance, Nasty Plot, Calm Mind...) - vira avalanche quando entra limpo no fim de jogo."
+  };
+  var ROLE_SORT_PCT = { Pivo: "bulkPct", Tanque: "bulkPct", Wallbreaker: "offensePct", Sweeper: "spePct" };
+  var ROLE_TIER_ORDER = { SS: 0, S: 1, A: 2, B: 3, C: 4, D: 5 };
+  function computeRoleCompendium() {
+    return ["Pivo", "Tanque", "Wallbreaker", "Sweeper"].map(function (role) {
+      var members = [];
+      SPECIES.forEach(function (sp) {
+        var r = SPECIES_ROLE[sp.sname];
+        if (r && r.roles && r.roles.indexOf(role) !== -1) {
+          var rank = SPECIES_RANK[sp.sname];
+          members.push({ sp: sp, tier: rank ? rank.tier : null, sortVal: r[ROLE_SORT_PCT[role]] });
+        }
+      });
+      members.sort(function (a, b) {
+        var ta = (a.tier !== null && ROLE_TIER_ORDER[a.tier] !== undefined) ? ROLE_TIER_ORDER[a.tier] : 6;
+        var tb = (b.tier !== null && ROLE_TIER_ORDER[b.tier] !== undefined) ? ROLE_TIER_ORDER[b.tier] : 6;
+        return ta !== tb ? ta - tb : b.sortVal - a.sortVal;
+      });
+      return { role: role, label: ROLE_LABEL_PT[role] || role, desc: ROLE_DESCRIPTIONS_PT[role], total: members.length, examples: members.slice(0, 10) };
+    });
+  }
+  function renderRoleCompendium() {
+    var groups = computeRoleCompendium();
+    document.getElementById("role-compendium").innerHTML = groups.map(function (g) {
+      var chips = g.examples.map(function (m) {
+        return '<span class="role-chip goto-species" data-x="' + m.sp.x + '">' + spriteImgHtml(m.sp.x, m.sp.n, 24) +
+          escapeHtml(m.sp.n) + rankBadgeHtml(m.sp.sname) + '</span>';
+      }).join("");
+      return '<div class="card"><h3>' + escapeHtml(g.label) + ' <span class="role-count">(' + g.total + ' espécie(s))</span></h3>' +
+        '<p class="mybuild-hint">' + escapeHtml(g.desc) + '</p>' +
+        (chips ? '<div class="role-chip-list">' + chips + '</div>' : '<p class="hint">Nenhuma espécie se encaixa neste papel com os critérios atuais.</p>') +
+      '</div>';
+    }).join("");
   }
 
   // ---------------- init ----------------
@@ -7329,6 +7471,10 @@
     computeTeamGenerationValidation: computeTeamGenerationValidation,
     generateTeamForArchetype: generateTeamForArchetype,
     LEVELCAPS: LEVELCAPS,
+    computeSpeedTiers: computeSpeedTiers,
+    calcFinalStat: calcFinalStat,
+    computeRoleCompendium: computeRoleCompendium,
+    SPECIES_ROLE: SPECIES_ROLE,
     getCurrentCap: getCurrentCap,
     levelCapMode: levelCapMode,
     getSpeciesByX: getSpeciesByX,
