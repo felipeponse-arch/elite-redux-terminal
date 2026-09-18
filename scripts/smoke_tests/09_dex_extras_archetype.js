@@ -224,18 +224,20 @@ async function section09() {
   setSearch("");
   await wait(120);
 
-  // --- 23. Arquétipo de time: monta o melhor time pro arquétipo escolhido
-  // (Fase 3b, REDESENHADA 2026-09-12 por pedido direto do usuário: "a ideia
-  // não é analisar os poke que eu tenho no time e sim ao clicar ali ele me
-  // dar o melhor time possível dentro dos poke que eu tenho focado naquele
-  // arquétipo" - e "ele falar que eu tenho 6 tanque no time não me ajuda de
-  // forma objetiva". O antigo "Detectar automaticamente" (só rotulava o
-  // time atual) e o aviso de papel redundante (só constatava o problema)
-  // foram REMOVIDOS - esta seção substitui inteiramente a versão anterior).
+  // --- 23. Arquétipo de time (card só de configuração desde 2026-09-18:
+  // "montar melhor time tem que sair junto com leitura estrategica nao
+  // temos mais que ter esses botoes eles nao fazem mais sentido" - pedido
+  // direto do usuário. O botão avulso "Montar melhor time"/"Usar este time"
+  // e o card "Leitura estratégica" foram REMOVIDOS; "Gerar time completo"
+  // (seção 20, generateCompleteTeam) cobre composição + build + guia numa
+  // ação só e é o único caminho de UI que resta pra gerar um time pelo
+  // arquétipo. teamRecommendation/generateTeamForArchetype/
+  // applyRecommendedTeam continuam existindo como uso INTERNO de
+  // generateCompleteTeam, sem botão próprio.
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(50);
   const archCard = [...document.querySelectorAll(".card")].find(c => c.querySelector("h3") && c.querySelector("h3").textContent === "Arquétipo do time");
-  check("card 'Arquétipo do time' aparece acima da Leitura estratégica (primeiro item da #team-strategy)",
+  check("card 'Arquétipo do time' é o primeiro item da #team-strategy (não tem mais Leitura estratégica abaixo)",
     !!archCard && document.getElementById("team-strategy").firstElementChild === archCard);
   const paceSel = document.getElementById("archetype-pace");
   const weatherSel = document.getElementById("archetype-weather");
@@ -245,18 +247,12 @@ async function section09() {
     [...weatherSel.options].some(o => o.value === "Sand") && [...weatherSel.options].some(o => o.value === "Trick Room"));
   check("aviso de papel redundante (versão antiga, só informativa) foi removido - não existe mais essa classe",
     !document.querySelector(".archetype-warning"));
-
-  // Clicar sem escolher Ritmo/Clima dá uma mensagem construtiva, não chama
-  // a IA às cegas (ela precisaria de um alvo real pra montar algo focado).
-  const buildBtn = document.getElementById("archetype-build");
-  check("botão 'Montar melhor time' existe (substitui 'Detectar automaticamente')", !!buildBtn);
-  if (buildBtn) {
-    buildBtn.click();
-    await wait(30);
-    check("clicar sem Ritmo/Clima/Monotype escolhido dá uma mensagem construtiva pedindo pra escolher um eixo primeiro",
-      document.getElementById("archetype-status").textContent.indexOf("Ritmo, Clima ou Monotype") !== -1,
-      document.getElementById("archetype-status").textContent);
-  }
+  check("botão avulso 'Montar melhor time' foi removido (achado de UX, 2026-09-18)",
+    !document.getElementById("archetype-build"));
+  check("só resta o botão 'Gerar time completo' no card de arquétipo",
+    !!document.getElementById("archetype-build-complete"));
+  check("card 'Leitura estratégica' foi removido (redundante com 'Gerar time completo')",
+    ![...document.querySelectorAll(".card h3")].some(h => h.textContent === "Leitura estratégica"));
 
   // Seleção manual persiste de verdade (controle explícito - a IA só monta
   // o time pro alvo já escolhido, nunca decide o alvo sozinha).
@@ -266,59 +262,6 @@ async function section09() {
   const savedArch1 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").archetype;
   check("selecionar Clima manualmente persiste em localStorage (arquétipo não é só decorativo)",
     !!savedArch1 && savedArch1.weather === "Rain", savedArch1);
-
-  // Monta o roster real (time + caixa ATUAIS desta suíte) pra alimentar o
-  // mock com snames de verdade - o mock devolve 2 reais + 1 INVENTADO
-  // (sname que não existe no roster), confirmando que a validação defensiva
-  // filtra o inventado em vez de confiar cegamente na resposta da IA.
-  const saveForArch = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
-  const rosterSnames = (saveForArch.team || []).concat(saveForArch.box || []);
-  window.__archToolCalls = [];
-  window.claude = {
-    use: async function (name) {
-      if (name !== "sample") return null;
-      return {
-        json: async function (prompt, opts) {
-          window.__archLastPrompt = prompt;
-          if (opts && Array.isArray(opts.tools)) {
-            for (const t of opts.tools) {
-              if (!t.inputSchema) { try { await t.execute({}); window.__archToolCalls.push(t.name); } catch (e) { } }
-            }
-          }
-          return {
-            team: rosterSnames.slice(0, 2).concat(["SPECIES_ISTO_NAO_EXISTE"]),
-            reasoning: "Mock: time de teste automatizado focado no arquétipo pedido."
-          };
-        }
-      };
-    }
-  };
-  buildBtn.click();
-  await wait(100);
-  check("'Montar melhor time' chama as ferramentas reais compartilhadas (buildStandardAiTools, Fase 4+)",
-    window.__archToolCalls.indexOf("getTeamWeaknesses") !== -1, window.__archToolCalls);
-  const recoBtn = document.getElementById("archetype-apply-team");
-  check("sugestão de time aparece com botão 'Usar este time' quando o mock devolve um team válido",
-    !!recoBtn, recoBtn && recoBtn.textContent);
-  check("chip do time sugerido mostra só os 2 reais - o sname inventado (SPECIES_ISTO_NAO_EXISTE) foi filtrado",
-    document.querySelectorAll(".archetype-reco-chip").length === 2,
-    document.querySelectorAll(".archetype-reco-chip").length);
-
-  if (recoBtn) {
-    recoBtn.click();
-    await wait(50);
-    const saveAfterArch = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
-    check("'Usar este time' realmente aplica o time recomendado (só os 2 reais, não o inventado)",
-      saveAfterArch.team.length === 2 &&
-      rosterSnames.slice(0, 2).every(sn => saveAfterArch.team.indexOf(sn) !== -1),
-      saveAfterArch.team);
-    check("motivo da recomendação aplicada fica salvo em state.archetype.reasoning",
-      saveAfterArch.archetype && saveAfterArch.archetype.reasoning.indexOf("Mock") !== -1,
-      saveAfterArch.archetype);
-    check("a sugestão some sozinha depois de aplicada (mesmo padrão da troca acionável da Leitura estratégica)",
-      !document.getElementById("archetype-apply-team"));
-  }
-  delete window.claude;
 
   // --- 24. PC Box ganha sugestão geral de encaixe no time (Fase 4 do
   // roadmap, 2026-09-12) - "não só a sugestão única do próximo chefão".

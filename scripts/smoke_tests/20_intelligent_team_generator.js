@@ -160,7 +160,11 @@ async function section20() {
     monoSel.value = tipoAlvo;
     monoSel.dispatchEvent(new Event("change", { bubbles: true }));
     await wait(30);
-    document.getElementById("archetype-build").click(); // só a composição, mais rápido pra este teste específico
+    // O botão avulso "Montar melhor time" foi removido (2026-09-18, junto
+    // com a Leitura estratégica) - generateTeamForArchetype agora só roda
+    // por dentro de "Gerar time completo", mas continua exposto pela ponte
+    // de teste pra exercitar só a composição (mais rápido pra este teste).
+    T.generateTeamForArchetype(); // só a composição, mais rápido pra este teste específico
     await pollUntil(function () { return estagios.length >= 1; }, 2000);
     await wait(80);
     check("Monotype filtra o roster ANTES do prompt - a espécie do outro tipo nem aparece listada pra IA escolher",

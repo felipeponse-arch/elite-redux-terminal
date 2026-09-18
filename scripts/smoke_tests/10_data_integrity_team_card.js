@@ -57,12 +57,13 @@ async function section10() {
   // --- 26. Auditoria WCAG/eMAG (2026-09-12) - todo .notes-status precisa
   // anunciar mensagens de status pra leitor de tela, mesmo padrão que o
   // toast/sync-banner/storage-banner já seguiam. Regressão-guarda: confirma
-  // que as 5 ocorrências reais no DOM (mybuild-status só existe com uma
-  // build ativa, então não é checado aqui - mas os outros 4 sempre existem
-  // nas telas já visitadas nesta suíte) têm role="status" aria-live="polite".
+  // que as ocorrências reais no DOM (mybuild-status só existe com uma
+  // build ativa, então não é checado aqui; team-strategy-status foi removido
+  // junto com a Leitura estratégica, 2026-09-18) têm role="status"
+  // aria-live="polite".
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(30);
-  const teamStatusIds = ["archetype-status", "team-strategy-status"];
+  const teamStatusIds = ["archetype-status"];
   const missingAriaLiveTeam = teamStatusIds.filter(function (id) {
     var el = document.getElementById(id);
     return !el || el.getAttribute("aria-live") !== "polite" || el.getAttribute("role") !== "status";
