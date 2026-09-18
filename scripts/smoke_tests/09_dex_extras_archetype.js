@@ -28,6 +28,21 @@ async function section09() {
     const dashWhileOnBox = document.querySelector("#dashboard .dashboard-card");
     check("dashboard NÃO recalcula enquanto o jogador está numa aba diferente da Dex (dashboardDirty adia o recálculo)",
       dashWhileOnBox === dashBefore, "mesmo nó: " + (dashWhileOnBox === dashBefore));
+    // "Remover da caixa" ganhou confirmação na auditoria de 2026-09-18 (era
+    // apagado na hora, sem aviso - achado grave, mesma classe do bug do
+    // "Novo jogo"). O clique acima só ABRE o diálogo agora - cancela sem
+    // remover, porque este teste é sobre dashboardDirty, não sobre remoção,
+    // e um <dialog> modal aberto deixa o resto da página inert e travaria
+    // os passos seguintes desta seção.
+    const cancelBtn09 = document.getElementById("confirm-modal-cancel");
+    if (cancelBtn09) { cancelBtn09.click(); await wait(30); }
+    // Como o Pokémon não é mais removido de verdade (cancelei o diálogo),
+    // ele continua selecionado (pcBoxSelectedX) - o teste de PC Box mais
+    // abaixo desta seção espera a caixa "limpa", sem seleção, igual ficava
+    // depois de uma remoção de verdade. Clicar de novo no MESMO slot
+    // desmarca (o clique é um toggle - ver o listener de .pcbox-slot).
+    slotForRemoveTest.click();
+    await wait(30);
   } else {
     check("caixa tinha pelo menos 1 membro pro teste de dashboardDirty", false);
   }

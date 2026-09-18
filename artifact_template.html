@@ -4063,11 +4063,28 @@
     if (removeBtn) {
       removeBtn.addEventListener("click", function () {
         var x = parseInt(removeBtn.dataset.x, 10);
-        state.box = state.box.filter(function (v) { return v !== x; });
-        pcBoxSelectedX = null;
-        saveBox();
-        updateBoxBadge();
-        renderBox();
+        var sp = getSpeciesByX(x);
+        // Achado GRAVE na auditoria de 2026-09-18: ao contrário do "remover"
+        // do Time (que banca pra caixa, nada se perde), este "×" tira o
+        // Pokémon da caixa de vez - não vai pro time, não sobra em lugar
+        // nenhum. É um ícone pequeno, do lado de um botão grande de "→
+        // time", plausível de clique errado achando que só fecha o painel
+        // de detalhes. Mesma classe de risco do bug do "Novo jogo" (perda
+        // de dado sem aviso), só que de um único Pokémon por clique em vez
+        // do time inteiro - por isso ganha a mesma confirmação.
+        openConfirmModal(
+          "Remover " + (sp ? sp.n : "Pokémon") + " da caixa?",
+          "Isso tira " + (sp ? sp.n : "este Pokémon") + " da sua caixa de vez - ele não vai pro time, não fica guardado em lugar nenhum, e não dá pra desfazer.",
+          "Remover",
+          function () {
+            state.box = state.box.filter(function (v) { return v !== x; });
+            pcBoxSelectedX = null;
+            saveBox();
+            updateBoxBadge();
+            renderBox();
+            flashToast((sp ? sp.n : "Pokémon") + " removido da caixa.");
+          }
+        );
       });
     }
     var toTeamBtn = content.querySelector(".pcbox-detail .box-to-team");
