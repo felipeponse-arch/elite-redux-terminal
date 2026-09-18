@@ -124,6 +124,14 @@ async function section20() {
     estagios[3].indexOf("Escreva um guia PRÁTICO") !== -1,
     estagios.map(function (p) { return p.slice(0, 30); }));
 
+  // ---- referência do Smogon (thread de sample teams, 2026-09-18): o
+  // "threats" do guia agora exige citar um CHEFÃO REAL (getRemainingBosses),
+  // não só "tipo X genérico" - mesma lição da descrição de time de lá
+  // (nomeia a ameaça de verdade, não uma categoria vaga). ----
+  check("o prompt do guia de uso agora exige citar um chefão/líder REAL (getRemainingBosses), não só 'tipo genérico'",
+    estagios[3].indexOf("chefão ou líder de ginásio REAL") !== -1 && estagios[3].indexOf("getRemainingBosses") !== -1,
+    estagios[3].slice(0, 400));
+
   var saveDepois = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
   check("o time foi aplicado sozinho, sem precisar clicar em \"Usar este time\" à parte",
     saveDepois.team.length === 2 && saveDepois.team.indexOf(fx1.sp.sname) !== -1 && saveDepois.team.indexOf(fx2.sp.sname) !== -1,

@@ -6619,10 +6619,13 @@
       "do time e como ele costuma vencer. opening: 2-3 frases, quem tende a abrir a partida e o que observar " +
       "nos primeiros turnos. development: 2-3 frases, como posicionar, quando trocar, quando usar suporte, " +
       "como preservar recursos importantes. winCondition: 1-2 frases, qual Pokémon ou combinação costuma " +
-      "fechar a partida e o que preservar pra isso. threats: 2-3 frases, que tipo de ameaça dificulta ESTE " +
-      "time (cite o tipo/estratégia) e qual integrante costuma segurar ela, com uma alternativa se o plano " +
-      "principal falhar. Não invente golpe/habilidade/item fora do que foi listado acima - se não tiver " +
-      "certeza de algo, seja mais genérico em vez de arriscar.";
+      "fechar a partida e o que preservar pra isso. threats: 2-3 frases - cite PELO MENOS UM chefão ou líder " +
+      "de ginásio REAL que ainda falta enfrentar (nome exato de getRemainingBosses) que é particularmente " +
+      "perigoso pra este time, dizendo qual integrante segura ele e por quê (tipo, golpe ou stat real dele, " +
+      "nunca chutado) - nomeie o adversário de verdade, não fique só em 'ameaças do tipo X' genérico. Se " +
+      "getRemainingBosses vier vazio (nada mais falta no jogo), aí sim fale em termos gerais de tipo/estratégia. " +
+      "Não invente golpe/habilidade/item fora do que foi listado acima - se não tiver certeza de algo, seja " +
+      "mais genérico em vez de arriscar.";
     try {
       var raw = await sample.json(prompt, { tools: buildStandardAiTools() });
       if (!raw || typeof raw !== "object") return null;
