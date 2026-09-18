@@ -5611,9 +5611,24 @@
     grid.querySelectorAll(".stc-delete").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var idx = parseInt(btn.dataset.idx, 10);
-        state.savedTeams.splice(idx, 1);
-        saveSavedTeams();
-        renderSavedTeams();
+        var slot = state.savedTeams[idx];
+        if (!slot) return;
+        // Achado na auditoria de 2026-09-18: excluía na hora, sem confirmar
+        // - botão "Excluir" fica ao lado de "Carregar", um clique errado
+        // perdia o layout salvo sem aviso nenhum e sem como desfazer (os
+        // Pokémon em si continuam no time/caixa, só a referência salva some).
+        // Mesmo <dialog> de confirmação do "Novo jogo" - já pronto e
+        // testado, reaproveitado aqui em vez de duplicar a lógica.
+        openConfirmModal(
+          "Excluir time salvo?",
+          "Isso apaga o layout \"" + (slot.name || ("Time " + (idx + 1))) + "\" salvo. Os Pokémon continuam no seu time/caixa - só a referência salva é removida, e não dá pra desfazer.",
+          "Excluir",
+          function () {
+            state.savedTeams.splice(idx, 1);
+            saveSavedTeams();
+            renderSavedTeams();
+          }
+        );
       });
     });
     grid.querySelectorAll(".stc-rename").forEach(function (btn) {
