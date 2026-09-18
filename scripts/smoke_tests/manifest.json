@@ -21,5 +21,6 @@
   "19_boss_difficulty_tier_and_gym_skills.js",
   "20_intelligent_team_generator.js",
   "21_auditoria_times_salvos.js",
+  "22_hp_ev_efficiency.js",
   "99_runner.js"
 ]

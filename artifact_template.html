@@ -4472,6 +4472,38 @@
   // escritas pro modo permanente ("a pedra só é necessária na 1a evolução,
   // depois libera o slot") - no temporário esse item nunca entra em campo.
   // Não bloqueia nada: explica em qual modo a build funciona.
+  // Aviso de eficiência de EV de HP com item de cura percentual (referência
+  // do Smogon: "Monotype Sets Compendium", 2026-09-18 - "For Leftovers
+  // numbers generally you want to hit a number divisible by 16+1"). Leftovers/
+  // Black Sludge curam 1/16 do HP máximo por turno desde a introdução deles
+  // (mecânica vanilla inalterada, mesmo raciocínio já usado pra Life Orb em
+  // ITEM_MOVE_POWER_MODS - textbook, não precisa de fonte externa por
+  // espécie) - um HP final que não é múltiplo de 16 (ou 16k+1, o ideal)
+  // desperdiça parte dessa cura no arredondamento pra baixo. Só informativo,
+  // nunca bloqueia nada - mesmo espírito de buildContextNotesHtml abaixo.
+  var HP_FRACTION_16_ITEMS = ["Leftovers", "Black Sludge"];
+  function hpEvEfficiencyNote(sp, hpEv, item) {
+    if (!sp || HP_FRACTION_16_ITEMS.indexOf(stripNote(item)) === -1) return "";
+    var level = getCurrentCap() || 50;
+    var base = sp.b[0];
+    var currentHp = calcFinalStat(base, 31, hpEv, level, 0);
+    if (currentHp % 16 === 1) return "";
+    var best = null;
+    for (var ev = 0; ev <= 252 && !best; ev += 4) {
+      if (calcFinalStat(base, 31, ev, level, 0) % 16 === 1) best = { ev: ev, ideal: true };
+    }
+    if (!best) {
+      for (var ev2 = 0; ev2 <= 252 && !best; ev2 += 4) {
+        if (calcFinalStat(base, 31, ev2, level, 0) % 16 === 0) best = { ev: ev2, ideal: false };
+      }
+    }
+    if (!best || best.ev === hpEv) return "";
+    var bestHp = calcFinalStat(base, 31, best.ev, level, 0);
+    return '<div class="ts-build-note">Com ' + escapeHtml(item) + ' (cura 1/16 do HP máximo por turno): ' +
+      hpEv + ' EV em HP dá ' + currentHp + ' HP no nível ' + level + ', desperdiçando parte da cura no ' +
+      'arredondamento. ' + best.ev + ' EV renderia ' + bestHp + ' HP' +
+      (best.ideal ? ' (múltiplo de 16+1, o ideal pra Leftovers)' : ' (múltiplo de 16)') + '.</div>';
+  }
   // Observações de contexto numa build (itens P2 e P3 da pauta técnica,
   // 2026-09-16), só informativas - nunca bloqueiam nem escondem a build:
   //   - golpe aprendido só por nível ACIMA do level cap atual (as builds do
@@ -4741,7 +4773,8 @@
       return '<div class="mybuild-move-power"><b>' + escapeHtml(name) + '</b> (' + escapeHtml(typeName) + ') poder base <span class="mono">' + base + '</span>' + buffLabel + '</div>';
     }).join("");
 
-    out.innerHTML = itemDescHtml(item) + statsHtml + (movesHtml ? '<div class="mybuild-moves-power">' + movesHtml + '</div>' : "");
+    out.innerHTML = itemDescHtml(item) + statsHtml + hpEvEfficiencyNote(sp, evs[0], item) +
+      (movesHtml ? '<div class="mybuild-moves-power">' + movesHtml + '</div>' : "");
   }
 
   // "Estratégias" (pedido do usuário, 2026-09-18, referência explícita ao
@@ -4767,6 +4800,7 @@
         itemDescHtml(set.item) +
         megaModeBuildNoteHtml(sp, set) +
         buildContextNotesHtml(sp, set) +
+        hpEvEfficiencyNote(sp, set.evs[0], set.item) +
         buildSynergyHtml(sp, set) +
         (set.rationale ? '<div class="ts-build-note">' + escapeHtml(set.rationale) + '</div>' : "") +
         '<button class="text-action-btn strategy-set-use" data-idx="' + idx + '" type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
@@ -7478,6 +7512,7 @@
     calcFinalStat: calcFinalStat,
     computeRoleCompendium: computeRoleCompendium,
     SPECIES_ROLE: SPECIES_ROLE,
+    hpEvEfficiencyNote: hpEvEfficiencyNote,
     getCurrentCap: getCurrentCap,
     levelCapMode: levelCapMode,
     getSpeciesByX: getSpeciesByX,
