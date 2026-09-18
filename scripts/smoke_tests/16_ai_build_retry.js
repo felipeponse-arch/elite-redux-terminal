@@ -84,4 +84,59 @@ async function section16() {
   check("duas rejeições seguidas: para em 2 chamadas (não fica em loop)", p2.length === 2, p2.length + " chamada(s)");
   check("duas rejeições seguidas: a mensagem diz que já tentou 2 vezes", status.indexOf("já tentei 2 vezes") !== -1, status);
   delete window.claude;
+
+  // ---- "Estratégias" (múltiplos sets nomeados, pedido do usuário citando
+  // o dex do Smogon como referência, 2026-09-18) - generateStrategySets()
+  // reusa a MESMA validateAiBuild() e o MESMO fixture desta seção. Mock
+  // devolve 2 sets: 1 válido + 1 com golpe inventado - diferente do retry
+  // acima, aqui o critério de nova tentativa é "nenhum set válido", então
+  // 1 válido entre 2 já é aceito sem retry (soft-fallback, o inválido só
+  // é descartado, não derruba o resto - mesmo espírito do item em
+  // generateBuildWithAI).
+  document.getElementById("back-to-list") && document.getElementById("back-to-list").click();
+  await wait(30);
+  var setValido = { name: "Set de Teste", ability: fx.abi, nature: "Bold", item: "", moves: fx.moves, evs: [252, 0, 252, 0, 4, 0], rationale: "set valido" };
+  var setInvalido = { name: "Set Quebrado", ability: fx.abi, nature: "Bold", item: "", moves: ["Golpe Que Nao Existe", fx.moves[1], fx.moves[2], fx.moves[3]], evs: [0, 0, 0, 0, 0, 0], rationale: "x" };
+  var setsPrompts = [];
+  window.claude = {
+    use: async function (name) {
+      if (name !== "sample") return null;
+      return { json: async function (prompt) { setsPrompts.push(prompt); return { sets: [setValido, setInvalido] }; } };
+    }
+  };
+  setSearch(fx.sp.n);
+  await wait(120);
+  var rowEstrat = document.querySelector('#species-list .species-row[data-x="' + fx.sp.x + '"]');
+  if (achou("linha de " + fx.sp.n + " na busca (Estratégias)", rowEstrat)) {
+    rowEstrat.click();
+    await wait(60);
+    var detEstrat = [...document.querySelectorAll(".detail-group")].find(function (d) {
+      return d.querySelector("summary") && d.querySelector("summary").textContent.indexOf("Estratégias") !== -1;
+    });
+    if (achou("seção 'Estratégias' existe na ficha (referência ao dex do Smogon)", detEstrat)) {
+      detEstrat.querySelector("summary").click();
+      await wait(30);
+      var genBtn = document.getElementById("strategy-sets-generate");
+      if (achou("botão 'Gerar sets de estratégia'", genBtn)) {
+        genBtn.click();
+        await pollUntil(function () { return setsPrompts.length >= 1; }, 1500);
+        await wait(80);
+        var cards = document.querySelectorAll(".strategy-set");
+        check("1 set válido é mantido mesmo com 1 inválido junto (soft-fallback, sem derrubar os dois nem tentar de novo)",
+          cards.length === 1 && setsPrompts.length === 1, cards.length + " card(s), " + setsPrompts.length + " chamada(s)");
+        check("nome do set válido aparece na tela, nunca o do rejeitado",
+          cards.length === 1 && cards[0].textContent.indexOf("Set de Teste") !== -1 && cards[0].textContent.indexOf("Set Quebrado") === -1,
+          cards.length ? cards[0].textContent.slice(0, 60) : "(sem card)");
+        var useBtn = document.querySelector(".strategy-set-use");
+        if (achou("botão '+ Usar como meu build' no set gerado", useBtn)) {
+          useBtn.click();
+          await wait(50);
+          var savedActive = (JSON.parse(localStorage.getItem("er_terminal_save") || "{}").customBuilds || {})[fx.sp.sname] || [];
+          check("'+ Usar como meu build' vira a build ativa de verdade (mesmo customBuilds de 'Meu build')",
+            savedActive.some(function (b) { return b.active && b.rationale === "set valido"; }), JSON.stringify(savedActive).slice(0, 200));
+        }
+      }
+    }
+  }
+  delete window.claude;
 }

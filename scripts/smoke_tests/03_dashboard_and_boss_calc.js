@@ -47,6 +47,35 @@ async function section03() {
     await wait(30);
   }
 
+  // --- 9b. dashboard EMPILHADA acima da Dex, não ao lado (achado grave do
+  // usuário, 2026-09-18: "a tela buga e some as informações do poke" -
+  // reproduzia sempre ao ir de Meu Time -> clicar num Pokémon -> voltar pra
+  // Dex). Causa real: #view-dex.active nunca tinha flex-direction definida
+  // (caía no padrão "row"), e só havia correção pra isso abaixo de 860px -
+  // funcionava "por sorte" enquanto o dashboard era estreito o bastante,
+  // até a linha "Velocidade" (texto longo) quebrar essa sorte em qualquer
+  // largura de desktop normal, espremendo .dex-shell numa fatia de poucos
+  // px (conteúdo real no DOM, mas ilegível na tela - por isso "sumia" sem
+  // erro nenhum no console). Testado num viewport de verdade (não só a
+  // regra CSS em isolado) pra pegar exatamente essa classe de regressão. ----
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  const teamHead = document.querySelector(".ts-head.goto-species");
+  if (achou("cabeçalho de um membro do time (pra navegar de volta pra Dex)", teamHead)) {
+    teamHead.click();
+    await wait(60);
+    const dashEl = document.getElementById("dashboard");
+    const shellEl = document.getElementById("dex-shell");
+    const dashRect = dashEl.getBoundingClientRect();
+    const shellRect = shellEl.getBoundingClientRect();
+    check("dashboard e a Dex ficam EMPILHADOS (dashboard acima, shell abaixo) - nunca lado a lado",
+      shellRect.top >= dashRect.bottom - 1, JSON.stringify({ dashBottom: dashRect.bottom, shellTop: shellRect.top }));
+    check("a Dex usa a largura inteira da tela (não espremida ao lado do dashboard)",
+      shellRect.width >= window.innerWidth * 0.9, shellRect.width + " de " + window.innerWidth);
+    document.getElementById("back-to-list") && document.getElementById("back-to-list").click();
+    await wait(30);
+  }
+
   // --- 10. boss final-stat calculator - 2026-09-09 field-research follow-up ---
   document.querySelector('.tab-btn[data-tab="bosses"]').click();
   await wait(50);

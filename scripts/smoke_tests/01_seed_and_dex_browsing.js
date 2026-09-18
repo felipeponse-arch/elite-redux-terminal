@@ -154,10 +154,13 @@ async function section01() {
     await wait(30);
     (function () {
       const groups = [...document.querySelectorAll(".detail-group")];
-      check("5 grupos na tela de detalhe (4 colapsáveis + 'Conhecer a espécie' sempre visível)", groups.length === 5, groups.length);
+      // 6 desde 2026-09-18: "Estratégias" (sets nomeados por IA, referência
+      // ao dex do Smogon) entrou como um 5º grupo colapsável, logo depois
+      // de "Auto Build".
+      check("6 grupos na tela de detalhe (5 colapsáveis + 'Conhecer a espécie' sempre visível)", groups.length === 6, groups.length);
       // "Conhecer a espécie" (2026-09-11, pedido do usuário: "quero que tudo
       // que está ali fique visível") não é mais um <details> - vira um <div>
-      // com .detail-group-heading no lugar do <summary>. Os outros 4 grupos
+      // com .detail-group-heading no lugar do <summary>. Os outros 5 grupos
       // continuam <details> de verdade.
       const conhecerGroup = groups.find(function (g) { return g.tagName !== "DETAILS" && g.querySelector(".detail-group-heading"); });
       check("'Conhecer a espécie' não é mais colapsável (não é <details>, sem <summary>)",
