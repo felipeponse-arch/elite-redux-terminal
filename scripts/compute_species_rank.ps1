@@ -66,6 +66,23 @@ detalhamento completo (não só as letras) pra UI mostrar o trabalho.
 Rodar depois de transform.ps1, extract_bosses.ps1 e
 expand_combo_abilities.ps1 (precisa de dex_compact.json, bosses.json e
 ability_translations_pt.json presentes e atuais).
+
+Ajuste de META (item 15 da auditoria de 2026-09-18, decisão do usuário
+2026-09-19): a Especialista em Meta Pokémon (ver charter na memória do
+projeto, project_elite_redux_team_roster.md) precisava de um lugar pra um
+achado de meta virar efeito real no app - decidido "modificador no rank
+score", sem nota explicativa separada na UI. `data/meta_rank_adjustments.json`
+(sname -> lista de {delta, source, version, confidence}) é onde esses
+achados entram; hoje está vazio (`{}`) porque nenhum achado real foi
+produzido ainda - a regra não-negociável do charter ("nunca inventar,
+nunca ter devaneios") vale aqui igual a qualquer outra saída dela, então
+este script SÓ aplica ajuste quando o arquivo tiver uma entrada de verdade,
+nunca fabrica uma. Cada delta é limitado a +-8 pontos percentuais (uma
+mudança de tier inteira é ~15-25 pontos, então um achado sozinho nunca pula
+mais de meio tier) e a soma por espécie a +-15; confidence só aceita "alta"
+ou "media" - um achado de baixa confiança (fonte única não confirmada) não
+vira número, fica de fora até confirmar, exatamente a regra 3 do charter
+("sem fonte confiável, dizer isso, não preencher com um achado plausível").
 #>
 
 . (Join-Path $PSScriptRoot "common.ps1")
@@ -76,6 +93,43 @@ $ser = New-GameDataParser
 $dex = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "dex_compact.json") -Raw -Encoding UTF8))
 $bosses = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "bosses.json") -Raw -Encoding UTF8))
 $pt = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "ability_translations_pt.json") -Raw -Encoding UTF8))
+$metaAdjRaw = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "meta_rank_adjustments.json") -Raw -Encoding UTF8))
+
+# --- ajustes de meta (Especialista em Meta Pokémon) - validados alto contra
+# o próprio charter, não só contra JSON valido: toda entrada precisa de
+# fonte + versão do jogo (regra 1), confiança dentro do permitido (regra 2/3,
+# "media"/"alta" só - achado fraco fica de fora, nunca vira número), e o
+# sname citado precisa existir de verdade nesta versão do dex. ---
+$snameSet = New-Object System.Collections.Generic.HashSet[string]
+foreach ($s in $dex.species) { if ($s -and $s["sname"]) { [void]$snameSet.Add($s["sname"]) } }
+$VALID_META_CONFIDENCE = @("alta", "media")
+$MAX_META_DELTA_PER_ENTRY = 8.0
+$MAX_META_DELTA_TOTAL = 15.0
+$metaDeltaBySname = @{}
+foreach ($sname in $metaAdjRaw.Keys) {
+    if (-not $snameSet.Contains($sname)) {
+        throw "meta_rank_adjustments.json: cita $sname, que nao existe em dex_compact.json"
+    }
+    $total = 0.0
+    foreach ($e in @($metaAdjRaw[$sname])) {
+        if ($null -eq $e["delta"]) { throw "meta_rank_adjustments.json: entrada de $sname sem campo 'delta'" }
+        $d = [double]$e["delta"]
+        if ([math]::Abs($d) -gt $MAX_META_DELTA_PER_ENTRY) {
+            throw "meta_rank_adjustments.json: delta de $sname ($d) excede o limite de +-$MAX_META_DELTA_PER_ENTRY pontos percentuais por achado"
+        }
+        if (-not $e["source"]) { throw "meta_rank_adjustments.json: entrada de $sname sem campo 'source' (charter do Especialista em Meta: toda alegacao carrega a fonte)" }
+        if (-not $e["version"]) { throw "meta_rank_adjustments.json: entrada de $sname sem campo 'version' (charter: toda alegacao carrega a versao do jogo em que foi confirmada)" }
+        if ($VALID_META_CONFIDENCE -notcontains $e["confidence"]) {
+            throw "meta_rank_adjustments.json: entrada de $sname tem 'confidence' invalido ('$($e["confidence"])') - so 'alta' ou 'media' (achado de baixa confianca nao vira numero, fica pendente)"
+        }
+        $total += $d
+    }
+    if ([math]::Abs($total) -gt $MAX_META_DELTA_TOTAL) {
+        throw "meta_rank_adjustments.json: soma dos ajustes de $sname ($total) excede o limite de +-$MAX_META_DELTA_TOTAL pontos percentuais"
+    }
+    if ($total -ne 0) { $metaDeltaBySname[$sname] = $total }
+}
+Write-Output "compute_species_rank.ps1: $($metaDeltaBySname.Keys.Count) especie(s) com ajuste de meta aplicado"
 
 # Order guard (architecture review, 2026-09-09): this script must run AFTER
 # expand_combo_abilities.ps1, because Score-AbilityText reads the EXPANDED
@@ -398,10 +452,17 @@ function Compute-Tiers($subsetRows) {
     $result = @{}
     foreach ($r in $subsetRows) {
         $c = $composites[$r.sname]
-        $finalPct = $compositeRanks[[string]$c.composite]
+        $basePct = $compositeRanks[[string]$c.composite]
+        $metaDelta = if ($metaDeltaBySname.ContainsKey($r.sname)) { $metaDeltaBySname[$r.sname] } else { 0.0 }
+        # Ajuste de meta aplicado DEPOIS do percentile-rank do composto, não
+        # antes - ele representa um achado sobre a espécie em si (não um
+        # sinal a mais pra recalcular a distribuição da população toda).
+        # Clampado em [0,100] pra não estourar a escala de score/tier.
+        $finalPct = [math]::Max(0, [math]::Min(100, $basePct + $metaDelta))
         $result[$r.sname] = @{
             tier = Get-Tier $finalPct
             score = [math]::Round($finalPct, 1)
+            metaAdjustment = $metaDelta
             bstPct = $c.bstPct; abilityPct = $c.abilityPct; movepoolPct = $c.movepoolPct; typePct = $c.typePct; bossDefPct = $c.bossDefPct
         }
     }
@@ -436,6 +497,7 @@ foreach ($r in $rows) {
         movepoolScore = $r.movepoolScore; movepoolPct = $g.movepoolPct
         typeScore = $r.typeScore; typePct = $g.typePct
         bossDefense = [math]::Round($r.bossDefense, 3); bossDefPct = $g.bossDefPct
+        metaAdjustment = $g.metaAdjustment
     }
 }
 
