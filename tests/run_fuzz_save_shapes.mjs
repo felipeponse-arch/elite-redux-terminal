@@ -134,6 +134,43 @@ async function main() {
     }
   }
 
+  // ---- save genuinamente CORROMPIDO (não é um shape aleatório-mas-válido
+  // como os de cima - é texto que nem chega a ser JSON) - achado em
+  // auditoria, 2026-09-18, item 7 (bug P0): antes disto, isso caía direto
+  // pro seed de exemplo, que persist() já sobrescrevia a chave corrompida
+  // na mesma passagem - perda de progresso 100% silenciosa. Roda aqui (não
+  // no smoke_test_suite.js) pelo mesmo motivo do resto do arquivo: precisa
+  // de reload de verdade, loadSave() só roda uma vez. ----
+  let corruptedSaveOk = true;
+  let corruptedSaveDetail = "";
+  try {
+    await page.evaluate(() => {
+      localStorage.removeItem("er_terminal_save_corrupted_backup");
+      localStorage.setItem("er_terminal_save", "{isto nao eh json valido de jeito nenhum");
+    });
+    pageErrors = [];
+    await page.reload({ waitUntil: "load" });
+    await page.waitForTimeout(250);
+    const result = await page.evaluate(() => ({
+      bannerVisivel: !document.getElementById("storage-banner").hidden,
+      textoBanner: document.getElementById("storage-banner-text").textContent,
+      backup: localStorage.getItem("er_terminal_save_corrupted_backup"),
+      saveNovoEhJsonValido: (() => { try { JSON.parse(localStorage.getItem("er_terminal_save")); return true; } catch (e) { return false; } })(),
+      tabsExist: !!document.querySelector(".tab-btn"),
+    }));
+    corruptedSaveOk = result.bannerVisivel && result.textoBanner.indexOf("corrompido") !== -1 &&
+      result.backup === "{isto nao eh json valido de jeito nenhum" && result.saveNovoEhJsonValido &&
+      result.tabsExist && pageErrors.length === 0;
+    corruptedSaveDetail = JSON.stringify({ ...result, pageErrors });
+  } catch (e) {
+    corruptedSaveOk = false;
+    corruptedSaveDetail = String(e);
+  }
+  console.log(corruptedSaveOk
+    ? "=== save corrompido (não-JSON): banner avisou, backup foi guardado, app recuperou sem crash ==="
+    : `=== FALHA no teste de save corrompido: ${corruptedSaveDetail} ===`);
+  if (!corruptedSaveOk) process.exitCode = 1;
+
   await page.evaluate(() => { try { localStorage.clear(); } catch (e) {} });
   await browser.close();
 

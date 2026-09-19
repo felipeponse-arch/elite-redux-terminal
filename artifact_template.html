@@ -2804,7 +2804,25 @@
         // mesmo, antes da primeira renderização.
         if (autoEvolveRoster(true)) persist();
         return;
-      } catch (e) { /* fall through */ }
+      } catch (e) {
+        // BUG P0 achado em auditoria, 2026-09-18: antes disto, um save
+        // corrompido (gravação incompleta, disco cheio, extensão de
+        // navegador) caía direto pro seed de exemplo abaixo, que persist()
+        // JÁ sobrescrevia a chave corrompida na mesma passagem - perda de
+        // progresso 100% silenciosa, sem nenhum aviso. Uma falha de
+        // ESCRITA (quota) já ganhava banner persistente (showStorageBanner
+        // logo acima) - a falha de LEITURA no carregamento não ganhava
+        // nada. Guarda o texto cru numa chave separada ANTES de qualquer
+        // coisa escrever por cima (só dá uma chance de recuperação manual,
+        // nunca tenta recuperar sozinho - o JSON pode estar genuinamente
+        // truncado) e avisa com o MESMO banner persistente de sempre.
+        lsSet(STORE_KEY + "_corrupted_backup", raw);
+        showStorageBanner(
+          "O save salvo neste navegador não pôde ser lido (ficou corrompido). Uma cópia do texto original foi " +
+          "guardada em \"" + STORE_KEY + "_corrupted_backup\" no armazenamento local deste navegador, caso queira " +
+          "tentar recuperar à mão. Recomeçando com um time de exemplo, sem mexer nessa cópia."
+        );
+      }
     }
     // First visit on this browser: seed with Claude's latest recommendation
     // instead of starting empty, and persist so it only happens once.
