@@ -111,6 +111,69 @@ async function section19() {
       juanCard ? juanCard.textContent.slice(0, 120) : "(sem card)");
   }
 
+  // ---- "Prontidão do seu time" (achado em auditoria, 2026-09-18, item 17):
+  // antes só existia um jeito manual (copiar time+chefão pra colar numa
+  // conversa à parte) de comparar o time do jogador com o do chefão. Reusa
+  // o mesmo motor de computeBossAttackTypes/bossSafetyScore já usado pra
+  // sugerir troca de caixa - o teste recalcula os números de forma
+  // independente (não confia só na presença do texto) e cruza contra o que
+  // a tela mostra de verdade. ----
+  T.state.settings.difficulty = "ace";
+  document.getElementById("boss-search-input").value = "Roxanne 1";
+  document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
+  await wait(30);
+  var roxanneRow = document.querySelector("#boss-list .species-row");
+  if (achou("Roxanne 1 (fixture) pra testar Prontidão do seu time", roxanneRow)) {
+    roxanneRow.click();
+    await wait(50);
+    var boss = T.BOSSES.find(function (b) { return b.name === "Roxanne 1"; });
+    if (achou("dado real do chefão Roxanne 1 (T.BOSSES)", boss)) {
+      var atkTypes = T.computeBossAttackTypes(boss);
+      var teamMembers = T.state.team.map(T.getSpeciesByX).filter(Boolean);
+      var esperadoSeguros = 0, esperadoVulneraveis = [];
+      teamMembers.forEach(function (owned) {
+        var melhor = null;
+        T.battleUnitsOf(owned).forEach(function (unit) {
+          var s = T.bossSafetyScore(unit, atkTypes);
+          if (melhor === null || s < melhor) melhor = s;
+        });
+        if (melhor >= 1) esperadoVulneraveis.push(owned.n);
+        else if (melhor <= -1) esperadoSeguros++;
+      });
+      var tier = "party"; // Ace usa "party", já confirmado no P1 desta seção
+      var bossParty = ((boss[tier] && boss[tier].length) ? boss[tier] : boss.party || [])
+        .map(function (m) { return T.getSpeciesByX(m.x); }).filter(Boolean);
+      var tiposEfetivosEsperados = {};
+      teamMembers.forEach(function (owned) {
+        T.battleUnitsOf(owned).forEach(function (unit) {
+          T.speciesTypeNames(unit.main).forEach(function (t) {
+            if (tiposEfetivosEsperados[t]) return;
+            if (bossParty.some(function (foe) { return T.abilityTypeMod(t, foe).mult >= 2; })) tiposEfetivosEsperados[t] = true;
+          });
+        });
+      });
+      var numTiposEsperado = Object.keys(tiposEfetivosEsperados).length;
+
+      var cardProntidao = [...document.querySelectorAll("#boss-detail .card")].find(function (c) {
+        return c.querySelector("h3") && c.querySelector("h3").textContent.indexOf("Prontidão") !== -1;
+      });
+      if (achou("card \"Prontidão do seu time\" na ficha do chefão", cardProntidao)) {
+        var texto = cardProntidao.textContent;
+        check("contagem de seguros/total bate com o recálculo independente (bossSafetyScore)",
+          texto.indexOf(esperadoSeguros + " de " + teamMembers.length + " Pokémon") !== -1,
+          "esperado " + esperadoSeguros + "/" + teamMembers.length + " em: " + texto);
+        var todosVulneraveisCitados = esperadoVulneraveis.every(function (nome) { return texto.indexOf(nome) !== -1; });
+        check("todo Pokémon vulnerável esperado é citado pelo nome (nunca só uma contagem vaga)",
+          esperadoVulneraveis.length === 0 || todosVulneraveisCitados, { esperado: esperadoVulneraveis, texto: texto });
+        check("contagem de tipos ofensivos super efetivos bate com o recálculo independente",
+          numTiposEsperado === 0
+            ? texto.indexOf("Nenhum dos seus tipos atuais é super efetivo") !== -1
+            : texto.indexOf("pelo menos " + numTiposEsperado + " tipo") !== -1,
+          "esperado " + numTiposEsperado + " em: " + texto);
+      }
+    }
+  }
+
   document.getElementById("boss-search-input").value = "";
   document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
   document.querySelector('.tab-btn[data-tab="dex"]').click();

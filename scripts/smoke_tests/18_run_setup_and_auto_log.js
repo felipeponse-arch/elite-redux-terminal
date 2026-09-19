@@ -140,6 +140,53 @@ async function section18() {
     await wait(30);
   }
 
+  // ---- Destaque de arquétipo Monotype no Glossário de Papéis e Speed
+  // Tiers (achado em auditoria, 2026-09-18, item 18) - antes as duas
+  // referências eram cegas ao arquétipo escolhido. Confere que o destaque
+  // aparece SÓ nas espécies do tipo certo (nunca a mais, nunca a menos) -
+  // recalculado de forma independente, não só "apareceu alguma marcação". ----
+  var tipoMonotype = T.MONOTYPE_ARCHETYPES[0];
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  selecionarArquetipo("monotype", tipoMonotype);
+  await wait(30);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  document.querySelector('#tabs-more-panel [data-tab="types"]').click();
+  await wait(50);
+
+  var roleGroupsComArquetipo = T.computeRoleCompendium();
+  check("computeRoleCompendium sinaliza \"combina\" só pra espécies do Monotype ativo (nunca a mais/menos)",
+    roleGroupsComArquetipo.every(function (g) {
+      return g.examples.every(function (ex) {
+        var combinaEsperado = T.speciesTypeNames(ex.sp).indexOf(tipoMonotype) !== -1;
+        return ex.combina === combinaEsperado;
+      });
+    }), roleGroupsComArquetipo.map(function (g) { return g.role + ":" + g.examples.map(function (e) { return e.sp.n + "=" + e.combina; }).join(","); }));
+  var chipsDestacados = document.querySelectorAll("#role-compendium .role-chip-match");
+  var todosExemplosQueCombinam = roleGroupsComArquetipo.reduce(function (a, g) { return a + g.examples.filter(function (e) { return e.combina; }).length; }, 0);
+  check("a quantidade de chips destacados na tela bate com o recálculo independente",
+    chipsDestacados.length === todosExemplosQueCombinam, chipsDestacados.length + " vs " + todosExemplosQueCombinam);
+
+  var linhasDestacadas = document.querySelectorAll("#speedtier-table tbody tr.speedtier-row-match");
+  var todasAsLinhas = document.querySelectorAll("#speedtier-table tbody tr");
+  var esperadoLinhasDestacadas = [...todasAsLinhas].filter(function (tr) {
+    var nome = tr.querySelector(".goto-species").textContent;
+    var sp = T.SPECIES.find(function (s) { return s.n === nome; });
+    return sp && T.speciesTypeNames(sp).indexOf(tipoMonotype) !== -1;
+  }).length;
+  check("Speed Tiers destaca as linhas certas pro Monotype ativo (recalculado de forma independente)",
+    linhasDestacadas.length === esperadoLinhasDestacadas && esperadoLinhasDestacadas > 0,
+    linhasDestacadas.length + " vs " + esperadoLinhasDestacadas + " esperadas (de " + todasAsLinhas.length + " linhas)");
+
+  // limpa o arquétipo pra não vazar estado pras seções seguintes
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(30);
+  selecionarArquetipo("monotype", "");
+  await wait(30);
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+
   document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
   await wait(30);
   escolher(diff, "ace");

@@ -218,7 +218,7 @@ async function section07() {
               window.__mockLastPrompt = prompt;
               if (opts && Array.isArray(opts.tools)) {
                 for (const t of opts.tools) {
-                  const input = (t.name === "getSpeciesRank" || t.name === "getPriorityMoveOptions" || t.name === "getAbilityMovepoolSynergy") ? { sname: "SPECIES_SQUIRTLE" } : {};
+                  const input = (t.name === "getSpeciesRank" || t.name === "getPriorityMoveOptions" || t.name === "getAbilityMovepoolSynergy" || t.name === "getSpeedBenchmark") ? { sname: "SPECIES_SQUIRTLE" } : {};
                   const result = await t.execute(input);
                   window.__mockToolCalls.push({ name: t.name, result });
                 }
@@ -278,6 +278,27 @@ async function section07() {
             return s.ability === "Torrent" && s.categoria === "Water" && s.golpesReaisQueSeBeneficiam.indexOf("Surf") !== -1;
           }),
           synergyCall && JSON.stringify(synergyCall.result.synergies));
+        // getSpeedBenchmark (achado em auditoria, 2026-09-18, item 14): a
+        // tabela de Speed Tiers nunca tinha chegado até o gerador de build
+        // por IA. Confere contra T.computeSpeedTiers("") de verdade - não
+        // só que a ferramenta foi chamada, mas que os números batem exato.
+        const speedCall = window.__mockToolCalls.find(c => c.name === "getSpeedBenchmark");
+        check("o mock chamou getSpeedBenchmark (sexta ferramenta real, não simulada por fora)",
+          speedCall && typeof speedCall.result.posicaoNoRankingInvestido === "number",
+          speedCall && JSON.stringify(speedCall.result));
+        if (speedCall) {
+          var Terr = window.__erTest;
+          var stReal = Terr.computeSpeedTiers("");
+          var idxReal = stReal.rows.findIndex(function (r) { return r.sp.sname === "SPECIES_SQUIRTLE"; });
+          check("getSpeedBenchmark bate exatamente com a tabela real de Speed Tiers (posição/total/velocidades)",
+            idxReal !== -1 &&
+            speedCall.result.posicaoNoRankingInvestido === idxReal + 1 &&
+            speedCall.result.totalDeEspecies === stReal.rows.length &&
+            speedCall.result.especiesQueUltrapassaInvestindo === stReal.rows.length - idxReal - 1 &&
+            speedCall.result.velocidadeComInvestimento === stReal.rows[idxReal].invested &&
+            speedCall.result.velocidadeComChoiceScarf === stReal.rows[idxReal].scarf,
+            { esperado: idxReal !== -1 ? { pos: idxReal + 1, total: stReal.rows.length, invested: stReal.rows[idxReal].invested } : null, real: speedCall.result });
+        }
         // getRemainingBosses - 2026-09-10, contexto de progressao para a IA
         // (pedido do usuario: "daqui ate o final o que faz sentido nesse
         // poke agora"). Sem interacao nova - le so state.settings.milestone,

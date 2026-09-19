@@ -89,7 +89,8 @@ async function section20() {
               opening: "Abra com o mais rápido dos dois pra ler o time adversário.",
               development: "Troque pro outro membro quando o tipo dele resistir ao que está em campo.",
               winCondition: "Feche a partida com quem sobrar de HP mais alto.",
-              threats: "Times com resistência dupla ao ataque principal dificultam - troque de golpe/plano nesse caso."
+              threats: "Times com resistência dupla ao ataque principal dificultam - " + fx1.sp.n + " segura essa matchup.",
+              threatMemberSname: fx1.sp.sname
             };
           }
           return {};
@@ -150,6 +151,25 @@ async function section20() {
       /Ameaças e respostas:/.test(cardGerado.textContent));
     check("validação confirma que os 2 membros têm build - não afirma isso sem checar de verdade",
       /Todos os 2 membros têm build confirmada/.test(cardGerado.textContent), cardGerado.textContent);
+
+    // ---- "Ver Estratégias" na ameaça citada (achado em auditoria,
+    // 2026-09-18, item 16): threatMemberSname vindo da IA (aqui mockado
+    // como fx1) precisa virar um link/botão de verdade pro membro CERTO,
+    // que ao ser ativado abre a Dex dele já com Estratégias expandida. ----
+    var linkEstrategias = cardGerado.querySelector(".goto-species-strategies");
+    if (achou("link \"Ver Estratégias\" aparece quando threatMemberSname veio válido", linkEstrategias)) {
+      check("o link aponta pro membro CERTO (o citado pela IA como threatMemberSname), não um genérico",
+        parseInt(linkEstrategias.dataset.x, 10) === fx1.sp.x, linkEstrategias.dataset.x + " vs esperado " + fx1.sp.x);
+      linkEstrategias.click();
+      await wait(80);
+      var detAberto = [...document.querySelectorAll(".detail-group")].find(function (d) {
+        return d.querySelector("summary") && d.querySelector("summary").textContent.indexOf("Estratégias") === 0;
+      });
+      check("clicar no link navega pra Dex do membro certo com a seção Estratégias já aberta",
+        document.querySelector(".detail-titles h2") && document.querySelector(".detail-titles h2").textContent === fx1.sp.n &&
+        !!detAberto && detAberto.open,
+        { especieAberta: (document.querySelector(".detail-titles h2") || {}).textContent, estrategiasAberta: detAberto && detAberto.open });
+    }
   }
 
   // ---- P2: Monotype filtra o roster deterministicamente (não confia na IA) ----

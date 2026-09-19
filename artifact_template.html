@@ -695,6 +695,10 @@
      party member. See goToDexSpecies(). */
   .goto-species { cursor: pointer; }
   .goto-species:hover { opacity: .8; }
+  /* "Ver Estratégias" no card "Time gerado" - vai direto pro membro certo
+     da ameaça citada (goToDexSpeciesStrategies), não só a Dex genérica. */
+  .goto-species-strategies { cursor: pointer; color: var(--badge-accent2); font-weight: 600; text-decoration: underline; text-decoration-style: dotted; }
+  .goto-species-strategies:hover { opacity: .8; }
   .evo-arrow { color: var(--text-dim); font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 44px; padding: 0 2px; }
   .evo-arrow-line { width: 100%; height: 2px; background: repeating-linear-gradient(90deg, var(--border) 0 4px, transparent 4px 8px); position: relative; flex: none; }
   .evo-arrow-line::after {
@@ -1331,6 +1335,9 @@
   .speedtier-table th.rowhead, .speedtier-table td.rowhead { text-align: left; }
   .speedtier-table tbody tr { content-visibility: auto; contain-intrinsic-size: 40px; }
   .speedtier-table tbody tr:hover { background: var(--surface-2); }
+  /* Destaque de arquétipo (item 18, mesma ideia do .role-chip-match acima). */
+  .speedtier-table tbody tr.speedtier-row-match { background: color-mix(in srgb, var(--accent-2) 10%, transparent); }
+  .speedtier-table tbody tr.speedtier-row-match:hover { background: color-mix(in srgb, var(--accent-2) 18%, transparent); }
   .speedtier-name-cell { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
   /* .speedtier-name-cell above styles the <span> wrapper inside the <td>,
      never the <td> itself - a table cell needs to keep display:table-cell
@@ -1346,6 +1353,11 @@
     padding: 4px 10px 4px 4px; font-size: 12.5px; font-weight: 600; cursor: pointer;
   }
   .role-chip:hover { border-color: var(--accent-2); }
+  /* Destaque de arquétipo (achado em auditoria, 2026-09-18, item 18): a
+     mesma referência agora sinaliza quem combina com o Monotype ativo do
+     jogador, sem esconder o resto - a tabela continua útil fora de uma run
+     Monotype, só ganha um sinal a mais quando faz sentido. */
+  .role-chip-match { border-color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 14%, var(--surface-2)); }
   .cov-table th, .cov-table td { padding: 0; text-align: center; }
   .cov-table th.rowhead, .cov-table td.rowhead { text-align: left; font-weight: 600; padding: 0 8px 0 0; }
   .cov-head { display: flex; flex-direction: column; align-items: center; gap: 2px; padding-bottom: 4px; }
@@ -3814,6 +3826,39 @@
     if (!isNaN(x)) goToDexSpecies(x);
   });
 
+  // "Ver Estratégias" no card "Time gerado" (achado em auditoria,
+  // 2026-09-18, item 16): o guia de uso já cita um chefão real e quem
+  // segura ele, mas o jogador ainda tinha que navegar à mão até a Dex e
+  // abrir Estratégias pra ver um set alternativo pra essa matchup - fecha
+  // esse ciclo com 1 clique/Enter. goToDexSpecies já roda selectSpecies()
+  // de forma síncrona, então o <details> de Estratégias já existe no DOM
+  // logo depois - só falta abri-lo e rolar até ele.
+  function goToDexSpeciesStrategies(x) {
+    goToDexSpecies(x);
+    var det = [].slice.call(document.querySelectorAll(".detail-group")).find(function (d) {
+      var s = d.querySelector("summary");
+      return s && s.textContent.indexOf("Estratégias") === 0;
+    });
+    if (det) {
+      det.open = true;
+      det.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+  }
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest && e.target.closest(".goto-species-strategies");
+    if (!el) return;
+    var x = parseInt(el.dataset.x, 10);
+    if (!isNaN(x)) goToDexSpeciesStrategies(x);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var el = e.target.closest && e.target.closest(".goto-species-strategies");
+    if (!el) return;
+    e.preventDefault();
+    var x = parseInt(el.dataset.x, 10);
+    if (!isNaN(x)) goToDexSpeciesStrategies(x);
+  });
+
   function selectSpecies(x) {
     // Only reset scroll when the species actually CHANGES - selectSpecies()
     // is also called to refresh the currently-open species in place (e.g.
@@ -5160,6 +5205,33 @@
     };
   }
 
+  // Ferramenta pra IA (achado em auditoria, 2026-09-18, item 14): a tabela
+  // de Speed Tiers (computeSpeedTiers, feature desta mesma sessão) nunca
+  // tinha chegado até o gerador de build por IA - ela decidia investimento
+  // de Velocidade só olhando o stat base no prompt, sem saber se 252 EV
+  // realmente ultrapassa alguma ameaça de verdade do jogo. Mesmo padrão das
+  // outras ferramentas: devolve um dado já calculado pelo app (mesmo
+  // computeSpeedTiers da tela de Tipos), a IA nunca recalcula sozinha.
+  function aiTool_getSpeedBenchmark(input) {
+    var sname = input && input.sname;
+    var sp = sname ? getSpeciesBySname(sname) : null;
+    if (!sp) return { erro: "sname nao encontrado" };
+    var st = computeSpeedTiers("");
+    var idx = st.rows.findIndex(function (r) { return r.sp.sname === sname; });
+    if (idx === -1) return { erro: "especie sem entrada na tabela de Speed Tiers" };
+    var row = st.rows[idx];
+    return {
+      nivel: st.level,
+      velocidadeBase: row.base,
+      velocidadeSemInvestimento: row.neutral,
+      velocidadeComInvestimento: row.invested,
+      velocidadeComChoiceScarf: row.scarf,
+      posicaoNoRankingInvestido: idx + 1,
+      totalDeEspecies: st.rows.length,
+      especiesQueUltrapassaInvestindo: st.rows.length - idx - 1
+    };
+  }
+
   // "Gerar build com IA" - 2026-09-09, user's own rule: check for a saved
   // build first (that's the normal render path, already handled by
   // myBuildEditorHtml/effectiveBuild); when there's room for another (cap
@@ -5225,6 +5297,12 @@
         description: "Retorna a descricao real (em ingles, texto original do jogo) do efeito de um item pelo nome exato (ex: 'Swirly Glasses', 'Tactical Vest', 'Iron Pill'). Use SEMPRE antes de recomendar ou explicar um item que nao seja obviamente vanilla/conhecido - nao adivinhe o efeito de item exclusivo deste hack. Retorna description=null quando nao ha descricao conhecida (nesse caso, nao invente o efeito).",
         inputSchema: { type: "object", properties: { name: { type: "string" } }, required: ["name"] },
         execute: function (input) { return aiTool_getItemInfo(input); }
+      },
+      {
+        name: "getSpeedBenchmark",
+        description: "Retorna, pro sname informado, a Velocidade real (no level cap atual) sem EV, com 252 EV + nature +Velocidade, e com Choice Scarf em cima - mais a posicao real desta especie no ranking de Velocidade investida entre as " + SPECIES.length + " especies do jogo e quantas ela ultrapassa investindo. Use antes de decidir EV de Velocidade - em vez de chutar se 252 EV 'e rapido o bastante', confira a posicao real.",
+        inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
+        execute: function (input) { return aiTool_getSpeedBenchmark(input); }
       }
     ];
   }
@@ -5339,6 +5417,10 @@
       "dos 4 golpes - o formato aqui e 1x1, entao golpe de prioridade pode decidir uma troca sozinho, " +
       "mas so inclua se fizer sentido pro papel escolhido (ex: um wallbreaker lento se beneficia mais " +
       "de prioridade do que um sweeper que ja e mais rapido que a maioria).\n" +
+      "Antes de decidir EV de Velocidade, use getSpeedBenchmark pra ver a posicao REAL desta especie no " +
+      "ranking de Velocidade - nao chute se 252 EV 'e rapido o bastante', confira quantas especies ela " +
+      "ultrapassa investindo. Se ela ja e rapida o bastante sem EV total (ou quase), considere investir " +
+      "menos em Velocidade e mais em bulk/ataque, e explique isso na rationale.\n" +
       "Use tambem getAbilityMovepoolSynergy pra ver se alguma das habilidades desta especie (escolhivel " +
       "ou innate) aumenta de verdade o poder de golpes que ela REALMENTE aprende (ex: Mighty Horn com um " +
       "golpe de chifre/broca real no movepool).\n" +
@@ -5476,7 +5558,9 @@
       curadoPromptLine +
       "Antes de responder, use getSpeciesRank e getAbilityMovepoolSynergy pra fundamentar os papeis escolhidos - " +
       "se getAbilityMovepoolSynergy retornar sinergia real, PELO MENOS UM dos sets precisa usar um golpe dela com " +
-      "a habilidade que ativa a sinergia (innate conta sempre).\n" +
+      "a habilidade que ativa a sinergia (innate conta sempre). Se algum set for um sweeper/atacante rapido, " +
+      "use getSpeedBenchmark pra confirmar que o EV de Velocidade escolhido realmente ultrapassa uma fatia " +
+      "relevante do jogo - nao chute.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
       '{"sets":[{"name":"...","ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"rationale":"..."}]}' +
       ". 'name' e um rotulo curto do papel (2-4 palavras, ex: 'Wallbreaker Especial'). nature precisa ser uma " +
@@ -6224,6 +6308,60 @@
     return { sp: boxBest.sp, owned: boxBest.owned, reasonType: reason.t, reasonMult: reason.mult };
   }
 
+  // "Prontidão do seu time" (achado em auditoria, 2026-09-18, item 17): antes
+  // a única forma de comparar o time do jogador com o do chefão era manual -
+  // "Enviar para o Claude" (copiar tudo e colar numa conversa à parte).
+  // Reusa o MESMO motor já usado pra sugerir troca de caixa
+  // (computeBossAttackTypes/bossSafetyScore/unitTypeMult, todos acima) - zero
+  // conta nova, só um resumo direto na própria ficha do chefão. Convenção de
+  // bossSafetyScore: score MENOR é MAIS seguro (imune/resiste sobem o
+  // "risco" pra baixo, fraco sobe pra cima) - ver o comentário original da
+  // função. Não é calculadora de dano (sem EVs/nature/habilidade do lado
+  // ofensivo do time) - só contagem de tipo, mesmo escopo do resto do
+  // dashboard/dessa mesma tela.
+  function bossReadinessHtml(boss) {
+    var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
+    if (!teamMembers.length) return "";
+    var atkTypes = computeBossAttackTypes(boss);
+    if (!atkTypes.length) return "";
+    var seguros = [], vulneraveis = [];
+    teamMembers.forEach(function (owned) {
+      var melhor = null;
+      battleUnitsOf(owned).forEach(function (unit) {
+        var s = bossSafetyScore(unit, atkTypes);
+        if (melhor === null || s < melhor) melhor = s;
+      });
+      if (melhor >= 1) vulneraveis.push(owned);
+      else if (melhor <= -1) seguros.push(owned);
+    });
+    var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
+    var bossParty = ((boss[tier] && boss[tier].length) ? boss[tier] : boss.party || [])
+      .map(function (m) { return getSpeciesByX(m.x); }).filter(Boolean);
+    var meusTiposEfetivos = {};
+    teamMembers.forEach(function (owned) {
+      battleUnitsOf(owned).forEach(function (unit) {
+        speciesTypeNames(unit.main).forEach(function (t) {
+          if (meusTiposEfetivos[t]) return;
+          if (bossParty.some(function (foe) { return abilityTypeMod(t, foe).mult >= 2; })) meusTiposEfetivos[t] = true;
+        });
+      });
+    });
+    var numTiposEfetivos = Object.keys(meusTiposEfetivos).length;
+    var frase1 = seguros.length + " de " + teamMembers.length + " Pokémon do seu time " +
+      (seguros.length === 1 ? "resiste bem" : "resistem bem") + " ao que este chefão ataca";
+    if (vulneraveis.length) {
+      frase1 += ", mas " + (vulneraveis.length === 1 ? "fica exposto: " : "ficam expostos: ") +
+        vulneraveis.map(function (sp) { return escapeHtml(sp.n); }).join(", ");
+    }
+    frase1 += ".";
+    var frase2 = numTiposEfetivos
+      ? "Seu time tem pelo menos " + numTiposEfetivos + " tipo" + (numTiposEfetivos === 1 ? "" : "s") + " super efetivo" + (numTiposEfetivos === 1 ? "" : "s") + " contra o time dele."
+      : "Nenhum dos seus tipos atuais é super efetivo contra o time dele - considere um golpe de cobertura.";
+    return '<div class="card"><h3>Prontidão do seu time</h3>' +
+      '<p style="margin:0 0 6px;">' + frase1 + '</p>' +
+      '<p style="margin:0;color:var(--text-dim);">' + frase2 + '</p></div>';
+  }
+
   // Fase 4 do roadmap (2026-09-12) - "PC Box ganha sugestões gerais de
   // encaixe no time, não só a sugestão única do próximo chefão". Reusa
   // computeSharedRisks() (mesma conta de "Cobertura defensiva"/dashboard,
@@ -6613,23 +6751,35 @@
       "acima - nunca um texto genérico sobre o arquétipo. Use getTeamWeaknesses, getRemainingBosses e, pra " +
       "membros específicos, getSpeciesRank/getPriorityMoveOptions antes de responder, em vez de chutar.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
-      '{"concept":"...","opening":"...","development":"...","winCondition":"...","threats":"..."}' +
-      ". Cada campo é texto corrido em português, sem markdown, sem lista. concept: 1-2 frases, a proposta " +
+      '{"concept":"...","opening":"...","development":"...","winCondition":"...","threats":"...","threatMemberSname":"..."}' +
+      ". Cada campo de texto é corrido em português, sem markdown, sem lista. concept: 1-2 frases, a proposta " +
       "do time e como ele costuma vencer. opening: 2-3 frases, quem tende a abrir a partida e o que observar " +
       "nos primeiros turnos. development: 2-3 frases, como posicionar, quando trocar, quando usar suporte, " +
       "como preservar recursos importantes. winCondition: 1-2 frases, qual Pokémon ou combinação costuma " +
       "fechar a partida e o que preservar pra isso. threats: 2-3 frases - cite PELO MENOS UM chefão ou líder " +
       "de ginásio REAL que ainda falta enfrentar (nome exato de getRemainingBosses) que é particularmente " +
       "perigoso pra este time, dizendo qual integrante segura ele e por quê (tipo, golpe ou stat real dele, " +
-      "nunca chutado) - nomeie o adversário de verdade, não fique só em 'ameaças do tipo X' genérico. Se " +
-      "getRemainingBosses vier vazio (nada mais falta no jogo), aí sim fale em termos gerais de tipo/estratégia. " +
-      "Não invente golpe/habilidade/item fora do que foi listado acima - se não tiver certeza de algo, seja " +
-      "mais genérico em vez de arriscar.";
+      "nunca chutado) - nomeie o adversário de verdade, não fique só em 'ameaças do tipo X' genérico. " +
+      "threatMemberSname: o sname EXATO (dos listados acima, ex: SPECIES_CHARIZARD) do integrante que você citou " +
+      "em threats como quem segura a ameaça - vazio se threats não citar nenhum chefão real. Se getRemainingBosses " +
+      "vier vazio (nada mais falta no jogo), aí sim fale em termos gerais de tipo/estratégia em threats e deixe " +
+      "threatMemberSname vazio. Não invente golpe/habilidade/item fora do que foi listado acima - se não tiver " +
+      "certeza de algo, seja mais genérico em vez de arriscar.";
+    // sname -> x, pra resolver threatMemberSname sem confiar cegamente na
+    // palavra da IA (mesma disciplina de sempre - só aceita se for um
+    // integrante REAL desta equipe, nunca um sname inventado ou de fora).
+    var snameParaX = {};
+    members.forEach(function (sp) { snameParaX[sp.sname] = sp.x; });
     try {
       var raw = await sample.json(prompt, { tools: buildStandardAiTools() });
       if (!raw || typeof raw !== "object") return null;
       var pick = function (k) { return (typeof raw[k] === "string") ? raw[k].slice(0, 500) : ""; };
-      var guide = { concept: pick("concept"), opening: pick("opening"), development: pick("development"), winCondition: pick("winCondition"), threats: pick("threats") };
+      var guide = {
+        concept: pick("concept"), opening: pick("opening"), development: pick("development"),
+        winCondition: pick("winCondition"), threats: pick("threats"),
+        threatMemberX: (typeof raw.threatMemberSname === "string" && snameParaX.hasOwnProperty(raw.threatMemberSname))
+          ? snameParaX[raw.threatMemberSname] : null
+      };
       // Confere se "threats" citou mesmo um chefão/líder real (achado em
       // auditoria, 2026-09-18): o prompt já EXIGIA isso, mas a resposta
       // nunca era checada contra o getRemainingBosses de verdade - mesma
@@ -6644,12 +6794,17 @@
             "nenhum chefão/líder real da lista abaixo, e a regra que você recebeu exigia isso.\n" +
             "Chefões/líderes que ainda faltam enfrentar: " + remainingNames.join(", ") + "\n" +
             "Time:\n" + teamList + "\n" +
-            "Reescreva SÓ o campo threats (2-3 frases, português): cite pelo menos um desses nomes exatos, diga " +
-            "qual integrante do time segura ele e por quê (tipo, golpe ou stat real dele). " +
-            "Responda SOMENTE com {\"threats\":\"...\"}, sem texto ao redor.",
+            "Reescreva SÓ os campos threats e threatMemberSname (threats: 2-3 frases em português, cite pelo " +
+            "menos um desses nomes exatos e diga qual integrante do time segura ele e por quê - tipo, golpe ou " +
+            "stat real dele; threatMemberSname: o sname EXATO desse integrante). " +
+            "Responda SOMENTE com {\"threats\":\"...\",\"threatMemberSname\":\"...\"}, sem texto ao redor.",
             { tools: buildStandardAiTools() }
           );
-          if (raw2 && typeof raw2.threats === "string") guide.threats = raw2.threats.slice(0, 500);
+          if (raw2 && typeof raw2.threats === "string") {
+            guide.threats = raw2.threats.slice(0, 500);
+            guide.threatMemberX = (typeof raw2.threatMemberSname === "string" && snameParaX.hasOwnProperty(raw2.threatMemberSname))
+              ? snameParaX[raw2.threatMemberSname] : null;
+          }
         } catch (e2) { /* tentativa extra falhou - fica com o threats original, mesmo sem citação confirmada */ }
       }
       return guide;
@@ -6717,7 +6872,11 @@
           '<div class="ts-guide-item"><b>Abertura:</b> ' + escapeHtml(g.opening || "—") + '</div>' +
           '<div class="ts-guide-item"><b>Desenvolvimento:</b> ' + escapeHtml(g.development || "—") + '</div>' +
           '<div class="ts-guide-item"><b>Condição de vitória:</b> ' + escapeHtml(g.winCondition || "—") + '</div>' +
-          '<div class="ts-guide-item"><b>Ameaças e respostas:</b> ' + escapeHtml(g.threats || "—") + '</div>' +
+          '<div class="ts-guide-item"><b>Ameaças e respostas:</b> ' + escapeHtml(g.threats || "—") +
+            (g.threatMemberX !== null && g.threatMemberX !== undefined
+              ? ' <span class="goto-species-strategies" tabindex="0" role="button" data-x="' + g.threatMemberX + '">Ver Estratégias &rarr;</span>'
+              : "") +
+          '</div>' +
         '</div>'
       : '<p class="mybuild-hint">O guia de uso não veio desta vez - o time e as builds continuam válidos, só falta o texto de como jogar (pode gerar de novo).</p>';
     var riskText = v.sharedRisks.length
@@ -7114,6 +7273,7 @@
         '<div class="detail-dexno mono">' + escapeHtml(boss.cat) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +
       (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:11px;margin:6px 0 0;max-width:65ch;">Nomes crus dos dados do jogo — não temos 100% de certeza que "Insane"/"Hell" batem exatamente com os modos "Ace"/"Elite" do menu do jogo atual. Confira sua dificuldade no Centro Pokémon se quiser ter certeza.</p></div>' : "") +
+      bossReadinessHtml(boss) +
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
         '<div class="boss-level-row"><label for="boss-level-input">Status final calculados pro nível</label>' +
           '<input type="number" id="boss-level-input" min="1" max="100" value="' + bossState.level + '"></div>' +
@@ -7384,11 +7544,18 @@
   function renderSpeedTiers() {
     var query = document.getElementById("speedtier-search").value;
     var result = computeSpeedTiers(query);
+    // Destaque de arquétipo (achado em auditoria, 2026-09-18, item 18) -
+    // mesmo tratamento do Glossário de Papéis logo abaixo: sinaliza quem é
+    // do tipo Monotype ativo, nunca filtra (a tabela inteira continua
+    // visível/útil fora de uma run Monotype).
+    var monotype = state.archetype.monotype || "";
     document.getElementById("speedtier-note").textContent =
       "Velocidade calculada no seu level cap atual (" + result.level + "), IVs 31. \"Investido\" = 252 EV + natureza " +
-      SPEEDTIER_NATURE + " (mesmo +10% de qualquer natureza +Velocidade). \"+ Choice Scarf\" empilha 1.5x em cima do investido, quando o item existe neste hack.";
+      SPEEDTIER_NATURE + " (mesmo +10% de qualquer natureza +Velocidade). \"+ Choice Scarf\" empilha 1.5x em cima do investido, quando o item existe neste hack." +
+      (monotype ? " Linhas destacadas: compatíveis com sua run Monotype " + monotype + "." : "");
     var body = result.rows.map(function (r, idx) {
-      return '<tr>' +
+      var combina = !!monotype && speciesTypeNames(r.sp).indexOf(monotype) !== -1;
+      return '<tr' + (combina ? ' class="speedtier-row-match"' : '') + '>' +
         '<td class="rowhead"><span class="speedtier-name-cell"><span class="speedtier-rank mono">' + (idx + 1) + '</span>' + spriteImgHtml(r.sp.x, r.sp.n, 24) +
           '<span class="goto-species" tabindex="0" role="button" data-x="' + r.sp.x + '">' + escapeHtml(r.sp.n) + '</span></span></td>' +
         '<td class="mono">' + r.base + '</td>' +
@@ -7424,14 +7591,24 @@
   };
   var ROLE_SORT_PCT = { Pivo: "bulkPct", Tanque: "bulkPct", Wallbreaker: "offensePct", Sweeper: "spePct" };
   var ROLE_TIER_ORDER = { SS: 0, S: 1, A: 2, B: 3, C: 4, D: 5 };
+  // Destaque de arquétipo (achado em auditoria, 2026-09-18, item 18): antes
+  // o Glossário de Papéis era cego ao arquétipo - um jogador numa run
+  // Monotype via o mesmo top-10 global de sempre, incluindo espécies de
+  // tipos que ele nem pode usar. `combina` sinaliza (nunca filtra/esconde -
+  // a referência continua útil fora de uma run Monotype) quem é do tipo
+  // Monotype ativo.
   function computeRoleCompendium() {
+    var monotype = state.archetype.monotype || "";
     return ["Pivo", "Tanque", "Wallbreaker", "Sweeper"].map(function (role) {
       var members = [];
       SPECIES.forEach(function (sp) {
         var r = SPECIES_ROLE[sp.sname];
         if (r && r.roles && r.roles.indexOf(role) !== -1) {
           var rank = SPECIES_RANK[sp.sname];
-          members.push({ sp: sp, tier: rank ? rank.tier : null, sortVal: r[ROLE_SORT_PCT[role]] });
+          members.push({
+            sp: sp, tier: rank ? rank.tier : null, sortVal: r[ROLE_SORT_PCT[role]],
+            combina: !!monotype && speciesTypeNames(sp).indexOf(monotype) !== -1
+          });
         }
       });
       members.sort(function (a, b) {
@@ -7439,18 +7616,21 @@
         var tb = (b.tier !== null && ROLE_TIER_ORDER[b.tier] !== undefined) ? ROLE_TIER_ORDER[b.tier] : 6;
         return ta !== tb ? ta - tb : b.sortVal - a.sortVal;
       });
-      return { role: role, label: ROLE_LABEL_PT[role] || role, desc: ROLE_DESCRIPTIONS_PT[role], total: members.length, examples: members.slice(0, 10) };
+      return { role: role, label: ROLE_LABEL_PT[role] || role, desc: ROLE_DESCRIPTIONS_PT[role], total: members.length, examples: members.slice(0, 10), monotype: monotype };
     });
   }
   function renderRoleCompendium() {
     var groups = computeRoleCompendium();
     document.getElementById("role-compendium").innerHTML = groups.map(function (g) {
       var chips = g.examples.map(function (m) {
-        return '<span class="role-chip goto-species" tabindex="0" role="button" data-x="' + m.sp.x + '">' + spriteImgHtml(m.sp.x, m.sp.n, 24) +
+        return '<span class="role-chip goto-species' + (m.combina ? ' role-chip-match' : '') + '" tabindex="0" role="button" data-x="' + m.sp.x + '">' + spriteImgHtml(m.sp.x, m.sp.n, 24) +
           escapeHtml(m.sp.n) + rankBadgeHtml(m.sp.sname) + '</span>';
       }).join("");
+      var monotypeNote = g.monotype
+        ? '<p class="hint" style="margin:2px 0 8px;">Destacados: compatíveis com sua run Monotype ' + escapeHtml(g.monotype) + '.</p>'
+        : "";
       return '<div class="card"><h3>' + escapeHtml(g.label) + ' <span class="role-count">(' + g.total + ' espécie(s))</span></h3>' +
-        '<p class="mybuild-hint">' + escapeHtml(g.desc) + '</p>' +
+        '<p class="mybuild-hint">' + escapeHtml(g.desc) + '</p>' + monotypeNote +
         (chips ? '<div class="role-chip-list">' + chips + '</div>' : '<p class="hint">Nenhuma espécie se encaixa neste papel com os critérios atuais.</p>') +
       '</div>';
     }).join("");
@@ -7503,6 +7683,7 @@
     formFamilyOf: formFamilyOf,
     bestRankForm: bestRankForm,
     computeBossAttackTypes: computeBossAttackTypes,
+    bossSafetyScore: bossSafetyScore,
     bossSpeedSummary: bossSpeedSummary,
     getRemainingBossEntries: getRemainingBossEntries,
     GYM_SKILLS: GYM_SKILLS,
@@ -7525,6 +7706,7 @@
     getCurrentCap: getCurrentCap,
     levelCapMode: levelCapMode,
     getSpeciesByX: getSpeciesByX,
+    speciesTypeNames: speciesTypeNames,
     ABILITIES: ABILITIES,
     BOSSES: BOSSES,
     MOVE_BY_NAME: MOVE_BY_NAME,
