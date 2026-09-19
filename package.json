@@ -9,6 +9,7 @@
     "test:ci": "node tests/run_ci_smoke.mjs",
     "test:isolated": "node tests/run_sections_isolated.mjs",
     "test:fuzz": "node tests/run_fuzz_save_shapes.mjs",
+    "test:sync": "node tests/run_sync_mock_test.mjs",
     "test:visual": "node tests/run_visual_regression.mjs"
   },
   "devDependencies": {
