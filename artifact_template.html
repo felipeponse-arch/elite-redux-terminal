@@ -5368,6 +5368,29 @@
     return items;
   }
 
+  // Golpes já em uso por OUTROS membros do time (achado real do usuário,
+  // 2026-09-20: "em grande maioria eles usam sempre o mesmo move... o time
+  // fica repetitivo, a estratégia não tem variedade") - mesmo raciocínio
+  // de teamItemsInUse acima, aplicado a golpe. Diferença importante: item
+  // repetido é sempre desperdício (só um Pokémon usa por vez), mas golpe
+  // repetido às vezes É a escolha certa (o mesmo STAB forte pode ser a
+  // melhor opção pra duas espécies do mesmo tipo) - por isso isto vira
+  // preferência forte no prompt, não proibição, e não ganha a mesma trava
+  // de "defesa em profundidade" pós-validação que os itens têm (não dá pra
+  // simplesmente apagar 1 dos 4 golpes de uma build sem deixá-la quebrada,
+  // ao contrário do item, que tem "vazio" como fallback válido).
+  function teamMovesInUse(excludeX) {
+    var moves = [];
+    state.team.forEach(function (x) {
+      if (x === excludeX) return;
+      var otherSp = getSpeciesByX(x);
+      if (!otherSp) return;
+      var b = effectiveBuild(otherSp);
+      if (b && b.moves) moves = moves.concat(b.moves);
+    });
+    return moves;
+  }
+
   // Orientação real de build por Ritmo/Clima do time (achado do usuário,
   // 2026-09-13, com print do time montado via "Montar melhor time": a
   // build gerada por IA pra um membro do time nunca considerava o
@@ -5422,6 +5445,7 @@
     // estava fora do alcance atual). Golpe de tutor nunca trava por nível.
     var movepoolLines = availableMovesFor(sp).ids.map(movePromptLine);
     var takenItems = teamItemsInUse(sp.x);
+    var takenMoves = teamMovesInUse(sp.x);
     var megaNames = megaFormsOf(sp).map(function (m) { return m.n; });
     var megaStoneRule = megaStoneRuleFor(sp);
     var archetypeParts = archetypeBuildGuidance();
@@ -5445,6 +5469,7 @@
       (megaStoneRule ? (megaStoneRule.prompt + "\n") : "") +
       "Itens de batalha reais disponiveis - escolha UM destes (ou deixe vazio se nenhum fizer sentido): " + AI_ITEM_POOL.join(", ") + "\n" +
       (takenItems.length ? ("Itens JA EM USO por outros membros do time atual - NUNCA repita nenhum destes, escolha outro item ou deixe vazio: " + takenItems.join(", ") + "\n") : "") +
+      (takenMoves.length ? ("Golpes JA EM USO por outros membros do time atual: " + takenMoves.join(", ") + ". Evite repetir estes golpes nesta build - o time fica mais forte e menos repetitivo quando cada membro cobre uma ameaca/papel diferente. So repita um destes se for claramente a melhor opcao sem alternativa real equivalente (ex: o STAB mais forte do movepool desta especie) - nesse caso, diga na rationale por que nao havia alternativa melhor.\n") : "") +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
       "Antes de responder, use as ferramentas disponiveis pra ver as fraquezas reais do time atual " +

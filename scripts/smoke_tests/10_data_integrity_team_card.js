@@ -182,6 +182,43 @@ async function section10() {
     !!charBuild27 && charBuild27.item === "" && charBuild27.ability === "Flame Body",
     charBuild27);
 
+  // Golpes repetidos entre membros do time (achado real do usuário,
+  // 2026-09-20: "em grande maioria eles usam sempre o mesmo move... a
+  // estratégia não tem variedade") - mesma disciplina do teste de item
+  // acima, mas SEM a trava de defesa em profundidade pós-validação (não dá
+  // pra remover 1 de 4 golpes sem deixar a build quebrada, ao contrário do
+  // item que tem "vazio" como fallback válido - ver comentário de
+  // teamMovesInUse). O Charmeleon salvo no teste anterior tem moves reais e
+  // conhecidos (Scratch/Smokescreen/Fire Fang/Slash) - gera agora pro
+  // Bulbasaur (também no time) e confere que o prompt cita esses golpes.
+  window.__genAiPrompts = [];
+  window.claude = {
+    use: async function (name) {
+      if (name !== "sample") return null;
+      return {
+        json: async function (prompt, opts) {
+          window.__genAiPrompts.push(prompt);
+          return { ability: "Overgrow", nature: "Bold", item: "", moves: ["Tackle", "Growl", "Vine Whip", "Growth"], evs: [252, 0, 252, 0, 0, 0], rationale: "teste golpe duplicado" };
+        }
+      };
+    }
+  };
+  setSearch("Bulbasaur");
+  await wait(120);
+  var bulbaRow27b = [].slice.call(document.querySelectorAll("#species-list .species-row")).find(function (r) { return r.textContent.indexOf("Bulbasaur") !== -1; });
+  if (bulbaRow27b) {
+    bulbaRow27b.click();
+    await wait(30);
+    var aiBtn27c = document.getElementById("mybuild-ai-generate");
+    if (aiBtn27c) { aiBtn27c.click(); await wait(150); }
+  }
+  var movePrompt = window.__genAiPrompts[0] || "";
+  check("prompt de build por IA avisa quais golpes já estão em uso por outros membros do time",
+    movePrompt.indexOf("Golpes JA EM USO") !== -1 && movePrompt.indexOf("Scratch") !== -1 && movePrompt.indexOf("Fire Fang") !== -1,
+    movePrompt.slice(0, 600));
+  setSearch("");
+  await wait(30);
+
   // Gerador de build ignorava o arquétipo escolhido (achado real do
   // usuário, 2026-09-13, com print do time montado via "Montar melhor
   // time": "a build tem que ser de acordo com o ritmo que nós escolhemos e
