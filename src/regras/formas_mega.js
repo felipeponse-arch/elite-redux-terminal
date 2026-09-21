@@ -74,6 +74,19 @@
   //     só é necessária na primeira mega - o slot fica livre depois.
   function megaMode() { return state.settings.megaMode === "permanente" ? "permanente" : "temporaria"; }
 
+  // Trava de progresso (regra de jogo passada pelo usuário, 2026-09-20: "as
+  // [pedras mega] só são obtidas após a quarta insígnia" - achado real: o
+  // app estava sugerindo mega no time/caixa mesmo ANTES da primeira
+  // insígnia). Mesmo índice de milestone já usado em GYM_LEADER_MILESTONE.Flannery
+  // (artifact_template.html) - Flannery é o 4º líder, cuja vitória concede
+  // "Heat Badge (4o ginasio)" (LEVELCAPS.rows[4]); bate com a própria
+  // data/how_to_obtain.json ("Depois de vencer Flannery (4o ginasio)... Mystery
+  // Gift"), mesmo gatilho de progresso usado pra outros desbloqueios do hack.
+  // Só afeta o que conta como "disponível pra lutar agora" (battleUnitsOf) -
+  // a Dex continua mostrando a evolução mega normalmente, é só informação.
+  var MEGA_UNLOCK_MILESTONE = 4;
+  function megaEvolutionUnlocked() { return state.settings.milestone >= MEGA_UNLOCK_MILESTONE; }
+
   // Pedras de cada forma mega, a partir de data/mega_forms.json (pedra ->
   // forma, cruzado com o fork de Showdown do próprio jogo). Não usa o código
   // de item da evolução no dado bruto: em 19 megas ele não bate com o nome do
@@ -97,6 +110,11 @@
   function battleUnitsOf(owned) {
     var fam = formFamilyOf(owned);
     if (!fam.length) return [];
+    // Antes da 4ª insígnia, mega evolução não existe pro jogador de verdade -
+    // nenhuma unidade de batalha considera a(s) forma(s) mega (ver
+    // megaEvolutionUnlocked acima). Reduz a família só à base, exatamente
+    // como uma criatura sem nenhuma linha de mega.
+    if (!megaEvolutionUnlocked()) fam = [fam[0]];
     var base = fam[0];
     var megas = fam.slice(1);
     if (megaMode() === "permanente") return fam.map(function (f) { return { forms: [f], main: f, owned: owned }; });

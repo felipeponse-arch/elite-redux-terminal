@@ -121,6 +121,29 @@ async function section15() {
   check("evolução só de fêmea mostra ♀ (não ♂)", !!femea && femea.txt.indexOf("♀") !== -1 && femea.txt.indexOf("♂") === -1, femea ? femea.sp.n + ": " + femea.txt : "sem fixture");
   check("evolução só de macho mostra ♂", !!macho && macho.txt.indexOf("♂") !== -1, macho ? macho.sp.n + ": " + macho.txt : "sem fixture");
 
+  // ---- trava de progresso: mega só conta como disponível a partir da 4ª
+  // insígnia (Flannery) - achado real em 2026-09-20, o usuário reportou o
+  // gerador de time sugerindo mega ANTES até da 1ª insígnia. ----
+  if (chari) {
+    var milestoneOriginal = T.state.settings.milestone;
+    function comMilestone(m, fn) {
+      T.state.settings.milestone = m;
+      try { return fn(); } finally { T.state.settings.milestone = milestoneOriginal; }
+    }
+    check("megaEvolutionUnlocked() ponte existe", typeof T.megaEvolutionUnlocked === "function");
+    [0, 1, 2, 3].forEach(function (m) {
+      var units = comMilestone(m, function () { return T.battleUnitsOf(chari); });
+      check("milestone " + m + " (antes da 4ª insígnia): só a forma base conta como disponível",
+        units.length === 1 && units[0].forms.length === 1 && units[0].main.sname === "SPECIES_CHARIZARD",
+        fmt(units));
+    });
+    [4, 9].forEach(function (m) {
+      var units = comMilestone(m, function () { return T.battleUnitsOf(chari); });
+      check("milestone " + m + " (4ª insígnia ou depois): as formas mega voltam a contar",
+        units.length === 4, fmt(units));
+    });
+  }
+
   // ---- configuração na tela de Progresso ----
   var sel = document.getElementById("settings-mega-mode");
   check("tela de Progresso tem o seletor de modo de mega", !!sel);

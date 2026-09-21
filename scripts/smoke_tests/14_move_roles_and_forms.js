@@ -95,6 +95,11 @@ async function section14() {
   var semMega = T.SPECIES.find(function (s) { return s && T.formFamilyOf(s).length === 1; });
   check("espécie sem mega tem família de 1 forma só", !!semMega);
   // Melhor rank entre as formas: acha uma base cuja mega rankeia acima dela.
+  // Precisa de mega desbloqueada (milestone >= 4, trava de 2026-09-20) - sem
+  // isso battleUnitsOf nunca considera a forma mega, e este teste quebraria
+  // rodando isolado (test:isolated recarrega a página, milestone volta a 0).
+  var msOriginalRank = T.state.settings.milestone;
+  T.state.settings.milestone = 9;
   var megaMelhor = null;
   T.SPECIES.some(function (s) {
     if (!s) return false;
@@ -107,6 +112,7 @@ async function section14() {
   });
   check("comparação de rank usa a melhor forma da criatura (mega quando ela rende mais)",
     !!megaMelhor, megaMelhor ? megaMelhor.s.n + " -> " + megaMelhor.best.sp.n : "");
+  T.state.settings.milestone = msOriginalRank;
 
   // ---- 3. auto-evolução reversível (caso real do usuário) ----
   var volc = T.getSpeciesBySname("SPECIES_VOLCARONA_REDUX");

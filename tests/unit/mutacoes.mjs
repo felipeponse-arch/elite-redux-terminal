@@ -28,6 +28,13 @@ export const MUTACOES = [
     para: "return [base];",
   },
   {
+    id: "mega-sem-trava-de-insignia",
+    descricao: "battleUnitsOf conta mega como disponível antes da 4ª insígnia",
+    arquivo: "formas_mega.js",
+    de: "if (!megaEvolutionUnlocked()) fam = [fam[0]];",
+    para: "",
+  },
+  {
     id: "cap-pela-dificuldade",
     descricao: "level cap volta a sair da dificuldade",
     arquivo: "level_cap.js",

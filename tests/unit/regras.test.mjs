@@ -49,12 +49,32 @@ test("família de formas liga base e mega nos dois sentidos", () => {
 test("modo de mega muda as unidades de batalha", () => {
   const chari = especie("SPECIES_CHARIZARD");
   R.state.settings.megaMode = "temporaria";
+  R.state.settings.milestone = 4; // mega já desbloqueada (ver teste dedicado abaixo)
   const temp = R.battleUnitsOf(chari);
   assert.equal(temp[0].forms.length, 1, "base sozinha (sem mega-evoluir)");
   assert.ok(temp.slice(1).every((u) => u.forms.length === 2 && u.forms[0].sname === "SPECIES_CHARIZARD"), "toda luta começa na base");
   R.state.settings.megaMode = "permanente";
   assert.ok(R.battleUnitsOf(chari).every((u) => u.forms.length === 1), "cada forma é uma escolha separada");
   R.state.settings.megaMode = "temporaria";
+  R.state.settings.milestone = 0;
+});
+
+test("mega evolução só conta como disponível pra lutar a partir da 4ª insígnia (Flannery)", () => {
+  const chari = especie("SPECIES_CHARIZARD");
+  assert.equal(R.megaEvolutionUnlocked(), false, "milestone 0 (início) - ainda não tem insígnia nenhuma");
+  for (const milestone of [0, 1, 2, 3]) {
+    R.state.settings.milestone = milestone;
+    const units = R.battleUnitsOf(chari);
+    assert.equal(units.length, 1, "milestone " + milestone + ": só a forma base conta como disponível");
+    assert.equal(units[0].forms.length, 1);
+    assert.equal(units[0].main.sname, "SPECIES_CHARIZARD");
+  }
+  for (const milestone of [4, 5, 9]) {
+    R.state.settings.milestone = milestone;
+    assert.equal(R.megaEvolutionUnlocked(), true, "milestone " + milestone + ": Flannery (4º ginásio) já foi batida");
+    assert.ok(R.battleUnitsOf(chari).length > 1, "milestone " + milestone + ": as formas mega voltam a contar");
+  }
+  R.state.settings.milestone = 0;
 });
 
 test("pedra obrigatória só pra forma mega no modo temporário", () => {
