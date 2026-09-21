@@ -304,6 +304,14 @@
   }
   .tab-btn:hover { color: var(--text); }
   .tab-btn.active { background: var(--surface); color: var(--badge-accent); box-shadow: var(--shadow); }
+  /* Rótulo curto (achado real do usuário, 2026-09-20: "às vezes ao clicar
+     no menu novo não abre direto" em mobile) - troca de texto, não de
+     função: em telas estreitas, "Meu Time"/"PC Box" por si só já
+     estouravam a barra em ~104px (medido em 375px), forçando rolagem
+     horizontal pra alcançar "Chefões" - um toque logo depois de rolar é
+     justamente o cenário clássico de toque perdido/precisa-tocar-de-novo
+     em barra de abas roláveis. Ver .tab-label-short abaixo. */
+  .tab-label-short { display: none; }
   .count-badge {
     background: var(--accent);
     color: var(--accent-ink);
@@ -1551,6 +1559,15 @@
       flex-wrap: nowrap;
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
+      /* touch-action (achado real do usuário, 2026-09-20): sem isso, um
+         navegador mobile pode gastar tempo decidindo se o gesto é rolagem
+         ou algo mais antes de mover a barra - declarar que só rola no eixo
+         X tira essa ambiguidade. scroll-snap faz a barra sempre PARAR
+         alinhada numa aba inteira (nunca com uma aba pela metade) - reduz
+         o toque perdido logo depois de rolar, porque o alvo não fica se
+         reacomodando sob o dedo. */
+      touch-action: pan-x;
+      scroll-snap-type: x proximity;
       /* Hiding the scrollbar (above) also hid the only cue that Progresso
          and Tipos exist off to the right - a fade at both edges signals
          "more to scroll" the way native horizontal chip/tab lists do. See
@@ -1559,7 +1576,14 @@
       -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
     }
     .tabs::-webkit-scrollbar { display: none; }
-    .tab-btn { white-space: nowrap; padding: 7px 11px; font-size: 13px; }
+    .tab-btn { white-space: nowrap; padding: 7px 9px; font-size: 13px; scroll-snap-align: start; }
+    /* Rótulo curto só em vez do completo - ver comentário junto de
+       .tab-label-short acima. Reduz a largura total das 4 abas o
+       suficiente pra caber (ou quase caber) sem rolar na maioria dos
+       aparelhos reais, em vez de só mitigar o toque perdido depois de já
+       forçar a rolagem. */
+    .tab-label-full { display: none; }
+    .tab-label-short { display: inline; }
     .species-row { padding: 6px 10px; gap: 8px; }
     .species-row .dexno { display: none; }
     .team-slots { grid-template-columns: 1fr; }
@@ -1609,8 +1633,8 @@
     <div class="tabs-row">
     <nav class="tabs" role="tablist" aria-label="Seções">
       <button class="tab-btn active" data-tab="dex" type="button" role="tab" aria-selected="true" aria-controls="view-dex">Dex</button>
-      <button class="tab-btn" data-tab="team" type="button" role="tab" aria-selected="false" aria-controls="view-team">Meu Time <span id="team-count-badge" class="count-badge mono">0/6</span></button>
-      <button class="tab-btn" data-tab="box" type="button" role="tab" aria-selected="false" aria-controls="view-box">PC Box <span id="box-count-badge" class="count-badge mono">0</span></button>
+      <button class="tab-btn" data-tab="team" type="button" role="tab" aria-selected="false" aria-controls="view-team"><span class="tab-label-full">Meu Time</span><span class="tab-label-short">Time</span> <span id="team-count-badge" class="count-badge mono">0/6</span></button>
+      <button class="tab-btn" data-tab="box" type="button" role="tab" aria-selected="false" aria-controls="view-box"><span class="tab-label-full">PC Box</span><span class="tab-label-short">Box</span> <span id="box-count-badge" class="count-badge mono">0</span></button>
       <button class="tab-btn" data-tab="bosses" type="button" role="tab" aria-selected="false" aria-controls="view-bosses">Chefões <span id="boss-count-badge" class="count-badge mono"></span></button>
     </nav>
     <!--
