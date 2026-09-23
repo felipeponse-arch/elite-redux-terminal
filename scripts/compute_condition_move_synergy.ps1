@@ -60,38 +60,48 @@ $comboRecuo = New-Object System.Collections.ArrayList
 
 foreach ($s in $dex.species) {
     if (-not $s) { continue }
-    $slotIds = @($s["ab"]) + @($s["inn"])
+    # Dedupe por id (nao por slot): o "ab" desta hack guarda 3 CANDIDATOS pro
+    # mesmo slot escolhivel, e uma mesma habilidade pode ocupar mais de um
+    # candidato (mesma licao real da analise de stat-stacking desta sessao,
+    # onde "3 slots" foi confundido com "3 habilidades simultaneas") - sem
+    # este Select-Object -Unique, uma habilidade repetida nos candidatos
+    # gerava a mesma entrada de combo 2-3x (achado real: Kyogre Primal saiu
+    # triplicado antes deste fix).
+    $abIds = @($s["ab"] | Select-Object -Unique)
+    $innIds = @($s["inn"] | Select-Object -Unique)
     $moveIds = @(@($s["lm"]) | ForEach-Object { $_[1] }) + @($s["tu"])
     $moveIds = @($moveIds | Select-Object -Unique)
 
-    foreach ($aid in $slotIds) {
-        if (-not $dex.abilities[$aid]) { continue }
-        $nome = $dex.abilities[$aid][0]
-        if (-not $CATALOGO_ABI.Contains($nome)) { continue }
-        $tipo = $CATALOGO_ABI[$nome]
+    foreach ($slot in @(@{ ids = $abIds; kind = "ab" }, @{ ids = $innIds; kind = "inn" })) {
+        foreach ($aid in $slot.ids) {
+            if (-not $dex.abilities[$aid]) { continue }
+            $nome = $dex.abilities[$aid][0]
+            if (-not $CATALOGO_ABI.Contains($nome)) { continue }
+            $tipo = $CATALOGO_ABI[$nome]
 
-        if ($tipo -eq "hp_baixo") {
-            $golpesRecuo = New-Object System.Collections.ArrayList
+            if ($tipo -eq "hp_baixo") {
+                $golpesRecuo = New-Object System.Collections.ArrayList
+                foreach ($mid in $moveIds) {
+                    $eff = $moveEffects["$mid"]
+                    if (-not $eff) { continue }
+                    if (@($eff.efeitos) | Where-Object { $_.tipo -eq "recuo" }) { [void]$golpesRecuo.Add($moveNameById[$mid]) }
+                }
+                if ($golpesRecuo.Count -gt 0) {
+                    [void]$comboRecuo.Add([ordered]@{ sname = $s["sname"]; nome = $s["n"]; habilidade = $nome; kind = $slot.kind; golpesRecuo = $golpesRecuo.ToArray() })
+                }
+                continue
+            }
+
+            $climaNecessario = $CLIMA_POR_TIPO[$tipo]
+            if (-not $climaNecessario) { continue }
             foreach ($mid in $moveIds) {
                 $eff = $moveEffects["$mid"]
                 if (-not $eff) { continue }
-                if (@($eff.efeitos) | Where-Object { $_.tipo -eq "recuo" }) { [void]$golpesRecuo.Add($moveNameById[$mid]) }
-            }
-            if ($golpesRecuo.Count -gt 0) {
-                [void]$comboRecuo.Add([ordered]@{ sname = $s["sname"]; nome = $s["n"]; habilidade = $nome; golpesRecuo = $golpesRecuo.ToArray() })
-            }
-            continue
-        }
-
-        $climaNecessario = $CLIMA_POR_TIPO[$tipo]
-        if (-not $climaNecessario) { continue }
-        foreach ($mid in $moveIds) {
-            $eff = $moveEffects["$mid"]
-            if (-not $eff) { continue }
-            $bate = @($eff.efeitos) | Where-Object { $_.tipo -eq "clima" -and $_.qual -eq $climaNecessario }
-            if ($bate) {
-                [void]$comboClima.Add([ordered]@{ sname = $s["sname"]; nome = $s["n"]; habilidade = $nome; clima = $climaNecessario; golpe = $moveNameById[$mid] })
-                break
+                $bate = @($eff.efeitos) | Where-Object { $_.tipo -eq "clima" -and $_.qual -eq $climaNecessario }
+                if ($bate) {
+                    [void]$comboClima.Add([ordered]@{ sname = $s["sname"]; nome = $s["n"]; habilidade = $nome; kind = $slot.kind; clima = $climaNecessario; golpe = $moveNameById[$mid] })
+                    break
+                }
             }
         }
     }

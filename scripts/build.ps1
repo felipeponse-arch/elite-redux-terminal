@@ -111,6 +111,7 @@ $dataFiles = @{
     "__SPECIES_RANK_JSON__" = Join-Path $dataDir "species_rank.json"
     "__SPECIES_ROLE_JSON__" = Join-Path $dataDir "species_role.json"
     "__ABILITY_SYNERGY_JSON__" = Join-Path $dataDir "species_ability_synergy.json"
+    "__CONDITION_MOVE_SYNERGY_JSON__" = Join-Path $dataDir "condition_move_synergy.json"
     "__MEGA_FORMS_JSON__" = Join-Path $dataDir "mega_forms.json"
     "__MOVE_ROLES_JSON__" = Join-Path $dataDir "move_roles.json"
     "__CHANGELOG_JSON__" = Join-Path $dataDir "changelog.json"

@@ -159,6 +159,23 @@ foreach ($c in @($condSyn.comboHpBaixoComRecuo)) {
     if (-not $speciesBySname.ContainsKey([string]$c.sname)) { Erro "condition_move_synergy.json (hp baixo): cita a especie '$($c.sname)', que nao existe em dex_compact.json" }
     foreach ($g in @($c.golpesRecuo)) { if (-not $moveNames.ContainsKey([string]$g)) { Erro "condition_move_synergy.json (hp baixo): cita o golpe '$g', que nao existe em dex_compact.json" } }
 }
+# Trava de regressao (achado real, 2026-09-23): antes de deduplicar os IDs de
+# habilidade em compute_condition_move_synergy.ps1, uma especie com a mesma
+# habilidade repetida entre os 3 candidatos de slot (ex: Kyogre Primal) saia
+# com a mesma combinacao especie+habilidade+golpe duplicada 2-3x. Sem esta
+# trava o build nao teria como pegar se a duplicacao voltasse.
+$vistosClima = @{}
+foreach ($c in @($condSyn.comboClimaAutossuficiente)) {
+    $chave = "$($c.sname)|$($c.habilidade)|$($c.golpe)"
+    if ($vistosClima.ContainsKey($chave)) { Erro "condition_move_synergy.json (clima): combo duplicado '$chave'" }
+    $vistosClima[$chave] = $true
+}
+$vistosHp = @{}
+foreach ($c in @($condSyn.comboHpBaixoComRecuo)) {
+    $chave = "$($c.sname)|$($c.habilidade)"
+    if ($vistosHp.ContainsKey($chave)) { Erro "condition_move_synergy.json (hp baixo): combo duplicado '$chave'" }
+    $vistosHp[$chave] = $true
+}
 
 if ($erros.Count) {
     Write-Output "validate_data_invariants.ps1: $($erros.Count) problema(s):"

@@ -243,6 +243,53 @@ async function section18() {
     await wait(30);
   }
 
+  // ---- Nota de combo autossuficiente habilidade-condicional x golpe
+  // (pedido do usuário, 2026-09-23: "com tudo que aprendemos, temos
+  // oportunidade de colocar algo de novo no que já temos hoje") - a ficha da
+  // espécie mostra a nota quando existe combo real (CONDITION_MOVE_SYNERGY),
+  // some quando não existe, e a mesma ferramenta que a IA usa
+  // (getConditionMoveSynergy) devolve o mesmo dado. ----
+  var especieComCombo = T.SPECIES.find(function (s) {
+    return s && s.sname && T.CONDITION_MOVE_SYNERGY[s.sname] && T.CONDITION_MOVE_SYNERGY[s.sname].length;
+  });
+  var especieSemCombo = T.SPECIES.find(function (s) {
+    return s && s.sname && !T.CONDITION_MOVE_SYNERGY[s.sname];
+  });
+  if (achou("espécie real com combo autossuficiente condicional", especieComCombo) &&
+      achou("espécie real sem combo autossuficiente condicional", especieSemCombo)) {
+    var hit = T.CONDITION_MOVE_SYNERGY[especieComCombo.sname][0];
+    setSearch(especieComCombo.n);
+    await wait(120);
+    var rowCombo = document.querySelector("#species-list .species-row");
+    if (rowCombo) { rowCombo.click(); await wait(30); }
+    var notaCombo = document.querySelector(".ts-build-note");
+    check("ficha da espécie com combo real mostra a nota, citando a habilidade e o golpe",
+      !!notaCombo && notaCombo.textContent.indexOf("Combo autossuficiente") !== -1 &&
+        notaCombo.textContent.indexOf(hit.habilidade) !== -1 && notaCombo.textContent.indexOf(hit.golpes[0]) !== -1,
+      { especie: especieComCombo.n, hit: hit, nota: notaCombo && notaCombo.textContent });
+    document.getElementById("back-to-list").click();
+    await wait(30);
+
+    setSearch(especieSemCombo.n);
+    await wait(120);
+    var rowSemCombo = document.querySelector("#species-list .species-row");
+    if (rowSemCombo) { rowSemCombo.click(); await wait(30); }
+    check("ficha da espécie sem combo real não mostra a nota de combo autossuficiente",
+      [].slice.call(document.querySelectorAll(".ts-build-note")).every(function (n) { return n.textContent.indexOf("Combo autossuficiente") === -1; }));
+    document.getElementById("back-to-list").click();
+    await wait(30);
+    setSearch("");
+    await wait(30);
+
+    var toolResult = T.aiTool_getConditionMoveSynergy({ sname: especieComCombo.sname });
+    check("ferramenta de IA getConditionMoveSynergy devolve o mesmo combo real mostrado na ficha",
+      toolResult.combos.length === T.CONDITION_MOVE_SYNERGY[especieComCombo.sname].length &&
+        toolResult.combos[0].ability === hit.habilidade,
+      toolResult);
+  } else {
+    check("pré-condição da checagem de combo autossuficiente (fixtures reais achadas)", false);
+  }
+
   document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
   await wait(30);
   escolher(diff, "ace");

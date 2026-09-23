@@ -2037,6 +2037,7 @@
 <script id="speciesrank" type="application/json">__SPECIES_RANK_JSON__</script>
 <script id="speciesrole" type="application/json">__SPECIES_ROLE_JSON__</script>
 <script id="abilitysynergy" type="application/json">__ABILITY_SYNERGY_JSON__</script>
+<script id="conditionmovesynergy" type="application/json">__CONDITION_MOVE_SYNERGY_JSON__</script>
 <script id="megaforms" type="application/json">__MEGA_FORMS_JSON__</script>
 <script id="moveroles" type="application/json">__MOVE_ROLES_JSON__</script>
 <script id="changelog" type="application/json">__CHANGELOG_JSON__</script>
@@ -2101,6 +2102,28 @@
   // combo REAL confirmado; habilidades que citam categoria sem flag nesta
   // hack (soco/mordida/cortante - ver o script) nunca aparecem.
   var ABILITY_SYNERGY = JSON.parse(document.getElementById("abilitysynergy").textContent || "{}");
+  // Sinergia habilidade-CONDICIONAL x golpe que a própria espécie usa pra
+  // satisfazer a condição sozinha (clima ou HP baixo) - ver
+  // scripts/compute_condition_move_synergy.ps1. Formato bruto do arquivo é
+  // duas listas achatadas (comboClimaAutossuficiente/comboHpBaixoComRecuo);
+  // reindexado aqui por sname pra ficar no mesmo formato de acesso O(1) que
+  // ABILITY_SYNERGY já usa (achado real, 2026-09-21: 40 combos já verificados
+  // nesta sessão de pesquisa mas nunca antes ligados ao app rodando).
+  var CONDITION_MOVE_SYNERGY_RAW = JSON.parse(document.getElementById("conditionmovesynergy").textContent || "{}");
+  var CONDITION_MOVE_SYNERGY = (function () {
+    var bySname = {};
+    function add(sname, entry) {
+      if (!bySname[sname]) bySname[sname] = [];
+      bySname[sname].push(entry);
+    }
+    (CONDITION_MOVE_SYNERGY_RAW.comboClimaAutossuficiente || []).forEach(function (c) {
+      add(c.sname, { habilidade: c.habilidade, kind: c.kind, tipo: "clima", clima: c.clima, golpes: [c.golpe] });
+    });
+    (CONDITION_MOVE_SYNERGY_RAW.comboHpBaixoComRecuo || []).forEach(function (c) {
+      add(c.sname, { habilidade: c.habilidade, kind: c.kind, tipo: "hp_baixo", golpes: c.golpesRecuo || [] });
+    });
+    return bySname;
+  })();
   // Past builds.json entries for a species, archived by scripts/archive_build.ps1
   // whenever a curated build gets replaced - see data/build_history.json.
   var BUILD_HISTORY = JSON.parse(document.getElementById("buildhistory").textContent || "{}");
@@ -3650,6 +3673,32 @@
     return "";
   }
 
+  // Nota da ESPÉCIE (não de uma build específica) sobre combo autossuficiente
+  // habilidade-condicional x golpe - pedido do usuário, 2026-09-23: "com tudo
+  // que aprendemos, temos oportunidade de colocar algo de novo no que já
+  // temos hoje". Mesmo padrão visual de buildNoteHtml, mas mora no card
+  // "Habilidades & Innates" (é conhecimento sobre a espécie, não sobre um set
+  // escolhido) - diferente de buildSynergyHtml acima, que só acende quando os
+  // 4 golpes da build ATUAL batem. Aqui é sempre visível quando existe, pra
+  // avisar o jogador do potencial ANTES dele montar a build.
+  function conditionMoveSynergyNoteHtml(sp) {
+    if (!sp) return "";
+    var hits = CONDITION_MOVE_SYNERGY[sp.sname];
+    if (!hits || !hits.length) return "";
+    return hits.map(function (h) {
+      var via = h.kind === "inn" ? "innate " + h.habilidade : h.habilidade;
+      if (h.tipo === "clima") {
+        return buildNoteHtml('Combo autossuficiente: ' + escapeHtml(via) + ' + ' + escapeHtml(h.golpes[0]) +
+          ' — ' + escapeHtml(sp.n) + ' aprende um golpe que invoca ' + escapeHtml(h.clima) +
+          ' sozinha, então essa habilidade entra em ação sem precisar de outro membro do time preparando o clima antes.');
+      }
+      var texto = h.golpes.length <= 2 ? h.golpes.map(escapeHtml).join(" e ") :
+        h.golpes.slice(0, 2).map(escapeHtml).join(", ") + " e mais " + (h.golpes.length - 2);
+      return buildNoteHtml('Combo autossuficiente: ' + escapeHtml(via) + ' + ' + texto +
+        ' — o próprio recuo do golpe já baixa o HP da ' + escapeHtml(sp.n) + ' o bastante pra ativar essa habilidade, sem precisar de dano vindo de fora.');
+    }).join("");
+  }
+
   function evoConditionText(ev) {
     var kind = EVOKINDS[ev[0]] || "";
     var rs = ev[1];
@@ -4106,7 +4155,8 @@
         '<div class="card"><h3>Stats base</h3>' + statsHtml +
           '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
         '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
-          '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p></div>' +
+          '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p>' +
+          conditionMoveSynergyNoteHtml(sp) + '</div>' +
         evoHtml +
         frmHtml +
         howToObtainHtml +
@@ -5162,6 +5212,28 @@
     };
   }
 
+  // Mesmo espirito de aiTool_getAbilityMovepoolSynergy acima, mas pra
+  // sinergia CONDICIONAL (clima/HP baixo) em vez de categoria/tipo de golpe -
+  // ver CONDITION_MOVE_SYNERGY (reindexado no load a partir de
+  // scripts/compute_condition_move_synergy.ps1). Combo autossuficiente real:
+  // a propria especie aprende o golpe que satisfaz a condicao da habilidade,
+  // sem depender de outro membro do time nem de dano externo.
+  function aiTool_getConditionMoveSynergy(input) {
+    var sname = input && input.sname;
+    var hits = sname ? CONDITION_MOVE_SYNERGY[sname] : null;
+    if (!hits) return { combos: [] };
+    return {
+      combos: hits.map(function (h) {
+        return {
+          ability: h.habilidade,
+          kind: h.kind === "inn" ? "innate (sempre ativa)" : "escolhivel",
+          condicao: h.tipo === "clima" ? ("clima: " + h.clima) : "HP baixo (via recuo do proprio golpe)",
+          golpesReaisQueAtivamSozinho: h.golpes
+        };
+      })
+    };
+  }
+
   // Descrição real de item, sourced do próprio config do jogo (ver
   // ITEM_DESC acima) - achado real de pesquisa, 2026-09-13: sem isso a IA
   // só via o NOME do item (ex. "Swirly Glasses", "Tactical Vest") e tinha
@@ -5378,6 +5450,12 @@
         execute: function (input) { return aiTool_getAbilityMovepoolSynergy(input); }
       },
       {
+        name: "getConditionMoveSynergy",
+        description: "Retorna, pro sname informado, combos autossuficientes reais entre uma habilidade condicional (ativa com clima especifico ou com HP baixo) e um golpe que esta MESMA especie aprende (nivel ou tutor) e que satisfaz essa condicao sozinha - sem depender de outro membro do time preparar o clima, nem de dano externo pra baixar o HP. Lista vazia = nenhum combo confirmado pra esta especie.",
+        inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
+        execute: function (input) { return aiTool_getConditionMoveSynergy(input); }
+      },
+      {
         name: "getBoxCandidatesForBoss",
         description: "Retorna o nome da proxima luta que falta (a partir do progresso atual do jogador) e, se existir, uma sugestao real de troca da caixa pra essa luta especifica (nunca alem dela), ja calculada pelo app (tipos de ataque reais do chefao x defesa real do candidato).",
         execute: function () { return aiTool_getBoxCandidatesForBoss(); }
@@ -5570,6 +5648,12 @@
       "escolhivel que voce escolher tem que ser exatamente a que ativa essa sinergia. Uma build que ignore " +
       "isso vai ser REJEITADA pela validacao e o usuario tera que pedir de novo, entao confira antes de " +
       "responder. Lista vazia = nenhuma sinergia real confirmada, escolha normalmente.\n" +
+      "Use tambem getConditionMoveSynergy pra ver se esta especie tem algum combo autossuficiente real entre " +
+      "uma habilidade condicional (clima ou HP baixo) e um golpe que ela mesma aprende pra satisfazer essa " +
+      "condicao sozinha, sem apoio de outro membro do time. Nao e obrigatorio incluir - varios destes golpes " +
+      "sao de clima/status e podem nao caber no papel escolhido (ex: nao force Hail num set 100% ofensivo que " +
+      "so quer dano) - mas quando o golpe combina com o papel, prefira incluir e escolher a habilidade que " +
+      "ativa o combo, e cite isso na rationale.\n" +
       "Use tambem getBoxCandidatesForBoss - se ela sugerir ESTA MESMA especie como o melhor candidato da " +
       "caixa pra proxima luta que falta, pode citar isso na rationale (ex: 'bom encaixe pra proxima luta, " +
       "contra X'), mas so se for esta especie mesmo, senao ignore.\n" +
@@ -5698,7 +5782,10 @@
       curadoPromptLine +
       "Antes de responder, use getSpeciesRank e getAbilityMovepoolSynergy pra fundamentar os papeis escolhidos - " +
       "se getAbilityMovepoolSynergy retornar sinergia real, PELO MENOS UM dos sets precisa usar um golpe dela com " +
-      "a habilidade que ativa a sinergia (innate conta sempre). Se algum set for um sweeper/atacante rapido, " +
+      "a habilidade que ativa a sinergia (innate conta sempre). Use tambem getConditionMoveSynergy - se ela " +
+      "retornar um combo autossuficiente real (habilidade condicional + golpe que a propria especie usa pra " +
+      "satisfazer a condicao) e ele fizer sentido pro papel de algum dos sets, use-o nesse set e cite na " +
+      "rationale; nao force em todos, alguns papeis nao combinam com o golpe. Se algum set for um sweeper/atacante rapido, " +
       "use getSpeedBenchmark pra confirmar que o EV de Velocidade escolhido realmente ultrapassa uma fatia " +
       "relevante do jogo - nao chute.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
@@ -7809,6 +7896,9 @@
     validateAiBuild: validateAiBuild,
     buildSynergyHtml: buildSynergyHtml,
     ABILITY_SYNERGY: ABILITY_SYNERGY,
+    CONDITION_MOVE_SYNERGY: CONDITION_MOVE_SYNERGY,
+    conditionMoveSynergyNoteHtml: conditionMoveSynergyNoteHtml,
+    aiTool_getConditionMoveSynergy: aiTool_getConditionMoveSynergy,
     BUILDS: BUILDS,
     getSpeciesBySname: function (sname) {
       for (var i = 0; i < SPECIES.length; i++) { if (SPECIES[i].sname === sname) return SPECIES[i]; }
