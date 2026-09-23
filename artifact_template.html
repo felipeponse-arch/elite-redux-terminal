@@ -12,6 +12,7 @@
        "mais disruptivo, mais moderno") - roxo-noite com magenta/ciano
        bioluminescentes no lugar do bege+verde-trilha original. Light mode
        segue a MESMA família de matiz (não é um tema à parte inventado). */
+    --banner-offset: 0px;
     --bg: #f6f4fb;
     --surface: #ffffff;
     --surface-2: #ece8f7;
@@ -249,6 +250,15 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    /* Achado real de auditoria, 2026-09-23: .sync-banner (usada pelos 3
+       banners - run-setup, sync, storage) e' position:fixed;top:0 sem
+       nenhum espaco reservado abaixo dela, entao ela cobre visualmente o
+       .topbar (marca/logo do app) inteiro enquanto estiver visivel -
+       inclusive em TODO save novo, ja que o banner de confirmacao de run
+       comeca visivel por padrao. --banner-offset e' mantida por
+       syncBannerOffset() com a altura real do banner ativo no momento. */
+    padding-top: var(--banner-offset);
+    transition: padding-top .12s ease;
   }
 
   /* ---------- top bar ---------- */
@@ -2953,6 +2963,28 @@
     document.getElementById("sync-banner-text").textContent = text;
     document.getElementById("sync-banner").hidden = false;
   }
+  // Compensa o espaco que os banners fixos (.sync-banner - run-setup/sync/
+  // storage) tomam no topo da tela - achado real de auditoria, 2026-09-23:
+  // nenhum deles empurra o conteudo abaixo (position:fixed), entao o
+  // .topbar (nome/logo do app) fica escondido atras do banner sempre que
+  // ele aparece, inclusive em TODO save novo (o banner de confirmacao de
+  // run comeca visivel por padrao ali). Um observer so (nao um call site em
+  // cada um dos 6 lugares que mostram/escondem algum dos 3 banners - mesmo
+  // principio de "um lugar so decide" ja usado no resto do app) reage a
+  // qualquer toggle e a mudanca de largura (a altura do banner varia
+  // conforme o texto quebra linha em tela estreita).
+  function syncBannerOffset() {
+    var banners = document.querySelectorAll(".sync-banner");
+    var altura = 0;
+    for (var i = 0; i < banners.length; i++) {
+      if (!banners[i].hidden) altura = Math.max(altura, banners[i].offsetHeight);
+    }
+    document.documentElement.style.setProperty("--banner-offset", altura + "px");
+  }
+  document.querySelectorAll(".sync-banner").forEach(function (b) {
+    new MutationObserver(syncBannerOffset).observe(b, { attributes: true, attributeFilter: ["hidden"] });
+  });
+  window.addEventListener("resize", debounce(syncBannerOffset, 100));
   // Indicador de status de sincronização (achado real do usuário,
   // 2026-09-13: dois aparelhos com times diferentes, e nada na tela avisava
   // que um deles nem estava sincronizando de verdade - violava RNF03

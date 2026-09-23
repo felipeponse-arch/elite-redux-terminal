@@ -220,6 +220,51 @@ Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema
   se aquele Pokémon resolve uma fraqueza de tipo que o time atual já compartilha — independente de qual
   seja a próxima luta.
 
+### 1.18 Leitura estratégica de time — revogação (2026-09-18)
+- RF44, RF45, RF46, RF56, RF57 e RF58 (seção 1.17, "Leitura estratégica: caixa inteira e troca
+  acionável") são **revogados**. O card "Leitura estratégica" e o botão avulso "Montar melhor time"
+  foram removidos do código no commit `e0b53f0` (2026-09-18), a pedido explícito do usuário: "nao
+  temos mais que ter esses botoes eles nao fazem mais sentido" — "Gerar time completo" (RF54) já
+  cobre composição de time + guia de uso numa ação só, tornando a leitura sob-demanda separada
+  redundante. Esta revogação foi identificada como dívida documental pendente pela auditoria
+  completa de 2026-09-23 (o requisito continuou descrevendo uma funcionalidade inexistente por 5
+  dias sem nenhuma marca de revogação, diferente do padrão já usado em RF13/RF17/RF36).
+
+### 1.19 Consolidação pós-12/09 — rank, Dex e build por IA (2026-09-18 a 2026-09-23)
+Funcionalidades reais entregues depois da última atualização desta especificação (12/09), registradas
+retroativamente pela auditoria de 2026-09-23 para fechar a lacuna. Convenção de escrita idêntica ao
+resto do documento.
+- RF59 — O Terminal deve permitir que o jogador veja a Velocidade real (sem EV, com 252 EV+nature e
+  com Choice Scarf) de qualquer espécie e sua posição no ranking de Velocidade investida entre todas
+  as espécies do jogo ("Speed Tiers"), destacando as linhas do tipo do arquétipo Monotype ativo.
+- RF60 — O Terminal deve exibir um glossário de papéis (Pivô/Tanque/Wallbreaker/Sweeper) com exemplos
+  reais de espécies para cada um, destacando os exemplos que combinam com o arquétipo ativo do time.
+- RF61 — O editor "Meu build" deve exibir uma barra visual do orçamento de EVs (total já usado dos
+  510 disponíveis) e avisos de eficiência de EV de HP para itens de recuperação por turno (Leftovers/
+  Black Sludge) e de breakpoints de EV por nível, quando aplicável.
+- RF62 — O Terminal deve calcular e exibir, para qualquer espécie, um rank relativo às demais espécies
+  do(s) mesmo(s) tipo(s) dela ("Rank Monotype"), visível apenas quando o jogador tiver um arquétipo
+  Monotype ativo — mesmo princípio do rank por estágio evolutivo (RF52), eixo de comparação diferente
+  (tipo, não estágio).
+- RF63 — Ao gerar uma build por IA para um membro do time, o Terminal deve informar quais itens,
+  golpes e papéis já estão em uso por outros membros do time atual, para reduzir repetição
+  desnecessária — item é regra dura (nunca repete), golpe e papel são preferência forte (pode repetir
+  quando genuinamente a melhor opção, com justificativa na rationale).
+- RF64 — O Terminal deve calcular e expor (na ficha da Dex e como ferramenta do gerador de build por
+  IA) combos autossuficientes reais entre uma habilidade condicional (clima específico ou HP baixo) e
+  um golpe que a própria espécie aprende para satisfazer essa condição sozinha, sem depender de outro
+  membro do time.
+- RF65 — O Terminal deve exibir, na aba Chefões, os buffs de líder de ginásio ainda ativos na luta
+  atual ("Gym Skills"), permitindo ao jogador marcar quais já foram retirados vencendo os treinadores
+  de apoio correspondentes.
+- RN16 — Mega Evolução (temporária ou permanente) só conta como disponível para uso em batalha a
+  partir da 4ª insígnia (Flannery) — antes disso, mesmo com a pedra/forma cadastrada, o Terminal não
+  deve contar a forma Mega como opção de combate real.
+
+**Nota da auditoria de 2026-09-23**: a numeração de Regras de Negócio pula de RN13 (seção 3) direto
+para RN15 — não existe RN14 em nenhuma versão deste documento. Não confirmado se é uma regra perdida
+numa edição anterior ou renumeração deliberada; fica registrado aqui para quem for investigar depois.
+
 ## 2. Requisitos não funcionais
 
 - RNF01 — **Portabilidade**: o Terminal deve funcionar como um único arquivo HTML autocontido (Claude

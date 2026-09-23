@@ -8,6 +8,17 @@ aparelhos, e uma bateria de correções de bugs reais encontrados usando o app d
 **Autor do projeto:** Claude (Sonnet 5 / Opus 5, sessões diferentes), em pair-programming com o usuário
 **Idioma:** português (identificadores, código e nomes de API permanecem em inglês)
 
+> **Aviso da auditoria de 2026-09-23**: este documento é um **snapshot histórico de 09/09/2026**,
+> gerado como pacote autocontido para uma auditoria externa pontual (Gemini) — não é mais atualizado
+> e não cobre a maior parte do projeto atual (redesign "Trilha Viva", rank por Monotype, sinergia
+> habilidade×golpe, Gym Skills, e dezenas de outras mudanças de então pra cá). Pelo menos 12
+> comentários em `artifact_template.html` e em scripts do pipeline ainda citam seções específicas
+> deste arquivo (ex.: "ver AUDITORIA-DOSSIE.md UX 2") como justificativa de uma decisão de código
+> real e em vigor — essas citações continuam válidas como registro do RACIOCÍNIO por trás da decisão,
+> mesmo que o estado geral do projeto descrito no resto deste documento esteja defasado. Não trate
+> nenhuma métrica, contagem ou afirmação de estado das seções 1-9 abaixo como atual sem conferir
+> contra o código/dados de verdade primeiro.
+
 ---
 
 ## 0. Instruções para o auditor
