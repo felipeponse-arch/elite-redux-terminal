@@ -219,6 +219,72 @@ async function section10() {
   setSearch("");
   await wait(30);
 
+  // Papéis já cobertos por outros membros (achado real do usuário,
+  // 2026-09-22: a correção de golpe repetido não bastou - "a estratégia não
+  // tem variedade" também vem da IA nunca saber que papel os outros membros
+  // já cumprem). Wartortle tem papel real confirmado (Pivô) em
+  // data/species_role.json - fixture achada no dado, não inventada. Precisa
+  // estar no time (não só na caixa/box) pra teamRolesInUse() contar.
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(30);
+  var freeSlotRole = document.querySelector(".team-slot .remove-btn");
+  if (freeSlotRole) { freeSlotRole.click(); await wait(30); }
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(30);
+  setSearch("Wartortle");
+  await wait(120);
+  var wartortleRow = [].slice.call(document.querySelectorAll("#species-list .species-row")).find(function (r) { return r.textContent.indexOf("Wartortle") !== -1; });
+  if (wartortleRow) {
+    wartortleRow.click();
+    await wait(30);
+    var addTeamBtnW = document.getElementById("add-team-btn");
+    if (addTeamBtnW && !addTeamBtnW.disabled) { addTeamBtnW.click(); await wait(30); }
+  }
+  window.__genAiPrompts = [];
+  window.claude = {
+    use: async function (name) {
+      if (name !== "sample") return null;
+      return {
+        json: async function (prompt, opts) {
+          window.__genAiPrompts.push(prompt);
+          return { ability: "Torrent", nature: "Bold", item: "", moves: ["Tackle", "Withdraw", "Water Gun", "Rapid Spin"], evs: [252, 0, 252, 0, 4, 0], rationale: "teste papel Wartortle" };
+        }
+      };
+    }
+  };
+  var aiBtnW = document.getElementById("mybuild-ai-generate");
+  if (aiBtnW) { aiBtnW.click(); await wait(150); }
+  setSearch("");
+  await wait(30);
+
+  setSearch("Charmeleon");
+  await wait(120);
+  var charRowRole = [].slice.call(document.querySelectorAll("#species-list .species-row")).find(function (r) { return r.textContent.indexOf("Charmeleon") !== -1; });
+  window.__genAiPrompts = [];
+  window.claude = {
+    use: async function (name) {
+      if (name !== "sample") return null;
+      return {
+        json: async function (prompt, opts) {
+          window.__genAiPrompts.push(prompt);
+          return { ability: "Blaze", nature: "Adamant", item: "", moves: ["Ember", "Scratch", "Smokescreen", "Dragon Rage"], evs: [252, 252, 0, 0, 0, 4], rationale: "teste papel duplicado" };
+        }
+      };
+    }
+  };
+  if (charRowRole) {
+    charRowRole.click();
+    await wait(30);
+    var aiBtnRole2 = document.getElementById("mybuild-ai-generate");
+    if (aiBtnRole2) { aiBtnRole2.click(); await wait(150); }
+  }
+  var rolePrompt = window.__genAiPrompts[0] || "";
+  check("prompt de build por IA avisa quais papéis já estão cobertos por outros membros do time",
+    rolePrompt.indexOf("Papeis JA COBERTOS") !== -1 && rolePrompt.indexOf("Pivô") !== -1,
+    rolePrompt.slice(0, 700));
+  setSearch("");
+  await wait(30);
+
   // Gerador de build ignorava o arquétipo escolhido (achado real do
   // usuário, 2026-09-13, com print do time montado via "Montar melhor
   // time": "a build tem que ser de acordo com o ritmo que nós escolhemos e
