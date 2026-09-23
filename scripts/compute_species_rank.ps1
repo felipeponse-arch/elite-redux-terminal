@@ -378,7 +378,7 @@ foreach ($s in $dex.species) {
     [void]$rows.Add([ordered]@{
         sname = $s["sname"]; bst = $bst; abilityScore = $abilityScore
         bossDefense = $bossDefense; movepoolScore = $movepoolScore; typeScore = $typeScore
-        stage = $stage; hasEvolutionLine = $hasEvolutionLine
+        stage = $stage; hasEvolutionLine = $hasEvolutionLine; ownTypes = $ownTypes
     })
 }
 
@@ -483,6 +483,36 @@ foreach ($stageNum in $byStage.Keys) {
     foreach ($sname in $tiers.Keys) { $stageResults[$sname] = $tiers[$sname] }
 }
 
+# Rank relativo por TIPO (item 15b da pesquisa de 2026-09-21, achado real na
+# pesquisa Smogon Monotype: "Pokemon are ranked separately for each type" -
+# Toedscruel e bom pra time de Grass mas so mediano pra time de Ground, e o
+# formato Monotype do Smogon ranqueia cada especie separadamente por tipo por
+# causa disso). Mesma ideia do rank por estagio acima (nao comparar um basico
+# contra um lendario so porque os dois "existem", ver comentario de $megaKindIdx),
+# so que o agrupamento e por MEMBRO do tipo (Same Type Clause: um Pokemon dual-
+# type serve pra QUALQUER time cujo tipo ele tenha, nao so um) em vez de por
+# estagio - por isso, ao contrario de $byStage, uma especie de tipo duplo entra
+# em ATE DOIS grupos aqui, um por tipo, cada um com seu proprio percentil.
+$byType = @{}
+foreach ($r in $rows) {
+    foreach ($t in $r.ownTypes) {
+        if (-not $byType.ContainsKey($t)) { $byType[$t] = New-Object System.Collections.ArrayList }
+        [void]$byType[$t].Add($r)
+    }
+}
+# monoResults[sname] = @{ TypeName = @{tier=...; score=...}; ... } - uma
+# entrada por tipo que a especie realmente tem, nunca os 18 tipos pra todo
+# mundo (economiza espaco e deixa claro que so os tipos reais da especie
+# geram rank Monotype).
+$monoResults = @{}
+foreach ($t in $byType.Keys) {
+    $tiers = Compute-Tiers $byType[$t]
+    foreach ($sname in $tiers.Keys) {
+        if (-not $monoResults.ContainsKey($sname)) { $monoResults[$sname] = [ordered]@{} }
+        $monoResults[$sname][$t] = @{ tier = $tiers[$sname].tier; score = $tiers[$sname].score }
+    }
+}
+
 $out = [ordered]@{}
 foreach ($r in $rows) {
     $g = $global[$r.sname]
@@ -498,6 +528,7 @@ foreach ($r in $rows) {
         typeScore = $r.typeScore; typePct = $g.typePct
         bossDefense = [math]::Round($r.bossDefense, 3); bossDefPct = $g.bossDefPct
         metaAdjustment = $g.metaAdjustment
+        monoRanks = if ($monoResults.ContainsKey($r.sname)) { $monoResults[$r.sname] } else { [ordered]@{} }
     }
 }
 
@@ -528,3 +559,5 @@ foreach ($t in "SS", "S", "A", "B", "C", "D") {
 Write-Output "  standalone (sem linha evolutiva, sem stageTier): $standaloneCount"
 Write-Output "-- especies por estagio (so quem tem linha evolutiva) --"
 foreach ($k in ($byStage.Keys | Sort-Object)) { Write-Output ("  estagio ${k}: $($byStage[$k].Count)") }
+Write-Output "-- rank Monotype (especies por tipo, dual-type conta nos dois) --"
+foreach ($t in ($byType.Keys | Sort-Object)) { Write-Output ("  ${t}: $($byType[$t].Count)") }

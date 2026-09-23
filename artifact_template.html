@@ -1443,6 +1443,28 @@
   .rank-badge-stage.tier-C  { color: var(--text); }
   .rank-badge-stage.tier-D  { color: var(--sem-weak); }
 
+  /* Monotype-relative badge (rankMonoBadgeHtml, 2026-09-21) - mesma
+     disciplina visual de .rank-badge-stage (outlined, "pergunta secundária/
+     contextual", não uma segunda opinião sobre a mesma pergunta), mas com
+     borda tracejada em vez de sólida pra diferenciar das duas badges já
+     existentes (preenchida = rank geral, contorno sólido = rank por
+     estágio, contorno tracejado = rank Monotype) - só aparece quando o
+     jogador tem um Monotype escolhido em Progresso. Mesmos tokens de cor
+     acessíveis das outras duas badges de rank. */
+  .rank-badge-mono {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 17px; padding: 0 4px; border-radius: var(--radius-sm);
+    font-size: 9.5px; font-weight: 800; font-family: "IBM Plex Mono", monospace;
+    letter-spacing: .02em; cursor: help; flex: none; background: none;
+    border: 1.5px dashed currentColor;
+  }
+  .rank-badge-mono.tier-SS { color: var(--sem-immune); }
+  .rank-badge-mono.tier-S  { color: var(--badge-accent); }
+  .rank-badge-mono.tier-A  { color: var(--badge-resist); }
+  .rank-badge-mono.tier-B  { color: var(--badge-accent2); }
+  .rank-badge-mono.tier-C  { color: var(--text); }
+  .rank-badge-mono.tier-D  { color: var(--sem-weak); }
+
   .rank-info-line { display: flex; flex-wrap: wrap; gap: 16px; margin: -4px 0 14px; }
   .rank-info-item { display: inline-flex; align-items: center; gap: 6px; }
   .rank-info-label { font-size: 11px; color: var(--text-dim); }
@@ -3738,6 +3760,28 @@
     return '<span class="rank-badge-stage ' + (RANK_TIER_CLASS[r.stageTier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.stageTier + '</span>';
   }
 
+  // Rank relativo por TIPO, só quando o jogador está numa run Monotype
+  // (achado real da pesquisa Smogon, 2026-09-21: o próprio formato Monotype
+  // do Smogon ranqueia cada espécie separadamente POR TIPO - "Toedscruel
+  // seria ranqueado separadamente pra cada tipo" porque times de Grass
+  // valorizam ele mais que times de Ground - mesma lógica do rank por
+  // estágio acima, comparar só quem compete pelo mesmo espaço, mas no eixo
+  // de tipo em vez de estágio evolutivo). Só renderiza quando (a) o jogador
+  // escolheu um Monotype em Progresso E (b) esta espécie realmente tem esse
+  // tipo (senão nem seria elegível pro time Monotype dele) - degrade seguro
+  // em qualquer outro caso, igual ao resto do rank.
+  function rankMonoBadgeHtml(sname) {
+    var monotype = state.archetype.monotype;
+    if (!monotype) return "";
+    var r = SPECIES_RANK[sname];
+    if (!r || !r.monoRanks || !r.monoRanks[monotype]) return "";
+    var mr = r.monoRanks[monotype];
+    var title = "Rank " + mr.tier + " entre outros Pokémon do tipo " + monotype + " (score " + mr.score + "/100) — " +
+      "mesma fórmula do rank normal, mas comparado só com quem tem o tipo " + monotype + ", já que é isso que decide quem " +
+      "pode entrar no seu time nesta run Monotype.";
+    return '<span class="rank-badge-mono ' + (RANK_TIER_CLASS[mr.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + mr.tier + '</span>';
+  }
+
   // The Dex detail used to show both badges bare, side by side, right next
   // to the species name - "S" filled next to "A" outlined with zero label,
   // which read as confusing/contradictory rather than as two different
@@ -3835,6 +3879,10 @@
     if (r.stageTier !== null && r.stageTier !== undefined) {
       var label = STAGE_LABEL[r.stage] || (r.stage + "º estágio");
       items += '<span class="rank-info-item"><span class="rank-info-label">Rank no ' + label + '</span>' + rankStageBadgeHtml(sp.sname) + '</span>';
+    }
+    var monoBadge = rankMonoBadgeHtml(sp.sname);
+    if (monoBadge) {
+      items += '<span class="rank-info-item"><span class="rank-info-label">Rank Monotype ' + escapeHtml(state.archetype.monotype) + '</span>' + monoBadge + '</span>';
     }
     items += roleTagsHtml(sp.sname);
     // The letters alone don't say which end is good without a hover -

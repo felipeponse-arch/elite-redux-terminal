@@ -179,6 +179,47 @@ async function section18() {
     linhasDestacadas.length === esperadoLinhasDestacadas && esperadoLinhasDestacadas > 0,
     linhasDestacadas.length + " vs " + esperadoLinhasDestacadas + " esperadas (de " + todasAsLinhas.length + " linhas)");
 
+  // ---- Rank relativo por Monotype (achado real, pesquisa Smogon 2026-09-21:
+  // "Pokemon are ranked separately for each type" - o próprio formato
+  // Monotype do Smogon ranqueia cada espécie por tipo, não com um número só.
+  // Confere que a badge aparece SÓ na ficha de espécie que tem o tipo ativo,
+  // com o tier certo (cross-checado contra SPECIES_RANK direto), some quando
+  // a espécie não tem esse tipo, e some de vez quando o Monotype é limpo. ----
+  var especieComTipo = T.SPECIES.find(function (s) {
+    return s && T.speciesTypeNames(s).indexOf(tipoMonotype) !== -1 &&
+      T.SPECIES_RANK[s.sname] && T.SPECIES_RANK[s.sname].monoRanks && T.SPECIES_RANK[s.sname].monoRanks[tipoMonotype];
+  });
+  var especieSemTipo = T.SPECIES.find(function (s) {
+    return s && T.speciesTypeNames(s).indexOf(tipoMonotype) === -1;
+  });
+  if (achou("espécie real com o tipo Monotype ativo e monoRanks calculado", especieComTipo) &&
+      achou("espécie real sem o tipo Monotype ativo", especieSemTipo)) {
+    setSearch(especieComTipo.n);
+    await wait(120);
+    var rowComTipo = document.querySelector("#species-list .species-row");
+    if (rowComTipo) { rowComTipo.click(); await wait(30); }
+    var badgeMono = document.querySelector(".rank-badge-mono");
+    var tierEsperado = T.SPECIES_RANK[especieComTipo.sname].monoRanks[tipoMonotype].tier;
+    check("badge de rank Monotype aparece na ficha de uma espécie do tipo ativo, com o tier certo",
+      !!badgeMono && badgeMono.textContent.trim() === tierEsperado,
+      { achado: badgeMono && badgeMono.textContent, esperado: tierEsperado, especie: especieComTipo.n });
+    document.getElementById("back-to-list").click();
+    await wait(30);
+
+    setSearch(especieSemTipo.n);
+    await wait(120);
+    var rowSemTipo = document.querySelector("#species-list .species-row");
+    if (rowSemTipo) { rowSemTipo.click(); await wait(30); }
+    check("badge de rank Monotype NÃO aparece na ficha de uma espécie sem o tipo ativo",
+      !document.querySelector(".rank-badge-mono"));
+    document.getElementById("back-to-list").click();
+    await wait(30);
+    setSearch("");
+    await wait(30);
+  } else {
+    check("pré-condição da checagem de rank Monotype (fixtures reais achadas)", false);
+  }
+
   // limpa o arquétipo pra não vazar estado pras seções seguintes
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(30);
@@ -186,6 +227,21 @@ async function section18() {
   await wait(30);
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
+
+  // Badge de rank Monotype some de vez quando o arquétipo é limpo, mesmo na
+  // MESMA espécie que mostrava antes (não é só "nunca apareceu").
+  if (especieComTipo) {
+    setSearch(especieComTipo.n);
+    await wait(120);
+    var rowDepoisDeLimpar = document.querySelector("#species-list .species-row");
+    if (rowDepoisDeLimpar) { rowDepoisDeLimpar.click(); await wait(30); }
+    check("badge de rank Monotype some depois de limpar o arquétipo (mesma espécie que mostrava antes)",
+      !document.querySelector(".rank-badge-mono"));
+    document.getElementById("back-to-list").click();
+    await wait(30);
+    setSearch("");
+    await wait(30);
+  }
 
   document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
   await wait(30);
