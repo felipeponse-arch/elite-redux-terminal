@@ -243,4 +243,42 @@ async function section08() {
   check("Fluffy (innate do Eevee) ajusta a cobertura como FRAQUEZA, não resistência",
     covFlags.indexOf("Fluffy (fraqueza extra)") !== -1, covFlags.join(" | "));
 
+
+  // ---- Build que muda de espécie precisa valer pra espécie nova (achado do
+  // usuário, print de 2026-09-24: Haxorus com "Ability: Moxie" - habilidade só
+  // do Axew/Fraxure - depois da auto-evolução; 583 dos 729 pares de evolução
+  // por nível mudam o conjunto de habilidades escolhíveis neste hack). ----
+  {
+    const TE = window.__erTest;
+    const fraxure = TE.getSpeciesBySname("SPECIES_FRAXURE");
+    const haxorus = TE.getSpeciesBySname("SPECIES_HAXORUS");
+    if (achou("Fraxure e Haxorus reais (fixture da evolução de build)", fraxure && haxorus)) {
+      const escolhiveisHax = TE.uniqueIds(haxorus.ab).map(function (id) { return TE.ABILITIES[id][0]; });
+      const logAntes = TE.state.autoLog.slice();
+      const buildAntes = TE.state.customBuilds["SPECIES_HAXORUS"];
+      const buildFraxAntes = TE.state.customBuilds["SPECIES_FRAXURE"];
+      delete TE.state.customBuilds["SPECIES_HAXORUS"];
+      TE.state.customBuilds["SPECIES_FRAXURE"] = [{ ability: "Moxie", nature: "Adamant", item: "", moves: ["Dragon Claw", "Earthquake"], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 252, 0, 0, 0, 252], source: "ia", active: true, savedAt: "x", rationale: "Moxie acumula ataque" }];
+      TE.carryUserData("SPECIES_FRAXURE", "SPECIES_HAXORUS");
+      const carregada = (TE.state.customBuilds["SPECIES_HAXORUS"] || [])[0];
+      check("evoluir Fraxure -> Haxorus leva a build, mas a habilidade vira uma escolhível REAL do Haxorus (não Moxie)",
+        !!carregada && escolhiveisHax.indexOf(carregada.ability) !== -1 && carregada.ability !== "Moxie" &&
+          carregada.moves.join(",") === "Dragon Claw,Earthquake" && carregada.rationale === "",
+        carregada);
+      check("o ajuste aparece no log \"O que o app fez sozinho\", com o valor antigo",
+        TE.state.autoLog.some(function (e) { return e.text.indexOf("Build de Haxorus ajustada") === 0 && e.text.indexOf("Moxie") !== -1; }),
+        TE.state.autoLog[0] && TE.state.autoLog[0].text);
+      check("a build antiga sai da espécie anterior (não fica duplicada)", !TE.state.customBuilds["SPECIES_FRAXURE"]);
+      // Save que já chegou contaminado (como o do usuário): conferido ao carregar.
+      TE.state.customBuilds["SPECIES_HAXORUS"] = [{ ability: "Moxie", nature: "Adamant", item: "", moves: ["Dragon Claw"], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0], source: "ia", active: true, savedAt: "x", rationale: "" }];
+      const mudou = TE.reconciliarBuildsSalvas();
+      check("build já salva com habilidade inexistente na espécie é corrigida na conferência do save",
+        mudou === true && escolhiveisHax.indexOf(TE.state.customBuilds["SPECIES_HAXORUS"][0].ability) !== -1,
+        TE.state.customBuilds["SPECIES_HAXORUS"][0].ability);
+      check("uma segunda conferência não muda mais nada (já valia)", TE.reconciliarBuildsSalvas() === false);
+      if (buildAntes) TE.state.customBuilds["SPECIES_HAXORUS"] = buildAntes; else delete TE.state.customBuilds["SPECIES_HAXORUS"];
+      if (buildFraxAntes) TE.state.customBuilds["SPECIES_FRAXURE"] = buildFraxAntes; else delete TE.state.customBuilds["SPECIES_FRAXURE"];
+      TE.state.autoLog = logAntes;
+    }
+  }
 }

@@ -2330,6 +2330,7 @@
 
   /*@regras tipos.js*/
   /*@regras confronto.js*/
+  /*@regras reconciliar_build.js*/
 
   function typePill(name, small) {
     var meta = TYPE_META[name] || { hex: "#777", dark: false };
@@ -2612,7 +2613,13 @@
       if (MONOTYPE_ARCHETYPES.indexOf(save.archetype.monotype) !== -1) state.archetype.monotype = save.archetype.monotype;
       if (typeof save.archetype.reasoning === "string") state.archetype.reasoning = save.archetype.reasoning.slice(0, 500);
     }
+    // Toda build salva precisa valer pra espécie em que está agora (achado do
+    // usuário, 2026-09-24: Haxorus com "Moxie", habilidade só do Axew/Fraxure).
+    // Conserta saves que já chegaram assim, tanto do próprio aparelho quanto de
+    // outro (sincronização) - ver reconciliarBuildsDe().
+    reconciliouAoAplicar = reconciliarBuildsSalvas();
   }
+  var reconciliouAoAplicar = false;
 
   // ---------------- custom build list helpers ----------------
   // state.customBuilds[sname] is always an array (0-3 entries) from this
@@ -2753,7 +2760,7 @@
         // Cobre o caso de um save de ANTES desta feature existir: se o cap
         // salvo já libera evoluções que nunca foram aplicadas, aplica agora
         // mesmo, antes da primeira renderização.
-        if (autoEvolveRoster(true)) persist();
+        if (autoEvolveRoster(true) || reconciliouAoAplicar) persist();
         return;
       } catch (e) {
         // BUG P0 achado em auditoria, 2026-09-18: antes disto, um save
@@ -3034,9 +3041,42 @@
   }
   // Build/anotação acompanham a criatura quando ela muda de espécie (nos dois
   // sentidos) - nunca sobrescreve algo que o destino já tenha próprio.
+  // Confere as builds salvas de UMA espécie contra os dados reais dela e ajusta o
+  // que não vale (reconciliarBuild, src/regras). Nunca apaga a build: troca a
+  // habilidade inexistente por uma escolhível real e tira só os golpes que a
+  // espécie não aprende - e anota o que mudou no log "O que o app fez sozinho",
+  // com o valor antigo, pra o jogador poder desfazer à mão se discordar.
+  function reconciliarBuildsDe(sname, contexto) {
+    var sp = getSpeciesBySname(sname);
+    var list = state.customBuilds[sname];
+    if (!sp || !list) return false;
+    var mudou = false;
+    state.customBuilds[sname] = list.map(function (b) {
+      var r = reconciliarBuild(b, sp);
+      if (r.changes.length) {
+        mudou = true;
+        logAutoAction("Build de " + sp.n + " ajustada" + (contexto ? " (" + contexto + ")" : "") + ": " +
+          r.changes.map(function (c) { return c.campo + " " + c.de + " → " + c.para; }).join("; ") + ". Gere de novo com IA se quiser um set pensado pra esta espécie.");
+      }
+      return r.build;
+    });
+    return mudou;
+  }
+  function reconciliarBuildsSalvas() {
+    var mudou = false;
+    Object.keys(state.customBuilds).forEach(function (sn) {
+      if (reconciliarBuildsDe(sn, "conferida contra os dados do jogo")) mudou = true;
+    });
+    return mudou;
+  }
+  // A build que muda de espécie passa por reconciliarBuildsDe: a habilidade e os
+  // golpes da espécie ANTERIOR podem não existir na nova (Fraxure -> Haxorus:
+  // Moxie sumiu).
   function carryUserData(fromSname, toSname) {
     if (state.customBuilds[fromSname] && !state.customBuilds[toSname]) {
       state.customBuilds[toSname] = state.customBuilds[fromSname];
+      var de = getSpeciesBySname(fromSname);
+      reconciliarBuildsDe(toSname, de ? "passou de " + de.n + " pra " + (getSpeciesBySname(toSname) || { n: toSname }).n : "");
     }
     delete state.customBuilds[fromSname];
     if (state.notes[fromSname] && !state.notes[toSname]) {
@@ -8202,6 +8242,8 @@
     buildSynergyHtml: buildSynergyHtml,
     ABILITY_SYNERGY: ABILITY_SYNERGY,
     CONDITION_MOVE_SYNERGY: CONDITION_MOVE_SYNERGY,
+    carryUserData: carryUserData,
+    reconciliarBuildsSalvas: reconciliarBuildsSalvas,
     confrontoParaParty: confrontoParaParty,
     bossConfrontoHtml: bossConfrontoHtml,
     dashboardConfrontoHtml: dashboardConfrontoHtml,

@@ -320,6 +320,14 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   prompts de build/estratégia avisam que Mega ainda não existe e não listam "outras formas" mega, e a
   criatura Mega ganha a etiqueta "Mega só na 4ª insígnia". Depois de liberar, a família inteira vale.
   Origem: print do usuário (insígnia no 2º ginásio, "Altaria Mega" SS na caixa entrando na sugestão).
+- RN19 — **Build salva sempre vale pra espécie atual**: quando uma build muda de espécie (auto-evolução ou
+  regressão por level cap, RF32) e quando um save é carregado ou sincronizado, cada build é conferida
+  contra os dados reais da espécie (`reconciliarBuild`): habilidade que a espécie não tem vira uma
+  escolhível real (a de sinergia ativa com os golpes, senão a primeira), golpe que ela nunca aprende sai
+  (golpe acima do level cap continua válido), a justificativa da IA que citava a habilidade antiga sai.
+  A build nunca é apagada; cada ajuste vai pro log "O que o app fez sozinho" com o valor antigo. Origem:
+  print do usuário (Haxorus com "Moxie", habilidade só do Axew/Fraxure). Medido: 583 dos 729 pares de
+  evolução por nível deste hack mudam o conjunto de habilidades escolhíveis.
 - RN17 — O motor de confronto não calcula dano nem compara Velocidade real: o nível do chefão não
   existe nos dados. Habilidades de chefão fora de `TYPE_MOD_ABILITIES` podem alterar o resultado e a
   interface declara essa limitação em vez de fingir certeza.
