@@ -282,6 +282,9 @@ async function section10() {
   check("prompt de build por IA avisa quais papéis já estão cobertos por outros membros do time",
     rolePrompt.indexOf("Papeis JA COBERTOS") !== -1 && rolePrompt.indexOf("Pivô") !== -1,
     rolePrompt.slice(0, 700));
+  check("prompt de build por IA manda usar getNextBossRoster e a ferramenta está registrada",
+    rolePrompt.indexOf("getNextBossRoster") !== -1 &&
+      window.__erTest.buildStandardAiTools().some(function (t) { return t.name === "getNextBossRoster"; }));
   setSearch("");
   await wait(30);
 

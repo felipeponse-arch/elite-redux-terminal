@@ -277,6 +277,25 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   Pokémon do chefão, buracos de cobertura, melhor abertura, ameaças) e como uma linha "Confronto" no
   resumo do topo da Dex para a próxima luta que falta (RN11 continua valendo: sem projetar lutas
   futuras). Batalha em dupla é tratada como 1x1 e o quadro avisa que o resultado é aproximado.
+- RF68 — Quando o quadro de confronto (RF66) tem buracos (Pokémon do chefão que nenhum membro do time
+  acerta super efetivo), o Terminal deve sugerir, sem ação do jogador, qual golpe que um membro do
+  time já pode usar agora (level cap atual + tutor) fecha mais buracos (escolha gulosa), ignorando
+  golpe já na build, de status, de poder < 50, de prioridade negativa, de precisão < 70 ou anulado
+  pela habilidade do chefão.
+- RF69 — O Terminal deve calcular o melhor time possível da caixa para o chefão (até 2 trocas, ou
+  entrada em vaga livre), só sugerindo quando o ganho for real (limiar de 2 pontos, nunca troca
+  lateral), e mostrar a troca na ficha do chefão e no resumo da Dex. A única ação do jogador é
+  "Aplicar" (usa rosterMove: quem sai vai pra caixa, ninguém é apagado).
+- RF70 — A ficha do chefão deve trazer, sem clique, um "Plano de luta": abertura (ou dupla de abertura
+  contra os dois primeiros do chefão em batalha em dupla), a melhor resposta a cada Pokémon dele com a
+  habilidade e o item reais (descrição do item no tooltip) e os golpes que mais ameaçam o time.
+- RF71 — A ferramenta de IA `getNextBossRoster` deve dar ao gerador de build e ao de estratégias o
+  elenco real da próxima luta (tipos, habilidade, item e golpes), os buracos do time e os golpes que
+  os fechariam; os prompts pedem (preferência, não obrigação) que a build responda a uma ameaça concreta.
+- RF72 — Ao avançar a insígnia no Progresso, o Terminal deve registrar sozinho no log "O que o app fez
+  sozinho" que a luta anterior foi assumida como vencida, com o que o confronto via antes dela
+  (nº de Pokémon sem resposta e de ameaças). Derrota não deixa rastro observável, então não existe
+  registro de derrota; o bloco "Como melhorar este confronto" já responde a ela sem o jogador pedir.
 - RN17 — O motor de confronto não calcula dano nem compara Velocidade real: o nível do chefão não
   existe nos dados. Habilidades de chefão fora de `TYPE_MOD_ABILITIES` podem alterar o resultado e a
   interface declara essa limitação em vez de fingir certeza.

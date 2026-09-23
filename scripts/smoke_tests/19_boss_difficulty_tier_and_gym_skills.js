@@ -193,6 +193,35 @@ async function section19() {
             [].slice.call(cardConfronto.querySelectorAll(".cf-cell .cf-sym")).every(function (s) {
               return /vantagem|seguro|neutro|arriscado|desvantagem/.test(s.getAttribute("aria-label") || "");
             }));
+
+          // Fases 3-6 (2026-09-24): plano de luta sempre presente (um passo
+          // por Pokémon do chefão, mais a abertura), ajustes só quando o
+          // motor tem o que sugerir, botão de aplicar só com troca real.
+          var plano = cardConfronto.querySelector("details.cf-plan");
+          check("plano de luta tem a abertura e um passo por Pokémon do chefão",
+            !!plano && plano.querySelectorAll("li").length >= boss.party.length + 1,
+            plano ? plano.querySelectorAll("li").length + " passos" : "(sem plano)");
+          var cxTrocas = T.confrontoParaParty(boss.party, true);
+          var ajustes = cardConfronto.querySelector(".cf-fix");
+          var temTrocas = !!(cxTrocas.trocas && cxTrocas.trocas.trocas.length);
+          var temAlgoPraSugerir = T.coberturaSugerida(cxTrocas.minhas, cxTrocas.c).length > 0 || temTrocas;
+          check("bloco \"Como melhorar este confronto\" aparece só quando o motor tem o que sugerir",
+            !!ajustes === temAlgoPraSugerir,
+            { ajustes: !!ajustes, buracos: cxTrocas.c.buracos.length });
+          check("botão de aplicar troca existe se e somente se há troca sugerida da caixa",
+            !!cardConfronto.querySelector(".cf-apply-swap") === temTrocas);
+
+          // Ferramenta de IA com o elenco real da próxima luta (fase 4).
+          var milestoneFase4 = T.state.settings.milestone;
+          T.state.settings.milestone = 0;
+          var roster = T.aiTool_getNextBossRoster();
+          var proxima = T.getRemainingBossEntries()[0];
+          check("getNextBossRoster devolve o elenco real da próxima luta (golpes, habilidade, item)",
+            roster.nextBossName === proxima.name &&
+              roster.timeDoChefao.length === T.bossPartyPorDificuldade(proxima).length &&
+              roster.timeDoChefao.every(function (m) { return m.golpes.length > 0 && m.habilidade; }),
+            roster);
+          T.state.settings.milestone = milestoneFase4;
         }
       }
     }
@@ -218,5 +247,48 @@ async function section19() {
       dashConfronto ? dashConfronto.textContent : "(sem linha)");
     T.state.settings.milestone = milestoneAntes;
     T.renderDashboard();
+  }
+
+  // ---- Registro automático da luta vencida (fase 5): avançar de insígnia
+  // anota no log "O que o app fez sozinho" o que o confronto via antes da
+  // luta; voltar de insígnia não anota nada. Mexe em time/caixa/log/progresso
+  // (auto-evolução pode disparar), então tira um retrato antes e restaura no
+  // fim. ----
+  if (T.state.team.length) {
+    var retrato = JSON.parse(JSON.stringify({ team: T.state.team, box: T.state.box, autoLog: T.state.autoLog, settings: T.state.settings }));
+    T.state.settings.milestone = 0;
+    document.getElementById("tabs-more-toggle").click();
+    await wait(20);
+    document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+    await wait(50);
+    var msSel19 = document.getElementById("settings-milestone");
+    msSel19.value = "0";
+    msSel19.dispatchEvent(new Event("change", { bubbles: true }));
+    await wait(30);
+    // logAutoAction não empilha a mesma frase seguida - só atualiza a data da
+    // entrada que já existe (seções anteriores podem ter gerado a mesma
+    // frase com este mesmo time), então o que vale é "a entrada existe e foi
+    // gravada/atualizada agora", não a contagem.
+    var inicioAvanco = new Date().toISOString();
+    msSel19.value = "1";
+    msSel19.dispatchEvent(new Event("change", { bubbles: true }));
+    await wait(50);
+    var logAvanco = T.state.autoLog.find(function (e) { return e.text.indexOf("assumi que venceu") !== -1; });
+    check("avançar de insígnia registra a luta vencida no log automático, com o que o confronto via",
+      !!logAvanco && /sem resposta super efetiva/.test(logAvanco.text) && logAvanco.at >= inicioAvanco,
+      logAvanco ? logAvanco.at + " / " + logAvanco.text : "(sem registro)");
+    var atDoAvanco = logAvanco && logAvanco.at;
+    await wait(15);
+    msSel19.value = "0";
+    msSel19.dispatchEvent(new Event("change", { bubbles: true }));
+    await wait(50);
+    var logDepoisDeVoltar = T.state.autoLog.find(function (e) { return e.text.indexOf("assumi que venceu") !== -1; });
+    check("voltar de insígnia não registra nem atualiza luta vencida",
+      !!logDepoisDeVoltar && logDepoisDeVoltar.at === atDoAvanco, logDepoisDeVoltar ? logDepoisDeVoltar.at + " vs " + atDoAvanco : "(sem registro)");
+    T.state.team = retrato.team; T.state.box = retrato.box; T.state.autoLog = retrato.autoLog;
+    T.state.settings.difficulty = retrato.settings.difficulty; T.state.settings.milestone = retrato.settings.milestone;
+    msSel19.value = String(retrato.settings.milestone);
+    document.querySelector('.tab-btn[data-tab="dex"]').click();
+    await wait(30);
   }
 }

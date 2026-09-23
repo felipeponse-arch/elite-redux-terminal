@@ -173,3 +173,154 @@
       estimada: minhas.some(function (m) { return !m.moves; })
     };
   }
+
+  // ---- Fechar buracos: qual golpe que o Pokémon JÁ pode usar agora resolve ----
+  // `mine.aprendiveis` (fornecido pelo adaptador, vem de availableMovesFor: level
+  // cap atual + tutor) é a lista de golpes que aquele Pokémon pode ter na build
+  // hoje. Escolha gulosa de cobertura: a cada passo o golpe que fecha mais
+  // buracos ainda abertos (empate: mais poder, depois STAB). Golpe fraco
+  // (poder < COBERTURA_PODER_MINIMO) não entra: acertar super efetivo com 20 de
+  // poder não é uma resposta de verdade.
+  var COBERTURA_PODER_MINIMO = 50;
+  var COBERTURA_PRECISAO_MINIMA = 70;
+  function coberturaSugerida(minhas, cx) {
+    var abertos = cx.linhas.filter(function (l) { return l.buraco; }).map(function (l) { return l.foe; });
+    var candidatos = [];
+    minhas.forEach(function (mine, idx) {
+      (mine.aprendiveis || []).forEach(function (mv) {
+        if (mine.moves && mine.moves.indexOf(mv) !== -1) return;
+        if (!MOVE_BY_NAME[mv] || moveRoleOf(mv) !== "dano") return;
+        var power = MOVE_BY_NAME[mv][3] || 0;
+        if (power < COBERTURA_PODER_MINIMO) return;
+        // Golpe que atrasa o turno (prioridade negativa: Focus Punch, Counter...)
+        // ou erra demais (precisão abaixo de 70) não é uma resposta confiável.
+        if ((MOVE_BY_NAME[mv][7] || 0) < 0) return;
+        var acc = MOVE_BY_NAME[mv][4];
+        if (acc > 0 && acc < COBERTURA_PRECISAO_MINIMA) return;
+        var type = confrontoMoveType(mv);
+        var resolve = abertos.filter(function (foe) {
+          return abilityTypeModFor(type, speciesTypeNames(foe.sp), foeAbilityIds(foe.sp, foe.ability)).mult >= 2;
+        });
+        if (resolve.length) candidatos.push({ idx: idx, move: mv, type: type, power: power, stab: mine.mainTypes.indexOf(type) !== -1, resolve: resolve });
+      });
+    });
+    var escolhidos = [];
+    var restantes = abertos.slice();
+    while (restantes.length && escolhidos.length < 3) {
+      var melhor = null, melhorN = 0;
+      candidatos.forEach(function (c) {
+        var n = c.resolve.filter(function (f) { return restantes.indexOf(f) !== -1; }).length;
+        if (!n) return;
+        if (!melhor || n > melhorN || (n === melhorN && (c.power > melhor.power || (c.power === melhor.power && c.stab && !melhor.stab)))) {
+          melhor = c; melhorN = n;
+        }
+      });
+      if (!melhor) break;
+      var cobre = melhor.resolve.filter(function (f) { return restantes.indexOf(f) !== -1; });
+      escolhidos.push({ idx: melhor.idx, move: melhor.move, type: melhor.type, power: melhor.power, resolve: cobre });
+      restantes = restantes.filter(function (f) { return cobre.indexOf(f) === -1; });
+    }
+    return escolhidos;
+  }
+
+  // ---- Melhor time possível pra ESTA luta ----
+  // Valor de um time contra o chefão: por Pokémon dele, os pontos da melhor
+  // resposta do time (sem resposta = -2), mais um bônus de +1 quando alguém o
+  // acerta super efetivo e uma penalidade de -3 quando ninguém acerta (o buraco
+  // pesa mais que uma resposta boa a mais). Cada duelo é calculado UMA vez por
+  // Pokémon (caixa de centenas de criaturas): o resto é só olhar a tabela.
+  var LIMIAR_TROCA = 2;
+  function confrontoDuelosDe(unit, foes) {
+    return foes.map(function (foe) {
+      var d = confrontoDuelo(unit, foe);
+      return { pontos: CONFRONTO_PONTOS[d.veredito], super: d.ofensa.classe === CONFRONTO_OFENSA.SUPER };
+    });
+  }
+  function valorDoTime(duelosDoTime, nFoes) {
+    var valor = 0, buracos = 0;
+    for (var f = 0; f < nFoes; f++) {
+      var melhorPts = -2, temSuper = false;
+      duelosDoTime.forEach(function (duelos) {
+        if (duelos[f].pontos > melhorPts) melhorPts = duelos[f].pontos;
+        if (duelos[f].super) temSuper = true;
+      });
+      valor += melhorPts + (temSuper ? 1 : -3);
+      if (!temSuper) buracos++;
+    }
+    return { valor: valor, buracos: buracos };
+  }
+  // Até `max` trocas (ou entradas, se o time tem vaga), sempre a que mais sobe o
+  // valor, e só se a subida for de pelo menos LIMIAR_TROCA - nunca troca lateral
+  // nem por diferença mínima. `atuais` e `caixa` são unidades do motor.
+  function melhoresTrocas(atuais, caixa, foes, max) {
+    var time = atuais.map(function (u) { return { u: u, d: confrontoDuelosDe(u, foes) }; });
+    var pool = caixa.map(function (u) { return { u: u, d: confrontoDuelosDe(u, foes) }; });
+    var base = valorDoTime(time.map(function (t) { return t.d; }), foes.length);
+    var inicial = base;
+    var trocas = [];
+    for (var n = 0; n < max; n++) {
+      var melhor = null;
+      var tentar = function (novoTime, info) {
+        var v = valorDoTime(novoTime.map(function (t) { return t.d; }), foes.length);
+        if (v.valor - base.valor >= LIMIAR_TROCA && (!melhor || v.valor > melhor.v.valor)) melhor = { v: v, info: info, time: novoTime };
+      };
+      if (time.length < 6) {
+        pool.forEach(function (c, pi) { tentar(time.concat([c]), { sai: null, pi: pi }); });
+      }
+      time.forEach(function (t, ti) {
+        pool.forEach(function (c, pi) {
+          var novo = time.slice(); novo[ti] = c;
+          tentar(novo, { sai: ti, pi: pi });
+        });
+      });
+      if (!melhor) break;
+      var saiu = melhor.info.sai === null ? null : time[melhor.info.sai];
+      var entrou = pool[melhor.info.pi];
+      trocas.push({ sai: saiu && saiu.u, entra: entrou.u, ganho: melhor.v.valor - base.valor, buracosDepois: melhor.v.buracos });
+      pool = pool.filter(function (_, pi) { return pi !== melhor.info.pi; });
+      if (saiu) pool.push(saiu);
+      time = melhor.time;
+      base = melhor.v;
+    }
+    return { trocas: trocas, buracosAntes: inicial.buracos, buracosDepois: base.buracos, valorAntes: inicial.valor, valorDepois: base.valor };
+  }
+
+  // ---- Plano de luta ----
+  // Os golpes que mais ameaçam o seu time neste chefão: por Pokémon dele, o
+  // golpe de maior multiplicador contra cada membro seu que fica em perigo,
+  // do mais grave pro menos, até `max`.
+  function cuidadosDoChefao(cx, minhas, max) {
+    var lista = [];
+    cx.linhas.forEach(function (l) {
+      l.respostas.forEach(function (r) {
+        var a = r.duelo.ameaca;
+        if (a.classe !== CONFRONTO_AMEACA.PERIGO || !a.worst) return;
+        lista.push({ foe: l.foe, idx: r.idx, move: a.worst.move, type: a.worst.type, mult: a.worst.mult, power: a.worst.power });
+      });
+    });
+    lista.sort(function (a, b) { return b.mult - a.mult || b.power - a.power; });
+    return lista.slice(0, max || 5);
+  }
+
+  // Batalha em dupla: os dois primeiros do time do chefão entram juntos. A dupla
+  // do jogador que mais pontua contra os dois, com penalidade quando um mesmo
+  // Pokémon dele ameaça os dois (não dá pra proteger um com o outro). Só faz
+  // sentido com 2+ membros seus e 2+ do chefão; senão devolve null.
+  function aberturaEmDupla(minhas, foes) {
+    if (minhas.length < 2 || foes.length < 2) return null;
+    var dois = foes.slice(0, 2);
+    var melhor = null;
+    for (var i = 0; i < minhas.length; i++) {
+      for (var j = i + 1; j < minhas.length; j++) {
+        var pts = 0, ameacaAosDois = 0;
+        dois.forEach(function (foe) {
+          var di = confrontoDuelo(minhas[i], foe), dj = confrontoDuelo(minhas[j], foe);
+          pts += CONFRONTO_PONTOS[di.veredito] + CONFRONTO_PONTOS[dj.veredito];
+          if (di.ameaca.classe === CONFRONTO_AMEACA.PERIGO && dj.ameaca.classe === CONFRONTO_AMEACA.PERIGO) ameacaAosDois++;
+        });
+        var valor = pts - 2 * ameacaAosDois;
+        if (!melhor || valor > melhor.valor) melhor = { idx: [i, j], valor: valor, ameacaAosDois: ameacaAosDois, foes: dois };
+      }
+    }
+    return melhor;
+  }

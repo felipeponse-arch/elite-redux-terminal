@@ -923,6 +923,17 @@
   .cf-best b { color: var(--text); }
   .cf-legend { margin: 8px 0 0; font-size: 11.5px; color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 4px 14px; }
   .cf-note { margin: 6px 0 0; font-size: 11.5px; color: var(--text-dim); max-width: 75ch; }
+  .cf-fix { margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border); }
+  .cf-fix h4 { margin: 0 0 6px; font-size: 13px; }
+  .cf-fix ul { margin: 0; padding-left: 18px; font-size: 12.5px; }
+  .cf-fix li { margin-bottom: 6px; }
+  .cf-fix ul ul { margin: 4px 0 6px; }
+  .cf-plan { margin-top: 12px; }
+  .cf-plan summary { cursor: pointer; font-weight: 600; font-size: 13px; }
+  .cf-plan ol { margin: 8px 0 0; padding-left: 20px; font-size: 12.5px; }
+  .cf-plan li { margin-bottom: 5px; }
+  .cf-plan-meta { color: var(--text-dim); cursor: help; }
+  .cf-plan-warn { color: var(--text); }
   .boss-mon-card .bm-head { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
   .boss-mon-card .bm-name { font-weight: 700; font-size: 13.5px; margin-bottom: 4px; }
   .boss-mon-card .bm-types { display: flex; gap: 5px; }
@@ -5109,6 +5120,36 @@
     };
   }
 
+  // Fase 4 do plano "estratégia/time/build vs chefão" (2026-09-24): o gerador
+  // de build só sabia os NOMES dos chefões que faltam. Agora vê o elenco real
+  // da próxima luta (habilidade, item e os 4 golpes de cada Pokémon dele, dado
+  // do jogo) e onde o time atual do jogador tem buraco, do mesmo motor da ficha
+  // do chefão (confrontoParaParty) - a IA nunca recalcula nada sozinha.
+  function aiTool_getNextBossRoster() {
+    var boss = getRemainingBossEntries()[0];
+    if (!boss) return { nextBossName: null };
+    var party = bossPartyPorDificuldade(boss);
+    var foes = confrontoFoesDe(party);
+    var cx = confrontoParaParty(party, false);
+    return {
+      nextBossName: boss.name,
+      categoria: boss.cat,
+      batalhaEmDupla: !!boss.db,
+      timeDoChefao: foes.map(function (f) {
+        return {
+          nome: f.name, tipos: speciesTypeNames(f.sp),
+          habilidade: f.ability || "(forma transformada - escolhivel desconhecida)",
+          item: f.item || "nenhum", golpes: f.moves
+        };
+      }),
+      buracosDoTime: cx ? cx.c.buracos.map(function (f) { return f.name; }) : "time vazio - nada a comparar",
+      ameacasAoTime: cx ? cx.c.ameacas.map(function (f) { return f.name; }) : [],
+      golpesQueFechariamBuracos: cx ? coberturaSugerida(cx.minhas, cx.c).map(function (s) {
+        return { pokemon: cx.minhas[s.idx].main.n, golpe: s.move, fecha: s.resolve.map(function (f) { return f.name; }) };
+      }) : []
+    };
+  }
+
   // Descrição real de item, sourced do próprio config do jogo (ver
   // ITEM_DESC acima) - achado real de pesquisa, 2026-09-13: sem isso a IA
   // só via o NOME do item (ex. "Swirly Glasses", "Tactical Vest") e tinha
@@ -5331,6 +5372,11 @@
         execute: function (input) { return aiTool_getConditionMoveSynergy(input); }
       },
       {
+        name: "getNextBossRoster",
+        description: "Retorna o elenco REAL da proxima luta que falta (cada Pokemon do chefao com tipos, habilidade, item e os 4 golpes - dado do jogo), se a luta e em dupla, quais Pokemon dele o time atual do jogador NAO acerta super efetivo (buracosDoTime), quais ameacam metade ou mais do time, e quais golpes que os membros do time ja podem usar fechariam esses buracos. Use pra montar uma build que responda a uma ameaca concreta desta luta.",
+        execute: function () { return aiTool_getNextBossRoster(); }
+      },
+      {
         name: "getBoxCandidatesForBoss",
         description: "Retorna o nome da proxima luta que falta (a partir do progresso atual do jogador) e, se existir, uma sugestao real de troca da caixa pra essa luta especifica (nunca alem dela), ja calculada pelo app (tipos de ataque reais do chefao x defesa real do candidato).",
         execute: function () { return aiTool_getBoxCandidatesForBoss(); }
@@ -5529,6 +5575,10 @@
       "sao de clima/status e podem nao caber no papel escolhido (ex: nao force Hail num set 100% ofensivo que " +
       "so quer dano) - mas quando o golpe combina com o papel, prefira incluir e escolher a habilidade que " +
       "ativa o combo, e cite isso na rationale.\n" +
+      "Use tambem getNextBossRoster: ele traz o elenco real da proxima luta e os buracos do time atual. Nao e " +
+      "obrigatorio, mas quando um dos 4 golpes ou o papel deste Pokemon puder responder a uma ameaca concreta " +
+      "dessa luta (ex: um golpe que acerta um chefao que ninguem do time acerta super efetivo, ou resistir ao " +
+      "golpe mais perigoso dele), prefira isso a um set generico - e cite o chefao na rationale.\n" +
       "Use tambem getBoxCandidatesForBoss - se ela sugerir ESTA MESMA especie como o melhor candidato da " +
       "caixa pra proxima luta que falta, pode citar isso na rationale (ex: 'bom encaixe pra proxima luta, " +
       "contra X'), mas so se for esta especie mesmo, senao ignore.\n" +
@@ -5660,7 +5710,9 @@
       "a habilidade que ativa a sinergia (innate conta sempre). Use tambem getConditionMoveSynergy - se ela " +
       "retornar um combo autossuficiente real (habilidade condicional + golpe que a propria especie usa pra " +
       "satisfazer a condicao) e ele fizer sentido pro papel de algum dos sets, use-o nesse set e cite na " +
-      "rationale; nao force em todos, alguns papeis nao combinam com o golpe. Se algum set for um sweeper/atacante rapido, " +
+      "rationale; nao force em todos, alguns papeis nao combinam com o golpe. Use tambem getNextBossRoster: pelo " +
+      "menos um dos sets deve responder a uma ameaca concreta da proxima luta (golpe ou resistencia contra o " +
+      "elenco real dela), citando o chefao na rationale. Se algum set for um sweeper/atacante rapido, " +
       "use getSpeedBenchmark pra confirmar que o EV de Velocidade escolhido realmente ultrapassa uma fatia " +
       "relevante do jogo - nao chute.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
@@ -6487,7 +6539,12 @@
       var b = effectiveBuild(f);
       if (b && b.moves && b.moves.length) moves = b.moves;
     });
-    return { main: unit.main, owned: unit.owned, mainTypes: speciesTypeNames(unit.main), moves: moves, forms: forms };
+    return {
+      main: unit.main, owned: unit.owned, mainTypes: speciesTypeNames(unit.main), moves: moves, forms: forms,
+      // Golpes que ele pode ter na build AGORA (level cap + tutor) - base das
+      // sugestões de "que golpe fecha este buraco".
+      aprendiveis: availableMovesFor(unit.main).names
+    };
   }
   // Pokémon de chefão -> formato do motor, já na forma Mega/Primal quando o
   // item que ele segura o transforma (mesmo mapa MEGA_FORMS da calculadora).
@@ -6501,22 +6558,40 @@
   // modo temporário, ou cada forma no permanente) que mais pontua contra ESTE
   // chefão - o jogador escolhe a melhor forma na hora, o app não deve
   // penalizar quem tem uma mega útil.
+  function confrontoMelhorUnidade(owned, foes) {
+    var melhor = null;
+    battleUnitsOf(owned).forEach(function (u) {
+      var cu = confrontoUnitOf(u);
+      var pts = confrontoTime([cu], foes).pontosPorMembro[0];
+      if (!melhor || pts > melhor.pts) melhor = { cu: cu, pts: pts };
+    });
+    return melhor && melhor.cu;
+  }
   function confrontoMinhasUnidades(foes) {
     return state.team.map(getSpeciesByX).filter(Boolean).map(function (owned) {
-      var melhor = null;
-      battleUnitsOf(owned).forEach(function (u) {
-        var cu = confrontoUnitOf(u);
-        var pts = confrontoTime([cu], foes).pontosPorMembro[0];
-        if (!melhor || pts > melhor.pts) melhor = { cu: cu, pts: pts };
-      });
-      return melhor && melhor.cu;
+      return confrontoMelhorUnidade(owned, foes);
     }).filter(Boolean);
   }
-  function confrontoParaParty(party) {
+  // Caixa inteira na mesma régua (nunca quem já está no time). Só é calculada
+  // quando a tela precisa de trocas - a caixa pode ter centenas de criaturas.
+  function confrontoUnidadesDaCaixa(foes) {
+    return state.box.filter(function (x) { return state.team.indexOf(x) === -1; })
+      .map(getSpeciesByX).filter(Boolean).map(function (owned) {
+        return confrontoMelhorUnidade(owned, foes);
+      }).filter(Boolean);
+  }
+  // `comTrocas` liga o cálculo da melhor troca da caixa (fase 3): a ficha do
+  // chefão e o resumo da Dex pedem; as outras chamadas não pagam por isso.
+  function confrontoParaParty(party, comTrocas) {
     var foes = confrontoFoesDe(party);
     var minhas = confrontoMinhasUnidades(foes);
     if (!foes.length || !minhas.length) return null;
-    return { foes: foes, minhas: minhas, c: confrontoTime(minhas, foes) };
+    var cx = { foes: foes, minhas: minhas, c: confrontoTime(minhas, foes), trocas: null };
+    if (comTrocas) {
+      var caixa = confrontoUnidadesDaCaixa(foes);
+      if (caixa.length) cx.trocas = melhoresTrocas(minhas, caixa, foes, 2);
+    }
+    return cx;
   }
   var CONFRONTO_SIMBOLO = {
     vantagem: ["▲", "vantagem"], seguro: ["◆", "seguro"], neutro: ["●", "neutro"],
@@ -6546,8 +6621,61 @@
     if (c.ameacas.length) partes.push("ameaçam metade ou mais do seu time: " + confrontoNomesTxt(c.ameacas));
     return partes.join("; ") + ".";
   }
+  // Texto do que fazer sobre os buracos e a troca da caixa (fase 3).
+  function confrontoAjustesHtml(cx) {
+    var partes = [];
+    coberturaSugerida(cx.minhas, cx.c).forEach(function (s) {
+      partes.push('<li>Ensine <b>' + escapeHtml(s.move) + '</b> (' + escapeHtml(s.type) + ') ao <b>' + escapeHtml(cx.minhas[s.idx].main.n) +
+        '</b>: fecha ' + confrontoNomesTxt(s.resolve) + '. Troque por um dos 4 golpes atuais.</li>');
+    });
+    var t = cx.trocas;
+    if (t && t.trocas.length) {
+      var linhas = t.trocas.map(function (tr) {
+        return '<li>' + (tr.sai
+          ? 'Entra <b>' + escapeHtml(tr.entra.main.n) + '</b> no lugar de <b>' + escapeHtml(tr.sai.main.n) + '</b>'
+          : 'Entra <b>' + escapeHtml(tr.entra.main.n) + '</b> na vaga livre do time') + '.</li>';
+      }).join("");
+      partes.push('<li>Melhor time da sua caixa para esta luta (buracos ' + t.buracosAntes + ' → ' + t.buracosDepois + '):<ul>' + linhas + '</ul>' +
+        '<button type="button" class="text-action-btn cf-apply-swap" data-trocas="' + escapeHtml(t.trocas.map(function (tr) {
+          return (tr.sai ? tr.sai.owned.x : "") + ">" + tr.entra.owned.x;
+        }).join(",")) + '">Aplicar ' + (t.trocas.length === 1 ? "esta troca" : "estas " + t.trocas.length + " trocas") + '</button></li>');
+    }
+    return partes.length ? '<div class="cf-fix"><h4>Como melhorar este confronto</h4><ul>' + partes.join("") + '</ul></div>' : "";
+  }
+  // Plano de luta (fase 5): tudo derivado do quadro - quem abre, quem responde a
+  // cada Pokémon do chefão e o que evitar. Habilidade e item dele saem do dado
+  // real; a descrição do item vai no tooltip, na língua do jogador.
+  function confrontoPlanoHtml(boss, cx) {
+    var c = cx.c;
+    var passos = [];
+    if (boss.db) {
+      var dupla = aberturaEmDupla(cx.minhas, cx.foes);
+      if (dupla) passos.push('<li>Batalha em dupla: abra com <b>' + escapeHtml(cx.minhas[dupla.idx[0]].main.n) + '</b> e <b>' + escapeHtml(cx.minhas[dupla.idx[1]].main.n) +
+        '</b> contra ' + escapeHtml(dupla.foes[0].name) + ' e ' + escapeHtml(dupla.foes[1].name) + ' (os dois primeiros do time dele)' +
+        (dupla.ameacaAosDois ? '; atenção, um mesmo Pokémon dele ameaça os dois' : '') + '.</li>');
+    } else if (c.abertura !== null) {
+      passos.push('<li>Abra com <b>' + escapeHtml(cx.minhas[c.abertura].main.n) + '</b>.</li>');
+    }
+    c.linhas.forEach(function (l) {
+      var m = l.melhor;
+      var itemDesc = l.foe.item ? (ITEM_PT[l.foe.item] || ITEM_DESC[l.foe.item] || "") : "";
+      var quem = escapeHtml(l.foe.name) + ' <span class="cf-plan-meta"' + (itemDesc ? ' title="' + escapeHtml(l.foe.item + ": " + itemDesc) + '"' : "") + '>(' +
+        escapeHtml(l.foe.ability || "habilidade da forma nova") + (l.foe.item ? ", " + escapeHtml(l.foe.item) : "") + ')</span>';
+      var resp;
+      if (!m || m.pontos <= 0) resp = 'sem boa resposta no seu time - jogue com cuidado';
+      else {
+        var o = m.duelo.ofensa.best;
+        resp = 'responda com <b>' + escapeHtml(cx.minhas[m.idx].main.n) + '</b>' + (o && o.move && m.duelo.ofensa.classe === "super" ? ' (' + escapeHtml(o.move) + ')' : '');
+      }
+      passos.push('<li>' + quem + ': ' + resp + '.</li>');
+    });
+    cuidadosDoChefao(c, cx.minhas, 4).forEach(function (a) {
+      passos.push('<li class="cf-plan-warn">Cuidado: ' + escapeHtml(a.foe.name) + ' tem <b>' + escapeHtml(a.move) + '</b> (' + escapeHtml(a.type) + ', ' + confrontoMultTxt(a.mult) + ') contra ' + escapeHtml(cx.minhas[a.idx].main.n) + '.</li>');
+    });
+    return '<details class="cf-plan"><summary>Plano de luta</summary><ol>' + passos.join("") + '</ol></details>';
+  }
   function bossConfrontoHtml(boss, party) {
-    var cx = confrontoParaParty(party);
+    var cx = confrontoParaParty(party, true);
     if (!cx) return "";
     var c = cx.c;
     var head = '<tr><th class="cf-foe" scope="col">Chefão</th>' + cx.minhas.map(function (m) {
@@ -6580,18 +6708,29 @@
       '<p class="cf-verdict">' + confrontoResumoTxt(cx).replace(/^./, function (ch) { return ch.toUpperCase(); }) + '</p>' +
       '<div class="cf-scroll"><table class="cf-table"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>' +
       '<div class="cf-legend">' + legenda + '</div>' +
+      confrontoAjustesHtml(cx) +
+      confrontoPlanoHtml(boss, cx) +
       notas.map(function (n) { return '<p class="cf-note">' + n + '</p>'; }).join("") +
       '</div>';
   }
   // Linha do resumo da Dex: só a próxima luta que falta (trava do usuário,
   // RN11), usando o time que o jogador tem agora.
-  function dashboardConfrontoHtml(nextBoss) {
+  // Time que o chefão usa na dificuldade escolhida (mesma regra do resto do app).
+  function bossPartyPorDificuldade(boss) {
     var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
-    var party = (nextBoss[tier] && nextBoss[tier].length) ? nextBoss[tier] : nextBoss.party;
-    var cx = confrontoParaParty(party);
+    return (boss[tier] && boss[tier].length) ? boss[tier] : boss.party;
+  }
+  function dashboardConfrontoHtml(nextBoss) {
+    var cx = confrontoParaParty(bossPartyPorDificuldade(nextBoss), true);
     if (!cx) return "";
+    var troca = "";
+    if (cx.trocas && cx.trocas.trocas.length) {
+      troca = ' Troca sugerida da caixa: ' + cx.trocas.trocas.map(function (tr) {
+        return tr.sai ? escapeHtml(tr.entra.main.n) + ' no lugar de ' + escapeHtml(tr.sai.main.n) : escapeHtml(tr.entra.main.n) + ' entra na vaga livre';
+      }).join('; ') + ' (buracos ' + cx.trocas.buracosAntes + ' → ' + cx.trocas.buracosDepois + ').';
+    }
     return '<div class="dash-item dash-confronto"><span class="dash-label">Confronto</span><span class="dash-value">' +
-      escapeHtml(nextBoss.name) + ': ' + confrontoResumoTxt(cx) +
+      escapeHtml(nextBoss.name) + ': ' + confrontoResumoTxt(cx) + troca +
       (cx.c.estimada ? ' <span class="dash-caveat">Parte estimada só pelos tipos (sem build salva).</span>' : '') + '</span></div>';
   }
 
@@ -7529,6 +7668,26 @@
       document.getElementById("boss-shell").classList.remove("show-detail");
     });
 
+    // Aplica a troca sugerida da caixa (fase 3) - a única ação do card, porque é
+    // a única que muda algo de verdade. Tudo passa por rosterMove, a mesma
+    // regra de sempre (quem sai vai pra caixa, ninguém é apagado).
+    document.querySelectorAll("#boss-detail .cf-apply-swap").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var feitas = 0;
+        btn.dataset.trocas.split(",").forEach(function (par) {
+          var p = par.split(">");
+          if (rosterMove(parseInt(p[1], 10), p[0] === "" ? null : parseInt(p[0], 10))) feitas++;
+        });
+        if (!feitas) return;
+        flashToast(feitas + (feitas === 1 ? " troca aplicada" : " trocas aplicadas") + " para " + boss.name + ".");
+        renderTeam();
+        renderBox();
+        syncRowAddButtons();
+        scheduleDashboardRefresh();
+        renderBossDetail();
+      });
+    });
+
     document.querySelectorAll("#boss-detail [data-diff]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         bossState.diff = btn.dataset.diff;
@@ -7678,7 +7837,21 @@
       afterCapChange();
     });
     msSel.addEventListener("change", function () {
+      // Registro automático da luta vencida (fase 5, 2026-09-24): avançar de
+      // insígnia é o único sinal que o app tem de que a luta anterior foi
+      // vencida (derrota não deixa rastro nenhum) - então anota, sem
+      // perguntar nada, o que o quadro de confronto via ANTES dessa luta com o
+      // time que o jogador tinha. Sem clique e sem dado novo persistido: vai
+      // pro log "O que o app fez sozinho", que já existe.
+      var milestoneAntes = state.settings.milestone;
+      var lutaAnterior = getRemainingBossEntries()[0];
+      var cxAntes = lutaAnterior ? confrontoParaParty(bossPartyPorDificuldade(lutaAnterior), false) : null;
       state.settings.milestone = parseInt(msSel.value, 10);
+      if (cxAntes && state.settings.milestone > milestoneAntes) {
+        logAutoAction("Você avançou de insígnia, então assumi que venceu " + lutaAnterior.name + ". Antes da luta o quadro de confronto via " +
+          cxAntes.c.buracos.length + " Pokémon dele sem resposta super efetiva e " + cxAntes.c.ameacas.length + " ameaçando metade ou mais do seu time.");
+        renderAutoLog();
+      }
       afterCapChange();
     });
     var megaSel = document.getElementById("settings-mega-mode");
@@ -7910,6 +8083,10 @@
     dashboardConfrontoHtml: dashboardConfrontoHtml,
     confrontoTime: confrontoTime,
     renderDashboard: renderDashboard,
+    aiTool_getNextBossRoster: aiTool_getNextBossRoster,
+    coberturaSugerida: coberturaSugerida,
+    buildStandardAiTools: buildStandardAiTools,
+    bossPartyPorDificuldade: bossPartyPorDificuldade,
     conditionMoveSynergyNoteHtml: conditionMoveSynergyNoteHtml,
     aiTool_getConditionMoveSynergy: aiTool_getConditionMoveSynergy,
     BUILDS: BUILDS,
