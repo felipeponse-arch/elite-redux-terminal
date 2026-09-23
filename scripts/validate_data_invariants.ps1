@@ -32,6 +32,8 @@ Checa:
      valida isso a fundo (fonte/versao/confianca/limite de delta), mas so
      roda na extracao completa, e este arquivo pode ser editado a mao sem
      rebuild completo.
+  9. data/condition_move_synergy.json (pesquisa de sinergia golpe x
+     habilidade, 2026-09-20/21): so cita especie e golpe reais.
 
 Literais em ASCII (PowerShell 5.1 le .ps1 sem BOM na codepage do sistema).
 #>
@@ -147,9 +149,20 @@ foreach ($sn in $role.Keys) { if (-not $speciesBySname.ContainsKey($sn)) { Erro 
 $metaAdj = Load "meta_rank_adjustments.json"
 foreach ($sn in $metaAdj.Keys) { if (-not $speciesBySname.ContainsKey($sn)) { Erro "meta_rank_adjustments.json: cita $sn, que nao existe em dex_compact.json" } }
 
+# 9. condition_move_synergy.json so cita especie (por sname) e golpe reais
+$condSyn = Load "condition_move_synergy.json"
+foreach ($c in @($condSyn.comboClimaAutossuficiente)) {
+    if (-not $speciesBySname.ContainsKey([string]$c.sname)) { Erro "condition_move_synergy.json (clima): cita a especie '$($c.sname)', que nao existe em dex_compact.json" }
+    if (-not $moveNames.ContainsKey([string]$c.golpe)) { Erro "condition_move_synergy.json (clima): cita o golpe '$($c.golpe)', que nao existe em dex_compact.json" }
+}
+foreach ($c in @($condSyn.comboHpBaixoComRecuo)) {
+    if (-not $speciesBySname.ContainsKey([string]$c.sname)) { Erro "condition_move_synergy.json (hp baixo): cita a especie '$($c.sname)', que nao existe em dex_compact.json" }
+    foreach ($g in @($c.golpesRecuo)) { if (-not $moveNames.ContainsKey([string]$g)) { Erro "condition_move_synergy.json (hp baixo): cita o golpe '$g', que nao existe em dex_compact.json" } }
+}
+
 if ($erros.Count) {
     Write-Output "validate_data_invariants.ps1: $($erros.Count) problema(s):"
     $erros | Select-Object -First 30 | ForEach-Object { Write-Output "  - $_" }
     throw "Invariantes de dados quebradas - build abortado."
 }
-Write-Output ("validate_data_invariants.ps1: OK (" + $descricoes.Count + " descricoes externas sem < ou >, " + $statusIds.Count + " golpes de status com papel, " + $megaForms.Count + " pedras mega validas, " + $synergy.Count + " especies com sinergia; " + $megaSemPedra + " formas mega/primal sem pedra conhecida - regra de pedra nao se aplica a elas; " + $destinoAusenteNaFonte + " evolucoes cuja forma de destino nao existe na fonte; species_rank/species_role sincronizados 1:1 com " + $speciesBySname.Count + " especies; " + $metaAdj.Keys.Count + " especie(s) com ajuste de meta em meta_rank_adjustments.json)")
+Write-Output ("validate_data_invariants.ps1: OK (" + $descricoes.Count + " descricoes externas sem < ou >, " + $statusIds.Count + " golpes de status com papel, " + $megaForms.Count + " pedras mega validas, " + $synergy.Count + " especies com sinergia; " + $megaSemPedra + " formas mega/primal sem pedra conhecida - regra de pedra nao se aplica a elas; " + $destinoAusenteNaFonte + " evolucoes cuja forma de destino nao existe na fonte; species_rank/species_role sincronizados 1:1 com " + $speciesBySname.Count + " especies; " + $metaAdj.Keys.Count + " especie(s) com ajuste de meta em meta_rank_adjustments.json; " + @($condSyn.comboClimaAutossuficiente).Count + " combo(s) de clima + " + @($condSyn.comboHpBaixoComRecuo).Count + " combo(s) de HP baixo em condition_move_synergy.json)")
