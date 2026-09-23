@@ -111,13 +111,12 @@ async function section19() {
       juanCard ? juanCard.textContent.slice(0, 120) : "(sem card)");
   }
 
-  // ---- "Prontidão do seu time" (achado em auditoria, 2026-09-18, item 17):
-  // antes só existia um jeito manual (copiar time+chefão pra colar numa
-  // conversa à parte) de comparar o time do jogador com o do chefão. Reusa
-  // o mesmo motor de computeBossAttackTypes/bossSafetyScore já usado pra
-  // sugerir troca de caixa - o teste recalcula os números de forma
-  // independente (não confia só na presença do texto) e cruza contra o que
-  // a tela mostra de verdade. ----
+  // ---- Comparação time x chefão na ficha do chefão (achado em auditoria,
+  // 2026-09-18, item 17: antes só existia o jeito manual de copiar time+chefão
+  // pra colar numa conversa à parte). Era o card "Prontidão do seu time"
+  // (só tipo); desde 2026-09-24 é o card "Confronto com o seu time" (motor
+  // src/regras/confronto.js), e o teste cruza a tela contra o que o motor
+  // calcula, não contra a presença de um texto. ----
   T.state.settings.difficulty = "ace";
   document.getElementById("boss-search-input").value = "Roxanne 1";
   document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
@@ -128,49 +127,12 @@ async function section19() {
     await wait(50);
     var boss = T.BOSSES.find(function (b) { return b.name === "Roxanne 1"; });
     if (achou("dado real do chefão Roxanne 1 (T.BOSSES)", boss)) {
-      var atkTypes = T.computeBossAttackTypes(boss);
       var teamMembers = T.state.team.map(T.getSpeciesByX).filter(Boolean);
-      var esperadoSeguros = 0, esperadoVulneraveis = [];
-      teamMembers.forEach(function (owned) {
-        var melhor = null;
-        T.battleUnitsOf(owned).forEach(function (unit) {
-          var s = T.bossSafetyScore(unit, atkTypes);
-          if (melhor === null || s < melhor) melhor = s;
-        });
-        if (melhor >= 1) esperadoVulneraveis.push(owned.n);
-        else if (melhor <= -1) esperadoSeguros++;
-      });
-      var tier = "party"; // Ace usa "party", já confirmado no P1 desta seção
-      var bossParty = ((boss[tier] && boss[tier].length) ? boss[tier] : boss.party || [])
-        .map(function (m) { return T.getSpeciesByX(m.x); }).filter(Boolean);
-      var tiposEfetivosEsperados = {};
-      teamMembers.forEach(function (owned) {
-        T.battleUnitsOf(owned).forEach(function (unit) {
-          T.speciesTypeNames(unit.main).forEach(function (t) {
-            if (tiposEfetivosEsperados[t]) return;
-            if (bossParty.some(function (foe) { return T.abilityTypeMod(t, foe).mult >= 2; })) tiposEfetivosEsperados[t] = true;
-          });
-        });
-      });
-      var numTiposEsperado = Object.keys(tiposEfetivosEsperados).length;
-
-      var cardProntidao = [...document.querySelectorAll("#boss-detail .card")].find(function (c) {
-        return c.querySelector("h3") && c.querySelector("h3").textContent.indexOf("Prontidão") !== -1;
-      });
-      if (achou("card \"Prontidão do seu time\" na ficha do chefão", cardProntidao)) {
-        var texto = cardProntidao.textContent;
-        check("contagem de seguros/total bate com o recálculo independente (bossSafetyScore)",
-          texto.indexOf(esperadoSeguros + " de " + teamMembers.length + " Pokémon") !== -1,
-          "esperado " + esperadoSeguros + "/" + teamMembers.length + " em: " + texto);
-        var todosVulneraveisCitados = esperadoVulneraveis.every(function (nome) { return texto.indexOf(nome) !== -1; });
-        check("todo Pokémon vulnerável esperado é citado pelo nome (nunca só uma contagem vaga)",
-          esperadoVulneraveis.length === 0 || todosVulneraveisCitados, { esperado: esperadoVulneraveis, texto: texto });
-        check("contagem de tipos ofensivos super efetivos bate com o recálculo independente",
-          numTiposEsperado === 0
-            ? texto.indexOf("Nenhum dos seus tipos atuais é super efetivo") !== -1
-            : texto.indexOf("pelo menos " + numTiposEsperado + " tipo") !== -1,
-          "esperado " + numTiposEsperado + " em: " + texto);
-      }
+      // O card antigo "Prontidão do seu time" (só tipo, 2026-09-18) foi
+      // fundido no "Confronto com o seu time" em 2026-09-24: não pode voltar
+      // a aparecer duplicado na ficha.
+      check("ficha do chefão não tem mais o card \"Prontidão do seu time\" (fundido no Confronto)",
+        ![...document.querySelectorAll("#boss-detail .card h3")].some(function (h) { return h.textContent.indexOf("Prontidão") !== -1; }));
 
       // ---- "Confronto com o seu time" (motor src/regras/confronto.js,
       // 2026-09-24): aparece sozinho na ficha, sem clique, e a tela mostra
@@ -187,6 +149,9 @@ async function section19() {
           var textoConfronto = cardConfronto.querySelector(".cf-verdict").textContent;
           check("todo Pokémon sem resposta super efetiva é citado pelo nome no resumo",
             cx.c.buracos.every(function (f) { return textoConfronto.indexOf(f.name) !== -1; }), textoConfronto);
+          check("todo Pokémon do seu time exposto ao que o chefão ataca é citado pelo nome (o lado defensivo do antigo card de Prontidão)",
+            cx.c.expostos.every(function (i) { return textoConfronto.indexOf(cx.minhas[i].main.n) !== -1; }) &&
+              (cx.c.expostos.length === 0 || textoConfronto.indexOf("expostos") !== -1), textoConfronto);
           check("o resumo cita a melhor abertura do motor",
             textoConfronto.indexOf(cx.minhas[cx.c.abertura].main.n) !== -1, textoConfronto);
           check("cada célula tem texto acessível dizendo o veredito (não só cor)",

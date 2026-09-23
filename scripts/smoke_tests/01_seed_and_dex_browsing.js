@@ -247,4 +247,50 @@ async function section01() {
   } else { check("Nidoking encontrado pro teste de sinergia visível na Dex", false); }
   setSearch("");
   await wait(120);
+
+  // ---- Lista da Dex em lotes (2026-09-24, achado da auditoria de 23/09):
+  // reconstruir as 1906 linhas custava ~30ms por busca/filtro; agora só um
+  // lote entra e o resto vem com a rolagem/seta pra baixo, sem perder nada:
+  // busca e filtro valem pra lista INTEIRA. ----
+  const ulLote = document.getElementById("species-list");
+  const totalReal = window.__erTest.SPECIES.length;
+  check("lista da Dex sem filtro renderiza só um lote, não as " + totalReal + " linhas de uma vez",
+    ulLote.querySelectorAll(".species-row").length > 0 && ulLote.querySelectorAll(".species-row").length < totalReal / 4,
+    ulLote.querySelectorAll(".species-row").length + " linhas");
+  const rowsPrimeiro = ulLote.querySelectorAll(".species-row").length;
+  ulLote.scrollTop = ulLote.scrollHeight;
+  await wait(80);
+  check("rolar até o fim traz mais linhas",
+    ulLote.querySelectorAll(".species-row").length > rowsPrimeiro, ulLote.querySelectorAll(".species-row").length + " vs " + rowsPrimeiro);
+  let voltasLote = 0;
+  while (ulLote.querySelectorAll(".species-row").length < totalReal && voltasLote++ < 60) {
+    ulLote.scrollTop = ulLote.scrollHeight;
+    await wait(30);
+  }
+  check("rolando o bastante a lista completa aparece (nenhuma espécie some por causa dos lotes)",
+    ulLote.querySelectorAll(".species-row").length === totalReal, ulLote.querySelectorAll(".species-row").length + "/" + totalReal);
+  // Busca acha uma espécie que ficaria muito além do primeiro lote.
+  const ultimaEspecie = window.__erTest.SPECIES.slice().sort(function (a, b) { return (a.i || 9999) - (b.i || 9999) || a.x - b.x; })[totalReal - 1];
+  setSearch(ultimaEspecie.n);
+  await wait(150);
+  check("busca acha a espécie do fim da lista, fora do primeiro lote",
+    [...ulLote.querySelectorAll(".species-row .sname")].some(function (s) { return s.textContent === ultimaEspecie.n; }), ultimaEspecie.n);
+  setSearch("");
+  await wait(150);
+  check("limpar a busca volta a um lote só", ulLote.querySelectorAll(".species-row").length < totalReal / 4,
+    ulLote.querySelectorAll(".species-row").length + " linhas");
+  // Seta pra baixo na última linha renderizada traz o próximo lote (não trava).
+  const antesSeta = ulLote.querySelectorAll(".species-row").length;
+  const ultimaLinha = ulLote.querySelectorAll(".species-row")[antesSeta - 1];
+  ultimaLinha.classList.add("kbd-active");
+  document.body.focus();
+  document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+  await wait(50);
+  check("seta pra baixo na última linha renderizada traz o próximo lote e move o cursor",
+    ulLote.querySelectorAll(".species-row").length > antesSeta &&
+      ulLote.querySelectorAll(".species-row")[antesSeta].classList.contains("kbd-active"),
+    ulLote.querySelectorAll(".species-row").length + " vs " + antesSeta);
+  ulLote.querySelectorAll(".kbd-active").forEach(function (r) { r.classList.remove("kbd-active"); });
+  setSearch("");
+  await wait(150);
 }

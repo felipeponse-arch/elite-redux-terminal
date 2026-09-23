@@ -513,14 +513,37 @@ async function section10() {
       check("cancelar fecha o diálogo sem mudar nada",
         !dialog30.open && JSON.stringify(teamBeforeCancel30) === JSON.stringify(JSON.parse(localStorage.getItem("er_terminal_save") || "{}").team));
 
+      // 2026-09-24: "Novo jogo" zera a RUN inteira, não só time e caixa. Semeia
+      // estado de run em todos os campos que antes sobreviviam ao reset.
+      const S30 = window.__erTest.state;
+      const dificuldadeAntes30 = S30.settings.difficulty;
+      S30.settings.milestone = 2;
+      S30.settings.runConfirmedAt = new Date().toISOString();
+      S30.archetype = { pace: "Balance", weather: "Rain", monotype: null, reasoning: "teste" };
+      S30.autoEvolved = { SPECIES_RATICATE: { from: "Rattata", lvl: 20 } };
+      S30.gymSkillsCleared = { Roxanne: ["teste"] };
       resetBtn30.click();
       await wait(50);
+      check("diálogo do 'Novo jogo' diz que zera a run inteira e o que continua guardado",
+        /zera a sua run/.test(document.getElementById("confirm-modal-message").textContent) &&
+          /Dificuldade, level cap e modo de Mega ficam como estão/.test(document.getElementById("confirm-modal-message").textContent));
       document.getElementById("confirm-modal-ok").click();
       await wait(80);
       const saveAfterReset30 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
       check("confirmar 'Novo jogo' zera time E caixa",
         saveAfterReset30.team.length === 0 && saveAfterReset30.box.length === 0,
         { team: saveAfterReset30.team, box: saveAfterReset30.box });
+      check("'Novo jogo' também volta a insígnia pro início e limpa arquétipo, auto-evolução e buffs de ginásio",
+        saveAfterReset30.settings.milestone === 0 &&
+          !saveAfterReset30.archetype.pace && !saveAfterReset30.archetype.weather &&
+          Object.keys(saveAfterReset30.autoEvolved || {}).length === 0 &&
+          Object.keys(saveAfterReset30.gymSkillsCleared || {}).length === 0,
+        { milestone: saveAfterReset30.settings.milestone, archetype: saveAfterReset30.archetype, autoEvolved: saveAfterReset30.autoEvolved, gym: saveAfterReset30.gymSkillsCleared });
+      check("'Novo jogo' mantém as opções de setup do jogo (dificuldade) mas pede pra confirmar a run de novo",
+        saveAfterReset30.settings.difficulty === dificuldadeAntes30 && !saveAfterReset30.settings.runConfirmedAt &&
+          document.getElementById("run-setup-banner").hidden === false);
+      check("'Novo jogo' anota no log \"O que o app fez sozinho\"",
+        (saveAfterReset30.autoLog || []).some(function (e) { return e.text.indexOf("Novo jogo:") === 0; }));
       check("anotação sobrevive ao reset (só a composição de time/caixa é limpa)",
         saveAfterReset30.notes && saveAfterReset30.notes.SPECIES_PIKACHU === "nota de teste - deve sobreviver ao reset");
       check("botão 'Novo jogo' fica desabilitado depois, sem nada pra resetar",

@@ -154,6 +154,13 @@ export const MUTACOES = [
     para: "",
   },
   {
+    id: "confronto-expostos-qualquer-ameaca",
+    descricao: "conta como exposto quem é ameaçado por só um Pokémon do chefão (perde o corte de metade)",
+    arquivo: "confronto.js",
+    de: "if (n > 0 && n * 2 >= foes.length) expostos.push(idx);",
+    para: "if (n > 0) expostos.push(idx);",
+  },
+  {
     id: "confronto-cobertura-aceita-prioridade-negativa",
     descricao: "cobertura sugerida aceita golpe que atrasa o turno (Focus Punch)",
     arquivo: "confronto.js",

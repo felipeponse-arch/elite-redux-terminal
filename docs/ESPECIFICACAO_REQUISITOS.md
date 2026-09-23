@@ -296,6 +296,20 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   sozinho" que a luta anterior foi assumida como vencida, com o que o confronto via antes dela
   (nº de Pokémon sem resposta e de ameaças). Derrota não deixa rastro observável, então não existe
   registro de derrota; o bloco "Como melhorar este confronto" já responde a ela sem o jogador pedir.
+- RF73 — O card "Prontidão do seu time" da ficha do chefão (só tipo, 2026-09-18) foi **fundido** no
+  card "Confronto com o seu time": o lado defensivo virou a frase "ficam expostos ao que ele ataca"
+  (membros em perigo contra metade ou mais do time do chefão, `confrontoTime().expostos`) e o lado
+  ofensivo é o próprio quadro. A ficha não pode ter os dois cards.
+- RF74 — "Novo jogo" **zera a run inteira**: time, caixa, arquétipo, registro de auto-evolução, buffs
+  de ginásio já resgatados e a insígnia (volta ao início). Dificuldade, level cap e modo de Mega ficam
+  (são opções de setup do jogo), mas a confirmação da run é pedida de novo (banner "Confira sua
+  run"). Builds, anotações e times salvos continuam guardados. O botão só fica habilitado quando
+  há algo da run pra zerar. Registra a ação no log "O que o app fez sozinho". (Revisa a versão de
+  2026-09-13, que zerava só time e caixa e deixava o resto da run contaminar a nova.)
+- RNF10 — **Lista da Dex em lotes**: a lista principal renderiza um lote (150 linhas) e o resto entra
+  com a rolagem ou a seta pra baixo; busca, filtro e ordenação valem pra lista INTEIRA. Medido:
+  reconstruir 1906 linhas custava ~30ms (o custo é o número de nós, não o conteúdo), um lote custa
+  ~1,5ms.
 - RN17 — O motor de confronto não calcula dano nem compara Velocidade real: o nível do chefão não
   existe nos dados. Habilidades de chefão fora de `TYPE_MOD_ABILITIES` podem alterar o resultado e a
   interface declara essa limitação em vez de fingir certeza.

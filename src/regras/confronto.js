@@ -164,8 +164,17 @@
     });
     var abertura = null;
     pontosPorMembro.forEach(function (p, idx) { if (abertura === null || p > pontosPorMembro[abertura]) abertura = idx; });
+    // Membros do jogador que ficam em perigo contra metade ou mais do time do
+    // chefão (o lado defensivo do quadro: quem NÃO deve ficar exposto).
+    var expostos = [];
+    minhas.forEach(function (m, idx) {
+      var n = 0;
+      linhas.forEach(function (l) { if (l.respostas[idx].duelo.ameaca.classe === CONFRONTO_AMEACA.PERIGO) n++; });
+      if (n > 0 && n * 2 >= foes.length) expostos.push(idx);
+    });
     return {
       linhas: linhas,
+      expostos: expostos,
       buracos: linhas.filter(function (l) { return l.buraco; }).map(function (l) { return l.foe; }),
       ameacas: linhas.filter(function (l) { return minhas.length && l.ameacando * 2 >= minhas.length; }).map(function (l) { return l.foe; }),
       pontosPorMembro: pontosPorMembro,

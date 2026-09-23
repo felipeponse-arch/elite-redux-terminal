@@ -250,6 +250,21 @@ test("dupla: escolhe a melhor dupla contra os dois primeiros do chefão e exige 
   assert.equal(R.aberturaEmDupla([minhas[0]], [f1, f2]), null);
 });
 
+test("expostos: só quem fica em perigo contra metade ou mais do time do chefão", () => {
+  golpeExiste("Thunderbolt", "Tackle");
+  const foes = [inimigo("SPECIES_HEATRAN", "Flash Fire", ["Thunderbolt"]), inimigo("SPECIES_HEATRAN", "Flash Fire", ["Tackle"])];
+  const minhas = [unidade("SPECIES_STARAPTOR", null), unidade("SPECIES_GARCHOMP", null)];
+  const c = R.confrontoTime(minhas, foes);
+  assert.equal(c.expostos.length, 1, "Electric é 2x no Staraptor; o Garchomp é imune");
+  assert.equal(c.expostos[0], 0);
+  const c2 = R.confrontoTime([minhas[1]], foes);
+  assert.equal(c2.expostos.length, 0);
+  const tres = [...foes, inimigo("SPECIES_HEATRAN", "Flash Fire", ["Tackle"])];
+  const c3 = R.confrontoTime([minhas[0]], tres);
+  assert.equal(c3.linhas.filter((l) => l.respostas[0].duelo.ameaca.classe === "perigo").length, 1, "pré-condição: só 1 de 3 o ameaça");
+  assert.equal(c3.expostos.length, 0, "ameaçado por só 1 de 3 (menos da metade) não conta como exposto");
+});
+
 test("time vazio contra chefão não quebra", () => {
   const c = R.confrontoTime([], [inimigo("SPECIES_HEATRAN", "Flash Fire", [])]);
   assert.equal(c.abertura, null);

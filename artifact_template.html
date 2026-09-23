@@ -1806,7 +1806,7 @@
                  modal customizado novo só pra este caso único. Builds/
                  anotações/times salvos NÃO são apagados - só a composição
                  atual de time/caixa, exatamente o que o usuário pediu. -->
-            <button id="reset-team-box-btn" class="text-action-btn" type="button" style="color:var(--sem-weak);" title="Remove todos os Pokémon do time e da caixa">Novo jogo (resetar time e caixa)</button>
+            <button id="reset-team-box-btn" class="text-action-btn" type="button" style="color:var(--sem-weak);" title="Zera a run: time, caixa, arquétipo, insígnia e buffs de ginásio. Builds, anotações e times salvos ficam.">Novo jogo (zerar a run)</button>
           </div>
           <div class="team-slots" id="team-slots"></div>
         </div>
@@ -2690,6 +2690,9 @@
       showStorageBanner("Não deu para salvar - armazenamento cheio? Tente apagar anotações antigas.");
     }
     pushToSync(save);
+    // O botão "Novo jogo" só fica habilitado se houver algo da run pra zerar
+    // (insígnia, arquétipo... além de time/caixa) - toda mudança passa por aqui.
+    updateResetTeamBoxBtn();
   }
 
   function showStorageBanner(text) {
@@ -3247,6 +3250,14 @@
     var rows = document.querySelectorAll(rowSelector);
     if (!rows.length) return;
     e.preventDefault();
+    // Lista da Dex em lotes (renderMaisLista): com o cursor nas últimas linhas,
+    // traz o próximo lote antes de mover, senão a seta pra baixo travaria no fim
+    // do que já está na tela.
+    if (rowSelector.indexOf("#species-list") === 0 && e.key === "ArrowDown") {
+      var ativo = document.querySelector("#species-list .species-row.kbd-active");
+      var idxAtivo = ativo ? Array.prototype.indexOf.call(rows, ativo) : -1;
+      if (idxAtivo >= rows.length - 3 && renderMaisLista()) rows = document.querySelectorAll(rowSelector);
+    }
     var curIdx = -1;
     for (var i = 0; i < rows.length; i++) {
       if (rows[i].classList.contains("kbd-active")) { curIdx = i; break; }
@@ -3312,10 +3323,55 @@
     return list;
   }
 
+  // Lista da Dex em LOTES (2026-09-24, achado da auditoria: reconstruir as 1906
+  // linhas custava ~30ms por busca/filtro/ordenação, e medido depois que o
+  // custo é o NÚMERO de nós - até uma lista mínima de 1906 <li> custa ~18ms;
+  // só renderizar menos resolve: ~1,5ms). Renderiza um lote e o resto entra
+  // conforme a rolagem chega perto do fim (ou a seta pra baixo chega na
+  // última linha) - a lista continua completa, só que sob demanda. Busca e
+  // filtro seguem valendo pra lista INTEIRA (getFiltered), não pro que já está
+  // na tela.
+  var LISTA_LOTE = 150;
+  var LISTA_LOTE_ATE_SELECIONADA = 600;
+  var listaAtual = [];
+  var listaRenderizadas = 0;
+  function linhaDaListaHtml(sp, idx, teamFull, hasSelectedRow) {
+    var names = speciesTypeNames(sp);
+    var pips = names.map(typePip).join("");
+    var isSel = state.selected === sp.x;
+    var sel = isSel ? " selected" : "";
+    var isTabStop = isSel || (!hasSelectedRow && idx === 0);
+    var inTeam = state.team.indexOf(sp.x) !== -1;
+    // Same three states syncRowAddButtons() maintains: in team / team full (swap) / free slot.
+    var addTitle = inTeam ? "Já está no time" : teamFull ? "Trocar por um do time" : "Adicionar ao time";
+    var addLabel = inTeam ? "✓" : teamFull ? "⇄" : "+";
+    return '<li class="species-row' + sel + '" data-x="' + sp.x + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
+      '<span class="dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</span>' +
+      spriteImgHtml(sp.x, sp.n, 28) +
+      '<span class="sname">' + escapeHtml(sp.n) + '</span>' +
+      rankBadgeHtml(sp.sname) +
+      '<span class="pips">' + pips + '</span>' +
+      '<button class="row-add-btn' + (!inTeam && teamFull ? ' is-swap' : '') + '" data-add="' + sp.x + '" type="button" title="' + addTitle + '" aria-label="' + addTitle + '"' +
+        (inTeam ? ' disabled' : '') + '>' + addLabel + '</button></li>';
+  }
+  // Acrescenta o próximo lote no fim da lista. Devolve true se acrescentou algo.
+  function renderMaisLista() {
+    if (listaRenderizadas >= listaAtual.length) return false;
+    var ul = document.getElementById("species-list");
+    var teamFull = state.team.length >= 6;
+    var fim = Math.min(listaAtual.length, listaRenderizadas + LISTA_LOTE);
+    var html = "";
+    for (var i = listaRenderizadas; i < fim; i++) html += linhaDaListaHtml(listaAtual[i], i, teamFull, true);
+    ul.insertAdjacentHTML("beforeend", html);
+    listaRenderizadas = fim;
+    return true;
+  }
   function renderList() {
     var list = getFiltered();
     var ul = document.getElementById("species-list");
+    listaAtual = list;
     if (list.length === 0) {
+      listaRenderizadas = 0;
       ul.innerHTML = '<li class="no-results">Nenhum Pokémon encontrado.</li>';
       return;
     }
@@ -3330,45 +3386,50 @@
     // if nothing is selected yet - everyone else is -1 so Tab doesn't stop
     // 1900+ times. Arrow keys move which row is 0 (see the keydown handler
     // below), matching how a real listbox behaves.
-    var hasSelectedRow = list.some(function (s) { return s.x === state.selected; });
-    var html = list.map(function (sp, idx) {
-      var names = speciesTypeNames(sp);
-      var pips = names.map(typePip).join("");
-      var isSel = state.selected === sp.x;
-      var sel = isSel ? " selected" : "";
-      var isTabStop = isSel || (!hasSelectedRow && idx === 0);
-      var inTeam = state.team.indexOf(sp.x) !== -1;
-      // Same three states syncRowAddButtons() maintains: in team / team full (swap) / free slot.
-      var addTitle = inTeam ? "Já está no time" : teamFull ? "Trocar por um do time" : "Adicionar ao time";
-      var addLabel = inTeam ? "✓" : teamFull ? "⇄" : "+";
-      return '<li class="species-row' + sel + '" data-x="' + sp.x + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
-        '<span class="dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</span>' +
-        spriteImgHtml(sp.x, sp.n, 28) +
-        '<span class="sname">' + escapeHtml(sp.n) + '</span>' +
-        rankBadgeHtml(sp.sname) +
-        '<span class="pips">' + pips + '</span>' +
-        '<button class="row-add-btn' + (!inTeam && teamFull ? ' is-swap' : '') + '" data-add="' + sp.x + '" type="button" title="' + addTitle + '" aria-label="' + addTitle + '"' +
-          (inTeam ? ' disabled' : '') + '>' + addLabel + '</button></li>';
-    }).join("");
+    // A linha aberta continua na tela quando está perto do topo (até
+    // LISTA_LOTE_ATE_SELECIONADA); mais longe que isso ela só aparece quando a
+    // rolagem chegar lá, e o tab stop fica na primeira linha.
+    var selIdx = -1;
+    for (var s = 0; s < list.length; s++) { if (list[s].x === state.selected) { selIdx = s; break; } }
+    var n = LISTA_LOTE;
+    if (selIdx !== -1 && selIdx < LISTA_LOTE_ATE_SELECIONADA) n = Math.max(n, selIdx + 1);
+    n = Math.min(n, list.length);
+    var hasSelectedRow = selIdx !== -1 && selIdx < n;
+    var html = "";
+    for (var i = 0; i < n; i++) html += linhaDaListaHtml(list[i], i, teamFull, hasSelectedRow);
     ul.innerHTML = html;
-    ul.querySelectorAll(".species-row").forEach(function (row) {
-      row.addEventListener("click", function (e) {
-        // the quick-add button lives inside the row; don't also open the detail
-        if (e.target.closest(".row-add-btn")) return;
-        selectSpecies(parseInt(row.dataset.x, 10));
-      });
-    });
-    ul.querySelectorAll(".row-add-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var x = parseInt(btn.dataset.add, 10);
+    listaRenderizadas = n;
+    preencherListaSeCurta();
+  }
+  // Se a área visível ainda não está cheia (lista curta na tela, tela muito
+  // alta) ou a rolagem chegou perto do fim, acrescenta lotes até sobrar folga.
+  function preencherListaSeCurta() {
+    var ul = document.getElementById("species-list");
+    var guarda = 0;
+    while (listaRenderizadas < listaAtual.length && guarda++ < 40 &&
+           ul.clientHeight > 0 && ul.scrollHeight - ul.scrollTop - ul.clientHeight < 800) {
+      renderMaisLista();
+    }
+  }
+  // Uma escuta só na lista inteira (antes eram 2 por linha, reanexadas a cada render).
+  (function () {
+    var ul = document.getElementById("species-list");
+    ul.addEventListener("click", function (e) {
+      var addBtn = e.target.closest(".row-add-btn");
+      if (addBtn) {
+        var x = parseInt(addBtn.dataset.add, 10);
         if (state.team.indexOf(x) !== -1) return;
         if (state.team.length >= 6) { openSwapModal(x); return; }
         if (rosterMove(x, null)) { // updateTeamBadge inside re-syncs the + / ✓ buttons
           flashToast(getSpeciesByX(x).n + " adicionado ao time (" + state.team.length + "/6)");
         }
-      });
+        return;
+      }
+      var row = e.target.closest(".species-row");
+      if (row) selectSpecies(parseInt(row.dataset.x, 10));
     });
-  }
+    ul.addEventListener("scroll", preencherListaSeCurta, { passive: true });
+  })();
 
   // Keeps the Dex list's quick-add buttons truthful after the team changes
   // somewhere else (detail view, box, swap) without re-rendering 1900 rows.
@@ -4173,7 +4234,7 @@
   // mesmo critério já usado em save-team-btn/etc.
   function updateResetTeamBoxBtn() {
     var btn = document.getElementById("reset-team-box-btn");
-    if (btn) btn.disabled = !state.team.length && !state.box.length;
+    if (btn) btn.disabled = !runTemAlgoPraZerar();
   }
 
   // PC Box - Fase 2 do roadmap de estratégia (2026-09-11/12, redesenho pedido
@@ -6321,24 +6382,61 @@
   // a função segue com `ok` falso) - o clique parecia não fazer nada. Trocado
   // pro <dialog>.showModal() já usado em #swap-modal, que não é um dos
   // diálogos síncronos que esse atributo restringe.
+  // 2026-09-24 (pauta da auditoria de 23/09, "vale só time/caixa ou a run
+  // inteira?"): o texto do próprio diálogo prometia "como se fosse começar um
+  // jogo novo", mas Arquétipo, registro de auto-evolução (indexado por NOME de
+  // espécie: um Pokémon novo de mesmo nome podia ser "desevoluído" por engano),
+  // buffs de ginásio já resgatados e a insígnia atual sobreviviam. Decisão
+  // (sem perguntar, regra de ser semi-automático): "Novo jogo" zera TUDO que
+  // pertence à run - time, caixa, arquétipo, auto-evolução, buffs de ginásio e
+  // insígnia (volta pro início). Dificuldade, level cap e modo de Mega são as
+  // opções de setup do jogo e podem continuar iguais numa run nova, então
+  // ficam como estão, mas a confirmação da run é pedida de novo (o banner
+  // "Confira sua run" volta). Builds, anotações e times salvos continuam
+  // guardados, como sempre.
+  function runTemAlgoPraZerar() {
+    return !!(state.team.length || state.box.length || state.archetype.pace || state.archetype.weather || state.archetype.monotype ||
+      Object.keys(state.autoEvolved).length || Object.keys(state.gymSkillsCleared).length || state.settings.milestone > 0);
+  }
+  function zerarRun() {
+    state.team = [];
+    state.box = [];
+    state.archetype = { pace: null, weather: null, monotype: null, reasoning: "" };
+    state.autoEvolved = {};
+    state.gymSkillsCleared = {};
+    state.settings.milestone = 0;
+    state.settings.runConfirmedAt = null;
+    teamRecommendation = null;
+    generatedTeamResult = null;
+    teamSwapIdx = null;
+    pcBoxSelectedX = null;
+    logAutoAction("Novo jogo: time, caixa, arquétipo, progresso de insígnias e buffs de ginásio zerados. Builds, anotações e times salvos foram mantidos.");
+    persist();
+    var msSel = document.getElementById("settings-milestone");
+    if (msSel) msSel.value = "0";
+    myBuildLevelIsCustom = false;
+    updateTeamBadge();
+    updateBoxBadge();
+    renderTeam();
+    renderBox();
+    renderCapBadge();
+    if (document.getElementById("cap-display")) renderCapDisplay();
+    renderProgressTrail();
+    renderRunStatus();
+    renderAutoLog();
+    syncRowAddButtons();
+    document.getElementById("run-setup-banner").hidden = false;
+  }
   document.getElementById("reset-team-box-btn").addEventListener("click", function () {
-    if (!state.team.length && !state.box.length) return;
+    if (!runTemAlgoPraZerar()) return;
     openConfirmModal(
       "Começar um jogo novo?",
-      "Isso remove TODOS os Pokémon do time e da caixa, como se fosse começar um jogo novo. Builds, anotações e times salvos continuam guardados.",
-      "Remover time e caixa",
+      "Isso zera a sua run: remove TODOS os Pokémon do time e da caixa, volta a insígnia pro início e limpa o arquétipo e os buffs de ginásio já resgatados. " +
+        "Dificuldade, level cap e modo de Mega ficam como estão, mas o app pede pra você confirmar de novo. Builds, anotações e times salvos continuam guardados.",
+      "Começar jogo novo",
       function () {
-        state.team = [];
-        state.box = [];
-        teamSwapIdx = null;
-        pcBoxSelectedX = null;
-        saveTeam();
-        saveBox();
-        updateTeamBadge();
-        updateBoxBadge();
-        renderTeam();
-        renderBox();
-        flashToast("Time e caixa resetados - pronto pra um jogo novo.");
+        zerarRun();
+        flashToast("Run zerada - pronto pra um jogo novo. Confira a dificuldade e o level cap.");
       }
     );
   });
@@ -6462,60 +6560,6 @@
     return { sp: boxBest.sp, owned: boxBest.owned, reasonType: reason.t, reasonMult: reason.mult };
   }
 
-  // "Prontidão do seu time" (achado em auditoria, 2026-09-18, item 17): antes
-  // a única forma de comparar o time do jogador com o do chefão era manual -
-  // "Enviar para o Claude" (copiar tudo e colar numa conversa à parte).
-  // Reusa o MESMO motor já usado pra sugerir troca de caixa
-  // (computeBossAttackTypes/bossSafetyScore/unitTypeMult, todos acima) - zero
-  // conta nova, só um resumo direto na própria ficha do chefão. Convenção de
-  // bossSafetyScore: score MENOR é MAIS seguro (imune/resiste sobem o
-  // "risco" pra baixo, fraco sobe pra cima) - ver o comentário original da
-  // função. Não é calculadora de dano (sem EVs/nature/habilidade do lado
-  // ofensivo do time) - só contagem de tipo, mesmo escopo do resto do
-  // dashboard/dessa mesma tela.
-  function bossReadinessHtml(boss) {
-    var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
-    if (!teamMembers.length) return "";
-    var atkTypes = computeBossAttackTypes(boss);
-    if (!atkTypes.length) return "";
-    var seguros = [], vulneraveis = [];
-    teamMembers.forEach(function (owned) {
-      var melhor = null;
-      battleUnitsOf(owned).forEach(function (unit) {
-        var s = bossSafetyScore(unit, atkTypes);
-        if (melhor === null || s < melhor) melhor = s;
-      });
-      if (melhor >= 1) vulneraveis.push(owned);
-      else if (melhor <= -1) seguros.push(owned);
-    });
-    var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
-    var bossParty = ((boss[tier] && boss[tier].length) ? boss[tier] : boss.party || [])
-      .map(function (m) { return getSpeciesByX(m.x); }).filter(Boolean);
-    var meusTiposEfetivos = {};
-    teamMembers.forEach(function (owned) {
-      battleUnitsOf(owned).forEach(function (unit) {
-        speciesTypeNames(unit.main).forEach(function (t) {
-          if (meusTiposEfetivos[t]) return;
-          if (bossParty.some(function (foe) { return abilityTypeMod(t, foe).mult >= 2; })) meusTiposEfetivos[t] = true;
-        });
-      });
-    });
-    var numTiposEfetivos = Object.keys(meusTiposEfetivos).length;
-    var frase1 = seguros.length + " de " + teamMembers.length + " Pokémon do seu time " +
-      (seguros.length === 1 ? "resiste bem" : "resistem bem") + " ao que este chefão ataca";
-    if (vulneraveis.length) {
-      frase1 += ", mas " + (vulneraveis.length === 1 ? "fica exposto: " : "ficam expostos: ") +
-        vulneraveis.map(function (sp) { return escapeHtml(sp.n); }).join(", ");
-    }
-    frase1 += ".";
-    var frase2 = numTiposEfetivos
-      ? "Seu time tem pelo menos " + numTiposEfetivos + " tipo" + (numTiposEfetivos === 1 ? "" : "s") + " super efetivo" + (numTiposEfetivos === 1 ? "" : "s") + " contra o time dele."
-      : "Nenhum dos seus tipos atuais é super efetivo contra o time dele - considere um golpe de cobertura.";
-    return '<div class="card"><h3>Prontidão do seu time</h3>' +
-      '<p style="margin:0 0 6px;">' + frase1 + '</p>' +
-      '<p style="margin:0;color:var(--text-dim);">' + frase2 + '</p></div>';
-  }
-
   // ---------------- confronto com o chefão ----------------
   // Adaptador entre a página e o motor puro (src/regras/confronto.js), pauta de
   // 2026-09-24 ("estratégia e sugestão de times e builds", com a regra do
@@ -6619,6 +6663,9 @@
       ? "sem resposta super efetiva do seu time: " + confrontoNomesTxt(c.buracos)
       : "todo Pokémon dele tem resposta super efetiva no seu time");
     if (c.ameacas.length) partes.push("ameaçam metade ou mais do seu time: " + confrontoNomesTxt(c.ameacas));
+    if (c.expostos.length) {
+      partes.push("ficam expostos ao que ele ataca: " + c.expostos.map(function (i) { return escapeHtml(cx.minhas[i].main.n); }).join(", "));
+    }
     return partes.join("; ") + ".";
   }
   // Texto do que fazer sobre os buracos e a troca da caixa (fase 3).
@@ -7646,7 +7693,6 @@
         '<div class="detail-dexno mono">' + escapeHtml(boss.cat) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +
       (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:11px;margin:6px 0 0;max-width:65ch;">Nomes crus dos dados do jogo — não temos 100% de certeza que "Insane"/"Hell" batem exatamente com os modos "Ace"/"Elite" do menu do jogo atual. Confira sua dificuldade no Centro Pokémon se quiser ter certeza.</p></div>' : "") +
-      bossReadinessHtml(boss) +
       bossConfrontoHtml(boss, party) +
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
         '<div class="boss-level-row"><label for="boss-level-input">Status final calculados pro nível</label>' +
