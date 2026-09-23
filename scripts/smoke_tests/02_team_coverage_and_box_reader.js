@@ -81,7 +81,7 @@ async function section02() {
   // existia (dash-suggestion "normal") também tem "na caixa" no texto,
   // então :last-child + indexOf("na caixa") colidia com ela quando a
   // sugestão de chefão não renderiza (falso positivo pra classe errada).
-  const nextFightLine = document.querySelector("#dashboard .dash-suggestion-boss .dash-value");
+  const nextFightLine = document.querySelector("#team-nextfight .dash-suggestion-boss .dash-value");
   const nextFightText = nextFightLine ? nextFightLine.textContent : "";
   if (nextFightLine) {
     check("linha 'Próxima luta' do dashboard (Fase 1) tem o formato esperado (chefão: espécie na caixa + motivo)",

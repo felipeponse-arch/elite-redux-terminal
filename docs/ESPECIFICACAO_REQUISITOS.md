@@ -310,6 +310,16 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   com a rolagem ou a seta pra baixo; busca, filtro e ordenação valem pra lista INTEIRA. Medido:
   reconstruir 1906 linhas custava ~30ms (o custo é o número de nós, não o conteúdo), um lote custa
   ~1,5ms.
+- RF75 — O resumo do topo da Dex deve ser **compacto** (Time, Maior risco e uma linha da próxima luta com
+  o botão "detalhes"), para nunca empurrar a busca pra fora da tela do celular. O detalhe (sugestão de
+  troca por rank, melhor candidato da caixa, velocidade e o confronto inteiro) mora num card "Resumo da
+  próxima luta" no FIM da aba Time (`#team-nextfight`). Origem: print do usuário, 2026-09-24.
+- RN18 — **Trava de Mega nas sugestões**: antes da 4ª insígnia (Flannery) toda leitura do que o jogador
+  PODE USAR passa por `battleFamilyOf`/`usableSpeciesFor`/`megaPromptBlock`: uma forma Mega já no
+  time/caixa conta como a base dela, a sugestão de time por IA só recebe e só aceita formas base, os
+  prompts de build/estratégia avisam que Mega ainda não existe e não listam "outras formas" mega, e a
+  criatura Mega ganha a etiqueta "Mega só na 4ª insígnia". Depois de liberar, a família inteira vale.
+  Origem: print do usuário (insígnia no 2º ginásio, "Altaria Mega" SS na caixa entrando na sugestão).
 - RN17 — O motor de confronto não calcula dano nem compara Velocidade real: o nível do chefão não
   existe nos dados. Habilidades de chefão fora de `TYPE_MOD_ABILITIES` podem alterar o resultado e a
   interface declara essa limitação em vez de fingir certeza.

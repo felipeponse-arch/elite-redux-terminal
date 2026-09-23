@@ -663,6 +663,19 @@
      correção de display já aplicada a .dash-suggestion e .dash-speed. */
   .dash-confronto { flex-basis: 100%; }
   .dash-confronto .dash-value { display: inline; }
+  /* Resumo compacto do topo da Dex (2026-09-24): uma linha da próxima luta, e o
+     detalhe mora no fim da aba Time (#team-nextfight). */
+  .dash-next .dash-value { display: inline; }
+  .dash-more {
+    background: none; border: none; padding: 0 2px; margin-left: 4px; cursor: pointer;
+    color: var(--badge-accent2); font: inherit; font-size: 12px; text-decoration: underline; text-decoration-style: dotted;
+  }
+  .mega-lock-tag {
+    display: inline-block; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: var(--radius-pill);
+    background: var(--surface-3); color: var(--badge-text-dim); vertical-align: middle; cursor: help;
+  }
+  .dash-lines { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; }
+  #team-nextfight h3 { margin: 0 0 10px; }
 
   .stat-row { display: grid; grid-template-columns: 90px 40px 1fr; align-items: center; gap: 10px; margin-bottom: 7px; }
   .stat-row:last-child { margin-bottom: 0; }
@@ -1823,6 +1836,8 @@
         </div>
 
         <div class="team-analysis" id="team-analysis"></div>
+
+        <div class="card" id="team-nextfight" hidden></div>
       </div>
     </section>
 
@@ -4294,7 +4309,7 @@
           '<div class="pcbox-detail-identity">' +
             '<div class="pcbox-detail-name-row">' +
               '<span class="pcbox-detail-name goto-species" tabindex="0" role="button" data-x="' + selectedSp.x + '" title="Ver na Dex">' + escapeHtml(selectedSp.n) + '</span>' +
-              rankBadgeHtml(selectedSp.sname) +
+              rankBadgeHtml(selectedSp.sname) + megaLockedTagHtml(selectedSp) +
             '</div>' +
             '<div class="pcbox-detail-types">' + names.map(typePip).join("") + '</div>' +
           '</div>' +
@@ -5578,7 +5593,6 @@
     var takenItems = teamItemsInUse(sp.x);
     var takenMoves = teamMovesInUse(sp.x);
     var takenRoles = teamRolesInUse(sp.x);
-    var megaNames = megaFormsOf(sp).map(function (m) { return m.n; });
     var megaStoneRule = megaStoneRuleFor(sp);
     var archetypeParts = archetypeBuildGuidance();
     var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon). " + PROMPT_DADOS_AVISO + " " +
@@ -5595,9 +5609,10 @@
       "(EVs em ataque e velocidade, nada em HP/Def/SpD) NAO leva golpe de papel 'cura' e leva pelo menos 2 golpes " +
       "de dano - uma build assim que ignore isso vai ser REJEITADA. Se quiser cura, invista em bulk e explique na rationale.\n" +
       "FORMATO 1x1: golpe de papel 'dupla' (Follow Me, Helping Hand, Ally Switch...) nao faz nada numa batalha de um contra um e e REJEITADO.\n" +
-      ((megaNames.length || isMegaForm(sp)) ? (megaModePromptLine() + "\n" +
-        "Esta build e para a forma " + sp.n + " - habilidade e golpes SO desta forma, nunca misture com os de outra." +
-        formFamilyPromptNote(sp) + "\n") : "") +
+      (megaPromptBlock(sp) ? (megaPromptBlock(sp) + "\n" +
+        ((megaEvolutionUnlocked() || isMegaForm(sp))
+          ? "Esta build e para a forma " + sp.n + " - habilidade e golpes SO desta forma, nunca misture com os de outra." + formFamilyPromptNote(sp) + "\n"
+          : "")) : "") +
       (megaStoneRule ? (megaStoneRule.prompt + "\n") : "") +
       "Itens de batalha reais disponiveis - escolha UM destes (ou deixe vazio se nenhum fizer sentido): " + AI_ITEM_POOL.join(", ") + "\n" +
       (takenItems.length ? ("Itens JA EM USO por outros membros do time atual - NUNCA repita nenhum destes, escolha outro item ou deixe vazio: " + takenItems.join(", ") + "\n") : "") +
@@ -5733,7 +5748,6 @@
     var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; });
     var cap = getCurrentCap();
     var movepoolLines = availableMovesFor(sp).ids.map(movePromptLine);
-    var megaNames = megaFormsOf(sp).map(function (m) { return m.n; });
     var megaStoneRule = megaStoneRuleFor(sp);
     // Achado em auditoria, 2026-09-18: "Estratégias" gerava sets sem NUNCA
     // olhar se já existe um build curado real (data/builds.json) pra esta
@@ -5760,8 +5774,10 @@
       "Movepool real - cada set escolhe exatamente 4 desta lista, nenhum golpe fora dela:\n<dados_do_jogo>\n" + movepoolLines.join("\n") + "\n</dados_do_jogo>\n" +
       "COERENCIA PAPEL x GOLPE: build 100% ofensiva nao leva golpe de papel 'cura' e leva pelo menos 2 golpes de dano.\n" +
       "FORMATO 1x1: golpe de papel 'dupla' nao faz nada numa batalha de um contra um e e REJEITADO.\n" +
-      ((megaNames.length || isMegaForm(sp)) ? (megaModePromptLine() + "\n" +
-        "Cada set e para a forma " + sp.n + " - habilidade e golpes SO desta forma." + formFamilyPromptNote(sp) + "\n") : "") +
+      (megaPromptBlock(sp) ? (megaPromptBlock(sp) + "\n" +
+        ((megaEvolutionUnlocked() || isMegaForm(sp))
+          ? "Cada set e para a forma " + sp.n + " - habilidade e golpes SO desta forma." + formFamilyPromptNote(sp) + "\n"
+          : "")) : "") +
       (megaStoneRule ? (megaStoneRule.prompt + "\n") : "") +
       "Itens de batalha reais disponiveis - cada set escolhe UM destes (ou deixa vazio): " + AI_ITEM_POOL.join(", ") + "\n" +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
@@ -6044,6 +6060,13 @@
     return BUILDS[sp.sname] || null;
   }
 
+  // Etiqueta em criatura que é forma Mega enquanto a Mega ainda não existe pro
+  // jogador (antes da 4ª insígnia): o rank SS dela é dado real, mas nenhuma
+  // sugestão a conta - a etiqueta diz isso na própria tela.
+  function megaLockedTagHtml(sp) {
+    if (!sp || !isMegaForm(sp) || megaEvolutionUnlocked()) return "";
+    return ' <span class="mega-lock-tag" title="Mega Evolução só a partir da 4ª insígnia (Flannery). Até lá as sugestões contam esta criatura como a forma base.">Mega só na 4ª insígnia</span>';
+  }
   // Linha "Outra forma: Mega X" no card do time (2026-09-16) - lembra que a
   // mesma criatura tem outra forma disponível, com link pra ficha dela.
   function otherFormsHtml(sp) {
@@ -6051,7 +6074,7 @@
     if (!others.length) return "";
     return '<br><b>' + (others.length > 1 ? 'Outras formas' : 'Outra forma') + ':</b> ' + others.map(function (f) {
       return '<span class="goto-species" tabindex="0" role="button" data-x="' + f.x + '">' + escapeHtml(f.n) + '</span>';
-    }).join(", ");
+    }).join(", ") + (!megaEvolutionUnlocked() && others.some(isMegaForm) ? ' <span class="mega-lock-tag" title="Mega Evolução só a partir da 4ª insígnia (Flannery).">Mega só na 4ª insígnia</span>' : "");
   }
 
   // ---------------- team roster rendering ----------------
@@ -6096,7 +6119,7 @@
         var swapOpen = teamSwapIdx === i;
         slots.push('<div class="team-slot' + (swapOpen ? ' swapping' : '') + '"><div>' +
           '<div class="ts-head goto-species" tabindex="0" role="button" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 40) +
-          '<div><div class="ts-name">' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + '</div>' +
+          '<div><div class="ts-name">' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + megaLockedTagHtml(sp) + '</div>' +
           '<div class="ts-types">' + names.map(function (n) { return typePill(n, true); }).join("") + '</div></div></div>' +
           '<div class="ts-abis"><b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + otherFormsHtml(sp) + '</div>' +
           buildHtml +
@@ -6181,6 +6204,7 @@
     renderTeamStrategy(members);
     renderTeamAnalysis(members);
     renderSavedTeams();
+    renderNextFightCard();
   }
 
   // ---- team <-> box swapping ----
@@ -6668,6 +6692,11 @@
     }
     return partes.join("; ") + ".";
   }
+  // A troca pode melhorar as respostas sem fechar nenhum buraco (ex: 5 → 5): dizer
+  // "buracos 5 → 5" parecia que a sugestão não servia pra nada.
+  function trocaBuracosTxt(t) {
+    return t.buracosAntes === t.buracosDepois ? "melhora as respostas do time, sem fechar buracos" : "buracos " + t.buracosAntes + " → " + t.buracosDepois;
+  }
   // Texto do que fazer sobre os buracos e a troca da caixa (fase 3).
   function confrontoAjustesHtml(cx) {
     var partes = [];
@@ -6682,7 +6711,7 @@
           ? 'Entra <b>' + escapeHtml(tr.entra.main.n) + '</b> no lugar de <b>' + escapeHtml(tr.sai.main.n) + '</b>'
           : 'Entra <b>' + escapeHtml(tr.entra.main.n) + '</b> na vaga livre do time') + '.</li>';
       }).join("");
-      partes.push('<li>Melhor time da sua caixa para esta luta (buracos ' + t.buracosAntes + ' → ' + t.buracosDepois + '):<ul>' + linhas + '</ul>' +
+      partes.push('<li>Melhor time da sua caixa para esta luta (' + trocaBuracosTxt(t) + '):<ul>' + linhas + '</ul>' +
         '<button type="button" class="text-action-btn cf-apply-swap" data-trocas="' + escapeHtml(t.trocas.map(function (tr) {
           return (tr.sai ? tr.sai.owned.x : "") + ">" + tr.entra.owned.x;
         }).join(",")) + '">Aplicar ' + (t.trocas.length === 1 ? "esta troca" : "estas " + t.trocas.length + " trocas") + '</button></li>');
@@ -6767,14 +6796,14 @@
     var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
     return (boss[tier] && boss[tier].length) ? boss[tier] : boss.party;
   }
-  function dashboardConfrontoHtml(nextBoss) {
-    var cx = confrontoParaParty(bossPartyPorDificuldade(nextBoss), true);
+  function dashboardConfrontoHtml(nextBoss, cxPronto) {
+    var cx = cxPronto || confrontoParaParty(bossPartyPorDificuldade(nextBoss), true);
     if (!cx) return "";
     var troca = "";
     if (cx.trocas && cx.trocas.trocas.length) {
       troca = ' Troca sugerida da caixa: ' + cx.trocas.trocas.map(function (tr) {
         return tr.sai ? escapeHtml(tr.entra.main.n) + ' no lugar de ' + escapeHtml(tr.sai.main.n) : escapeHtml(tr.entra.main.n) + ' entra na vaga livre';
-      }).join('; ') + ' (buracos ' + cx.trocas.buracosAntes + ' → ' + cx.trocas.buracosDepois + ').';
+      }).join('; ') + ' (' + trocaBuracosTxt(cx.trocas) + ').';
     }
     return '<div class="dash-item dash-confronto"><span class="dash-label">Confronto</span><span class="dash-value">' +
       escapeHtml(nextBoss.name) + ': ' + confrontoResumoTxt(cx) + troca +
@@ -6828,15 +6857,24 @@
   // Deliberately reuses computeSharedRisks() (also used by the full team
   // analysis table) rather than a separate calculation, so this can't
   // quietly disagree with what "Cobertura defensiva" says the same risk is.
+  // 2026-09-24 (print do usuário no celular: o resumo tinha crescido até empurrar a
+  // busca da Dex pra fora da tela - "como o usuário adiciona um Poke no time
+  // desse jeito"): o topo da Dex fica COMPACTO (Time, Maior risco e uma linha da
+  // próxima luta) e o detalhe - sugestão de troca, caixa, velocidade e o confronto
+  // inteiro - mora no fim da aba Time (#team-nextfight, renderNextFightCard).
+  function nextFightCx(nextBoss) {
+    if (!nextBoss) return null;
+    return confrontoParaParty(bossPartyPorDificuldade(nextBoss), true);
+  }
   function renderDashboard() {
     var el = document.getElementById("dashboard");
     if (!el) return;
     var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
     if (!teamMembers.length) {
       el.innerHTML = '<div class="dashboard-card"><p style="color:var(--text-dim);font-size:13px;margin:0;">Monte seu time na Dex pra ver um resumo aqui.</p></div>';
+      renderNextFightCard();
       return;
     }
-    var boxMembers = state.box.map(getSpeciesByX).filter(Boolean);
 
     var items = '<div class="dash-item"><span class="dash-label">Time</span><span class="dash-value">' + teamMembers.length + '/6</span></div>';
 
@@ -6845,6 +6883,23 @@
       ? '<div class="dash-item"><span class="dash-label">Maior risco</span><span class="dash-value">' + typePill(risks[0].t, true) + ' <span class="mono">' + risks[0].n + '/' + teamMembers.length + '</span> fracos</span></div>'
       : '<div class="dash-item"><span class="dash-label">Maior risco</span><span class="dash-value">nenhum tipo derruba 2+ ao mesmo tempo</span></div>';
 
+    // Fase 1 do "leitor de caixa" (reunião 2026-09-11) - SÓ a próxima luta que
+    // falta, nunca o jogo inteiro (trava explícita do usuário).
+    var nextBoss = getRemainingBossEntries()[0];
+    var cx = nextFightCx(nextBoss);
+    if (nextBoss && cx) {
+      var n = cx.c.buracos.length;
+      items += '<div class="dash-item dash-next"><span class="dash-label">Próxima luta</span><span class="dash-value"><b>' + escapeHtml(nextBoss.name) + '</b>: ' +
+        (n ? n + (n === 1 ? " Pokémon sem resposta super efetiva" : " Pokémon sem resposta super efetiva") : "todos com resposta super efetiva") +
+        ' <button type="button" class="dash-more">detalhes</button></span></div>';
+    }
+
+    el.innerHTML = '<div class="dashboard-card">' + items + '</div>';
+    renderNextFightCard(nextBoss, cx);
+  }
+  // Detalhe da próxima luta, no fim da aba Time (antes ficava todo no topo da Dex).
+  function nextFightDetailHtml(teamMembers, boxMembers, nextBoss, cx) {
+    var items = "";
     // Swap suggestion: biggest-scoring box member vs lowest-scoring team
     // member, only surfaced when the gap is real (>=15 of 100) - a 2-point
     // difference isn't worth interrupting the user over every session.
@@ -6866,12 +6921,6 @@
           '<span class="goto-species" tabindex="0" role="button" data-x="' + worstTeam.sp.x + '">' + escapeHtml(worstTeam.sp.n) + '</span> (' + worstTeam.tier + ') no time</span></div>';
       }
     }
-
-    // Fase 1 do "leitor de caixa" (reunião 2026-09-11) - SÓ a próxima luta
-    // que falta, nunca o jogo inteiro (trava explícita do usuário). Uma
-    // linha a mais no MESMO card, não uma tela nova - herda o
-    // esconde-sozinho no celular que o dashboard já tinha.
-    var nextBoss = getRemainingBossEntries()[0];
     if (nextBoss) {
       var boxSuggestion = bestBoxCandidateForBoss(nextBoss);
       if (boxSuggestion) {
@@ -6887,11 +6936,28 @@
           (speed.tied ? ' (' + speed.tied + ' empatado' + (speed.tied > 1 ? 's' : '') + ')' : '') +
           '. <span class="dash-caveat">Só base: nível, EVs, nature, item e habilidade mudam a ordem.</span></span></div>';
       }
-      items += dashboardConfrontoHtml(nextBoss);
+      items += dashboardConfrontoHtml(nextBoss, cx);
     }
-
-    el.innerHTML = '<div class="dashboard-card">' + items + '</div>';
+    return items;
   }
+  function renderNextFightCard(nextBoss, cx) {
+    var el = document.getElementById("team-nextfight");
+    if (!el) return;
+    var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
+    if (!teamMembers.length) { el.hidden = true; el.innerHTML = ""; return; }
+    if (!arguments.length) { nextBoss = getRemainingBossEntries()[0]; cx = nextFightCx(nextBoss); }
+    var boxMembers = state.box.map(getSpeciesByX).filter(Boolean);
+    var items = nextFightDetailHtml(teamMembers, boxMembers, nextBoss, cx);
+    el.hidden = !items;
+    el.innerHTML = items ? '<h3>Resumo da próxima luta</h3><div class="dash-lines">' + items + '</div>' : "";
+  }
+  // "detalhes" no resumo da Dex: leva pro fim da aba Time, onde o detalhe mora.
+  document.getElementById("dashboard").addEventListener("click", function (e) {
+    if (!e.target.closest(".dash-more")) return;
+    document.querySelector('.tab-btn[data-tab="team"]').click();
+    var card = document.getElementById("team-nextfight");
+    if (card && !card.hidden) card.scrollIntoView({ block: "start" });
+  });
 
   // ---------------- team strategy & archetype ----------------
   // teamAnalysisReport ("Leitura estratégica") e o botão avulso "Montar
@@ -7002,6 +7068,16 @@
     }
     var rosterXs = state.team.concat(state.box).filter(function (x, i, arr) { return arr.indexOf(x) === i; });
     var roster = rosterXs.map(getSpeciesByX).filter(Boolean);
+    // Antes da 4ª insígnia uma forma Mega já no time/caixa conta como a base
+    // dela (achado do usuário, 2026-09-24: "Altaria Mega" na caixa entrava na
+    // sugestão de time sem o jogador ter acesso a Mega ainda) - sem duplicar a
+    // mesma criatura se as duas formas estiverem no roster.
+    var jaNoRoster = {};
+    roster = roster.map(usableSpeciesFor).filter(function (sp) {
+      if (jaNoRoster[sp.x]) return false;
+      jaNoRoster[sp.x] = true;
+      return true;
+    });
     // Monotype é uma REGRA, não uma sugestão de estilo pra IA seguir por
     // conta própria (ao contrário de Ritmo/Clima) - o roster já sai
     // filtrado por tipo real antes de qualquer coisa ir pro prompt, então
@@ -7013,10 +7089,11 @@
         : "Nenhum Pokémon capturado ainda - pegue algo na Dex primeiro.";
       return false;
     }
-    // Formas mega de quem o jogador tem também valem (formFamilyOf).
+    // Formas mega de quem o jogador tem também valem - mas só depois da 4ª
+    // insígnia (battleFamilyOf).
     var validSnames = [];
     roster.forEach(function (sp) {
-      formFamilyOf(sp).forEach(function (f) { if (validSnames.indexOf(f.sname) === -1) validSnames.push(f.sname); });
+      battleFamilyOf(sp).forEach(function (f) { if (validSnames.indexOf(f.sname) === -1) validSnames.push(f.sname); });
     });
     var rosterDesc = roster.map(function (sp) {
       var role = SPECIES_ROLE[sp.sname];
@@ -7036,6 +7113,7 @@
       "SOMENTE espécies desta lista real que o jogador já possui (time + caixa) - nunca invente nem sugira " +
       "algo fora dela:\n" + rosterDesc + "\n\n" +
       "Foco pedido: " + focusDesc + ".\n" +
+      (megaEvolutionUnlocked() ? "" : "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da 4a insignia (Flannery). NAO sugira nenhuma forma mega nem conte com mega no time; use so as formas base da lista.\n") +
       (monotype ? "A lista acima JÁ está filtrada só pro tipo " + monotype + " (Monotype) - todos servem, escolha pela sinergia entre eles.\n" : "") +
       "Use as ferramentas disponíveis pra checar rank/papel/sinergia real de candidatos específicos antes de " +
       "decidir - não confie só no resumo acima. Evite concentrar o mesmo papel sem necessidade real (ex: 4 " +

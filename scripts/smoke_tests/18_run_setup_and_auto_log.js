@@ -349,7 +349,7 @@ async function section18() {
   }
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(50);
-  var dashVel = document.querySelector("#dashboard .dash-speed");
+  var dashVel = document.querySelector("#team-nextfight .dash-speed");
   check("dashboard mostra a linha de velocidade com o aviso de que é só base",
     !dashVel || dashVel.textContent.indexOf("Só base") !== -1, dashVel ? dashVel.textContent : "(sem próxima luta no marco atual)");
 

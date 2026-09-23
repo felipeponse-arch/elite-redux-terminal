@@ -37,7 +37,7 @@
   // Trecho de prompt: ", outras formas: Mega Charizard X (SPECIES_..., Fire/Dragon, Vel 100, innates ...)".
   // Cada forma com o próprio dado, nunca misturado.
   function formFamilyPromptNote(sp) {
-    var others = formFamilyOf(sp).filter(function (f) { return f.x !== sp.x; });
+    var others = battleFamilyOf(sp).filter(function (f) { return f.x !== sp.x; });
     if (!others.length) return "";
     return ", outras formas desta MESMA criatura (cada uma com dado proprio, nunca misture): " + others.map(function (f) {
       var r = SPECIES_RANK[f.sname];
@@ -87,6 +87,34 @@
   var MEGA_UNLOCK_MILESTONE = 4;
   function megaEvolutionUnlocked() { return state.settings.milestone >= MEGA_UNLOCK_MILESTONE; }
 
+  // Achado do usuário (print, 2026-09-24): com a insígnia em "Knuckle Badge (2o
+  // ginásio)", a caixa tinha "Altaria Mega" (SS) e a sugestão de time a tratava
+  // como opção real. A trava de battleUnitsOf só cobria a avaliação de duelo;
+  // a sugestão de time por IA, os prompts de build e o roster ainda enxergavam
+  // as formas mega. Toda leitura do que o jogador PODE USAR agora passa por
+  // estas três funções, nunca por formFamilyOf() direto.
+  //   battleFamilyOf   - as formas utilizáveis (antes da 4ª insígnia, só a base);
+  //   usableSpeciesFor - a criatura que vale de fato: uma forma Mega que já está
+  //                      no time/caixa antes de liberar conta como a base dela;
+  //   megaPromptBlock  - o trecho de prompt sobre Mega (ou o aviso de que ainda
+  //                      não existe pro jogador).
+  function battleFamilyOf(sp) {
+    var fam = formFamilyOf(sp);
+    return megaEvolutionUnlocked() ? fam : fam.slice(0, 1);
+  }
+  function usableSpeciesFor(sp) {
+    if (!sp) return sp;
+    return (!megaEvolutionUnlocked() && isMegaForm(sp)) ? formFamilyOf(sp)[0] : sp;
+  }
+  function megaPromptBlock(sp) {
+    if (!megaFormsOf(sp).length && !isMegaForm(sp)) return "";
+    if (!megaEvolutionUnlocked() && !isMegaForm(sp)) {
+      return "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da 4a insignia (Flannery) e agora NAO tem essa opcao. " +
+        "NAO considere, cite nem recomende nenhuma forma mega nem pedra mega nesta resposta; avalie so a forma base.";
+    }
+    return megaModePromptLine();
+  }
+
   // Pedras de cada forma mega, a partir de data/mega_forms.json (pedra ->
   // forma, cruzado com o fork de Showdown do próprio jogo). Não usa o código
   // de item da evolução no dado bruto: em 19 megas ele não bate com o nome do
@@ -108,13 +136,12 @@
   // Cada forma continua avaliada com o próprio dado - a unidade só diz quais
   // formas contam juntas.
   function battleUnitsOf(owned) {
-    var fam = formFamilyOf(owned);
-    if (!fam.length) return [];
     // Antes da 4ª insígnia, mega evolução não existe pro jogador de verdade -
     // nenhuma unidade de batalha considera a(s) forma(s) mega (ver
-    // megaEvolutionUnlocked acima). Reduz a família só à base, exatamente
-    // como uma criatura sem nenhuma linha de mega.
-    if (!megaEvolutionUnlocked()) fam = [fam[0]];
+    // megaEvolutionUnlocked acima): battleFamilyOf reduz a família só à base,
+    // exatamente como uma criatura sem nenhuma linha de mega.
+    var fam = battleFamilyOf(owned);
+    if (!fam.length) return [];
     var base = fam[0];
     var megas = fam.slice(1);
     if (megaMode() === "permanente") return fam.map(function (f) { return { forms: [f], main: f, owned: owned }; });

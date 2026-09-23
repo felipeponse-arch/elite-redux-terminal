@@ -8,7 +8,7 @@ import { MUTACOES } from "./unit/mutacoes.mjs";
 let sobreviveram = 0;
 let quebradas = 0;
 for (const m of MUTACOES) {
-  const r = spawnSync(process.execPath, ["--test", "tests/unit/regras.test.mjs", "tests/unit/confronto.test.mjs"], {
+  const r = spawnSync(process.execPath, ["--test", "tests/unit/regras.test.mjs", "tests/unit/confronto.test.mjs", "tests/unit/mega_gate.test.mjs"], {
     env: { ...process.env, MUTACAO_ARQUIVO: m.arquivo, MUTACAO_DE: m.de, MUTACAO_PARA: m.para },
     encoding: "utf8",
   });

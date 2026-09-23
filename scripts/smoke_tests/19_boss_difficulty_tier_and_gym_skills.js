@@ -206,10 +206,29 @@ async function section19() {
     var milestoneAntes = T.state.settings.milestone;
     T.state.settings.milestone = 0;
     T.renderDashboard();
-    var dashConfronto = document.querySelector("#dashboard .dash-confronto");
-    check("resumo da Dex mostra a linha \"Confronto\" da próxima luta quando há time",
+    var dashConfronto = document.querySelector("#team-nextfight .dash-confronto");
+    check("o detalhe da próxima luta (fim da aba Time) mostra a linha \"Confronto\" quando há time",
       !!dashConfronto && /melhor abertura/.test(dashConfronto.textContent),
       dashConfronto ? dashConfronto.textContent : "(sem linha)");
+    // Print do usuário (2026-09-24): o resumo do topo da Dex tinha crescido
+    // até empurrar a busca pra fora da tela do celular. Agora é compacto; o
+    // detalhe mora no fim da aba Time.
+    var dashCompacto = document.querySelector("#dashboard .dashboard-card");
+    check("resumo do topo da Dex é compacto: só Time, Maior risco e uma linha da próxima luta",
+      !!dashCompacto && dashCompacto.querySelectorAll(".dash-item").length === 3 && !!dashCompacto.querySelector(".dash-next") &&
+        !dashCompacto.querySelector(".dash-confronto") && !dashCompacto.querySelector(".dash-speed") && !dashCompacto.querySelector(".dash-suggestion"),
+      dashCompacto ? dashCompacto.textContent : "(sem card)");
+    check("resumo do topo da Dex é curto (menos de 240 caracteres)", !!dashCompacto && dashCompacto.textContent.length < 240,
+      dashCompacto ? dashCompacto.textContent.length : "(sem card)");
+    var maisBtn = document.querySelector("#dashboard .dash-more");
+    if (achou("botão \"detalhes\" no resumo compacto", maisBtn)) {
+      maisBtn.click();
+      await wait(50);
+      check("\"detalhes\" leva pra aba Time, onde o card da próxima luta mora",
+        document.getElementById("view-team").classList.contains("active") && !document.getElementById("team-nextfight").hidden);
+      document.querySelector('.tab-btn[data-tab="dex"]').click();
+      await wait(30);
+    }
     T.state.settings.milestone = milestoneAntes;
     T.renderDashboard();
   }
