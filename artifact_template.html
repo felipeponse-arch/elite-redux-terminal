@@ -659,6 +659,10 @@
      de .dash-value, que já estava certa) - só o display: inline que resolve
      o empacotamento em flex-item por trecho de texto. */
   .dash-speed .dash-value { display: inline; }
+  /* Linha "Confronto" (2026-09-24): mesma estrutura de frase corrida, mesma
+     correção de display já aplicada a .dash-suggestion e .dash-speed. */
+  .dash-confronto { flex-basis: 100%; }
+  .dash-confronto .dash-value { display: inline; }
 
   .stat-row { display: grid; grid-template-columns: 90px 40px 1fr; align-items: center; gap: 10px; margin-bottom: 7px; }
   .stat-row:last-child { margin-bottom: 0; }
@@ -896,6 +900,29 @@
   }
   .boss-mon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
   .boss-mon-card { background: var(--surface-2); border-radius: var(--radius-md); padding: 10px 12px; }
+  /* Matriz "Confronto com o seu time" (2026-09-24, motor src/regras/confronto.js).
+     A cor só reforça: o significado de cada célula vai SEMPRE no símbolo e no
+     texto acessível, e o texto usa var(--text) sobre um tint leve, então o
+     contraste não depende da cor de fundo. */
+  .cf-verdict { margin: 0 0 10px; font-size: 13px; max-width: 70ch; }
+  .cf-verdict b { color: var(--text); }
+  .cf-scroll { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
+  .cf-table { border-collapse: separate; border-spacing: 3px; font-size: 12.5px; min-width: 100%; }
+  .cf-table th { font-weight: 600; color: var(--text-dim); text-align: center; padding: 2px 4px; vertical-align: bottom; }
+  .cf-table th.cf-foe { text-align: left; }
+  .cf-foe-cell { display: flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap; }
+  .cf-foe-cell small { color: var(--text-dim); font-weight: 400; }
+  .cf-cell { text-align: center; min-width: 34px; height: 30px; border-radius: var(--radius-sm, 6px); background: var(--surface-2); }
+  .cf-cell .cf-sym { font-size: 14px; line-height: 1; }
+  .cf-v-vantagem { background: color-mix(in srgb, var(--sem-resist) 26%, var(--surface-2)); }
+  .cf-v-seguro { background: color-mix(in srgb, var(--accent-2) 16%, var(--surface-2)); }
+  .cf-v-neutro { background: var(--surface-2); }
+  .cf-v-arriscado { background: color-mix(in srgb, var(--sem-weak) 14%, var(--surface-2)); }
+  .cf-v-desvantagem { background: color-mix(in srgb, var(--sem-weak) 28%, var(--surface-2)); }
+  .cf-best { font-size: 12px; white-space: nowrap; color: var(--text-dim); text-align: left; padding-left: 6px; }
+  .cf-best b { color: var(--text); }
+  .cf-legend { margin: 8px 0 0; font-size: 11.5px; color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  .cf-note { margin: 6px 0 0; font-size: 11.5px; color: var(--text-dim); max-width: 75ch; }
   .boss-mon-card .bm-head { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
   .boss-mon-card .bm-name { font-weight: 700; font-size: 13.5px; margin-bottom: 4px; }
   .boss-mon-card .bm-types { display: flex; gap: 5px; }
@@ -2275,192 +2302,8 @@
     Fairy:   { hex: "#d982ad", dark: true  }
   };
 
-  var TYPE_CHART = {
-    Normal:   { Rock:0.5, Ghost:0, Steel:0.5 },
-    Fighting: { Normal:2, Ice:2, Poison:0.5, Flying:0.5, Psychic:0.5, Bug:0.5, Rock:2, Ghost:0, Dark:2, Steel:2, Fairy:0.5 },
-    Fire:     { Fire:0.5, Water:0.5, Grass:2, Ice:2, Bug:2, Rock:0.5, Dragon:0.5, Steel:2 },
-    Water:    { Fire:2, Water:0.5, Grass:0.5, Ground:2, Rock:2, Dragon:0.5 },
-    Electric: { Water:2, Electric:0.5, Grass:0.5, Ground:0, Flying:2, Dragon:0.5 },
-    Grass:    { Fire:0.5, Water:2, Grass:0.5, Poison:0.5, Ground:2, Flying:0.5, Bug:0.5, Rock:2, Dragon:0.5, Steel:0.5 },
-    Ice:      { Fire:0.5, Water:0.5, Grass:2, Ice:0.5, Ground:2, Flying:2, Dragon:2, Steel:0.5 },
-    Poison:   { Grass:2, Poison:0.5, Ground:0.5, Rock:0.5, Ghost:0.5, Steel:0, Fairy:2 },
-    Ground:   { Fire:2, Electric:2, Grass:0.5, Poison:2, Flying:0, Bug:0.5, Rock:2, Steel:2 },
-    Flying:   { Electric:0.5, Grass:2, Fighting:2, Bug:2, Rock:0.5, Steel:0.5 },
-    Psychic:  { Fighting:2, Poison:2, Psychic:0.5, Dark:0, Steel:0.5 },
-    Bug:      { Fire:0.5, Grass:2, Fighting:0.5, Poison:0.5, Flying:0.5, Psychic:2, Ghost:0.5, Dark:2, Steel:0.5, Fairy:0.5 },
-    Rock:     { Fire:2, Ice:2, Fighting:0.5, Ground:0.5, Flying:2, Bug:2, Steel:0.5 },
-    Ghost:    { Normal:0, Psychic:2, Ghost:2, Dark:0.5 },
-    Dragon:   { Dragon:2, Steel:0.5, Fairy:0 },
-    Dark:     { Fighting:0.5, Psychic:2, Ghost:2, Dark:0.5, Fairy:0.5 },
-    Steel:    { Fire:0.5, Water:0.5, Electric:0.5, Ice:2, Rock:2, Steel:0.5, Fairy:2 },
-    Fairy:    { Fire:0.5, Fighting:2, Poison:0.5, Dragon:2, Dark:2, Steel:0.5 }
-  };
-
-  // Curated, NOT auto-generated: type-effectiveness modifiers para habilidades
-  // verificadas contra o texto real (traduzido) de cada uma - nunca assumidas
-  // do comportamento vanilla, já que este hack renomeia e rebalanceia
-  // habilidades livremente (ver AUDITORIA-DOSSIE.md 9.4).
-  // 2026-09-11 (pedido do usuário: acurácia dos dados heurísticos entre
-  // 90-95%): até aqui a tabela só cobria as 6 habilidades vistas no time do
-  // usuário - o suficiente pro quadro de fraquezas do time, mas o "leitor de
-  // caixa" (bestBoxCandidateForBoss) reusa abilityTypeMod() pra QUALQUER
-  // espécie da caixa, não só o time, então uma tabela de 6 entradas deixava
-  // a maioria das sugestões silenciosamente erradas (voltando pro type chart
-  // cru sempre que a espécie da caixa tivesse uma habilidade defensiva real
-  // fora dessas 6). Ampliada via varredura sistemática (não automática) das
-  // 1033 descrições traduzidas: toda sentença mencionando um dos 18 tipos de
-  // dano real foi extraída (359 sentenças), filtrada por palavras-chave de
-  // dano (79 sobraram) e CADA UMA lida à mão contra o texto completo em PT e
-  // EN antes de virar entrada aqui - mesma disciplina de "nunca confiar em
-  // regex sozinho" já usada em Score-AbilityText (common.ps1).
-  // Escopo deliberadamente restrito ao que abilityTypeMod() modela (um
-  // multiplicador fixo por tipo de ataque recebido, no próprio portador).
-  // Ficou de fora, por não caber nesse modelo (não é erro/esquecimento):
-  //   - imunidade a status (veneno/queimadura/paralisia/sono) - não é dano
-  //     de golpe;
-  //   - dano de campo por turno tipo Toxic Spill/Funeral Pyre/Flame Coat
-  //     (afeta quem NÃO é de um tipo, todo turno - não é resposta a um
-  //     golpe recebido);
-  //   - redução plana contra TODO ataque (Shell Armor -20%, Multiscale
-  //     -50% com HP cheio) - não é por tipo, mecanismo diferente do que
-  //     seDamper já modela (que é só sobre golpes super efetivos);
-  //   - habilidades só ofensivas (aumentam o dano que o PRÓPRIO golpe
-  //     causa) - abilityTypeMod() é só sobre o lado defensivo;
-  //   - efeitos condicionados a clima/terreno (ex: Foggy Eye só sob
-  //     neblina) - mesma razão que o dashboard só olha pro PRÓXIMO chefão:
-  //     não dá pra assumir a condição ativa numa sugestão estática;
-  //   - mudança de tipo dinâmica no meio da batalha (Color Change, Protean)
-  //     - não modelável sem simular o turno.
-  // Ids batem com os índices de ABILITIES / dex_compact.json "abilities".
-  // Combos (ids que juntam 2+ habilidades, ex Aerialist = Levitate + Flock)
-  // ganham sua PRÓPRIA entrada aqui quando um componente relevante existe -
-  // abilityTypeMod() não decompõe o texto do combo em tempo real, então sem
-  // isso uma espécie com só o id do combo (não o id "puro" do componente)
-  // ficaria sem o efeito mesmo tendo a habilidade de verdade.
-  var TYPE_MOD_ABILITIES = {
-    26:  { immune: ["Ground"] },                          // Levitate
-    444: { immune: ["Water"] },                           // Evaporate
-    450: { immune: ["Ground"], healPct: 25 },             // Earth Eater
-    314: { immune: ["Rock"] },                             // Mountaineer
-    116: { seDamper: 0.65 },                               // Solid Rock: -35% em golpes SE
-    318: { seDamper: 0.5 },                                // Primal Armor: -50% em golpes SE
-    // Fossilized: "Reduz pela metade o dano recebido de golpes Rock" -
-    // RESISTE a Rock (0.5x = menos dano), não "dano extra" como um
-    // comentário antigo aqui dizia por engano (o valor sempre esteve
-    // certo, só o comentário estava invertido).
-    303: { resist: { Rock: 0.5 } },                        // Fossilized
-    17:  { resist: { Poison: 0.5 } },                      // Immunity
-    40:  { resist: { Water: 0.7, Ice: 0.7 } },              // Magma Armor
-    47:  { resist: { Fire: 0.5, Ice: 0.5 } },               // Thick Fat
-    85:  { resist: { Fire: 0.5 } },                         // Heatproof
-    134: { resist: { Ghost: 0.5, Dark: 0.5 } },             // Heavy Metal
-    195: { resist: { Water: 0.5 } },                        // Water Compaction
-    199: { resist: { Fire: 0.5 } },                         // Water Bubble
-    218: { resist: { Fire: 2 } },                           // Fluffy (FRAQUEZA a Fire, não resistência)
-    306: { resist: { Dark: 0.75, Fairy: 0.75 } },           // Nocturnal
-    311: { resist: { Water: 2 } },                          // Liquified (fraqueza a Water)
-    337: { resist: { Grass: 0.5 } },                        // Raw Wood
-    // Seaweed: texto diz "se for do tipo Grass" - verificado nos dados reais
-    // que TODOS os 8 portadores atuais (Tangela, Lotad/Lombre/Ludicolo,
-    // Lileep/Cradily, Tangrowth, Dhelmise) já são Grass, então a condição é
-    // sempre satisfeita na prática; sem gate condicional extra no código.
-    342: { resist: { Fire: 0.5 } },                         // Seaweed
-    442: { resist: { Fairy: 0.5 } },                        // Fae Hunter
-    445: { resist: { Grass: 0.5 } },                        // Lumberjack
-    526: { resist: { Dark: 0.5 } },                         // Monster Hunter
-    547: { resist: { Ghost: 0.5 } },                        // Purifying Salt
-    754: { resist: { Fire: 2 } },                           // Puffy (fraqueza a Fire)
-    764: { resist: { Fire: 0.5 } },                         // Deep Freeze
-    804: { resist: { Fire: 0.5 } },                         // Firefighter
-    889: { resist: { Fire: 0.25, Ice: 0.25 } },             // Thick Blubber
-    904: { resist: { Water: 0.5, Ground: 0.5 } },           // Strong Foundation
-    995: { resist: { Fire: 0.5, Electric: 0.5, Water: 0.5 } },      // Elemental Aegis
-    996: { resist: { Dark: 0.5, Ghost: 0.5, Psychic: 0.5 } },       // Aegis Ward
-    // Combos que embutem um componente já mapeado acima:
-    606: { immune: ["Ground"] },                           // Aerialist (Levitate + Flock)
-    688: { immune: ["Ground"] },                           // Imposing Wings (Giant Wings + Levitate)
-    664: { resist: { Fire: 0.5 } },                         // Flame Bubble (Water Bubble + Flaming Soul)
-    682: { resist: { Fire: 0.5 } },                         // Iron Giant (Heatproof + Juggernaut)
-    936: { resist: { Fire: 0.5, Ice: 0.5 } },               // Sumo Guard (Juggernaut + Thick Fat)
-    946: { resist: { Fire: 2 } },                           // Massive Pelt (Tangling Hair + Fluffy, fraqueza)
-    1010:{ resist: { Fire: 0.5 } },                         // Thermal Entropy (Thermal Exchange + Heatproof)
-    1015:{ resist: { Fire: 0.5 } }                          // Droideka (Heatproof + Shell Armor)
-  };
-
-  // Which of a species' abilities are safe to treat as ALWAYS active without
-  // knowing which build the player picked: innates (always on, by the game's
-  // own rule) plus any choosable slot that isn't really a choice - when all 3
-  // listed choosable ids are identical there's no alternative to pick, so
-  // it's effectively locked (e.g. Coalossal Mega's 3 slots are all Earth
-  // Eater). A choosable ability with real alternatives (e.g. Terrakion's
-  // Justified/Avenger/Rockhard Will) is deliberately left out here - which one
-  // is active depends on the build, and guessing wrong would be worse than
-  // showing the unmodified type chart.
-  function alwaysActiveAbilities(sp) {
-    var ids = sp.inn.slice();
-    if (sp.ab.length && sp.ab.every(function (id) { return id === sp.ab[0]; })) ids.push(sp.ab[0]);
-    return ids;
-  }
-
-  // Applies TYPE_MOD_ABILITIES on top of the flat type chart for one species'
-  // real ability kit. Returns the adjusted multiplier plus which ability(ies)
-  // caused a change, so the UI can show its work instead of a bare number.
-  function abilityTypeMod(atk, sp) {
-    var raw = typeMultiplier(atk, speciesTypeNames(sp));
-    var ids = alwaysActiveAbilities(sp);
-
-    // Immunity always wins and is checked across ALL active abilities first:
-    // otherwise, if a damage-dampening ability (Solid Rock) happens to be
-    // listed before an immunity one (Evaporate) in sp.inn's order, the
-    // dampener's now-moot reason ("amortece...") would show alongside the
-    // real answer ("imune"), which is confusing even though the final
-    // number is still correct either way.
-    var immuneId = ids.filter(function (id) {
-      var mod = TYPE_MOD_ABILITIES[id];
-      return mod && mod.immune && mod.immune.indexOf(atk) !== -1;
-    })[0];
-    if (immuneId !== undefined) {
-      var mod = TYPE_MOD_ABILITIES[immuneId];
-      var name = (ABILITIES[immuneId] && ABILITIES[immuneId][0]) || "?";
-      return { raw: raw, mult: 0, reasons: [name + (mod.healPct ? " (imune, cura " + mod.healPct + "%)" : " (imune)")] };
-    }
-
-    var mult = raw;
-    var reasons = [];
-    ids.forEach(function (id) {
-      var m = TYPE_MOD_ABILITIES[id];
-      if (!m) return;
-      var nm = (ABILITIES[id] && ABILITIES[id][0]) || "?";
-      if (m.resist && m.resist[atk] !== undefined) {
-        mult *= m.resist[atk];
-        // "resist" guarda o multiplicador cru, que pode ser > 1 (ex:
-        // Fluffy causa FRAQUEZA a Fire, não resistência) - texto errado
-        // aqui seria pior que não mostrar nada, então o rótulo segue o
-        // valor real em vez de assumir sempre "resistência".
-        reasons.push(nm + (m.resist[atk] < 1 ? " (resistência extra)" : " (fraqueza extra)"));
-      } else if (m.seDamper && raw > 1) {
-        mult *= m.seDamper;
-        reasons.push(nm + " (amortece dano super efetivo)");
-      }
-    });
-    return { raw: raw, mult: mult, reasons: reasons };
-  }
-
-  function typeMultiplier(atk, defTypes) {
-    var m = 1;
-    for (var i = 0; i < defTypes.length; i++) {
-      var row = TYPE_CHART[atk];
-      var v = row && (defTypes[i] in row) ? row[defTypes[i]] : 1;
-      m *= v;
-    }
-    return m;
-  }
-
-  function speciesTypeNames(sp) {
-    var names = sp.t.map(function (i) { return TYPES[i]; });
-    if (names.length === 2 && names[0] === names[1]) names = [names[0]];
-    return names;
-  }
+  /*@regras tipos.js*/
+  /*@regras confronto.js*/
 
   function typePill(name, small) {
     var meta = TYPE_META[name] || { hex: "#777", dark: false };
@@ -6621,6 +6464,137 @@
       '<p style="margin:0;color:var(--text-dim);">' + frase2 + '</p></div>';
   }
 
+  // ---------------- confronto com o chefão ----------------
+  // Adaptador entre a página e o motor puro (src/regras/confronto.js), pauta de
+  // 2026-09-24 ("estratégia e sugestão de times e builds", com a regra do
+  // usuário de ser semi-automático: nada aqui pede clique nem pergunta
+  // nada - aparece sozinho pra qualquer chefão que estiver aberto e pra
+  // próxima luta no resumo da Dex). Todas as decisões de estado (time,
+  // builds, modo de mega, forma Mega/Primal do chefão) ficam aqui; as regras
+  // ficam no motor, onde os testes unitários e de sabotagem as protegem.
+  function confrontoUnitOf(unit) {
+    var forms = unit.forms.map(function (f) {
+      var ids = alwaysActiveAbilities(f).slice();
+      var b = effectiveBuild(f);
+      if (b && b.ability && ABILITY_ID_BY_NAME[b.ability] !== undefined) ids.push(ABILITY_ID_BY_NAME[b.ability]);
+      return { types: speciesTypeNames(f), abilityIds: ids };
+    });
+    // Golpes da build da forma principal; sem ela, da primeira outra forma da
+    // unidade que tenha build. Nunca mistura golpes de formas diferentes.
+    var moves = null;
+    [unit.main].concat(unit.forms).forEach(function (f) {
+      if (moves) return;
+      var b = effectiveBuild(f);
+      if (b && b.moves && b.moves.length) moves = b.moves;
+    });
+    return { main: unit.main, owned: unit.owned, mainTypes: speciesTypeNames(unit.main), moves: moves, forms: forms };
+  }
+  // Pokémon de chefão -> formato do motor, já na forma Mega/Primal quando o
+  // item que ele segura o transforma (mesmo mapa MEGA_FORMS da calculadora).
+  function confrontoFoesDe(party) {
+    return (party || []).map(function (m) {
+      var megaSname = MEGA_FORMS[m.item];
+      return foeFromBossMember(m, megaSname ? getSpeciesBySname(megaSname) : null);
+    }).filter(Boolean);
+  }
+  // Uma unidade por membro do time: a forma de batalha (base, ou base+mega no
+  // modo temporário, ou cada forma no permanente) que mais pontua contra ESTE
+  // chefão - o jogador escolhe a melhor forma na hora, o app não deve
+  // penalizar quem tem uma mega útil.
+  function confrontoMinhasUnidades(foes) {
+    return state.team.map(getSpeciesByX).filter(Boolean).map(function (owned) {
+      var melhor = null;
+      battleUnitsOf(owned).forEach(function (u) {
+        var cu = confrontoUnitOf(u);
+        var pts = confrontoTime([cu], foes).pontosPorMembro[0];
+        if (!melhor || pts > melhor.pts) melhor = { cu: cu, pts: pts };
+      });
+      return melhor && melhor.cu;
+    }).filter(Boolean);
+  }
+  function confrontoParaParty(party) {
+    var foes = confrontoFoesDe(party);
+    var minhas = confrontoMinhasUnidades(foes);
+    if (!foes.length || !minhas.length) return null;
+    return { foes: foes, minhas: minhas, c: confrontoTime(minhas, foes) };
+  }
+  var CONFRONTO_SIMBOLO = {
+    vantagem: ["▲", "vantagem"], seguro: ["◆", "seguro"], neutro: ["●", "neutro"],
+    arriscado: ["◐", "arriscado"], desvantagem: ["▼", "desvantagem"]
+  };
+  function confrontoMultTxt(mult) { return mult === 0 ? "imune" : "x" + mult; }
+  function confrontoNomesTxt(list) {
+    return list.map(function (f) { return escapeHtml(f.name); }).join(", ");
+  }
+  function confrontoCelulaHtml(mineName, foe, d) {
+    var s = CONFRONTO_SIMBOLO[d.veredito];
+    var o = d.ofensa.best
+      ? (d.ofensa.best.move || ("tipo " + d.ofensa.best.type + ", sem build")) + " (" + confrontoMultTxt(d.ofensa.best.mult) + ")"
+      : "sem golpe de dano";
+    var a = d.ameaca.worst ? d.ameaca.worst.move + " (" + confrontoMultTxt(d.ameaca.worst.mult) + ")" : "nenhum golpe de dano";
+    var txt = mineName + " contra " + foe.name + ": " + s[1] + ". Seu melhor golpe: " + o + ". Golpe mais perigoso dele: " + a + ".";
+    return '<td class="cf-cell cf-v-' + d.veredito + '" title="' + escapeHtml(txt) + '"><span class="cf-sym" role="img" aria-label="' + escapeHtml(txt) + '">' + s[0] + '</span></td>';
+  }
+  // Frase única do resumo (usada na ficha do chefão e no resumo da Dex).
+  function confrontoResumoTxt(cx) {
+    var c = cx.c;
+    var partes = [];
+    if (c.abertura !== null) partes.push("melhor abertura: <b>" + escapeHtml(cx.minhas[c.abertura].main.n) + "</b>");
+    partes.push(c.buracos.length
+      ? "sem resposta super efetiva do seu time: " + confrontoNomesTxt(c.buracos)
+      : "todo Pokémon dele tem resposta super efetiva no seu time");
+    if (c.ameacas.length) partes.push("ameaçam metade ou mais do seu time: " + confrontoNomesTxt(c.ameacas));
+    return partes.join("; ") + ".";
+  }
+  function bossConfrontoHtml(boss, party) {
+    var cx = confrontoParaParty(party);
+    if (!cx) return "";
+    var c = cx.c;
+    var head = '<tr><th class="cf-foe" scope="col">Chefão</th>' + cx.minhas.map(function (m) {
+      return '<th scope="col" title="' + escapeHtml(m.main.n) + '">' + spriteImgHtml(m.main.x, m.main.n, 26) + '</th>';
+    }).join("") + '<th class="cf-best" scope="col">Melhor resposta</th></tr>';
+    var rows = c.linhas.map(function (l) {
+      var foe = l.foe;
+      var celulas = l.respostas.map(function (r) { return confrontoCelulaHtml(cx.minhas[r.idx].main.n, foe, r.duelo); }).join("");
+      var m = l.melhor;
+      var melhorTxt = "-";
+      if (m) {
+        var quem = cx.minhas[m.idx].main;
+        var o = m.duelo.ofensa.best;
+        melhorTxt = '<b>' + escapeHtml(quem.n) + '</b>' + (o && o.move && m.duelo.ofensa.classe === "super" ? " (" + escapeHtml(o.move) + ")" : "") +
+          (m.pontos < 0 ? " - sem boa resposta" : "");
+      }
+      return '<tr><th scope="row" class="cf-foe"><span class="cf-foe-cell">' + spriteImgHtml(foe.sp.x, foe.name, 26) +
+        '<span>' + escapeHtml(foe.name) + (foe.transformado ? ' <small>vira ' + escapeHtml(foe.sp.n) + '</small>' : "") + '</span></span></th>' +
+        celulas + '<td class="cf-best">' + melhorTxt + '</td></tr>';
+    }).join("");
+    var legenda = Object.keys(CONFRONTO_SIMBOLO).map(function (k) {
+      return '<span><span aria-hidden="true">' + CONFRONTO_SIMBOLO[k][0] + '</span> ' + CONFRONTO_SIMBOLO[k][1] + '</span>';
+    }).join("");
+    var semBuild = cx.minhas.filter(function (m) { return !m.moves; }).map(function (m) { return m.main.n; });
+    var notas = [];
+    if (semBuild.length) notas.push("Sem build salva para " + escapeHtml(semBuild.join(", ")) + ": assumi os tipos do próprio Pokémon como golpes. Salvar uma build deixa o resultado exato.");
+    if (boss.db) notas.push("Batalha em dupla: este quadro trata a luta como 1x1, então o resultado é aproximado.");
+    notas.push("Só tipo, habilidade, golpes e itens que o dado do jogo informa. Não calcula dano nem velocidade real (o nível do chefão não está nos dados) e habilidades de chefão que o app ainda não cataloga podem mudar o resultado.");
+    return '<div class="card" id="boss-confronto"><h3>Confronto com o seu time</h3>' +
+      '<p class="cf-verdict">' + confrontoResumoTxt(cx).replace(/^./, function (ch) { return ch.toUpperCase(); }) + '</p>' +
+      '<div class="cf-scroll"><table class="cf-table"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>' +
+      '<div class="cf-legend">' + legenda + '</div>' +
+      notas.map(function (n) { return '<p class="cf-note">' + n + '</p>'; }).join("") +
+      '</div>';
+  }
+  // Linha do resumo da Dex: só a próxima luta que falta (trava do usuário,
+  // RN11), usando o time que o jogador tem agora.
+  function dashboardConfrontoHtml(nextBoss) {
+    var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
+    var party = (nextBoss[tier] && nextBoss[tier].length) ? nextBoss[tier] : nextBoss.party;
+    var cx = confrontoParaParty(party);
+    if (!cx) return "";
+    return '<div class="dash-item dash-confronto"><span class="dash-label">Confronto</span><span class="dash-value">' +
+      escapeHtml(nextBoss.name) + ': ' + confrontoResumoTxt(cx) +
+      (cx.c.estimada ? ' <span class="dash-caveat">Parte estimada só pelos tipos (sem build salva).</span>' : '') + '</span></div>';
+  }
+
   // Fase 4 do roadmap (2026-09-12) - "PC Box ganha sugestões gerais de
   // encaixe no time, não só a sugestão única do próximo chefão". Reusa
   // computeSharedRisks() (mesma conta de "Cobertura defensiva"/dashboard,
@@ -6727,6 +6701,7 @@
           (speed.tied ? ' (' + speed.tied + ' empatado' + (speed.tied > 1 ? 's' : '') + ')' : '') +
           '. <span class="dash-caveat">Só base: nível, EVs, nature, item e habilidade mudam a ordem.</span></span></div>';
       }
+      items += dashboardConfrontoHtml(nextBoss);
     }
 
     el.innerHTML = '<div class="dashboard-card">' + items + '</div>';
@@ -7533,6 +7508,7 @@
       '</div></div>' +
       (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:11px;margin:6px 0 0;max-width:65ch;">Nomes crus dos dados do jogo — não temos 100% de certeza que "Insane"/"Hell" batem exatamente com os modos "Ace"/"Elite" do menu do jogo atual. Confira sua dificuldade no Centro Pokémon se quiser ter certeza.</p></div>' : "") +
       bossReadinessHtml(boss) +
+      bossConfrontoHtml(boss, party) +
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
         '<div class="boss-level-row"><label for="boss-level-input">Status final calculados pro nível</label>' +
           '<input type="number" id="boss-level-input" min="1" max="100" value="' + bossState.level + '"></div>' +
@@ -7929,6 +7905,11 @@
     buildSynergyHtml: buildSynergyHtml,
     ABILITY_SYNERGY: ABILITY_SYNERGY,
     CONDITION_MOVE_SYNERGY: CONDITION_MOVE_SYNERGY,
+    confrontoParaParty: confrontoParaParty,
+    bossConfrontoHtml: bossConfrontoHtml,
+    dashboardConfrontoHtml: dashboardConfrontoHtml,
+    confrontoTime: confrontoTime,
+    renderDashboard: renderDashboard,
     conditionMoveSynergyNoteHtml: conditionMoveSynergyNoteHtml,
     aiTool_getConditionMoveSynergy: aiTool_getConditionMoveSynergy,
     BUILDS: BUILDS,

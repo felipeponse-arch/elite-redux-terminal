@@ -171,6 +171,30 @@ async function section19() {
             : texto.indexOf("pelo menos " + numTiposEsperado + " tipo") !== -1,
           "esperado " + numTiposEsperado + " em: " + texto);
       }
+
+      // ---- "Confronto com o seu time" (motor src/regras/confronto.js,
+      // 2026-09-24): aparece sozinho na ficha, sem clique, e a tela mostra
+      // exatamente o que o motor calculou (uma linha por Pokémon do chefão,
+      // uma coluna por membro do time, buracos citados pelo nome). ----
+      var cardConfronto = document.getElementById("boss-confronto");
+      if (teamMembers.length && achou("card \"Confronto com o seu time\" na ficha do chefão (time não vazio)", cardConfronto)) {
+        var cx = T.confrontoParaParty(boss.party);
+        if (achou("resultado do motor pra Roxanne 1", cx)) {
+          check("uma linha por Pokémon do chefão e uma coluna por membro do time",
+            cardConfronto.querySelectorAll("tbody tr").length === boss.party.length &&
+              cardConfronto.querySelectorAll("tbody tr:first-child .cf-cell").length === teamMembers.length,
+            cardConfronto.querySelectorAll("tbody tr").length + " linhas, " + cardConfronto.querySelectorAll("tbody tr:first-child .cf-cell").length + " colunas");
+          var textoConfronto = cardConfronto.querySelector(".cf-verdict").textContent;
+          check("todo Pokémon sem resposta super efetiva é citado pelo nome no resumo",
+            cx.c.buracos.every(function (f) { return textoConfronto.indexOf(f.name) !== -1; }), textoConfronto);
+          check("o resumo cita a melhor abertura do motor",
+            textoConfronto.indexOf(cx.minhas[cx.c.abertura].main.n) !== -1, textoConfronto);
+          check("cada célula tem texto acessível dizendo o veredito (não só cor)",
+            [].slice.call(cardConfronto.querySelectorAll(".cf-cell .cf-sym")).every(function (s) {
+              return /vantagem|seguro|neutro|arriscado|desvantagem/.test(s.getAttribute("aria-label") || "");
+            }));
+        }
+      }
     }
   }
 
@@ -178,4 +202,21 @@ async function section19() {
   document.getElementById("boss-search-input").dispatchEvent(new Event("input", { bubbles: true }));
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
+
+  // Resumo da Dex: linha "Confronto" da próxima luta, sem clique (o mesmo
+  // motor da ficha do chefão). Só aparece com time montado.
+  // O resumo só re-renderiza quando o time muda (dashboardDirty), então o
+  // teste força o render com o progresso em "sem badge" (a próxima luta é
+  // sempre um líder de ginásio) e restaura o milestone no fim.
+  if (T.state.team.length) {
+    var milestoneAntes = T.state.settings.milestone;
+    T.state.settings.milestone = 0;
+    T.renderDashboard();
+    var dashConfronto = document.querySelector("#dashboard .dash-confronto");
+    check("resumo da Dex mostra a linha \"Confronto\" da próxima luta quando há time",
+      !!dashConfronto && /melhor abertura/.test(dashConfronto.textContent),
+      dashConfronto ? dashConfronto.textContent : "(sem linha)");
+    T.state.settings.milestone = milestoneAntes;
+    T.renderDashboard();
+  }
 }

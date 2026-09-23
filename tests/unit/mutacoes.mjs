@@ -111,4 +111,32 @@ export const MUTACOES = [
     de: "return evs[b] - evs[a] || a - b;",
     para: "return evs[a] - evs[b] || a - b;",
   },
+  {
+    id: "confronto-ignora-habilidade-do-chefao",
+    descricao: "o ataque do jogador ignora a habilidade do Pokémon do chefão (Levitate/innates) e usa só a tabela crua",
+    arquivo: "confronto.js",
+    de: "mult: abilityTypeModFor(c.type, defTypes, ids).mult };",
+    para: "mult: typeMultiplier(c.type, defTypes) };",
+  },
+  {
+    id: "confronto-conta-golpe-de-status",
+    descricao: "golpe de status conta como golpe de dano no confronto",
+    arquivo: "confronto.js",
+    de: "return MOVE_BY_NAME[n] && moveRoleOf(n) === \"dano\";",
+    para: "return MOVE_BY_NAME[n];",
+  },
+  {
+    id: "confronto-dobro-exato-nao-e-perigo",
+    descricao: "dano exatamente 2x deixa de contar como ameaça",
+    arquivo: "confronto.js",
+    de: "var classe = pior.mult >= 2 ? CONFRONTO_AMEACA.PERIGO",
+    para: "var classe = pior.mult > 2 ? CONFRONTO_AMEACA.PERIGO",
+  },
+  {
+    id: "confronto-velocidade-ignorada",
+    descricao: "duelo ameaçado e mais lento continua sendo vantagem",
+    arquivo: "confronto.js",
+    de: "(a.classe === CONFRONTO_AMEACA.PERIGO && veloz !== \"maior\")",
+    para: "false",
+  },
 ];

@@ -261,6 +261,29 @@ resto do documento.
   partir da 4ª insígnia (Flannery) — antes disso, mesmo com a pedra/forma cadastrada, o Terminal não
   deve contar a forma Mega como opção de combate real.
 
+### 1.20 Motor de confronto com o chefão (2026-09-24)
+Origem: pedido do usuário de cobrir de forma abrangente "estratégias e sugestão de times e builds",
+para o jogador ter vantagem contra qualquer chefão conforme o time e o momento do jogo, com o
+**menor número possível de interações humanas** (sistema semi-automático).
+- RF66 — O Terminal deve calcular, para qualquer chefão e o time atual do jogador, quem acerta quem:
+  para cada par (Pokémon do time × Pokémon do chefão), o melhor golpe do jogador (multiplicador de
+  tipo já ajustado pela habilidade e innates REAIS do Pokémon do chefão) e o golpe mais perigoso do
+  chefão contra o jogador, classificando o duelo em vantagem / seguro / neutro / arriscado /
+  desvantagem. Sem build salva o Terminal usa os tipos do próprio Pokémon como golpe presumido e
+  marca o resultado como estimado. Pokémon de chefão que se transforma em Mega/Primal vale na forma
+  nova (habilidade escolhível da forma nova é desconhecida no dado e não é inventada).
+- RF67 — O resultado do confronto (RF66) deve aparecer **sem nenhuma ação do jogador**: como card
+  "Confronto com o seu time" na ficha de qualquer chefão (quadro chefão × time, melhor resposta por
+  Pokémon do chefão, buracos de cobertura, melhor abertura, ameaças) e como uma linha "Confronto" no
+  resumo do topo da Dex para a próxima luta que falta (RN11 continua valendo: sem projetar lutas
+  futuras). Batalha em dupla é tratada como 1x1 e o quadro avisa que o resultado é aproximado.
+- RN17 — O motor de confronto não calcula dano nem compara Velocidade real: o nível do chefão não
+  existe nos dados. Habilidades de chefão fora de `TYPE_MOD_ABILITIES` podem alterar o resultado e a
+  interface declara essa limitação em vez de fingir certeza.
+- RNF09 — **Semi-automático**: toda análise nova deve derivar do estado que o Terminal já conhece
+  (time, builds, progresso, modo de Mega, dificuldade) e aparecer sozinha; ação do jogador só onde
+  há efeito real a aplicar (ex.: trocar um membro) ou consentimento necessário (geração por IA).
+
 **Nota da auditoria de 2026-09-23**: a numeração de Regras de Negócio pula de RN13 (seção 3) direto
 para RN15 — não existe RN14 em nenhuma versão deste documento. Não confirmado se é uma regra perdida
 numa edição anterior ou renumeração deliberada; fica registrado aqui para quem for investigar depois.
