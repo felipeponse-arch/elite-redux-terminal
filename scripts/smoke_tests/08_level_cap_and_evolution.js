@@ -281,4 +281,40 @@ async function section08() {
       TE.state.autoLog = logAntes;
     }
   }
+
+  // ---- Sets de "Estratégias" vão pro save (pedido do usuário, 2026-09-24:
+  // economizar chamada de IA - antes sumiam a cada recarga da página). ----
+  {
+    const TE = window.__erTest;
+    const garchomp = TE.getSpeciesBySname("SPECIES_GARCHOMP");
+    if (achou("Garchomp real (fixture dos sets de Estratégias)", garchomp)) {
+      const antes = TE.state.strategySets;
+      const versao = TE.buildSave().dataVersion;
+      const set = { name: "Sweeper Físico", ability: "x", nature: "Jolly", item: "", moves: ["Earthquake", "Dragon Claw"], evs: [0, 252, 0, 0, 4, 252], rationale: "teste" };
+      TE.state.strategySets = { SPECIES_GARCHOMP: { sets: [set], cap: 40, dataVersion: versao, geradoEm: "2026-09-24T10:00:00Z" } };
+      const salvo = JSON.parse(JSON.stringify(TE.buildSave()));
+      check("buildSave() leva os sets de Estratégias", !!(salvo.strategySets && salvo.strategySets.SPECIES_GARCHOMP));
+      const lido = TE.sanitizarStrategySets(salvo.strategySets);
+      check("o set volta igual depois de salvar e carregar",
+        lido.SPECIES_GARCHOMP && lido.SPECIES_GARCHOMP.sets[0].moves.join(",") === "Earthquake,Dragon Claw" && lido.SPECIES_GARCHOMP.cap === 40, lido);
+      TE.state.strategySets = lido;
+      const html = TE.strategySetsHtml(garchomp);
+      check("a ficha mostra o set guardado sem nova chamada, com o cap em que foi gerado",
+        html.indexOf("Sweeper Físico") !== -1 && html.indexOf("level cap 40") !== -1 && html.indexOf("Gerar de novo") !== -1);
+      const sujo = TE.sanitizarStrategySets({
+        SPECIES_GARCHOMP: { sets: [set], dataVersion: "0.0-outra", geradoEm: "x" },
+        SPECIES_NAO_EXISTE: { sets: [set], dataVersion: versao },
+        SPECIES_HAXORUS: { sets: [{ name: 1, moves: [] }], dataVersion: versao },
+        __proto__x: "lixo"
+      });
+      check("save de outra versão dos dados, espécie inexistente ou set malformado são descartados", Object.keys(sujo).length === 0, sujo);
+      const muitos = {};
+      for (let i = 0; i < 70; i++) {
+        const sp = TE.SPECIES[i + 10];
+        muitos[sp.sname] = { sets: [set], dataVersion: versao, geradoEm: "2026-09-" + String(10 + (i % 15)).padStart(2, "0") + "T00:" + String(i).padStart(2, "0") + ":00Z" };
+      }
+      check("teto de espécies guardadas é respeitado", Object.keys(TE.sanitizarStrategySets(muitos)).length === 60);
+      TE.state.strategySets = antes;
+    }
+  }
 }

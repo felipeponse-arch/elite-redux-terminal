@@ -2453,6 +2453,11 @@
     // showdownSet() every other build source already uses. Purely
     // additive, same {} safe-default pattern as notes/orphans.
     customBuilds: {},
+    // Sets de "Estratégias" já gerados, por sname (pedido do usuário,
+    // 2026-09-24: economizar chamada de IA - antes ficavam só na memória e
+    // cada recarga da página pagava a mesma chamada de novo). Ver
+    // sanitizarStrategySets() em applySave().
+    strategySets: {},
     // Arquétipo do time (Fase 3b do roadmap de estratégia, 2026-09-12) - dois
     // eixos INDEPENDENTES (fonte real trazida pelo usuário, r/VGC via
     // Reddit): ritmo (Hyper Offense/Balance/Bulky Offense/Stall/Semi-Stall)
@@ -2474,6 +2479,9 @@
   //   { v: 2, team: [sname], box: [sname], savedTeams: [{name, team:[sname]}],
   //     settings: {difficulty, milestone}, dataVersion, savedAt }
   var AUTO_LOG_MAX = 30;
+  // Teto de espécies com sets de Estratégias guardados no save (os mais
+  // antigos saem primeiro) - o save vai pro localStorage e pra sincronização.
+  var STRATEGY_SETS_MAX = 60;
   var STORE_KEY = "er_terminal_save";
   var SCHEMA_VERSION = 2;
 
@@ -2602,6 +2610,7 @@
         }
       });
     }
+    state.strategySets = sanitizarStrategySets(save.strategySets);
     // Arquétipo do time (Fase 3b, 2026-09-12) - defensivo igual notes/
     // customBuilds acima: só aceita valor que já é uma das opções reais
     // (um save editado à mão ou de outra versão não pode injetar algo fora
@@ -2620,6 +2629,46 @@
     reconciliouAoAplicar = reconciliarBuildsSalvas();
   }
   var reconciliouAoAplicar = false;
+
+  // Mesma disciplina defensiva das builds: só aceita set com o formato certo,
+  // de espécie que existe nesta versão dos dados e gerado sobre ESTA versão
+  // (um patch novo muda movepool/habilidades - aí o set é descartado e a
+  // próxima visita gera de novo). Mantém só as STRATEGY_SETS_MAX mais novas.
+  function sanitizarStrategySets(raw) {
+    var out = {};
+    if (!raw || typeof raw !== "object") return out;
+    var versaoAtual = DATA.meta ? DATA.meta.version : null;
+    var entradas = [];
+    Object.keys(raw).forEach(function (sname) {
+      var e = raw[sname];
+      if (!e || typeof e !== "object" || !Array.isArray(e.sets) || !getSpeciesBySname(sname)) return;
+      if (versaoAtual && e.dataVersion && e.dataVersion !== versaoAtual) return;
+      var sets = e.sets.slice(0, 3).map(function (s) {
+        if (!s || typeof s !== "object" || typeof s.name !== "string" || !Array.isArray(s.moves)) return null;
+        var moves = s.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4);
+        if (!moves.length) return null;
+        return {
+          name: s.name.slice(0, 40),
+          ability: typeof s.ability === "string" ? s.ability : "",
+          nature: typeof s.nature === "string" ? s.nature : "",
+          item: typeof s.item === "string" ? s.item : "",
+          moves: moves,
+          evs: Array.isArray(s.evs) && s.evs.length === 6 ? s.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0],
+          rationale: typeof s.rationale === "string" ? s.rationale.slice(0, 400) : ""
+        };
+      }).filter(Boolean);
+      if (!sets.length) return;
+      entradas.push([sname, {
+        sets: sets,
+        cap: typeof e.cap === "number" ? e.cap : null,
+        dataVersion: typeof e.dataVersion === "string" ? e.dataVersion : versaoAtual,
+        geradoEm: typeof e.geradoEm === "string" ? e.geradoEm : ""
+      }]);
+    });
+    entradas.sort(function (a, b) { return a[1].geradoEm < b[1].geradoEm ? 1 : a[1].geradoEm > b[1].geradoEm ? -1 : 0; });
+    entradas.slice(0, STRATEGY_SETS_MAX).forEach(function (p) { out[p[0]] = p[1]; });
+    return out;
+  }
 
   // ---------------- custom build list helpers ----------------
   // state.customBuilds[sname] is always an array (0-3 entries) from this
@@ -2691,6 +2740,7 @@
       autoLog: state.autoLog,
       gymSkillsCleared: state.gymSkillsCleared,
       customBuilds: state.customBuilds,
+      strategySets: state.strategySets,
       archetype: state.archetype
     };
   }
@@ -2820,7 +2870,7 @@
   // the banner (and any store write at all) now only fires when something
   // real actually differs.
   var syncDb = null, syncRef = null;
-  var SYNC_CONTENT_KEYS = ["team", "box", "savedTeams", "settings", "notes", "customBuilds", "archetype"];
+  var SYNC_CONTENT_KEYS = ["team", "box", "savedTeams", "settings", "notes", "customBuilds", "strategySets", "archetype"];
   function syncContentDiffers(a, b) {
     if (!a || !b) return true;
     for (var i = 0; i < SYNC_CONTENT_KEYS.length; i++) {
@@ -4169,7 +4219,7 @@
       '<details class="detail-group" open><summary>Auto Build</summary>' +
         myBuildEditorHtml(sp) +
       '</details>' +
-      '<details class="detail-group"' + (strategySetsCache[sp.sname] ? " open" : "") + '><summary>Estratégias' + (strategySetsCache[sp.sname] ? " (" + strategySetsCache[sp.sname].sets.length + ")" : "") + '</summary>' +
+      '<details class="detail-group"' + (state.strategySets[sp.sname] ? " open" : "") + '><summary>Estratégias' + (state.strategySets[sp.sname] ? " (" + state.strategySets[sp.sname].sets.length + ")" : "") + '</summary>' +
         strategySetsHtml(sp) +
       '</details>' +
       (function () {
@@ -4635,18 +4685,12 @@
     if (!sp || !build || !Array.isArray(build.moves)) return "";
     var cap = getCurrentCap();
     var notas = [];
-    if (cap !== null && cap !== undefined) {
-      var acima = [];
-      build.moves.forEach(function (name) {
-        var id = MOVE_ID_BY_NAME[name];
-        if (id === undefined || sp.tu.indexOf(id) !== -1) return;
-        var niveis = sp.lm.filter(function (p) { return p[1] === id; }).map(function (p) { return p[0]; });
-        if (!niveis.length) return;
-        var nivel = Math.min.apply(null, niveis);
-        if (nivel > cap) acima.push(escapeHtml(name) + " (nível " + nivel + ")");
-      });
-      if (acima.length) notas.push("Acima do seu level cap atual (" + cap + "): " + acima.join(", ") + ".");
-    }
+    // Conta única em golpesTravadosNoCap (src/regras/level_cap.js). Golpe que
+    // a forma não aprende (nivel null) não entra aqui - reconciliarBuild cuida.
+    var acima = golpesTravadosNoCap(sp, build.moves).filter(function (g) { return g.nivel !== null; });
+    if (acima.length) notas.push("Acima do seu level cap atual (" + cap + "): " + acima.map(function (g) {
+      return escapeHtml(g.nome) + " (nível " + g.nivel + ")";
+    }).join(", ") + ".");
     var dupla = build.moves.filter(function (m) { return moveRoleOf(m) === "dupla"; });
     if (build.formato === "dupla") notas.push("A fonte descreve este set como pensado pra batalha dupla.");
     if (dupla.length) notas.push("Só funciona em batalha dupla: " + dupla.map(escapeHtml).join(", ") + ".");
@@ -4923,7 +4967,7 @@
   // se o jogador quiser outra leitura). Cada set passa pela MESMA
   // validateAiBuild() que "Meu build" usa - nenhuma garantia a menos.
   function strategySetsHtml(sp) {
-    var cached = strategySetsCache[sp.sname];
+    var cached = state.strategySets[sp.sname];
     var strategyLevel = getCurrentCap() || 50;
     var cardsHtml = cached ? cached.sets.map(function (set, idx) {
       // showdownSet() quer EVs já formatado ("252 Atk / 4 SpD"), não o
@@ -4944,7 +4988,8 @@
       '</div>';
     }).join("") : "";
     return '<p class="mybuild-hint">Referência do Smogon, adaptada: até 3 papéis competitivos distintos pra ' + escapeHtml(sp.n) +
-      ' neste hack, cada um com golpes/item/EVs reais e o porquê. Não é "Meu build" (isso continua acima, sua build de verdade) - é leitura exploratória, gerada de novo sempre que pedir.</p>' +
+      ' neste hack, cada um com golpes/item/EVs reais e o porquê. Não é "Meu build" (isso continua acima, sua build de verdade) - é leitura exploratória. Os sets ficam guardados; "Gerar de novo" pede outra leitura.</p>' +
+      (cached && cached.cap ? '<p class="mybuild-hint">Gerados no level cap ' + cached.cap + (cached.geradoEm ? ' em ' + escapeHtml(cached.geradoEm.slice(0, 10).split("-").reverse().join("/")) : "") + '.</p>' : "") +
       '<button id="strategy-sets-generate" class="text-action-btn" type="button">' + (cached ? "Gerar de novo" : "Gerar sets de estratégia") + '</button> ' +
       '<span id="strategy-sets-status" class="notes-status" role="status" aria-live="polite"></span>' +
       cardsHtml;
@@ -4953,7 +4998,7 @@
     var btn = document.getElementById("strategy-sets-generate");
     if (btn) btn.addEventListener("click", function () { generateStrategySets(sp); });
     function setAt(idx) {
-      var cached = strategySetsCache[sp.sname];
+      var cached = state.strategySets[sp.sname];
       return cached && cached.sets[idx];
     }
     document.querySelectorAll(".strategy-set-copy").forEach(function (copyBtn) {
@@ -5764,9 +5809,8 @@
     }
   }
 
-  // Cache efêmero de "Estratégias" (var strategySetsCache abaixo) - nunca
-  // vai pro save, some ao recarregar a página. { [sname]: { sets: [...] } }.
-  var strategySetsCache = {};
+  // Sets de "Estratégias" ficam em state.strategySets (vão pro save desde
+  // 2026-09-24) - { [sname]: { sets: [...], cap, dataVersion, geradoEm } }.
   // "Estratégias" - até 3 sets nomeados e distintos por espécie, cada um
   // com o mesmo formato e a MESMA validação (validateAiBuild) de "Gerar
   // build com IA", só que em lote. Pedido do usuário citando o dex do
@@ -5865,7 +5909,13 @@
         if (statusEl) statusEl.textContent = "Não consegui montar nenhum set válido dessa vez (já tentei 2 vezes) - tente de novo.";
         return;
       }
-      strategySetsCache[sp.sname] = { sets: sets };
+      state.strategySets[sp.sname] = {
+        sets: sets, cap: cap, dataVersion: DATA.meta ? DATA.meta.version : null, geradoEm: new Date().toISOString()
+      };
+      // Reaplica o teto (a mais antiga sai) e grava - a próxima visita a esta
+      // espécie mostra estes sets sem nova chamada.
+      state.strategySets = sanitizarStrategySets(state.strategySets);
+      persist();
       if (statusEl) statusEl.textContent = "";
       if (state.selected === sp.x) selectSpecies(sp.x);
     } catch (e) {
@@ -8244,6 +8294,9 @@
     CONDITION_MOVE_SYNERGY: CONDITION_MOVE_SYNERGY,
     carryUserData: carryUserData,
     reconciliarBuildsSalvas: reconciliarBuildsSalvas,
+    sanitizarStrategySets: sanitizarStrategySets,
+    buildSave: buildSave,
+    strategySetsHtml: strategySetsHtml,
     confrontoParaParty: confrontoParaParty,
     bossConfrontoHtml: bossConfrontoHtml,
     dashboardConfrontoHtml: dashboardConfrontoHtml,

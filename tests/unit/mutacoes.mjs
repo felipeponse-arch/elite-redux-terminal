@@ -21,6 +21,20 @@ export const MUTACOES = [
     para: "",
   },
   {
+    id: "golpe-travado-tutor-trava",
+    descricao: "golpe de tutor aparece como travado pelo level cap",
+    arquivo: "level_cap.js",
+    de: "if (id === undefined || sp.tu.indexOf(id) !== -1) return;",
+    para: "if (id === undefined) return;",
+  },
+  {
+    id: "golpe-travado-nivel-errado",
+    descricao: "golpe liberado exatamente no nível do cap aparece como travado",
+    arquivo: "level_cap.js",
+    de: "if (menor === null || menor > cap) out.push",
+    para: "if (menor === null || menor >= cap) out.push",
+  },
+  {
     id: "familia-so-base",
     descricao: "família de formas ignora as megas",
     arquivo: "formas_mega.js",

@@ -102,6 +102,35 @@ test("golpes liberados respeitam o level cap e sempre incluem tutor", () => {
   R.state.settings.levelCapMode = "more"; R.state.settings.milestone = 0;
 });
 
+test("golpes travados da build: nível de liberação, tutor nunca trava, sem cap nada trava", () => {
+  // fixture no dado real: espécie com um golpe só de nível acima de 30 e um de tutor
+  const sp = R.SPECIES.find((s) => s.tu.length && s.lm.some((p) => p[0] > 30 && !s.tu.includes(p[1]) && !s.lm.some((q) => q[1] === p[1] && q[0] <= 30)));
+  assert.ok(sp, "fixture: espécie com golpe só de nível > 30 e golpe de tutor");
+  const alto = sp.lm.find((p) => p[0] > 30 && !sp.tu.includes(p[1]) && !sp.lm.some((q) => q[1] === p[1] && q[0] <= 30));
+  const nomeAlto = R.MOVES[alto[1]][0], nomeTutor = R.MOVES[sp.tu[0]][0];
+  const nivelMin = Math.min(...sp.lm.filter((p) => p[1] === alto[1]).map((p) => p[0]));
+  R.state.settings.levelCapMode = "more"; R.state.settings.milestone = 0; // cap 18
+  const trav = R.golpesTravadosNoCap(sp, [nomeAlto, nomeTutor, "Golpe Que Nao Existe"]);
+  assert.equal(trav.length, 1, "só o golpe de nível alto trava (nome desconhecido é ignorado)");
+  assert.equal(trav[0].nome, nomeAlto);
+  assert.equal(trav[0].nivel, nivelMin, "o nível mostrado é o menor em que a espécie aprende");
+  const estranho = R.SPECIES.find((s) => s !== sp && !s.tu.includes(alto[1]) && !s.lm.some((p) => p[1] === alto[1]));
+  assert.equal(R.golpesTravadosNoCap(estranho, [nomeAlto])[0].nivel, null, "golpe fora do movepool volta com nível null");
+  // golpe cujo menor nível é EXATAMENTE o cap de algum marco
+  let noLimite = null;
+  for (let m = 0; m < 9 && !noLimite; m++) {
+    R.state.settings.milestone = m;
+    const c = R.getCurrentCap();
+    const achado = R.SPECIES.map((s) => [s, s.lm.find((p) => p[0] === c && !s.tu.includes(p[1]) && !s.lm.some((q) => q[1] === p[1] && q[0] < c))]).find(([, p]) => p);
+    if (achado) noLimite = achado;
+  }
+  assert.ok(noLimite, "fixture: golpe aprendido exatamente no nível do cap de algum marco");
+  assert.equal(R.golpesTravadosNoCap(noLimite[0], [R.MOVES[noLimite[1][1]][0]]).length, 0, "golpe do nível igual ao cap já está liberado");
+  R.state.settings.milestone = 9; // Campeão: sem cap
+  assert.equal(R.golpesTravadosNoCap(sp, [nomeAlto]).length, 0);
+  R.state.settings.milestone = 0;
+});
+
 test("level cap vem da opção Level Cap, não da dificuldade", () => {
   R.state.settings.milestone = 0;
   R.state.settings.levelCapMode = "elite"; R.state.settings.difficulty = "easy";

@@ -46,3 +46,22 @@
       lockedCount: sp.lm.length - allowedLm.length
     };
   }
+
+  // Golpes de uma build que o Pokémon ainda não aprende no cap atual, com o
+  // nível em que liberam (pedido do usuário, 2026-09-24: a build curada é de
+  // fim de jogo - no cap 18, 124 das 138 curadas têm golpe travado, e o card do
+  // time mostrava tudo como se já desse pra usar). Tutor nunca trava. Golpe
+  // que a espécie não aprende de jeito nenhum volta com nivel null.
+  function golpesTravadosNoCap(sp, moves) {
+    var cap = getCurrentCap();
+    if (cap === null || cap === undefined || !sp || !Array.isArray(moves)) return [];
+    var out = [];
+    moves.forEach(function (nome) {
+      var id = MOVE_ID_BY_NAME[nome];
+      if (id === undefined || sp.tu.indexOf(id) !== -1) return;
+      var menor = null;
+      sp.lm.forEach(function (p) { if (p[1] === id && (menor === null || p[0] < menor)) menor = p[0]; });
+      if (menor === null || menor > cap) out.push({ nome: nome, nivel: menor });
+    });
+    return out;
+  }
