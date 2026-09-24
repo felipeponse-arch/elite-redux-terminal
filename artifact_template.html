@@ -69,7 +69,7 @@
       <div class="brand-mark">⌁</div>
       <div class="brand-text">
         <h1>Elite Redux Terminal</h1>
-        <p class="brand-sub">Dex offline &middot; build <span class="mono">2.65beta</span> &middot; <span id="species-count" class="mono"></span> espécies &middot; dados de <span id="data-stamp" class="mono"></span> &middot; <span id="sync-status-indicator" class="mono" title="Sincronização entre aparelhos"></span></p>
+        <p class="brand-sub"><span class="brand-sub-info">Dex offline &middot; build <span class="mono">2.65beta</span> &middot; <span id="species-count" class="mono"></span> espécies &middot; dados de <span id="data-stamp" class="mono"></span> &middot;&nbsp;</span><span class="brand-sub-sync"><span id="sync-status-indicator" class="mono" title="Sincronização entre aparelhos"></span></span></p>
       </div>
     </div>
     <div class="tabs-row">
@@ -185,12 +185,12 @@
 
         <div class="card" id="saved-teams-card">
           <h3>Times salvos (máx. 3)</h3>
-          <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">Guarde até 3 composições completas — inclusive as que eu recomendar depois de analisar um chefão — e carregue de volta quando quiser sem remontar tudo na mão.</p>
+          <p style="color:var(--text-dim);font-size:var(--fs-texto);margin:0 0 10px;max-width:65ch;">Guarde até 3 composições completas — inclusive as que eu recomendar depois de analisar um chefão — e carregue de volta quando quiser sem remontar tudo na mão.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
             <input id="save-team-name" type="text" placeholder="Nome do time (opcional)" aria-label="Nome do time a salvar" class="campo campo-texto" style="flex:1;min-width:180px;">
             <button id="save-team-btn" class="add-team-btn" type="button">Salvar time atual</button>
           </div>
-          <div id="saved-teams-status" style="font-size:11.5px;color:var(--badge-accent2);margin:0 0 10px;min-height:14px;"></div>
+          <div id="saved-teams-status" style="font-size:var(--fs-pequeno);color:var(--badge-accent2);margin:0 0 10px;min-height:14px;"></div>
           <div class="saved-teams-grid" id="saved-teams-grid"></div>
         </div>
 
@@ -204,7 +204,7 @@
       <div class="team-shell">
         <div>
           <h3 class="section-title" style="margin-bottom:6px;">PC Box</h3>
-          <p style="color:var(--text-dim);font-size:12.5px;margin:0 0 12px;max-width:70ch;">Todo Pokémon que você já capturou, sem limite de 6. Use isso pra guardar o panorama geral: quanto mais completo, melhor eu consigo sugerir trocas quando um treinador específico estiver dando trabalho.</p>
+          <p style="color:var(--text-dim);font-size:var(--fs-texto);margin:0 0 12px;max-width:70ch;">Todo Pokémon que você já capturou, sem limite de 6. Use isso pra guardar o panorama geral: quanto mais completo, melhor eu consigo sugerir trocas quando um treinador específico estiver dando trabalho.</p>
           <!-- Redesenho da caixa, Fase 2 do roadmap de estratégia (2026-09-11/12,
                pedido do usuário com print de referência do jogo real): grade
                paginada em caixas numeradas + busca, em vez da lista fluida de
@@ -284,13 +284,13 @@
               <span class="rotulo-ajuste-dica">Temporária: volta à forma base ao fim de cada batalha, e a pedra fica no item. Permanente: fica Mega até você trocar a forma fora da batalha.</span>
             </label>
           </div>
-          <div class="stat-total" style="margin-top:16px;">Level cap atual <b class="mono" id="cap-display" style="font-size:16px;"></b></div>
+          <div class="stat-total" style="margin-top:16px;">Level cap atual <b class="mono" id="cap-display" style="font-size:var(--fs-grande);"></b></div>
           <p class="hint" style="margin:12px 0 0;">O app assume <b>Ability, Innate, Move e Type Randomizer desativados</b>. Com algum deles ligado, as habilidades, golpes ou tipos da Dex não valem pra sua run. Boss Rush e Encounter Randomizer não mudam nada aqui.</p>
           <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px;">
             <button id="settings-run-confirm" type="button" class="add-team-btn">Confirmar: bate com o meu jogo</button>
             <span id="settings-run-status" class="hint" style="margin:0;" role="status"></span>
           </div>
-          <p style="color:var(--text-dim);font-size:11px;margin-top:10px;" id="settings-note"></p>
+          <p style="color:var(--text-dim);font-size:var(--fs-legenda);margin-top:10px;" id="settings-note"></p>
         </div>
         <div class="card card-ajustes">
           <h3>O que o app fez sozinho</h3>
@@ -310,7 +310,7 @@
         <div class="card card-ajustes">
           <h3>Acessibilidade</h3>
           <div style="display:flex;flex-direction:column;gap:14px;">
-            <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;cursor:pointer;">
+            <label style="display:flex;align-items:center;gap:9px;font-size:var(--fs-texto);font-weight:600;cursor:pointer;">
               <input type="checkbox" id="settings-high-contrast" style="width:16px;height:16px;">
               Alto contraste
             </label>
@@ -670,7 +670,7 @@
   function typePill(name, small) {
     var meta = TYPE_META[name] || { hex: "#777", dark: false };
     var color = meta.dark ? "#1c1b17" : "#fff9f2";
-    return '<span class="type-pill" style="background:' + meta.hex + ';color:' + color + (small ? ';padding:2px 8px;font-size:10.5px' : '') + '">' + escapeHtml(name) + '</span>';
+    return '<span class="type-pill" style="background:' + meta.hex + ';color:' + color + (small ? ';padding:2px 8px;font-size:var(--fs-micro)' : '') + '">' + escapeHtml(name) + '</span>';
   }
 
   function typePip(name) {
@@ -771,6 +771,7 @@
   // ---------------- init ----------------
   document.getElementById("species-count").textContent = SPECIES.length;
   document.getElementById("data-stamp").textContent = (DATA.meta && DATA.meta.generated) || "?";
+  atualizarTituloDoSubtitulo();
   TELAS.contadores();
   TELAS.resumo();
   renderCapBadge();

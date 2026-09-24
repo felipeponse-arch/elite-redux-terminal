@@ -13,5 +13,9 @@ export default {
     // tema, por largura de tela); reordenar só pra agradar essa regra mudaria
     // o que ganha. Continua valendo a checagem de seletor DUPLICADO.
     "no-descending-specificity": null,
+    // Escala de texto (2026-09-24): todo tamanho de fonte vem de um token
+    // --fs-* de tokens.css - valor solto em px reprova. (Antes eram 19
+    // tamanhos, vários a meio pixel um do outro.)
+    "declaration-property-value-allowed-list": { "font-size": ["/^var\\(--fs-[a-z]+\\)$/", "inherit"] },
   },
 };

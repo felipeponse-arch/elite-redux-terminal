@@ -59,6 +59,22 @@
   --radius-md: 12px;
   --radius-lg: 18px;
   --radius-pill: 999px;
+  /* Escala de tamanho de texto (2026-09-24, pedido do usuário: "padronizar
+     o tamanho da fonte"). Antes: 19 tamanhos soltos, muitos a meio pixel um
+     do outro (10/10,5, 12/12,5, 13/13,5). Agora 9 degraus inteiros, um por
+     papel - todo font-size do app usa um destes (stylelint e checar_css.mjs
+     reprovam valor solto). Na troca, o meio pixel subiu (11,5->12, 12,5->13,
+     13,5->14, legibilidade), menos nos rótulos micro (10,5->10) e no título
+     de card (14,5->14, pra não passar das abas). */
+  --fs-micro: 10px;     /* etiquetas e rótulos em caixa-alta */
+  --fs-legenda: 11px;   /* notas, datas, dicas de campo */
+  --fs-pequeno: 12px;   /* chips, rodapé, tabelas compactas */
+  --fs-texto: 13px;     /* texto denso, campos, tabelas */
+  --fs-destaque: 14px;  /* nomes, abas, título de card */
+  --fs-base: 15px;      /* corpo */
+  --fs-grande: 16px;    /* título de modal, cabeçalho no celular */
+  --fs-titulo: 20px;    /* título do app, ícones */
+  --fs-display: 26px;   /* nome da espécie na ficha */
   /* Escritos pelo JS: "Aumentar fonte" (Progresso) e a cor do tipo nos chips
      de Monotype. Declarados aqui pra ter valor padrão e ficar na lista de
      tokens do app (antes só existiam quando o JS escrevia). */

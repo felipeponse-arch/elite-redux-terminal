@@ -391,6 +391,14 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   terminar; `display=swap`). Medido: com as fontes levando 1,5 s, a primeira pintura caiu de
   1.728 ms para 108 ms. `tests/e2e/desempenho.spec.mjs` atrasa as fontes em 3 s e reprova se a
   primeira pintura esperar por elas.
+- RNF19 — **Escala de texto e tela estável** (2026-09-24, pedido do usuário): todo tamanho de fonte
+  usa um dos 9 tokens `--fs-*` de `tokens.css` (10, 11, 12, 13, 14, 15, 16, 20 e 26 px - antes 19
+  tamanhos soltos); stylelint e `checar_css.mjs` reprovam valor solto, no CSS e inline. A tela não
+  se desloca ao carregar: o cabeçalho tem a mesma forma com qualquer texto no subtítulo (a
+  informação fixa corta com "…" primeiro, o status da sincronização por último, texto inteiro no
+  `title`) e o resumo da Dex reserva a altura de uma linha enquanto vazio. Medido antes: CLS ~0,53
+  no computador; `desempenho.spec.mjs` confere a forma do cabeçalho e a reserva do resumo direto, e
+  o CLS < 0,1 em quatro larguras.
 
 ### Build que acompanha o jogador e banco de builds (2026-09-24)
 

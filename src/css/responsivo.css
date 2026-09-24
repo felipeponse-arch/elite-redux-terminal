@@ -31,7 +31,7 @@
     border: none;
     color: var(--badge-accent2);
     font-weight: 700;
-    font-size: 13px;
+    font-size: var(--fs-texto);
     cursor: pointer;
     margin-bottom: 10px;
     padding: 0;
@@ -45,8 +45,8 @@
    reachable — at 375px all six no longer fit on one row. */
 @media (max-width: 620px) {
   .brand-sub { display: none; }
-  .brand-mark { width: 32px; height: 32px; font-size: 16px; border-radius: var(--radius-md); }
-  .brand-text h1 { font-size: 16px; }
+  .brand-mark { width: 32px; height: 32px; font-size: var(--fs-grande); border-radius: var(--radius-md); }
+  .brand-text h1 { font-size: var(--fs-grande); }
   .topbar { padding: 8px 10px; gap: 8px; }
   .tabs-row { width: 100%; }
   .tabs {
@@ -72,7 +72,7 @@
     -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
   }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab-btn { white-space: nowrap; padding: 7px 9px; font-size: 13px; scroll-snap-align: start; }
+  .tab-btn { white-space: nowrap; padding: 7px 9px; font-size: var(--fs-texto); scroll-snap-align: start; }
   /* Rótulo curto só em vez do completo - ver comentário junto de
      .tab-label-short acima. Reduz a largura total das 4 abas o
      suficiente pra caber (ou quase caber) sem rolar na maioria dos

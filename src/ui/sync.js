@@ -93,10 +93,18 @@
   // que um deles nem estava sincronizando de verdade - violava RNF03
   // ("degradação graciosa... nunca falhar silenciosamente"), que já valia
   // pra geração por IA mas nunca foi aplicado a este outro capability).
+  // O subtítulo do cabeçalho fica numa linha só, cortado com "…" quando não
+  // cabe (opção A, 2026-09-24) - o texto inteiro vai no title, pra ler ao
+  // passar o mouse. Chamada sempre que o texto dele muda.
+  function atualizarTituloDoSubtitulo() {
+    var sub = document.querySelector(".brand-sub");
+    if (sub) sub.title = sub.textContent.replace(/\s+/g, " ").trim();
+  }
   function setSyncStatusIndicator(text, warn) {
     var el = document.getElementById("sync-status-indicator");
     if (!el) return;
     el.textContent = text;
+    atualizarTituloDoSubtitulo();
     el.style.color = warn ? "var(--sem-weak)" : "";
   }
   setSyncStatusIndicator("sincronização: verificando...");

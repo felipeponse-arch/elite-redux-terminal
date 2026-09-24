@@ -185,7 +185,7 @@
     if (!el) return;
     var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
     if (!teamMembers.length) {
-      el.innerHTML = '<div class="dashboard-card"><p style="color:var(--text-dim);font-size:13px;margin:0;">Monte seu time na Dex pra ver um resumo aqui.</p></div>';
+      el.innerHTML = '<div class="dashboard-card"><p style="color:var(--text-dim);font-size:var(--fs-texto);margin:0;">Monte seu time na Dex pra ver um resumo aqui.</p></div>';
       renderNextFightCard();
       return;
     }

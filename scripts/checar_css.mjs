@@ -73,6 +73,16 @@ for (const arquivo of fontes) {
   }
 }
 
+// 4. tamanho de fonte inline (HTML montado no JS e no template) também só por
+// token da escala - o stylelint só enxerga os .css.
+for (const arquivo of fontes.filter((f) => !f.endsWith(".css"))) {
+  readFileSync(arquivo, "utf8").split("\n").forEach((linha, i) => {
+    for (const [, valor] of linha.matchAll(/font-size:\s*([^;"']+)/g)) {
+      if (!/^var\(--fs-[a-z]+\)$/.test(valor.trim())) erros.push(`${arquivo}:${i + 1}: font-size "${valor.trim()}" fora da escala (use var(--fs-...))`);
+    }
+  });
+}
+
 if (erros.length) {
   console.error(`checar_css: ${erros.length} problema(s)`);
   for (const e of [...new Set(erros)]) console.error("  - " + e);

@@ -21,14 +21,14 @@
   font-weight: 700;
 }
 .ts-head { display: flex; align-items: center; gap: 10px; }
-.team-slot .ts-name { font-weight: 700; font-size: 15px; }
+.team-slot .ts-name { font-weight: 700; font-size: var(--fs-base); }
 .team-slot.swapping { border-color: var(--accent); }
 .ts-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; margin-top: 10px; }
 .ts-swap-btn {
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--badge-accent2);
-  font-size: 11.5px;
+  font-size: var(--fs-pequeno);
   font-weight: 700;
   padding: 5px 10px;
   border-radius: var(--radius-md);
@@ -39,7 +39,7 @@
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--badge-accent);
-  font-size: 12px;
+  font-size: var(--fs-pequeno);
   font-weight: 700;
   padding: 7px 12px;
   border-radius: var(--radius-md);
@@ -50,8 +50,8 @@
 .ts-goto-dex:hover { border-color: var(--accent); }
 
 .swap-panel { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--accent); }
-.swap-title { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--badge-accent); font-weight: 700; margin-bottom: 8px; }
-.swap-empty { font-size: 11.5px; color: var(--text-dim); }
+.swap-title { font-size: var(--fs-legenda); text-transform: uppercase; letter-spacing: .05em; color: var(--badge-accent); font-weight: 700; margin-bottom: 8px; }
+.swap-empty { font-size: var(--fs-pequeno); color: var(--text-dim); }
 .swap-list { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
 .swap-pick {
   display: flex;
@@ -67,4 +67,4 @@
   color: var(--text);
 }
 .swap-pick:hover { border-color: var(--accent); background: var(--surface-3); }
-.swap-pick-name { font-size: 12.5px; font-weight: 600; }
+.swap-pick-name { font-size: var(--fs-texto); font-weight: 600; }

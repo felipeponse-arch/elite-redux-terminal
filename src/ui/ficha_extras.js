@@ -109,7 +109,7 @@
       return buildEntryHtml(sp, entry, meta, 'data-src="boss" data-sname="' + sp.sname + '" data-idx="' + i + '"');
     }).join("");
     return '<details class="bh-details"><summary>Builds vistas em chefões (' + refs.length + ')</summary>' + items +
-      '<p style="color:var(--text-dim);font-size:11px;margin-top:8px;">Referência do time de um chefão, não uma recomendação — o moveset foi ajustado pra aquela luta específica, não necessariamente pro seu time.</p></details>';
+      '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin-top:8px;">Referência do time de um chefão, não uma recomendação — o moveset foi ajustado pra aquela luta específica, não necessariamente pro seu time.</p></details>';
   }
 
   // Delegated once for the whole document: the Dex detail and the team slots

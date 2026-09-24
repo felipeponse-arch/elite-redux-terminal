@@ -2,13 +2,13 @@
    lugar dos 3 <select> antigos. */
 .archetype-axis { margin-bottom: 12px; }
 .archetype-axis-label {
-  display: block; font-size: 11px; color: var(--text-dim); font-weight: 600;
+  display: block; font-size: var(--fs-legenda); color: var(--text-dim); font-weight: 600;
   text-transform: uppercase; letter-spacing: .03em; margin-bottom: 6px;
 }
 .archetype-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .arch-chip {
   border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
-  padding: 6px 12px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 600;
+  padding: 6px 12px; border-radius: var(--radius-pill); font-size: var(--fs-pequeno); font-weight: 600;
   cursor: pointer; font-family: inherit;
 }
 .arch-chip:hover { border-color: var(--accent-2); }
@@ -20,10 +20,10 @@
    já usam), não o gradiente de marca - a cor JÁ É a informação aqui. */
 .arch-chip-type.active { background: var(--chip-color); border-color: transparent; color: var(--chip-ink); }
 .mybuild-moves-power { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
-.mybuild-move-power { font-size: 11.5px; color: var(--text-dim); line-height: 1.6; }
+.mybuild-move-power { font-size: var(--fs-pequeno); color: var(--text-dim); line-height: 1.6; }
 .mybuild-move-power b { color: var(--text); font-weight: 600; }
 .team-slot .ts-types { display: flex; gap: 5px; margin: 6px 0; }
-.team-slot .ts-abis { font-size: 11.5px; color: var(--text-dim); line-height: 1.4; }
+.team-slot .ts-abis { font-size: var(--fs-pequeno); color: var(--text-dim); line-height: 1.4; }
 .ts-build {
   margin-top: 10px;
   padding-top: 10px;
@@ -35,11 +35,11 @@
 .ts-build-label {
   text-transform: uppercase;
   letter-spacing: .04em;
-  font-size: 9.5px;
+  font-size: var(--fs-micro);
   font-weight: 700;
   color: var(--badge-accent2);
 }
-.ts-build-empty { color: var(--text-dim); font-style: italic; font-size: 11.5px; }
+.ts-build-empty { color: var(--text-dim); font-style: italic; font-size: var(--fs-pequeno); }
 /* "Estratégias" (referência estilo Smogon, 2026-09-18) - cada set é seu
    próprio bloco visual (não empilhado dentro de outro .card), pra ficar
    claro que são ALTERNATIVAS entre si, não uma sequência única. */
@@ -54,13 +54,13 @@
 }
 .strategy-set:first-child { margin-top: 14px; }
 .strategy-set-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
-.strategy-set-name { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 13.5px; color: var(--accent); }
+.strategy-set-name { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: var(--fs-destaque); color: var(--accent); }
 .remove-btn {
   align-self: flex-end;
   background: none;
   border: none;
   color: var(--sem-weak);
-  font-size: 12px;
+  font-size: var(--fs-pequeno);
   font-weight: 700;
   cursor: pointer;
   padding: 2px 0;
@@ -73,12 +73,12 @@
    bloco fica visualmente separado dos vizinhos, reforça a leitura em
    grade). Sprite no cabeçalho ajuda a reconhecer o membro sem precisar
    ler o nome truncado. */
-.cov-table { border-collapse: separate; border-spacing: 3px; font-size: 11.5px; }
+.cov-table { border-collapse: separate; border-spacing: 3px; font-size: var(--fs-pequeno); }
 /* Speed tiers (redesign 2026-09-18) - lista de verdade, não mapa de
    calor: volta pro border-collapse tradicional + linha divisória fina,
    mais legível pra 1900+ linhas de texto/nome do que blocos separados
    por gap. content-visibility mantém a rolagem leve com tantas linhas. */
-.speedtier-table { border-collapse: collapse; border-spacing: 0; font-size: 12.5px; width: 100%; }
+.speedtier-table { border-collapse: collapse; border-spacing: 0; font-size: var(--fs-texto); width: 100%; }
 .speedtier-table th, .speedtier-table td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--border); }
 .speedtier-table th.rowhead, .speedtier-table td.rowhead { text-align: left; }
 .speedtier-table tbody tr { content-visibility: auto; contain-intrinsic-size: 40px; }
@@ -91,14 +91,14 @@
    never the <td> itself - a table cell needs to keep display:table-cell
    for the row layout to work (same lesson as .cov-head next to it). */
 .speedtier-invested { color: var(--badge-accent2); font-weight: 700; }
-.speedtier-rank { color: var(--text-dim); min-width: 24px; text-align: right; font-size: 11px; }
+.speedtier-rank { color: var(--text-dim); min-width: 24px; text-align: right; font-size: var(--fs-legenda); }
 /* Glossário de papéis (redesign 2026-09-18). */
-.role-count { font-size: 11px; font-weight: 400; color: var(--text-dim); }
+.role-count { font-size: var(--fs-legenda); font-weight: 400; color: var(--text-dim); }
 .role-chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .role-chip {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-pill);
-  padding: 4px 10px 4px 4px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  padding: 4px 10px 4px 4px; font-size: var(--fs-texto); font-weight: 600; cursor: pointer;
 }
 .role-chip:hover { border-color: var(--accent-2); }
 /* Destaque de arquétipo (achado em auditoria, 2026-09-18, item 18): a
@@ -109,7 +109,7 @@
 .cov-table th, .cov-table td { padding: 0; text-align: center; }
 .cov-table th.rowhead, .cov-table td.rowhead { text-align: left; font-weight: 600; padding: 0 8px 0 0; }
 .cov-head { display: flex; flex-direction: column; align-items: center; gap: 2px; padding-bottom: 4px; }
-.cov-head-name { font-size: 10px; font-weight: 700; color: var(--text-dim); max-width: 46px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cov-head-name { font-size: var(--fs-micro); font-weight: 700; color: var(--text-dim); max-width: 46px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cov-cell {
   display: flex; align-items: center; justify-content: center;
   width: 34px; height: 30px; border-radius: var(--radius-sm);

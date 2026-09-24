@@ -5,7 +5,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   color: var(--badge-accent2);
-  font-size: 12.5px;
+  font-size: var(--fs-texto);
   font-weight: 700;
   cursor: pointer;
   padding: 6px 10px;
@@ -14,7 +14,7 @@
 .pcbox-detail .box-to-team.is-swap { color: var(--badge-accent); border-color: var(--accent); }
 .pcbox-detail .remove-btn {
   background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);
-  padding: 6px 10px; font-size: 15px; line-height: 1; cursor: pointer; color: var(--sem-weak);
+  padding: 6px 10px; font-size: var(--fs-base); line-height: 1; cursor: pointer; color: var(--sem-weak);
 }
 
 .row-add-btn {
@@ -25,7 +25,7 @@
   width: 24px;
   height: 24px;
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--fs-destaque);
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -41,7 +41,7 @@
   transform: translateX(-50%) translateY(12px);
   background: var(--accent);
   color: var(--accent-ink);
-  font-size: 13px;
+  font-size: var(--fs-texto);
   font-weight: 700;
   padding: 10px 18px;
   border-radius: var(--radius-pill);
@@ -59,7 +59,7 @@
   position: fixed; left: 0; right: 0; top: 0; z-index: 200;
   display: flex; align-items: center; justify-content: center; gap: 12px;
   background: var(--accent-2); color: var(--accent-ink);
-  font-size: 12.5px; font-weight: 600; padding: 8px 14px; box-shadow: var(--shadow);
+  font-size: var(--fs-texto); font-weight: 600; padding: 8px 14px; box-shadow: var(--shadow);
 }
 /* The EXACT same bug as .tabs-more-panel earlier today: an author-
    stylesheet `display` always beats the browser's native [hidden]
@@ -70,27 +70,27 @@
    fix alongside this one was real too, but this CSS bug alone explains
    the reported symptom on its own. */
 .sync-banner[hidden] { display: none; }
-.dash-caveat { color: var(--text-dim); font-size: 11.5px; }
-.auto-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; }
+.dash-caveat { color: var(--text-dim); font-size: var(--fs-pequeno); }
+.auto-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: var(--fs-texto); }
 .ts-generated-team { border: 1px solid var(--accent); }
-.ts-usage-guide { display: flex; flex-direction: column; gap: 8px; font-size: 13px; margin-bottom: 10px; }
+.ts-usage-guide { display: flex; flex-direction: column; gap: 8px; font-size: var(--fs-texto); margin-bottom: 10px; }
 .ts-guide-item b { color: var(--text-dim); font-weight: 700; }
-.ts-validation { font-size: 12.5px; color: var(--text-dim); padding-top: 8px; border-top: 1px solid var(--border); }
+.ts-validation { font-size: var(--fs-texto); color: var(--text-dim); padding-top: 8px; border-top: 1px solid var(--border); }
 .ts-validation-warn { color: var(--sem-weak); }
-.gym-skill-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+.gym-skill-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: var(--fs-texto); }
 .gym-skill-list label { display: flex; gap: 9px; align-items: flex-start; cursor: pointer; }
 .gym-skill-list input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; width: 15px; height: 15px; }
 .gym-skill-list .gs-detail { color: var(--text-dim); font-weight: 400; }
-.auto-log time { display: block; font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.auto-log time { display: block; font-size: var(--fs-legenda); color: var(--text-dim); font-variant-numeric: tabular-nums; }
 .sync-banner button {
-  border: none; border-radius: var(--radius-sm); padding: 4px 10px; font-size: 12px; font-weight: 700;
+  border: none; border-radius: var(--radius-sm); padding: 4px 10px; font-size: var(--fs-pequeno); font-weight: 700;
   cursor: pointer; background: rgba(0,0,0,.15); color: inherit;
 }
-#sync-banner-dismiss, #storage-banner-dismiss, #run-setup-dismiss { background: none; font-size: 16px; padding: 0 4px; line-height: 1; }
+#sync-banner-dismiss, #storage-banner-dismiss, #run-setup-dismiss { background: none; font-size: var(--fs-grande); padding: 0 4px; line-height: 1; }
 
 .showdown-block {
   font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
-  font-size: 11.5px;
+  font-size: var(--fs-pequeno);
   line-height: 1.55;
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -120,13 +120,13 @@
   background: none;
   border: none;
   color: var(--badge-accent2);
-  font-size: 11px;
+  font-size: var(--fs-legenda);
   font-weight: 700;
   cursor: pointer;
   padding: 2px 4px;
 }
-.ts-build-note { font-size: 11px; color: var(--text-dim); margin-top: 6px; font-style: italic; }
-.ts-item-desc { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+.ts-build-note { font-size: var(--fs-legenda); color: var(--text-dim); margin-top: 6px; font-style: italic; }
+.ts-item-desc { font-size: var(--fs-legenda); color: var(--text-dim); margin-top: 4px; }
 .ts-item-desc b { color: var(--text); }
 
 .bh-details { margin-top: 10px; }
@@ -136,7 +136,7 @@
    any other clickable row in the app, so it reads as one. */
 .bh-details summary {
   cursor: pointer;
-  font-size: 12.5px;
+  font-size: var(--fs-texto);
   font-weight: 700;
   color: var(--badge-accent2);
   list-style: none;
@@ -151,6 +151,6 @@
 .bh-details[open] summary::before { content: "▾ "; }
 .bh-entry { margin-top: 10px; }
 .bh-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
-.bh-date { font-size: 10.5px; color: var(--text-dim); }
-.bh-context { font-size: 11px; color: var(--text); font-style: italic; flex: 1; }
-.bh-copy { background: none; border: none; color: var(--badge-accent2); font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; }
+.bh-date { font-size: var(--fs-micro); color: var(--text-dim); }
+.bh-context { font-size: var(--fs-legenda); color: var(--text); font-style: italic; flex: 1; }
+.bh-copy { background: none; border: none; color: var(--badge-accent2); font-size: var(--fs-legenda); font-weight: 700; cursor: pointer; padding: 2px 4px; }

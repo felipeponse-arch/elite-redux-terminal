@@ -336,7 +336,7 @@
   function renderTeamAnalysis(members) {
     var el = document.getElementById("team-analysis");
     if (!members.length) {
-      el.innerHTML = '<div class="card"><p style="color:var(--text-dim);font-size:13px;">Adicione Pokémon na aba Dex para ver a cobertura defensiva do time.</p></div>';
+      el.innerHTML = '<div class="card"><p style="color:var(--text-dim);font-size:var(--fs-texto);">Adicione Pokémon na aba Dex para ver a cobertura defensiva do time.</p></div>';
       return;
     }
     var head = '<th class="rowhead">Vs. tipo</th>' + members.map(function (sp) {
@@ -359,8 +359,8 @@
       return '<tr><td class="rowhead">' + typePill(atk, true) + '</td>' + cells + '</tr>';
     }).join("");
     var abilityNote = anyAbilityMod
-      ? '<p style="color:var(--text-dim);font-size:11.5px;margin-top:6px;">* ajustado por habilidade inata ou travada (passe o mouse pra ver qual). Só cobre as habilidades já verificadas neste time — o resto da tabela ainda é o multiplicador de tipo puro, sem considerar habilidade.</p>'
-      : '<p style="color:var(--text-dim);font-size:11.5px;margin-top:6px;">Tabela de multiplicador de tipo puro — nenhuma habilidade deste time altera esses valores hoje (mas isso só está verificado para as habilidades já conferidas, não para as 1033 do jogo).</p>';
+      ? '<p style="color:var(--text-dim);font-size:var(--fs-pequeno);margin-top:6px;">* ajustado por habilidade inata ou travada (passe o mouse pra ver qual). Só cobre as habilidades já verificadas neste time — o resto da tabela ainda é o multiplicador de tipo puro, sem considerar habilidade.</p>'
+      : '<p style="color:var(--text-dim);font-size:var(--fs-pequeno);margin-top:6px;">Tabela de multiplicador de tipo puro — nenhuma habilidade deste time altera esses valores hoje (mas isso só está verificado para as habilidades já conferidas, não para as 1033 do jogo).</p>';
 
     var risks = computeSharedRisks(members);
     var riskHtml = risks.length ? risks.map(function (r) {
@@ -368,7 +368,7 @@
       return '<div class="risk-item">' + typePill(r.t, true) +
         '<div class="risk-bar-track"><div class="risk-bar-fill" style="width:' + pct + '%"></div></div>' +
         '<span class="mono">' + r.n + '/' + members.length + ' fracos</span></div>';
-    }).join("") : '<p style="color:var(--text-dim);font-size:13px;">Nenhum tipo derruba 2 ou mais membros do time ao mesmo tempo &mdash; boa cobertura defensiva de base.</p>';
+    }).join("") : '<p style="color:var(--text-dim);font-size:var(--fs-texto);">Nenhum tipo derruba 2 ou mais membros do time ao mesmo tempo &mdash; boa cobertura defensiva de base.</p>';
 
     // Used to be two bare <h3>s dumped straight into #team-analysis, with no
     // .card wrapper - the only section titles in the whole app that didn't

@@ -240,7 +240,7 @@
       '<p class="hint" style="margin:0 0 10px;">Cada treinador de apoio deste ginásio tira um desses buffs de ' + escapeHtml(leaderName) + ' quando você o vence, antes de desafiá-la(o). Marque os que você já tirou — não precisa dizer qual treinador, só o efeito.</p>' +
       (summary.note ? '<p class="hint" style="margin:0 0 10px;">' + escapeHtml(summary.note) + '</p>' : "") +
       '<ul class="gym-skill-list">' + itemsHtml + '</ul>' +
-      '<div class="gym-skill-summary mono" style="margin-top:10px;font-size:12.5px;">Restam ' + summary.remaining + ' de ' + summary.total + ' buff' + (summary.total === 1 ? "" : "s") + ' ativo' + (summary.remaining === 1 ? "" : "s") + ' antes da luta.</div>' +
+      '<div class="gym-skill-summary mono" style="margin-top:10px;font-size:var(--fs-texto);">Restam ' + summary.remaining + ' de ' + summary.total + ' buff' + (summary.total === 1 ? "" : "s") + ' ativo' + (summary.remaining === 1 ? "" : "s") + ' antes da luta.</div>' +
     '</div>';
   }
 
@@ -362,21 +362,21 @@
         '<h2>' + escapeHtml(boss.name) + '</h2>' +
         '<div class="detail-dexno mono">' + escapeHtml(boss.cat) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +
-      (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:11px;margin:6px 0 0;max-width:65ch;">Nomes crus dos dados do jogo — não temos 100% de certeza que "Insane"/"Hell" batem exatamente com os modos "Ace"/"Elite" do menu do jogo atual. Confira sua dificuldade no Centro Pokémon se quiser ter certeza.</p></div>' : "") +
+      (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:6px 0 0;max-width:65ch;">Nomes crus dos dados do jogo — não temos 100% de certeza que "Insane"/"Hell" batem exatamente com os modos "Ace"/"Elite" do menu do jogo atual. Confira sua dificuldade no Centro Pokémon se quiser ter certeza.</p></div>' : "") +
       bossConfrontoHtml(boss, party) +
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
         '<div class="boss-level-row"><label for="boss-level-input">Status final calculados pro nível</label>' +
           '<input type="number" id="boss-level-input" class="campo campo-numero" min="1" max="100" value="' + bossState.level + '"></div>' +
-        '<p style="color:var(--text-dim);font-size:11px;margin:4px 0 12px;max-width:65ch;">Você digita o nível — não temos como saber o nível real de um treinador nos dados do jogo (por isso não existe uma calculadora de dano completa aqui, só isso). EVs/IVs são reais, extraídos do jogo. Considera o item quando é Choice Band/Specs/Scarf, Assault Vest, Tactical Vest, Thick Club ou Light Ball (marcado com *). Quando é Mega Stone ou orbe de reversão primal, os status já são calculados na forma transformada (types e stats reais dessa forma) — mas não sabemos qual das habilidades escolhíveis DA FORMA MEGA fica ativa (os dados não dizem), e não simulamos clima/campo/Trick Room já ativos antes da transformação (isso exigiria simular a ordem dos turnos, que este cálculo não faz). Efeito de habilidade em geral e itens ainda não identificados também não entram na conta.</p>' +
+        '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:4px 0 12px;max-width:65ch;">Você digita o nível — não temos como saber o nível real de um treinador nos dados do jogo (por isso não existe uma calculadora de dano completa aqui, só isso). EVs/IVs são reais, extraídos do jogo. Considera o item quando é Choice Band/Specs/Scarf, Assault Vest, Tactical Vest, Thick Club ou Light Ball (marcado com *). Quando é Mega Stone ou orbe de reversão primal, os status já são calculados na forma transformada (types e stats reais dessa forma) — mas não sabemos qual das habilidades escolhíveis DA FORMA MEGA fica ativa (os dados não dizem), e não simulamos clima/campo/Trick Room já ativos antes da transformação (isso exigiria simular a ordem dos turnos, que este cálculo não faz). Efeito de habilidade em geral e itens ainda não identificados também não entram na conta.</p>' +
         '<div class="boss-mon-grid">' + monsHtml + '</div></div>' +
       renderGymSkillsCardHtml(boss) +
       '<div class="card"><h3>Enviar para o Claude</h3>' +
-        '<p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">Junta o time dele com o seu time e sua caixa num texto só. Copie e cole na conversa pra eu montar a contra-estratégia.</p>' +
+        '<p style="color:var(--text-dim);font-size:var(--fs-texto);margin:0 0 10px;max-width:65ch;">Junta o time dele com o seu time e sua caixa num texto só. Copie e cole na conversa pra eu montar a contra-estratégia.</p>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">' +
-          '<textarea id="boss-export-text" class="campo campo-texto mono" readonly rows="5" style="flex:1;min-width:220px;font-size:12px;resize:vertical;">' + escapeHtml(exportText) + '</textarea>' +
+          '<textarea id="boss-export-text" class="campo campo-texto mono" readonly rows="5" style="flex:1;min-width:220px;font-size:var(--fs-pequeno);resize:vertical;">' + escapeHtml(exportText) + '</textarea>' +
           '<button id="boss-export-copy" class="add-team-btn" type="button">Copiar</button>' +
         '</div>' +
-        '<div id="boss-export-status" style="font-size:11.5px;color:var(--badge-accent2);margin-top:6px;min-height:14px;"></div>' +
+        '<div id="boss-export-status" style="font-size:var(--fs-pequeno);color:var(--badge-accent2);margin-top:6px;min-height:14px;"></div>' +
       '</div>';
 
     // Cliques e mudanças do detalhe: ouvintes únicos em #boss-detail (initBosses).

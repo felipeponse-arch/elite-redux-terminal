@@ -109,7 +109,7 @@
   }
 
   function renderMovesTable(pairs, title, emptyMsg) {
-    if (!pairs.length) return '<div class="card"><h3>' + title + '</h3><p style="color:var(--text-dim);font-size:12.5px;">' + emptyMsg + '</p></div>';
+    if (!pairs.length) return '<div class="card"><h3>' + title + '</h3><p style="color:var(--text-dim);font-size:var(--fs-texto);">' + emptyMsg + '</p></div>';
     var cap = title.indexOf("Nível") !== -1 ? getCurrentCap() : null;
     var rows = pairs.map(function (row, idx) {
       var lv = row[0], moveId = row[1];
@@ -422,7 +422,7 @@
   if (htoEntry) {
     howToObtainHtml = '<div class="card"><h3>Como obter</h3>' +
       '<p style="margin:0 0 6px;"><b>' + escapeHtml(htoEntry.method) + '</b></p>' +
-      '<p style="color:var(--text-dim);font-size:12.5px;margin:0;">' + escapeHtml(htoEntry.note) + '</p>' +
+      '<p style="color:var(--text-dim);font-size:var(--fs-texto);margin:0;">' + escapeHtml(htoEntry.note) + '</p>' +
       '</div>';
   }
     return howToObtainHtml;
@@ -491,7 +491,7 @@
       '<div class="card"><h3>Stats base</h3>' + statsHtml +
         '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
       '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
-        '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p>' +
+        '<p style="color:var(--text-dim);font-size:var(--fs-pequeno);margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p>' +
         conditionMoveSynergyNoteHtml(sp) + '</div>' +
       evoHtml +
       frmHtml +
