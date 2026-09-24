@@ -1,6 +1,6 @@
   // ===== src/regras/golpes.js =====
   // O que cada golpe faz (papel pelo efeito real) e como descrevê-lo pra IA.
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras golpes.js), no mesmo escopo do resto do código - sem module,
   // sem wrapper. Só lógica pura: nada aqui lê a página (item D1 da pauta
   // técnica, 2026-09-16), o que permite carregar este arquivo no Node pros

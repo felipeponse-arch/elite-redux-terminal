@@ -121,5 +121,5 @@ for (const pedido of pedidos) {
 }
 if (promovidas) {
   writeFileSync(caminhoBuilds, JSON.stringify(builds, null, 2) + "\n", "utf8");
-  console.log(`\n${promovidas} build(s) gravada(s) em data/builds.json. Rode scripts/build.ps1 (valida e publica o dado).`);
+  console.log(`\n${promovidas} build(s) gravada(s) em data/builds.json. Rode npm run build (valida o dado e monta o app).`);
 }

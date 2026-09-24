@@ -2,7 +2,7 @@
   // Peças dos prompts de IA (o que vai pro modelo) e a tradução dos erros da IA pro
   // jogador. Só texto e dado: quem conversa com a plataforma é o cliente único
   // pedirIA(), no template (fase 4 da refatoração).
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras prompts_ia.js), no mesmo escopo do resto do código. Só lógica: nada aqui
   // lê ou desenha a página - testável no Node (tests/unit). Movido do template na
   // fase 4 da refatoração (2026-09-24).

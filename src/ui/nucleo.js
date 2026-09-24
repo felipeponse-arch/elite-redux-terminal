@@ -1,7 +1,7 @@
   // ===== src/ui/nucleo.js =====
   // Estado do app (state), gravação no aparelho e a camada de ações (acao/TELAS): toda mudança grava uma vez e redesenha cada tela uma vez.
   // Interface: lê e desenha a página. Colado no <script> principal por
-  // scripts/build.ps1 (marcador @ui nucleo.js) no MESMO lugar de onde saiu do
+  // scripts/build.mjs (marcador @ui nucleo.js) no MESMO lugar de onde saiu do
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   // ---------------- state ----------------

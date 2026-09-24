@@ -1,7 +1,7 @@
   // ===== src/ui/progresso.js =====
   // Aba Progresso: dificuldade, level cap, insígnia, modo de Mega, confirmação da run e acessibilidade.
   // Interface: lê e desenha a página. Colado no <script> principal por
-  // scripts/build.ps1 (marcador @ui progresso.js) no MESMO lugar de onde saiu do
+  // scripts/build.mjs (marcador @ui progresso.js) no MESMO lugar de onde saiu do
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   // ---------------- progress / settings view ----------------

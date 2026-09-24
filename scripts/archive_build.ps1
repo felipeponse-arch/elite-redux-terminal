@@ -67,4 +67,4 @@ foreach ($b in @($current)) {
 
 Write-Output "archive_build.ps1: OK - build anterior de $Sname arquivada (contexto: `"$Context`")."
 Write-Output "  $Sname agora tem $($history[$Sname].Count) build(s) no historico."
-Write-Output "  Lembrete: agora edite builds.json com a NOVA build para $Sname, depois rode build.ps1."
+Write-Output "  Lembrete: agora edite builds.json com a NOVA build para $Sname, depois rode npm run build."

@@ -1,6 +1,6 @@
   // ===== src/regras/calc_stat.js =====
   // Fórmula de status final (base+IV+EV+nível+nature+item) e o que deriva
-  // dela. Colado dentro do <script> principal do app por scripts/build.ps1
+  // dela. Colado dentro do <script> principal do app por scripts/build.mjs
   // (marcador @regras calc_stat.js), no mesmo escopo do resto do código -
   // sem module, sem wrapper. Só lógica pura: nada aqui lê a página (item D1
   // da pauta técnica, 2026-09-16), o que permite carregar este arquivo no

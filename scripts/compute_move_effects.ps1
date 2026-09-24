@@ -54,7 +54,7 @@ $pt = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "move_translations
 # Achado real ao rodar isto pela primeira vez (comparado contra a saída do
 # protótipo em Node, que já tinha sido verificada linha a linha): o número
 # de golpes com efeito batia errado (415 aqui contra 482 no protótipo) -
-# causa raiz é o mesmo aviso já documentado em validate_data_invariants.ps1
+# causa raiz é o mesmo aviso já documentado em scripts/validar_dados.mjs
 # ("PowerShell 5.1 lê .ps1 sem BOM na codepage do sistema") - toda letra
 # acentuada escrita DIRETO no código deste arquivo (não vinda do JSON lido
 # com -Encoding UTF8) corrompe ao rodar via `-File` (confirmado: "confusão"

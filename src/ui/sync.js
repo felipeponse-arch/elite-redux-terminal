@@ -1,7 +1,7 @@
   // ===== src/ui/sync.js =====
   // Sincronização entre aparelhos (capability db) e os avisos de sync.
   // Interface: lê e desenha a página. Colado no <script> principal por
-  // scripts/build.ps1 (marcador @ui sync.js) no MESMO lugar de onde saiu do
+  // scripts/build.mjs (marcador @ui sync.js) no MESMO lugar de onde saiu do
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   // ---------------- cross-device sync (db capability) ----------------

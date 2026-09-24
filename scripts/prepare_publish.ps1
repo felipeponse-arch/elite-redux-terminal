@@ -41,11 +41,12 @@ if ($head -ne $remote) {
 }
 
 Write-Output "--- 3/4 build + suite completa ---"
-# Quem decide e o codigo de saida. Com "Stop", qualquer linha no stderr do
-# processo filho (ex: aviso do Node no servidor que o Playwright sobe, fase 6)
-# virava erro fatal aqui no PowerShell 5.1 - mesmo com todos os testes passando.
+# Mesma verificacao do hook de pre-commit (scripts/verificar.mjs). Quem decide e
+# o codigo de saida. Com "Stop", qualquer linha no stderr do processo filho (ex:
+# aviso do Node no servidor que o Playwright sobe, fase 6) virava erro fatal
+# aqui no PowerShell 5.1 - mesmo com todos os testes passando.
 $ErrorActionPreference = "Continue"
-& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "run_pre_commit_checks.ps1") 2>&1 | ForEach-Object { "$_" }
+& node (Join-Path $PSScriptRoot "verificar.mjs") 2>&1 | ForEach-Object { "$_" }
 $saidaTestes = $LASTEXITCODE
 $ErrorActionPreference = "Stop"
 if ($saidaTestes -ne 0) { Fail "build ou testes falharam (saida acima)." }

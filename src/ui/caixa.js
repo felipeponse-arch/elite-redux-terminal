@@ -1,7 +1,7 @@
   // ===== src/ui/caixa.js =====
   // Aba Caixa (PC Box): grade por páginas, busca e ações de cada Pokémon da caixa.
   // Interface: lê e desenha a página. Colado no <script> principal por
-  // scripts/build.ps1 (marcador @ui caixa.js) no MESMO lugar de onde saiu do
+  // scripts/build.mjs (marcador @ui caixa.js) no MESMO lugar de onde saiu do
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   // PC Box - Fase 2 do roadmap de estratégia (2026-09-11/12, redesenho pedido

@@ -1,6 +1,6 @@
   // ===== src/regras/dados_base.js =====
   // Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras dados_base.js), no mesmo escopo do resto do código - sem module,
   // sem wrapper. Só lógica pura: nada aqui lê a página (item D1 da pauta
   // técnica, 2026-09-16), o que permite carregar este arquivo no Node pros

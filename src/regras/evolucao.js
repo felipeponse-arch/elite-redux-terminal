@@ -1,7 +1,7 @@
   // ===== src/regras/evolucao.js =====
   // Builds salvas por espécie, registro "O que o app fez sozinho" e o que acontece
   // com a build quando a criatura evolui ou regride (auto-evolução por level cap).
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras evolucao.js), no mesmo escopo do resto do código. Só lógica: nada aqui
   // lê ou desenha a página - testável no Node (tests/unit). Movido do template na
   // fase 3 da refatoração (2026-09-24), sem mudar o comportamento.

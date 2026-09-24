@@ -67,7 +67,7 @@ $DUPLA = @("Follow Me", "Helping Hand", "Ally Switch", "After You", "Instruct", 
 # especies usam pra referenciar golpes (e o que o NextDex oficial faz:
 # gameData.moves[moveID]); o `id` bruto diverge em 3 golpes (Jetstream Burst,
 # Sky Quake, Toxic Terrain). A primeira versao deste script usou `id` - achado
-# por scripts/validate_data_invariants.ps1 no mesmo dia.
+# por scripts/validar_dados.mjs no mesmo dia.
 $out = [ordered]@{}
 $counts = @{}
 $moves = @($raw["moves"])

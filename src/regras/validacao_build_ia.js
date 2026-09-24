@@ -1,6 +1,6 @@
   // ===== src/regras/validacao_build_ia.js =====
   // Validação da build sugerida pela IA contra o dado real.
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras validacao_build_ia.js), no mesmo escopo do resto do código - sem module,
   // sem wrapper. Só lógica pura: nada aqui lê a página (item D1 da pauta
   // técnica, 2026-09-16), o que permite carregar este arquivo no Node pros

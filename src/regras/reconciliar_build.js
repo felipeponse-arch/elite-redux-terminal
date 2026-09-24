@@ -1,6 +1,6 @@
   // ===== src/regras/reconciliar_build.js =====
   // Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras reconciliar_build.js), no mesmo escopo do resto do código - sem
   // module, sem wrapper. Só lógica pura: nada aqui lê a página.
   //

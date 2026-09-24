@@ -1,7 +1,7 @@
   // ===== src/regras/confronto.js =====
   // Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
   // acerta quem, quem ameaça quem e onde o time tem buraco.
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras confronto.js), no mesmo escopo do resto do código - sem module,
   // sem wrapper. Só lógica pura: nada aqui lê a página, o que permite carregar
   // este arquivo no Node pros testes unitários (tests/unit/).

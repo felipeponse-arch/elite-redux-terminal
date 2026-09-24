@@ -1,4 +1,4 @@
-/* The whole sprite sheet lives in this one rule (build.ps1 inlines it as a
+/* The whole sprite sheet lives in this one rule (scripts/build.mjs inlines it as a
    base64 PNG). Kept in CSS rather than a JS-set custom property: a multi-MB
    value is rejected as a custom property but fine as a stylesheet url(). */
 .spr {

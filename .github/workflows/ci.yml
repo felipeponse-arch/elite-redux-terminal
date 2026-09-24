@@ -1,15 +1,15 @@
 name: CI
 
-# Roda todos os testes num Chromium headless via Playwright (@playwright/test,
-# fase 6 da refatoração, 2026-09-24), contra o MESMO artifact_final.html que
-# seria publicado - sem isso, nada garantia que os testes passassem antes de um
+# Roda todas as travas e testes contra o MESMO artifact_final.html que seria
+# publicado - sem isso, nada garantia que os testes passassem antes de um
 # publish (achado real da auditoria completa da equipe, 2026-09-13).
 #
-# -SkipExtract de propósito: build.ps1 sem essa flag roda check_upstream.ps1
-# (chamada de rede pro NextDex oficial) - isso é uma preocupação separada
-# (dado desatualizado), não "o código atual funciona", e tornaria o CI
-# flaky por causa de rede externa em toda run. O check de drift periódico
-# é uma tarefa própria (scripts/check_upstream.ps1), não este workflow.
+# Linux desde a fase 8 da refatoração (2026-09-24): build (scripts/build.mjs),
+# servidor de testes e travas são Node - nada aqui depende mais do Windows.
+# O build só MONTA o app a partir dos data/*.json versionados; a extração do
+# dado bruto (scripts/build.ps1, rede pro NextDex) fica fora de propósito -
+# dado desatualizado é outra preocupação (scripts/check_upstream.ps1) e rede
+# externa em toda execução deixaria o CI instável.
 on:
   push:
     branches: [master, main]
@@ -17,12 +17,18 @@ on:
     branches: [master, main]
   workflow_dispatch: {}
 
+# Um push novo no mesmo ramo cancela a execução anterior, que ficou velha.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  smoke-test:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: powershell
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,10 +37,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: npm
 
       # npm ci instala exatamente o que está no package-lock.json - npm install
       # podia resolver versões diferentes das testadas localmente.
-      - name: Instala dependências do CI (Playwright)
+      - name: Instala dependências
         run: npm ci
 
       # Etapa 1 da pauta técnica (S2): dependência com vulnerabilidade alta ou
@@ -43,28 +50,43 @@ jobs:
       - name: Auditoria de dependências (npm audit)
         run: npm audit --audit-level=high
 
-      # Fase 1 da refatoração (2026-09-24): acento corrompido, .ps1 sem BOM (o
-      # PowerShell 5.1 corrompe o acento e isso já errou 16 notas do rank) e
-      # erro de sintaxe (inclusive no JS de dentro do template), ESLint só com
-      # regras de correção e checagem de tipos de src/regras (tsc, checkJs).
-      - name: Travas estáticas (codificação, sintaxe, lint, tipos)
+      # Acento corrompido, .ps1 sem BOM, sintaxe (inclusive o JS de dentro do
+      # template), ESLint e stylelint só com regras de correção, tokens de CSS
+      # (as duas paletas escuras iguais, todo var() declarado) e tipos de
+      # src/regras (tsc, checkJs).
+      - name: Travas estáticas (codificação, sintaxe, lint JS/CSS, tokens, tipos)
         run: npm run check
 
-      # Etapa 2 da pauta técnica (Q3): regras do jogo testadas no Node, sem
-      # build nem navegador - falha em segundos, antes dos minutos de Chromium.
+      # Regras do jogo testadas no Node, sem build nem navegador - falha em
+      # segundos, antes dos minutos de Chromium.
       - name: Testes unitários das regras (src/regras)
         run: npm run test:unit
 
-      # Q5: cada defeito do catálogo (tests/unit/mutacoes.mjs) tem que derrubar
+      # Cada defeito do catálogo (tests/unit/mutacoes.mjs) tem que derrubar
       # algum teste unitário - defeito que sobrevive = regra sem proteção.
       - name: Teste de sabotagem das regras
         run: npm run test:sabotage
 
+      # Valida os dados (builds.json e invariantes) e monta o app.
+      - name: Build (npm run build)
+        run: npm run build
+
+      # O navegador fica em cache entre execuções (mesma versão do Playwright
+      # do package-lock = mesmo navegador).
+      - name: Cache do navegador do Playwright
+        id: cache-navegador
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
       - name: Instala o Chromium do Playwright
+        if: steps.cache-navegador.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
-      - name: Builda artifact_final.html (reusa data/*.json já commitado)
-        run: powershell -NoProfile -File scripts/build.ps1 -SkipExtract
+      - name: Dependências de sistema do Chromium (navegador veio do cache)
+        if: steps.cache-navegador.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       # O Playwright sobe sozinho o servidor de testes (webServer em
       # playwright.config.mjs). Um comando só: cada seção da suíte sozinha em
@@ -74,9 +96,9 @@ jobs:
       - name: Testes de navegador (Playwright)
         run: npm run test:e2e
 
-      # Não bloqueia: as imagens de referência são geradas no Windows local, e
-      # o runner do GitHub renderiza fonte com antialiasing diferente - falha
-      # aqui é sinal pra olhar as imagens, não prova de regressão.
+      # Não bloqueia: as imagens de referência são geradas no Windows local, e o
+      # Linux renderiza fonte com antialiasing diferente - falha aqui é sinal
+      # pra olhar as imagens (sobem no relatório), não prova de regressão.
       - name: Regressão visual (informativa)
         if: ${{ !cancelled() }}
         continue-on-error: true

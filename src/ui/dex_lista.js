@@ -1,7 +1,7 @@
   // ===== src/ui/dex_lista.js =====
   // Dex: filtro de tipo, busca, ordenação, lista em lotes e o modal de troca do time.
   // Interface: lê e desenha a página. Colado no <script> principal por
-  // scripts/build.ps1 (marcador @ui dex_lista.js) no MESMO lugar de onde saiu do
+  // scripts/build.mjs (marcador @ui dex_lista.js) no MESMO lugar de onde saiu do
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   // ---------------- type filter panel ----------------

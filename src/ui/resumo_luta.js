@@ -1,7 +1,7 @@
   // ===== src/ui/resumo_luta.js =====
   // Confronto e resumo da próxima luta (card do chefão, resumo do topo da Dex, card no fim do Time).
   // Interface: lê e desenha a página. Colado no <script> principal por
-  // scripts/build.ps1 (marcador @ui resumo_luta.js) no MESMO lugar de onde saiu do
+  // scripts/build.mjs (marcador @ui resumo_luta.js) no MESMO lugar de onde saiu do
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   var CONFRONTO_SIMBOLO = {

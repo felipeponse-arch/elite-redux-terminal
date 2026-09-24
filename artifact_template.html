@@ -461,8 +461,8 @@
   // IMPORTANT: this check deliberately never writes a placeholder's exact
   // text (e.g. the literal "__DEX" + "_DATA_JSON__" tag) anywhere in this
   // file, not even split across a string concat, and not even inside this
-  // comment as a real contiguous token - build.ps1's splice step is a
-  // blind whole-file .Replace() per placeholder (scripts/build.ps1), so
+  // comment as a real contiguous token - the build's splice step is a
+  // blind whole-file .Replace() per placeholder (scripts/build.mjs), so
   // any occurrence of that exact text ANYWHERE in the template - comments
   // included - gets substituted too. A first version of this exact check
   // did write the placeholder literally to compare against, and that one
@@ -483,8 +483,8 @@
       '<h2 style="margin:0 0 10px;">Build incompleto publicado</h2>' +
       '<p style="color:var(--text, #444);line-height:1.5;">Os dados do Pokedex nao foram embutidos corretamente neste ' +
       'arquivo. Isso normalmente significa que <code>artifact_template.html</code> foi publicado em vez do ' +
-      'arquivo gerado por <code>scripts/build.ps1</code> (<code>artifact_final.html</code>).</p>' +
-      '<p style="color:var(--text, #444);line-height:1.5;">Rode <code>scripts\\build.ps1</code> e publique o ' +
+      'arquivo gerado pelo build (<code>npm run build</code> -> <code>artifact_final.html</code>).</p>' +
+      '<p style="color:var(--text, #444);line-height:1.5;">Rode <code>npm run build</code> e publique o ' +
       '<code>artifact_final.html</code> resultante.</p></div>';
     throw new Error("Build incompleto: dados do dex nao foram substituidos (arquivo errado publicado).");
   }

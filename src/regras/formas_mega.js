@@ -1,6 +1,6 @@
   // ===== src/regras/formas_mega.js =====
   // Família de formas (base <-> mega), modo de Mega Evolução, pedras e unidades de batalha.
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras formas_mega.js), no mesmo escopo do resto do código - sem module,
   // sem wrapper. Só lógica pura: nada aqui lê a página (item D1 da pauta
   // técnica, 2026-09-16), o que permite carregar este arquivo no Node pros

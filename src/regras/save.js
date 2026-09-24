@@ -1,7 +1,7 @@
   // ===== src/regras/save.js =====
   // Save do app: formato gravado (buildSave), leitura defensiva (applySave e os
   // saneadores) e comparação do sync. Lê/escreve o `state`, nunca a página.
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras save.js), no mesmo escopo do resto do código. Só lógica: nada aqui
   // lê ou desenha a página - testável no Node (tests/unit). Movido do template na
   // fase 3 da refatoração (2026-09-24), sem mudar o comportamento.

@@ -2,7 +2,7 @@
   // Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
   // ameaças do chefão ao time, melhor candidato da caixa e o confronto (adaptador
   // do app pro motor puro de confronto.js).
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras chefoes.js), no mesmo escopo do resto do código. Só lógica: nada aqui
   // lê ou desenha a página - testável no Node (tests/unit). Movido do template na
   // fase 3 da refatoração (2026-09-24), sem mudar o comportamento.

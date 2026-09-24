@@ -8,6 +8,8 @@
     "check:sintaxe": "node scripts/checar_sintaxe.mjs",
     "lint": "eslint . artifact_template.html",
     "check:tipos": "tsc -p tsconfig.json",
+    "build": "node scripts/build.mjs",
+    "verificar": "node scripts/verificar.mjs",
     "lint:css": "stylelint \"src/css/*.css\" && node scripts/checar_css.mjs",
     "check": "node scripts/checar_encoding.mjs && node scripts/checar_sintaxe.mjs && eslint . artifact_template.html && stylelint \"src/css/*.css\" && node scripts/checar_css.mjs && tsc -p tsconfig.json",
     "test:unit": "node --test \"tests/unit/*.test.mjs\"",

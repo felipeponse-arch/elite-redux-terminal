@@ -1,7 +1,7 @@
   // ===== src/ui/auto_evolucao.js =====
   // Registro "O que o app fez sozinho" na tela e a auto-evolução do time/caixa pelo level cap.
   // Interface: lê e desenha a página. Colado no <script> principal por
-  // scripts/build.ps1 (marcador @ui auto_evolucao.js) no MESMO lugar de onde saiu do
+  // scripts/build.mjs (marcador @ui auto_evolucao.js) no MESMO lugar de onde saiu do
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   // ---------------- level cap & auto-evolution ----------------

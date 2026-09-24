@@ -1,7 +1,7 @@
   // ===== src/regras/plano_build.js =====
   // Build que acompanha o jogador: plano de golpes por slot, estilo da build e
   // escolha da build curada. Colado dentro do <script> principal do app por
-  // scripts/build.ps1 (marcador @regras plano_build.js), no mesmo escopo do resto
+  // scripts/build.mjs (marcador @regras plano_build.js), no mesmo escopo do resto
   // do código - sem module, sem wrapper. Só lógica pura: nada aqui lê a página.
   //
   // Pedido do usuário (2026-09-24): "montamos uma build no cap 18; no próximo cap

@@ -1,6 +1,6 @@
   // ===== src/regras/level_cap.js =====
   // Level cap atual e golpes liberados por ele.
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras level_cap.js), no mesmo escopo do resto do código - sem module,
   // sem wrapper. Só lógica pura: nada aqui lê a página (item D1 da pauta
   // técnica, 2026-09-16), o que permite carregar este arquivo no Node pros

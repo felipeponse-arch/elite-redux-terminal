@@ -1,7 +1,7 @@
   // ===== src/ui/dex_ficha.js =====
   // Dex: ficha do Pokémon (stats, habilidades, golpes, rank, evolução) e o agendamento do resumo do topo.
   // Interface: lê e desenha a página. Colado no <script> principal por
-  // scripts/build.ps1 (marcador @ui dex_ficha.js) no MESMO lugar de onde saiu do
+  // scripts/build.mjs (marcador @ui dex_ficha.js) no MESMO lugar de onde saiu do
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   // ---------------- detail rendering ----------------

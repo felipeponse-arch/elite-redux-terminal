@@ -1,6 +1,6 @@
   // ===== src/regras/tipos.js =====
   // Tabela de efetividade de tipos, habilidades que alteram dano recebido por tipo e tipagem de espécie.
-  // Colado dentro do <script> principal do app por scripts/build.ps1 (marcador
+  // Colado dentro do <script> principal do app por scripts/build.mjs (marcador
   // @regras tipos.js), no mesmo escopo do resto do código - sem module,
   // sem wrapper. Só lógica pura: nada aqui lê a página. Movido do template em
   // 2026-09-24 (motor de confronto, src/regras/confronto.js): o motor precisa

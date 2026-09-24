@@ -1,7 +1,7 @@
   // ===== src/ui/arquetipo.js =====
   // Arquétipo do time, time sugerido e o Gerador Inteligente de Times.
   // Interface: lê e desenha a página. Colado no <script> principal por
-  // scripts/build.ps1 (marcador @ui arquetipo.js) no MESMO lugar de onde saiu do
+  // scripts/build.mjs (marcador @ui arquetipo.js) no MESMO lugar de onde saiu do
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   // ---------------- team strategy & archetype ----------------

@@ -380,6 +380,12 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   `-texto`, `-ajuste`, `-filtro`, `-numero`) e a fonte do app - um teste percorre as abas e reprova
   campo fora disso. A regressão visual cobre claro, escuro, alto contraste e celular; com
   `VISUAL_EXATO=1` exige zero pixel diferente (prova de refatoração sem mudança visual).
+- RNF17 — **Build e verificação independentes de sistema** (refatoração fase 8, 2026-09-24):
+  `npm run build` (`scripts/build.mjs`) valida os dados (`scripts/validar_dados.mjs`) e monta o
+  `artifact_final.html`; `npm run verificar` (`scripts/verificar.mjs`) roda travas, unitários,
+  sabotagem, build e testes de navegador - é o que o hook de pre-commit e o `prepare_publish`
+  chamam. Tudo em Node: o CI roda em Linux. Só a extração do dado bruto do jogo (rede, rara)
+  continua em PowerShell (`scripts/build.ps1`), que termina chamando o mesmo `build.mjs`.
 
 ### Build que acompanha o jogador e banco de builds (2026-09-24)
 
@@ -419,7 +425,7 @@ builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   estilo que o time pede vem do Ritmo do arquétipo (Hyper/Bulky Offense → ofensivo; Stall/Semi-Stall →
   defensivo; resto → equilibrado). A curada mostrada é a do estilo do time; sem ela, a primeira.
 - RF79 — **Banco de builds curadas**: `data/builds.json` aceita até 3 builds por espécie (lista), no
-  máximo uma por estilo (`validate_builds.ps1` trava). Uma build de IA NÃO vira curada sozinha - ela é
+  máximo uma por estilo (`scripts/validar_dados.mjs` trava no build). Uma build de IA NÃO vira curada sozinha - ela é
   montada pro contexto daquele momento e a validação do app só confere se é legal, não se é boa. O
   Playtester roda `node scripts/playtester_curadoria.mjs <save.json>` sobre o save sincronizado:
   checklist mecânico (mesma `validateAiBuild` do app sem cap, plano aprendível, estilo ainda não coberto,
