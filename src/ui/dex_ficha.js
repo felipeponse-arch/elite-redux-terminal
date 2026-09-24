@@ -428,56 +428,14 @@
     return howToObtainHtml;
   }
 
-  function selectSpecies(x) {
-    // Only reset scroll when the species actually CHANGES - selectSpecies()
-    // is also called to refresh the currently-open species in place (e.g.
-    // after "Salvar build"/"Limpar" in Meu build), and yanking the user
-    // back to the top after they clicked a button deep in the page would be
-    // its own real regression. Paired with the #app height fix just above
-    // (min-height -> height, the actual root cause of "a dex fica travada"
-    // - the whole page was scrolling instead of this panel internally) -
-    // without that fix this reset would have had nothing to reset, since
-    // .species-detail's own scrollTop never moved at all before.
-    var isSameSpecies = state.selected === x;
-    state.selected = x;
-    var sp = getSpeciesByX(x);
-    if (!sp) return;
-    document.getElementById("dex-shell").classList.add("show-detail");
-    document.querySelectorAll(".species-row").forEach(function (r) {
-      var isThis = parseInt(r.dataset.x, 10) === x;
-      r.classList.toggle("selected", isThis);
-      // Keep listbox semantics/roving tabindex in sync with a mouse click too,
-      // not just the initial render - see the accessibility-pass comment
-      // in renderList().
-      r.setAttribute("aria-selected", String(isThis));
-      r.tabIndex = isThis ? 0 : -1;
-    });
-
-    var names = speciesTypeNames(sp);
-    var statsHtml = fichaStatsHtml(sp);
-
-    var synergyHits = ABILITY_SYNERGY[sp.sname];
-    var abiHtml = uniqueIds(sp.ab).map(function (id) { return abilityCard(id, "Escolhível", "choosable", synergyHits); }).join("");
-    var innHtml = sp.inn.map(function (id) { return abilityCard(id, "Innate", "innate", synergyHits); }).join("");
-
-    var evoHtml = fichaEvolucaoHtml(sp);
-
-    var frmHtml = fichaFormasHtml(sp);
-
-    var howToObtainHtml = fichaComoObterHtml(sp);
-
-    var lm = sp.lm.slice().sort(function (a, b) { return a[0] - b[0]; });
-    var lmHtml = renderMovesTable(lm, "Golpes por Nível", "Sem golpes por nível registrados.");
-
-    var tuPairs = sp.tu.map(function (id) { return [null, id]; });
-    var tuHtml = tuPairs.length ? renderMovesTable(tuPairs, "Golpes de Tutor / TM", "Sem golpes de tutor registrados.") : "";
-
+  // Ficha: cabeçalho (sprite, nome, botões de time/caixa, tipos, onde obter).
+  function fichaCabecalhoHtml(sp) {
+    var x = sp.x;
     var inTeam = state.team.indexOf(x) !== -1;
     var teamFull = state.team.length >= 6;
     var inBox = state.box.indexOf(x) !== -1;
-
-    document.getElementById("species-detail").innerHTML =
-      '<button class="back-btn" id="back-to-list">&larr; Voltar para a lista</button>' +
+    var names = speciesTypeNames(sp);
+    return '<button class="back-btn" id="back-to-list">&larr; Voltar para a lista</button>' +
       // 48 matches the atlas cell size, so the largest sprite in the UI is shown
       // 1:1 and never upscaled.
       '<div class="detail-head"><div class="ts-head">' + spriteImgHtml(sp.x, sp.n, 48) + '<div class="detail-titles">' +
@@ -517,52 +475,105 @@
       rankInfoLineHtml(sp) +
       (sp.d ? '<p class="flavor">' + escapeHtml(sp.d) + '</p>' : "") +
       (function () { var t = howToObtainText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })() +
-      (function () { var t = whereToFindText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })() +
-      // Reorganização em blocos colapsáveis, Fase 2 - 2026-09-11 (reunião:
-      // "a tela do Poke na dex tá meio pesada de informação"). <details>
-      // nativo em vez de JS customizado - foco/teclado/leitor de tela vêm de
-      // graça (skill artifact-design, princípio já seguido no resto do
-      // app). Critério de aberto/fechado por padrão (time, mesma reunião):
-      // o que é fato rápido de consultar (stats, habilidades, evolução)
-      // fica ABERTO; o que é denso (tabelas de golpe, inteiras) ou usado
-      // ocasionalmente (notas/histórico/comparar) fica FECHADO - mas nunca
-      // escondido de verdade, um clique sempre abre, e o <summary> sempre
-      // diz o que tem dentro (inclusive contagem, pra não precisar abrir só
-      // pra saber se há algo lá). "Auto Build" fica ABERTO apesar de denso:
-      // é a ação central do app (RF21-30), esconder por padrão atrapalharia
-      // o fluxo principal mais do que ajudaria a limpar a tela.
-      //
-      // ATUALIZAÇÃO, mesmo dia (pedido do usuário): "Conhecer a espécie"
-      // deixou de ser colapsável - "quero que tudo que está ali fique
-      // visível". Virou um <div> comum (não <details>) com um cabeçalho
-      // estático (.detail-group-heading) no lugar do <summary> - mesmo
-      // peso visual, sem a semântica de abrir/fechar.
-      '<div class="detail-group"><h3 class="detail-group-heading">Conhecer a espécie</h3>' +
-        '<div class="card"><h3>Stats base</h3>' + statsHtml +
-          '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
-        '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
-          '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p>' +
-          conditionMoveSynergyNoteHtml(sp) + '</div>' +
-        evoHtml +
-        frmHtml +
-        howToObtainHtml +
-      '</div>' +
-      '<details class="detail-group"><summary>Golpes (' + (lm.length + tuPairs.length) + ')</summary>' +
-        lmHtml + tuHtml +
-      '</details>' +
+      (function () { var t = whereToFindText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })();
+  }
+
+  // Ficha: bloco "Conhecer a espécie" (stats, habilidades, evolução, formas).
+  function fichaConhecerHtml(sp) {
+    var statsHtml = fichaStatsHtml(sp);
+    var synergyHits = ABILITY_SYNERGY[sp.sname];
+    var abiHtml = uniqueIds(sp.ab).map(function (id) { return abilityCard(id, "Escolhível", "choosable", synergyHits); }).join("");
+    var innHtml = sp.inn.map(function (id) { return abilityCard(id, "Innate", "innate", synergyHits); }).join("");
+    var evoHtml = fichaEvolucaoHtml(sp);
+    var frmHtml = fichaFormasHtml(sp);
+    var howToObtainHtml = fichaComoObterHtml(sp);
+    return '<div class="detail-group"><h3 class="detail-group-heading">Conhecer a espécie</h3>' +
+      '<div class="card"><h3>Stats base</h3>' + statsHtml +
+        '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
+      '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
+        '<p style="color:var(--text-dim);font-size:11.5px;margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p>' +
+        conditionMoveSynergyNoteHtml(sp) + '</div>' +
+      evoHtml +
+      frmHtml +
+      howToObtainHtml +
+    '</div>';
+  }
+
+  // Ficha: golpes por nível e de tutor/TM (bloco fechado por padrão).
+  function fichaGolpesHtml(sp) {
+    var lm = sp.lm.slice().sort(function (a, b) { return a[0] - b[0]; });
+    var lmHtml = renderMovesTable(lm, "Golpes por Nível", "Sem golpes por nível registrados.");
+    var tuPairs = sp.tu.map(function (id) { return [null, id]; });
+    var tuHtml = tuPairs.length ? renderMovesTable(tuPairs, "Golpes de Tutor / TM", "Sem golpes de tutor registrados.") : "";
+    return '<details class="detail-group"><summary>Golpes (' + (lm.length + tuPairs.length) + ')</summary>' +
+      lmHtml + tuHtml +
+    '</details>';
+  }
+
+  // Ficha: anotações e builds de referência (só aparece se houver algo).
+  function fichaNotasHtml(sp) {
+    var notes = notesCardHtml(sp);
+    var refs = buildHistoryHtml(sp) + bossReferenceHtml(sp);
+    var refsBlock = refs ? '<div class="card"><h3>Builds de referência</h3>' + refs + '</div>' : "";
+    if (!notes && !refsBlock) return "";
+    return '<details class="detail-group"><summary>Anotações e builds de referência</summary>' + notes + refsBlock + '</details>';
+  }
+
+  function selectSpecies(x) {
+    // Only reset scroll when the species actually CHANGES - selectSpecies()
+    // is also called to refresh the currently-open species in place (e.g.
+    // after "Salvar build"/"Limpar" in Meu build), and yanking the user
+    // back to the top after they clicked a button deep in the page would be
+    // its own real regression. Paired with the #app height fix just above
+    // (min-height -> height, the actual root cause of "a dex fica travada"
+    // - the whole page was scrolling instead of this panel internally) -
+    // without that fix this reset would have had nothing to reset, since
+    // .species-detail's own scrollTop never moved at all before.
+    var isSameSpecies = state.selected === x;
+    state.selected = x;
+    var sp = getSpeciesByX(x);
+    if (!sp) return;
+    document.getElementById("dex-shell").classList.add("show-detail");
+    document.querySelectorAll(".species-row").forEach(function (r) {
+      var isThis = parseInt(r.dataset.x, 10) === x;
+      r.classList.toggle("selected", isThis);
+      // Keep listbox semantics/roving tabindex in sync with a mouse click too,
+      // not just the initial render - see the accessibility-pass comment
+      // in renderList().
+      r.setAttribute("aria-selected", String(isThis));
+      r.tabIndex = isThis ? 0 : -1;
+    });
+
+    // Reorganização em blocos colapsáveis, Fase 2 - 2026-09-11 (reunião:
+    // "a tela do Poke na dex tá meio pesada de informação"). <details>
+    // nativo em vez de JS customizado - foco/teclado/leitor de tela vêm de
+    // graça (skill artifact-design, princípio já seguido no resto do
+    // app). Critério de aberto/fechado por padrão (time, mesma reunião):
+    // o que é fato rápido de consultar (stats, habilidades, evolução)
+    // fica ABERTO; o que é denso (tabelas de golpe, inteiras) ou usado
+    // ocasionalmente (notas/histórico/comparar) fica FECHADO - mas nunca
+    // escondido de verdade, um clique sempre abre, e o <summary> sempre
+    // diz o que tem dentro (inclusive contagem, pra não precisar abrir só
+    // pra saber se há algo lá). "Auto Build" fica ABERTO apesar de denso:
+    // é a ação central do app (RF21-30), esconder por padrão atrapalharia
+    // o fluxo principal mais do que ajudaria a limpar a tela.
+    //
+    // ATUALIZAÇÃO, mesmo dia (pedido do usuário): "Conhecer a espécie"
+    // deixou de ser colapsável - "quero que tudo que está ali fique
+    // visível". Virou um <div> comum (não <details>) com um cabeçalho
+    // estático (.detail-group-heading) no lugar do <summary> - mesmo
+    // peso visual, sem a semântica de abrir/fechar.
+    document.getElementById("species-detail").innerHTML =
+      fichaCabecalhoHtml(sp) +
+      fichaConhecerHtml(sp) +
+      fichaGolpesHtml(sp) +
       '<details class="detail-group" open><summary>Auto Build</summary>' +
         myBuildEditorHtml(sp) +
       '</details>' +
       '<details class="detail-group"' + (state.strategySets[sp.sname] ? " open" : "") + '><summary>Estratégias' + (state.strategySets[sp.sname] ? " (" + state.strategySets[sp.sname].sets.length + ")" : "") + '</summary>' +
         strategySetsHtml(sp) +
       '</details>' +
-      (function () {
-        var notes = notesCardHtml(sp);
-        var refs = buildHistoryHtml(sp) + bossReferenceHtml(sp);
-        var refsBlock = refs ? '<div class="card"><h3>Builds de referência</h3>' + refs + '</div>' : "";
-        if (!notes && !refsBlock) return "";
-        return '<details class="detail-group"><summary>Anotações e builds de referência</summary>' + notes + refsBlock + '</details>';
-      })() +
+      fichaNotasHtml(sp) +
       '<details class="detail-group"><summary>Comparar com outro Pokémon</summary>' +
         compareCardHtml(sp) +
       '</details>';

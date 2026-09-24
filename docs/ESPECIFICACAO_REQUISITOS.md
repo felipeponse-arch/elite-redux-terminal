@@ -357,6 +357,12 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   `prompts_ia.js` a partir dos mesmos blocos (espécie, movepool, regras de papel, Mega, itens, time
   em uso) - build e Estratégias recebem as mesmas orientações. Erro do app ao aplicar a resposta é
   capturado em cada gerador; na revisão automática conta como tentativa (teto de 2).
+- RNF14 — **Interface por área** (refatoração fase 5, 2026-09-24): o código de tela mora em `src/ui`,
+  um arquivo por área (Dex, ficha, editor de build, time, caixa, chefões, progresso, IA etc.),
+  encaixado no template pelo build. Cada área tem um ouvinte de eventos único no seu contêiner,
+  ligado uma vez (delegação) - nenhum desenho religa ouvintes. Funções que montam telas grandes
+  (ficha, card do chefão, geração de build por IA) são divididas em partes nomeadas. Testes nunca
+  clicam num nó já substituído por um redesenho: buscam o elemento de novo, como o jogador faria.
 
 ### Build que acompanha o jogador e banco de builds (2026-09-24)
 

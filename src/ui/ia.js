@@ -356,6 +356,65 @@
     }
   }
 
+  // Acertos na build validada antes de gravar (tirados de generateBuildWithAI na
+  // fase 5 da refatoração). Devolve true se o item foi descartado.
+  function ajustarBuildDaIa(sp, validated, opts, takenItems, cap) {
+    // Defesa em profundidade (achado real do usuário, 2026-09-12): o
+    // prompt já pede pra IA não repetir item de outro membro do time,
+    // mas nunca confia cegamente nisso (mesma disciplina de todo o
+    // resto de validateAiBuild) - se mesmo assim vier um item já em uso,
+    // some o item em vez de rejeitar a build inteira (item já era um
+    // campo "soft fallback" antes disto, nunca motivo de rejeição total).
+    var itemWasDropped = false;
+    if (validated.item && takenItems.indexOf(validated.item) !== -1) {
+      itemWasDropped = true;
+      validated.item = "";
+    }
+    if (opts.modo === "ponte" && opts.alvo) {
+      // A build de agora é a curada com golpes-ponte: habilidade, natureza,
+      // item e EVs continuam os da curada (quando valem pra esta forma).
+      var alvoAb = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+      if (alvoAb.indexOf(opts.alvo.ability) !== -1) validated.ability = opts.alvo.ability;
+      if (opts.alvo.nature) validated.nature = opts.alvo.nature;
+      if (takenItems.indexOf(opts.alvo.item) === -1) validated.item = opts.alvo.item || "";
+      validated.evs = evsTextoParaArray(opts.alvo.evs);
+      validated.rationale = "Build curada adaptada ao level cap " + cap + ": golpes-ponte até liberar os da curada.";
+    }
+    return itemWasDropped;
+  }
+
+  // Uma ação só: gravar a build, limpar a marca de revisão e registrar no
+  // log - uma gravação e um redesenho no fim (card do time, ficha aberta
+  // desta espécie, confronto). Devolve false se não salvou (lista cheia).
+  function salvarBuildDaIa(sp, validated, opts, cap) {
+    return acao(telasDeBuild(sp.sname).concat(["log"]), function () {
+      var salvou;
+      if (opts.modo === "revisao" && getBuildList(sp.sname).length >= 3) {
+        // Lista cheia (3 builds): a revisada entra no lugar da ativa, e a de
+        // antes vai inteira pro log (habilidade, natureza, item, EVs e golpes).
+        salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia");
+      } else {
+        // A revisada vira a ativa e a de antes continua salva como variante -
+        // o jogador volta pra ela com um toque no chip, nada se perde.
+        salvou = addBuildVariant(sp.sname, validated, opts.modo === "ponte" ? "curada" : "ia");
+        if (salvou && opts.modo === "revisao") {
+          delete opts.anterior.revisar; delete opts.anterior.revisadaDe; delete opts.anterior.tentativasRevisao;
+        }
+      }
+      if (!salvou) return false;
+      if (opts.modo === "revisao") {
+        var a = opts.anterior;
+        logAutoAction("Build de " + sp.n + " revisada depois da evolução" + (a ? " (antes: " + (a.ability || "?") + ", " + (a.nature || "?") + ", " + (a.item || "sem item") + ", " +
+          (evsToShowdownText(a.evs || []) || "sem EV") + "; " + (a.moves || []).join(", ") + ")" : "") +
+          ": " + validated.ability + "; " + validated.moves.join(", ") + (getBuildList(sp.sname).length > 1 ? ". A build anterior continua salva nos chips da ficha." : "."));
+      } else if (opts.modo === "ponte") {
+        logAutoAction("Build curada de " + sp.n + " adaptada ao level cap " + cap + ": " + validated.moves.join(", ") +
+          (validated.plano ? " (troca pelos golpes da curada quando liberarem)" : "") + ".");
+      }
+      return true;
+    });
+  }
+
   // Modos (opts.modo): normal (botão "Gerar com IA": sempre uma build NOVA, nunca
   // uma do banco - é o que o jogador pediu); "revisao" (a criatura acabou de
   // evoluir; opts.anterior = build da forma anterior, a nova substitui a ativa);
@@ -395,65 +454,17 @@
         return false;
       }
       var validated = resp.valor, raw = resp.bruto;
-      // Defesa em profundidade (achado real do usuário, 2026-09-12): o
-      // prompt já pede pra IA não repetir item de outro membro do time,
-      // mas nunca confia cegamente nisso (mesma disciplina de todo o
-      // resto de validateAiBuild) - se mesmo assim vier um item já em uso,
-      // some o item em vez de rejeitar a build inteira (item já era um
-      // campo "soft fallback" antes disto, nunca motivo de rejeição total).
-      var itemWasDropped = false;
-      if (validated.item && takenItems.indexOf(validated.item) !== -1) {
-        itemWasDropped = true;
-        validated.item = "";
-      }
       // A IA leva de segundos a minutos. Nos modos automáticos, se o mundo mudou
       // nesse meio-tempo (o jogador editou/criou a build, a criatura saiu do time
       // ou voltou de forma), a resposta é descartada - nunca passa por cima de
       // uma escolha feita enquanto esperava. "obsoleta" não conta como falha.
       if (opts.modo === "revisao" && (getActiveBuild(sp.sname) !== opts.anterior || state.team.indexOf(sp.x) === -1)) return "obsoleta";
       if (opts.modo === "ponte" && (getActiveBuild(sp.sname) || state.team.indexOf(sp.x) === -1)) return "obsoleta";
-      if (opts.modo === "ponte" && opts.alvo) {
-        // A build de agora é a curada com golpes-ponte: habilidade, natureza,
-        // item e EVs continuam os da curada (quando valem pra esta forma).
-        var alvoAb = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
-        if (alvoAb.indexOf(opts.alvo.ability) !== -1) validated.ability = opts.alvo.ability;
-        if (opts.alvo.nature) validated.nature = opts.alvo.nature;
-        if (takenItems.indexOf(opts.alvo.item) === -1) validated.item = opts.alvo.item || "";
-        validated.evs = evsTextoParaArray(opts.alvo.evs);
-        validated.rationale = "Build curada adaptada ao level cap " + cap + ": golpes-ponte até liberar os da curada.";
-      }
+      var itemWasDropped = ajustarBuildDaIa(sp, validated, opts, takenItems, cap);
       var planoCheck = anexarPlanoDaIa(sp, validated, raw && raw.plano, cap,
         opts.modo === "ponte" && opts.alvo ? opts.alvo.moves : null);
       validated.planoConsultado = true; // o prompt já pediu o plano - não pedir de novo
-      // Uma ação só: gravar a build, limpar a marca de revisão e registrar no
-      // log - uma gravação e um redesenho no fim (card do time, ficha aberta
-      // desta espécie, confronto).
-      var ok = acao(telasDeBuild(sp.sname).concat(["log"]), function () {
-        var salvou;
-        if (opts.modo === "revisao" && getBuildList(sp.sname).length >= 3) {
-          // Lista cheia (3 builds): a revisada entra no lugar da ativa, e a de
-          // antes vai inteira pro log (habilidade, natureza, item, EVs e golpes).
-          salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia");
-        } else {
-          // A revisada vira a ativa e a de antes continua salva como variante -
-          // o jogador volta pra ela com um toque no chip, nada se perde.
-          salvou = addBuildVariant(sp.sname, validated, opts.modo === "ponte" ? "curada" : "ia");
-          if (salvou && opts.modo === "revisao") {
-            delete opts.anterior.revisar; delete opts.anterior.revisadaDe; delete opts.anterior.tentativasRevisao;
-          }
-        }
-        if (!salvou) return false;
-        if (opts.modo === "revisao") {
-          var a = opts.anterior;
-          logAutoAction("Build de " + sp.n + " revisada depois da evolução" + (a ? " (antes: " + (a.ability || "?") + ", " + (a.nature || "?") + ", " + (a.item || "sem item") + ", " +
-            (evsToShowdownText(a.evs || []) || "sem EV") + "; " + (a.moves || []).join(", ") + ")" : "") +
-            ": " + validated.ability + "; " + validated.moves.join(", ") + (getBuildList(sp.sname).length > 1 ? ". A build anterior continua salva nos chips da ficha." : "."));
-        } else if (opts.modo === "ponte") {
-          logAutoAction("Build curada de " + sp.n + " adaptada ao level cap " + cap + ": " + validated.moves.join(", ") +
-            (validated.plano ? " (troca pelos golpes da curada quando liberarem)" : "") + ".");
-        }
-        return true;
-      });
+      var ok = salvarBuildDaIa(sp, validated, opts, cap);
       if (!ok) {
         if (statusEl) statusEl.textContent = "Limite de 3 builds atingido.";
         return false;
