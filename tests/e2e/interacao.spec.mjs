@@ -1,7 +1,7 @@
 // Interações com cliques e teclado de verdade (Playwright), onde a suíte de
 // dentro da página não chega: tempo real entre digitar e clicar, tamanho de
 // tela, foco.
-import { test, expect, abrirApp, abrirAba } from "./apoio.mjs";
+import { test, expect, abrirApp, abrirAba, adicionarAoTimePelaDex } from "./apoio.mjs";
 
 // Bug achado na fase 6 (2026-09-24): no computador, digitar na busca com uma
 // ficha aberta deixava a ficha congelada - "+ Time" continuava ativo depois
@@ -56,6 +56,23 @@ test("todo campo de formulário usa a pele .campo e a fonte do app", async ({ pa
   await page.locator("#boss-list .species-row").first().click();
   await conferir("chefão");
   expect(fora, "campos sem .campo ou sem a fonte do app").toEqual([]);
+});
+
+// Primeira espécie com DUAS curadas no dado real (Lepastry, builds da
+// comunidade de 24/09/2026): o card do time mostra a do estilo que o Ritmo
+// pede, e troca quando o Ritmo muda.
+test("espécie com duas curadas mostra a do estilo do Ritmo", async ({ page }) => {
+  await abrirApp(page);
+  await adicionarAoTimePelaDex(page, "Lepastry");
+  await abrirAba(page, "team");
+  const card = page.locator(".team-slot").first();
+  await expect(card).toContainText("Gooey");
+  await page.locator('.arch-chip[data-axis="pace"][data-value="Hyper Offense"]').click();
+  await expect(card).toContainText("ofensivo", { ignoreCase: true });
+  await expect(card).toContainText("Gladiator");
+  await page.locator('.arch-chip[data-axis="pace"][data-value="Stall"]').click();
+  await expect(card).toContainText("defensivo", { ignoreCase: true });
+  await expect(card).toContainText("Gooey");
 });
 
 test("no celular, digitar na busca volta pra lista e a ficha some", async ({ page }) => {

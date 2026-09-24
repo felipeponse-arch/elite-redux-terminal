@@ -8,7 +8,12 @@
       "Sets de Estratégias ficam salvos: voltar à ficha não pede à IA de novo",
       "Corrigido: 16 habilidades eram pontuadas errado no rank (ex.: Sturdy valia 0) - 33 espécies mudaram de letra",
       "Corrigido: buff de ginásio marcado em outro aparelho não chegava neste",
-      "Corrigido: mudar a dificuldade não atualizava o chefão já aberto; o \"+\" da lista não atualizava a ficha aberta ao lado"
+      "Corrigido: mudar a dificuldade não atualizava o chefão já aberto; o \"+\" da lista não atualizava a ficha aberta ao lado",
+      "9 builds novas da comunidade (thread Build Workshop do Discord oficial, 13 a 24/09), todas conferidas contra os dados do jogo: Mega Hydreigon Redux, Mega Clefable Redux, Lepastry (defensiva e ofensiva), Ivysaur, Veluza, e um 2º set pra Iron Thorns, Spindaze e Mega Tyranitar Redux",
+      "Abre mais rápido: a tela não espera mais as fontes do Google pra aparecer",
+      "Cabeçalho numa linha só no computador e a tela não \"pula\" mais ao abrir",
+      "Tamanhos de texto padronizados em todo o app; campos (buscas, listas, anotações) com a fonte do app",
+      "Corrigido: a busca dos Chefões estava sem estilo; digitar na busca da Dex com uma ficha aberta deixava a ficha sem atualizar (\"+ Time\" continuava ativo)"
     ]
   },
   {

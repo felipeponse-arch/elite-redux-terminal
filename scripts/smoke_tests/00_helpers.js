@@ -144,6 +144,22 @@ async function addByName(name, toBox) {
   await wait(30);
 }
 
+// Todas as builds curadas, uma por item: em builds.json o valor de uma espécie
+// pode ser uma build ou uma lista (até 3, uma por estilo) - a mesma
+// normalização de curadasDe() no app. Devolve [{ sname, b }]. As seções que
+// varriam T.BUILDS supondo um objeto por espécie quebraram quando entrou a
+// primeira espécie com duas curadas no dado real (builds da comunidade,
+// 24/09/2026).
+function todasAsCuradas(T) {
+  var pares = [];
+  Object.keys(T.BUILDS).forEach(function (sn) {
+    [].concat(T.BUILDS[sn]).forEach(function (b) {
+      if (b && Array.isArray(b.moves)) pares.push({ sname: sn, b: b });
+    });
+  });
+  return pares;
+}
+
 // Tira todo mundo do time clicando "remover" como uma pessoa faria: um por vez,
 // buscando o botão de novo depois de cada clique (o time é redesenhado e o
 // clique é tratado por um ouvinte só no #team-slots - fase 5, 2026-09-24).

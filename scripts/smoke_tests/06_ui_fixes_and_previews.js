@@ -333,11 +333,11 @@ async function section06() {
   // builds.json mudar.
   if (T && T.BUILDS && T.buildSynergyHtml) {
     var comSinergia = null, semSinergia = null;
-    var snames = Object.keys(T.BUILDS);
-    for (var bi = 0; bi < snames.length && !(comSinergia && semSinergia); bi++) {
-      var spB = T.getSpeciesBySname(snames[bi]);
+    var curadas = todasAsCuradas(T);
+    for (var bi = 0; bi < curadas.length && !(comSinergia && semSinergia); bi++) {
+      var spB = T.getSpeciesBySname(curadas[bi].sname);
       if (!spB) continue;
-      var bld = T.BUILDS[snames[bi]];
+      var bld = curadas[bi].b;
       var html = T.buildSynergyHtml(spB, bld);
       if (html && !comSinergia) comSinergia = { sp: spB, b: bld, html: html };
       if (!html && !semSinergia) semSinergia = { sp: spB, b: bld };
@@ -362,12 +362,12 @@ async function section06() {
     // só de habilidade escolhível - senão pulava em silêncio (achado da Q4,
     // 2026-09-16). Agora procura uma build que sirva.
     var soEscolhivel = null;
-    for (var ei = 0; ei < snames.length && !soEscolhivel; ei++) {
-      var spE = T.getSpeciesBySname(snames[ei]);
+    for (var ei = 0; ei < curadas.length && !soEscolhivel; ei++) {
+      var spE = T.getSpeciesBySname(curadas[ei].sname);
       if (!spE) continue;
       var hitsE = T.ABILITY_SYNERGY[spE.sname] || [];
-      if (hitsE.length && hitsE.every(function (h) { return h.kind !== "inn"; }) && T.buildSynergyHtml(spE, T.BUILDS[snames[ei]])) {
-        soEscolhivel = { sp: spE, b: T.BUILDS[snames[ei]] };
+      if (hitsE.length && hitsE.every(function (h) { return h.kind !== "inn"; }) && T.buildSynergyHtml(spE, curadas[ei].b)) {
+        soEscolhivel = { sp: spE, b: curadas[ei].b };
       }
     }
     if (achou("build curada com sinergia só de habilidade escolhível", soEscolhivel)) {

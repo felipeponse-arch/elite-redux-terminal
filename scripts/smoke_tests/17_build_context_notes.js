@@ -36,10 +36,10 @@ async function section17() {
 
   // ---- P3 na build curada: só observação ----
   var curadaDupla = null;
-  Object.keys(T.BUILDS).some(function (sn) {
-    var b = T.BUILDS[sn];
+  todasAsCuradas(T).some(function (par) {
+    var b = par.b;
     if (!b.moves.some(function (m) { return T.moveRoleOf(m) === "dupla"; })) return false;
-    curadaDupla = { sp: T.getSpeciesBySname(sn), b: b };
+    curadaDupla = { sp: T.getSpeciesBySname(par.sname), b: b };
     return !!curadaDupla.sp;
   });
   if (achou("build curada com golpe só de dupla", curadaDupla)) {
@@ -55,10 +55,10 @@ async function section17() {
     T.state.settings.milestone = 0;
     var capBaixo = T.getCurrentCap();
     var acima = null;
-    Object.keys(T.BUILDS).some(function (sn) {
-      var sp = T.getSpeciesBySname(sn);
+    todasAsCuradas(T).some(function (par) {
+      var sp = T.getSpeciesBySname(par.sname);
       if (!sp) return false;
-      var b = T.BUILDS[sn];
+      var b = par.b;
       var golpe = b.moves.filter(function (m) {
         var entrada = sp.lm.filter(function (p) { return T.MOVES[p[1]][0] === m; });
         var tutor = sp.tu.some(function (tid) { return T.MOVES[tid][0] === m; });

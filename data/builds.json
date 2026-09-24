@@ -74,21 +74,40 @@
     "fonte": "curadoria-do-projeto",
     "versao": "2.65beta"
   },
-  "SPECIES_TYRANITAR_MEGA_REDUX": {
-    "ability": "Evaporate",
-    "nature": "Modest",
-    "evs": "252 HP / 252 SpA / 4 SpD",
-    "item": "Leftovers",
-    "moves": [
-      "Eruption",
-      "Diamond Storm",
-      "Flamethrower",
-      "Earth Power"
-    ],
-    "note": "Habilidade travada (Evaporate = imunidade a Water). Leftovers em vez de Life Orb porque Eruption escala com %HP.",
-    "fonte": "curadoria-do-projeto",
-    "versao": "2.65beta"
-  },
+  "SPECIES_TYRANITAR_MEGA_REDUX": [
+    {
+      "estilo": "equilibrado",
+      "ability": "Evaporate",
+      "nature": "Modest",
+      "evs": "252 HP / 252 SpA / 4 SpD",
+      "item": "Leftovers",
+      "moves": [
+        "Eruption",
+        "Diamond Storm",
+        "Flamethrower",
+        "Earth Power"
+      ],
+      "note": "Habilidade travada (Evaporate = imunidade a Water). Leftovers em vez de Life Orb porque Eruption escala com %HP.",
+      "fonte": "curadoria-do-projeto",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "ofensivo",
+      "ability": "Evaporate",
+      "nature": "Modest",
+      "evs": "16 HP / 4 Def / 252 SpA / 236 Spe",
+      "item": "Tyranitarite R",
+      "moves": [
+        "Weather Ball",
+        "Solar Beam",
+        "Diamond Storm",
+        "Rock Polish"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Forma base com Drought antes de megaevoluir (RyuXen, 21/09): depois de um Rock Polish e do Furnace, passa todo mundo. Sem Drought, Flamethrower no lugar de Weather Ball e Earth Power no lugar de Solar Beam. EVs pensados pro nível 80.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    }
+  ],
   "SPECIES_PROBOPASS": {
     "ability": "Impenetrable",
     "nature": "Calm",
@@ -2535,21 +2554,40 @@
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
-  "SPECIES_SPINDAZE": {
-    "ability": "Contrary",
-    "nature": "Adamant",
-    "evs": "252 HP or Spe / 252 Atk / 6 SpD",
-    "item": "Shell Bell",
-    "moves": [
-      "Superpower",
-      "Strength",
-      "Dizzy Punch",
-      "Teeter Dance"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
-    "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
-  },
+  "SPECIES_SPINDAZE": [
+    {
+      "estilo": "ofensivo",
+      "ability": "Contrary",
+      "nature": "Adamant",
+      "evs": "252 HP or Spe / 252 Atk / 6 SpD",
+      "item": "Shell Bell",
+      "moves": [
+        "Superpower",
+        "Strength",
+        "Dizzy Punch",
+        "Teeter Dance"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "equilibrado",
+      "ability": "Contrary",
+      "nature": "Timid",
+      "evs": "236 HP / 4 Atk / 8 Def / 8 SpD / 252 Spe",
+      "item": "Leftovers",
+      "moves": [
+        "Superpower",
+        "Substitute",
+        "Psycho Boost",
+        "Teeter Dance"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Ataque misto (RyuXen, 19/09): Substitute + Teeter Dance + Leftovers são o motor, com Toxic Spill e Cosmic Daze; Psycho Boost pega os tipos Poison imunes ao Toxic Spill. Precisa de apoio contra Psychic. Mais agressivo: Viral Strike no lugar de Substitute, natureza Hasty e mais Ataque. EVs pensados pro nível 80.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    }
+  ],
   "SPECIES_RIBOMBEE_REDUX_MEGA": {
     "ability": "Sniper",
     "nature": "Jolly",
@@ -2820,18 +2858,131 @@
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
-  "SPECIES_IRON_THORNS": {
-    "ability": "Light Metal",
-    "nature": "Jolly",
-    "evs": "56 HP / 244 Atk / 208 Spe",
-    "item": "Booster Energy",
+  "SPECIES_IRON_THORNS": [
+    {
+      "estilo": "ofensivo",
+      "ability": "Light Metal",
+      "nature": "Jolly",
+      "evs": "56 HP / 244 Atk / 208 Spe",
+      "item": "Booster Energy",
+      "moves": [
+        "Bolt Strike",
+        "Earthquake",
+        "Asteroid Shot",
+        "Shift Gear"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Booster Energy / Life Orb / Electric Seed.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "equilibrado",
+      "ability": "Fearmonger",
+      "nature": "Adamant",
+      "evs": "236 HP / 232 Atk / 40 SpD",
+      "item": "Booster Energy",
+      "moves": [
+        "Bolt Strike",
+        "Core Enforcer",
+        "Rock Wrecker",
+        "Spiky Shield"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas citadas no post (RyuXen, 13/09): item Rocky Helmet / Electric Seed; Dragon Claw ou Recover no lugar de Core Enforcer; Spine Breaker ou Rock Slide no lugar de Rock Wrecker; Wide Guard. EVs pensados pro nível 80; o autor diz que o set passa fácil pra batalha em dupla.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    }
+  ],
+  "SPECIES_HYDREIGON_REDUX_MEGA": {
+    "ability": "Mega Launcher",
+    "nature": "Modest",
+    "evs": "252 HP / 16 Def / 232 SpA / 8 SpD",
+    "item": "Hydreigonite R",
     "moves": [
-      "Bolt Strike",
-      "Earthquake",
-      "Asteroid Shot",
-      "Shift Gear"
+      "Pixie Beam",
+      "Focus Blast",
+      "Dragon Pulse",
+      "Safe Passage"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Booster Energy / Life Orb / Electric Seed.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Wallbreaker, não sweeper (RyuXen, 14/09). Roost é opção no lugar de Focus Blast ou Dragon Pulse; com dois ataques, o autor prefere manter Focus Blast pra não travar em tipo Steel. Protect no lugar de Safe Passage é pensado pra dupla. Lento o bastante pra Trick Room. EVs pensados pro nível 80.",
+    "fonte": "discord-build-workshop-2.65",
+    "versao": "2.65beta"
+  },
+  "SPECIES_LEPASTRY": [
+    {
+      "estilo": "defensivo",
+      "ability": "Gooey",
+      "nature": "Impish",
+      "evs": "252 HP / 160 Def / 108 SpD",
+      "item": "Sitrus Berry",
+      "moves": [
+        "Megaton Hammer",
+        "Wish",
+        "Bonk",
+        "Protect"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Sem investimento em Speed de propósito (RyuXen, 18/09): no nível 80, contra a Elite Four, já passa o Mega Rayquaza depois que o Air Lock acaba. Star Crash é opção no lugar de Bonk (mais dano imediato, sinergia com Sugar Rush). EVs pensados pro nível 80.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "ofensivo",
+      "ability": "Gladiator",
+      "nature": "Adamant",
+      "evs": "252 HP / 252 Atk / 4 SpD",
+      "item": "Salac Berry",
+      "moves": [
+        "Megaton Hammer",
+        "Berry Smash",
+        "Bonk",
+        "Swords Dance"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativa ofensiva ao Belly Drum (RyuXen, 18/09): com Readied Action (innate), Berry Smash ou Bonk no 1º turno dão até 4x de Speed ou apostam em Drowsiness. Fairy + Fighting cobre quase tudo sem golpe extra. Estilo marcado como ofensivo pela intenção do autor (os EVs sozinhos dariam equilibrado). EVs pensados pro nível 80.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    }
+  ],
+  "SPECIES_IVYSAUR": {
+    "ability": "Chloroplast",
+    "nature": "Calm",
+    "evs": "232 HP / 160 Def / 116 SpD",
+    "item": "Eviolite",
+    "moves": [
+      "Leech Seed",
+      "Synthesis",
+      "Knock Off",
+      "Protect"
+    ],
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Stall pra começo de jogo (EVs pensados pro nível 16 - RyuXen, 19/09), montado pra outro membro do time cuidar de Toxic Terrain ou Toxic Spikes.",
+    "fonte": "discord-build-workshop-2.65",
+    "versao": "2.65beta"
+  },
+  "SPECIES_VELUZA": {
+    "ability": "Mold Breaker",
+    "nature": "Adamant",
+    "evs": "4 HP / 252 Atk / 252 Spe",
+    "item": "Sitrus Berry",
+    "moves": [
+      "Fishious Rend",
+      "Aqua Jet",
+      "Psyblade",
+      "Fillet Away"
+    ],
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. EVs no post (RyuXen, 20/09): \"Speed máxima > Ataque máximo > HP par\" - sem conta; aqui 252 Spe / 252 Atk e o resto em HP (confira se o HP final fica par). Jolly também serve. Razor Shell no lugar de Fishious Rend em nível mais baixo; Deviate Slash tende a dar mais dano que Psyblade (se o alvo não for imune a crítico).",
+    "fonte": "discord-build-workshop-2.65",
+    "versao": "2.65beta"
+  },
+  "SPECIES_CLEFABLE_REDUX_MEGA": {
+    "ability": "Serene Grace",
+    "nature": "Calm",
+    "evs": "252 HP / 108 Def / 148 SpD",
+    "item": "Clefablite R",
+    "moves": [
+      "Diamond Storm",
+      "Moonlight",
+      "Moonblast",
+      "Stealth Rock"
+    ],
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. EVs no post (RyuXen, 21/09): \"252 HP / 108 Def / 148 Def\" - Def repetido; lido como 148 SpD (natureza Calm, set de defesa especial). EVs pensados pro nível 80.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   }
