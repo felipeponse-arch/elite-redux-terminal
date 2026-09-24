@@ -138,3 +138,29 @@
   // tipo real ANTES de mostrar pra IA (determinístico, não confia na IA
   // pra respeitar isso sozinha).
   var MONOTYPE_ARCHETYPES = USABLE_TYPES;
+
+  // Rótulos em português dos papéis (movidos do template na fase 4 - os prompts de IA e a
+  // ficha usam os mesmos).
+  // The Dex detail used to show both badges bare, side by side, right next
+  // to the species name - "S" filled next to "A" outlined with zero label,
+  // which read as confusing/contradictory rather than as two different
+  // questions being answered (user feedback, 2026-09-09). Now a labeled
+  // line of its own, in plain words, so no tooltip is required to understand
+  // it. The list row and Team/Box cards keep just the bare rankBadgeHtml()
+  // chip - that's fine there, it's a single glanceable "how good is this"
+  // signal, not a place to also explain a second, different ranking.
+  // Papel/arquétipo (Pivô/Tanque/Wallbreaker/Sweeper) + divisão física/
+  // especial - sinal SEPARADO do rank (ver SPECIES_ROLE acima). Renderiza
+  // como texto simples, não como badge de letra única, porque não é uma
+  // nota de "quão forte" - é "que tipo de forte", e uma espécie pode
+  // acumular mais de um papel real ao mesmo tempo.
+  //
+  // As chaves em SPECIES_ROLE são ASCII sem acento (Pivo/Fisico) de
+  // propósito - achado real ao gerar o dado: compute_species_role.ps1 é lido
+  // pelo PowerShell 5.1 na codepage padrão do sistema (sem BOM no arquivo),
+  // então um literal acentuado no fonte do script virava mojibame no JSON.
+  // O rótulo final acentuado, em português, é responsabilidade desta
+  // camada (igual RANK_TIER_CLASS já faz pra tier, embora tier nunca tenha
+  // tido acento pra começo de conversa).
+  var ROLE_LABEL_PT = { Pivo: "Pivô", Tanque: "Tanque", Wallbreaker: "Wallbreaker", Sweeper: "Sweeper" };
+  var SPLIT_LABEL_PT = { Fisico: "Físico", Especial: "Especial", Misto: "Misto" };

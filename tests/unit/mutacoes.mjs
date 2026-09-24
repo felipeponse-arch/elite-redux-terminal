@@ -34,6 +34,28 @@ export const MUTACOES = [
     de: "if (menor === null || menor > cap) out.push",
     para: "if (menor === null || menor >= cap) out.push",
   },
+  // ---- prompts e respostas da IA (fase 4, 2026-09-24) ----
+  {
+    id: "time-ia-aceita-repetido-e-inventado",
+    descricao: "time sugerido pela IA aceita sname repetido ou fora do que o jogador tem",
+    arquivo: "prompts_ia.js",
+    de: "if (typeof sn !== \"string\" || validSnames.indexOf(sn) === -1 || seenSname[sn]) return false;",
+    para: "if (typeof sn !== \"string\") return false;",
+  },
+  {
+    id: "guia-confia-no-sname-da-ia",
+    descricao: "guia aceita integrante inventado pela IA como quem segura a ameaça",
+    arquivo: "prompts_ia.js",
+    de: "(typeof raw.threatMemberSname === \"string\" && snameParaX.hasOwnProperty(raw.threatMemberSname))",
+    para: "(typeof raw.threatMemberSname === \"string\")",
+  },
+  {
+    id: "plano-pergunta-sem-golpe-futuro",
+    descricao: "pede plano à IA mesmo sem golpe por liberar (chamada paga à toa)",
+    arquivo: "prompts_ia.js",
+    de: "if (!bloco) return \"\";",
+    para: "",
+  },
   // ---- regras movidas do template na fase 3 (2026-09-24) ----
   {
     id: "chefao-vencido-continua-faltando",

@@ -345,6 +345,19 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   revisão automática de builds são disparados pela ação. Exceções deliberadas (gravam direto): carregar
   o save e aplicar o save de outro aparelho.
 
+- RNF12 — **Regras fora da página** (refatoração fase 3, 2026-09-24): lógica que não lê nem desenha a
+  página mora em `src/regras` e é testada no Node - save (`save.js`), builds salvas e evolução
+  (`evolucao.js`), build mostrada (`builds.js`), chefões e confronto (`chefoes.js`), prompts e
+  leitura das respostas da IA (`prompts_ia.js`). As regras dependem só de dados e constantes
+  (`types/app-globais.d.ts` lista o que vem do template); a checagem de tipos acusa qualquer
+  dependência nova.
+- RNF13 — **Cliente único de IA** (refatoração fase 4, 2026-09-24): todo pedido ao modelo passa por
+  `pedirIA()`: disponibilidade, nova tentativa com o motivo técnico da rejeição (o jogador vê o texto
+  dele), ferramentas do app e tradução de erro (`sampleErrorMessage`). Os prompts são montados em
+  `prompts_ia.js` a partir dos mesmos blocos (espécie, movepool, regras de papel, Mega, itens, time
+  em uso) - build e Estratégias recebem as mesmas orientações. Erro do app ao aplicar a resposta é
+  capturado em cada gerador; na revisão automática conta como tentativa (teto de 2).
+
 ### Build que acompanha o jogador e banco de builds (2026-09-24)
 
 Pedidos do usuário: "montamos uma build no cap 18; no próximo cap ele pode aprender golpes melhores pra

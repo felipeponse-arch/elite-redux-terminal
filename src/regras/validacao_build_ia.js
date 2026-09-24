@@ -173,3 +173,19 @@
     evs = trimAndReallocateEvs(sp, evs, getCurrentCap() || 50, raw.nature, item);
     return { ability: raw.ability, nature: raw.nature, item: item, moves: raw.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: evs, rationale: rationale };
   }
+
+  // Resposta das Estratégias ({"sets":[...]}) -> só os sets que passam na MESMA
+  // validação da build (validateAiBuild) e têm nome. Set ruim entre sets bons
+  // não derruba os outros. Movido do template na fase 4 (2026-09-24).
+  function setsValidosDaResposta(sp, bruto) {
+    var candidatos = (bruto && Array.isArray(bruto.sets)) ? bruto.sets : [];
+    var out = [];
+    candidatos.forEach(function (c) {
+      var v = validateAiBuild(sp, c);
+      if (v && typeof c.name === "string" && c.name.trim()) {
+        v.name = c.name.trim().slice(0, 40);
+        out.push(v);
+      }
+    });
+    return out;
+  }
