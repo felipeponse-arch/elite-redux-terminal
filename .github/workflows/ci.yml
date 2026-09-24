@@ -45,8 +45,9 @@ jobs:
 
       # Fase 1 da refatoração (2026-09-24): acento corrompido, .ps1 sem BOM (o
       # PowerShell 5.1 corrompe o acento e isso já errou 16 notas do rank) e
-      # erro de sintaxe, inclusive no JS de dentro do template.
-      - name: Travas de codificação e sintaxe
+      # erro de sintaxe (inclusive no JS de dentro do template), ESLint só com
+      # regras de correção e checagem de tipos de src/regras (tsc, checkJs).
+      - name: Travas estáticas (codificação, sintaxe, lint, tipos)
         run: npm run check
 
       # Etapa 2 da pauta técnica (Q3): regras do jogo testadas no Node, sem

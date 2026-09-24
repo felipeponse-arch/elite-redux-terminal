@@ -32,7 +32,7 @@ export function problemasDeEncoding(caminho, bytes) {
     if (CORROMPIDO.test(linha) && !/mojibake/i.test(linha)) problemas.push(`${caminho}:${i + 1}: texto corrompido -> ${linha.trim().slice(0, 100)}`);
   });
   const temBom = bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf;
-  if (/\.ps1$/i.test(caminho) && !temBom && /[^\x00-\x7F]/.test(texto)) {
+  if (/\.ps1$/i.test(caminho) && !temBom && /[\u0080-￿]/.test(texto)) {
     problemas.push(`${caminho}: .ps1 com acento e sem BOM UTF-8 - o PowerShell 5.1 lê na codepage do Windows e corrompe o acento`);
   }
   return problemas;

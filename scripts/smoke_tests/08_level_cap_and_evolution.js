@@ -80,7 +80,6 @@ async function section08() {
     const lockedHint = [...document.querySelectorAll(".mybuild-hint")].map(h => h.textContent).find(t => t.indexOf("acima do level cap") !== -1);
     check("aviso de golpes travados aparece quando há golpes acima do cap", !!lockedHint, lockedHint);
     const moveOpts = [...document.querySelectorAll("#mybuild-move-0 option")].filter(o => o.value);
-    const anyAboveCap = moveOpts.length < 100; // sanidade: lista real e não vazia, verificado com o hint acima
     check("seletor de golpe não está vazio mesmo com trava aplicada", moveOpts.length > 0, moveOpts.length);
 
     // Salva build + anotação ANTES de evoluir, pra confirmar que ambas

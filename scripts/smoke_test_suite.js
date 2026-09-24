@@ -58,6 +58,7 @@ async function runLiveTests() {
     combined += (await (await fetch(base + file)).text()) + "\n";
   }
   combined += "\nwindow.__smokeTestsRunAllSections = runAllSections;\n";
+  // eslint-disable-next-line no-eval -- carregador da suíte: roda os arquivos de scripts/smoke_tests na página
   (0, eval)(combined);
   return await window.__smokeTestsRunAllSections();
 }

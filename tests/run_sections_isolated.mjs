@@ -36,6 +36,7 @@ async function main() {
           combined += (await (await fetch(base + file)).text()) + "\n";
         }
         combined += `\nwindow.__rodarSecao = async function () { results.length = 0; try { await ${secao}(); } catch (e) { results.push({ name: "EXCEÇÃO na seção: " + e.message, pass: false, detail: "" }); } return results.slice(); };\n`;
+        // eslint-disable-next-line no-eval -- carregador da suíte: roda os arquivos de scripts/smoke_tests na página
         (0, eval)(combined);
         return await window.__rodarSecao();
       }, { secao });

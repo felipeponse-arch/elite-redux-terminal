@@ -32,12 +32,13 @@ if (-not $nodeCmdUnit) {
   if ($foundUnit) { $env:PATH = "$($foundUnit.FullName);$env:PATH" }
 }
 # Travas estaticas (fase 1 da refatoracao, 2026-09-24): acento corrompido,
-# .ps1 sem BOM e erro de sintaxe - segundos, antes de qualquer teste.
-Write-Output "--- travas: codificacao e sintaxe ---"
+# .ps1 sem BOM, sintaxe, ESLint (correcao) e tipos das regras - ~3s, antes
+# de qualquer teste.
+Write-Output "--- travas: codificacao, sintaxe, lint e tipos ---"
 npm run check --silent
 if ($LASTEXITCODE -ne 0) {
   Write-Output ""
-  Write-Output "Trava de codificacao ou sintaxe falhou - commit bloqueado."
+  Write-Output "Trava estatica falhou (codificacao, sintaxe, lint ou tipos) - commit bloqueado."
   exit 1
 }
 Write-Output "--- testes unitarios das regras ---"

@@ -2927,7 +2927,7 @@
   // settings/notes/customBuilds), ignoring savedAt/dataVersion entirely -
   // the banner (and any store write at all) now only fires when something
   // real actually differs.
-  var syncDb = null, syncRef = null;
+  var syncRef = null;
   // Campos que NÃO contam como "o conteúdo mudou": versão/datas mudam a cada
   // gravação, e o log "O que o app fez sozinho" registra ações locais (se só
   // ele difere, não há nada pra oferecer ao jogador). Todo o resto do save
@@ -3032,7 +3032,6 @@
     if (typeof claude === "undefined" || !claude.use) { setSyncStatusIndicator("só neste aparelho (ambiente sem plataforma)", true); return; }
     var db = await claude.use("db");
     if (!db) { setSyncStatusIndicator("só neste aparelho (sincronização não concedida)", true); return; } // not served/granted/loaded in this view
-    syncDb = db;
     syncRef = db.doc("sync/save");
     syncRetryCount = 0; // conexão real de novo - zera o backoff pra próxima queda
     setSyncStatusIndicator("sincronizado entre aparelhos");
@@ -3101,7 +3100,7 @@
       aplicarSaveRemoto(remote);
       showSyncBanner("Seu time foi atualizado em outro aparelho agora.");
     }, function () {
-      syncDb = null; syncRef = null;
+      syncRef = null;
       setSyncStatusIndicator("só neste aparelho (conexão de sincronização perdida)", true);
       scheduleSyncRetry();
     });
@@ -3925,7 +3924,6 @@
       if (!mv) return "";
       var typeName = TYPES[mv[1]];
       var meta = TYPE_META[typeName] || { hex: "#777", dark: false };
-      var splitName = DATA.splits[mv[2]] || "";
       var id = "mv_" + title.replace(/\s/g, "") + "_" + idx;
       var aboveCap = cap !== null && cap !== undefined && lv > cap;
       // Whole-row type tint, not just the pill - field research, 2026-09-09

@@ -316,12 +316,12 @@ async function section10() {
   await wait(30);
   setSearch("Bulbasaur");
   await wait(120);
-  var bulbaRow27b = document.querySelector("#species-list .species-row");
-  if (bulbaRow27b) {
-    bulbaRow27b.click();
+  var bulbaRow27d = document.querySelector("#species-list .species-row");
+  if (bulbaRow27d) {
+    bulbaRow27d.click();
     await wait(30);
-    var aiBtn27c = document.getElementById("mybuild-ai-generate");
-    if (aiBtn27c) { aiBtn27c.click(); await wait(150); }
+    var aiBtn27d = document.getElementById("mybuild-ai-generate");
+    if (aiBtn27d) { aiBtn27d.click(); await wait(150); }
   }
   var archPrompt = window.__genAiPrompts[0] || "";
   check("prompt de build por IA menciona o Clima do time (Trick Room) quando um arquétipo está escolhido",
@@ -336,8 +336,8 @@ async function section10() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
   if (bulbaRow27b) {
-    var aiBtn27d = document.getElementById("mybuild-ai-generate");
-    if (aiBtn27d) { aiBtn27d.click(); await wait(150); }
+    var aiBtn27e = document.getElementById("mybuild-ai-generate");
+    if (aiBtn27e) { aiBtn27e.click(); await wait(150); }
   }
   var noArchPrompt = window.__genAiPrompts[0] || "";
   check("sem arquétipo escolhido, o prompt NÃO menciona Ritmo/Clima do time (condicional de verdade)",

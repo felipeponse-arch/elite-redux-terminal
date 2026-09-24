@@ -64,7 +64,6 @@ async function section01() {
     await wait(30);
     const rows = [...document.querySelectorAll("#species-detail .stat-row")];
     const defRow = rows.find(r => r.querySelector(".stat-label").textContent === "Defesa");
-    const spdRow = rows.find(r => r.querySelector(".stat-label").textContent === "Sp. Def");
     check("Shuckle Def shows tier-elite (BST >= 150 clamps to 100%)",
       defRow && defRow.querySelector(".stat-bar-fill").classList.contains("tier-elite"));
     check("Shuckle stat bar width clamped at 100%",

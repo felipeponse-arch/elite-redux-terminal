@@ -6,7 +6,9 @@
   "scripts": {
     "check:encoding": "node scripts/checar_encoding.mjs",
     "check:sintaxe": "node scripts/checar_sintaxe.mjs",
-    "check": "node scripts/checar_encoding.mjs && node scripts/checar_sintaxe.mjs",
+    "lint": "eslint . artifact_template.html",
+    "check:tipos": "tsc -p tsconfig.json",
+    "check": "node scripts/checar_encoding.mjs && node scripts/checar_sintaxe.mjs && eslint . artifact_template.html && tsc -p tsconfig.json",
     "test:unit": "node --test \"tests/unit/*.test.mjs\"",
     "test:sabotage": "node tests/run_sabotage.mjs",
     "test:ci": "node tests/run_ci_smoke.mjs",
@@ -16,8 +18,12 @@
     "test:visual": "node tests/run_visual_regression.mjs"
   },
   "devDependencies": {
-    "playwright": "1.63.0",
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "globals": "17.12.0",
     "pixelmatch": "7.2.0",
-    "pngjs": "7.0.0"
+    "playwright": "1.63.0",
+    "pngjs": "7.0.0",
+    "typescript": "7.0.2"
   }
 }

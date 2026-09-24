@@ -1,0 +1,17 @@
+{
+  // Checagem de tipos das regras puras (fase 1 da refatoração, 2026-09-24):
+  // o TypeScript só LÊ o JS (checkJs + JSDoc), não gera nada (noEmit). Os
+  // arquivos de src/regras são scripts que dividem o escopo global (o build os
+  // cola no mesmo <script>), e é assim que o TypeScript os enxerga também.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "target": "es2022",
+    "lib": ["es2022", "dom"],
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true
+  },
+  "include": ["src/regras/*.js", "types/*.d.ts"]
+}

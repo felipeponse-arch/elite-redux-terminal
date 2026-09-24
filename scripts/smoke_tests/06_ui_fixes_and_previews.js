@@ -390,19 +390,19 @@ async function section06() {
     var spS = spSinergia.sp;
     var golpeSinergico = spSinergia.hit.golpes[0];
     var movesReais = T.uniqueIds(spS.lm.map(function (p) { return p[1]; }).concat(spS.tu)).map(function (id) { return T.MOVES[id][0]; });
-    var semSinergia = movesReais.filter(function (m) {
+    var golpesSemSinergia = movesReais.filter(function (m) {
       // só golpes de DANO: a fixture usa EVs 100% ofensivos, e desde 2026-09-16
       // build assim com golpe de cura é rejeitada por outra regra (seção 14).
       return T.moveRoleOf(m) === "dano" && !T.ABILITY_SYNERGY[spS.sname].some(function (h) { return (h.golpes || []).indexOf(m) !== -1; });
     });
     var base = { ability: spSinergia.hit.name, nature: "Adamant", item: "", evs: [4, 252, 0, 0, 0, 252], rationale: "teste" };
 
-    if (movesReais.indexOf(golpeSinergico) !== -1 && semSinergia.length >= 4) {
-      var cumpre = Object.assign({}, base, { moves: [golpeSinergico, semSinergia[0], semSinergia[1], semSinergia[2]] });
+    if (movesReais.indexOf(golpeSinergico) !== -1 && golpesSemSinergia.length >= 4) {
+      var cumpre = Object.assign({}, base, { moves: [golpeSinergico, golpesSemSinergia[0], golpesSemSinergia[1], golpesSemSinergia[2]] });
       check("build COM golpe potencializado pela habilidade escolhida é aceita",
         !!T.validateAiBuild(spS, cumpre), spS.n + " / " + golpeSinergico);
 
-      var naoCumpre = Object.assign({}, base, { moves: semSinergia.slice(0, 4) });
+      var naoCumpre = Object.assign({}, base, { moves: golpesSemSinergia.slice(0, 4) });
       var motivo = {};
       check("build SEM nenhum golpe potencializado é rejeitada pela regra",
         T.validateAiBuild(spS, naoCumpre, motivo) === null);
@@ -410,7 +410,7 @@ async function section06() {
         !!motivo.txt && motivo.txt.indexOf("potencializado") !== -1, motivo.txt || "(sem motivo)");
     } else {
       check("fixture de sinergia utilizável (golpe no movepool + 4 golpes sem sinergia)", false,
-        spS.n + " golpeSinergico=" + golpeSinergico + " semSinergia=" + semSinergia.length);
+        spS.n + " golpeSinergico=" + golpeSinergico + " golpesSemSinergia=" + golpesSemSinergia.length);
     }
   }
 }
