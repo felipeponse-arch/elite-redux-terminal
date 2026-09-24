@@ -16,7 +16,8 @@ data/sprites_all/
 # that wrote this CI setup).
 node_modules/
 
-# Saída da regressão visual (tests/run_visual_regression.mjs) - imagem atual e
-# diferença de cada execução. Só as baselines em tests/visual_baselines/ são
-# fonte; isto é gerado de novo toda vez.
-tests/visual_diffs/
+# Saída do Playwright (fase 6, 2026-09-24): prints, traces e diferenças visuais
+# das falhas (test-results/) e o relatório HTML (playwright-report/). Só as
+# referências em tests/visual_baselines/ são fonte; isto é gerado a cada execução.
+test-results*/
+playwright-report*/

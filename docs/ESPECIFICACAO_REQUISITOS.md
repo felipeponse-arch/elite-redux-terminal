@@ -363,6 +363,14 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   ligado uma vez (delegação) - nenhum desenho religa ouvintes. Funções que montam telas grandes
   (ficha, card do chefão, geração de build por IA) são divididas em partes nomeadas. Testes nunca
   clicam num nó já substituído por um redesenho: buscam o elemento de novo, como o jogador faria.
+- RNF15 — **Testes de navegador num runner só** (refatoração fase 6, 2026-09-24): todo teste que
+  precisa do app aberto roda no `@playwright/test` (`playwright.config.mjs`, `tests/e2e/`), que
+  sobe sozinho o servidor de testes (`scripts/servidor_estatico.mjs`). Cada seção da suíte roda
+  sozinha em navegador limpo, mais a sequência completa numa página; cenários que precisam de
+  recarga (save órfão, template sem build, filtros da Dex, sincronização na carga) são testes
+  automáticos, não trechos pra colar à mão. Erro não tratado na página reprova o teste. Falha
+  guarda print e trace; o relatório HTML sai em `playwright-report/`. `npm run test:e2e` bloqueia
+  commit e CI; `npm run test:visual` compara com `tests/visual_baselines/` (informativo no CI).
 
 ### Build que acompanha o jogador e banco de builds (2026-09-24)
 

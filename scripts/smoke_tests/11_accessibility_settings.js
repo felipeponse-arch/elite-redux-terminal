@@ -51,7 +51,7 @@ async function section11() {
   // (er_terminal_a11y), separada de propósito do save do jogo - é
   // preferência de exibição por aparelho, não dado de save/sincronização.
   // Um reload de verdade só é testável via Playwright (ver
-  // tests/run_fuzz_save_shapes.mjs), então aqui confirma que o que foi
+  // tests/e2e/recarga.spec.mjs), então aqui confirma que o que foi
   // gravado bate com o que os controles mostram.
   const storedRaw = localStorage.getItem("er_terminal_a11y");
   const stored = storedRaw ? JSON.parse(storedRaw) : null;

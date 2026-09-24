@@ -181,15 +181,21 @@
     return !!b && b.classList.contains("active");
   }
   // Ficha aberta do Pokémon selecionado, mantendo a rolagem (selectSpecies
-  // volta pro topo e, no celular, abriria o detalhe - por isso só quando já
-  // está aberto).
+  // volta pro topo e, no celular, abriria o detalhe - por isso só quando o
+  // painel está à mostra).
+  //
+  // Achado da fase 6 (2026-09-24, primeiro teste com recarga automatizado):
+  // antes conferia a classe show-detail, que a busca tira ao digitar. No
+  // computador a ficha continua na tela sem ela (só o CSS do celular esconde o
+  // painel) - aí a ficha congelava: "+ Time" ficava ativo com o Pokémon já no
+  // time, e salvar build não aparecia. O que vale é o painel estar escondido.
   function redesenharFichaAberta() {
     if (state.selected === null || state.selected === undefined) return;
-    if (!document.getElementById("dex-shell").classList.contains("show-detail")) return;
     var painel = document.getElementById("species-detail");
-    var y = painel ? painel.scrollTop : 0;
+    if (!painel || getComputedStyle(painel).display === "none") return;
+    var y = painel.scrollTop;
     selectSpecies(state.selected);
-    if (painel) painel.scrollTop = y;
+    painel.scrollTop = y;
   }
   var TELAS = {
     contadores: function () {

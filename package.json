@@ -11,19 +11,15 @@
     "check": "node scripts/checar_encoding.mjs && node scripts/checar_sintaxe.mjs && eslint . artifact_template.html && tsc -p tsconfig.json",
     "test:unit": "node --test \"tests/unit/*.test.mjs\"",
     "test:sabotage": "node tests/run_sabotage.mjs",
-    "test:ci": "node tests/run_ci_smoke.mjs",
-    "test:isolated": "node tests/run_sections_isolated.mjs",
-    "test:fuzz": "node tests/run_fuzz_save_shapes.mjs",
-    "test:sync": "node tests/run_sync_mock_test.mjs",
-    "test:visual": "node tests/run_visual_regression.mjs"
+    "test:e2e": "playwright test --project=funcional",
+    "test:visual": "playwright test --project=visual",
+    "test:relatorio": "playwright show-report"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
+    "@playwright/test": "1.63.0",
     "eslint": "9.39.5",
     "globals": "17.12.0",
-    "pixelmatch": "7.2.0",
-    "playwright": "1.63.0",
-    "pngjs": "7.0.0",
     "typescript": "7.0.2"
   }
 }

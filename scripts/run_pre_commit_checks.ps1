@@ -64,50 +64,18 @@ if ($LASTEXITCODE -ne 0) {
   exit 1
 }
 
-# Reusa um dev server que já esteja de pé (ex: sessão interativa de dev)
-# em vez de sempre subir um novo - evita acumular processos órfãos se um
-# hook anterior não conseguiu derrubar o dele por algum motivo.
-$serverAlreadyUp = $false
-try {
-  Invoke-WebRequest -Uri "http://localhost:8100/artifact_final.html" -UseBasicParsing -TimeoutSec 2 | Out-Null
-  $serverAlreadyUp = $true
-  Write-Output "--- dev server ja estava rodando na 8100, reusando ---"
-} catch {}
-
-$serverProc = $null
-if (-not $serverAlreadyUp) {
-  Write-Output "--- subindo dev server em segundo plano ---"
-  $serverProc = Start-Process powershell -ArgumentList "-NoProfile", "-File", "scripts/dev_server.ps1" -WindowStyle Hidden -PassThru
-  # da um tempo pro HttpListener subir antes do teste tentar conectar -
-  # o driver Playwright (tests/run_ci_smoke.mjs) já faz polling por conta
-  # própria, isto e só uma folga extra pra não gastar esse polling à toa.
-  Start-Sleep -Milliseconds 500
-}
-
-$testExit = 1
-try {
-  # localiza o Node portátil desta sessão se `node` não estiver no PATH
-  # do usuário (ver feedback_dev_server_launch_json.md - este projeto já
-  # teve mais de um problema de "ferramenta não está onde eu esperava").
-  $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
-  if (-not $nodeCmd) {
-    $portableRoot = Join-Path $env:LOCALAPPDATA "node-portable"
-    $found = Get-ChildItem $portableRoot -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($found) { $env:PATH = "$($found.FullName);$env:PATH" }
-  }
-  Write-Output "--- rodando scripts/smoke_test_suite.js (Parte A) headless ---"
-  npm run test:ci
-  $testExit = $LASTEXITCODE
-} finally {
-  if ($serverProc) {
-    Write-Output "--- parando o dev server que este hook subiu ---"
-    try { Stop-Process -Id $serverProc.Id -Force -ErrorAction SilentlyContinue } catch {}
-  }
-}
+# Testes de navegador (fase 6 da refatoracao, 2026-09-24): o Playwright sobe o
+# proprio servidor de testes (scripts/servidor_estatico.mjs) e roda em paralelo
+# a suite por secao + sequencia completa, os cenarios com recarga, o fuzz de
+# saves e a sincronizacao. Falha deixa print + trace em test-results/ e o
+# relatorio em playwright-report/ (npm run test:relatorio).
+Write-Output "--- testes de navegador (Playwright, projeto funcional) ---"
+npm run test:e2e --silent
+$testExit = $LASTEXITCODE
 
 if ($testExit -ne 0) {
   Write-Output ""
-  Write-Output "Smoke test falhou - commit bloqueado."
+  Write-Output "Teste de navegador falhou - commit bloqueado. Detalhes: npm run test:relatorio"
   Write-Output "Pra pular isto de propósito (não recomendado): git commit --no-verify"
   exit 1
 }

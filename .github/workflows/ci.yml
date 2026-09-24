@@ -1,8 +1,8 @@
 name: CI
 
-# Roda a suite completa (scripts/smoke_test_suite.js, Parte A) num Chromium
-# headless via Playwright, contra o MESMO artifact_final.html que seria
-# publicado - sem isso, nada garantia que os testes passassem antes de um
+# Roda todos os testes num Chromium headless via Playwright (@playwright/test,
+# fase 6 da refatoração, 2026-09-24), contra o MESMO artifact_final.html que
+# seria publicado - sem isso, nada garantia que os testes passassem antes de um
 # publish (achado real da auditoria completa da equipe, 2026-09-13).
 #
 # -SkipExtract de propósito: build.ps1 sem essa flag roda check_upstream.ps1
@@ -66,46 +66,32 @@ jobs:
       - name: Builda artifact_final.html (reusa data/*.json já commitado)
         run: powershell -NoProfile -File scripts/build.ps1 -SkipExtract
 
-      - name: Sobe o dev server local em segundo plano
-        run: |
-          Start-Process powershell -ArgumentList "-NoProfile", "-File", "scripts/dev_server.ps1" -WindowStyle Hidden
-
-      - name: Roda a suíte de smoke test (Parte A) headless
-        run: npm run test:ci
-
-      # Etapa 2 da pauta técnica (Q1): cada seção roda sozinha, em navegador
-      # limpo. Pega teste que só passa porque herdou estado da seção anterior.
-      - name: Seções da suíte isoladas
-        if: ${{ !cancelled() }}
-        run: npm run test:isolated
-
-      # Etapa 1 da pauta técnica (I2): as duas camadas existiam desde 13/09 mas
-      # não rodavam em lugar nenhum. Ficam só aqui, fora do pre-commit, que
-      # precisa continuar rápido.
-      - name: Fuzz de formatos de save
-        if: ${{ !cancelled() }}
-        run: npm run test:fuzz
-
-      # Levantamento de 2026-09-24: o teste do merge entre aparelhos (o código
-      # mais delicado do app, com bugs reais no histórico) não rodava em lugar
-      # nenhum.
-      - name: Sincronização entre aparelhos (mock do db)
-        if: ${{ !cancelled() }}
-        run: npm run test:sync
+      # O Playwright sobe sozinho o servidor de testes (webServer em
+      # playwright.config.mjs). Um comando só: cada seção da suíte sozinha em
+      # navegador limpo + a sequência completa, cenários com recarga, fuzz de
+      # saves e sincronização entre aparelhos. No CI: uma nova tentativa por
+      # teste, e o que só passa na segunda aparece como "flaky" no relatório.
+      - name: Testes de navegador (Playwright)
+        run: npm run test:e2e
 
       # Não bloqueia: as imagens de referência são geradas no Windows local, e
       # o runner do GitHub renderiza fonte com antialiasing diferente - falha
-      # aqui é sinal pra olhar as imagens, não prova de regressão. As
-      # diferenças sobem como artefato da execução.
+      # aqui é sinal pra olhar as imagens, não prova de regressão.
       - name: Regressão visual (informativa)
         if: ${{ !cancelled() }}
         continue-on-error: true
         run: npm run test:visual
 
-      - name: Guarda as diferenças visuais
+      # Relatório HTML + prints, traces e diferenças visuais de cada falha.
+      - name: Guarda o relatório dos testes
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: visual-diffs
-          path: tests/visual_diffs/
+          name: relatorio-playwright
+          path: |
+            playwright-report/
+            playwright-report-visual/
+            test-results/
+            test-results-visual/
           if-no-files-found: ignore
+          retention-days: 14
