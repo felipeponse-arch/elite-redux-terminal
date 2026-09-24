@@ -75,7 +75,15 @@ function instalarMockDb(semente) {
 export async function abrirApp(page, { mockDb = false, semente = null, arquivo = "artifact_final.html" } = {}) {
   if (mockDb) await ligarMockDb(page, semente);
   await page.goto("/" + arquivo, { waitUntil: "load" });
+  await esperarFontes(page);
   if (mockDb) await page.waitForTimeout(200);
+}
+
+// As fontes não travam mais a primeira pintura (fase 8): chegam depois e trocam
+// a fonte de reserva. Print e medida de layout só depois delas.
+async function esperarFontes(page) {
+  await page.waitForFunction(() => window.__fontesProntas === true, null, { timeout: 15_000 });
+  await page.evaluate(() => document.fonts.ready);
 }
 
 // Liga o db falso a partir da PRÓXIMA navegação (addInitScript vale pras
@@ -113,6 +121,7 @@ export async function saveLocal(page) {
 // Recarrega de verdade (loadSave() e a sincronização só rodam na carga).
 export async function recarregar(page) {
   await page.reload({ waitUntil: "load" });
+  await esperarFontes(page);
   await page.waitForTimeout(200);
 }
 

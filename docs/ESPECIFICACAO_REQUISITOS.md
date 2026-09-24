@@ -386,6 +386,11 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   sabotagem, build e testes de navegador - é o que o hook de pre-commit e o `prepare_publish`
   chamam. Tudo em Node: o CI roda em Linux. Só a extração do dado bruto do jogo (rede, rara)
   continua em PowerShell (`scripts/build.ps1`), que termina chamando o mesmo `build.mjs`.
+- RNF18 — **Primeira pintura sem depender de rede externa** (refatoração fase 8, 2026-09-24): a
+  folha do Google Fonts não bloqueia a renderização (carrega com `media="print"` e é ligada ao
+  terminar; `display=swap`). Medido: com as fontes levando 1,5 s, a primeira pintura caiu de
+  1.728 ms para 108 ms. `tests/e2e/desempenho.spec.mjs` atrasa as fontes em 3 s e reprova se a
+  primeira pintura esperar por elas.
 
 ### Build que acompanha o jogador e banco de builds (2026-09-24)
 

@@ -2,7 +2,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Fontes sem travar a primeira pintura (fase 8, 2026-09-24). Medido: a
+     folha do Google Fonts era "render-blocking" - a tela só pintava depois
+     da resposta do Google (primeira pintura 232 ms com rede boa, 1.728 ms com
+     a resposta das fontes levando 1,5 s; sem ela, 104 ms). Com media="print"
+     ela baixa sem bloquear; o script logo abaixo a liga ao terminar de
+     carregar, e display=swap troca a fonte de reserva pela do app. Script e
+     não onload="" no atributo: manipulador inline pode ser barrado pelo CSP
+     do artifact. A tag do script abaixo tem id de propósito: o ESLint acha o
+     script do app pela primeira tag script SEM atributo. -->
+<link id="fontes-do-app" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print">
+<script id="ligar-fontes">
+  (function () {
+    var l = document.getElementById("fontes-do-app");
+    function ligar() { l.media = "all"; window.__fontesProntas = true; }
+    // Já carregou (cache) antes deste script rodar? Liga direto.
+    if (l.sheet) ligar(); else { l.addEventListener("load", ligar); l.addEventListener("error", function () { window.__fontesProntas = true; }); }
+  })();
+</script>
 <style>
   /*@css tokens.css*/
   /*@css base.css*/

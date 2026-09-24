@@ -21,9 +21,10 @@ for (const f of arquivos) {
 // número da linha do erro é o do template.
 const tpl = readFileSync("artifact_template.html", "utf8");
 let blocos = 0;
-for (const m of tpl.matchAll(/<script>([\s\S]*?)<\/script>/g)) {
+// Com id também (o que liga as fontes no <head>, fase 8); com type não.
+for (const m of tpl.matchAll(/<script(?: id="[\w-]+")?>([\s\S]*?)<\/script>/g)) {
   blocos++;
-  const antes = tpl.slice(0, m.index + "<script>".length).split("\n").length - 1;
+  const antes = tpl.slice(0, m.index + m[0].length - m[1].length - "</script>".length).split("\n").length - 1;
   try {
     new vm.Script("\n".repeat(antes) + m[1], { filename: "artifact_template.html" });
   } catch (e) {
