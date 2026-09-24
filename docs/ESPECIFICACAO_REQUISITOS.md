@@ -371,6 +371,15 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   automáticos, não trechos pra colar à mão. Erro não tratado na página reprova o teste. Falha
   guarda print e trace; o relatório HTML sai em `playwright-report/`. `npm run test:e2e` bloqueia
   commit e CI; `npm run test:visual` compara com `tests/visual_baselines/` (informativo no CI).
+- RNF16 — **CSS por área e com travas** (refatoração fase 7, 2026-09-24): o CSS mora em `src/css`
+  (tokens, base, campos e um arquivo por área), colado pelo build no `<style>` na ordem original da
+  cascata. Cores, raios e sombras só por token (`tokens.css`); `npm run check` roda o stylelint
+  (sintaxe - um comentário quebrado não descarta mais uma regra em silêncio) e `checar_css.mjs`
+  (as duas cópias da paleta escura idênticas, os três temas com o mesmo conjunto de cores, todo
+  `var(--x)` declarado). Campo de formulário usa a classe `.campo` + um tamanho (`campo-busca`,
+  `-texto`, `-ajuste`, `-filtro`, `-numero`) e a fonte do app - um teste percorre as abas e reprova
+  campo fora disso. A regressão visual cobre claro, escuro, alto contraste e celular; com
+  `VISUAL_EXATO=1` exige zero pixel diferente (prova de refatoração sem mudança visual).
 
 ### Build que acompanha o jogador e banco de builds (2026-09-24)
 

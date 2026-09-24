@@ -1,0 +1,113 @@
+/* ---------- top bar ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(155deg, var(--accent), var(--accent-strong));
+  color: var(--accent-ink);
+  font-size: 20px;
+  flex: none;
+  box-shadow: var(--shadow);
+}
+.brand-text h1 { font-size: 19px; font-weight: 700; letter-spacing: 0.01em; }
+.brand-sub { margin: 2px 0 0; font-size: 12.5px; color: var(--text-dim); }
+.brand-sub .mono { color: var(--badge-accent2); }
+
+/* Groups .tabs + .tabs-more so .topbar's justify-content:space-between
+   (brand <-> nav area) only fires once, between brand and this whole row -
+   without it, space-between would also push .tabs-more away from .tabs
+   itself, off to the far edge instead of sitting right beside it. */
+.tabs-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: var(--radius-md); min-width: 0; }
+.tab-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .15s, color .15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { background: var(--surface); color: var(--badge-accent); box-shadow: var(--shadow); }
+/* Rótulo curto (achado real do usuário, 2026-09-20: "às vezes ao clicar
+   no menu novo não abre direto" em mobile) - troca de texto, não de
+   função: em telas estreitas, "Meu Time"/"PC Box" por si só já
+   estouravam a barra em ~104px (medido em 375px), forçando rolagem
+   horizontal pra alcançar "Chefões" - um toque logo depois de rolar é
+   justamente o cenário clássico de toque perdido/precisa-tocar-de-novo
+   em barra de abas roláveis. Ver .tab-label-short abaixo. */
+.tab-label-short { display: none; }
+.count-badge {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  padding: 1px 7px;
+  font-family: "IBM Plex Mono", monospace;
+}
+.tab-btn:not(.active) .count-badge { background: var(--surface-3); color: var(--badge-text-dim); }
+
+/* "Mais" dropdown (Progresso/Tipos) - design review, 2026-09-09. The
+   toggle reuses .tab-btn/.tab-btn.active as-is (same class), so it looks
+   identical to a real tab and gets the same "active" highlight
+   automatically when Progresso or Tipos is the current view. */
+.tabs-more { position: relative; flex: none; }
+.tabs-more-panel {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 50;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow); padding: 4px; display: flex; flex-direction: column;
+  gap: 2px; min-width: 160px;
+}
+/* An author-stylesheet display value always beats the browser's native
+   [hidden] handling regardless of selector specificity (author origin
+   outranks user-agent origin in the cascade) - found via an actual fresh
+   page load, not just checking morePanel.hidden === true in JS, which
+   stayed correct throughout. Same fix .modal-backdrop[hidden] already
+   has below; this rule was missing here since the dropdown shipped. */
+.tabs-more-panel[hidden] { display: none; }
+.tabs-more-panel .tab-btn { justify-content: flex-start; width: 100%; }
+
+/* min-width:0 on every flex item in this chain: without it a wide child (the
+   type matrix) stretches its ancestors instead of scrolling inside .scroll-x,
+   which pushed the whole page sideways on a phone. */
+main { flex: 1; min-height: 0; min-width: 0; display: flex; }
+.view { display: none; flex: 1; min-height: 0; min-width: 0; }
+.view.active { display: flex; }
+/* #view-dex é a única view com 2 filhos diretos (#dashboard + .dex-shell) -
+   sem direção definida aqui, ela caía no padrão "row", então os dois
+   ficavam LADO A LADO em vez de empilhados. Achado real do usuário,
+   2026-09-18 (repetiu várias vezes: "a tela buga e some as informações do
+   poke"), ao navegar de "Meu Time" pra Dex via goToDexSpecies() com o
+   dashboard já cheio (time 6/6 + a linha "Velocidade", que é a mais
+   larga) - o texto longo do dashboard "vencia" a disputa por espaço no
+   row, espremendo .dex-shell numa fatia residual de ~50px, onde o
+   conteúdo real (sprite/stats/nome do Pokémon) ficava tecnicamente
+   presente no DOM mas visualmente ilegível/cortado - "sumia" sem erro
+   nenhum no console. Só existia uma correção pra isto abaixo de 860px
+   (ver o media query mais adiante) - por sorte, até agora, o dashboard
+   nunca tinha sido largo o bastante pra estourar acima disso. A pilha
+   vertical sempre foi a intenção real do layout, nunca o "row" por
+   acidente - então a correção é permanente, não só mobile. */
+#view-dex.active { flex-direction: column; }

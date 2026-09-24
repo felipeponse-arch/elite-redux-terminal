@@ -1,0 +1,167 @@
+:root {
+  /* "Trilha Viva" - identidade escolhida em 2026-09-18 depois de 3
+     propostas comparadas lado a lado com o usuário (ver histórico da
+     sessão): mantém a atmosfera de jornada/trilha/descoberta da proposta
+     B, mas com uma paleta deliberadamente mais ousada (o usuário pediu
+     "mais disruptivo, mais moderno") - roxo-noite com magenta/ciano
+     bioluminescentes no lugar do bege+verde-trilha original. Light mode
+     segue a MESMA família de matiz (não é um tema à parte inventado). */
+  --banner-offset: 0px;
+  --bg: #f6f4fb;
+  --surface: #ffffff;
+  --surface-2: #ece8f7;
+  --surface-3: #e1daf0;
+  --border: #d9d0ec;
+  --text: #1c1730;
+  --text-dim: #6b5f8a;
+  --accent: #d6266f;
+  --accent-strong: #b81a5c;
+  --accent-ink: #fff7fb;
+  --accent-2: #0e9c86;
+  --sem-weak: #c23b3b;
+  --sem-resist: #1f8f5f;
+  --sem-immune: #6b3fa0;
+  /* Ângulo de foco/badges recalibrado pra nova paleta (2026-09-18),
+     mesma metodologia da auditoria de 2026-09-13 que criou este padrão
+     -safe: o ciano-escuro abaixo mede 5.1:1 como TEXTO sobre --surface
+     (WCAG AA 4.5:1 pra texto, 3:1 pra indicador não-textual como o
+     anel de foco) - o --accent-2 "vivo" (#0e9c86) fica só pra borda/
+     fundo/ícone, nunca como cor de texto puro. */
+  --focus: #0b7c6c;
+  --shadow: 0 10px 28px -14px rgb(28 23 48 / 0.28);
+  --badge-text-dim: #58507a;
+  /* --accent (#d6266f) já mede 4.8:1 como texto sobre --surface branco -
+     ainda assim mantém uma variante -badge dedicada (mesmo padrão do
+     resto do arquivo) com um pouco mais de margem, pra sobreviver a
+     qualquer ajuste fino futuro do tom sem precisar re-auditar. */
+  --badge-accent: #c11f63;
+  --badge-accent2: #0b7c6c;
+  --badge-resist: #1c8156;
+  /* Cor por categoria de treinador (Chefões) - versões escurecidas pra
+     valer como TEXTO no claro (mesmo método -safe usado acima: medido
+     contra --surface-2, AA 4.5:1). "Lider de Ginasio"/"Campeao" reusam
+     --accent-2/--accent direto (já são -safe) - só as demais precisam
+     de token próprio. */
+  --cat-aqua: #2a68a6;
+  --cat-magma: #9c4720;
+  --cat-frontier: #6f3fa8;
+  --cat-elite: #86680f;
+  --cat-super: #5f5f76;
+  color-scheme: light;
+
+  /* ---- Estrutura: igual em todos os temas (os blocos de tema abaixo não
+     redefinem nada daqui). ---- */
+  /* Escala de raio - substitui os ~68 valores de border-radius fixos
+     espalhados pelo arquivo (achado de auditoria visual, 2026-09-18: TODO
+     card/botão/chip usava o mesmo raio, sem hierarquia nenhuma - "SaaS card
+     kit" clássico). */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  /* Escritos pelo JS: "Aumentar fonte" (Progresso) e a cor do tipo nos chips
+     de Monotype. Declarados aqui pra ter valor padrão e ficar na lista de
+     tokens do app (antes só existiam quando o JS escrevia). */
+  --user-font-scale: 1;
+  --chip-color: var(--accent);
+  --chip-ink: var(--accent-ink);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d0b1a;
+    --surface: #17132c;
+    --surface-2: #201a3f;
+    --surface-3: #291f52;
+    --border: #34285f;
+    --text: #f4effc;
+    --text-dim: #ab9ed4;
+    --accent: #ff4f9a;
+    --accent-strong: #ff7ab5;
+    --accent-ink: #1a0a14;
+    --accent-2: #33f0c8;
+    --sem-weak: #e5686a;
+    --sem-resist: #4fce93;
+    --sem-immune: #b28ce0;
+    --focus: #33f0c8;
+    --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
+    /* Dark mode's plain --accent/--accent-2 already clear AA as text
+       (magenta/ciano vivos sobre roxo quase preto) - sem precisar
+       escurecer nada aqui, mesmo raciocínio do padrão original. */
+    --badge-accent: #ff4f9a;
+    --badge-accent2: #33f0c8;
+    --badge-resist: #4fce93;
+    --badge-text-dim: #ab9ed4;
+    --cat-aqua: #6fb0ff;
+    --cat-magma: #ff8a5c;
+    --cat-frontier: #c9a3f2;
+    --cat-elite: #e8c34f;
+    --cat-super: #b7b7c9;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d0b1a;
+  --surface: #17132c;
+  --surface-2: #201a3f;
+  --surface-3: #291f52;
+  --border: #34285f;
+  --text: #f4effc;
+  --text-dim: #ab9ed4;
+  --accent: #ff4f9a;
+  --accent-strong: #ff7ab5;
+  --accent-ink: #1a0a14;
+  --accent-2: #33f0c8;
+  --sem-weak: #e5686a;
+  --sem-resist: #4fce93;
+  --sem-immune: #b28ce0;
+  --focus: #33f0c8;
+  --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
+  --badge-accent: #ff4f9a;
+  --badge-accent2: #33f0c8;
+  --badge-resist: #4fce93;
+  --badge-text-dim: #ab9ed4;
+  --cat-aqua: #6fb0ff;
+  --cat-magma: #ff8a5c;
+  --cat-frontier: #c9a3f2;
+  --cat-elite: #e8c34f;
+  --cat-super: #b7b7c9;
+  color-scheme: dark;
+}
+
+/* Alto contraste (checklist eMAG 3.1, achado em auditoria de UX/
+   Acessibilidade 2026-09-13 - "não atendido de jeito nenhum" até aqui).
+   Paleta PRÓPRIA, independente de claro/escuro (preto/branco puro +
+   cores bem saturadas, convenção padrão de modo de alto contraste) -
+   não é uma variação do tema atual, é o eixo ortogonal de propósito:
+   o jogador liga isto por cima de qualquer tema, não troca um pelo
+   outro. As variantes badge-accent/badge-resist/text-dim não precisam
+   de uma variante "-safe" separada aqui - já nascem clareando AAA
+   (7:1+) contra #000/#fff, então reusam os mesmos valores. */
+:root[data-high-contrast="true"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #1a1a1a;
+  --surface-3: #2a2a2a;
+  --border: #ffffff;
+  --text: #ffffff;
+  --text-dim: #e6e6e6;
+  --accent: #ffcc00;
+  --accent-strong: #ffdd44;
+  --accent-ink: #000000;
+  --accent-2: #00e5ff;
+  --sem-weak: #ff6666;
+  --sem-resist: #66ff66;
+  --sem-immune: #d9a3ff;
+  --focus: #ffffff;
+  --shadow: 0 0 0 1px #ffffff;
+  --badge-accent: #ffcc00;
+  --badge-accent2: #00e5ff;
+  --badge-resist: #66ff66;
+  --badge-text-dim: #e6e6e6;
+  --cat-aqua: #66ccff;
+  --cat-magma: #ff9966;
+  --cat-frontier: #d9a3ff;
+  --cat-elite: #ffcc00;
+  --cat-super: #e6e6e6;
+  color-scheme: dark;
+}

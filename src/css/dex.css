@@ -1,0 +1,236 @@
+/* ---------- Dex view ---------- */
+.dex-shell { flex: 1; min-height: 0; display: grid; grid-template-columns: 340px 1fr; }
+.dex-sidebar {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface);
+}
+.search-row { padding: 14px 14px 8px; }
+/* Accessibility pass, 2026-09-10: a global visible-focus ring for every
+   interactive element, not just the search box. Most custom controls here
+   (chip-btn, type-check, tab-btn, box-chip buttons...) reset the browser's
+   default outline via their own styling, which silently made keyboard-only
+   navigation invisible on anything but the search box. `:focus-visible`
+   (not plain `:focus`) so a mouse click doesn't ring every button - only
+   real keyboard/AT focus does. */
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.filter-row { display: flex; gap: 8px; padding: 0 14px 10px; }
+.chip-btn {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 7px 10px;
+  border-radius: var(--radius-md);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.chip-btn.active { border-color: var(--accent); color: var(--badge-accent); }
+/* O filtro ocupa o que sobra da linha (Dex: ordenar; Chefões: categoria). */
+.filter-row > .campo { flex: 1; min-width: 0; }
+.type-filter-panel {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.type-filter-panel.hidden { display: none; }
+.type-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px 4px 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--surface-2);
+  user-select: none;
+}
+.type-check input { accent-color: var(--accent); }
+.type-check.checked { color: var(--accent-ink); }
+
+.species-list { list-style: none; margin: 0; padding: 4px 0; overflow-y: auto; flex: 1; }
+.species-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  content-visibility: auto;
+  contain-intrinsic-size: 46px;
+}
+.species-row:hover { background: var(--surface-2); }
+.species-row.selected { background: var(--surface-2); border-left-color: var(--accent); }
+/* Keyboard navigation (Fase 1, 2026-09-09) - distinct from .selected
+   (which marks the species currently OPEN in the detail panel) so moving
+   the arrow-key highlight around never looks like it silently changed
+   what's actually selected. */
+.species-row.kbd-active { outline: 2px solid var(--focus); outline-offset: -2px; }
+.species-row .dexno { color: var(--text-dim); font-size: 11.5px; width: 34px; flex: none; }
+.species-row .sname { font-weight: 600; font-size: 13.5px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.species-row .pips { display: flex; gap: 3px; flex: none; }
+.no-results { padding: 20px 16px; color: var(--text-dim); font-size: 13px; }
+
+.type-pip { width: 9px; height: 9px; border-radius: var(--radius-sm); flex: none; }
+.type-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.species-detail { flex: 1; min-height: 0; overflow-y: auto; padding: 24px 28px 60px; }
+.empty-state { color: var(--text-dim); padding: 40px; text-align: center; font-size: 14px; }
+.back-btn { display: none; }
+
+.detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
+.detail-titles h2 { font-size: 26px; font-weight: 700; }
+.detail-dexno { color: var(--text-dim); font-size: 13px; }
+.detail-sname { color: var(--text-dim); font-size: 11.5px; margin-top: 2px; }
+.detail-types { display: flex; gap: 6px; margin: 10px 0 14px; }
+/* Botão de ação primária como o "farol" da tela (achado de auditoria,
+   2026-09-18: era um botão laranja igual a qualquer outro - agora é o
+   único elemento com gradiente + glow do app, pra sobrar exatamente 1
+   coisa em destaque por tela, não um botão a mais entre muitos). */
+.add-team-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: var(--accent-ink);
+  border: none;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--accent) 65%, transparent);
+}
+.add-team-btn:disabled { background: var(--surface-3); color: var(--text-dim); cursor: default; box-shadow: none; }
+.flavor { color: var(--text-dim); font-size: 13.5px; font-style: italic; max-width: 65ch; margin-bottom: 20px; }
+/* "Como conseguir" (Fase 2, 2026-09-11) - uma frase, não um card (decisão
+   da UX: informação real mas pequena o bastante pra não merecer sua
+   própria seção). Cor de destaque (não --text-dim, pra não se misturar
+   com o flavor text acima) mas sem peso de card. */
+.obtain-hint { color: var(--badge-accent2); font-size: 12.5px; font-weight: 600; max-width: 65ch; margin: -8px 0 20px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+/* Título de card sem o eyebrow ALL-CAPS genérico (achado de auditoria
+   visual, 2026-09-18 - "tracked-out ALL-CAPS eyebrow label above every
+   heading" é um dos tiques mais reconhecíveis de UI gerada por padrão).
+   Marcador lateral (a "trilha") no lugar do letter-spacing pra dar
+   estrutura sem gritar. */
+.card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.card h3::before {
+  content: "";
+  width: 4px;
+  height: 14px;
+  flex: none;
+  background: var(--accent-2);
+  border-radius: var(--radius-sm);
+}
+/* Mesmo tratamento de .card h3, pra títulos de seção que não moram
+   dentro de um .card (ex: "Meu time", "PC Box") - 3 pontos do arquivo
+   ainda tinham o eyebrow ALL-CAPS antigo hardcoded inline (achado ao
+   revisar o resto do app depois do redesign do .card, 2026-09-18). */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+.section-title::before {
+  content: "";
+  width: 4px;
+  height: 14px;
+  flex: none;
+  background: var(--accent-2);
+  border-radius: var(--radius-sm);
+}
+
+/* Trilha visual do progresso da campanha (renderProgressTrail) - pura
+   leitura, deriva de LEVELCAPS/state.settings.milestone, nunca escreve
+   estado por conta própria. */
+.trail-track { position: relative; display: flex; gap: 20px; overflow-x: auto; padding: 8px 4px 12px; }
+.trail-line-bg {
+  position: absolute; top: 25px; left: 4px; right: 4px; height: 2px;
+  background: repeating-linear-gradient(90deg, var(--border) 0 6px, transparent 6px 12px);
+}
+.trail-line-fill {
+  position: absolute; top: 25px; left: 4px; height: 2px; max-width: calc(100% - 8px);
+  background: var(--accent-2); box-shadow: 0 0 8px color-mix(in srgb, var(--accent-2) 70%, transparent);
+}
+.trail-node { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; flex: none; width: 74px; }
+.trail-dot {
+  width: 34px; height: 34px; border-radius: var(--radius-pill); flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; font-family: "IBM Plex Mono", monospace;
+  border: 2px solid transparent;
+}
+.trail-dot.done { background: var(--accent-2); color: var(--accent-ink); }
+.trail-dot.active {
+  background: var(--surface); border-color: var(--accent); color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent), 0 0 14px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.trail-dot.locked { background: var(--surface-2); border-color: var(--border); color: var(--text-dim); }
+.trail-label { font-size: 10px; color: var(--text-dim); text-align: center; line-height: 1.3; }
+.trail-label.active { color: var(--accent); font-weight: 700; }
+
+/* Blocos colapsáveis da tela de detalhe (Fase 2, 2026-09-11). <summary>
+   nativo já vem com foco/teclado/Enter-Espaço de graça - só estilizado
+   por cima, marcador triângulo mantido de propósito (sinaliza "isto
+   expande" sem precisar de ícone customizado). */
+.detail-group { margin-bottom: 16px; }
+.detail-group > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 4px;
+  color: var(--text);
+  list-style-position: outside;
+}
+.detail-group > summary:hover { color: var(--badge-accent); }
+.detail-group[open] > summary { margin-bottom: 4px; border-bottom: 1px solid var(--border); }
+/* .card já tem margin-bottom próprio - dentro de um <details> aberto isso
+   empilha certo; o último .card de um grupo não precisa do espaço extra
+   porque o próprio .detail-group já tem margin-bottom. */
+.detail-group .card:last-child { margin-bottom: 0; }
+/* "Conhecer a espécie" virou sempre-visível, 2026-09-11 (pedido do
+   usuário: "quero que tudo que está ali fique visível") - não é mais um
+   <details>, então não tem <summary> nem marcador de expandir/recolher.
+   Reaproveita a mesma tipografia/espaçamento do <summary> dos outros
+   grupos (mesmo peso visual na tela), só sem cursor:pointer nem a
+   semântica de toggle. */
+.detail-group-heading {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 4px 6px;
+  margin: 0 0 4px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}

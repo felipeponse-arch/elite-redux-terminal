@@ -21,6 +21,43 @@ test("ficha aberta continua atualizando depois de digitar na busca (computador)"
   await expect(page.locator("#add-team-btn")).toHaveText("No time");
 });
 
+// Fase 7 (2026-09-24): a busca dos Chefões ficou sem estilo nenhum porque a
+// pele dos campos era repetida por id e ninguém repetiu pra ela; e nenhum
+// campo herdava a fonte do app. Todo campo visível, em todas as abas, usa a
+// classe .campo e a fonte do app.
+test("todo campo de formulário usa a pele .campo e a fonte do app", async ({ page }) => {
+  // Campos com visual próprio de propósito (e o motivo).
+  const EXCECOES = {
+    "mybuild-num": "grade compacta de IV/EV, raio menor",
+    "stc-rename-input": "modo de edição do nome, borda de destaque",
+  };
+  await abrirApp(page);
+  const fora = [];
+  const conferir = async (onde) => {
+    const achados = await page.evaluate((excecoes) => {
+      const fonteDoApp = getComputedStyle(document.body).fontFamily;
+      return [...document.querySelectorAll("input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea")]
+        .filter((el) => el.offsetParent !== null)
+        .filter((el) => ![...el.classList].some((c) => c in excecoes) && !(el.id in excecoes))
+        .filter((el) => !el.classList.contains("campo") || (!el.classList.contains("mono") && getComputedStyle(el).fontFamily !== fonteDoApp))
+        .map((el) => el.id || el.className || el.outerHTML.slice(0, 60));
+    }, EXCECOES);
+    for (const a of achados) fora.push(`${onde}: ${a}`);
+  };
+  for (const aba of ["dex", "team", "box", "bosses", "progress", "types"]) {
+    await abrirAba(page, aba);
+    await conferir(aba);
+  }
+  await abrirAba(page, "dex");
+  await page.locator("#species-list .species-row").first().click();
+  await page.locator("#species-detail details").evaluateAll((ds) => ds.forEach((d) => { d.open = true; }));
+  await conferir("ficha");
+  await abrirAba(page, "bosses");
+  await page.locator("#boss-list .species-row").first().click();
+  await conferir("chefão");
+  expect(fora, "campos sem .campo ou sem a fonte do app").toEqual([]);
+});
+
 test("no celular, digitar na busca volta pra lista e a ficha some", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 });
   await abrirApp(page);

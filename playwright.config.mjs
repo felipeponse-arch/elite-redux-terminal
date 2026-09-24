@@ -18,8 +18,10 @@ const PORTA = Number(process.env.PORTA_TESTES || 8101);
 const noCI = !!process.env.CI;
 // O visual roda num comando separado (no CI, depois do funcional): pastas
 // próprias pro relatório e pras falhas, senão apagaria as do funcional.
-const soVisual = process.argv.includes("--project=visual");
-const sufixo = soVisual ? "-visual" : "";
+// Os workers do Playwright recarregam este arquivo sem os argumentos da linha
+// de comando - a escolha passa por variável de ambiente, que eles herdam.
+if (process.argv.includes("--project=visual")) process.env.PW_SO_VISUAL = "1";
+const sufixo = process.env.PW_SO_VISUAL ? "-visual" : "";
 const html = ["html", { open: "never", outputFolder: "playwright-report" + sufixo }];
 
 export default defineConfig({

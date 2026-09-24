@@ -147,7 +147,10 @@ $final = Get-Content $templatePath -Raw -Encoding UTF8
 # Desde a fase 5 da refatoracao (2026-09-24) o mesmo vale pra interface:
 # src/ui/*.js, marcador /*@ui NOME*/ - cada arquivo e colado no lugar exato de
 # onde saiu do template, entao a ordem de execucao do script nao muda.
-foreach ($tipo in @("regras", "ui")) {
+# Fase 7 (2026-09-24): o CSS tambem - src/css/*.css, marcador /*@css NOME*/
+# dentro do <style>, em fatias contiguas (a ordem da cascata nao muda).
+$extensoes = @{ "regras" = "*.js"; "ui" = "*.js"; "css" = "*.css" }
+foreach ($tipo in @("regras", "ui", "css")) {
     $dir = Join-Path $root ("src\" + $tipo)
     $marcadores = [regex]::Matches($final, "/\*@" + $tipo + " ([A-Za-z0-9_.]+)\*/")
     $usados = @{}
@@ -160,7 +163,7 @@ foreach ($tipo in @("regras", "ui")) {
         $final = $final.Replace($m.Value, (Get-Content $arq -Raw -Encoding UTF8).TrimEnd())
     }
     if (Test-Path $dir) {
-        foreach ($f in (Get-ChildItem $dir -Filter "*.js" -File)) {
+        foreach ($f in (Get-ChildItem $dir -Filter $extensoes[$tipo] -File)) {
             if (-not $usados.ContainsKey($f.Name)) { throw "src/$tipo/$($f.Name) nao tem marcador /*@$tipo $($f.Name)*/ no template - nunca chegaria no app." }
         }
     }

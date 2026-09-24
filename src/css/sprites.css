@@ -1,0 +1,70 @@
+/* The whole sprite sheet lives in this one rule (build.ps1 inlines it as a
+   base64 PNG). Kept in CSS rather than a JS-set custom property: a multi-MB
+   value is rejected as a custom property but fine as a stylesheet url(). */
+.spr {
+  display: inline-block;
+  flex: none;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-2);
+  background-image: url("__SPRITE_ATLAS_DATAURI__");
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.sprite-fallback {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--surface-3);
+  color: var(--text-dim);
+  font-weight: 700;
+}
+.ts-head { display: flex; align-items: center; gap: 10px; }
+.team-slot .ts-name { font-weight: 700; font-size: 15px; }
+.team-slot.swapping { border-color: var(--accent); }
+.ts-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; margin-top: 10px; }
+.ts-swap-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--badge-accent2);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.ts-swap-btn:hover { border-color: var(--accent-2); }
+.ts-goto-dex {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--badge-accent);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  margin-top: 8px;
+}
+.ts-goto-dex + .ts-goto-dex { margin-left: 6px; }
+.ts-goto-dex:hover { border-color: var(--accent); }
+
+.swap-panel { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--accent); }
+.swap-title { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--badge-accent); font-weight: 700; margin-bottom: 8px; }
+.swap-empty { font-size: 11.5px; color: var(--text-dim); }
+.swap-list { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
+.swap-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--text);
+}
+.swap-pick:hover { border-color: var(--accent); background: var(--surface-3); }
+.swap-pick-name { font-size: 12.5px; font-weight: 600; }

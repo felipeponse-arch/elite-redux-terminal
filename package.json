@@ -8,7 +8,8 @@
     "check:sintaxe": "node scripts/checar_sintaxe.mjs",
     "lint": "eslint . artifact_template.html",
     "check:tipos": "tsc -p tsconfig.json",
-    "check": "node scripts/checar_encoding.mjs && node scripts/checar_sintaxe.mjs && eslint . artifact_template.html && tsc -p tsconfig.json",
+    "lint:css": "stylelint \"src/css/*.css\" && node scripts/checar_css.mjs",
+    "check": "node scripts/checar_encoding.mjs && node scripts/checar_sintaxe.mjs && eslint . artifact_template.html && stylelint \"src/css/*.css\" && node scripts/checar_css.mjs && tsc -p tsconfig.json",
     "test:unit": "node --test \"tests/unit/*.test.mjs\"",
     "test:sabotage": "node tests/run_sabotage.mjs",
     "test:e2e": "playwright test --project=funcional",
@@ -20,6 +21,8 @@
     "@playwright/test": "1.63.0",
     "eslint": "9.39.5",
     "globals": "17.12.0",
+    "stylelint": "17.15.0",
+    "stylelint-config-recommended": "18.0.0",
     "typescript": "7.0.2"
   }
 }

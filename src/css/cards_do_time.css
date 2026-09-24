@@ -1,0 +1,156 @@
+/* Botões vivem no painel de detalhe do slot selecionado agora (redesenho PC
+   Box, ver .pcbox-detail acima) - não mais um por chip. */
+.pcbox-detail .box-to-team {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--badge-accent2);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+.pcbox-detail .box-to-team:disabled { color: var(--text-dim); cursor: default; }
+.pcbox-detail .box-to-team.is-swap { color: var(--badge-accent); border-color: var(--accent); }
+.pcbox-detail .remove-btn {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 6px 10px; font-size: 15px; line-height: 1; cursor: pointer; color: var(--sem-weak);
+}
+
+.row-add-btn {
+  flex: none;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.row-add-btn:hover { border-color: var(--accent); color: var(--badge-accent); }
+.row-add-btn:disabled { opacity: .35; cursor: default; }
+.row-add-btn.is-swap { color: var(--badge-accent2); border-color: color-mix(in srgb, var(--accent-2) 45%, transparent); }
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s, transform .18s;
+  z-index: 100;
+  max-width: 90vw;
+  text-align: center;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.sync-banner {
+  position: fixed; left: 0; right: 0; top: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  background: var(--accent-2); color: var(--accent-ink);
+  font-size: 12.5px; font-weight: 600; padding: 8px 14px; box-shadow: var(--shadow);
+}
+/* The EXACT same bug as .tabs-more-panel earlier today: an author-
+   stylesheet `display` always beats the browser's native [hidden]
+   handling, regardless of the hidden attribute/property being correctly
+   set. Missed it again when adding this banner - this is why the user
+   saw "Atualizar" showing constantly even though the banner's own JS
+   logic (.hidden===true) was correct the whole time; the content-diff
+   fix alongside this one was real too, but this CSS bug alone explains
+   the reported symptom on its own. */
+.sync-banner[hidden] { display: none; }
+.dash-caveat { color: var(--text-dim); font-size: 11.5px; }
+.auto-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; }
+.ts-generated-team { border: 1px solid var(--accent); }
+.ts-usage-guide { display: flex; flex-direction: column; gap: 8px; font-size: 13px; margin-bottom: 10px; }
+.ts-guide-item b { color: var(--text-dim); font-weight: 700; }
+.ts-validation { font-size: 12.5px; color: var(--text-dim); padding-top: 8px; border-top: 1px solid var(--border); }
+.ts-validation-warn { color: var(--sem-weak); }
+.gym-skill-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+.gym-skill-list label { display: flex; gap: 9px; align-items: flex-start; cursor: pointer; }
+.gym-skill-list input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; width: 15px; height: 15px; }
+.gym-skill-list .gs-detail { color: var(--text-dim); font-weight: 400; }
+.auto-log time { display: block; font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.sync-banner button {
+  border: none; border-radius: var(--radius-sm); padding: 4px 10px; font-size: 12px; font-weight: 700;
+  cursor: pointer; background: rgba(0,0,0,.15); color: inherit;
+}
+#sync-banner-dismiss, #storage-banner-dismiss, #run-setup-dismiss { background: none; font-size: 16px; padding: 0 4px; line-height: 1; }
+
+.showdown-block {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  font-size: 11.5px;
+  line-height: 1.55;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin: 0;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--text);
+}
+.ts-build-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+/* .ts-ai-generate-btn precisa de classe própria (não pode reusar
+   .ts-build-copy) - o card do Meu Time já tem um listener delegado que
+   escuta TODO .ts-build-copy dentro de #team-slots pra copiar o set;
+   usar a mesma classe faria o botão de gerar build acionar o copiador
+   por engano. Mesma aparência visual, ação diferente.
+   Achado em auditoria de frontend (2026-09-13): .ts-build-copy (ts- =
+   team-slot) tinha virado o nome genérico de fato pra este estilo,
+   reusado em 7+ botões fora do Time (editor "Meu build", anotações,
+   arquétipo, estratégia de time, builds de referência) - todos com seu
+   próprio listener por id, então não colidem HOJE, mas um futuro
+   listener delegado em .ts-build-copy escopado a `document` (uma
+   "simplificação" natural) dispararia em todos eles por engano. Só o
+   botão real de copiar dentro de #team-slots usa .ts-build-copy agora;
+   todo o resto usa .text-action-btn, puramente visual. */
+.ts-build-copy, .ts-ai-generate-btn, .text-action-btn {
+  background: none;
+  border: none;
+  color: var(--badge-accent2);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.ts-build-note { font-size: 11px; color: var(--text-dim); margin-top: 6px; font-style: italic; }
+.ts-item-desc { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+.ts-item-desc b { color: var(--text); }
+
+.bh-details { margin-top: 10px; }
+.bh-details + .bh-details { margin-top: 8px; }
+/* Used to be a bare dim line with a tiny triangle - easy to mistake for
+   stray text, not a feature (user feedback, 2026-09-09). Now styled like
+   any other clickable row in the app, so it reads as one. */
+.bh-details summary {
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--badge-accent2);
+  list-style: none;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.bh-details summary:hover { background: var(--surface-3); }
+.bh-details summary::-webkit-details-marker { display: none; }
+.bh-details summary::before { content: "▸ "; }
+.bh-details[open] summary::before { content: "▾ "; }
+.bh-entry { margin-top: 10px; }
+.bh-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.bh-date { font-size: 10.5px; color: var(--text-dim); }
+.bh-context { font-size: 11px; color: var(--text); font-style: italic; flex: 1; }
+.bh-copy { background: none; border: none; color: var(--badge-accent2); font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; }

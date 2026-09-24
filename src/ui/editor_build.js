@@ -271,13 +271,13 @@
       (hasBuild && b.plano ? planoDaBuildHtml(golpesNoCap(sp, b.moves, b.plano, getCurrentCap())) +
         buildNoteHtml("Aqui você edita os golpes de agora; as trocas acima entram sozinhas no time quando o level cap liberar.") : "") +
       '<div class="mybuild-row">' +
-        '<label class="mybuild-field">Habilidade<select id="mybuild-ability">' + abiOptionsHtml + '</select></label>' +
-        '<label class="mybuild-field">Nature<select id="mybuild-nature">' + natureOptionsHtml + '</select></label>' +
-        '<label class="mybuild-field">Item<input type="text" id="mybuild-item" list="mybuild-item-list" placeholder="Buscar item..." autocomplete="off"></label>' +
+        '<label class="mybuild-field">Habilidade<select id="mybuild-ability" class="campo campo-ajuste">' + abiOptionsHtml + '</select></label>' +
+        '<label class="mybuild-field">Nature<select id="mybuild-nature" class="campo campo-ajuste">' + natureOptionsHtml + '</select></label>' +
+        '<label class="mybuild-field">Item<input type="text" id="mybuild-item" class="campo campo-ajuste" list="mybuild-item-list" placeholder="Buscar item..." autocomplete="off"></label>' +
       '</div>' + itemDatalist +
       '<div class="mybuild-row mybuild-moves">' +
         [0, 1, 2, 3].map(function (i) {
-          return '<label class="mybuild-field">Golpe ' + (i + 1) + '<select id="mybuild-move-' + i + '">' + moveOptionsHtml + '</select></label>';
+          return '<label class="mybuild-field">Golpe ' + (i + 1) + '<select id="mybuild-move-' + i + '" class="campo campo-ajuste">' + moveOptionsHtml + '</select></label>';
         }).join("") +
       '</div>' + mbLockedHint +
       '<div class="mybuild-ivev">' +
@@ -288,7 +288,7 @@
         '<div class="mybuild-ev-bar-track"><div class="mybuild-ev-bar-fill" id="mybuild-ev-bar"></div></div>' +
       '</div>' +
       '<div class="boss-level-row"><label for="mybuild-level">Status calculados pro nível (level cap atual' + (mbCap ? ": " + mbCap : "") + ')</label>' +
-        '<input type="number" id="mybuild-level" min="1" max="100" value="' + (myBuildLevel || mbCap || 50) + '"></div>' +
+        '<input type="number" id="mybuild-level" class="campo campo-numero" min="1" max="100" value="' + (myBuildLevel || mbCap || 50) + '"></div>' +
       '<div id="mybuild-status-preview"></div>' +
       '<p class="mybuild-hint" style="margin:2px 0 12px;">Preenchido a partir do level cap configurado em Progresso - pode digitar outro valor pra simular, mas volta a seguir o cap sempre que ele mudar. Poder de golpe considera STAB e Life Orb quando presente - não é uma calculadora de dano (sem efetividade de tipo, sem status de campo, sem outras habilidades de golpe).</p>' +
       '<div class="notes-actions"><button id="mybuild-save" class="text-action-btn" type="button">Salvar build</button>' +

@@ -366,14 +366,14 @@
       bossConfrontoHtml(boss, party) +
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
         '<div class="boss-level-row"><label for="boss-level-input">Status final calculados pro nível</label>' +
-          '<input type="number" id="boss-level-input" min="1" max="100" value="' + bossState.level + '"></div>' +
+          '<input type="number" id="boss-level-input" class="campo campo-numero" min="1" max="100" value="' + bossState.level + '"></div>' +
         '<p style="color:var(--text-dim);font-size:11px;margin:4px 0 12px;max-width:65ch;">Você digita o nível — não temos como saber o nível real de um treinador nos dados do jogo (por isso não existe uma calculadora de dano completa aqui, só isso). EVs/IVs são reais, extraídos do jogo. Considera o item quando é Choice Band/Specs/Scarf, Assault Vest, Tactical Vest, Thick Club ou Light Ball (marcado com *). Quando é Mega Stone ou orbe de reversão primal, os status já são calculados na forma transformada (types e stats reais dessa forma) — mas não sabemos qual das habilidades escolhíveis DA FORMA MEGA fica ativa (os dados não dizem), e não simulamos clima/campo/Trick Room já ativos antes da transformação (isso exigiria simular a ordem dos turnos, que este cálculo não faz). Efeito de habilidade em geral e itens ainda não identificados também não entram na conta.</p>' +
         '<div class="boss-mon-grid">' + monsHtml + '</div></div>' +
       renderGymSkillsCardHtml(boss) +
       '<div class="card"><h3>Enviar para o Claude</h3>' +
         '<p style="color:var(--text-dim);font-size:12.5px;margin:0 0 10px;max-width:65ch;">Junta o time dele com o seu time e sua caixa num texto só. Copie e cole na conversa pra eu montar a contra-estratégia.</p>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">' +
-          '<textarea id="boss-export-text" class="mono" readonly rows="5" style="flex:1;min-width:220px;padding:9px 10px;border-radius: var(--radius-md);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12px;resize:vertical;">' + escapeHtml(exportText) + '</textarea>' +
+          '<textarea id="boss-export-text" class="campo campo-texto mono" readonly rows="5" style="flex:1;min-width:220px;font-size:12px;resize:vertical;">' + escapeHtml(exportText) + '</textarea>' +
           '<button id="boss-export-copy" class="add-team-btn" type="button">Copiar</button>' +
         '</div>' +
         '<div id="boss-export-status" style="font-size:11.5px;color:var(--badge-accent2);margin-top:6px;min-height:14px;"></div>' +

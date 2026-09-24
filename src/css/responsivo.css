@@ -1,0 +1,91 @@
+@media (max-width: 860px) {
+  /* #view-dex.active { flex-direction: column } subiu pra regra
+     incondicional acima (achado real, 2026-09-18) - o resto daqui
+     continua mobile-only: grade de 1 coluna e sidebar/lista colapsável. */
+  .dex-shell { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .dex-sidebar { display: flex; }
+  /* With a detail open, keep the search box on screen and step only the
+     results list aside — otherwise looking up a second Pokemon means going
+     back to the list first. Typing brings the list right back (see JS). */
+  .dex-shell.show-detail .dex-sidebar {
+    display: flex;
+    flex: none;
+    min-height: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .dex-shell.show-detail .species-list,
+  .dex-shell.show-detail .filter-row,
+  .dex-shell.show-detail .type-filter-panel { display: none; }
+  .dex-shell.show-detail .search-row { padding: 10px 14px; }
+  .dex-shell:not(.show-detail) .species-detail { display: none; }
+  /* Vertical space is scarce here and the Pokemon being looked at matters
+     more than the team summary - hide the dashboard while a detail is
+     open. */
+  #dashboard:has(+ .dex-shell.show-detail) { display: none; }
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    color: var(--badge-accent2);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    padding: 0;
+  }
+  .topbar { padding: 10px 12px; gap: 10px; }
+  .species-detail { padding: 16px 16px 50px; }
+  .team-shell, .types-shell { padding: 16px 16px 50px; }
+}
+
+/* Phone layout: the header must not eat the screen, and every tab has to stay
+   reachable — at 375px all six no longer fit on one row. */
+@media (max-width: 620px) {
+  .brand-sub { display: none; }
+  .brand-mark { width: 32px; height: 32px; font-size: 16px; border-radius: var(--radius-md); }
+  .brand-text h1 { font-size: 16px; }
+  .topbar { padding: 8px 10px; gap: 8px; }
+  .tabs-row { width: 100%; }
+  .tabs {
+    flex: 1;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    /* touch-action (achado real do usuário, 2026-09-20): sem isso, um
+       navegador mobile pode gastar tempo decidindo se o gesto é rolagem
+       ou algo mais antes de mover a barra - declarar que só rola no eixo
+       X tira essa ambiguidade. scroll-snap faz a barra sempre PARAR
+       alinhada numa aba inteira (nunca com uma aba pela metade) - reduz
+       o toque perdido logo depois de rolar, porque o alvo não fica se
+       reacomodando sob o dedo. */
+    touch-action: pan-x;
+    scroll-snap-type: x proximity;
+    /* Hiding the scrollbar (above) also hid the only cue that Progresso
+       and Tipos exist off to the right - a fade at both edges signals
+       "more to scroll" the way native horizontal chip/tab lists do. See
+       AUDITORIA-DOSSIE.md UX 3. */
+    mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn { white-space: nowrap; padding: 7px 9px; font-size: 13px; scroll-snap-align: start; }
+  /* Rótulo curto só em vez do completo - ver comentário junto de
+     .tab-label-short acima. Reduz a largura total das 4 abas o
+     suficiente pra caber (ou quase caber) sem rolar na maioria dos
+     aparelhos reais, em vez de só mitigar o toque perdido depois de já
+     forçar a rolagem. */
+  .tab-label-full { display: none; }
+  .tab-label-short { display: inline; }
+  .species-row { padding: 6px 10px; gap: 8px; }
+  .species-row .dexno { display: none; }
+  .team-slots { grid-template-columns: 1fr; }
+  .saved-teams-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

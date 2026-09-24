@@ -1,0 +1,35 @@
+/* Campos de formulário (fase 7 da refatoração, 2026-09-24).
+   Antes cada campo repetia a mesma "pele" (borda, fundo, cor, raio) - por id,
+   por seletor de área ou inline no HTML/JS, em ~12 lugares. Resultado: a
+   busca dos Chefões ficou sem estilo nenhum (ninguém lembrou de repetir) e
+   nenhum campo herdava a fonte do app.
+   Uso: class="campo" + um tamanho. Largura e posição continuam na regra da
+   área (a pele é a mesma em qualquer lugar). */
+
+/* Os navegadores dão fonte própria a input/select/textarea (Arial no
+   Chromium) - só button já herdava a do app. */
+input, select, textarea { font-family: inherit; }
+
+.campo {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: var(--radius-md);
+}
+/* Busca principal de uma lista (Dex, Chefões, Velocidades). */
+.campo-busca { width: 100%; padding: 10px 12px; font-size: 14px; }
+.campo-busca:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+/* Texto livre: busca na caixa, nome do time, anotação, comparação. */
+.campo-texto { padding: 9px 10px; font-size: 13px; }
+/* Ajustes (Progresso, editor de build). */
+.campo-ajuste { padding: 8px 9px; font-size: 13px; }
+/* Filtro compacto ao lado de outro controle (ordenar, categoria). */
+.campo-filtro { padding: 7px 8px; font-size: 12.5px; }
+/* Número curto (nível). */
+.campo-numero { width: 62px; padding: 5px 8px; font-size: 13px; }
+
+/* Formulário de ajustes (aba Progresso): rótulo em cima, campo, dica embaixo.
+   Antes o mesmo style="" repetido em cada rótulo e cada dica. */
+.card-ajustes { max-width: 460px; }
+.rotulo-ajuste { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; font-weight: 600; }
+.rotulo-ajuste-dica { font-weight: 400; font-size: 11px; color: var(--text-dim); }
