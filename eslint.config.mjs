@@ -36,6 +36,10 @@ for (const f of REGRAS) for (const n of nomesDoTopo(readFileSync("src/regras/" +
 const template = readFileSync("artifact_template.html", "utf8");
 const scriptPrincipal = (template.match(/<script>([\s\S]*?)<\/script>/) || ["", ""])[1];
 const nomesTemplate = nomesDoTopo(scriptPrincipal, 2);
+// Interface (src/ui, fase 5): colada no mesmo <script>, mesmo escopo.
+const UI = readdirSync("src/ui").filter((f) => f.endsWith(".js"));
+const nomesUi = new Set();
+for (const f of UI) for (const n of nomesDoTopo(readFileSync("src/ui/" + f, "utf8"), 2)) nomesUi.add(n);
 const SMOKE = readdirSync("scripts/smoke_tests").filter((f) => f.endsWith(".js"));
 const nomesSmoke = new Set();
 for (const f of SMOKE) for (const n of nomesDoTopo(readFileSync("scripts/smoke_tests/" + f, "utf8"), 0)) nomesSmoke.add(n);
@@ -55,7 +59,8 @@ const processadorTemplate = {
     let js = "\n".repeat(antes) + m[1];
     linhasDoTemplate = texto.split("\n").length;
     const fim = js.lastIndexOf("})(");
-    const regras = REGRAS.map((f) => readFileSync("src/regras/" + f, "utf8")).join("\n");
+    const regras = REGRAS.map((f) => readFileSync("src/regras/" + f, "utf8"))
+      .concat(UI.map((f) => readFileSync("src/ui/" + f, "utf8"))).join("\n");
     if (fim !== -1) {
       // O trecho depois do fechamento vai pra depois das regras, numa linha só
       // (é só "})();" e espaço), pra nada do template mudar de linha.
@@ -86,7 +91,7 @@ export default [
     files: ["src/regras/**/*.js"],
     languageOptions: {
       ecmaVersion: 2022, sourceType: "script",
-      globals: { ...globals.browser, ...comoGlobais(nomesRegras, "writable"), ...comoGlobais(nomesTemplate, "writable") },
+      globals: { ...globals.browser, ...comoGlobais(nomesRegras, "writable"), ...comoGlobais(nomesTemplate, "writable"), ...comoGlobais(nomesUi, "writable") },
     },
     rules: {
       ...CORRECAO,
@@ -94,6 +99,21 @@ export default [
       // outra regra) - "não usada" dentro do arquivo não quer dizer morta.
       "no-unused-vars": ["error", { args: "none", caughtErrors: "none", vars: "local" }],
       // O nome declarado aqui também aparece na lista de globais derivada.
+      "no-redeclare": ["error", { builtinGlobals: false }],
+    },
+  },
+  {
+    // Interface: enxerga os nomes do template, das regras e dos outros arquivos
+    // de interface. "Não usada" só vale dentro de função (o que é do topo é
+    // usado por outro arquivo) - mesma regra das regras.
+    files: ["src/ui/**/*.js"],
+    languageOptions: {
+      ecmaVersion: 2022, sourceType: "script",
+      globals: { ...globals.browser, ...comoGlobais(nomesRegras, "writable"), ...comoGlobais(nomesTemplate, "writable"), ...comoGlobais(nomesUi, "writable"), claude: "readonly" },
+    },
+    rules: {
+      ...CORRECAO,
+      "no-unused-vars": ["error", { args: "none", caughtErrors: "none", vars: "local" }],
       "no-redeclare": ["error", { builtinGlobals: false }],
     },
   },

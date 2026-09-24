@@ -144,22 +144,29 @@ $final = Get-Content $templatePath -Raw -Encoding UTF8
 # mesmo escopo do <script> principal. O artifact publicado continua sendo um
 # arquivo só. Todo arquivo de src/regras precisa ter marcador, e todo marcador
 # precisa de arquivo - senão o build aborta.
-$regrasDir = Join-Path $root "src\regras"
-$marcadores = [regex]::Matches($final, "/\*@regras ([A-Za-z0-9_.]+)\*/")
-$usados = @{}
-foreach ($m in $marcadores) {
-    $nome = $m.Groups[1].Value
-    if ($usados.ContainsKey($nome)) { throw "Marcador /*@regras $nome*/ aparece mais de uma vez no template." }
-    $arq = Join-Path $regrasDir $nome
-    if (-not (Test-Path $arq)) { throw "Marcador /*@regras $nome*/ sem arquivo em src/regras." }
-    $usados[$nome] = $true
-    $final = $final.Replace($m.Value, (Get-Content $arq -Raw -Encoding UTF8).TrimEnd())
+# Desde a fase 5 da refatoracao (2026-09-24) o mesmo vale pra interface:
+# src/ui/*.js, marcador /*@ui NOME*/ - cada arquivo e colado no lugar exato de
+# onde saiu do template, entao a ordem de execucao do script nao muda.
+foreach ($tipo in @("regras", "ui")) {
+    $dir = Join-Path $root ("src\" + $tipo)
+    $marcadores = [regex]::Matches($final, "/\*@" + $tipo + " ([A-Za-z0-9_.]+)\*/")
+    $usados = @{}
+    foreach ($m in $marcadores) {
+        $nome = $m.Groups[1].Value
+        if ($usados.ContainsKey($nome)) { throw "Marcador /*@$tipo $nome*/ aparece mais de uma vez no template." }
+        $arq = Join-Path $dir $nome
+        if (-not (Test-Path $arq)) { throw "Marcador /*@$tipo $nome*/ sem arquivo em src/$tipo." }
+        $usados[$nome] = $true
+        $final = $final.Replace($m.Value, (Get-Content $arq -Raw -Encoding UTF8).TrimEnd())
+    }
+    if (Test-Path $dir) {
+        foreach ($f in (Get-ChildItem $dir -Filter "*.js" -File)) {
+            if (-not $usados.ContainsKey($f.Name)) { throw "src/$tipo/$($f.Name) nao tem marcador /*@$tipo $($f.Name)*/ no template - nunca chegaria no app." }
+        }
+    }
+    if ($final -match ("/\*@" + $tipo + " ")) { throw "Sobrou marcador /*@$tipo ...*/ depois da colagem." }
+    Write-Output "  $tipo coladas: $($usados.Count) arquivo(s) de src/$tipo"
 }
-foreach ($f in (Get-ChildItem $regrasDir -Filter "*.js" -File)) {
-    if (-not $usados.ContainsKey($f.Name)) { throw "src/regras/$($f.Name) nao tem marcador /*@regras $($f.Name)*/ no template - nunca chegaria no app." }
-}
-if ($final -match "/\*@regras ") { throw "Sobrou marcador /*@regras ...*/ depois da colagem." }
-Write-Output "  regras coladas: $($usados.Count) arquivo(s) de src/regras"
 $ser = New-GameDataParser
 
 foreach ($placeholder in $dataFiles.Keys) {
