@@ -195,6 +195,27 @@ async function section24() {
         r3 === true && l3.length === 2 && !l3[0].active && l3[0] === marcada && !marcada.revisar && l3[1].active && l3[1].source === "ia" && l3[1].planoConsultado === true,
         l3.map((b) => b.moves.join("/") + (b.active ? "*" : "")));
     }
+
+    // ---- "+" da lista da Dex com a ficha do mesmo Pokémon aberta ao lado
+    // (levantamento de 2026-09-24: a ficha continuava oferecendo "Adicionar"). ----
+    S.team = [];
+    document.querySelector('.tab-btn[data-tab="dex"]').click();
+    await wait(30);
+    setSearch("Swampert");
+    await wait(120);
+    const linha = document.querySelector('#species-list .species-row[data-x="' + TE.getSpeciesBySname("SPECIES_SWAMPERT").x + '"]');
+    if (achou("linha do Swampert na busca", linha)) {
+      linha.click();
+      await wait(60);
+      const btnAntes = document.getElementById("add-team-btn");
+      const ativoAntes = !!btnAntes && !btnAntes.disabled;
+      linha.querySelector(".row-add-btn").click();
+      await wait(60);
+      const btnDepois = document.getElementById("add-team-btn");
+      check("\"+\" da lista atualiza a ficha aberta do mesmo Pokémon (Adicionar ao time fica desativado)",
+        ativoAntes && btnDepois && btnDepois.disabled && S.team.length === 1, { ativoAntes, desativadoDepois: btnDepois && btnDepois.disabled });
+    }
+    setSearch("");
   } finally {
     if (claudeAntes === undefined) delete window.claude; else window.claude = claudeAntes;
     TE.applySave(snapshot);

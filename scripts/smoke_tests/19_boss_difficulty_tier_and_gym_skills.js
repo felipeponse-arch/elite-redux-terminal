@@ -37,6 +37,20 @@ async function section19() {
     var insaneBtn = document.querySelector('.chip-btn[data-diff="insane"]');
     check("o seletor manual de chips (Padrão/Insane/Hell) continua disponível pra conferir os outros tiers",
       !!insaneBtn);
+    // Levantamento de 2026-09-24: mudar a dificuldade no Progresso não mudava o
+    // time do chefão que já estava aberto (só ao reabrir).
+    timeSelecionadoPara("ace");
+    document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+    await wait(30);
+    var diffSel = document.getElementById("settings-difficulty");
+    diffSel.value = "elite";
+    diffSel.dispatchEvent(new Event("change", { bubbles: true }));
+    document.querySelector('.tab-btn[data-tab="bosses"]').click();
+    await wait(30);
+    check("mudar a dificuldade atualiza o chefão já aberto, sem reabrir (Ace 5 -> Elite 6 membros)",
+      document.querySelectorAll(".boss-mon-card .bm-name").length === 6, "membros=" + document.querySelectorAll(".boss-mon-card .bm-name").length);
+    diffSel.value = diffOriginal;
+    diffSel.dispatchEvent(new Event("change", { bubbles: true }));
   }
   T.state.settings.difficulty = diffOriginal;
   document.getElementById("boss-search-input").value = "";

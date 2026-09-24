@@ -1,4 +1,4 @@
-<#
+﻿<#
 Trava de build: nenhuma entrada de data/builds.json pode citar habilidade ou
 golpe que a espécie não tem de verdade em data/dex_compact.json.
 

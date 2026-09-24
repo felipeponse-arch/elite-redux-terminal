@@ -1,4 +1,4 @@
-<#
+﻿<#
 Elite Redux Terminal - single build entrypoint.
 
 Regenerates data/dex_compact.json and data/bosses.json from the raw game data

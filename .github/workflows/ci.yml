@@ -43,6 +43,12 @@ jobs:
       - name: Auditoria de dependências (npm audit)
         run: npm audit --audit-level=high
 
+      # Fase 1 da refatoração (2026-09-24): acento corrompido, .ps1 sem BOM (o
+      # PowerShell 5.1 corrompe o acento e isso já errou 16 notas do rank) e
+      # erro de sintaxe, inclusive no JS de dentro do template.
+      - name: Travas de codificação e sintaxe
+        run: npm run check
+
       # Etapa 2 da pauta técnica (Q3): regras do jogo testadas no Node, sem
       # build nem navegador - falha em segundos, antes dos minutos de Chromium.
       - name: Testes unitários das regras (src/regras)
@@ -78,6 +84,13 @@ jobs:
       - name: Fuzz de formatos de save
         if: ${{ !cancelled() }}
         run: npm run test:fuzz
+
+      # Levantamento de 2026-09-24: o teste do merge entre aparelhos (o código
+      # mais delicado do app, com bugs reais no histórico) não rodava em lugar
+      # nenhum.
+      - name: Sincronização entre aparelhos (mock do db)
+        if: ${{ !cancelled() }}
+        run: npm run test:sync
 
       # Não bloqueia: as imagens de referência são geradas no Windows local, e
       # o runner do GitHub renderiza fonte com antialiasing diferente - falha

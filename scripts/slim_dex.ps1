@@ -1,4 +1,4 @@
-<#
+﻿<#
 Strips fields from data/dex_compact.json that the UI never renders, to cut page
 weight. Run AFTER transform.ps1 (which regenerates the full file from the raw
 game data) and before build.ps1.

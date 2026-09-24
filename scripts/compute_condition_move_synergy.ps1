@@ -1,4 +1,4 @@
-<#
+﻿<#
 Cruzamento final: habilidades condicionais (catálogo verificado à mão contra
 o texto real de cada uma - a mesma disciplina de FLAG_PHRASES em
 compute_ability_movepool_synergy.ps1) x golpes reais que a PRÓPRIA espécie

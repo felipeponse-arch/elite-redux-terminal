@@ -142,6 +142,13 @@ async function main() {
     const currentPng = PNG.sync.read(screenshotBuffer);
     const baselinePath = path.join(BASELINE_DIR, `${scenario.name}.png`);
 
+    // Sem referência no CI = falha: gravar uma nova e passar escondia qualquer
+    // mudança (levantamento de 2026-09-24). Localmente continua criando a
+    // referência que falta, pra quem está montando um cenário novo.
+    if (!existsSync(baselinePath) && process.env.CI && !UPDATE_BASELINES) {
+      results.push({ name: scenario.name, status: "MUDOU", diffPct: "100.00", reason: "sem imagem de referência versionada - rode localmente e versione tests/visual_baselines/" + scenario.name + ".png" });
+      continue;
+    }
     if (!existsSync(baselinePath) || UPDATE_BASELINES) {
       writeFileSync(baselinePath, screenshotBuffer);
       results.push({ name: scenario.name, status: "baseline criada" });

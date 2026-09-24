@@ -1,4 +1,4 @@
-# Generates data/dex_compact.json from data/gameData_265beta.json (the raw
+﻿# Generates data/dex_compact.json from data/gameData_265beta.json (the raw
 # Elite Redux NextDex export). Run via build.ps1, or standalone for debugging.
 
 . (Join-Path $PSScriptRoot "common.ps1")

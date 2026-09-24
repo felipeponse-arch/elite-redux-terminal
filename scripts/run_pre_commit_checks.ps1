@@ -1,4 +1,4 @@
-<#
+﻿<#
 Roda ANTES de cada commit (git hook local) - garante que o build e a
 suite de smoke test inteira passam antes de qualquer commit entrar no
 historico. Achado real da auditoria completa da equipe (2026-09-13):
@@ -30,6 +30,15 @@ if (-not $nodeCmdUnit) {
   $portableRootUnit = Join-Path $env:LOCALAPPDATA "node-portable"
   $foundUnit = Get-ChildItem $portableRootUnit -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
   if ($foundUnit) { $env:PATH = "$($foundUnit.FullName);$env:PATH" }
+}
+# Travas estaticas (fase 1 da refatoracao, 2026-09-24): acento corrompido,
+# .ps1 sem BOM e erro de sintaxe - segundos, antes de qualquer teste.
+Write-Output "--- travas: codificacao e sintaxe ---"
+npm run check --silent
+if ($LASTEXITCODE -ne 0) {
+  Write-Output ""
+  Write-Output "Trava de codificacao ou sintaxe falhou - commit bloqueado."
+  exit 1
 }
 Write-Output "--- testes unitarios das regras ---"
 npm run test:unit --silent

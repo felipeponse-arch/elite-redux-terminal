@@ -1,5 +1,17 @@
 [
   {
+    "date": "2026-09-24",
+    "items": [
+      "A build acompanha o Pokémon: quando o level cap libera o golpe planejado, ele entra sozinho no lugar certo (e volta se o cap descer). O card mostra \"Já liberado\" e \"Próximas trocas\"",
+      "Ao evoluir, a build é revisada sozinha mantendo o papel; a anterior continua salva nos chips da ficha. A Mega usa a build da forma base, ajustando só a habilidade",
+      "Build curada com golpe que ainda não liberou ganha golpes provisórios até o da curada liberar",
+      "Sets de Estratégias ficam salvos: voltar à ficha não pede à IA de novo",
+      "Corrigido: 16 habilidades eram pontuadas errado no rank (ex.: Sturdy valia 0) - 33 espécies mudaram de letra",
+      "Corrigido: buff de ginásio marcado em outro aparelho não chegava neste",
+      "Corrigido: mudar a dificuldade não atualizava o chefão já aberto; o \"+\" da lista não atualizava a ficha aberta ao lado"
+    ]
+  },
+  {
     "date": "2026-09-17",
     "items": [
       "Novo card \"Buffs do ginásio\" na luta contra cada líder: mostra os buffs que ele ainda tem, e você marca os que já tirou vencendo os treinadores de apoio - sem precisar dizer qual treinador",

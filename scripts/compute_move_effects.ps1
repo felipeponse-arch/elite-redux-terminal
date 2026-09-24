@@ -1,4 +1,4 @@
-<#
+﻿<#
 Catálogo sistemático do efeito REAL de cada golpe (pedido do usuário,
 2026-09-20/21: "mesma pesquisa que fez com as habilidades, agora nos golpes,
 depois juntamos os dois"). Mesma disciplina de compute_ability_movepool_
@@ -58,7 +58,7 @@ $pt = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "move_translations
 # ("PowerShell 5.1 lê .ps1 sem BOM na codepage do sistema") - toda letra
 # acentuada escrita DIRETO no código deste arquivo (não vinda do JSON lido
 # com -Encoding UTF8) corrompe ao rodar via `-File` (confirmado: "confusão"
-# saiu "confusÃ£o" no JSON de teste). Testada primeiro a classe de caractere
+# saiu "confusÃ£o" no JSON de teste - mojibake). Testada primeiro a classe de caractere
 # [áa]/[ãa] (mesmo estilo já usado em Score-AbilityText, common.ps1), mas
 # não é suficiente aqui: se o PRÓPRIO acento no arquivo corrompe pra 2
 # bytes/caracteres errados, nem o "á" nem o "a" dentro do "[áa]" batem com o

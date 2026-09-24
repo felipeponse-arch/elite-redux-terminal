@@ -1,4 +1,4 @@
-<#
+﻿<#
 Classifica o PAPEL/arquétipo de cada espécie (Pivô/Tanque/Wallbreaker/Sweeper)
 e a divisão física/especial do seu ataque - pedido do usuário, 2026-09-11:
 o rank (compute_species_rank.ps1) mede "quão forte", isso mede "que TIPO de

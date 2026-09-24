@@ -2928,7 +2928,14 @@
   // the banner (and any store write at all) now only fires when something
   // real actually differs.
   var syncDb = null, syncRef = null;
-  var SYNC_CONTENT_KEYS = ["team", "box", "savedTeams", "settings", "notes", "customBuilds", "strategySets", "archetype"];
+  // Campos que NÃO contam como "o conteúdo mudou": versão/datas mudam a cada
+  // gravação, e o log "O que o app fez sozinho" registra ações locais (se só
+  // ele difere, não há nada pra oferecer ao jogador). Todo o resto do save
+  // conta - a lista é derivada de buildSave() (2026-09-24: era uma lista fixa
+  // à parte, que ficou sem gymSkillsCleared e autoEvolved, e o buff de ginásio
+  // marcado em outro aparelho era ignorado).
+  var SYNC_IGNORADAS = ["v", "dataVersion", "savedAt", "autoLog"];
+  var SYNC_CONTENT_KEYS = Object.keys(buildSave()).filter(function (k) { return SYNC_IGNORADAS.indexOf(k) === -1; });
   function syncContentDiffers(a, b) {
     if (!a || !b) return true;
     for (var i = 0; i < SYNC_CONTENT_KEYS.length; i++) {
@@ -3658,6 +3665,10 @@
         if (state.team.length >= 6) { openSwapModal(x); return; }
         if (rosterMove(x, null)) { // updateTeamBadge inside re-syncs the + / ✓ buttons
           flashToast(getSpeciesByX(x).n + " adicionado ao time (" + state.team.length + "/6)");
+          // A ficha do MESMO Pokémon aberta ao lado (computador) mostrava ainda o
+          // botão "Adicionar ao time" (levantamento de 2026-09-24). Só redesenha
+          // se ela já está aberta - selectSpecies abre o detalhe no celular.
+          if (state.selected === x && document.getElementById("dex-shell").classList.contains("show-detail")) selectSpecies(x);
         }
         return;
       }
@@ -8181,11 +8192,15 @@
     return lines.join("\n");
   }
 
+  // Variante do time do chefão pra dificuldade atual (cai no time padrão quando
+  // o chefão não tem aquela variante).
+  function varianteDoChefao(boss) {
+    var preferida = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
+    return (boss && boss[preferida] && boss[preferida].length) ? preferida : "party";
+  }
   function selectBoss(i) {
     bossState.selected = i;
-    var preferred = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
-    var boss = BOSSES[i];
-    bossState.diff = (boss && boss[preferred] && boss[preferred].length) ? preferred : "party";
+    bossState.diff = varianteDoChefao(BOSSES[i]);
     document.querySelectorAll("#boss-list .species-row").forEach(function (r) {
       var isThis = parseInt(r.dataset.i, 10) === i;
       r.classList.toggle("selected", isThis);
@@ -8542,6 +8557,15 @@
       state.settings.difficulty = diffSel.value;
       saveSettings();
       scheduleDashboardRefresh();
+      // Chefão já aberto passa pra variante da dificuldade nova (levantamento de
+      // 2026-09-24: só mudava ao reabrir o chefão). Mesma escolha de variante de
+      // selectBoss(), sem mexer na navegação (no celular o jogador pode estar na
+      // lista, com o chefão ainda marcado).
+      var bossAberto = bossState.selected !== null ? BOSSES[bossState.selected] : null;
+      if (bossAberto) {
+        bossState.diff = varianteDoChefao(bossAberto);
+        renderBossDetail();
+      }
     });
     capSel.addEventListener("change", function () {
       state.settings.levelCapMode = LEVEL_CAP_MODES.indexOf(capSel.value) !== -1 ? capSel.value : "more";

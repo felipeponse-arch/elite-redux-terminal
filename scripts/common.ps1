@@ -1,4 +1,4 @@
-# Shared helpers for the Elite Redux Terminal data pipeline.
+﻿# Shared helpers for the Elite Redux Terminal data pipeline.
 # Dot-source this from other scripts: . (Join-Path $PSScriptRoot "common.ps1")
 
 Add-Type -AssemblyName System.Web.Extensions

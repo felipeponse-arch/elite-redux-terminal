@@ -1,4 +1,4 @@
-<#
+﻿<#
 Rank robusto por simulação (vigésima-quarta passagem, 2026-09-12) - reunião
 completa da equipe pedida pelo usuário depois de feedback pesado ("algo no
 rank não faz sentido"). A versão anterior deste script pesava só atributos

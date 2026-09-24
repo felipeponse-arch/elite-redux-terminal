@@ -22,6 +22,7 @@
 // do remoto; 2026-09-13: aceitar remoto mais VELHO só porque chegou depois),
 // pra provar que a correção continua valendo, não só que o mock "funciona".
 import { chromium } from "playwright";
+import { readFileSync } from "node:fs";
 
 const BASE_URL = process.env.CI_SMOKE_BASE_URL || "http://localhost:8100";
 const SERVER_WAIT_TIMEOUT_MS = 30000;
@@ -244,6 +245,24 @@ async function main() {
     check("save remoto com habilidade inexistente: ajuste GRAVADO no aparelho (antes sumia)", result.gravado && result.gravado !== "Moxie", result);
     check("save remoto com habilidade inexistente: ajuste devolvido pro sync", result.devolvido && result.devolvido !== "Moxie", result);
     check("nenhum erro de página durante o cenário E", pageErrors.length === 0, pageErrors);
+  }
+
+  // ---- Cenário F: o outro aparelho mudou SÓ um campo que a lista fixa antiga
+  // não conferia (buff de ginásio resgatado, auto-evolução). Achado do
+  // levantamento de 2026-09-24: a mudança era ignorada em silêncio. ----
+  {
+    const gym = JSON.parse(readFileSync(new URL("../data/gym_skills.json", import.meta.url), "utf8"));
+    const lider = Object.keys(gym.leaders)[0];
+    const buff = gym.leaders[lider].buffs[0].id;
+    const remotoInicial = baseSave({ team: [], savedAt: "2020-01-01T00:00:00.000Z" });
+    const { result, pageErrors } = await withPage(browser, remotoInicial, async (page) => {
+      const remotoNovo = baseSave({ team: [], savedAt: "2099-01-01T00:00:00.000Z", gymSkillsCleared: { [lider]: [buff] } });
+      await page.evaluate((doc) => window.__syncMock.snapshotCallback(doc), remotoNovo);
+      await page.waitForTimeout(50);
+      return page.evaluate((l) => ({ buffs: (window.__erTest.state.gymSkillsCleared || {})[l] || [] }), lider);
+    });
+    check("buff de ginásio marcado em outro aparelho chega aqui (antes era ignorado)", result.buffs.indexOf(buff) !== -1, result);
+    check("nenhum erro de página durante o cenário F", pageErrors.length === 0, pageErrors);
   }
 
   await browser.close();

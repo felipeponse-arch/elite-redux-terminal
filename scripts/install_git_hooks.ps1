@@ -1,4 +1,4 @@
-<#
+﻿<#
 Instala o hook local de pre-commit (build + suite de smoke test completa
 antes de qualquer commit entrar no histórico). .git/hooks/ NUNCA é
 versionado pelo git - por isso o hook em si (scripts/run_pre_commit_checks.ps1)

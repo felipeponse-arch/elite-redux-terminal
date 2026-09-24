@@ -1,4 +1,4 @@
-<#
+﻿<#
 Prepara artifact_final.html pra publicação - único caminho aceito pra
 publicar (item I3 da pauta técnica, 2026-09-16).
 

@@ -1,4 +1,4 @@
-# Injecao de mock de sincronizacao (db), 2026-09-11: exclusiva deste servidor
+﻿# Injecao de mock de sincronizacao (db), 2026-09-11: exclusiva deste servidor
 # de dev local - NUNCA entra no artifact_final.html publicado. Motivo: ao
 # contrario do mock de IA (claude.use("sample")), que a suite de testes
 # consegue injetar em window.claude a qualquer momento porque generateBuildWithAI()

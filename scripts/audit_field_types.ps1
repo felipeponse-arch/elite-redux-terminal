@@ -1,4 +1,4 @@
-# Varredura sistemática de tipos no dado bruto do NextDex, 2026-09-10.
+﻿# Varredura sistemática de tipos no dado bruto do NextDex, 2026-09-10.
 #
 # Motivo: dois bugs reais encontrados na mesma sessão (evolveChainByX,
 # evoConditionText) vieram do mesmo erro - `evolutions[].rs` (o requisito de
