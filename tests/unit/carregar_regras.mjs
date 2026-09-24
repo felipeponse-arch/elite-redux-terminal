@@ -25,7 +25,18 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
     ITEM_DESC: lerJson("item_descriptions.json"),
     ITEM_PT: lerJson("item_translations_pt.json"),
     MOVE_ROLES: lerJson("move_roles.json"),
-    state: { settings: { difficulty, levelCapMode, milestone, megaMode }, customBuilds: {}, notes: {} },
+    BOSSES: lerJson("bosses.json"),
+    GYM_SKILLS: lerJson("gym_skills.json"),
+    // Mesmo formato do `state` inicial do template (var state = {...}): desde a
+    // fase 3 da refatoração (2026-09-24) save, evolução, builds e chefões moram
+    // em src/regras e leem o state inteiro.
+    state: {
+      query: "", typeFilter: new Set(), sort: "dex", selected: null, team: [], box: [],
+      settings: { difficulty, levelCapMode, milestone, megaMode, runConfirmedAt: null },
+      savedTeams: [], orphans: { team: [], box: [] }, notes: {}, autoEvolved: {}, autoLog: [],
+      gymSkillsCleared: {}, customBuilds: {}, strategySets: {},
+      archetype: { pace: null, weather: null, monotype: null, reasoning: "" },
+    },
   };
   vm.createContext(contexto);
   const template = readFileSync(join(root, "artifact_template.html"), "utf8");

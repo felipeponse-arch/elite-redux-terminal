@@ -20,3 +20,9 @@ declare var MOVE_ROLES: any;
 declare var SPECIES_RANK: Record<string, any>;
 /** Estado do app (time, caixa, builds, configurações...). */
 declare var state: any;
+/** Chefões e times deles (data/bosses.json). */
+declare var BOSSES: any[];
+/** Buffs de ginásio por líder (data/gym_skills.json). */
+declare var GYM_SKILLS: any;
+/** Papel natural por espécie (data/species_role.json). */
+declare var SPECIES_ROLE: Record<string, any>;

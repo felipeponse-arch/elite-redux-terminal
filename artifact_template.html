@@ -2272,40 +2272,6 @@
     return '<option value="' + escapeHtml(s.n) + '">';
   }).join("");
 
-  // sname list (persisted form) -> x list (runtime form), dropping anything
-  // this data build no longer knows about. Unknown snames are NOT lost: the
-  // caller collects them separately (state.orphans) and buildSave() writes
-  // them back out untouched, so a save imported into an older/mismatched
-  // data build doesn't silently delete Pokemon on the next persist() - see
-  // AUDITORIA-DOSSIE.md 1.1.
-  function snamesToXs(list, orphansOut) {
-    if (!Array.isArray(list)) return [];
-    return list.filter(function (sn) {
-      var known = (typeof sn === "string") && !!SPECIES_BY_SNAME[sn];
-      if (!known && orphansOut && typeof sn === "string") orphansOut.push(sn);
-      return known;
-    }).map(function (sn) { return SPECIES_BY_SNAME[sn].x; });
-  }
-  function xsToSnames(list) {
-    return (list || []).map(snameOf).filter(Boolean);
-  }
-
-  var USABLE_TYPES = TYPES.filter(function (t) { return t !== "Mystery" && t !== "None" && t !== "Stellar"; });
-  var MONOTYPE_ARCHETYPES = USABLE_TYPES;
-
-  // Arquétipo de time (Fase 3b, 2026-09-12) - taxonomia REAL trazida pelo
-  // usuário (fonte: r/VGC no Reddit, registrada na memória do projeto), dois
-  // eixos independentes - um time pode ser "Sand" (clima) E "Balance"
-  // (ritmo) ao mesmo tempo. Vazio ("") = não definido, sempre a primeira
-  // opção dos dois <select> - nunca chuta um valor padrão.
-  var PACE_ARCHETYPES = ["Hyper Offense", "Balance", "Bulky Offense", "Stall", "Semi-Stall"];
-  var WEATHER_ARCHETYPES = ["Sand", "Rain", "Sun", "Snow", "Trick Room"];
-  // Terceiro eixo, independente dos outros dois (Gerador Inteligente de
-  // Times, 2026-09-17, pedido do usuário): Monotype restringe o time a UM
-  // tipo só. Ao contrário de Ritmo/Clima (guia de estilo, a IA decide os
-  // membros livremente), Monotype é uma REGRA - o roster é filtrado por
-  // tipo real ANTES de mostrar pra IA (determinístico, não confia na IA
-  // pra respeitar isso sozinha). Preenchida logo abaixo de USABLE_TYPES.
 
   var TYPE_META = {
     Normal:  { hex: "#8e8873", dark: false },
@@ -2332,6 +2298,10 @@
   /*@regras confronto.js*/
   /*@regras reconciliar_build.js*/
 /*@regras plano_build.js*/
+/*@regras save.js*/
+/*@regras evolucao.js*/
+/*@regras builds.js*/
+/*@regras chefoes.js*/
 
   function typePill(name, small) {
     var meta = TYPE_META[name] || { hex: "#777", dark: false };
@@ -2474,276 +2444,14 @@
     archetype: { pace: null, weather: null, monotype: null, reasoning: "" }
   };
 
-  // ---------------- persistence ----------------
-  // Everything is stored under ONE versioned key so the whole save can be
-  // migrated, exported and imported as a unit. Schema:
-  //   { v: 2, team: [sname], box: [sname], savedTeams: [{name, team:[sname]}],
-  //     settings: {difficulty, milestone}, dataVersion, savedAt }
-  var AUTO_LOG_MAX = 30;
-  // Teto de espécies com sets de Estratégias guardados no save (os mais
-  // antigos saem primeiro) - o save vai pro localStorage e pra sincronização.
-  var STRATEGY_SETS_MAX = 60;
   var STORE_KEY = "er_terminal_save";
-  var SCHEMA_VERSION = 2;
 
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
 
-  function applySave(save) {
-    if (!save || typeof save !== "object") return;
-    // Orphans (snames this build doesn't recognise) are stored INSIDE
-    // save.team/save.box by buildSave(), not in a separate field, so they
-    // keep re-partitioning correctly on every future load: known-again ->
-    // back into the active list, still-unknown -> still an orphan.
-    var teamOrphans = [], boxOrphans = [];
-    state.team = snamesToXs(save.team, teamOrphans).slice(0, 6);
-    state.box = snamesToXs(save.box, boxOrphans);
-    state.orphans = { team: teamOrphans, box: boxOrphans };
-    if (Array.isArray(save.savedTeams)) {
-      state.savedTeams = save.savedTeams.filter(function (t) {
-        return t && Array.isArray(t.team);
-      }).slice(0, 3).map(function (t) {
-        return { name: String(t.name || ""), team: t.team.filter(function (s) { return typeof s === "string"; }) };
-      });
-    }
-    if (save.settings && typeof save.settings === "object") {
-      if (save.settings.difficulty) state.settings.difficulty = save.settings.difficulty;
-      if (LEVEL_CAP_MODES.indexOf(save.settings.levelCapMode) !== -1) state.settings.levelCapMode = save.settings.levelCapMode;
-      else state.settings.levelCapMode = levelCapModeFromDifficulty(save.settings.difficulty);
-      if (save.settings.megaMode === "permanente" || save.settings.megaMode === "temporaria") state.settings.megaMode = save.settings.megaMode;
-      if (typeof save.settings.milestone === "number") state.settings.milestone = save.settings.milestone;
-      if (typeof save.settings.runConfirmedAt === "string") state.settings.runConfirmedAt = save.settings.runConfirmedAt;
-      // Fase 1 quality-of-life, 2026-09-09: remember sort order + type
-      // filter between sessions - both used to silently reset on reload.
-      // typeFilter is validated against USABLE_TYPES so a hand-edited or
-      // stale save can't inject a name that isn't a real type.
-      if (typeof save.settings.sort === "string") state.sort = save.settings.sort;
-      if (Array.isArray(save.settings.typeFilter)) {
-        state.typeFilter = new Set(save.settings.typeFilter.filter(function (t) {
-          return USABLE_TYPES.indexOf(t) !== -1;
-        }));
-      }
-    }
-    // Bounds-check against this build's actual level-cap table: a save from
-    // a build with more/fewer milestones could otherwise index past the end
-    // of LEVELCAPS.rows wherever milestone is used to look up a row.
-    if (LEVELCAPS && Array.isArray(LEVELCAPS.rows) && LEVELCAPS.rows.length) {
-      var maxMilestone = LEVELCAPS.rows.length - 1;
-      if (state.settings.milestone < 0) state.settings.milestone = 0;
-      if (state.settings.milestone > maxMilestone) state.settings.milestone = maxMilestone;
-    }
-    // Defensive on import: only keep string values, so a hand-edited or
-    // corrupted save can't inject something odd into a field that gets
-    // rendered as plain text.
-    state.notes = {};
-    if (save.notes && typeof save.notes === "object") {
-      Object.keys(save.notes).forEach(function (k) {
-        if (typeof save.notes[k] === "string" && save.notes[k]) state.notes[k] = save.notes[k];
-      });
-    }
-    state.autoLog = Array.isArray(save.autoLog) ? save.autoLog.filter(function (e) {
-      return e && typeof e.at === "string" && typeof e.text === "string";
-    }).slice(0, AUTO_LOG_MAX).map(function (e) { return { at: e.at, text: e.text }; }) : [];
-    // Mesma disciplina defensiva das notas/builds acima: so aceita chave de
-    // lider e id de buff que realmente existem no GYM_SKILLS carregado agora -
-    // um save de uma versao futura/editada a mao nao injeta lixo aqui.
-    state.gymSkillsCleared = {};
-    if (save.gymSkillsCleared && typeof save.gymSkillsCleared === "object" && GYM_SKILLS) {
-      Object.keys(save.gymSkillsCleared).forEach(function (leaderName) {
-        var leaderData = GYM_SKILLS.leaders[leaderName];
-        var validIds = leaderData && leaderData.buffs ? leaderData.buffs.map(function (b) { return b.id; }) : [];
-        var arr = save.gymSkillsCleared[leaderName];
-        if (leaderData && Array.isArray(arr)) {
-          var kept = arr.filter(function (id) { return typeof id === "string" && validIds.indexOf(id) !== -1; });
-          if (kept.length) state.gymSkillsCleared[leaderName] = kept;
-        }
-      });
-    }
-    if (teamOrphans.length || boxOrphans.length) {
-      logAutoAction((teamOrphans.length + boxOrphans.length) + " Pokémon do save não existem nesta versão dos dados (" + teamOrphans.concat(boxOrphans).join(", ") + ") - guardados no save sem aparecer, pra não serem apagados.");
-    }
-    state.autoEvolved = {};
-    if (save.autoEvolved && typeof save.autoEvolved === "object") {
-      Object.keys(save.autoEvolved).forEach(function (k) {
-        var rec = save.autoEvolved[k];
-        if (rec && typeof rec.from === "string" && typeof rec.lvl === "number" && getSpeciesBySname(k) && getSpeciesBySname(rec.from)) {
-          state.autoEvolved[k] = { from: rec.from, lvl: rec.lvl };
-        }
-      });
-    }
-    // Same defensive-import discipline as notes above: only accept a build
-    // that actually has the right shape, so a hand-edited or corrupted
-    // save can't inject something odd into fields that get rendered as
-    // plain text or fed into calcFinalStat.
-    // UPDATE 2026-09-09: customBuilds[sname] used to be ONE build object;
-    // now it's an ARRAY of up to 3 (manual and/or AI-generated variants),
-    // so an old save (single object per species) needs wrapping into a
-    // 1-item array here - this is the one and only place that has to know
-    // both shapes exist, everything downstream only ever sees the array.
-    state.customBuilds = {};
-    if (save.customBuilds && typeof save.customBuilds === "object") {
-      Object.keys(save.customBuilds).forEach(function (k) {
-        var raw = save.customBuilds[k];
-        var rawList = Array.isArray(raw) ? raw : (raw && typeof raw === "object" ? [raw] : []);
-        var clean = rawList.slice(0, 3).map(function (b) {
-          if (!b || typeof b !== "object") return null;
-          var moves = Array.isArray(b.moves) ? b.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4) : [];
-          var entrada = {
-            ability: typeof b.ability === "string" ? b.ability : "",
-            nature: typeof b.nature === "string" ? b.nature : "",
-            item: typeof b.item === "string" ? b.item : "",
-            moves: moves,
-            ivs: Array.isArray(b.ivs) && b.ivs.length === 6 ? b.ivs.map(function (v) { return clampInt(v, 0, 31, 31); }) : [31, 31, 31, 31, 31, 31],
-            evs: Array.isArray(b.evs) && b.evs.length === 6 ? b.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0],
-            source: BUILD_SOURCES.indexOf(b.source) !== -1 ? b.source : "manual",
-            active: !!b.active,
-            savedAt: typeof b.savedAt === "string" ? b.savedAt : new Date().toISOString(),
-            rationale: typeof b.rationale === "string" ? b.rationale.slice(0, 280) : ""
-          };
-          // Campos de 2026-09-24 (build que acompanha o jogador). Só o formato é
-          // conferido aqui; o que vale pra espécie é conferido por reconciliarBuild
-          // logo abaixo e, de novo, na hora de derivar os golpes (golpesNoCap).
-          var plano = planoSaneado(b.plano, moves);
-          if (plano) entrada.plano = plano;
-          var ant = anteriorSaneado(b.anterior, 0);
-          if (ant) entrada.anterior = ant;
-          if (b.revisar === "evolucao" || b.revisar === "plano") entrada.revisar = b.revisar;
-          if (typeof b.revisadaDe === "string") entrada.revisadaDe = b.revisadaDe.slice(0, 40);
-          if (typeof b.tentativasRevisao === "number") entrada.tentativasRevisao = clampInt(b.tentativasRevisao, 0, 9, 0);
-          if (b.planoConsultado === true) entrada.planoConsultado = true;
-          return entrada;
-        }).filter(function (b) {
-          if (!b) return false;
-          var isEmpty = !b.ability && !b.nature && !b.item && !b.moves.length &&
-            b.ivs.every(function (v) { return v === 31; }) && b.evs.every(function (v) { return v === 0; });
-          return !isEmpty;
-        });
-        if (clean.length) {
-          if (!clean.some(function (b) { return b.active; })) clean[0].active = true;
-          state.customBuilds[k] = clean;
-        }
-      });
-    }
-    state.strategySets = sanitizarStrategySets(save.strategySets);
-    // Arquétipo do time (Fase 3b, 2026-09-12) - defensivo igual notes/
-    // customBuilds acima: só aceita valor que já é uma das opções reais
-    // (um save editado à mão ou de outra versão não pode injetar algo fora
-    // da taxonomia conhecida).
-    state.archetype = { pace: null, weather: null, monotype: null, reasoning: "" };
-    if (save.archetype && typeof save.archetype === "object") {
-      if (PACE_ARCHETYPES.indexOf(save.archetype.pace) !== -1) state.archetype.pace = save.archetype.pace;
-      if (WEATHER_ARCHETYPES.indexOf(save.archetype.weather) !== -1) state.archetype.weather = save.archetype.weather;
-      if (MONOTYPE_ARCHETYPES.indexOf(save.archetype.monotype) !== -1) state.archetype.monotype = save.archetype.monotype;
-      if (typeof save.archetype.reasoning === "string") state.archetype.reasoning = save.archetype.reasoning.slice(0, 500);
-    }
-    // Toda build salva precisa valer pra espécie em que está agora (achado do
-    // usuário, 2026-09-24: Haxorus com "Moxie", habilidade só do Axew/Fraxure).
-    // Conserta saves que já chegaram assim, tanto do próprio aparelho quanto de
-    // outro (sincronização) - ver reconciliarBuildsDe().
-    reconciliouAoAplicar = reconciliarBuildsSalvas();
-  }
-  var reconciliouAoAplicar = false;
 
-  // Versões anteriores de uma build (pilha da evolução em etapas - ver
-  // reconciliarBuildsDe). Profundidade máxima 3: é o máximo de etapas de uma
-  // linha evolutiva, e trava um save malformado que tente aninhar sem fim.
-  function anteriorSaneado(a, profundidade) {
-    if (profundidade >= 3 || !a || typeof a !== "object" || typeof a.sname !== "string" || !Array.isArray(a.moves)) return null;
-    var out = {
-      sname: a.sname.slice(0, 60),
-      ability: typeof a.ability === "string" ? a.ability : "",
-      moves: a.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4),
-      rationale: typeof a.rationale === "string" ? a.rationale.slice(0, 280) : ""
-    };
-    var plano = planoSaneado(a.plano, out.moves);
-    if (plano) out.plano = plano;
-    var mais = anteriorSaneado(a.anterior, profundidade + 1);
-    if (mais) out.anterior = mais;
-    return out;
-  }
 
-  // Mesma disciplina defensiva das builds: só aceita set com o formato certo,
-  // de espécie que existe nesta versão dos dados e gerado sobre ESTA versão
-  // (um patch novo muda movepool/habilidades - aí o set é descartado e a
-  // próxima visita gera de novo). Mantém só as STRATEGY_SETS_MAX mais novas.
-  function sanitizarStrategySets(raw) {
-    var out = {};
-    if (!raw || typeof raw !== "object") return out;
-    var versaoAtual = DATA.meta ? DATA.meta.version : null;
-    var entradas = [];
-    Object.keys(raw).forEach(function (sname) {
-      var e = raw[sname];
-      if (!e || typeof e !== "object" || !Array.isArray(e.sets) || !getSpeciesBySname(sname)) return;
-      if (versaoAtual && e.dataVersion && e.dataVersion !== versaoAtual) return;
-      var sets = e.sets.slice(0, 3).map(function (s) {
-        if (!s || typeof s !== "object" || typeof s.name !== "string" || !Array.isArray(s.moves)) return null;
-        var moves = s.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4);
-        if (!moves.length) return null;
-        return {
-          name: s.name.slice(0, 40),
-          ability: typeof s.ability === "string" ? s.ability : "",
-          nature: typeof s.nature === "string" ? s.nature : "",
-          item: typeof s.item === "string" ? s.item : "",
-          moves: moves,
-          evs: Array.isArray(s.evs) && s.evs.length === 6 ? s.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0],
-          rationale: typeof s.rationale === "string" ? s.rationale.slice(0, 400) : ""
-        };
-      }).filter(Boolean);
-      if (!sets.length) return;
-      entradas.push([sname, {
-        sets: sets,
-        cap: typeof e.cap === "number" ? e.cap : null,
-        dataVersion: typeof e.dataVersion === "string" ? e.dataVersion : versaoAtual,
-        geradoEm: typeof e.geradoEm === "string" ? e.geradoEm : ""
-      }]);
-    });
-    entradas.sort(function (a, b) { return a[1].geradoEm < b[1].geradoEm ? 1 : a[1].geradoEm > b[1].geradoEm ? -1 : 0; });
-    entradas.slice(0, STRATEGY_SETS_MAX).forEach(function (p) { out[p[0]] = p[1]; });
-    return out;
-  }
 
-  // ---------------- custom build list helpers ----------------
-  // state.customBuilds[sname] is always an array (0-3 entries) from this
-  // point on - every read/write in the app goes through these, so "which
-  // one is active", "add a new variant", "replace the shown one" and the
-  // 3-build cap all live in exactly one place.
-  function getBuildList(sname) { return state.customBuilds[sname] || []; }
-  function getActiveBuild(sname) {
-    var list = getBuildList(sname);
-    for (var i = 0; i < list.length; i++) { if (list[i].active) return list[i]; }
-    return list.length ? list[0] : null;
-  }
-  // Used by the two pre-existing "+ Usar como meu build" quick-copy buttons
-  // (boss party card, build-history/boss-reference entries) - their
-  // established behavior is "replace whatever's currently showing", not
-  // "add a new variant", so they keep working exactly as before even with
-  // the list-based storage underneath.
-  // Único lugar que monta a entrada salva de uma build (antes eram 2 cópias
-  // campo a campo, e um campo novo - o plano de golpes - sumia numa delas).
-  var BUILD_SOURCES = ["ia", "manual", "curada"];
-  // Plano de golpes: o que veio com a build; senão, o da build que ela substitui
-  // (editar a build à mão mantém as trocas dos golpes que continuam nela). Build
-  // sem plano que ainda tem golpe por liberar fica marcada pra revisão
-  // automática, que pede só o plano à IA (gerarPlanoParaBuild).
-  function entradaDeBuild(build, source, sname, substituida) {
-    var e = {
-      ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs,
-      source: BUILD_SOURCES.indexOf(source) !== -1 ? source : "manual", active: true, savedAt: new Date().toISOString(),
-      rationale: build.rationale || ""
-    };
-    var plano = (build.plano && Object.keys(build.plano).length) ? build.plano
-      : (substituida && substituida.plano ? planoSaneado(substituida.plano, build.moves || []) : null);
-    if (plano) e.plano = plano;
-    // Plano já perguntado à IA (mesmo que a resposta tenha sido "nenhuma troca"):
-    // editar natureza/EV/item sem mexer nos golpes não pede de novo.
-    var mesmosGolpes = !!substituida && (substituida.moves || []).slice().sort().join("|") === (build.moves || []).slice().sort().join("|");
-    if (build.planoConsultado || (mesmosGolpes && substituida.planoConsultado)) e.planoConsultado = true;
-    if (!plano && !e.planoConsultado && (e.source !== "ia" || build.pedirPlano)) {
-      var sp = getSpeciesBySname(sname);
-      if (sp && golpesFuturosDe(sp, getCurrentCap()).length) { e.revisar = "plano"; e.tentativasRevisao = 0; }
-    }
-    return e;
-  }
   // As 4 operações que mudam builds salvas são AÇÕES (ver acao()): gravam e
   // redesenham o que mostra build (card do time, ficha aberta, confronto do
   // chefão) sozinhas - quem chama não precisa lembrar de nada disso.
@@ -2793,31 +2501,6 @@
     });
   }
 
-  function buildSave() {
-    return {
-      v: SCHEMA_VERSION,
-      dataVersion: DATA.meta ? DATA.meta.version : null,
-      savedAt: new Date().toISOString(),
-      team: xsToSnames(state.team).concat(state.orphans.team),
-      box: xsToSnames(state.box).concat(state.orphans.box),
-      savedTeams: state.savedTeams,
-      // sort/typeFilter merged in here (not stored directly on
-      // state.settings) so every mutation site doesn't need to remember to
-      // keep two copies in sync - state.sort/state.typeFilter stay the
-      // single source of truth the rendering code already reads directly.
-      settings: Object.assign({}, state.settings, {
-        sort: state.sort,
-        typeFilter: Array.from(state.typeFilter)
-      }),
-      notes: state.notes,
-      autoEvolved: state.autoEvolved,
-      autoLog: state.autoLog,
-      gymSkillsCleared: state.gymSkillsCleared,
-      customBuilds: state.customBuilds,
-      strategySets: state.strategySets,
-      archetype: state.archetype
-    };
-  }
 
   function persist() {
     var save = buildSave();
@@ -3038,22 +2721,7 @@
   // the banner (and any store write at all) now only fires when something
   // real actually differs.
   var syncRef = null;
-  // Campos que NÃO contam como "o conteúdo mudou": versão/datas mudam a cada
-  // gravação, e o log "O que o app fez sozinho" registra ações locais (se só
-  // ele difere, não há nada pra oferecer ao jogador). Todo o resto do save
-  // conta - a lista é derivada de buildSave() (2026-09-24: era uma lista fixa
-  // à parte, que ficou sem gymSkillsCleared e autoEvolved, e o buff de ginásio
-  // marcado em outro aparelho era ignorado).
-  var SYNC_IGNORADAS = ["v", "dataVersion", "savedAt", "autoLog"];
-  var SYNC_CONTENT_KEYS = Object.keys(buildSave()).filter(function (k) { return SYNC_IGNORADAS.indexOf(k) === -1; });
-  function syncContentDiffers(a, b) {
-    if (!a || !b) return true;
-    for (var i = 0; i < SYNC_CONTENT_KEYS.length; i++) {
-      var k = SYNC_CONTENT_KEYS[i];
-      if (JSON.stringify(a[k]) !== JSON.stringify(b[k])) return true;
-    }
-    return false;
-  }
+  // (O que conta como "mudou" no sync: syncContentDiffers, src/regras/save.js.)
   // Save vindo de outro aparelho. Se a conferência das builds (applySave ->
   // reconciliarBuildsSalvas) precisou ajustar algo, grava o ajuste e devolve pro
   // sync - antes o ajuste ficava só na memória e sumia na próxima leitura
@@ -3224,195 +2892,9 @@
     document.getElementById("storage-banner").hidden = true;
   });
 
-  // Bug achado em 2026-09-17, conferido linha a linha contra o codigo-fonte
-  // oficial (src/battle_main.c da eliteredux-source): o jogo usa o campo
-  // "party" (mesmo time) pra Easy E Ace - a diferenca entre elas e so EVs
-  // habilitados, nao o time - e so troca de time em Elite ("insane"/
-  // partyInsane) e Hell ("hell"/partyHell), que o app nem modela como
-  // dificuldade selecionavel. Antes disto Ace mostrava o time de Elite
-  // (insane) e Elite mostrava o de Hell - o seletor manual de chips
-  // (Padrao/Insane/Hell) continua disponivel pra quem quiser conferir os
-  // outros tiers na mesma tela.
-  var DIFF_TO_BOSSKEY = { easy: "party", ace: "party", elite: "insane" };
 
   // ---------------- level cap & auto-evolution ----------------
 
-  // Auto-evolução por level cap, 2026-09-10 (pedido do usuário, decisões
-  // confirmadas por ele antes de construir): assume que todo Pokémon do
-  // time/caixa já está no nível liberado pelo cap atual - qualquer evolução
-  // por NÍVEL cujo requisito seja <= cap acontece sozinha, encadeando quantas
-  // etapas o cap permitir de uma vez (ex: cap pula de 20 pra 40 e o Pokémon
-  // evolui 2 vezes). Escopo deliberadamente restrito a `EVO_LEVEL` puro -
-  // EXCLUI variantes por gênero (EVO_LEVEL_MALE/FEMALE, que também têm `rs`
-  // numérico): o app não sabe o sexo real do Pokémon do usuário, e evoluir
-  // errado é pior que não evoluir. Também exclui troca/pedra/amizade/mega de
-  // propósito (mega já é seu próprio mecanismo de "mega permanente" em outro
-  // lugar deste app - não confundir os dois).
-  // Build/anotação salvas no nome antigo são carregadas pro novo nome (só se
-  // o novo nome ainda não tiver uma build/anotação própria - nunca sobrescreve
-  // algo que o usuário já configurou manualmente pra forma evoluída).
-  function evolveChainByX(x, cap, messages) {
-    var steps = 0;
-    while (steps < 10) { // trava de segurança contra dado malformado/ciclo
-      var sp = getSpeciesByX(x);
-      if (!sp || !sp.ev || !sp.ev.length) return x;
-      var applicable = null;
-      for (var i = 0; i < sp.ev.length; i++) {
-        var ev = sp.ev[i];
-        // O nível de evolução vem como STRING no dado bruto (ex: "16", não
-        // 16 - confirmado direto em data/dex_compact.json), mesmo quando é
-        // puramente numérico - por isso Number(...) em vez de checar
-        // typeof === "number", que falharia silenciosamente sempre.
-        var reqLevel = Number(ev[1]);
-        if (EVOKINDS[ev[0]] === EVO_LEVEL && !isNaN(reqLevel) && reqLevel <= cap) { applicable = ev; break; }
-      }
-      if (!applicable) return x;
-      var target = getSpeciesByX(applicable[2]);
-      if (!target || target.x === x) return x;
-      carryUserData(sp.sname, target.sname);
-      state.autoEvolved[target.sname] = { from: sp.sname, lvl: reqLevel };
-      messages.push(sp.n + " → " + target.n);
-      x = target.x;
-      steps++;
-    }
-    return x;
-  }
-  // Build/anotação acompanham a criatura quando ela muda de espécie (nos dois
-  // sentidos) - nunca sobrescreve algo que o destino já tenha próprio.
-  // Confere as builds salvas de UMA espécie contra os dados reais dela e ajusta o
-  // que não vale (reconciliarBuild, src/regras). Nunca apaga a build: troca a
-  // habilidade inexistente por uma escolhível real e tira só os golpes que a
-  // espécie não aprende - e anota o que mudou no log "O que o app fez sozinho",
-  // com o valor antigo, pra o jogador poder desfazer à mão se discordar.
-  // `deSname` (opcional): a espécie de onde a build veio. Quando o ajuste muda
-  // algo, a versão de antes fica guardada em `anterior` - se a criatura voltar
-  // pra aquela espécie (cap desceu), carryUserData restaura a build inteira em
-  // vez de ficar com os golpes cortados (defeito b da revisão da v136).
-  function reconciliarBuildsDe(sname, contexto, deSname) {
-    var sp = getSpeciesBySname(sname);
-    var list = state.customBuilds[sname];
-    if (!sp || !list) return false;
-    var mudou = false;
-    state.customBuilds[sname] = list.map(function (b) {
-      var r = reconciliarBuild(b, sp);
-      if (r.changes.length) {
-        mudou = true;
-        if (deSname) {
-          // Pilha: evolução em 2 etapas numa subida só (Axew -> Fraxure ->
-          // Haxorus) guarda as 2 versões, e a regressão desfaz uma de cada vez.
-          r.build.anterior = { sname: deSname, ability: b.ability, moves: (b.moves || []).slice(), rationale: b.rationale || "" };
-          if (b.plano) r.build.anterior.plano = b.plano;
-          if (b.anterior) r.build.anterior.anterior = b.anterior;
-        }
-        logAutoAction("Build de " + sp.n + " ajustada" + (contexto ? " (" + contexto + ")" : "") + ": " +
-          r.changes.map(function (c) { return c.campo + " " + c.de + " → " + c.para; }).join("; ") + ".");
-      }
-      return r.build;
-    });
-    return mudou;
-  }
-  // Build que volta pra espécie de onde veio recupera a versão guardada.
-  function restaurarAnteriorPara(list, sname) {
-    return list.map(function (b) {
-      if (!b.anterior || b.anterior.sname !== sname) return b;
-      var r = {};
-      Object.keys(b).forEach(function (k) { if (k !== "anterior") r[k] = b[k]; });
-      r.ability = b.anterior.ability;
-      r.moves = b.anterior.moves.slice();
-      r.rationale = b.anterior.rationale;
-      if (b.anterior.plano) r.plano = b.anterior.plano; else delete r.plano;
-      if (b.anterior.anterior) r.anterior = b.anterior.anterior;
-      return r;
-    });
-  }
-  function ehEvolucaoPraFrente(fromSname, toSname) {
-    var de = getSpeciesBySname(fromSname), para = getSpeciesBySname(toSname);
-    return !!(de && para && (de.ev || []).some(function (ev) { return ev[2] === para.x; }));
-  }
-  function reconciliarBuildsSalvas() {
-    var mudou = false;
-    Object.keys(state.customBuilds).forEach(function (sn) {
-      if (reconciliarBuildsDe(sn, "conferida contra os dados do jogo")) mudou = true;
-    });
-    return mudou;
-  }
-  // A build que muda de espécie passa por reconciliarBuildsDe: a habilidade e os
-  // golpes da espécie ANTERIOR podem não existir na nova (Fraxure -> Haxorus:
-  // Moxie sumiu).
-  // A build acompanha a criatura. Destino sem build própria: a lista inteira vai
-  // e vira a do destino. Destino que já tem build (de outra criatura da mesma
-  // espécie, ou montada pela Dex): as que chegam entram até o limite de 3, e a
-  // ativa da criatura que evoluiu continua ATIVA (é a que ela estava usando); a
-  // que já existia fica salva nos chips. O que não couber fica na origem - antes,
-  // nesse caso, a build da origem era apagada sem ir pra lugar nenhum (defeito a
-  // da revisão da v136). Mesma ideia pras anotações (só move se o destino não
-  // tiver).
-  function carryUserData(fromSname, toSname) {
-    var origem = state.customBuilds[fromSname];
-    if (origem && origem.length) {
-      var de = getSpeciesBySname(fromSname), para = getSpeciesBySname(toSname);
-      var contexto = de ? "passou de " + de.n + " pra " + (para || { n: toSname }).n : "";
-      var destino = state.customBuilds[toSname] || [];
-      var praFrente = ehEvolucaoPraFrente(fromSname, toSname);
-      var cabem = Math.max(0, 3 - destino.length);
-      // A ativa da origem vai primeiro, pra ser a que cabe quando falta espaço.
-      var ordenada = origem.filter(function (b) { return b.active; }).concat(origem.filter(function (b) { return !b.active; }));
-      var vao = restaurarAnteriorPara(ordenada.slice(0, cabem), toSname);
-      if (!praFrente) {
-        // Voltou de forma (cap desceu): nada de revisão pendente da evolução.
-        vao.forEach(function (b) { delete b.revisar; delete b.revisadaDe; delete b.tentativasRevisao; });
-      }
-      if (vao.length) {
-        var ativaChegou = vao.some(function (b) { return b.active; });
-        if (destino.length && ativaChegou) {
-          destino.forEach(function (b) { b.active = false; });
-          logAutoAction("A build que " + (de ? de.n : fromSname) + " usava continua ativa em " + (para ? para.n : toSname) +
-            "; a que já existia pra " + (para ? para.n : toSname) + " ficou salva nos chips da ficha.");
-        }
-        state.customBuilds[toSname] = destino.concat(vao);
-        if (ordenada.length > cabem) state.customBuilds[fromSname] = ordenada.slice(cabem);
-        else delete state.customBuilds[fromSname];
-        reconciliarBuildsDe(toSname, contexto, fromSname);
-        if (praFrente) marcarRevisaoPosEvolucao(toSname, fromSname);
-      }
-    }
-    if (state.notes[fromSname] && !state.notes[toSname]) {
-      state.notes[toSname] = state.notes[fromSname];
-      delete state.notes[fromSname];
-    }
-  }
-  // Desfaz, etapa por etapa, evoluções que ESTE app aplicou sozinho e que o
-  // cap atual não libera mais (ex: cap voltou de 60 pra 55 -> Selenumbra
-  // volta a ser Volcarona Redux). Só mexe no que está em state.autoEvolved:
-  // um Pokémon que o jogador adicionou já evoluído pela Dex nunca é tocado.
-  function devolveChainByX(x, cap, messages) {
-    var steps = 0;
-    while (steps < 10) {
-      var sp = getSpeciesByX(x);
-      var rec = sp ? state.autoEvolved[sp.sname] : null;
-      if (!rec || rec.lvl <= cap) return x;
-      var prev = getSpeciesBySname(rec.from);
-      if (!prev) return x;
-      carryUserData(sp.sname, prev.sname);
-      delete state.autoEvolved[sp.sname];
-      messages.push(sp.n + " voltou a " + prev.n + " (evolui no nível " + rec.lvl + ")");
-      x = prev.x;
-      steps++;
-    }
-    return x;
-  }
-  // Roda ao carregar o save e sempre que dificuldade/milestone mudam (na
-  // hora, conforme pedido do usuário) - não em toda renderização, já que
-  // percorre time+caixa inteiros. Retorna true se algo mudou, pra quem
-  // chamou saber se precisa re-renderizar/persistir de novo.
-  // Repetição da mesma mensagem seguida (ex: órfãos a cada abertura) não
-  // empilha - só atualiza a data da entrada que já existe.
-  function logAutoAction(text) {
-    var now = new Date().toISOString();
-    if (state.autoLog.length && state.autoLog[0].text === text) { state.autoLog[0].at = now; return; }
-    state.autoLog.unshift({ at: now, text: text });
-    if (state.autoLog.length > AUTO_LOG_MAX) state.autoLog.length = AUTO_LOG_MAX;
-  }
   function renderAutoLog() {
     var out = document.getElementById("auto-log-list");
     if (!out) return;
@@ -4760,32 +4242,8 @@
     }
   }
 
-  // ---- Smogon / Pokemon Showdown set format ----
-  // builds.json keeps human-readable notes in parentheses ("Tough Claws (única
-  // opção)"); Showdown wants the bare value, so strip them here rather than
-  // duplicating every field in the data file.
-  function stripNote(s) {
-    return String(s || "").replace(/\s*\(.*?\)\s*$/, "").trim();
-  }
 
-  // Showdown writes alternate forms hyphenated: "Charizard-Mega-X".
-  function showdownName(name) {
-    return String(name || "").trim().replace(/\s+/g, "-");
-  }
 
-  function showdownSet(sp, build) {
-    if (!build) return "";
-    var lines = [];
-    var item = stripNote(build.item);
-    lines.push(showdownName(sp.n) + (item ? " @ " + item : ""));
-    var ability = stripNote(build.ability);
-    if (ability) lines.push("Ability: " + ability);
-    if (build.evs) lines.push("EVs: " + build.evs);
-    var nature = stripNote(build.nature);
-    if (nature) lines.push(nature + " Nature");
-    (build.moves || []).forEach(function (mv) { lines.push("- " + mv); });
-    return lines.join("\n");
-  }
 
   // Descrição real do item segurado, quando existe (ver ITEM_DESC acima) -
   // resolve um gap real: nem todo item novo deste hack (ex. Swirly Glasses,
@@ -4939,27 +4397,7 @@
     '</div>';
   }
 
-  // Inverse of evsToShowdownText() - these reference builds (build history,
-  // boss-seen builds) store EVs as that same formatted string, but
-  // state.customBuilds needs the raw 6-number array. No IVs are stored on
-  // either source, so a copy from here defaults to 31 all - same default
-  // "Meu build" itself already assumes for an unfilled IV field.
-  function evsTextToArray(text) {
-    var out = [0, 0, 0, 0, 0, 0];
-    (text || "").split("/").forEach(function (part) {
-      var m = part.trim().match(/^(\d+)\s+(\S+)$/);
-      if (!m) return;
-      var idx = STAT_LABELS_SHORT.indexOf(m[2]);
-      if (idx !== -1) out[idx] = parseInt(m[1], 10);
-    });
-    return out;
-  }
 
-  function evsToShowdownText(evs) {
-    var parts = [];
-    for (var i = 0; i < 6; i++) { if (evs[i] > 0) parts.push(evs[i] + " " + STAT_LABELS_SHORT[i]); }
-    return parts.join(" / ");
-  }
 
   // "Meu build" - 2026-09-09, user feedback on the free-text notes field
   // ("não tem interação com o poke, o usuário tem que digitar tudo"):
@@ -5535,87 +4973,6 @@
       : { name: name || null, description: null, aviso: "sem descrição conhecida pra este item - não invente o efeito" };
   }
 
-  // "Estou no 2º badge, o que faz sentido daqui até o final?" - pedido do
-  // usuário, 2026-09-10: sem NENHUMA pergunta nova pro jogador - usa só o
-  // milestone que ele já configura em Progresso (state.settings.milestone),
-  // interpretado internamente.
-  //
-  // Descoberta real que viabiliza isso (verificada contra os 107 chefões
-  // reais, não assumida): os líderes de ginásio deste hack têm exatamente os
-  // mesmos nomes e a mesma ordem do Pokémon Emerald original (Roxanne ->
-  // Brawly -> Wattson -> Flannery -> Norman -> Winona -> Tate And Liza ->
-  // Juan/Wallace), na mesma sequência dos 10 milestones já usados em
-  // LEVELCAPS - Elite Redux rebalanceia stats/times, não a posição dos
-  // líderes no mapa. "Juan" e "Wallace" aparecem como entradas separadas em
-  // bosses.json mas compartilham o mesmo `map` (501) no dado bruto,
-  // confirmando serem o mesmo 8º ginásio - tratados como equivalentes aqui.
-  // Índice = milestone que a vitória CONCEDE (mesmos índices de
-  // LEVELCAPS.rows, 1 = Stone Badge ... 8 = Rain Badge).
-  var GYM_LEADER_MILESTONE = {
-    "Roxanne": 1, "Brawly": 2, "Wattson": 3, "Flannery": 4,
-    "Norman": 5, "Winona": 6, "Tate And Liza": 7, "Juan": 8, "Wallace": 8
-  };
-  // "Roxanne 1"/"Roxanne 2"... -> "Roxanne". Mesmo corte usado no dedup de
-  // rebatalha abaixo e na chave de GYM_SKILLS.leaders - promovido a funcao
-  // pra nao divergir entre os dois lugares que precisam dele.
-  function gymLeaderBaseName(name) { return String(name || "").replace(/\s+\d+$/, "").trim(); }
-  // Cada líder aparece várias vezes em bosses.json (Wattson 1, 2, 3...) -
-  // são rebatalhas em pontos diferentes do jogo, não dificuldades; só a
-  // PRIMEIRA ocorrência de cada nome-base é o encontro real que concede o
-  // badge, então só ela entra na lista de "o que falta".
-  function getRemainingBossEntries() {
-    var curMilestone = state.settings.milestone;
-    var seenLeader = {};
-    var seenEliteFour = {};
-    var champIncluded = false;
-    var remaining = [];
-    BOSSES.forEach(function (b) {
-      // Só líderes de ginásio e Alto Comando têm variantes puramente
-      // numéricas (nome-base + " N", ex: "Wattson 1"/"2"/"3" = rebatalhas).
-      // O Campeão tem variantes de NOME (Steven/Wallace, cada um em modo
-      // normal/Doubles/Legends/Doubles Legends - achado ao testar isso ao
-      // vivo: sem esse tratamento à parte, as 8 variações apareciam como 8
-      // entradas "restantes" distintas, quando na prática representam o
-      // mesmo desafio final) - por isso o Campeão usa uma regra própria em
-      // vez do mesmo dedup por nome-base.
-      if (b.cat === "Lider de Ginasio") {
-        var baseName = gymLeaderBaseName(b.name);
-        var milestone = GYM_LEADER_MILESTONE[baseName];
-        if (milestone === undefined || milestone <= curMilestone) return;
-        // Dedup pelo BADGE, não pelo nome: Juan e Wallace são o mesmo 8º
-        // ginásio e apareciam como duas lutas restantes (achado 2026-09-16).
-        if (seenLeader[milestone]) return;
-        seenLeader[milestone] = true;
-        remaining.push(b);
-      } else if (b.cat === "Alto Comando") {
-        if (curMilestone >= 9) return; // 9 = "Champion / Alto Comando", já não falta mais nada
-        var efName = b.name.replace(/\s+\d+$/, "").trim();
-        if (seenEliteFour[efName]) return;
-        seenEliteFour[efName] = true;
-        remaining.push(b);
-      } else if (b.cat === "Campeao") {
-        if (curMilestone >= 9) return;
-        if (champIncluded) return; // uma única entrada representa "o Campeão", não cada variante de nome
-        champIncluded = true;
-        remaining.push(b);
-      }
-      // Equipe Aqua/Magma, Frontier Brain etc. ficam fora de propósito -
-      // não são pontos fixos e ordenados da progressão de badges.
-    });
-    // Bug real achado em 2026-09-16 (item P4): bosses.json lista o Alto
-    // Comando ANTES dos líderes, e "próxima luta" é remaining[0] - no
-    // começo do jogo o dashboard apontava Sidney em vez de Roxanne. Ordena
-    // pela progressão real: ginásios pelo badge, depois Alto Comando na
-    // ordem do arquivo, depois o Campeão.
-    var ordem = function (b, idx) {
-      if (b.cat === "Lider de Ginasio") return GYM_LEADER_MILESTONE[b.name.replace(/\s+\d+$/, "").trim()] * 1000 + idx;
-      if (b.cat === "Alto Comando") return 9000 + idx;
-      return 99000 + idx;
-    };
-    return remaining.map(function (b, idx) { return { b: b, k: ordem(b, idx) }; })
-      .sort(function (a, c) { return a.k - c.k; })
-      .map(function (e) { return e.b; });
-  }
   function aiTool_getRemainingBosses() {
     var remaining = getRemainingBossEntries();
     var typeCounts = {};
@@ -5767,70 +5124,8 @@
     ];
   }
 
-  // Itens já em uso por OUTROS membros do time (achado real do usuário,
-  // 2026-09-12: "todos os poke tem praticamente os mesmos itens... nenhum
-  // outro pode ter a build montada com life orb"). Olha só a build ATIVA
-  // de cada outro membro (effectiveBuild - a mesma noção de "a build" que
-  // o resto do app usa, não as até 3 variantes salvas), e só membros do
-  // TIME (não a caixa inteira) - é o item já em uso NA PRÓXIMA LUTA, não
-  // um item que só existe guardado em algum lugar.
-  function teamItemsInUse(excludeX) {
-    var items = [];
-    state.team.forEach(function (x) {
-      if (x === excludeX) return;
-      var otherSp = getSpeciesByX(x);
-      if (!otherSp) return;
-      var b = effectiveBuild(otherSp);
-      if (b && b.item) items.push(b.item);
-    });
-    return items;
-  }
 
-  // Golpes já em uso por OUTROS membros do time (achado real do usuário,
-  // 2026-09-20: "em grande maioria eles usam sempre o mesmo move... o time
-  // fica repetitivo, a estratégia não tem variedade") - mesmo raciocínio
-  // de teamItemsInUse acima, aplicado a golpe. Diferença importante: item
-  // repetido é sempre desperdício (só um Pokémon usa por vez), mas golpe
-  // repetido às vezes É a escolha certa (o mesmo STAB forte pode ser a
-  // melhor opção pra duas espécies do mesmo tipo) - por isso isto vira
-  // preferência forte no prompt, não proibição, e não ganha a mesma trava
-  // de "defesa em profundidade" pós-validação que os itens têm (não dá pra
-  // simplesmente apagar 1 dos 4 golpes de uma build sem deixá-la quebrada,
-  // ao contrário do item, que tem "vazio" como fallback válido).
-  function teamMovesInUse(excludeX) {
-    var moves = [];
-    state.team.forEach(function (x) {
-      if (x === excludeX) return;
-      var otherSp = getSpeciesByX(x);
-      if (!otherSp) return;
-      var b = effectiveBuild(otherSp);
-      if (b && b.moves) moves = moves.concat(b.moves);
-    });
-    return moves;
-  }
 
-  // Papéis já cobertos por OUTROS membros do time (achado real, 2026-09-22:
-  // a correção de golpe repetido não bastou - "a estratégia não tem
-  // variedade" também vem da IA nunca saber que papel os outros membros já
-  // cumprem, decidindo o papel de cada Pokémon isolado, então um time podia
-  // sair com 6 atacantes puros mesmo com golpes todos diferentes). Usa
-  // SPECIES_ROLE (mesmo dado real já mostrado na linha "Papel" da ficha -
-  // ver roleTagsHtml), não uma heurística nova - papel aqui é sobre o perfil
-  // NATURAL da espécie (ataque/bulk/velocidade + movepool), não o que a IA
-  // escolheu numa build anterior. Ainda mais "preferência", nunca proibição,
-  // que golpe: times de verdade às vezes precisam de 2+ sweepers de
-  // propósito - o objetivo é a IA PESAR isso, não ser forçada a evitar.
-  function teamRolesInUse(excludeX) {
-    var roles = [];
-    state.team.forEach(function (x) {
-      if (x === excludeX) return;
-      var otherSp = getSpeciesByX(x);
-      if (!otherSp) return;
-      var role = SPECIES_ROLE[otherSp.sname];
-      if (role && role.roles) roles = roles.concat(role.roles);
-    });
-    return roles;
-  }
 
   // Orientação real de build por Ritmo/Clima do time (achado do usuário,
   // 2026-09-13, com print do time montado via "Montar melhor time": a
@@ -5865,21 +5160,6 @@
     return parts;
   }
 
-  // Golpes que esta forma ainda vai aprender por nível (acima do cap, e antes de
-  // evoluir sozinha) - a IA usa pra montar o plano de golpes da build.
-  function golpesFuturosDe(sp, cap) {
-    if (cap === null || cap === undefined) return [];
-    var limite = nivelDeEvolucaoDaForma(sp);
-    var vistos = {}, out = [];
-    sp.lm.slice().sort(function (a, b) { return a[0] - b[0]; }).forEach(function (p) {
-      var nome = MOVES[p[1]] && MOVES[p[1]][0];
-      if (!nome || vistos[nome] || p[0] <= cap || (limite !== null && p[0] > limite) || sp.tu.indexOf(p[1]) !== -1) return;
-      if (nivelDoGolpe(sp, nome) <= cap) return; // também aprende antes, em outro nível
-      vistos[nome] = true;
-      out.push({ id: p[1], nome: nome, nivel: p[0] });
-    });
-    return out;
-  }
   function planoPromptBlock(sp, cap) {
     var futuros = golpesFuturosDe(sp, cap);
     if (!futuros.length) return "";
@@ -6169,12 +5449,6 @@
   var REVISOES_POR_ABERTURA = 3;
   var revisoesFeitas = 0, revisandoAgora = null, revisaoRodando = false;
   var revisaoFalhouNestaAbertura = {};
-  function marcarRevisaoPosEvolucao(toSname, fromSname) {
-    var de = getSpeciesBySname(fromSname), para = getSpeciesBySname(toSname);
-    if (!de || !para || !(de.ev || []).some(function (ev) { return ev[2] === para.x; })) return; // só evolução pra frente
-    var ativa = getActiveBuild(toSname);
-    if (ativa && ativa.source !== "curada") { ativa.revisar = "evolucao"; ativa.revisadaDe = de.n; ativa.tentativasRevisao = 0; }
-  }
   // Falhas da build-ponte por espécie: não há build salva onde anotar a
   // tentativa, então ficam no próprio aparelho (conveniência local - no pior
   // caso, cada aparelho tenta 2 vezes).
@@ -6628,56 +5902,11 @@
       item: entry.item || "",
       moves: (entry.moves || []).slice(0, 4),
       ivs: ivs,
-      evs: evsTextToArray(entry.evs)
+      evs: evsTextoParaArray(entry.evs)
     }, "manual"); // ação: grava e redesenha a ficha aberta desta espécie
     flashToast("Build " + (fromBoss ? "de chefão " : "antiga ") + "copiada pro seu \"Meu build\" de " + sp.n);
   });
 
-  // A user's own "Meu build" (state.customBuilds) always wins over the
-  // curated one (BUILDS/builds.json) when both exist for the same species -
-  // it's THEIR pick, made deliberately in the Dex editor; the curated one is
-  // a starting suggestion, not something that should keep overriding a
-  // choice the user already made. Centralized here so the team-slot card,
-  // "copy whole team", and the per-slot copy button can't disagree about
-  // which build is actually showing - found a real bug in this session
-  // where renderTeam() only ever read BUILDS, so a saved "Meu build" from
-  // the Dex never reached the Team tab at all (user feedback, 2026-09-09).
-  function effectiveBuild(sp) {
-    var custom = getActiveBuild(sp.sname);
-    if (custom) {
-      // Normalized to the exact shape showdownSet()/renderTeam() already
-      // expect from a BUILDS entry (evs as a formatted string, not the raw
-      // 6-number array customBuilds actually stores) - found live: without
-      // this, the preview printed "EVs: 0,252,0,0,0,0" (Array.toString()
-      // via string concatenation) instead of "EVs: 252 Atk".
-      // Golpes derivados pelo cap a partir do plano (src/regras/plano_build.js):
-      // o que está salvo nunca muda; a troca aparece quando o golpe libera e
-      // some sozinha se o cap voltar.
-      var d = golpesNoCap(sp, custom.moves, custom.plano, getCurrentCap());
-      return { ability: custom.ability, nature: custom.nature, item: custom.item, evs: evsToShowdownText(custom.evs), moves: d.moves,
-        origem: custom.source, estilo: estiloDeEvs(custom.evs), trocas: d.trocas, pendentes: d.pendentes };
-    }
-    // Forma Mega sem build própria: é a MESMA criatura da base, com os mesmos
-    // golpes (293 de 303 Megas têm movepool idêntico ao da base) - herda a build
-    // da base e ajusta só o que não vale na Mega (a habilidade, na maioria).
-    if (isMegaForm(sp)) {
-      var base = getSpeciesByX(MEGA_BASE_BY_X[sp.x]);
-      var daBase = base && getActiveBuild(base.sname);
-      if (daBase) {
-        var r = reconciliarBuild(daBase, sp);
-        var dm = golpesNoCap(sp, r.build.moves, r.build.plano, getCurrentCap());
-        return { ability: r.build.ability, nature: r.build.nature, item: r.build.item, evs: evsToShowdownText(r.build.evs), moves: dm.moves,
-          origem: "base", herdadaDe: base.n, ajustes: r.changes, trocas: dm.trocas, pendentes: dm.pendentes };
-      }
-    }
-    // Curada: a do estilo que o Ritmo do time pede; sem essa, a primeira.
-    var cur = curadaParaEstilo(sp.sname, estiloDoRitmo(state.archetype.pace), false);
-    if (!cur) return null;
-    // Curada promovida pelo Playtester pode ter plano (golpes do cap em que foi
-    // gerada + trocas): segue o cap igual às builds do jogador.
-    var dc = golpesNoCap(sp, cur.moves, cur.plano, getCurrentCap());
-    return Object.assign({}, cur, { moves: dc.moves, origem: "curada", estilo: cur.estilo || estiloDeEvs(cur.evs), trocas: dc.trocas, pendentes: dc.pendentes });
-  }
 
   // Rótulo e linhas de contexto da build mostrada (card do time e ficha).
   function rotuloDaBuild(build) {
@@ -7064,10 +6293,6 @@
   // ficam como estão, mas a confirmação da run é pedida de novo (o banner
   // "Confira sua run" volta). Builds, anotações e times salvos continuam
   // guardados, como sempre.
-  function runTemAlgoPraZerar() {
-    return !!(state.team.length || state.box.length || state.archetype.pace || state.archetype.weather || state.archetype.monotype ||
-      Object.keys(state.autoEvolved).length || Object.keys(state.gymSkillsCleared).length || state.settings.milestone > 0);
-  }
   function zerarRun() {
     acao(TELAS_ELENCO.concat(["ficha", "progresso", "log"]), function () {
       state.team = [];
@@ -7103,202 +6328,10 @@
     );
   });
 
-  // ---------------- team coverage & dashboard risk ----------------
-  // Shared by renderTeamAnalysis (the full table) and renderDashboard (the
-  // one-line "biggest shared weakness" summary) - factored out so the two
-  // can never quietly disagree about what the team's worst shared risk is.
-  function computeSharedRisks(members) {
-    var riskCount = {};
-    USABLE_TYPES.forEach(function (atk) {
-      members.forEach(function (sp) {
-        if (abilityTypeMod(atk, sp).mult >= 2) riskCount[atk] = (riskCount[atk] || 0) + 1;
-      });
-    });
-    return Object.keys(riskCount).map(function (t) { return { t: t, n: riskCount[t] }; })
-      .filter(function (r) { return r.n >= 2; })
-      .sort(function (a, b) { return b.n - a.n; });
-  }
 
-  // Leitor de caixa pra próxima luta (Fase 1, reunião 2026-09-11) - trava
-  // explícita do usuário: pensa SÓ na próxima luta que falta, nunca no jogo
-  // inteiro daqui pra frente. Resolve os tipos de ataque reais do chefão a
-  // partir do movepool real do time dele (bosses.json), no mesmo tier que
-  // o resto do app já usa pra essa dificuldade (DIFF_TO_BOSSKEY, igual
-  // selectBoss()). Golpes de status não contam - não causam dano de tipo.
-  // Velocidade base do seu mais rápido contra o time da próxima luta (item
-  // P4 da pauta, 2026-09-16). Mesma trava do resto do dashboard: só a
-  // próxima luta. Compara só Velocidade BASE - nível, EVs/IVs, nature, item
-  // (Choice Scarf), habilidade e clima mudam a ordem real, e o texto diz isso.
-  // Usa cada Pokémon na forma em que está salvo no time.
-  function bossSpeedSummary(boss, teamMembers) {
-    var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
-    var party = (boss[tier] && boss[tier].length) ? boss[tier] : boss.party;
-    var fastest = null;
-    teamMembers.forEach(function (sp) { if (!fastest || sp.b[5] > fastest.b[5]) fastest = sp; });
-    var foes = (party || []).map(function (m) { return getSpeciesByX(m.x); }).filter(Boolean);
-    if (!fastest || !foes.length) return null;
-    return {
-      fastest: fastest,
-      total: foes.length,
-      faster: foes.filter(function (f) { return f.b[5] > fastest.b[5]; }).length,
-      tied: foes.filter(function (f) { return f.b[5] === fastest.b[5]; }).length
-    };
-  }
 
-  function computeBossAttackTypes(boss) {
-    var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
-    var party = (boss[tier] && boss[tier].length) ? boss[tier] : boss.party;
-    var types = {};
-    (party || []).forEach(function (m) {
-      (m.mv || []).forEach(function (moveName) {
-        var mv = MOVE_BY_NAME[moveName];
-        if (!mv) return;
-        // Bug real achado em 2026-09-16: comparava com "Status", mas o dado
-        // escreve "STATUS" - a condição nunca batia e golpe de status do
-        // chefão (Roost, Toxic...) contava como tipo de ataque na sugestão.
-        if (moveRoleOf(moveName) !== "dano") return;
-        types[TYPES[mv[1]]] = true;
-      });
-    });
-    return Object.keys(types);
-  }
 
-  // Score simples e explicável (mesmo espírito de computeSharedRisks() -
-  // contagem, não simulação de batalha): quantos dos tipos de ataque reais
-  // do chefão o candidato resiste/é imune, menos quantos ele é fraco.
-  // Nunca sugere uma troca lateral ou pior - só quando a caixa tem alguém
-  // genuinamente mais seguro que o melhor que já está no time.
-  // Aceita uma espécie ou uma unidade de batalha (battleUnitsOf).
-  function bossSafetyScore(spOrUnit, atkTypes) {
-    var unit = spOrUnit.forms ? spOrUnit : { forms: [spOrUnit] };
-    var score = 0;
-    atkTypes.forEach(function (t) {
-      var mult = unitTypeMult(unit, t);
-      if (mult === 0) score -= 2;
-      else if (mult < 1) score -= 1;
-      else if (mult >= 2) score += 1;
-    });
-    return score;
-  }
-  function bestBoxCandidateForBoss(boss) {
-    var atkTypes = computeBossAttackTypes(boss);
-    if (!atkTypes.length) return null;
-    var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
-    var boxMembers = state.box.map(getSpeciesByX).filter(Boolean);
-    if (!teamMembers.length || !boxMembers.length) return null;
 
-    // Cada membro (time e caixa) é avaliado pelas unidades de batalha dele
-    // (battleUnitsOf, conforme o modo de mega): um Charizard na caixa que
-    // resiste mal ao chefão na base pode ser a resposta como Mega Charizard Y.
-    // No modo temporário a unidade mega inclui a base (toda luta começa nela).
-    // Do lado do time vale o mesmo, senão a comparação sugeriria trocar um
-    // membro que já resolve a luta mega-evoluindo.
-    var teamBestScore = null;
-    teamMembers.forEach(function (owned) {
-      battleUnitsOf(owned).forEach(function (unit) {
-        var s = bossSafetyScore(unit, atkTypes);
-        if (teamBestScore === null || s < teamBestScore) teamBestScore = s;
-      });
-    });
-
-    var boxBest = null;
-    boxMembers.forEach(function (owned) {
-      battleUnitsOf(owned).forEach(function (unit) {
-        var s = bossSafetyScore(unit, atkTypes);
-        var r = SPECIES_RANK[unit.main.sname];
-        var rankScore = r ? r.score : 0;
-        if (!boxBest || s < boxBest.score || (s === boxBest.score && rankScore > boxBest.rankScore)) {
-          boxBest = { unit: unit, sp: unit.main, owned: owned, score: s, rankScore: rankScore };
-        }
-      });
-    });
-    if (!boxBest || boxBest.score >= teamBestScore) return null;
-
-    var reason = null;
-    atkTypes.forEach(function (t) {
-      var mult = unitTypeMult(boxBest.unit, t);
-      if (!reason || mult < reason.mult) reason = { t: t, mult: mult };
-    });
-    return { sp: boxBest.sp, owned: boxBest.owned, reasonType: reason.t, reasonMult: reason.mult };
-  }
-
-  // ---------------- confronto com o chefão ----------------
-  // Adaptador entre a página e o motor puro (src/regras/confronto.js), pauta de
-  // 2026-09-24 ("estratégia e sugestão de times e builds", com a regra do
-  // usuário de ser semi-automático: nada aqui pede clique nem pergunta
-  // nada - aparece sozinho pra qualquer chefão que estiver aberto e pra
-  // próxima luta no resumo da Dex). Todas as decisões de estado (time,
-  // builds, modo de mega, forma Mega/Primal do chefão) ficam aqui; as regras
-  // ficam no motor, onde os testes unitários e de sabotagem as protegem.
-  function confrontoUnitOf(unit) {
-    var forms = unit.forms.map(function (f) {
-      var ids = alwaysActiveAbilities(f).slice();
-      var b = effectiveBuild(f);
-      if (b && b.ability && ABILITY_ID_BY_NAME[b.ability] !== undefined) ids.push(ABILITY_ID_BY_NAME[b.ability]);
-      return { types: speciesTypeNames(f), abilityIds: ids };
-    });
-    // Golpes da build da forma principal; sem ela, da primeira outra forma da
-    // unidade que tenha build. Nunca mistura golpes de formas diferentes.
-    var moves = null;
-    [unit.main].concat(unit.forms).forEach(function (f) {
-      if (moves) return;
-      var b = effectiveBuild(f);
-      if (b && b.moves && b.moves.length) moves = b.moves;
-    });
-    return {
-      main: unit.main, owned: unit.owned, mainTypes: speciesTypeNames(unit.main), moves: moves, forms: forms,
-      // Golpes que ele pode ter na build AGORA (level cap + tutor) - base das
-      // sugestões de "que golpe fecha este buraco".
-      aprendiveis: availableMovesFor(unit.main).names
-    };
-  }
-  // Pokémon de chefão -> formato do motor, já na forma Mega/Primal quando o
-  // item que ele segura o transforma (mesmo mapa MEGA_FORMS da calculadora).
-  function confrontoFoesDe(party) {
-    return (party || []).map(function (m) {
-      var megaSname = MEGA_FORMS[m.item];
-      return foeFromBossMember(m, megaSname ? getSpeciesBySname(megaSname) : null);
-    }).filter(Boolean);
-  }
-  // Uma unidade por membro do time: a forma de batalha (base, ou base+mega no
-  // modo temporário, ou cada forma no permanente) que mais pontua contra ESTE
-  // chefão - o jogador escolhe a melhor forma na hora, o app não deve
-  // penalizar quem tem uma mega útil.
-  function confrontoMelhorUnidade(owned, foes) {
-    var melhor = null;
-    battleUnitsOf(owned).forEach(function (u) {
-      var cu = confrontoUnitOf(u);
-      var pts = confrontoTime([cu], foes).pontosPorMembro[0];
-      if (!melhor || pts > melhor.pts) melhor = { cu: cu, pts: pts };
-    });
-    return melhor && melhor.cu;
-  }
-  function confrontoMinhasUnidades(foes) {
-    return state.team.map(getSpeciesByX).filter(Boolean).map(function (owned) {
-      return confrontoMelhorUnidade(owned, foes);
-    }).filter(Boolean);
-  }
-  // Caixa inteira na mesma régua (nunca quem já está no time). Só é calculada
-  // quando a tela precisa de trocas - a caixa pode ter centenas de criaturas.
-  function confrontoUnidadesDaCaixa(foes) {
-    return state.box.filter(function (x) { return state.team.indexOf(x) === -1; })
-      .map(getSpeciesByX).filter(Boolean).map(function (owned) {
-        return confrontoMelhorUnidade(owned, foes);
-      }).filter(Boolean);
-  }
-  // `comTrocas` liga o cálculo da melhor troca da caixa (fase 3): a ficha do
-  // chefão e o resumo da Dex pedem; as outras chamadas não pagam por isso.
-  function confrontoParaParty(party, comTrocas) {
-    var foes = confrontoFoesDe(party);
-    var minhas = confrontoMinhasUnidades(foes);
-    if (!foes.length || !minhas.length) return null;
-    var cx = { foes: foes, minhas: minhas, c: confrontoTime(minhas, foes), trocas: null };
-    if (comTrocas) {
-      var caixa = confrontoUnidadesDaCaixa(foes);
-      if (caixa.length) cx.trocas = melhoresTrocas(minhas, caixa, foes, 2);
-    }
-    return cx;
-  }
   var CONFRONTO_SIMBOLO = {
     vantagem: ["▲", "vantagem"], seguro: ["◆", "seguro"], neutro: ["●", "neutro"],
     arriscado: ["◐", "arriscado"], desvantagem: ["▼", "desvantagem"]
@@ -7427,13 +6460,6 @@
       notas.map(function (n) { return '<p class="cf-note">' + n + '</p>'; }).join("") +
       '</div>';
   }
-  // Linha do resumo da Dex: só a próxima luta que falta (trava do usuário,
-  // RN11), usando o time que o jogador tem agora.
-  // Time que o chefão usa na dificuldade escolhida (mesma regra do resto do app).
-  function bossPartyPorDificuldade(boss) {
-    var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
-    return (boss[tier] && boss[tier].length) ? boss[tier] : boss.party;
-  }
   function dashboardConfrontoHtml(nextBoss, cxPronto) {
     var cx = cxPronto || confrontoParaParty(bossPartyPorDificuldade(nextBoss), true);
     if (!cx) return "";
@@ -7481,29 +6507,7 @@
       ? " (seu " + escapeHtml(s.owned.n) + " mega-evoluído)"
       : " (seu " + escapeHtml(s.owned.n) + ", que entra na forma base e mega-evolui na luta)";
   }
-  // Melhor rank entre as unidades de batalha da criatura.
-  function bestRankForm(owned) {
-    var best = null;
-    battleUnitsOf(owned).forEach(function (unit) {
-      var r = SPECIES_RANK[unit.main.sname];
-      if (r && (!best || r.score > best.score)) best = { sp: unit.main, owned: owned, score: r.score, tier: r.tier };
-    });
-    return best;
-  }
 
-  // Dashboard summary at the top of the Dex - design proposal B, 2026-09-09.
-  // Deliberately reuses computeSharedRisks() (also used by the full team
-  // analysis table) rather than a separate calculation, so this can't
-  // quietly disagree with what "Cobertura defensiva" says the same risk is.
-  // 2026-09-24 (print do usuário no celular: o resumo tinha crescido até empurrar a
-  // busca da Dex pra fora da tela - "como o usuário adiciona um Poke no time
-  // desse jeito"): o topo da Dex fica COMPACTO (Time, Maior risco e uma linha da
-  // próxima luta) e o detalhe - sugestão de troca, caixa, velocidade e o confronto
-  // inteiro - mora no fim da aba Time (#team-nextfight, renderNextFightCard).
-  function nextFightCx(nextBoss) {
-    if (!nextBoss) return null;
-    return confrontoParaParty(bossPartyPorDificuldade(nextBoss), true);
-  }
   function renderDashboard() {
     var el = document.getElementById("dashboard");
     if (!el) return;
@@ -8235,12 +7239,6 @@
     return lines.join("\n");
   }
 
-  // Variante do time do chefão pra dificuldade atual (cai no time padrão quando
-  // o chefão não tem aquela variante).
-  function varianteDoChefao(boss) {
-    var preferida = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
-    return (boss && boss[preferida] && boss[preferida].length) ? preferida : "party";
-  }
   function selectBoss(i) {
     bossState.selected = i;
     bossState.diff = varianteDoChefao(BOSSES[i]);
@@ -8254,22 +7252,6 @@
     renderBossDetail();
   }
 
-  // Resumo puro (nao mexe no DOM) de quantos buffs de Gym Skill ainda
-  // restam pro lider `leaderName` - usado no render do card e exposto na
-  // ponte de teste. Retorna null quando o lider nao esta em GYM_SKILLS
-  // (ainda nao e um chefao que o app reconhece como lider de ginasio).
-  function gymSkillsSummaryFor(leaderName) {
-    if (!GYM_SKILLS || !GYM_SKILLS.leaders) return null;
-    var leaderData = GYM_SKILLS.leaders[leaderName];
-    if (!leaderData) return null;
-    if (leaderData.gateOnly) return { gateOnly: true, gateNote: leaderData.gateNote };
-    var clearedIds = state.gymSkillsCleared[leaderName] || [];
-    var buffs = leaderData.buffs.map(function (b) {
-      return { id: b.id, label: b.label, detail: b.detail, cleared: clearedIds.indexOf(b.id) !== -1 };
-    });
-    var remaining = buffs.filter(function (b) { return !b.cleared; }).length;
-    return { gateOnly: false, note: leaderData.note || null, buffs: buffs, remaining: remaining, total: buffs.length };
-  }
 
   // Card "Buffs do ginásio" (item pedido pelo usuário, 2026-09-17): só
   // aparece pra chefões que são líderes de ginásio (boss.cat), e só quando
@@ -8297,7 +7279,7 @@
     '</div>';
   }
 
-  var STAT_LABELS_SHORT = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
+  var STAT_LABELS_SHORT = ROTULOS_EV; // mesma lista das regras (plano_build.js)
   function renderBossDetail() {
     var boss = BOSSES[bossState.selected];
     if (!boss) return;
@@ -8687,29 +7669,6 @@
     renderRoleCompendium();
   }
 
-  // ---------------- Speed tiers ----------------
-  // Timid/Jolly dão o MESMO +10% em Velocidade (só muda qual outro stat cai
-  // 10%, irrelevante pra este cálculo) - Jolly é só o rótulo escolhido pra
-  // representar "qualquer natureza +Velocidade" na coluna "Investido".
-  var SPEEDTIER_NATURE = "Jolly";
-  function computeSpeedTiers(query) {
-    var level = getCurrentCap() || 50;
-    var q = (query || "").trim().toLowerCase();
-    var rows = SPECIES.filter(function (sp) {
-      return !q || sp.n.toLowerCase().indexOf(q) !== -1;
-    }).map(function (sp) {
-      var base = sp.b[5];
-      return {
-        sp: sp,
-        base: base,
-        neutral: calcFinalStat(base, 31, 0, level, 5, null, null, sp.n),
-        invested: calcFinalStat(base, 31, 252, level, 5, SPEEDTIER_NATURE, null, sp.n),
-        scarf: calcFinalStat(base, 31, 252, level, 5, SPEEDTIER_NATURE, "Choice Scarf", sp.n)
-      };
-    });
-    rows.sort(function (a, b) { return b.invested - a.invested || b.base - a.base; });
-    return { level: level, rows: rows };
-  }
   function renderSpeedTiers() {
     var query = document.getElementById("speedtier-search").value;
     var result = computeSpeedTiers(query);

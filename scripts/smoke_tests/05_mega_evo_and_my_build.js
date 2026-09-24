@@ -191,7 +191,7 @@ async function section05() {
   // before "Meu build" existed. Charizard's real boss-reference fixture
   // (Courtney Mossdeep, Charizardite Y) is used here specifically because
   // its EVs string ("252 SpA / 4 SpD / 252 Spe") exercises the new
-  // evsTextToArray() parser - the inverse of evsToShowdownText(), needed
+  // evsTextoParaArray() parser - the inverse of evsToShowdownText(), needed
   // because these reference entries store EVs as a string while
   // customBuilds needs the raw 6-number array.
   setSearch("Charizard");
@@ -212,7 +212,7 @@ async function section05() {
       const char = charList2 && charList2[0]; // customBuilds[sname] is a list now (Fase-3 multi-build)
       check("boss-reference 'usar como meu build' copies ability/item/nature",
         char && char.ability && char.item && char.nature, char && JSON.stringify(char));
-      check("boss-reference EVs string is correctly parsed into the raw array (evsTextToArray)",
+      check("boss-reference EVs string is correctly parsed into the raw array (evsTextoParaArray)",
         char && char.evs && char.evs.reduce(function (a, b) { return a + b; }, 0) > 0 &&
         document.getElementById("mybuild-ev-total").textContent.indexOf(String(char.evs.reduce(function (a, b) { return a + b; }, 0))) !== -1,
         char && char.evs);

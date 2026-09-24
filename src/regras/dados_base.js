@@ -120,3 +120,21 @@
     }
     return out;
   }
+
+  // ---- Taxonomia de tipos e arquétipos (movida do template na fase 3 da
+  // refatoração, 2026-09-24: o save, as sugestões e os prompts dependem dela) ----
+  var USABLE_TYPES = TYPES.filter(function (t) { return t !== "Mystery" && t !== "None" && t !== "Stellar"; });
+  // Arquétipo de time (Fase 3b, 2026-09-12) - taxonomia REAL trazida pelo
+  // usuário (fonte: r/VGC no Reddit, registrada na memória do projeto), dois
+  // eixos independentes - um time pode ser "Sand" (clima) E "Balance"
+  // (ritmo) ao mesmo tempo. Vazio ("") = não definido, sempre a primeira
+  // opção dos dois <select> - nunca chuta um valor padrão.
+  var PACE_ARCHETYPES = ["Hyper Offense", "Balance", "Bulky Offense", "Stall", "Semi-Stall"];
+  var WEATHER_ARCHETYPES = ["Sand", "Rain", "Sun", "Snow", "Trick Room"];
+  // Terceiro eixo, independente dos outros dois (Gerador Inteligente de
+  // Times, 2026-09-17, pedido do usuário): Monotype restringe o time a UM
+  // tipo só. Ao contrário de Ritmo/Clima (guia de estilo, a IA decide os
+  // membros livremente), Monotype é uma REGRA - o roster é filtrado por
+  // tipo real ANTES de mostrar pra IA (determinístico, não confia na IA
+  // pra respeitar isso sozinha).
+  var MONOTYPE_ARCHETYPES = USABLE_TYPES;
