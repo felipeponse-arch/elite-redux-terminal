@@ -335,6 +335,16 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   (time, builds, progresso, modo de Mega, dificuldade) e aparecer sozinha; ação do jogador só onde
   há efeito real a aplicar (ex.: trocar um membro) ou consentimento necessário (geração por IA).
 
+- RNF11 — **Camada de ações** (refatoração fase 2, 2026-09-24): toda mudança de estado feita pelo
+  jogador passa por `acao(telas, mudar)`, que grava o save UMA vez e redesenha cada tela afetada UMA
+  vez (`TELAS`, em ordem fixa). Ações aninhadas viram lote (uma gravação no fim); `mudar()` que
+  devolve `false` não grava nada; erro dentro dela não trava a camada. Tela escondida não é desenhada
+  (a aba redesenha ao abrir; Chefões usa marcação de desatualizado). A ficha só é redesenhada quando a
+  mudança é do Pokémon aberto (`"ficha:SNAME"`) e mantém a rolagem - redesenhar outra apagaria o que o
+  jogador estiver digitando. Funções de desenho não têm efeito colateral: contadores, resumo da Dex e
+  revisão automática de builds são disparados pela ação. Exceções deliberadas (gravam direto): carregar
+  o save e aplicar o save de outro aparelho.
+
 ### Build que acompanha o jogador e banco de builds (2026-09-24)
 
 Pedidos do usuário: "montamos uma build no cap 18; no próximo cap ele pode aprender golpes melhores pra

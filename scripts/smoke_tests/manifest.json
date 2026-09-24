@@ -24,5 +24,6 @@
   "22_hp_ev_efficiency.js",
   "23_ev_breakpoints.js",
   "24_build_que_acompanha.js",
+  "25_camada_de_acoes.js",
   "99_runner.js"
 ]

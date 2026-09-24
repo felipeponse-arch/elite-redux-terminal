@@ -1754,9 +1754,9 @@
         raw list of 1906 species with a search box - no orientation, no "here's
         where you left off", even though the team-analysis and rank data
         needed to answer that already existed elsewhere in the app. Filled by
-        renderDashboard(), scheduled from updateTeamBadge()/updateBoxBadge()
-        (the two existing chokepoints every roster change already runs
-        through - see rosterMove()) via scheduleDashboardRefresh() - it only
+        renderDashboard(), scheduled by the action layer (acao() -> tela
+        "resumo", which every roster change goes through - see rosterMove())
+        via scheduleDashboardRefresh() - it only
         recalculates immediately while the Dex tab is actually visible;
         otherwise it marks itself dirty and renders once the player comes
         back to this tab (perf pass, 2026-09-11 - the leitor de caixa
@@ -2744,37 +2744,53 @@
     }
     return e;
   }
+  // As 4 operações que mudam builds salvas são AÇÕES (ver acao()): gravam e
+  // redesenham o que mostra build (card do time, ficha aberta, confronto do
+  // chefão) sozinhas - quem chama não precisa lembrar de nada disso.
   function setOrReplaceActiveBuild(sname, build, source) {
-    var list = getBuildList(sname).slice();
-    var activeIdx = -1;
-    for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
-    var entry = entradaDeBuild(build, source, sname, activeIdx !== -1 ? list[activeIdx] : null);
-    if (activeIdx !== -1) { list[activeIdx] = entry; }
-    else if (list.length < 3) { list.forEach(function (b) { b.active = false; }); list.push(entry); }
-    else { list.forEach(function (b, i) { b.active = (i === 0); }); list[0] = entry; }
-    state.customBuilds[sname] = list;
+    return acao(telasDeBuild(sname), function () {
+      var list = getBuildList(sname).slice();
+      var activeIdx = -1;
+      for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
+      var entry = entradaDeBuild(build, source, sname, activeIdx !== -1 ? list[activeIdx] : null);
+      if (activeIdx !== -1) { list[activeIdx] = entry; }
+      else if (list.length < 3) { list.forEach(function (b) { b.active = false; }); list.push(entry); }
+      else { list.forEach(function (b, i) { b.active = (i === 0); }); list[0] = entry; }
+      state.customBuilds[sname] = list;
+      return true;
+    });
   }
   // New explicit action, 2026-09-09 (user's own rule): ALWAYS adds a
   // separate variant rather than overwriting - refuses past the 3-build
   // cap instead of silently dropping one, since these are deliberate
   // choices (manual or AI), not disposable snapshots like save history.
   function addBuildVariant(sname, build, source) {
-    var list = getBuildList(sname).slice();
-    if (list.length >= 3) return false;
-    list.forEach(function (b) { b.active = false; });
-    list.push(entradaDeBuild(build, source, sname, null));
-    state.customBuilds[sname] = list;
-    return true;
+    return acao(telasDeBuild(sname), function () {
+      var list = getBuildList(sname).slice();
+      if (list.length >= 3) return false;
+      list.forEach(function (b) { b.active = false; });
+      list.push(entradaDeBuild(build, source, sname, null));
+      state.customBuilds[sname] = list;
+      return true;
+    });
   }
   function setActiveBuildIndex(sname, idx) {
-    var list = getBuildList(sname);
-    list.forEach(function (b, i) { b.active = (i === idx); });
+    return acao(telasDeBuild(sname), function () {
+      var list = getBuildList(sname);
+      if (idx < 0 || idx >= list.length) return false;
+      list.forEach(function (b, i) { b.active = (i === idx); });
+      return true;
+    });
   }
   function removeBuildIndex(sname, idx) {
-    var list = getBuildList(sname).slice();
-    list.splice(idx, 1);
-    if (list.length && !list.some(function (b) { return b.active; })) list[0].active = true;
-    if (list.length) state.customBuilds[sname] = list; else delete state.customBuilds[sname];
+    return acao(telasDeBuild(sname), function () {
+      var list = getBuildList(sname).slice();
+      if (idx < 0 || idx >= list.length) return false;
+      list.splice(idx, 1);
+      if (list.length && !list.some(function (b) { return b.active; })) list[0].active = true;
+      if (list.length) state.customBuilds[sname] = list; else delete state.customBuilds[sname];
+      return true;
+    });
   }
 
   function buildSave() {
@@ -2829,12 +2845,106 @@
     document.getElementById("storage-banner-text").textContent = text;
     document.getElementById("storage-banner").hidden = false;
   }
-  // Kept as separate names so call sites still read clearly; all write the
-  // one versioned blob.
-  function saveTeam() { persist(); }
-  function saveBox() { persist(); }
-  function saveSettings() { persist(); }
-  function saveSavedTeams() { persist(); }
+  // ---------------- camada de ações (fase 2 da refatoração, 2026-09-24) ----------------
+  // Toda mudança de estado feita pelo jogador passa por acao(telas, mudar):
+  //   1. `mudar()` altera o state (devolver false = nada mudou, nada acontece);
+  //   2. o save é gravado UMA vez (persist);
+  //   3. cada tela afetada é redesenhada UMA vez, na ordem de TELAS_ORDEM.
+  // Ações chamadas de dentro de outra ação (ex.: aplicar várias trocas de uma
+  // vez) viram um lote: gravam e redesenham só quando a de fora termina.
+  // Antes cada ponto do app decidia sozinho o que gravar e o que redesenhar -
+  // 38 lugares - e boa parte dos defeitos de 2026-09-24 veio disso (campo que
+  // não era gravado, tela que ficava desatualizada, gravação em dobro).
+  //
+  // Telas escondidas não são desenhadas: a troca de aba já redesenha a aba que
+  // abre (ver o listener de .tab-btn). As funções de desenho não têm efeito
+  // colateral - quem dispara a revisão automática das builds é a ação.
+  function abaAtiva(nome) {
+    var b = document.querySelector('.tab-btn[data-tab="' + nome + '"]');
+    return !!b && b.classList.contains("active");
+  }
+  // Ficha aberta do Pokémon selecionado, mantendo a rolagem (selectSpecies
+  // volta pro topo e, no celular, abriria o detalhe - por isso só quando já
+  // está aberto).
+  function redesenharFichaAberta() {
+    if (state.selected === null || state.selected === undefined) return;
+    if (!document.getElementById("dex-shell").classList.contains("show-detail")) return;
+    var painel = document.getElementById("species-detail");
+    var y = painel ? painel.scrollTop : 0;
+    selectSpecies(state.selected);
+    if (painel) painel.scrollTop = y;
+  }
+  var TELAS = {
+    contadores: function () {
+      document.getElementById("team-count-badge").textContent = state.team.length + "/6";
+      document.getElementById("box-count-badge").textContent = state.box.length;
+      syncRowAddButtons();
+      updateResetTeamBoxBtn();
+    },
+    resumo: function () { scheduleDashboardRefresh(); },
+    lista: function () { renderList(); },
+    time: function () { if (abaAtiva("team")) renderTeam(); },
+    caixa: function () { if (abaAtiva("box")) renderBox(); },
+    // Só a grade de times salvos (o renderTeam inteiro já a inclui).
+    timesSalvos: function () { if (abaAtiva("team")) renderSavedTeams(); },
+    ficha: redesenharFichaAberta,
+    // Aba escondida: marca e redesenha quando ela abrir (ver o listener de
+    // .tab-btn) - mesmo padrão do dashboardDirty.
+    chefao: function () {
+      if (bossState.selected === null) return;
+      if (abaAtiva("bosses")) { renderBossDetail(); chefaoDesatualizado = false; } else chefaoDesatualizado = true;
+    },
+    progresso: function () {
+      renderCapBadge();
+      if (document.getElementById("cap-display")) renderCapDisplay();
+      renderProgressTrail();
+      renderRunStatus();
+    },
+    log: function () { renderAutoLog(); },
+    // Marcador: não desenha nada, só diz que builds mudaram (dispara a revisão
+    // automática em concluirAcoes).
+    builds: function () {}
+  };
+  var TELAS_BUILD = ["builds", "resumo", "time", "chefao"];
+  function telasDeBuild(sname) { return TELAS_BUILD.concat(["ficha:" + sname]); }
+  var TELAS_ORDEM = ["contadores", "resumo", "lista", "time", "timesSalvos", "caixa", "ficha", "chefao", "progresso", "log", "builds"];
+  // Mudança que mexe no time ou nas builds pode precisar de revisão automática.
+  var TELAS_QUE_REVISAM = ["time", "builds"];
+  var acaoProfundidade = 0, acaoGravar = false, acaoTelas = {};
+  var chefaoDesatualizado = false;
+  function acao(telas, mudar) {
+    var mudou;
+    acaoProfundidade++;
+    try {
+      mudou = mudar();
+    } finally {
+      acaoProfundidade--;
+      if (mudou !== false) {
+        acaoGravar = true;
+        (telas || []).forEach(function (t) { acaoTelas[t] = true; });
+      }
+      if (acaoProfundidade === 0) concluirAcoes();
+    }
+    return mudou;
+  }
+  // "ficha:SNAME" = redesenhar a ficha só se ela for desse Pokémon. Redesenhar
+  // a ficha de OUTRO Pokémon apagaria o que o jogador estiver digitando nela
+  // (editor de build, anotação) sem motivo.
+  function fichaAfetada(telas) {
+    if (telas.ficha) return true;
+    var sp = state.selected !== null && state.selected !== undefined ? getSpeciesByX(state.selected) : null;
+    return !!sp && !!telas["ficha:" + sp.sname];
+  }
+  function concluirAcoes() {
+    var telas = acaoTelas, gravar = acaoGravar;
+    acaoTelas = {};
+    acaoGravar = false;
+    if (gravar) persist();
+    if (fichaAfetada(telas)) telas.ficha = true;
+    if (telas.time) delete telas.timesSalvos; // renderTeam já desenha a grade
+    TELAS_ORDEM.forEach(function (t) { if (telas[t]) TELAS[t](); });
+    if (TELAS_QUE_REVISAM.some(function (t) { return telas[t]; })) agendarRevisoes();
+  }
 
   // Preferências de acessibilidade (alto contraste / tamanho da fonte),
   // 2026-09-13 - chave PRÓPRIA, separada de er_terminal_save de propósito:
@@ -3356,7 +3466,10 @@
       closeMorePanel();
       if (btn.dataset.tab === "team") renderTeam();
       if (btn.dataset.tab === "box") renderBox();
-      if (btn.dataset.tab === "bosses") initBosses();
+      if (btn.dataset.tab === "bosses") {
+        initBosses();
+        if (chefaoDesatualizado && bossState.selected !== null) { renderBossDetail(); chefaoDesatualizado = false; }
+      }
       if (btn.dataset.tab === "progress") initProgress();
       if (btn.dataset.tab === "types") { renderTypeMatrix(); wireSpeedTiersOnce(); renderSpeedTiers(); }
       // dashboardDirty (auditoria de performance, 2026-09-11): o dashboard só
@@ -3396,10 +3509,10 @@
       label.style.background = meta.hex; label.style.color = meta.dark ? "#1c1b17" : "#fff9f2"; label.style.borderColor = meta.hex;
     }
     checkboxEl.addEventListener("change", function (e) {
-      if (e.target.checked) { state.typeFilter.add(t); label.classList.add("checked"); label.style.background = meta.hex; label.style.color = meta.dark ? "#1c1b17" : "#fff9f2"; label.style.borderColor = meta.hex; }
-      else { state.typeFilter.delete(t); label.classList.remove("checked"); label.style.background = ""; label.style.color = ""; label.style.borderColor = ""; }
-      persist();
-      renderList();
+      var marcado = e.target.checked;
+      if (marcado) { label.classList.add("checked"); label.style.background = meta.hex; label.style.color = meta.dark ? "#1c1b17" : "#fff9f2"; label.style.borderColor = meta.hex; }
+      else { label.classList.remove("checked"); label.style.background = ""; label.style.color = ""; label.style.borderColor = ""; }
+      acao(["lista"], function () { if (marcado) state.typeFilter.add(t); else state.typeFilter.delete(t); });
     });
     typeFilterPanel.appendChild(label);
   });
@@ -3420,9 +3533,7 @@
   // static HTML always ships with "dex" marked as the default option.
   document.getElementById("sort-select").value = state.sort;
   document.getElementById("sort-select").addEventListener("change", function (e) {
-    state.sort = e.target.value;
-    persist();
-    renderList();
+    acao(["lista"], function () { state.sort = e.target.value; });
   });
 
   // Keyboard shortcuts - Fase 1 quality-of-life, 2026-09-09: "/" jumps to
@@ -3662,13 +3773,8 @@
         var x = parseInt(addBtn.dataset.add, 10);
         if (state.team.indexOf(x) !== -1) return;
         if (state.team.length >= 6) { openSwapModal(x); return; }
-        if (rosterMove(x, null)) { // updateTeamBadge inside re-syncs the + / ✓ buttons
-          flashToast(getSpeciesByX(x).n + " adicionado ao time (" + state.team.length + "/6)");
-          // A ficha do MESMO Pokémon aberta ao lado (computador) mostrava ainda o
-          // botão "Adicionar ao time" (levantamento de 2026-09-24). Só redesenha
-          // se ela já está aberta - selectSpecies abre o detalhe no celular.
-          if (state.selected === x && document.getElementById("dex-shell").classList.contains("show-detail")) selectSpecies(x);
-        }
+        // A ação redesenha contadores, botões "+" e a ficha aberta ao lado.
+        if (rosterMove(x, null)) flashToast(getSpeciesByX(x).n + " adicionado ao time (" + state.team.length + "/6)");
         return;
       }
       var row = e.target.closest(".species-row");
@@ -3710,15 +3816,9 @@
       btn.addEventListener("click", function () {
         var outX = parseInt(btn.dataset.out, 10);
         var outSp = getSpeciesByX(outX);
+        // A ação (rosterMove) redesenha a ficha aberta e a caixa, se visíveis.
         if (!rosterMove(swapModalX, outX)) return;
         closeSwapModal();
-        // keep an open detail view in sync with what just happened
-        if (state.selected === sp.x) selectSpecies(sp.x);
-        // this modal now opens from the Box tab too (see renderBox), which
-        // has its own grid that rosterMove()'s badge updates don't touch -
-        // refresh it directly. Harmless no-op cost when Box isn't the
-        // visible tab.
-        renderBox();
         flashToast(sp.n + " entrou; " + outSp.n + " foi para a caixa");
       });
     });
@@ -4387,10 +4487,7 @@
     if (addBtn && !inTeam) {
       addBtn.addEventListener("click", function () {
         if (state.team.length >= 6) { openSwapModal(x); return; }
-        if (rosterMove(x, null)) {
-          flashToast(sp.n + " entrou no time (" + state.team.length + "/6)");
-          selectSpecies(x);
-        }
+        if (rosterMove(x, null)) flashToast(sp.n + " entrou no time (" + state.team.length + "/6)");
       });
     }
 
@@ -4405,8 +4502,7 @@
     if (notesSaveBtn) {
       notesSaveBtn.addEventListener("click", function () {
         var text = document.getElementById("species-notes-input").value.trim();
-        if (text) state.notes[sp.sname] = text; else delete state.notes[sp.sname];
-        persist();
+        acao([], function () { if (text) state.notes[sp.sname] = text; else delete state.notes[sp.sname]; });
         var status = document.getElementById("species-notes-status");
         if (status) status.textContent = "Salvo.";
       });
@@ -4423,11 +4519,10 @@
         // quando `inTeam`, mas confere de novo aqui (não confia só no
         // estado do botão no momento do render) antes de escrever no
         // array - mesmo x nunca deve estar em time E caixa ao mesmo tempo.
-        if (state.team.indexOf(x) !== -1) return;
-        state.box.push(x);
-        saveBox();
-        updateBoxBadge();
-        selectSpecies(x);
+        acao(telasDeElenco(x), function () {
+          if (state.team.indexOf(x) !== -1 || state.box.indexOf(x) !== -1) return false;
+          state.box.push(x);
+        });
       });
     }
 
@@ -4440,7 +4535,8 @@
   }
 
   // Auditoria de performance, 2026-09-11 (pedido do usuário: "focar em
-  // performance e velocidade"): updateTeamBadge()/updateBoxBadge() chamavam
+  // performance e velocidade"): os contadores do time/caixa (hoje a tela
+  // "resumo" da camada de ações) chamavam
   // renderDashboard() sem condição - inclusive o cálculo novo do "leitor de
   // caixa" (bestBoxCandidateForBoss, itera a caixa inteira), mesmo quando o
   // jogador está numa aba completamente diferente (Caixa, Chefões...) e não
@@ -4460,20 +4556,7 @@
     }
   }
 
-  // ---------------- team view ----------------
-  function updateTeamBadge() {
-    document.getElementById("team-count-badge").textContent = state.team.length + "/6";
-    syncRowAddButtons();
-    scheduleDashboardRefresh();
-    updateResetTeamBoxBtn();
-  }
-
-  // ---------------- box view ----------------
-  function updateBoxBadge() {
-    document.getElementById("box-count-badge").textContent = state.box.length;
-    scheduleDashboardRefresh();
-    updateResetTeamBoxBtn();
-  }
+  // (Contadores do time/caixa: TELAS.contadores, na camada de ações.)
 
   // "Novo jogo" (2026-09-13) - desabilitado quando não há nada pra resetar,
   // mesmo critério já usado em save-team-btn/etc.
@@ -4496,7 +4579,6 @@
     var members = state.box.map(getSpeciesByX).filter(Boolean);
     if (!members.length) {
       content.innerHTML = '<p class="pcbox-empty-note">Caixa vazia — abra um Pokémon na aba Dex e clique em "+ Adicionar à caixa".</p>';
-      updateBoxBadge();
       return;
     }
 
@@ -4593,11 +4675,10 @@
           "Isso tira " + (sp ? sp.n : "este Pokémon") + " da sua caixa de vez - ele não vai pro time, não fica guardado em lugar nenhum, e não dá pra desfazer.",
           "Remover",
           function () {
-            state.box = state.box.filter(function (v) { return v !== x; });
-            pcBoxSelectedX = null;
-            saveBox();
-            updateBoxBadge();
-            renderBox();
+            acao(telasDeElenco(x), function () {
+              state.box = state.box.filter(function (v) { return v !== x; });
+              pcBoxSelectedX = null;
+            });
             flashToast((sp ? sp.n : "Pokémon") + " removido da caixa.");
           }
         );
@@ -4609,15 +4690,15 @@
         var x = parseInt(toTeamBtn.dataset.x, 10);
         if (state.team.length >= 6) { openSwapModal(x); return; }
         var sp = getSpeciesByX(x);
-        if (rosterMove(x, null)) {
-          flashToast(sp.n + " foi para o time (" + state.team.length + "/6)");
-          pcBoxSelectedX = null;
-          renderBox();
-        }
+        // Lote: a seleção da caixa é limpa antes do redesenho da própria ação.
+        var foi = acao([], function () {
+          var ok = rosterMove(x, null);
+          if (ok) pcBoxSelectedX = null;
+          return ok;
+        });
+        if (foi) flashToast(sp.n + " foi para o time (" + state.team.length + "/6)");
       });
     }
-
-    updateBoxBadge();
   }
 
   // Busca da PC Box: salta pra caixa+slot certos e seleciona, em vez de
@@ -5158,10 +5239,7 @@
           ability: set.ability, nature: set.nature, item: set.item,
           moves: set.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: set.evs, rationale: set.rationale, pedirPlano: true
         }, "ia");
-        persist();
-        agendarRevisoes();
         flashToast('"' + set.name + '" virou seu "Meu build" de ' + sp.n);
-        selectSpecies(sp.x);
       });
     });
   }
@@ -5230,9 +5308,7 @@
     if (saveBtn) {
       saveBtn.addEventListener("click", function () {
         setOrReplaceActiveBuild(sp.sname, readEditorForm(), "manual");
-        persist();
         flashToast("Build salvo para " + sp.n);
-        selectSpecies(sp.x);
       });
     }
     // "Salvar como nova variante" - 2026-09-09, user's own rule: up to 3
@@ -5243,20 +5319,13 @@
     var saveVariantBtn = document.getElementById("mybuild-save-variant");
     if (saveVariantBtn) {
       saveVariantBtn.addEventListener("click", function () {
-        var ok = addBuildVariant(sp.sname, readEditorForm(), "manual");
-        if (ok) {
-          persist();
-          flashToast("Nova variante salva para " + sp.n);
-          selectSpecies(sp.x);
-        }
+        if (addBuildVariant(sp.sname, readEditorForm(), "manual")) flashToast("Nova variante salva para " + sp.n);
       });
     }
     // Chips switch WHICH saved build is active/shown - 2026-09-09.
     document.querySelectorAll(".mybuild-chip").forEach(function (chip) {
       chip.addEventListener("click", function () {
         setActiveBuildIndex(sp.sname, parseInt(chip.dataset.idx, 10));
-        persist();
-        selectSpecies(sp.x);
       });
     });
     var clearBtn = document.getElementById("mybuild-clear");
@@ -5266,8 +5335,6 @@
         var activeIdx = 0;
         for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
         removeBuildIndex(sp.sname, activeIdx);
-        persist();
-        selectSpecies(sp.x);
       });
     }
     var copyBtn = document.getElementById("mybuild-copy");
@@ -6005,34 +6072,39 @@
       var planoCheck = anexarPlanoDaIa(sp, validated, raw && raw.plano, cap,
         opts.modo === "ponte" && opts.alvo ? opts.alvo.moves : null);
       validated.planoConsultado = true; // o prompt já pediu o plano - não pedir de novo
-      var ok;
-      if (opts.modo === "revisao" && getBuildList(sp.sname).length >= 3) {
-        // Lista cheia (3 builds): a revisada entra no lugar da ativa, e a de
-        // antes vai inteira pro log (habilidade, natureza, item, EVs e golpes).
-        setOrReplaceActiveBuild(sp.sname, validated, "ia");
-        ok = true;
-      } else {
-        // A revisada vira a ativa e a de antes continua salva como variante -
-        // o jogador volta pra ela com um toque no chip, nada se perde.
-        ok = addBuildVariant(sp.sname, validated, opts.modo === "ponte" ? "curada" : "ia");
-        if (ok && opts.modo === "revisao") {
-          delete opts.anterior.revisar; delete opts.anterior.revisadaDe; delete opts.anterior.tentativasRevisao;
+      // Uma ação só: gravar a build, limpar a marca de revisão e registrar no
+      // log - uma gravação e um redesenho no fim (card do time, ficha aberta
+      // desta espécie, confronto).
+      var ok = acao(telasDeBuild(sp.sname).concat(["log"]), function () {
+        var salvou;
+        if (opts.modo === "revisao" && getBuildList(sp.sname).length >= 3) {
+          // Lista cheia (3 builds): a revisada entra no lugar da ativa, e a de
+          // antes vai inteira pro log (habilidade, natureza, item, EVs e golpes).
+          salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia");
+        } else {
+          // A revisada vira a ativa e a de antes continua salva como variante -
+          // o jogador volta pra ela com um toque no chip, nada se perde.
+          salvou = addBuildVariant(sp.sname, validated, opts.modo === "ponte" ? "curada" : "ia");
+          if (salvou && opts.modo === "revisao") {
+            delete opts.anterior.revisar; delete opts.anterior.revisadaDe; delete opts.anterior.tentativasRevisao;
+          }
         }
-      }
+        if (!salvou) return false;
+        if (opts.modo === "revisao") {
+          var a = opts.anterior;
+          logAutoAction("Build de " + sp.n + " revisada depois da evolução" + (a ? " (antes: " + (a.ability || "?") + ", " + (a.nature || "?") + ", " + (a.item || "sem item") + ", " +
+            (evsToShowdownText(a.evs || []) || "sem EV") + "; " + (a.moves || []).join(", ") + ")" : "") +
+            ": " + validated.ability + "; " + validated.moves.join(", ") + (getBuildList(sp.sname).length > 1 ? ". A build anterior continua salva nos chips da ficha." : "."));
+        } else if (opts.modo === "ponte") {
+          logAutoAction("Build curada de " + sp.n + " adaptada ao level cap " + cap + ": " + validated.moves.join(", ") +
+            (validated.plano ? " (troca pelos golpes da curada quando liberarem)" : "") + ".");
+        }
+        return true;
+      });
       if (!ok) {
         if (statusEl) statusEl.textContent = "Limite de 3 builds atingido.";
         return false;
       }
-      if (opts.modo === "revisao") {
-        var a = opts.anterior;
-        logAutoAction("Build de " + sp.n + " revisada depois da evolução" + (a ? " (antes: " + (a.ability || "?") + ", " + (a.nature || "?") + ", " + (a.item || "sem item") + ", " +
-          (evsToShowdownText(a.evs || []) || "sem EV") + "; " + (a.moves || []).join(", ") + ")" : "") +
-          ": " + validated.ability + "; " + validated.moves.join(", ") + (getBuildList(sp.sname).length > 1 ? ". A build anterior continua salva nos chips da ficha." : "."));
-      } else if (opts.modo === "ponte") {
-        logAutoAction("Build curada de " + sp.n + " adaptada ao level cap " + cap + ": " + validated.moves.join(", ") +
-          (validated.plano ? " (troca pelos golpes da curada quando liberarem)" : "") + ".");
-      }
-      persist();
       if (!opts.silencioso) {
         flashToast("Build gerada por IA salva para " + sp.n + (itemWasDropped ? " (sem item - já em uso por outro membro do time)" : "") +
           (validated.plano ? " - com " + Object.keys(validated.plano).length + " troca(s) planejada(s) para quando o cap subir" : ""));
@@ -6040,22 +6112,8 @@
       if (planoCheck.descartados.length && statusEl) {
         statusEl.textContent = "Trocas do plano descartadas: " + planoCheck.descartados.map(function (d) { return d.motivo; }).join("; ") + ".";
       }
-      // Bug real, achado em auditoria (2026-09-11): sample.json() pode levar
-      // vários segundos - se o jogador já tiver navegado pra outra espécie
-      // (ou aba) enquanto esperava, forçar selectSpecies(sp.x) aqui puxava
-      // ele de volta pra ESTA espécie sem aviso nenhum, mesmo já tendo
-      // escolhido olhar outra coisa. A build é salva de qualquer forma
-      // (persist() já rodou acima) - só o "puxão" de tela é condicional
-      // agora: só reabre/atualiza a ficha se o jogador ainda estiver
-      // olhando pra esta mesma espécie na Dex.
-      if (state.selected === sp.x) selectSpecies(sp.x);
-      // Achado real do usuário, 2026-09-13: "não achei o botão de criar
-      // build na tela do time" - agora existe um botão direto no card do
-      // Meu Time (ver renderTeam()), chamando esta mesma função. Sem
-      // atualizar o card aqui, a build salva só apareceria depois de trocar
-      // de aba e voltar - renderTeam() é barato de chamar mesmo se o
-      // jogador estiver noutra aba no momento.
-      if (state.team.indexOf(sp.x) !== -1) renderTeam();
+      // A ação acima já redesenhou a ficha (só se for desta espécie - nunca
+      // puxa o jogador de volta pra ela, bug de 2026-09-11) e o card do time.
       return true;
     } catch (e) {
       if (statusEl) statusEl.textContent = sampleErrorMessage(e);
@@ -6083,16 +6141,17 @@
       var lista = getBuildList(sp.sname);
       var alvo = lista.indexOf(entry) !== -1 ? entry : null;
       if (!alvo || alvo.moves.join("|") !== movesPerguntados) return "obsoleta"; // a build mudou enquanto a IA respondia
-      delete alvo.revisar;
-      delete alvo.tentativasRevisao;
-      alvo.planoConsultado = true;
-      if (Object.keys(r.plano).length) {
-        alvo.plano = r.plano;
-        logAutoAction("Plano de golpes da build de " + sp.n + ": " + Object.keys(r.plano).map(function (de) {
-          return de + " → " + r.plano[de] + " (nível " + nivelDoGolpe(sp, r.plano[de]) + ")";
-        }).join(", ") + ".");
-      }
-      persist();
+      acao(telasDeBuild(sp.sname).concat(["log"]), function () {
+        delete alvo.revisar;
+        delete alvo.tentativasRevisao;
+        alvo.planoConsultado = true;
+        if (Object.keys(r.plano).length) {
+          alvo.plano = r.plano;
+          logAutoAction("Plano de golpes da build de " + sp.n + ": " + Object.keys(r.plano).map(function (de) {
+            return de + " → " + r.plano[de] + " (nível " + nivelDoGolpe(sp, r.plano[de]) + ")";
+          }).join(", ") + ".");
+        }
+      });
       return true;
     } catch (e) {
       return false;
@@ -6176,29 +6235,28 @@
             var curEntrada = { ability: cur.ability, nature: cur.nature, item: cur.item, moves: cur.moves.slice(), planoConsultado: true,
               ivs: [31, 31, 31, 31, 31, 31], evs: evsTextoParaArray(cur.evs), rationale: "Build curada de " + sp.n + " (" + (cur.fonte || "curadoria") + ")." };
             if (cur.plano) curEntrada.plano = cur.plano;
-            var cheia = getBuildList(sp.sname).length >= 3;
-            if (cheia) setOrReplaceActiveBuild(sp.sname, curEntrada, "curada");
-            else {
-              addBuildVariant(sp.sname, curEntrada, "curada");
-              delete tarefa.entry.revisar; delete tarefa.entry.revisadaDe; delete tarefa.entry.tentativasRevisao;
-            }
-            logAutoAction("Build de " + sp.n + " trocada pela curada depois da evolução (antes: " + (tarefa.entry.ability || "?") + "; " + tarefa.entry.moves.join(", ") + ")" +
-              (cheia ? "." : ". A build anterior continua salva nos chips da ficha."));
-            persist();
-            renderTeam();
+            acao(telasDeBuild(sp.sname).concat(["log"]), function () {
+              var cheia = getBuildList(sp.sname).length >= 3;
+              if (cheia) setOrReplaceActiveBuild(sp.sname, curEntrada, "curada");
+              else {
+                addBuildVariant(sp.sname, curEntrada, "curada");
+                delete tarefa.entry.revisar; delete tarefa.entry.revisadaDe; delete tarefa.entry.tentativasRevisao;
+              }
+              logAutoAction("Build de " + sp.n + " trocada pela curada depois da evolução (antes: " + (tarefa.entry.ability || "?") + "; " + tarefa.entry.moves.join(", ") + ")" +
+                (cheia ? "." : ". A build anterior continua salva nos chips da ficha."));
+            });
             continue;
           }
         }
         // Plano pedido quando já não há golpe por liberar (o cap passou de tudo):
         // não há o que perguntar - sai da fila sem gastar vaga nem tentativa.
         if (tarefa.tipo === "plano" && !golpesFuturosDe(sp, getCurrentCap()).length) {
-          delete tarefa.entry.revisar; delete tarefa.entry.tentativasRevisao;
-          persist();
+          acao(["time"], function () { delete tarefa.entry.revisar; delete tarefa.entry.tentativasRevisao; });
           continue;
         }
         if (!(await iaLiberadaSemPerguntar())) break;
         revisandoAgora = sp.sname;
-        renderTeam();
+        TELAS.time(); // etiqueta "atualizando…" no card (estado de tela, não do save)
         var ok = false;
         if (tarefa.tipo === "plano") ok = await gerarPlanoParaBuild(sp, tarefa.entry);
         else if (tarefa.tipo === "evolucao") ok = await generateBuildWithAI(sp, "sem-status", { modo: "revisao", anterior: tarefa.entry, deNome: tarefa.entry.revisadaDe, silencioso: true });
@@ -6213,12 +6271,13 @@
           if (tarefa.tipo === "ponte") {
             if (registrarFalhaPonte(sp.sname) >= 2) logAutoAction("Não consegui adaptar a build curada de " + sp.n + " ao level cap com IA (2 tentativas). Ela continua aparecendo como está.");
           } else if (tarefa.entry && getBuildList(sp.sname).indexOf(tarefa.entry) !== -1) {
-            tarefa.entry.tentativasRevisao = (tarefa.entry.tentativasRevisao || 0) + 1;
-            if (tarefa.entry.tentativasRevisao >= 2) logAutoAction("Não consegui revisar a build de " + sp.n + " com IA (2 tentativas). Ela continua valendo como está.");
-            persist();
+            acao(["time", "log"], function () {
+              tarefa.entry.tentativasRevisao = (tarefa.entry.tentativasRevisao || 0) + 1;
+              if (tarefa.entry.tentativasRevisao >= 2) logAutoAction("Não consegui revisar a build de " + sp.n + " com IA (2 tentativas). Ela continua valendo como está.");
+            });
           }
         }
-        renderTeam();
+        TELAS.time(); // tira a etiqueta "atualizando…"
       }
     } finally {
       revisaoRodando = false;
@@ -6359,15 +6418,15 @@
         if (statusEl) statusEl.textContent = "Não consegui montar nenhum set válido dessa vez (já tentei 2 vezes) - tente de novo.";
         return;
       }
-      state.strategySets[sp.sname] = {
-        sets: sets, cap: cap, dataVersion: DATA.meta ? DATA.meta.version : null, geradoEm: new Date().toISOString()
-      };
-      // Reaplica o teto (a mais antiga sai) e grava - a próxima visita a esta
-      // espécie mostra estes sets sem nova chamada.
-      state.strategySets = sanitizarStrategySets(state.strategySets);
-      persist();
+      // Grava (a próxima visita mostra estes sets sem nova chamada) e redesenha a
+      // ficha só se ela ainda for desta espécie.
+      acao(["ficha:" + sp.sname], function () {
+        state.strategySets[sp.sname] = {
+          sets: sets, cap: cap, dataVersion: DATA.meta ? DATA.meta.version : null, geradoEm: new Date().toISOString()
+        };
+        state.strategySets = sanitizarStrategySets(state.strategySets); // teto: a mais antiga sai
+      });
       if (statusEl) statusEl.textContent = "";
-      if (state.selected === sp.x) selectSpecies(sp.x);
     } catch (e) {
       if (statusEl) statusEl.textContent = sampleErrorMessage(e);
     }
@@ -6570,12 +6629,8 @@
       moves: (entry.moves || []).slice(0, 4),
       ivs: ivs,
       evs: evsTextToArray(entry.evs)
-    }, "manual");
-    persist();
+    }, "manual"); // ação: grava e redesenha a ficha aberta desta espécie
     flashToast("Build " + (fromBoss ? "de chefão " : "antiga ") + "copiada pro seu \"Meu build\" de " + sp.n);
-    // Refresh the open Dex detail so "Meu build"'s fields/preview reflect
-    // this write immediately, same as every other write path already does.
-    if (document.getElementById("mybuild-ability")) selectSpecies(sp.x);
   });
 
   // A user's own "Meu build" (state.customBuilds) always wins over the
@@ -6668,9 +6723,8 @@
 
   // ---------------- team roster rendering ----------------
   function renderTeam() {
-    // Time mudou (membro novo, evolução, build nova): confere se alguma build do
-    // time precisa de revisão automática. Agendado - junta mudanças seguidas.
-    agendarRevisoes();
+    // Só desenha. A revisão automática das builds é disparada pelas ações que
+    // mudam time/builds (concluirAcoes), não por quem desenha.
     var slotsEl = document.getElementById("team-slots");
     var members = state.team.map(getSpeciesByX).filter(Boolean);
     var slots = [];
@@ -6744,13 +6798,11 @@
         // filosofia "nada se perde, só se move" usada em todo o resto do
         // app. Time e Caixa não têm médo comum aqui (não é rosterMove(),
         // que troca um POR outro) - só garante que quem sai não desaparece.
-        state.team = state.team.filter(function (v) { return v !== x; });
-        if (state.box.indexOf(x) === -1) state.box.push(x);
-        teamSwapIdx = null;
-        saveTeam();
-        updateTeamBadge();
-        updateBoxBadge();
-        renderTeam();
+        acao(telasDeElenco(x), function () {
+          state.team = state.team.filter(function (v) { return v !== x; });
+          if (state.box.indexOf(x) === -1) state.box.push(x);
+          teamSwapIdx = null;
+        });
       });
     });
     slotsEl.querySelectorAll(".ts-swap-btn").forEach(function (btn) {
@@ -6778,7 +6830,7 @@
       btn.addEventListener("click", function () {
         var slotIdx = parseInt(btn.dataset.idx, 10);
         var outX = state.team[slotIdx];
-        if (rosterMove(parseInt(btn.dataset.x, 10), outX)) renderTeam();
+        rosterMove(parseInt(btn.dataset.x, 10), outX); // a ação redesenha o time
       });
     });
     var gotoDex = document.getElementById("ts-goto-dex");
@@ -6791,7 +6843,8 @@
       document.querySelector('.tab-btn[data-tab="box"]').click();
     });
 
-    updateTeamBadge();
+    // Contadores e resumo da Dex são das ações (TELAS.contadores/resumo), não
+    // do desenho do time - chamá-los daqui recalculava o confronto 2 vezes.
     renderTeamStrategy(members);
     renderTeamAnalysis(members);
     renderSavedTeams();
@@ -6823,26 +6876,35 @@
   //   - whoever it displaces always lands in the box, like benching in-game
   //   - a Pokemon is never in the team twice
   // `outX` null means "take a free slot"; returns false if the move is invalid.
-  function rosterMove(inX, outX) {
-    if (getSpeciesByX(inX) === null) return false;
-    if (state.team.indexOf(inX) !== -1) return false;
-
-    if (outX === null || outX === undefined) {
-      if (state.team.length >= 6) return false;
-      state.team.push(inX);
-    } else {
-      var slot = state.team.indexOf(outX);
-      if (slot === -1) return false;
-      state.team[slot] = inX;
-      if (state.box.indexOf(outX) === -1) state.box.push(outX);
+  // Telas que dependem de quem está no time/caixa (a ficha mostra "no time",
+  // o card do chefão mostra o confronto com o time).
+  var TELAS_ELENCO = ["contadores", "resumo", "time", "caixa", "chefao"];
+  // + a ficha de cada Pokémon envolvido (só redesenha se for a que está aberta).
+  function telasDeElenco() {
+    var out = TELAS_ELENCO.slice();
+    for (var i = 0; i < arguments.length; i++) {
+      var sp = arguments[i] !== null && arguments[i] !== undefined ? getSpeciesByX(arguments[i]) : null;
+      if (sp) out.push("ficha:" + sp.sname);
     }
-    state.box = state.box.filter(function (v) { return v !== inX; });
-
-    teamSwapIdx = null;
-    persist();
-    updateTeamBadge();
-    updateBoxBadge();
-    return true;
+    return out;
+  }
+  function rosterMove(inX, outX) {
+    return acao(telasDeElenco(inX, outX), function () {
+      if (getSpeciesByX(inX) === null) return false;
+      if (state.team.indexOf(inX) !== -1) return false;
+      if (outX === null || outX === undefined) {
+        if (state.team.length >= 6) return false;
+        state.team.push(inX);
+      } else {
+        var slot = state.team.indexOf(outX);
+        if (slot === -1) return false;
+        state.team[slot] = inX;
+        if (state.box.indexOf(outX) === -1) state.box.push(outX);
+      }
+      state.box = state.box.filter(function (v) { return v !== inX; });
+      teamSwapIdx = null;
+      return true;
+    });
   }
 
   var savedTeamEditingIdx = null;
@@ -6907,17 +6969,16 @@
         // snamesToXs()/state.orphans acima).
         var loadOrphans = [];
         var xs = snamesToXs(slot.team, loadOrphans).slice(0, 6);
-        state.team.forEach(function (x) {
-          if (xs.indexOf(x) === -1 && state.box.indexOf(x) === -1) state.box.push(x);
+        acao(TELAS_ELENCO.concat(["ficha"]), function () {
+          state.team.forEach(function (x) {
+            if (xs.indexOf(x) === -1 && state.box.indexOf(x) === -1) state.box.push(x);
+          });
+          state.box = state.box.filter(function (x) { return xs.indexOf(x) === -1; });
+          state.team = xs;
+          loadOrphans.forEach(function (sn) {
+            if (state.orphans.team.indexOf(sn) === -1) state.orphans.team.push(sn);
+          });
         });
-        state.box = state.box.filter(function (x) { return xs.indexOf(x) === -1; });
-        state.team = xs;
-        loadOrphans.forEach(function (sn) {
-          if (state.orphans.team.indexOf(sn) === -1) state.orphans.team.push(sn);
-        });
-        saveTeam();
-        updateBoxBadge();
-        renderTeam();
         document.getElementById("saved-teams-status").textContent = "Time \"" + (slot.name || ("Time " + (idx + 1))) + "\" carregado.";
       });
     });
@@ -6937,9 +6998,7 @@
           "Isso apaga o layout \"" + (slot.name || ("Time " + (idx + 1))) + "\" salvo. Os Pokémon continuam no seu time/caixa - só a referência salva é removida, e não dá pra desfazer.",
           "Excluir",
           function () {
-            state.savedTeams.splice(idx, 1);
-            saveSavedTeams();
-            renderSavedTeams();
+            acao(["timesSalvos", "contadores"], function () { state.savedTeams.splice(idx, 1); });
           }
         );
       });
@@ -6957,10 +7016,8 @@
         var idx = parseInt(btn.dataset.idx, 10);
         var input = document.getElementById("stc-rename-input");
         var newName = input ? input.value.trim() : "";
-        if (newName && state.savedTeams[idx]) state.savedTeams[idx].name = newName;
         savedTeamEditingIdx = null;
-        saveSavedTeams();
-        renderSavedTeams();
+        acao(["timesSalvos"], function () { if (newName && state.savedTeams[idx]) state.savedTeams[idx].name = newName; });
       });
     });
     var renameInput = document.getElementById("stc-rename-input");
@@ -6976,10 +7033,8 @@
     if (state.savedTeams.length >= 3 || !state.team.length) return;
     var nameInput = document.getElementById("save-team-name");
     var name = nameInput.value.trim() || ("Time " + (state.savedTeams.length + 1));
-    state.savedTeams.push({ name: name, team: xsToSnames(state.team) });
-    saveSavedTeams();
     nameInput.value = "";
-    renderSavedTeams();
+    acao(["timesSalvos"], function () { state.savedTeams.push({ name: name, team: xsToSnames(state.team) }); });
     document.getElementById("saved-teams-status").textContent = "Salvo como \"" + name + "\".";
   });
 
@@ -7014,33 +7069,24 @@
       Object.keys(state.autoEvolved).length || Object.keys(state.gymSkillsCleared).length || state.settings.milestone > 0);
   }
   function zerarRun() {
-    state.team = [];
-    state.box = [];
-    state.archetype = { pace: null, weather: null, monotype: null, reasoning: "" };
-    state.autoEvolved = {};
-    state.gymSkillsCleared = {};
-    state.settings.milestone = 0;
-    state.settings.runConfirmedAt = null;
-    capRegistrado = getCurrentCap();
-    teamRecommendation = null;
-    generatedTeamResult = null;
-    teamSwapIdx = null;
-    pcBoxSelectedX = null;
-    logAutoAction("Novo jogo: time, caixa, arquétipo, progresso de insígnias e buffs de ginásio zerados. Builds, anotações e times salvos foram mantidos.");
-    persist();
+    acao(TELAS_ELENCO.concat(["ficha", "progresso", "log"]), function () {
+      state.team = [];
+      state.box = [];
+      state.archetype = { pace: null, weather: null, monotype: null, reasoning: "" };
+      state.autoEvolved = {};
+      state.gymSkillsCleared = {};
+      state.settings.milestone = 0;
+      state.settings.runConfirmedAt = null;
+      capRegistrado = getCurrentCap();
+      teamRecommendation = null;
+      generatedTeamResult = null;
+      teamSwapIdx = null;
+      pcBoxSelectedX = null;
+      myBuildLevelIsCustom = false;
+      logAutoAction("Novo jogo: time, caixa, arquétipo, progresso de insígnias e buffs de ginásio zerados. Builds, anotações e times salvos foram mantidos.");
+    });
     var msSel = document.getElementById("settings-milestone");
     if (msSel) msSel.value = "0";
-    myBuildLevelIsCustom = false;
-    updateTeamBadge();
-    updateBoxBadge();
-    renderTeam();
-    renderBox();
-    renderCapBadge();
-    if (document.getElementById("cap-display")) renderCapDisplay();
-    renderProgressTrail();
-    renderRunStatus();
-    renderAutoLog();
-    syncRowAddButtons();
     document.getElementById("run-setup-banner").hidden = false;
   }
   document.getElementById("reset-team-box-btn").addEventListener("click", function () {
@@ -7619,11 +7665,13 @@
       chip.addEventListener("click", function () {
         var axis = chip.dataset.axis;
         var value = chip.dataset.value || null;
-        state.archetype[axis] = value;
-        teamRecommendation = null; // alvo mudou, sugestão antiga não vale mais
-        if (axis === "monotype") generatedTeamResult = null; // arquétipo mudou, o time gerado antigo não corresponde mais ao que foi pedido
-        persist();
-        renderTeamStrategy(members);
+        // O Ritmo decide qual curada o time mostra (estilo) - por isso "time" e
+        // "builds", não só o card de arquétipo.
+        acao(["time", "builds", "resumo"], function () {
+          state.archetype[axis] = value;
+          teamRecommendation = null; // alvo mudou, sugestão antiga não vale mais
+          if (axis === "monotype") generatedTeamResult = null; // arquétipo mudou, o time gerado antigo não corresponde mais ao que foi pedido
+        });
       });
     });
     var buildCompleteBtn = document.getElementById("archetype-build-complete");
@@ -7779,20 +7827,18 @@
     if (!xs.length) {
       flashToast("Nenhum dos sugeridos ainda está com você - monte de novo.");
       teamRecommendation = null;
-      renderTeam();
+      TELAS.time(); // estado de tela (a sugestão), nada a gravar
       return false;
     }
-    state.team.forEach(function (x) {
-      if (xs.indexOf(x) === -1 && consumed.indexOf(x) === -1 && state.box.indexOf(x) === -1) state.box.push(x);
+    acao(TELAS_ELENCO.concat(["ficha"]), function () {
+      state.team.forEach(function (x) {
+        if (xs.indexOf(x) === -1 && consumed.indexOf(x) === -1 && state.box.indexOf(x) === -1) state.box.push(x);
+      });
+      state.box = state.box.filter(function (x) { return xs.indexOf(x) === -1 && consumed.indexOf(x) === -1; });
+      state.team = xs;
+      state.archetype.reasoning = teamRecommendation.reasoning;
+      teamRecommendation = null;
     });
-    state.box = state.box.filter(function (x) { return xs.indexOf(x) === -1 && consumed.indexOf(x) === -1; });
-    state.team = xs;
-    state.archetype.reasoning = teamRecommendation.reasoning;
-    teamRecommendation = null;
-    persist();
-    updateTeamBadge();
-    updateBoxBadge();
-    renderTeam();
     flashToast("Time atualizado (" + xs.length + "/6).");
     return true;
   }
@@ -7940,7 +7986,7 @@
     var guide = await generateTeamUsageGuide(members, focusDesc);
     setStatus("Etapa 4/4 - validando a equipe...");
     generatedTeamResult = { archetypeLabel: focusDesc, guide: guide, validation: computeTeamGenerationValidation(members), forTeamKey: teamKeyFor(members) };
-    renderTeam();
+    TELAS.time(); // estado de tela (resultado da geração); as builds já foram gravadas pelas ações
     setStatus(guide ? "Time completo gerado." : "Time e builds gerados - o guia de uso não veio desta vez, pode gerar de novo depois.");
     flashToast("Time completo gerado: composição, builds" + (guide ? " e guia" : "") + " prontos.");
   }
@@ -8113,8 +8159,7 @@
           moves: (m.mv || []).slice(0, 4),
           ivs: m.ivsRaw.slice(),
           evs: m.evsRaw.slice()
-        }, "manual");
-        persist();
+        }, "manual"); // ação: grava e redesenha o que mostra build
         flashToast("Build do " + m.n + " copiado pro seu \"Meu build\" - vá na Dex pra ver/ajustar");
       }
     });
@@ -8393,18 +8438,17 @@
     // regra de sempre (quem sai vai pra caixa, ninguém é apagado).
     document.querySelectorAll("#boss-detail .cf-apply-swap").forEach(function (btn) {
       btn.addEventListener("click", function () {
+        // Lote: todas as trocas, uma gravação e um redesenho no fim (antes era um
+        // persist + push de sync por troca, e depois 5 redesenhos à mão).
         var feitas = 0;
-        btn.dataset.trocas.split(",").forEach(function (par) {
-          var p = par.split(">");
-          if (rosterMove(parseInt(p[1], 10), p[0] === "" ? null : parseInt(p[0], 10))) feitas++;
+        acao([], function () {
+          btn.dataset.trocas.split(",").forEach(function (par) {
+            var p = par.split(">");
+            if (rosterMove(parseInt(p[1], 10), p[0] === "" ? null : parseInt(p[0], 10))) feitas++;
+          });
+          return feitas > 0;
         });
-        if (!feitas) return;
-        flashToast(feitas + (feitas === 1 ? " troca aplicada" : " trocas aplicadas") + " para " + boss.name + ".");
-        renderTeam();
-        renderBox();
-        syncRowAddButtons();
-        scheduleDashboardRefresh();
-        renderBossDetail();
+        if (feitas) flashToast(feitas + (feitas === 1 ? " troca aplicada" : " trocas aplicadas") + " para " + boss.name + ".");
       });
     });
 
@@ -8433,13 +8477,14 @@
       gymCard.querySelectorAll("[data-gymskill]").forEach(function (cb) {
         cb.addEventListener("change", function () {
           var id = cb.dataset.gymskill;
-          var cleared = state.gymSkillsCleared[leaderName] || [];
-          if (cb.checked) { if (cleared.indexOf(id) === -1) cleared = cleared.concat([id]); }
-          else { cleared = cleared.filter(function (x) { return x !== id; }); }
-          if (cleared.length) state.gymSkillsCleared[leaderName] = cleared;
-          else delete state.gymSkillsCleared[leaderName];
-          persist();
-          renderBossDetail();
+          var marcado = cb.checked;
+          acao(["chefao", "contadores"], function () {
+            var cleared = state.gymSkillsCleared[leaderName] || [];
+            if (marcado) { if (cleared.indexOf(id) === -1) cleared = cleared.concat([id]); }
+            else { cleared = cleared.filter(function (x) { return x !== id; }); }
+            if (cleared.length) state.gymSkillsCleared[leaderName] = cleared;
+            else delete state.gymSkillsCleared[leaderName];
+          });
         });
       });
     }
@@ -8524,50 +8569,39 @@
     // Auto-evolução por level cap, 2026-09-10: dispara na hora, junto com a
     // mudança que acabou de alterar o cap - exatamente o que o usuário pediu
     // ("na hora, ao mudar o level cap"), não só no próximo save manual.
-    function afterCapChange() {
-      saveSettings();
-      renderCapDisplay();
-      renderCapBadge();
-      renderProgressTrail();
-      var evoluiu = autoEvolveRoster(true);
-      var trocou = registrarTrocasDoPlano(capRegistrado, getCurrentCap());
-      capRegistrado = getCurrentCap();
-      if (evoluiu || trocou) {
-        persist();
-        renderTeam();
-        renderBox();
-        scheduleDashboardRefresh();
-        syncRowAddButtons();
-      }
-      agendarRevisoes();
-      // "Meu build" fica linkado ao level cap (pedido do usuário): derruba
-      // a flag de valor manual, então a próxima renderização volta a puxar
-      // do cap - e se a Dex já estiver mostrando um Pokémon agora mesmo,
-      // atualiza na hora, não só na próxima visita.
-      myBuildLevelIsCustom = false;
-      if (document.getElementById("dex-shell").classList.contains("show-detail") && state.selected !== null) {
-        selectSpecies(state.selected);
-      }
+    // Mudança de level cap (marco ou modo): uma ação só - a configuração, a
+    // auto-evolução que o cap novo libera, as trocas do plano de golpes e o
+    // registro no log gravam juntos e redesenham tudo que depende do cap
+    // (time, caixa, ficha aberta, confronto, progresso). Antes eram 2
+    // gravações e 9 redesenhos chamados à mão.
+    function afterCapChange(mudar) {
+      acao(TELAS_ELENCO.concat(["ficha", "progresso", "log", "builds"]), function () {
+        mudar();
+        autoEvolveRoster(true);
+        registrarTrocasDoPlano(capRegistrado, getCurrentCap());
+        capRegistrado = getCurrentCap();
+        // "Meu build" fica linkado ao level cap (pedido do usuário): derruba a
+        // flag de valor manual, e a ficha aberta é redesenhada pela ação.
+        myBuildLevelIsCustom = false;
+      });
     }
     // Dificuldade só escolhe a variante dos chefões - não mexe no cap, então
     // não dispara auto-evolução nem destrava golpes.
     diffSel.addEventListener("change", function () {
-      state.settings.difficulty = diffSel.value;
-      saveSettings();
-      scheduleDashboardRefresh();
       // Chefão já aberto passa pra variante da dificuldade nova (levantamento de
       // 2026-09-24: só mudava ao reabrir o chefão). Mesma escolha de variante de
       // selectBoss(), sem mexer na navegação (no celular o jogador pode estar na
       // lista, com o chefão ainda marcado).
-      var bossAberto = bossState.selected !== null ? BOSSES[bossState.selected] : null;
-      if (bossAberto) {
-        bossState.diff = varianteDoChefao(bossAberto);
-        renderBossDetail();
-      }
+      acao(["resumo", "chefao"], function () {
+        state.settings.difficulty = diffSel.value;
+        var bossAberto = bossState.selected !== null ? BOSSES[bossState.selected] : null;
+        if (bossAberto) bossState.diff = varianteDoChefao(bossAberto);
+      });
     });
     capSel.addEventListener("change", function () {
-      state.settings.levelCapMode = LEVEL_CAP_MODES.indexOf(capSel.value) !== -1 ? capSel.value : "more";
-      afterCapChange();
+      afterCapChange(function () {
+        state.settings.levelCapMode = LEVEL_CAP_MODES.indexOf(capSel.value) !== -1 ? capSel.value : "more";
+      });
     });
     msSel.addEventListener("change", function () {
       // Registro automático da luta vencida (fase 5, 2026-09-24): avançar de
@@ -8579,24 +8613,20 @@
       var milestoneAntes = state.settings.milestone;
       var lutaAnterior = getRemainingBossEntries()[0];
       var cxAntes = lutaAnterior ? confrontoParaParty(bossPartyPorDificuldade(lutaAnterior), false) : null;
-      state.settings.milestone = parseInt(msSel.value, 10);
-      if (cxAntes && state.settings.milestone > milestoneAntes) {
-        logAutoAction("Você avançou de insígnia, então assumi que venceu " + lutaAnterior.name + ". Antes da luta o quadro de confronto via " +
-          cxAntes.c.buracos.length + " Pokémon dele sem resposta super efetiva e " + cxAntes.c.ameacas.length + " ameaçando metade ou mais do seu time.");
-        renderAutoLog();
-      }
-      afterCapChange();
+      afterCapChange(function () {
+        state.settings.milestone = parseInt(msSel.value, 10);
+        if (cxAntes && state.settings.milestone > milestoneAntes) {
+          logAutoAction("Você avançou de insígnia, então assumi que venceu " + lutaAnterior.name + ". Antes da luta o quadro de confronto via " +
+            cxAntes.c.buracos.length + " Pokémon dele sem resposta super efetiva e " + cxAntes.c.ameacas.length + " ameaçando metade ou mais do seu time.");
+        }
+      });
     });
     var megaSel = document.getElementById("settings-mega-mode");
     megaSel.value = megaMode();
     megaSel.addEventListener("change", function () {
-      state.settings.megaMode = megaSel.value === "permanente" ? "permanente" : "temporaria";
-      saveSettings();
-      renderTeam();
-      scheduleDashboardRefresh();
-      if (document.getElementById("dex-shell").classList.contains("show-detail") && state.selected !== null) {
-        selectSpecies(state.selected);
-      }
+      acao(["time", "resumo", "ficha", "chefao", "builds"], function () {
+        state.settings.megaMode = megaSel.value === "permanente" ? "permanente" : "temporaria";
+      });
       flashToast("Mega Evolução: modo " + (megaMode() === "permanente" ? "permanente" : "temporário"));
     });
     renderCapDisplay();
@@ -8605,9 +8635,7 @@
     var runBtn = document.getElementById("settings-run-confirm");
     renderRunStatus();
     runBtn.addEventListener("click", function () {
-      state.settings.runConfirmedAt = new Date().toISOString();
-      saveSettings();
-      renderRunStatus();
+      acao(["progresso"], function () { state.settings.runConfirmedAt = new Date().toISOString(); });
       document.getElementById("run-setup-banner").hidden = true;
       flashToast("Configuração da run confirmada");
     });
@@ -8780,8 +8808,8 @@
   // ---------------- init ----------------
   document.getElementById("species-count").textContent = SPECIES.length;
   document.getElementById("data-stamp").textContent = (DATA.meta && DATA.meta.generated) || "?";
-  updateTeamBadge();
-  updateBoxBadge();
+  TELAS.contadores();
+  TELAS.resumo();
   renderCapBadge();
   renderList();
 
@@ -8830,6 +8858,8 @@
     generateBuildWithAI: generateBuildWithAI,
     gerarPlanoParaBuild: gerarPlanoParaBuild,
     processarRevisoes: processarRevisoes,
+    acao: acao,
+    TELAS: TELAS,
     desligarRevisaoAutomatica: function (sim) { revisaoAutomaticaDesligada = !!sim; },
     strategySetsHtml: strategySetsHtml,
     confrontoParaParty: confrontoParaParty,

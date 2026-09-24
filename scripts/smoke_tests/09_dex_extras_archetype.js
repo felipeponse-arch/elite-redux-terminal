@@ -46,11 +46,25 @@ async function section09() {
   } else {
     check("caixa tinha pelo menos 1 membro pro teste de dashboardDirty", false);
   }
+  // Fase 2 da refatoração (2026-09-24): quem marca o resumo como
+  // desatualizado é a AÇÃO que muda o estado, não o desenho da caixa. O
+  // diálogo acima foi cancelado (nada mudou), então voltar pra Dex não
+  // recalcula - antes recalculava à toa, porque renderBox mexia no contador.
+  document.querySelector('.tab-btn[data-tab="dex"]').click();
+  await wait(50);
+  const dashSemMudanca = document.querySelector("#dashboard .dashboard-card");
+  check("sem mudança de estado, voltar pra Dex não recalcula o resumo (nada mudou)",
+    dashSemMudanca === dashBefore, "mesmo nó: " + (dashSemMudanca === dashBefore));
+  // Mudança de verdade feita em outra aba: marca e recalcula ao voltar.
+  document.querySelector('.tab-btn[data-tab="box"]').click();
+  await wait(30);
+  window.__erTest.acao(["resumo"], function () { return true; });
+  const dashAindaNaCaixa = document.querySelector("#dashboard .dashboard-card");
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(50);
   const dashAfterSwitch = document.querySelector("#dashboard .dashboard-card");
-  check("dashboard recalcula (flush) ao voltar pra aba Dex com dashboardDirty=true",
-    dashAfterSwitch !== dashBefore, "mesmo nó: " + (dashAfterSwitch === dashBefore));
+  check("ação em outra aba não recalcula na hora; recalcula (flush) ao voltar pra Dex",
+    dashAindaNaCaixa === dashBefore && dashAfterSwitch !== dashBefore, "mesmo nó: " + (dashAfterSwitch === dashBefore));
 
   // Atualização ao vivo, JÁ na aba Dex, sem trocar de aba nenhuma vez -
   // usa Torkoal (não tocado por nenhuma seção anterior desta suíte) mas
