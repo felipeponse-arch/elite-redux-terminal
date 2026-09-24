@@ -52,13 +52,16 @@ if (-not $history.ContainsKey($Sname)) {
     $history[$Sname] = $tmp
 }
 
-$entry = [ordered]@{
-    savedAt = (Get-Date -Format "yyyy-MM-dd")
-    context = $Context
+# Desde 2026-09-24 o valor pode ser uma lista (ate 3 curadas, uma por estilo):
+# cada build da lista vira uma entrada propria no historico.
+foreach ($b in @($current)) {
+    $entry = [ordered]@{
+        savedAt = (Get-Date -Format "yyyy-MM-dd")
+        context = $Context
+    }
+    foreach ($key in $b.Keys) { $entry[$key] = $b[$key] }
+    [void]$history[$Sname].Add($entry)
 }
-foreach ($key in $current.Keys) { $entry[$key] = $current[$key] }
-
-[void]$history[$Sname].Add($entry)
 
 [System.IO.File]::WriteAllText($historyPath, (ConvertTo-JsonManual $history), (New-Object System.Text.UTF8Encoding($false)))
 

@@ -57,12 +57,36 @@ foreach ($s in $dex["species"]) {
 # foi validada, e o formato quando a fonte deixa explicito. Modo de mega e
 # nivel-alvo ficaram de fora de proposito: saem do item e do movepool, e uma
 # copia guardada so abriria espaco pra divergir.
-$FONTES = @("discord-build-workshop-2.65", "discord-movesets", "curadoria-do-projeto")
+$FONTES = @("discord-build-workshop-2.65", "discord-movesets", "curadoria-do-projeto", "ia-curada-playtester")
 $FORMATOS = @("1x1", "dupla")
+# Estilo (2026-09-24): uma espécie pode ter ate 3 curadas, uma por estilo. O
+# valor de builds.json pode ser um objeto (1 build) ou uma lista - o app
+# normaliza os dois em curadasDe() (src/regras/plano_build.js).
+$ESTILOS = @("ofensivo", "equilibrado", "defensivo")
 $versaoDoDado = [string]$dex["meta"]["version"]
 $problemas = New-Object System.Collections.ArrayList
-foreach ($sname in $builds.Keys) {
-    $b = $builds[$sname]
+$totalBuilds = 0
+$entradas = New-Object System.Collections.ArrayList
+foreach ($snameChave in $builds.Keys) {
+    $valor = $builds[$snameChave]
+    # @() de um dicionario da 1 elemento; de uma lista, os elementos dela.
+    $lista = @($valor)
+    if ($lista.Count -gt 3) { [void]$problemas.Add("$snameChave : $($lista.Count) builds - maximo 3 (uma por estilo)") }
+    $estilosVistos = @{}
+    foreach ($b in $lista) {
+        if ($b.ContainsKey("estilo")) {
+            $e = [string]$b["estilo"]
+            if ($ESTILOS -notcontains $e) { [void]$problemas.Add("$snameChave : estilo '$e' invalido (use: $($ESTILOS -join ', '))") }
+            elseif ($estilosVistos.ContainsKey($e)) { [void]$problemas.Add("$snameChave : duas builds com estilo '$e'") }
+            else { $estilosVistos[$e] = $true }
+        }
+        [void]$entradas.Add(@($snameChave, $b))
+    }
+}
+foreach ($par in $entradas) {
+    $sname = $par[0]
+    $b = $par[1]
+    $totalBuilds++
     if ($FONTES -notcontains [string]$b["fonte"]) {
         [void]$problemas.Add("$sname : fonte '$($b["fonte"])' invalida (use: $($FONTES -join ', '))")
     }
@@ -93,6 +117,15 @@ foreach ($sname in $builds.Keys) {
             [void]$problemas.Add("$sname : golpe '$mv' repetido no mesmo set")
         }
     }
+    # Plano de golpes (build promovida da IA): golpe de agora dentro do set,
+    # destino aprendido de verdade pela especie.
+    if ($b.ContainsKey("plano") -and $b["plano"]) {
+        foreach ($de in $b["plano"].Keys) {
+            $para = [string]$b["plano"][$de]
+            if (-not $vistos.Contains([string]$de)) { [void]$problemas.Add("$sname : plano parte de '$de', que nao esta no set") }
+            if (-not $golpePorSname[$sname].Contains($para)) { [void]$problemas.Add("$sname : plano leva a '$para', que esta especie nao aprende") }
+        }
+    }
 }
 
 if ($problemas.Count -gt 0) {
@@ -101,4 +134,4 @@ if ($problemas.Count -gt 0) {
     throw "validate_builds.ps1: $($problemas.Count) problema(s) em data/builds.json - build abortado. Nenhuma build pode citar habilidade/golpe que a especie nao tem."
 }
 
-Write-Output ("validate_builds.ps1: OK ({0} builds, todas com habilidade e golpes reais da propria especie, fonte e versao {1})" -f $builds.Count, $versaoDoDado)
+Write-Output ("validate_builds.ps1: OK ({0} builds em {1} especies, todas com habilidade e golpes reais da propria especie, fonte e versao {2})" -f $totalBuilds, $builds.Count, $versaoDoDado)

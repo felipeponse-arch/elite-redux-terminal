@@ -335,6 +335,58 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   (time, builds, progresso, modo de Mega, dificuldade) e aparecer sozinha; ação do jogador só onde
   há efeito real a aplicar (ex.: trocar um membro) ou consentimento necessário (geração por IA).
 
+### Build que acompanha o jogador e banco de builds (2026-09-24)
+
+Pedidos do usuário: "montamos uma build no cap 18; no próximo cap ele pode aprender golpes melhores pra
+build que já montamos - o jogo pode atualizar a build"; "ao evoluir o kit muda"; "toda build gerada por
+IA pode ser considerada curada... o Playtester faz a curadoria... pra economizar chamadas de IA"; até 3
+builds curadas por espécie, uma por papel, só dos papéis que o jogador já pediu. Medido nas 138 curadas
+(sem Mega): a cada degrau de cap entre 18 e 70, 17% a 46% das espécies destravam um golpe do set ideal.
+
+- RF76 — **Plano de golpes**: toda build pode ter um `plano` { golpe de agora → golpe que entra depois }.
+  Quem escolhe a troca é quem montou a build (a IA ou a curadoria) - nunca uma regra fixa ("golpe mais
+  forte" errou 19 de 24 trocas no estudo). O app só calcula QUANDO o golpe libera (`golpesNoCap`,
+  `src/regras/plano_build.js`) e deriva os golpes na hora de mostrar (`effectiveBuild`). O que está
+  salvo nunca é regravado: se o cap descer, a troca volta sozinha. O card mostra "Já liberado" e
+  "Próximas trocas"; toda troca que entra ou volta com a mudança de cap vai pro log "O que o app fez
+  sozinho" (só membros do time).
+- RN20 — **Plano válido**: o destino precisa ser um golpe de NÍVEL que esta forma aprende acima do cap
+  atual e antes do nível em que ela evolui sozinha (680 de 729 pré-evoluções têm golpe assim); golpe
+  de tutor ou já liberado não entra (devia estar na build agora); um destino por golpe. Passo inválido
+  sai com o motivo, a build nunca é rejeitada por causa do plano (`validarPlano`).
+- RF77 — **Geração por IA com plano**: o prompt de build recebe os golpes futuros da forma com o nível
+  e pede o campo `plano`. Build à mão (ou set de Estratégias escolhido) sem plano e com golpe por
+  liberar pede só o plano, numa chamada curta sem ferramentas; editar a build mantém o plano dos golpes
+  que continuam nela.
+- RF78 — **Revisão automática** (sem clique): na evolução pra frente a build ativa é marcada; com a
+  curada da forma nova no estilo do time e sem golpe travado, troca pela curada sem IA; senão a IA
+  revisa mantendo o papel (a build anterior vai no prompt). Membro do time sem build própria cuja curada
+  tem golpe travado ganha uma "build-ponte" (a curada com golpes liberados agora e plano até os dela).
+  Custo limitado: só membros do time, uma chamada por vez, no máximo 3 por abertura, 2 tentativas por
+  build, e só roda se a IA já estiver liberada pelo jogador (nunca abre o pedido de consentimento sem
+  clique). O card mostra "revisão pendente"/"atualizando…".
+- RN21 — **Mega usa a build da base**: a Mega é a mesma criatura, com os mesmos golpes (293 de 303 Megas
+  têm movepool idêntico à base). Sem build própria, a Mega herda a build da base ajustando só o que
+  não existe nela (a habilidade, na maioria) - sem IA.
+- RN22 — **Estilo da build**: ofensivo / equilibrado / defensivo, calculado pelos EVs (ataque+SpA+Spe
+  ≥ 400 ofensivo; HP+Def+SpD ≥ 400 defensivo; senão equilibrado - nas 189 curadas: 105/51/33). O
+  estilo que o time pede vem do Ritmo do arquétipo (Hyper/Bulky Offense → ofensivo; Stall/Semi-Stall →
+  defensivo; resto → equilibrado). A curada mostrada é a do estilo do time; sem ela, a primeira.
+- RF79 — **Banco de builds curadas**: `data/builds.json` aceita até 3 builds por espécie (lista), no
+  máximo uma por estilo (`validate_builds.ps1` trava). Uma build de IA NÃO vira curada sozinha - ela é
+  montada pro contexto daquele momento e a validação do app só confere se é legal, não se é boa. O
+  Playtester roda `node scripts/playtester_curadoria.mjs <save.json>` sobre o save sincronizado:
+  checklist mecânico (mesma `validateAiBuild` do app sem cap, plano aprendível, estilo ainda não coberto,
+  não repete uma curada) e, depois do julgamento dele, `--promover SNAME#n` grava com fonte
+  `ia-curada-playtester`, estilo e plano. A justificativa da IA é copiada como nota, nunca interpretada.
+- RF80 — **Sets de Estratégias guardados**: vão pro save (e pro sync) com cap, versão dos dados e data;
+  recarregar não paga outra chamada. Versão dos dados diferente descarta; teto de 60 espécies.
+- RN23 — **Build acompanha a criatura sem perder nada**: destino sem build recebe a lista inteira;
+  destino com build recebe as que chegam como variantes extras (sem trocar a ativa) até 3, o resto fica
+  na origem. Quando o ajuste da evolução muda algo, a versão anterior fica guardada (`anterior`) e volta
+  inteira se a criatura regredir (cap desceu). Ajuste feito num save vindo de outro aparelho é gravado e
+  devolvido pro sync.
+
 **Nota da auditoria de 2026-09-23**: a numeração de Regras de Negócio pula de RN13 (seção 3) direto
 para RN15 — não existe RN14 em nenhuma versão deste documento. Não confirmado se é uma regra perdida
 numa edição anterior ou renumeração deliberada; fica registrado aqui para quem for investigar depois.

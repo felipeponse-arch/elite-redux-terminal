@@ -2331,6 +2331,7 @@
   /*@regras tipos.js*/
   /*@regras confronto.js*/
   /*@regras reconciliar_build.js*/
+/*@regras plano_build.js*/
 
   function typePill(name, small) {
     var meta = TYPE_META[name] || { hex: "#777", dark: false };
@@ -2586,18 +2587,31 @@
         var rawList = Array.isArray(raw) ? raw : (raw && typeof raw === "object" ? [raw] : []);
         var clean = rawList.slice(0, 3).map(function (b) {
           if (!b || typeof b !== "object") return null;
-          return {
+          var moves = Array.isArray(b.moves) ? b.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4) : [];
+          var entrada = {
             ability: typeof b.ability === "string" ? b.ability : "",
             nature: typeof b.nature === "string" ? b.nature : "",
             item: typeof b.item === "string" ? b.item : "",
-            moves: Array.isArray(b.moves) ? b.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4) : [],
+            moves: moves,
             ivs: Array.isArray(b.ivs) && b.ivs.length === 6 ? b.ivs.map(function (v) { return clampInt(v, 0, 31, 31); }) : [31, 31, 31, 31, 31, 31],
             evs: Array.isArray(b.evs) && b.evs.length === 6 ? b.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0],
-            source: (b.source === "ia") ? "ia" : "manual",
+            source: BUILD_SOURCES.indexOf(b.source) !== -1 ? b.source : "manual",
             active: !!b.active,
             savedAt: typeof b.savedAt === "string" ? b.savedAt : new Date().toISOString(),
             rationale: typeof b.rationale === "string" ? b.rationale.slice(0, 280) : ""
           };
+          // Campos de 2026-09-24 (build que acompanha o jogador). Só o formato é
+          // conferido aqui; o que vale pra espécie é conferido por reconciliarBuild
+          // logo abaixo e, de novo, na hora de derivar os golpes (golpesNoCap).
+          var plano = planoSaneado(b.plano, moves);
+          if (plano) entrada.plano = plano;
+          var ant = anteriorSaneado(b.anterior, 0);
+          if (ant) entrada.anterior = ant;
+          if (b.revisar === "evolucao" || b.revisar === "plano") entrada.revisar = b.revisar;
+          if (typeof b.revisadaDe === "string") entrada.revisadaDe = b.revisadaDe.slice(0, 40);
+          if (typeof b.tentativasRevisao === "number") entrada.tentativasRevisao = clampInt(b.tentativasRevisao, 0, 9, 0);
+          if (b.planoConsultado === true) entrada.planoConsultado = true;
+          return entrada;
         }).filter(function (b) {
           if (!b) return false;
           var isEmpty = !b.ability && !b.nature && !b.item && !b.moves.length &&
@@ -2629,6 +2643,24 @@
     reconciliouAoAplicar = reconciliarBuildsSalvas();
   }
   var reconciliouAoAplicar = false;
+
+  // Versões anteriores de uma build (pilha da evolução em etapas - ver
+  // reconciliarBuildsDe). Profundidade máxima 3: é o máximo de etapas de uma
+  // linha evolutiva, e trava um save malformado que tente aninhar sem fim.
+  function anteriorSaneado(a, profundidade) {
+    if (profundidade >= 3 || !a || typeof a !== "object" || typeof a.sname !== "string" || !Array.isArray(a.moves)) return null;
+    var out = {
+      sname: a.sname.slice(0, 60),
+      ability: typeof a.ability === "string" ? a.ability : "",
+      moves: a.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4),
+      rationale: typeof a.rationale === "string" ? a.rationale.slice(0, 280) : ""
+    };
+    var plano = planoSaneado(a.plano, out.moves);
+    if (plano) out.plano = plano;
+    var mais = anteriorSaneado(a.anterior, profundidade + 1);
+    if (mais) out.anterior = mais;
+    return out;
+  }
 
   // Mesma disciplina defensiva das builds: só aceita set com o formato certo,
   // de espécie que existe nesta versão dos dados e gerado sobre ESTA versão
@@ -2686,11 +2718,37 @@
   // established behavior is "replace whatever's currently showing", not
   // "add a new variant", so they keep working exactly as before even with
   // the list-based storage underneath.
+  // Único lugar que monta a entrada salva de uma build (antes eram 2 cópias
+  // campo a campo, e um campo novo - o plano de golpes - sumia numa delas).
+  var BUILD_SOURCES = ["ia", "manual", "curada"];
+  // Plano de golpes: o que veio com a build; senão, o da build que ela substitui
+  // (editar a build à mão mantém as trocas dos golpes que continuam nela). Build
+  // sem plano que ainda tem golpe por liberar fica marcada pra revisão
+  // automática, que pede só o plano à IA (gerarPlanoParaBuild).
+  function entradaDeBuild(build, source, sname, substituida) {
+    var e = {
+      ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs,
+      source: BUILD_SOURCES.indexOf(source) !== -1 ? source : "manual", active: true, savedAt: new Date().toISOString(),
+      rationale: build.rationale || ""
+    };
+    var plano = (build.plano && Object.keys(build.plano).length) ? build.plano
+      : (substituida && substituida.plano ? planoSaneado(substituida.plano, build.moves || []) : null);
+    if (plano) e.plano = plano;
+    // Plano já perguntado à IA (mesmo que a resposta tenha sido "nenhuma troca"):
+    // editar natureza/EV/item sem mexer nos golpes não pede de novo.
+    var mesmosGolpes = !!substituida && (substituida.moves || []).slice().sort().join("|") === (build.moves || []).slice().sort().join("|");
+    if (build.planoConsultado || (mesmosGolpes && substituida.planoConsultado)) e.planoConsultado = true;
+    if (!plano && !e.planoConsultado && (e.source !== "ia" || build.pedirPlano)) {
+      var sp = getSpeciesBySname(sname);
+      if (sp && golpesFuturosDe(sp, getCurrentCap()).length) { e.revisar = "plano"; e.tentativasRevisao = 0; }
+    }
+    return e;
+  }
   function setOrReplaceActiveBuild(sname, build, source) {
     var list = getBuildList(sname).slice();
     var activeIdx = -1;
     for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
-    var entry = { ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs, source: source, active: true, savedAt: new Date().toISOString(), rationale: build.rationale || "" };
+    var entry = entradaDeBuild(build, source, sname, activeIdx !== -1 ? list[activeIdx] : null);
     if (activeIdx !== -1) { list[activeIdx] = entry; }
     else if (list.length < 3) { list.forEach(function (b) { b.active = false; }); list.push(entry); }
     else { list.forEach(function (b, i) { b.active = (i === 0); }); list[0] = entry; }
@@ -2704,7 +2762,7 @@
     var list = getBuildList(sname).slice();
     if (list.length >= 3) return false;
     list.forEach(function (b) { b.active = false; });
-    list.push({ ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs, source: source, active: true, savedAt: new Date().toISOString(), rationale: build.rationale || "" });
+    list.push(entradaDeBuild(build, source, sname, null));
     state.customBuilds[sname] = list;
     return true;
   }
@@ -2879,6 +2937,22 @@
     }
     return false;
   }
+  // Save vindo de outro aparelho. Se a conferência das builds (applySave ->
+  // reconciliarBuildsSalvas) precisou ajustar algo, grava o ajuste e devolve pro
+  // sync - antes o ajuste ficava só na memória e sumia na próxima leitura
+  // (defeito c da revisão da v136). O outro aparelho recebe já ajustado e a
+  // conferência dele não muda mais nada, então não há vai-e-volta.
+  function aplicarSaveRemoto(remote) {
+    applySave(remote);
+    lsSet(STORE_KEY, JSON.stringify(remote));
+    // O marco pode ter mudado no outro aparelho: a referência das trocas do plano
+    // (registrarTrocasDoPlano) passa a ser o cap que chegou.
+    capRegistrado = getCurrentCap();
+    if (reconciliouAoAplicar) {
+      reconciliouAoAplicar = false;
+      persist();
+    }
+  }
   function pushToSync(save) {
     if (!syncRef) return;
     // persist() only ever runs from a genuine content-changing action (every
@@ -2975,8 +3049,7 @@
             // continua existindo pra atualizar a TELA, mas persist() agora
             // nunca mais sobrescreve o remoto com dado velho enquanto isso
             // não acontece.
-            applySave(remote);
-            lsSet(STORE_KEY, JSON.stringify(remote));
+            aplicarSaveRemoto(remote);
             showSyncBanner("Encontramos um save mais novo de outro aparelho.");
           } else {
             // Local has real differences and isn't older - push it up.
@@ -3018,8 +3091,7 @@
         syncRef.set(local3).catch(function () {});
         return;
       }
-      applySave(remote);
-      lsSet(STORE_KEY, JSON.stringify(remote));
+      aplicarSaveRemoto(remote);
       showSyncBanner("Seu time foi atualizado em outro aparelho agora.");
     }, function () {
       syncDb = null; syncRef = null;
@@ -3096,7 +3168,11 @@
   // habilidade inexistente por uma escolhível real e tira só os golpes que a
   // espécie não aprende - e anota o que mudou no log "O que o app fez sozinho",
   // com o valor antigo, pra o jogador poder desfazer à mão se discordar.
-  function reconciliarBuildsDe(sname, contexto) {
+  // `deSname` (opcional): a espécie de onde a build veio. Quando o ajuste muda
+  // algo, a versão de antes fica guardada em `anterior` - se a criatura voltar
+  // pra aquela espécie (cap desceu), carryUserData restaura a build inteira em
+  // vez de ficar com os golpes cortados (defeito b da revisão da v136).
+  function reconciliarBuildsDe(sname, contexto, deSname) {
     var sp = getSpeciesBySname(sname);
     var list = state.customBuilds[sname];
     if (!sp || !list) return false;
@@ -3105,12 +3181,37 @@
       var r = reconciliarBuild(b, sp);
       if (r.changes.length) {
         mudou = true;
+        if (deSname) {
+          // Pilha: evolução em 2 etapas numa subida só (Axew -> Fraxure ->
+          // Haxorus) guarda as 2 versões, e a regressão desfaz uma de cada vez.
+          r.build.anterior = { sname: deSname, ability: b.ability, moves: (b.moves || []).slice(), rationale: b.rationale || "" };
+          if (b.plano) r.build.anterior.plano = b.plano;
+          if (b.anterior) r.build.anterior.anterior = b.anterior;
+        }
         logAutoAction("Build de " + sp.n + " ajustada" + (contexto ? " (" + contexto + ")" : "") + ": " +
-          r.changes.map(function (c) { return c.campo + " " + c.de + " → " + c.para; }).join("; ") + ". Gere de novo com IA se quiser um set pensado pra esta espécie.");
+          r.changes.map(function (c) { return c.campo + " " + c.de + " → " + c.para; }).join("; ") + ".");
       }
       return r.build;
     });
     return mudou;
+  }
+  // Build que volta pra espécie de onde veio recupera a versão guardada.
+  function restaurarAnteriorPara(list, sname) {
+    return list.map(function (b) {
+      if (!b.anterior || b.anterior.sname !== sname) return b;
+      var r = {};
+      Object.keys(b).forEach(function (k) { if (k !== "anterior") r[k] = b[k]; });
+      r.ability = b.anterior.ability;
+      r.moves = b.anterior.moves.slice();
+      r.rationale = b.anterior.rationale;
+      if (b.anterior.plano) r.plano = b.anterior.plano; else delete r.plano;
+      if (b.anterior.anterior) r.anterior = b.anterior.anterior;
+      return r;
+    });
+  }
+  function ehEvolucaoPraFrente(fromSname, toSname) {
+    var de = getSpeciesBySname(fromSname), para = getSpeciesBySname(toSname);
+    return !!(de && para && (de.ev || []).some(function (ev) { return ev[2] === para.x; }));
   }
   function reconciliarBuildsSalvas() {
     var mudou = false;
@@ -3122,17 +3223,47 @@
   // A build que muda de espécie passa por reconciliarBuildsDe: a habilidade e os
   // golpes da espécie ANTERIOR podem não existir na nova (Fraxure -> Haxorus:
   // Moxie sumiu).
+  // A build acompanha a criatura. Destino sem build própria: a lista inteira vai
+  // e vira a do destino. Destino que já tem build (de outra criatura da mesma
+  // espécie, ou montada pela Dex): as que chegam entram até o limite de 3, e a
+  // ativa da criatura que evoluiu continua ATIVA (é a que ela estava usando); a
+  // que já existia fica salva nos chips. O que não couber fica na origem - antes,
+  // nesse caso, a build da origem era apagada sem ir pra lugar nenhum (defeito a
+  // da revisão da v136). Mesma ideia pras anotações (só move se o destino não
+  // tiver).
   function carryUserData(fromSname, toSname) {
-    if (state.customBuilds[fromSname] && !state.customBuilds[toSname]) {
-      state.customBuilds[toSname] = state.customBuilds[fromSname];
-      var de = getSpeciesBySname(fromSname);
-      reconciliarBuildsDe(toSname, de ? "passou de " + de.n + " pra " + (getSpeciesBySname(toSname) || { n: toSname }).n : "");
+    var origem = state.customBuilds[fromSname];
+    if (origem && origem.length) {
+      var de = getSpeciesBySname(fromSname), para = getSpeciesBySname(toSname);
+      var contexto = de ? "passou de " + de.n + " pra " + (para || { n: toSname }).n : "";
+      var destino = state.customBuilds[toSname] || [];
+      var praFrente = ehEvolucaoPraFrente(fromSname, toSname);
+      var cabem = Math.max(0, 3 - destino.length);
+      // A ativa da origem vai primeiro, pra ser a que cabe quando falta espaço.
+      var ordenada = origem.filter(function (b) { return b.active; }).concat(origem.filter(function (b) { return !b.active; }));
+      var vao = restaurarAnteriorPara(ordenada.slice(0, cabem), toSname);
+      if (!praFrente) {
+        // Voltou de forma (cap desceu): nada de revisão pendente da evolução.
+        vao.forEach(function (b) { delete b.revisar; delete b.revisadaDe; delete b.tentativasRevisao; });
+      }
+      if (vao.length) {
+        var ativaChegou = vao.some(function (b) { return b.active; });
+        if (destino.length && ativaChegou) {
+          destino.forEach(function (b) { b.active = false; });
+          logAutoAction("A build que " + (de ? de.n : fromSname) + " usava continua ativa em " + (para ? para.n : toSname) +
+            "; a que já existia pra " + (para ? para.n : toSname) + " ficou salva nos chips da ficha.");
+        }
+        state.customBuilds[toSname] = destino.concat(vao);
+        if (ordenada.length > cabem) state.customBuilds[fromSname] = ordenada.slice(cabem);
+        else delete state.customBuilds[fromSname];
+        reconciliarBuildsDe(toSname, contexto, fromSname);
+        if (praFrente) marcarRevisaoPosEvolucao(toSname, fromSname);
+      }
     }
-    delete state.customBuilds[fromSname];
     if (state.notes[fromSname] && !state.notes[toSname]) {
       state.notes[toSname] = state.notes[fromSname];
+      delete state.notes[fromSname];
     }
-    delete state.notes[fromSname];
   }
   // Desfaz, etapa por etapa, evoluções que ESTE app aplicou sozinho e que o
   // cap atual não libera mais (ex: cap voltou de 60 pra 55 -> Selenumbra
@@ -4816,6 +4947,8 @@
     return '<div class="card"><h3>Meu build</h3>' +
       '<p class="mybuild-hint">Monte seu set escolhendo direto das opções reais deste Pokémon - nada de digitar de cabeça.</p>' +
       buildChipsHtml(list) +
+      (hasBuild && b.plano ? planoDaBuildHtml(golpesNoCap(sp, b.moves, b.plano, getCurrentCap())) +
+        buildNoteHtml("Aqui você edita os golpes de agora; as trocas acima entram sozinhas no time quando o level cap liberar.") : "") +
       '<div class="mybuild-row">' +
         '<label class="mybuild-field">Habilidade<select id="mybuild-ability">' + abiOptionsHtml + '</select></label>' +
         '<label class="mybuild-field">Nature<select id="mybuild-nature">' + natureOptionsHtml + '</select></label>' +
@@ -5014,9 +5147,10 @@
         if (!set) return;
         setOrReplaceActiveBuild(sp.sname, {
           ability: set.ability, nature: set.nature, item: set.item,
-          moves: set.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: set.evs, rationale: set.rationale
+          moves: set.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: set.evs, rationale: set.rationale, pedirPlano: true
         }, "ia");
         persist();
+        agendarRevisoes();
         flashToast('"' + set.name + '" virou seu "Meu build" de ' + sp.n);
         selectSpecies(sp.x);
       });
@@ -5655,7 +5789,67 @@
     return parts;
   }
 
-  async function generateBuildWithAI(sp, statusElId) {
+  // Golpes que esta forma ainda vai aprender por nível (acima do cap, e antes de
+  // evoluir sozinha) - a IA usa pra montar o plano de golpes da build.
+  function golpesFuturosDe(sp, cap) {
+    if (cap === null || cap === undefined) return [];
+    var limite = nivelDeEvolucaoDaForma(sp);
+    var vistos = {}, out = [];
+    sp.lm.slice().sort(function (a, b) { return a[0] - b[0]; }).forEach(function (p) {
+      var nome = MOVES[p[1]] && MOVES[p[1]][0];
+      if (!nome || vistos[nome] || p[0] <= cap || (limite !== null && p[0] > limite) || sp.tu.indexOf(p[1]) !== -1) return;
+      if (nivelDoGolpe(sp, nome) <= cap) return; // também aprende antes, em outro nível
+      vistos[nome] = true;
+      out.push({ id: p[1], nome: nome, nivel: p[0] });
+    });
+    return out;
+  }
+  function planoPromptBlock(sp, cap) {
+    var futuros = golpesFuturosDe(sp, cap);
+    if (!futuros.length) return "";
+    return "PLANO DE GOLPES: o jogador sobe de nivel ao longo do jogo. Estes golpes esta forma ainda NAO aprende (liberam no nivel indicado):\n" +
+      "<dados_do_jogo>\n" + futuros.map(function (f) { return "nivel " + f.nivel + ": " + movePromptLine(f.id); }).join("\n") + "\n</dados_do_jogo>\n" +
+      "Para cada um dos 4 golpes escolhidos, se um destes golpes futuros for claramente melhor PARA O MESMO PAPEL deste slot, aponte a troca no campo " +
+      "\"plano\" ({\"golpe de agora\": \"golpe futuro\"}). So aponte troca que voce faria de verdade; slot sem troca melhor fica fora do plano. " +
+      "O app aplica a troca sozinho quando o level cap liberar o golpe.\n";
+  }
+  function contextoDoModoPrompt(sp, opts, cap) {
+    if (opts.modo === "revisao" && opts.anterior) {
+      var a = opts.anterior;
+      return "REVISAO DEPOIS DA EVOLUCAO: este Pokemon acabou de evoluir" + (opts.deNome ? " de " + opts.deNome : "") +
+        ". A build que ele usava era: habilidade " + dadoExterno(a.ability || "?") + ", golpes " + (a.moves || []).map(dadoExterno).join(", ") +
+        ". Mantenha o mesmo PAPEL e os golpes que continuam bons; troque so o que a forma nova faz claramente melhor (habilidade, stats e movepool mudaram). " +
+        "Na rationale, diga o que mudou e por que.\n";
+    }
+    if (opts.modo === "ponte" && opts.alvo) {
+      var trav = golpesTravadosNoCap(sp, opts.alvo.moves).filter(function (g) { return g.nivel !== null; });
+      return "BUILD ALVO (curada pela comunidade, pensada pro fim do jogo): habilidade " + dadoExterno(opts.alvo.ability) + ", natureza " + dadoExterno(opts.alvo.nature) +
+        ", golpes " + opts.alvo.moves.map(dadoExterno).join(", ") + ". No level cap " + cap + " ainda estao travados: " +
+        trav.map(function (g) { return dadoExterno(g.nome) + " (nivel " + g.nivel + ")"; }).join(", ") +
+        ". Monte a build de AGORA: mantenha todos os golpes da curada que ja estao liberados e, pra cada golpe travado, escolha um golpe-ponte " +
+        "liberado agora que cumpra o mesmo papel. No campo \"plano\", aponte cada golpe-ponte para o golpe travado da curada que ele substitui.\n";
+    }
+    return "";
+  }
+  // Confere o plano devolvido pela IA e anexa o que vale à build validada.
+  function anexarPlanoDaIa(sp, validated, rawPlano, cap, destinosPermitidos) {
+    var bruto = rawPlano;
+    if (destinosPermitidos && bruto && typeof bruto === "object") {
+      bruto = {};
+      Object.keys(rawPlano).forEach(function (de) { if (destinosPermitidos.indexOf(rawPlano[de]) !== -1) bruto[de] = rawPlano[de]; });
+    }
+    var r = validarPlano(sp, validated.moves, bruto, cap);
+    if (Object.keys(r.plano).length) validated.plano = r.plano;
+    return r;
+  }
+
+  // Modos (opts.modo): normal (botão "Gerar com IA": sempre uma build NOVA, nunca
+  // uma do banco - é o que o jogador pediu); "revisao" (a criatura acabou de
+  // evoluir; opts.anterior = build da forma anterior, a nova substitui a ativa);
+  // "ponte" (opts.alvo = build curada com golpe ainda travado; a IA escolhe os
+  // golpes de agora e o plano leva até a curada). Devolve true se salvou.
+  async function generateBuildWithAI(sp, statusElId, opts) {
+    opts = opts || {};
     var statusEl = document.getElementById(statusElId || "mybuild-ai-status");
     if (statusEl) statusEl.textContent = "Consultando o Claude...";
     if (typeof claude === "undefined" || !claude.use) {
@@ -5705,6 +5899,8 @@
       (takenRoles.length ? ("Papeis JA COBERTOS por outros membros do time atual (perfil natural de cada especie, nao a build escolhida): " + takenRoles.map(function (r) { return ROLE_LABEL_PT[r] || r; }).join(", ") + ". Pese isso na hora de decidir o papel deste Pokemon - um time com varios atacantes puros e nenhuma bulk/suporte fica fragil contra qualquer coisa que sobreviva o primeiro golpe. Nao e proibido repetir papel (as vezes o time PRECISA de 2+ sweepers de proposito), mas se for repetir um papel ja bem coberto, diga na rationale por que faz sentido mesmo assim.\n") : "") +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
+      contextoDoModoPrompt(sp, opts, cap) +
+      planoPromptBlock(sp, cap) +
       "Antes de responder, use as ferramentas disponiveis pra ver as fraquezas reais do time atual " +
       "do jogador, o rank real desta especie, e quais chefoes/lideres de ginasio ainda faltam ate o " +
       "final do jogo a partir de onde o jogador esta agora - use tudo isso pra decidir o PAPEL que " +
@@ -5744,7 +5940,7 @@
       "caixa pra proxima luta que falta, pode citar isso na rationale (ex: 'bom encaixe pra proxima luta, " +
       "contra X'), mas so se for esta especie mesmo, senao ignore.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
-      '{"ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"rationale":"..."}' +
+      '{"ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"plano":{"golpe de agora":"golpe futuro"},"rationale":"..."}' +
       ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
       "evs sao 6 numeros inteiros de 0 a 252, somando no maximo 510. " +
       "rationale e uma frase curta em portugues explicando a escolha com base no time/rank/momento do jogo" +
@@ -5781,13 +5977,60 @@
         itemWasDropped = true;
         validated.item = "";
       }
-      var ok = addBuildVariant(sp.sname, validated, "ia");
+      // A IA leva de segundos a minutos. Nos modos automáticos, se o mundo mudou
+      // nesse meio-tempo (o jogador editou/criou a build, a criatura saiu do time
+      // ou voltou de forma), a resposta é descartada - nunca passa por cima de
+      // uma escolha feita enquanto esperava. "obsoleta" não conta como falha.
+      if (opts.modo === "revisao" && (getActiveBuild(sp.sname) !== opts.anterior || state.team.indexOf(sp.x) === -1)) return "obsoleta";
+      if (opts.modo === "ponte" && (getActiveBuild(sp.sname) || state.team.indexOf(sp.x) === -1)) return "obsoleta";
+      if (opts.modo === "ponte" && opts.alvo) {
+        // A build de agora é a curada com golpes-ponte: habilidade, natureza,
+        // item e EVs continuam os da curada (quando valem pra esta forma).
+        var alvoAb = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+        if (alvoAb.indexOf(opts.alvo.ability) !== -1) validated.ability = opts.alvo.ability;
+        if (opts.alvo.nature) validated.nature = opts.alvo.nature;
+        if (takenItems.indexOf(opts.alvo.item) === -1) validated.item = opts.alvo.item || "";
+        validated.evs = evsTextoParaArray(opts.alvo.evs);
+        validated.rationale = "Build curada adaptada ao level cap " + cap + ": golpes-ponte até liberar os da curada.";
+      }
+      var planoCheck = anexarPlanoDaIa(sp, validated, raw && raw.plano, cap,
+        opts.modo === "ponte" && opts.alvo ? opts.alvo.moves : null);
+      validated.planoConsultado = true; // o prompt já pediu o plano - não pedir de novo
+      var ok;
+      if (opts.modo === "revisao" && getBuildList(sp.sname).length >= 3) {
+        // Lista cheia (3 builds): a revisada entra no lugar da ativa, e a de
+        // antes vai inteira pro log (habilidade, natureza, item, EVs e golpes).
+        setOrReplaceActiveBuild(sp.sname, validated, "ia");
+        ok = true;
+      } else {
+        // A revisada vira a ativa e a de antes continua salva como variante -
+        // o jogador volta pra ela com um toque no chip, nada se perde.
+        ok = addBuildVariant(sp.sname, validated, opts.modo === "ponte" ? "curada" : "ia");
+        if (ok && opts.modo === "revisao") {
+          delete opts.anterior.revisar; delete opts.anterior.revisadaDe; delete opts.anterior.tentativasRevisao;
+        }
+      }
       if (!ok) {
         if (statusEl) statusEl.textContent = "Limite de 3 builds atingido.";
-        return;
+        return false;
+      }
+      if (opts.modo === "revisao") {
+        var a = opts.anterior;
+        logAutoAction("Build de " + sp.n + " revisada depois da evolução" + (a ? " (antes: " + (a.ability || "?") + ", " + (a.nature || "?") + ", " + (a.item || "sem item") + ", " +
+          (evsToShowdownText(a.evs || []) || "sem EV") + "; " + (a.moves || []).join(", ") + ")" : "") +
+          ": " + validated.ability + "; " + validated.moves.join(", ") + (getBuildList(sp.sname).length > 1 ? ". A build anterior continua salva nos chips da ficha." : "."));
+      } else if (opts.modo === "ponte") {
+        logAutoAction("Build curada de " + sp.n + " adaptada ao level cap " + cap + ": " + validated.moves.join(", ") +
+          (validated.plano ? " (troca pelos golpes da curada quando liberarem)" : "") + ".");
       }
       persist();
-      flashToast("Build gerada por IA salva para " + sp.n + (itemWasDropped ? " (sem item - já em uso por outro membro do time)" : ""));
+      if (!opts.silencioso) {
+        flashToast("Build gerada por IA salva para " + sp.n + (itemWasDropped ? " (sem item - já em uso por outro membro do time)" : "") +
+          (validated.plano ? " - com " + Object.keys(validated.plano).length + " troca(s) planejada(s) para quando o cap subir" : ""));
+      }
+      if (planoCheck.descartados.length && statusEl) {
+        statusEl.textContent = "Trocas do plano descartadas: " + planoCheck.descartados.map(function (d) { return d.motivo; }).join("; ") + ".";
+      }
       // Bug real, achado em auditoria (2026-09-11): sample.json() pode levar
       // vários segundos - se o jogador já tiver navegado pra outra espécie
       // (ou aba) enquanto esperava, forçar selectSpecies(sp.x) aqui puxava
@@ -5804,10 +6047,206 @@
       // de aba e voltar - renderTeam() é barato de chamar mesmo se o
       // jogador estiver noutra aba no momento.
       if (state.team.indexOf(sp.x) !== -1) renderTeam();
+      return true;
     } catch (e) {
       if (statusEl) statusEl.textContent = sampleErrorMessage(e);
+      return false;
     }
   }
+
+  // Plano pra uma build que o jogador montou à mão: a IA não mexe em nada da
+  // build, só aponta, slot a slot, o golpe futuro que entra quando liberar.
+  // Chamada curta, sem ferramentas. Devolve true se o plano foi gravado.
+  async function gerarPlanoParaBuild(sp, entry) {
+    var cap = getCurrentCap();
+    var bloco = planoPromptBlock(sp, cap);
+    var movesPerguntados = entry.moves.join("|");
+    if (!bloco || typeof claude === "undefined" || !claude.use) return false;
+    var sample = await claude.use("sample");
+    if (!sample) return false;
+    var prompt = "Voce e o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon). " + PROMPT_DADOS_AVISO + "\n" +
+      "O jogador montou esta build a mao para " + sp.n + " (tipo " + speciesTypeNames(sp).join("/") + ") e ela NAO deve mudar: habilidade " +
+      dadoExterno(entry.ability || "?") + ", golpes " + entry.moves.map(dadoExterno).join(", ") + ". Level cap atual: " + cap + ".\n" + bloco +
+      "Responda SOMENTE com um objeto JSON: {\"plano\":{\"golpe de agora\":\"golpe futuro\"}} - objeto vazio se nenhuma troca for claramente melhor.";
+    try {
+      var raw = await sample.json(prompt);
+      var r = validarPlano(sp, entry.moves, raw && raw.plano, cap);
+      var lista = getBuildList(sp.sname);
+      var alvo = lista.indexOf(entry) !== -1 ? entry : null;
+      if (!alvo || alvo.moves.join("|") !== movesPerguntados) return "obsoleta"; // a build mudou enquanto a IA respondia
+      delete alvo.revisar;
+      delete alvo.tentativasRevisao;
+      alvo.planoConsultado = true;
+      if (Object.keys(r.plano).length) {
+        alvo.plano = r.plano;
+        logAutoAction("Plano de golpes da build de " + sp.n + ": " + Object.keys(r.plano).map(function (de) {
+          return de + " → " + r.plano[de] + " (nível " + nivelDoGolpe(sp, r.plano[de]) + ")";
+        }).join(", ") + ".");
+      }
+      persist();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // ---------------- revisão automática de builds (sem clique) ----------------
+  // Pedido do usuário (2026-09-24): a build acompanha o Pokémon sozinha - no
+  // cap (plano, sem IA), na evolução e na curada com golpe ainda travado (com
+  // IA, uma vez). Regras de custo: só membros do TIME, uma chamada por vez, no
+  // máximo REVISOES_POR_ABERTURA por abertura da página, 2 tentativas por build,
+  // e só roda sozinha se a IA já estiver liberada pelo jogador (nunca abre o
+  // pedido de consentimento sem ele ter clicado em nada). Antes da IA, a curada
+  // da forma nova no estilo do time resolve de graça.
+  var REVISOES_POR_ABERTURA = 3;
+  var revisoesFeitas = 0, revisandoAgora = null, revisaoRodando = false;
+  var revisaoFalhouNestaAbertura = {};
+  function marcarRevisaoPosEvolucao(toSname, fromSname) {
+    var de = getSpeciesBySname(fromSname), para = getSpeciesBySname(toSname);
+    if (!de || !para || !(de.ev || []).some(function (ev) { return ev[2] === para.x; })) return; // só evolução pra frente
+    var ativa = getActiveBuild(toSname);
+    if (ativa && ativa.source !== "curada") { ativa.revisar = "evolucao"; ativa.revisadaDe = de.n; ativa.tentativasRevisao = 0; }
+  }
+  // Falhas da build-ponte por espécie: não há build salva onde anotar a
+  // tentativa, então ficam no próprio aparelho (conveniência local - no pior
+  // caso, cada aparelho tenta 2 vezes).
+  var PONTE_FALHAS_KEY = "er_terminal_ponte_falhas";
+  function ponteFalhas() { try { return JSON.parse(lsGet(PONTE_FALHAS_KEY) || "{}") || {}; } catch (e) { return {}; } }
+  function registrarFalhaPonte(sname) { var f = ponteFalhas(); f[sname] = (f[sname] || 0) + 1; lsSet(PONTE_FALHAS_KEY, JSON.stringify(f)); return f[sname]; }
+  function tarefaDeRevisao(sp) {
+    if (revisaoFalhouNestaAbertura[sp.sname]) return null;
+    var ativa = getActiveBuild(sp.sname);
+    if (ativa && ativa.revisar && (ativa.tentativasRevisao || 0) < 2) return { sp: sp, tipo: ativa.revisar, entry: ativa };
+    if (!ativa) {
+      // Mega que herda a build da base (RN21) não precisa de build própria.
+      if (isMegaForm(sp)) {
+        var base = getSpeciesByX(MEGA_BASE_BY_X[sp.x]);
+        if (base && getActiveBuild(base.sname)) return null;
+      }
+      if ((ponteFalhas()[sp.sname] || 0) >= 2) return null;
+      var cur = curadaParaEstilo(sp.sname, estiloDoRitmo(state.archetype.pace), false);
+      if (cur && golpesTravadosNoCap(sp, cur.moves).some(function (g) { return g.nivel !== null; })) {
+        return { sp: sp, tipo: "ponte", alvo: cur };
+      }
+    }
+    return null;
+  }
+  function revisaoStatusHtml(sname) {
+    if (revisandoAgora === sname) return ' <span class="mega-lock-tag" role="status">atualizando…</span>';
+    var ativa = getActiveBuild(sname);
+    if (ativa && ativa.revisar && (ativa.tentativasRevisao || 0) < 2) {
+      return ' <span class="mega-lock-tag" title="O app revisa esta build sozinho com IA assim que a IA estiver liberada nesta página.">revisão pendente</span>';
+    }
+    return "";
+  }
+  async function iaLiberadaSemPerguntar() {
+    if (typeof claude === "undefined" || !claude.use) return false;
+    try {
+      var perm = await claude.use("permissions");
+      return !!perm && (await perm.state("sample")) === "granted";
+    } catch (e) { return false; }
+  }
+  // Só a suíte de testes desliga (window.__erTest.desligarRevisaoAutomatica):
+  // lá o estado é montado à mão e uma rodada em segundo plano mexeria nele no
+  // meio de outra verificação. Os testes da fila chamam as funções direto.
+  var revisaoAutomaticaDesligada = false;
+  async function processarRevisoes() {
+    if (revisaoRodando || revisaoAutomaticaDesligada) return;
+    revisaoRodando = true;
+    try {
+      while (revisoesFeitas < REVISOES_POR_ABERTURA) {
+        var tarefa = null;
+        var membros = state.team.map(getSpeciesByX).filter(Boolean);
+        for (var i = 0; i < membros.length && !tarefa; i++) tarefa = tarefaDeRevisao(membros[i]);
+        if (!tarefa) break;
+        var sp = tarefa.sp;
+        // Evolução com curada da forma nova no estilo do time: sem IA.
+        if (tarefa.tipo === "evolucao") {
+          var cur = curadaParaEstilo(sp.sname, estiloDoRitmo(state.archetype.pace), true);
+          if (cur && !golpesTravadosNoCap(sp, cur.moves).some(function (g) { return g.nivel !== null; })) {
+            var curEntrada = { ability: cur.ability, nature: cur.nature, item: cur.item, moves: cur.moves.slice(), planoConsultado: true,
+              ivs: [31, 31, 31, 31, 31, 31], evs: evsTextoParaArray(cur.evs), rationale: "Build curada de " + sp.n + " (" + (cur.fonte || "curadoria") + ")." };
+            if (cur.plano) curEntrada.plano = cur.plano;
+            var cheia = getBuildList(sp.sname).length >= 3;
+            if (cheia) setOrReplaceActiveBuild(sp.sname, curEntrada, "curada");
+            else {
+              addBuildVariant(sp.sname, curEntrada, "curada");
+              delete tarefa.entry.revisar; delete tarefa.entry.revisadaDe; delete tarefa.entry.tentativasRevisao;
+            }
+            logAutoAction("Build de " + sp.n + " trocada pela curada depois da evolução (antes: " + (tarefa.entry.ability || "?") + "; " + tarefa.entry.moves.join(", ") + ")" +
+              (cheia ? "." : ". A build anterior continua salva nos chips da ficha."));
+            persist();
+            renderTeam();
+            continue;
+          }
+        }
+        // Plano pedido quando já não há golpe por liberar (o cap passou de tudo):
+        // não há o que perguntar - sai da fila sem gastar vaga nem tentativa.
+        if (tarefa.tipo === "plano" && !golpesFuturosDe(sp, getCurrentCap()).length) {
+          delete tarefa.entry.revisar; delete tarefa.entry.tentativasRevisao;
+          persist();
+          continue;
+        }
+        if (!(await iaLiberadaSemPerguntar())) break;
+        revisandoAgora = sp.sname;
+        renderTeam();
+        var ok = false;
+        if (tarefa.tipo === "plano") ok = await gerarPlanoParaBuild(sp, tarefa.entry);
+        else if (tarefa.tipo === "evolucao") ok = await generateBuildWithAI(sp, "sem-status", { modo: "revisao", anterior: tarefa.entry, deNome: tarefa.entry.revisadaDe, silencioso: true });
+        else ok = await generateBuildWithAI(sp, "sem-status", { modo: "ponte", alvo: tarefa.alvo, silencioso: true });
+        revisoesFeitas++;
+        revisandoAgora = null;
+        if (ok === "obsoleta") {
+          // O mundo mudou enquanto a IA respondia: a resposta foi descartada e a
+          // próxima rodada decide de novo a partir do estado atual.
+        } else if (!ok) {
+          revisaoFalhouNestaAbertura[sp.sname] = true;
+          if (tarefa.tipo === "ponte") {
+            if (registrarFalhaPonte(sp.sname) >= 2) logAutoAction("Não consegui adaptar a build curada de " + sp.n + " ao level cap com IA (2 tentativas). Ela continua aparecendo como está.");
+          } else if (tarefa.entry && getBuildList(sp.sname).indexOf(tarefa.entry) !== -1) {
+            tarefa.entry.tentativasRevisao = (tarefa.entry.tentativasRevisao || 0) + 1;
+            if (tarefa.entry.tentativasRevisao >= 2) logAutoAction("Não consegui revisar a build de " + sp.n + " com IA (2 tentativas). Ela continua valendo como está.");
+            persist();
+          }
+        }
+        renderTeam();
+      }
+    } finally {
+      revisaoRodando = false;
+      revisandoAgora = null;
+    }
+  }
+  // Disparo: ao abrir (depois da primeira pintura) e sempre que o time ou o
+  // cap mudam - com um respiro pra juntar mudanças seguidas numa rodada só.
+  // Troca de golpe pelo plano quando o cap muda: nada é regravado (os golpes
+  // são derivados em effectiveBuild), mas o jogador vê no registro "O que o app
+  // fez sozinho" o que entrou - ou voltou, se o cap desceu. Só membros do time.
+  var capRegistrado = getCurrentCap();
+  function registrarTrocasDoPlano(capAntes, capDepois) {
+    if (capAntes === capDepois) return false;
+    var houve = false;
+    state.team.map(getSpeciesByX).filter(Boolean).forEach(function (sp) {
+      var b = getActiveBuild(sp.sname);
+      if (!b || !b.plano) return;
+      var t = trocasEntreCaps(sp, b.moves, b.plano, capAntes, capDepois);
+      if (t.entraram.length) {
+        houve = true;
+        logAutoAction("Build de " + sp.n + " (level cap " + capDepois + "): " + t.entraram.map(function (x) { return x.para + " entrou no lugar de " + x.de; }).join(", ") + ".");
+      }
+      if (t.voltaram.length) {
+        houve = true;
+        logAutoAction("Build de " + sp.n + " (level cap " + capDepois + "): " + t.voltaram.map(function (x) { return x.de + " voltou (" + x.para + " só no nível " + x.nivel + ")"; }).join(", ") + ".");
+      }
+    });
+    if (houve) renderAutoLog();
+    return houve;
+  }
+  var timerRevisoes = null;
+  function agendarRevisoes() {
+    clearTimeout(timerRevisoes);
+    timerRevisoes = setTimeout(processarRevisoes, 1500);
+  }
+  agendarRevisoes();
 
   // Sets de "Estratégias" ficam em state.strategySets (vão pro save desde
   // 2026-09-24) - { [sname]: { sets: [...], cap, dataVersion, geradoEm } }.
@@ -5840,11 +6279,13 @@
     // diferenciação - nunca bloqueia nem repete a regra "dura" de
     // validateAiBuild (a mesma assimetria de sempre: builds curadas têm
     // gente real respondendo por elas, "Estratégias" não pode se impor).
-    var curado = BUILDS[sp.sname];
-    var curadoPromptLine = curado
-      ? ("Já existe um build CURADO real (verificado pela comunidade, fonte: " + curado.fonte + ") pra " + sp.n +
-         ": habilidade " + curado.ability + ", item " + (curado.item || "nenhum") + ", golpes " + curado.moves.join("/") +
-         ". Os sets que você montar aqui devem ser DIFERENTES desse - não repita a mesma combinação de papel.\n")
+    var curados = curadasDe(sp.sname);
+    var curadoPromptLine = curados.length
+      ? ("Já existe" + (curados.length > 1 ? "m " + curados.length + " builds CURADOS" : " um build CURADO") + " real (verificado) pra " + sp.n + ": " +
+         curados.map(function (c) {
+           return "[" + (c.estilo || estiloDeEvs(c.evs)) + ", fonte " + c.fonte + "] habilidade " + c.ability + ", item " + (c.item || "nenhum") + ", golpes " + c.moves.join("/");
+         }).join("; ") +
+         ". Os sets que você montar aqui devem ser DIFERENTES desses - não repita a mesma combinação de papel.\n")
       : "";
     var prompt = "Você é o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon). " + PROMPT_DADOS_AVISO + " " +
       "Monte de 2 a 3 sets competitivos DISTINTOS (formato Pokemon Showdown), estilo dex do Smogon, para o Pokemon " +
@@ -6145,9 +6586,58 @@
       // 6-number array customBuilds actually stores) - found live: without
       // this, the preview printed "EVs: 0,252,0,0,0,0" (Array.toString()
       // via string concatenation) instead of "EVs: 252 Atk".
-      return { ability: custom.ability, nature: custom.nature, item: custom.item, evs: evsToShowdownText(custom.evs), moves: custom.moves };
+      // Golpes derivados pelo cap a partir do plano (src/regras/plano_build.js):
+      // o que está salvo nunca muda; a troca aparece quando o golpe libera e
+      // some sozinha se o cap voltar.
+      var d = golpesNoCap(sp, custom.moves, custom.plano, getCurrentCap());
+      return { ability: custom.ability, nature: custom.nature, item: custom.item, evs: evsToShowdownText(custom.evs), moves: d.moves,
+        origem: custom.source, estilo: estiloDeEvs(custom.evs), trocas: d.trocas, pendentes: d.pendentes };
     }
-    return BUILDS[sp.sname] || null;
+    // Forma Mega sem build própria: é a MESMA criatura da base, com os mesmos
+    // golpes (293 de 303 Megas têm movepool idêntico ao da base) - herda a build
+    // da base e ajusta só o que não vale na Mega (a habilidade, na maioria).
+    if (isMegaForm(sp)) {
+      var base = getSpeciesByX(MEGA_BASE_BY_X[sp.x]);
+      var daBase = base && getActiveBuild(base.sname);
+      if (daBase) {
+        var r = reconciliarBuild(daBase, sp);
+        var dm = golpesNoCap(sp, r.build.moves, r.build.plano, getCurrentCap());
+        return { ability: r.build.ability, nature: r.build.nature, item: r.build.item, evs: evsToShowdownText(r.build.evs), moves: dm.moves,
+          origem: "base", herdadaDe: base.n, ajustes: r.changes, trocas: dm.trocas, pendentes: dm.pendentes };
+      }
+    }
+    // Curada: a do estilo que o Ritmo do time pede; sem essa, a primeira.
+    var cur = curadaParaEstilo(sp.sname, estiloDoRitmo(state.archetype.pace), false);
+    if (!cur) return null;
+    // Curada promovida pelo Playtester pode ter plano (golpes do cap em que foi
+    // gerada + trocas): segue o cap igual às builds do jogador.
+    var dc = golpesNoCap(sp, cur.moves, cur.plano, getCurrentCap());
+    return Object.assign({}, cur, { moves: dc.moves, origem: "curada", estilo: cur.estilo || estiloDeEvs(cur.evs), trocas: dc.trocas, pendentes: dc.pendentes });
+  }
+
+  // Rótulo e linhas de contexto da build mostrada (card do time e ficha).
+  function rotuloDaBuild(build) {
+    if (!build) return "";
+    if (build.origem === "ia") return "Build gerada por IA";
+    if (build.origem === "manual") return "Meu build";
+    if (build.origem === "curada") return ESTILO_ROTULO[build.estilo] ? "Build curada (" + ESTILO_ROTULO[build.estilo] + ")" : "Build curada";
+    if (build.origem === "base") return "Build da forma base";
+    return "Build (formato Showdown)";
+  }
+  function planoDaBuildHtml(build) {
+    if (!build) return "";
+    var linhas = [];
+    if (build.herdadaDe) {
+      linhas.push("Mesma criatura de " + escapeHtml(build.herdadaDe) + ": mesmos golpes" +
+        (build.ajustes && build.ajustes.length ? ", " + build.ajustes.map(function (c) { return c.campo + " " + escapeHtml(c.de) + " → " + escapeHtml(c.para); }).join("; ") + " (não existe na Mega)" : "") + ".");
+    }
+    if (build.trocas && build.trocas.length) {
+      linhas.push("Já liberado: " + build.trocas.map(function (t) { return escapeHtml(t.para) + " no lugar de " + escapeHtml(t.de) + " (nível " + t.nivel + ")"; }).join(", ") + ".");
+    }
+    if (build.pendentes && build.pendentes.length) {
+      linhas.push("Próximas trocas: " + build.pendentes.map(function (t) { return escapeHtml(t.de) + " → " + escapeHtml(t.para) + " no nível " + t.nivel; }).join(", ") + ".");
+    }
+    return linhas.map(buildNoteHtml).join("");
   }
 
   // Etiqueta em criatura que é forma Mega enquanto a Mega ainda não existe pro
@@ -6169,6 +6659,9 @@
 
   // ---------------- team roster rendering ----------------
   function renderTeam() {
+    // Time mudou (membro novo, evolução, build nova): confere se alguma build do
+    // time precisa de revisão automática. Agendado - junta mudanças seguidas.
+    agendarRevisoes();
     var slotsEl = document.getElementById("team-slots");
     var members = state.team.map(getSpeciesByX).filter(Boolean);
     var slots = [];
@@ -6178,14 +6671,13 @@
         var names = speciesTypeNames(sp);
         var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ");
         var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ");
-        var activeCustom = getActiveBuild(sp.sname);
         var build = effectiveBuild(sp);
-        var buildLabel = activeCustom ? (activeCustom.source === "ia" ? "Build gerada por IA" : "Meu build") : "Build (formato Showdown)";
         var buildHtml = build ? (
           '<div class="ts-build">' +
-            '<div class="ts-build-head"><span class="ts-build-label">' + buildLabel + '</span>' +
+            '<div class="ts-build-head"><span class="ts-build-label">' + rotuloDaBuild(build) + '</span>' + revisaoStatusHtml(sp.sname) +
               '<button class="ts-build-copy" data-x="' + sp.x + '" type="button" title="Copiar este set">copiar</button></div>' +
             '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
+            planoDaBuildHtml(build) +
             itemDescHtml(build.item) +
             megaModeBuildNoteHtml(sp, build) +
             buildContextNotesHtml(sp, build) +
@@ -6520,6 +7012,7 @@
     state.gymSkillsCleared = {};
     state.settings.milestone = 0;
     state.settings.runConfirmedAt = null;
+    capRegistrado = getCurrentCap();
     teamRecommendation = null;
     generatedTeamResult = null;
     teamSwapIdx = null;
@@ -8023,13 +8516,17 @@
       renderCapDisplay();
       renderCapBadge();
       renderProgressTrail();
-      if (autoEvolveRoster(true)) {
+      var evoluiu = autoEvolveRoster(true);
+      var trocou = registrarTrocasDoPlano(capRegistrado, getCurrentCap());
+      capRegistrado = getCurrentCap();
+      if (evoluiu || trocou) {
         persist();
         renderTeam();
         renderBox();
         scheduleDashboardRefresh();
         syncRowAddButtons();
       }
+      agendarRevisoes();
       // "Meu build" fica linkado ao level cap (pedido do usuário): derruba
       // a flag de valor manual, então a próxima renderização volta a puxar
       // do cap - e se a Dex já estiver mostrando um Pokémon agora mesmo,
@@ -8296,6 +8793,22 @@
     reconciliarBuildsSalvas: reconciliarBuildsSalvas,
     sanitizarStrategySets: sanitizarStrategySets,
     buildSave: buildSave,
+    applySave: applySave,
+    effectiveBuild: effectiveBuild,
+    getActiveBuild: getActiveBuild,
+    setOrReplaceActiveBuild: setOrReplaceActiveBuild,
+    registrarTrocasDoPlano: registrarTrocasDoPlano,
+    tarefaDeRevisao: tarefaDeRevisao,
+    planoDaBuildHtml: planoDaBuildHtml,
+    rotuloDaBuild: rotuloDaBuild,
+    golpesFuturosDe: golpesFuturosDe,
+    planoPromptBlock: planoPromptBlock,
+    anexarPlanoDaIa: anexarPlanoDaIa,
+    MEGA_BASE_BY_X: MEGA_BASE_BY_X,
+    generateBuildWithAI: generateBuildWithAI,
+    gerarPlanoParaBuild: gerarPlanoParaBuild,
+    processarRevisoes: processarRevisoes,
+    desligarRevisaoAutomatica: function (sim) { revisaoAutomaticaDesligada = !!sim; },
     strategySetsHtml: strategySetsHtml,
     confrontoParaParty: confrontoParaParty,
     bossConfrontoHtml: bossConfrontoHtml,

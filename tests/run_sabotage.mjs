@@ -3,12 +3,17 @@
 // os testes unitários FALHEM. Sabotagem que "sobrevive" = regra sem proteção.
 //   npm run test:sabotage
 import { spawnSync } from "node:child_process";
+import { readdirSync } from "node:fs";
 import { MUTACOES } from "./unit/mutacoes.mjs";
+
+// Todo arquivo *.test.mjs da pasta, igual ao npm run test:unit - antes era uma
+// lista fixa, e um arquivo de teste novo ficava fora da sabotagem sem aviso.
+const ARQUIVOS_DE_TESTE = readdirSync("tests/unit").filter((f) => f.endsWith(".test.mjs")).map((f) => "tests/unit/" + f);
 
 let sobreviveram = 0;
 let quebradas = 0;
 for (const m of MUTACOES) {
-  const r = spawnSync(process.execPath, ["--test", "tests/unit/regras.test.mjs", "tests/unit/confronto.test.mjs", "tests/unit/mega_gate.test.mjs", "tests/unit/reconciliar_build.test.mjs"], {
+  const r = spawnSync(process.execPath, ["--test", ...ARQUIVOS_DE_TESTE], {
     env: { ...process.env, MUTACAO_ARQUIVO: m.arquivo, MUTACAO_DE: m.de, MUTACAO_PARA: m.para },
     encoding: "utf8",
   });

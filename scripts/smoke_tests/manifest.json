@@ -23,5 +23,6 @@
   "21_auditoria_times_salvos.js",
   "22_hp_ev_efficiency.js",
   "23_ev_breakpoints.js",
+  "24_build_que_acompanha.js",
   "99_runner.js"
 ]

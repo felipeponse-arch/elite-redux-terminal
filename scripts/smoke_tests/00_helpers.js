@@ -9,6 +9,10 @@
 // referencia `check`/`wait`/etc. como se estivessem no mesmo arquivo,
 // exatamente como antes da divisão.
 var results = [];
+// A fila de revisão automática de builds (2026-09-24) roda em segundo plano;
+// aqui o estado é montado à mão por cada seção, então ela fica desligada pra
+// suíte inteira. A seção 24 testa a fila chamando as funções direto.
+if (window.__erTest && window.__erTest.desligarRevisaoAutomatica) window.__erTest.desligarRevisaoAutomatica(true);
 function check(name, cond, detail) {
   results.push({ name, pass: !!cond, detail: detail || "" });
 }

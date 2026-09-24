@@ -90,7 +90,9 @@ async function main() {
   await waitForServer(`${BASE_URL}/artifact_final.html`);
   const browser = await chromium.launch();
   const falhas = [];
+  let totalChecks = 0;
   function check(nome, ok, detalhe) {
+    totalChecks++;
     console.log((ok ? "pega      " : "FALHOU    ") + nome + (ok ? "" : " -- " + JSON.stringify(detalhe)));
     if (!ok) falhas.push(nome);
   }
@@ -212,8 +214,40 @@ async function main() {
     check("nenhum erro de página durante o cenário D", pageErrors.length === 0, pageErrors);
   }
 
+  // ---- Cenário E: save de outro aparelho chega com build que não vale pra
+  // espécie (Haxorus com Moxie, o print do usuário de 2026-09-24). A conferência
+  // ajusta - e desde 2026-09-24 o ajuste é GRAVADO e devolvido pro sync; antes
+  // ficava só na memória (defeito c da revisão da v136). ----
+  {
+    const remotoInicial = baseSave({ team: [], savedAt: "2020-01-01T00:00:00.000Z" });
+    const { result, pageErrors } = await withPage(browser, remotoInicial, async (page) => {
+      const remotoNovo = baseSave({
+        team: ["SPECIES_HAXORUS"], savedAt: "2099-01-01T00:00:00.000Z",
+        customBuilds: { SPECIES_HAXORUS: [{ ability: "Moxie", nature: "Jolly", item: "", moves: ["Dragon Claw"], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0], source: "ia", active: true, savedAt: "x", rationale: "" }] }
+      });
+      const setsAntes = await page.evaluate(() => window.__syncMock.setCalls.length);
+      await page.evaluate((doc) => window.__syncMock.snapshotCallback(doc), remotoNovo);
+      await page.waitForTimeout(50);
+      return page.evaluate((antes) => {
+        var T = window.__erTest;
+        var local = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
+        var novos = window.__syncMock.setCalls.slice(antes);
+        var ultimo = novos[novos.length - 1];
+        return {
+          memoria: T.state.customBuilds.SPECIES_HAXORUS && T.state.customBuilds.SPECIES_HAXORUS[0].ability,
+          gravado: local.customBuilds && local.customBuilds.SPECIES_HAXORUS && local.customBuilds.SPECIES_HAXORUS[0].ability,
+          devolvido: ultimo && ultimo.customBuilds && ultimo.customBuilds.SPECIES_HAXORUS && ultimo.customBuilds.SPECIES_HAXORUS[0].ability
+        };
+      }, setsAntes);
+    });
+    check("save remoto com habilidade inexistente: ajuste feito na memória", result.memoria && result.memoria !== "Moxie", result);
+    check("save remoto com habilidade inexistente: ajuste GRAVADO no aparelho (antes sumia)", result.gravado && result.gravado !== "Moxie", result);
+    check("save remoto com habilidade inexistente: ajuste devolvido pro sync", result.devolvido && result.devolvido !== "Moxie", result);
+    check("nenhum erro de página durante o cenário E", pageErrors.length === 0, pageErrors);
+  }
+
   await browser.close();
-  console.log(`\n=== sincronização entre dispositivos (mock fiel do capability db): ${4 * 3 - falhas.length}/${4 * 3} verificações passaram ===`);
+  console.log(`\n=== sincronização entre dispositivos (mock fiel do capability db): ${totalChecks - falhas.length}/${totalChecks} verificações passaram ===`);
   if (falhas.length) process.exitCode = 1;
 }
 

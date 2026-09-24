@@ -47,6 +47,18 @@
       out.moves = out.moves.filter(function (m) { return pool[m]; });
       changes.push({ campo: "golpes", de: invalidos.join(", "), para: "removido" });
     }
+    // Plano de golpes (src/regras/plano_build.js): passo cujo golpe de agora saiu
+    // da build, ou cujo destino esta espécie não aprende, deixa de valer.
+    if (build.plano && typeof build.plano === "object") {
+      var plano = {}, fora = [];
+      Object.keys(build.plano).forEach(function (de) {
+        var para = build.plano[de];
+        if (out.moves.indexOf(de) !== -1 && typeof para === "string" && pool[para]) plano[de] = para;
+        else fora.push(de + " → " + para);
+      });
+      out.plano = plano;
+      if (fora.length) changes.push({ campo: "plano", de: fora.join(", "), para: "removido" });
+    }
     var escolhiveis = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
     if (out.ability && escolhiveis.indexOf(out.ability) === -1) {
       var nova = habilidadeSubstitutaPara(sp, out.moves);
