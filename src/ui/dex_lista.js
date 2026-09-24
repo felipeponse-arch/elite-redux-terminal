@@ -325,16 +325,7 @@
         spriteImgHtml(m.x, m.n, 30) +
         '<span class="swap-pick-name">' + escapeHtml(m.n) + '</span></button>';
     }).join("");
-    list.querySelectorAll(".swap-pick").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var outX = parseInt(btn.dataset.out, 10);
-        var outSp = getSpeciesByX(outX);
-        // A ação (rosterMove) redesenha a ficha aberta e a caixa, se visíveis.
-        if (!rosterMove(swapModalX, outX)) return;
-        closeSwapModal();
-        flashToast(sp.n + " entrou; " + outSp.n + " foi para a caixa");
-      });
-    });
+    // Clique numa opção: ouvinte único em #swap-modal-list (logo abaixo).
     // <dialog> nativo (2026-09-13, refactor de estrutura - Engenheira de
     // Frontend/CSS): showModal() já move o foco pra dentro do diálogo
     // sozinho, mas o alvo padrão do navegador é o próprio <dialog> - ainda
@@ -345,6 +336,22 @@
     var firstPick = list.querySelector(".swap-pick");
     (firstPick || document.getElementById("swap-modal-close")).focus();
   }
+
+  // Troca pelo modal: um ouvinte só na lista (fase 5 da refatoração).
+  (function () {
+    var list = document.getElementById("swap-modal-list");
+    list.addEventListener("click", function (e) {
+      var btn = e.target.closest(".swap-pick");
+      if (!btn || !list.contains(btn) || swapModalX === null || swapModalX === undefined) return;
+      var sp = getSpeciesByX(swapModalX);
+      var outX = parseInt(btn.dataset.out, 10);
+      var outSp = getSpeciesByX(outX);
+      // A ação (rosterMove) redesenha a ficha aberta e a caixa, se visíveis.
+      if (!sp || !outSp || !rosterMove(swapModalX, outX)) return;
+      closeSwapModal();
+      flashToast(sp.n + " entrou; " + outSp.n + " foi para a caixa");
+    });
+  })();
 
   function closeSwapModal() {
     document.getElementById("swap-modal").close();

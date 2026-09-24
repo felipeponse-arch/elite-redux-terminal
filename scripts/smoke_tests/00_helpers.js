@@ -143,3 +143,11 @@ async function addByName(name, toBox) {
   if (btn && !btn.disabled) btn.click();
   await wait(30);
 }
+
+// Tira todo mundo do time clicando "remover" como uma pessoa faria: um por vez,
+// buscando o botão de novo depois de cada clique (o time é redesenhado e o
+// clique é tratado por um ouvinte só no #team-slots - fase 5, 2026-09-24).
+function esvaziarTimePelosBotoes() {
+  var guarda = 0, btn;
+  while ((btn = document.querySelector(".team-slot .remove-btn")) && guarda++ < 12) btn.click();
+}

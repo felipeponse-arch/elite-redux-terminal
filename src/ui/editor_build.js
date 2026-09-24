@@ -448,129 +448,98 @@
       '<span id="strategy-sets-status" class="notes-status" role="status" aria-live="polite"></span>' +
       cardsHtml;
   }
-  function wireStrategySets(sp) {
-    var btn = document.getElementById("strategy-sets-generate");
-    if (btn) btn.addEventListener("click", function () { generateStrategySets(sp); });
-    function setAt(idx) {
-      var cached = state.strategySets[sp.sname];
-      return cached && cached.sets[idx];
-    }
-    document.querySelectorAll(".strategy-set-copy").forEach(function (copyBtn) {
-      copyBtn.addEventListener("click", function () {
-        var set = setAt(parseInt(copyBtn.dataset.idx, 10));
-        if (!set) return;
-        copyText(showdownSet(sp, { ability: set.ability, nature: set.nature, item: set.item, moves: set.moves, evs: evsToShowdownText(set.evs) }), document.getElementById("strategy-sets-status"), "Copiado!");
-      });
-    });
-    document.querySelectorAll(".strategy-set-use").forEach(function (useBtn) {
-      useBtn.addEventListener("click", function () {
-        var set = setAt(parseInt(useBtn.dataset.idx, 10));
-        if (!set) return;
-        setOrReplaceActiveBuild(sp.sname, {
-          ability: set.ability, nature: set.nature, item: set.item,
-          moves: set.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: set.evs, rationale: set.rationale, pedirPlano: true
-        }, "ia");
-        flashToast('"' + set.name + '" virou seu "Meu build" de ' + sp.n);
-      });
-    });
-  }
+  // (Botões dos sets de Estratégias: ouvinte único do painel da ficha, junto do editor.)
 
   // Sets initial <select>/<input> values from saved state (kept out of the
   // HTML-string generation in myBuildEditorHtml() - easier to set .value
-  // directly than to re-walk every option list marking one "selected"),
-  // and wires the save/clear/copy buttons + the live EV-total counter.
+  // directly than to re-walk every option list marking one "selected").
   function wireMyBuildEditor(sp) {
+    // Só preenche os campos com a build ativa. Digitação e botões do editor
+    // são tratados por ouvintes únicos no painel da ficha (logo abaixo, fase 5
+    // da refatoração) - antes eram ~20 ouvintes religados a cada abertura.
     var b = getActiveBuild(sp.sname) || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
     if (!myBuildLevelIsCustom) myBuildLevel = getCurrentCap() || 50;
     var abiEl = document.getElementById("mybuild-ability");
     if (abiEl) abiEl.value = b.ability || "";
     var natEl = document.getElementById("mybuild-nature");
     if (natEl) natEl.value = b.nature || "";
-    if (natEl) natEl.addEventListener("change", function () { updateMyBuildStatus(sp); });
     var itemEl = document.getElementById("mybuild-item");
     if (itemEl) itemEl.value = b.item || "";
-    if (itemEl) itemEl.addEventListener("input", function () { updateMyBuildStatus(sp); });
     for (var i = 0; i < 4; i++) {
       var mv = document.getElementById("mybuild-move-" + i);
       if (mv) mv.value = b.moves[i] || "";
-      if (mv) mv.addEventListener("change", function () { updateMyBuildStatus(sp); });
     }
     for (var j = 0; j < 6; j++) {
       var ivEl = document.getElementById("mybuild-iv-" + j);
       if (ivEl) ivEl.value = b.ivs[j];
-      if (ivEl) ivEl.addEventListener("input", function () { updateMyBuildStatus(sp); });
       var evEl = document.getElementById("mybuild-ev-" + j);
       if (evEl) evEl.value = b.evs[j];
-      if (evEl) evEl.addEventListener("input", updateMyBuildEvTotal);
-      if (evEl) evEl.addEventListener("input", function () { updateMyBuildStatus(sp); });
     }
     updateMyBuildEvTotal();
-    // "input" (not "change") - unlike the boss-level-input, this only ever
-    // touches #mybuild-status-preview, never re-renders the level field
-    // itself, so there's no focus-loss risk from updating on every keystroke.
-    var levelEl = document.getElementById("mybuild-level");
-    if (levelEl) levelEl.addEventListener("input", function () {
-      myBuildLevel = clampInt(levelEl.value, 1, 100, myBuildLevel);
-      myBuildLevelIsCustom = true;
-      updateMyBuildStatus(sp);
-    });
     updateMyBuildStatus(sp);
+  }
 
-    function readEditorForm() {
-      var moves = [];
-      for (var i = 0; i < 4; i++) {
-        var mv = document.getElementById("mybuild-move-" + i);
-        if (mv && mv.value) moves.push(mv.value);
-      }
-      var ivs = [], evs = [];
-      for (var j = 0; j < 6; j++) {
-        ivs.push(clampInt(document.getElementById("mybuild-iv-" + j).value, 0, 31, 31));
-        evs.push(clampInt(document.getElementById("mybuild-ev-" + j).value, 0, 252, 0));
-      }
-      return {
-        ability: document.getElementById("mybuild-ability").value,
-        nature: document.getElementById("mybuild-nature").value,
-        item: document.getElementById("mybuild-item").value.trim(),
-        moves: moves, ivs: ivs, evs: evs
-      };
+  // O que está digitado no editor agora (a build salva só muda ao salvar).
+  function lerFormularioDoEditor() {
+    var moves = [];
+    for (var i = 0; i < 4; i++) {
+      var mv = document.getElementById("mybuild-move-" + i);
+      if (mv && mv.value) moves.push(mv.value);
     }
+    var ivs = [], evs = [];
+    for (var j = 0; j < 6; j++) {
+      ivs.push(clampInt(document.getElementById("mybuild-iv-" + j).value, 0, 31, 31));
+      evs.push(clampInt(document.getElementById("mybuild-ev-" + j).value, 0, 252, 0));
+    }
+    return {
+      ability: document.getElementById("mybuild-ability").value,
+      nature: document.getElementById("mybuild-nature").value,
+      item: document.getElementById("mybuild-item").value.trim(),
+      moves: moves, ivs: ivs, evs: evs
+    };
+  }
 
-    var saveBtn = document.getElementById("mybuild-save");
-    if (saveBtn) {
-      saveBtn.addEventListener("click", function () {
-        setOrReplaceActiveBuild(sp.sname, readEditorForm(), "manual");
-        flashToast("Build salvo para " + sp.n);
-      });
-    }
-    // "Salvar como nova variante" - 2026-09-09, user's own rule: up to 3
-    // builds salvas por espécie, cada uma independente (não sobrescreve a
-    // que já está ativa). Só existe quando há espaço - o próprio HTML já
-    // esconde o botão com 3 salvas, mas addBuildVariant() também recusa por
-    // conta própria, então não depende só da UI pra respeitar o limite.
-    var saveVariantBtn = document.getElementById("mybuild-save-variant");
-    if (saveVariantBtn) {
-      saveVariantBtn.addEventListener("click", function () {
-        if (addBuildVariant(sp.sname, readEditorForm(), "manual")) flashToast("Nova variante salva para " + sp.n);
-      });
-    }
-    // Chips switch WHICH saved build is active/shown - 2026-09-09.
-    document.querySelectorAll(".mybuild-chip").forEach(function (chip) {
-      chip.addEventListener("click", function () {
-        setActiveBuildIndex(sp.sname, parseInt(chip.dataset.idx, 10));
-      });
+  // Ouvintes únicos do editor "Meu build" e dos sets de Estratégias, no painel da
+  // ficha. A espécie é sempre a da ficha aberta (state.selected).
+  (function () {
+    var painel = document.getElementById("species-detail");
+    function especieAberta() { return state.selected !== null && state.selected !== undefined ? getSpeciesByX(state.selected) : null; }
+    // Digitação: status ao vivo (e o total de EV) sem gravar nada.
+    painel.addEventListener("input", function (e) {
+      var id = e.target.id || "";
+      var sp = especieAberta();
+      if (!sp || id.indexOf("mybuild-") !== 0) return;
+      if (/^mybuild-ev-\d$/.test(id)) updateMyBuildEvTotal();
+      // "input" (not "change") - unlike the boss-level-input, this only ever
+      // touches #mybuild-status-preview, never re-renders the level field
+      // itself, so there's no focus-loss risk from updating on every keystroke.
+      if (id === "mybuild-level") {
+        myBuildLevel = clampInt(e.target.value, 1, 100, myBuildLevel);
+        myBuildLevelIsCustom = true;
+      }
+      if (/^mybuild-(item|iv-\d|ev-\d|level)$/.test(id)) updateMyBuildStatus(sp);
     });
-    var clearBtn = document.getElementById("mybuild-clear");
-    if (clearBtn) {
-      clearBtn.addEventListener("click", function () {
+    painel.addEventListener("change", function (e) {
+      var sp = especieAberta();
+      if (sp && /^mybuild-(nature|move-\d)$/.test(e.target.id || "")) updateMyBuildStatus(sp);
+    });
+    painel.addEventListener("click", function (e) {
+      var alvo = e.target.closest("button");
+      var sp = especieAberta();
+      if (!alvo || !painel.contains(alvo) || !sp) return;
+      if (alvo.id === "mybuild-save") {
+        setOrReplaceActiveBuild(sp.sname, lerFormularioDoEditor(), "manual");
+        flashToast("Build salvo para " + sp.n);
+      } else if (alvo.id === "mybuild-save-variant") {
+        if (addBuildVariant(sp.sname, lerFormularioDoEditor(), "manual")) flashToast("Nova variante salva para " + sp.n);
+      } else if (alvo.classList.contains("mybuild-chip")) {
+        setActiveBuildIndex(sp.sname, parseInt(alvo.dataset.idx, 10));
+      } else if (alvo.id === "mybuild-clear") {
         var list = getBuildList(sp.sname);
         var activeIdx = 0;
         for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
         removeBuildIndex(sp.sname, activeIdx);
-      });
-    }
-    var copyBtn = document.getElementById("mybuild-copy");
-    if (copyBtn) {
-      copyBtn.addEventListener("click", function () {
+      } else if (alvo.id === "mybuild-copy") {
         var saved = getActiveBuild(sp.sname);
         if (!saved) return;
         var text = showdownSet(sp, {
@@ -578,10 +547,23 @@
           evs: evsToShowdownText(saved.evs), moves: saved.moves.filter(Boolean)
         });
         copyText(text, document.getElementById("mybuild-status"), "Copiado!");
-      });
-    }
-    var aiBtn = document.getElementById("mybuild-ai-generate");
-    if (aiBtn) {
-      aiBtn.addEventListener("click", function () { generateBuildWithAI(sp); });
-    }
-  }
+      } else if (alvo.id === "mybuild-ai-generate") {
+        generateBuildWithAI(sp);
+      } else if (alvo.id === "strategy-sets-generate") {
+        generateStrategySets(sp);
+      } else if (alvo.classList.contains("strategy-set-copy") || alvo.classList.contains("strategy-set-use")) {
+        var cache = state.strategySets[sp.sname];
+        var set = cache && cache.sets[parseInt(alvo.dataset.idx, 10)];
+        if (!set) return;
+        if (alvo.classList.contains("strategy-set-copy")) {
+          copyText(showdownSet(sp, { ability: set.ability, nature: set.nature, item: set.item, moves: set.moves, evs: evsToShowdownText(set.evs) }), document.getElementById("strategy-sets-status"), "Copiado!");
+        } else {
+          setOrReplaceActiveBuild(sp.sname, {
+            ability: set.ability, nature: set.nature, item: set.item,
+            moves: set.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: set.evs, rationale: set.rationale, pedirPlano: true
+          }, "ia");
+          flashToast('"' + set.name + '" virou seu "Meu build" de ' + sp.n);
+        }
+      }
+    });
+  })();

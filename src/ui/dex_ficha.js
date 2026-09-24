@@ -360,6 +360,74 @@
     if (!isNaN(x)) goToDexSpeciesStrategies(x);
   });
 
+  // Ficha: barras dos stats base.
+  function fichaStatsHtml(sp) {
+  var statLabels = ["HP", "Ataque", "Defesa", "Sp. Atq", "Sp. Def", "Velocidade"];
+  var statsHtml = sp.b.map(function (v, i) {
+    return '<div class="stat-row"><span class="stat-label">' + statLabels[i] + '</span><span class="stat-val mono">' + v + '</span>' +
+      '<div class="stat-bar-track"><div class="stat-bar-fill ' + statTier(v) + '" style="width:' + statPct(v) + '%"></div></div></div>';
+  }).join("");
+    return statsHtml;
+  }
+
+  // Ficha: linha evolutiva (cada etapa leva à ficha dela).
+  function fichaEvolucaoHtml(sp) {
+  var evoHtml = "";
+  if (sp.ev.length) {
+    // Waypoint da trilha (redesign 2026-09-18) - mesma linguagem visual do
+    // Progresso: nó atual com anel de destaque, conector tracejado com
+    // seta no lugar da flechinha de texto solta.
+    var nodes = ['<div class="evo-node evo-node-current goto-species" tabindex="0" role="button" data-x="' + sp.x + '">' + spriteImgHtml(sp.x, sp.n, 26) + escapeHtml(sp.n) + '</div>'];
+    sp.ev.forEach(function (ev) {
+      var target = getSpeciesByX(ev[2]);
+      nodes.push('<span class="evo-arrow"><span class="evo-arrow-line"></span><small>' + evoConditionText(ev) + '</small></span>');
+      nodes.push('<div class="evo-node' + (target ? ' goto-species" tabindex="0" role="button" data-x="' + target.x : '') + '">' + (target ? spriteImgHtml(target.x, target.n, 26) : "") + escapeHtml(target ? target.n : "?") + '</div>');
+    });
+    evoHtml = '<div class="card"><h3>Linha evolutiva</h3><div class="evo-chain">' + nodes.join("") + '</div></div>';
+  }
+    return evoHtml;
+  }
+
+  // Ficha: formas alternativas da espécie.
+  function fichaFormasHtml(sp) {
+  // Formas alternativas (sp.frm), 2026-09-11 - achado na varredura completa
+  // do jogo pedida pelo usuário (dado real, nunca extraído até agora: 41
+  // espécies têm isto populado - Deoxys, Rotom, Burmy/Wormadam, Shellos/
+  // Gastrodon, Darmanitan, Basculin, Deerling/Sawsbuck, Tornadus/Thundurus/
+  // Landorus, Shaymin, Pichu). Cada forma já é sua própria entrada completa
+  // na dex (mesmo padrão das variantes Mega/Regional/Redux) - isto é só
+  // navegação direta entre elas, reaproveitando a mesma classe .evo-node
+  // (peso visual já estabelecido) e o mesmo goToDexSpecies() da linha
+  // evolutiva, sem CSS novo.
+  var frmHtml = "";
+  if (sp.frm && sp.frm.length) {
+    var frmNodes = sp.frm.map(function (fx) {
+      var f = getSpeciesByX(fx);
+      return f ? '<div class="evo-node goto-species" tabindex="0" role="button" data-x="' + f.x + '">' + spriteImgHtml(f.x, f.n, 26) + escapeHtml(f.n) + '</div>' : "";
+    }).join("");
+    if (frmNodes) frmHtml = '<div class="card"><h3>Formas alternativas</h3><div class="evo-chain">' + frmNodes + '</div></div>';
+  }
+    return frmHtml;
+  }
+
+  // Ficha: como obter espécies exclusivas (presente, loja, evento).
+  function fichaComoObterHtml(sp) {
+  // "Como obter" - só aparece pras poucas espécies exclusivas curadas em
+  // data/how_to_obtain.json (presente de NPC, compra em loja, evento
+  // estático - nunca rota de encontro selvagem comum, ver comentário de
+  // HOW_TO_OBTAIN acima). Ausência de card aqui não significa "não
+  // documentado", só que ainda não foi curado - mesma semântica de builds.json.
+  var howToObtainHtml = "";
+  var htoEntry = HOW_TO_OBTAIN[sp.sname];
+  if (htoEntry) {
+    howToObtainHtml = '<div class="card"><h3>Como obter</h3>' +
+      '<p style="margin:0 0 6px;"><b>' + escapeHtml(htoEntry.method) + '</b></p>' +
+      '<p style="color:var(--text-dim);font-size:12.5px;margin:0;">' + escapeHtml(htoEntry.note) + '</p>' +
+      '</div>';
+  }
+    return howToObtainHtml;
+  }
+
   function selectSpecies(x) {
     // Only reset scroll when the species actually CHANGES - selectSpecies()
     // is also called to refresh the currently-open species in place (e.g.
@@ -386,61 +454,17 @@
     });
 
     var names = speciesTypeNames(sp);
-    var statLabels = ["HP", "Ataque", "Defesa", "Sp. Atq", "Sp. Def", "Velocidade"];
-    var statsHtml = sp.b.map(function (v, i) {
-      return '<div class="stat-row"><span class="stat-label">' + statLabels[i] + '</span><span class="stat-val mono">' + v + '</span>' +
-        '<div class="stat-bar-track"><div class="stat-bar-fill ' + statTier(v) + '" style="width:' + statPct(v) + '%"></div></div></div>';
-    }).join("");
+    var statsHtml = fichaStatsHtml(sp);
 
     var synergyHits = ABILITY_SYNERGY[sp.sname];
     var abiHtml = uniqueIds(sp.ab).map(function (id) { return abilityCard(id, "Escolhível", "choosable", synergyHits); }).join("");
     var innHtml = sp.inn.map(function (id) { return abilityCard(id, "Innate", "innate", synergyHits); }).join("");
 
-    var evoHtml = "";
-    if (sp.ev.length) {
-      // Waypoint da trilha (redesign 2026-09-18) - mesma linguagem visual do
-      // Progresso: nó atual com anel de destaque, conector tracejado com
-      // seta no lugar da flechinha de texto solta.
-      var nodes = ['<div class="evo-node evo-node-current goto-species" tabindex="0" role="button" data-x="' + sp.x + '">' + spriteImgHtml(sp.x, sp.n, 26) + escapeHtml(sp.n) + '</div>'];
-      sp.ev.forEach(function (ev) {
-        var target = getSpeciesByX(ev[2]);
-        nodes.push('<span class="evo-arrow"><span class="evo-arrow-line"></span><small>' + evoConditionText(ev) + '</small></span>');
-        nodes.push('<div class="evo-node' + (target ? ' goto-species" tabindex="0" role="button" data-x="' + target.x : '') + '">' + (target ? spriteImgHtml(target.x, target.n, 26) : "") + escapeHtml(target ? target.n : "?") + '</div>');
-      });
-      evoHtml = '<div class="card"><h3>Linha evolutiva</h3><div class="evo-chain">' + nodes.join("") + '</div></div>';
-    }
+    var evoHtml = fichaEvolucaoHtml(sp);
 
-    // Formas alternativas (sp.frm), 2026-09-11 - achado na varredura completa
-    // do jogo pedida pelo usuário (dado real, nunca extraído até agora: 41
-    // espécies têm isto populado - Deoxys, Rotom, Burmy/Wormadam, Shellos/
-    // Gastrodon, Darmanitan, Basculin, Deerling/Sawsbuck, Tornadus/Thundurus/
-    // Landorus, Shaymin, Pichu). Cada forma já é sua própria entrada completa
-    // na dex (mesmo padrão das variantes Mega/Regional/Redux) - isto é só
-    // navegação direta entre elas, reaproveitando a mesma classe .evo-node
-    // (peso visual já estabelecido) e o mesmo goToDexSpecies() da linha
-    // evolutiva, sem CSS novo.
-    var frmHtml = "";
-    if (sp.frm && sp.frm.length) {
-      var frmNodes = sp.frm.map(function (fx) {
-        var f = getSpeciesByX(fx);
-        return f ? '<div class="evo-node goto-species" tabindex="0" role="button" data-x="' + f.x + '">' + spriteImgHtml(f.x, f.n, 26) + escapeHtml(f.n) + '</div>' : "";
-      }).join("");
-      if (frmNodes) frmHtml = '<div class="card"><h3>Formas alternativas</h3><div class="evo-chain">' + frmNodes + '</div></div>';
-    }
+    var frmHtml = fichaFormasHtml(sp);
 
-    // "Como obter" - só aparece pras poucas espécies exclusivas curadas em
-    // data/how_to_obtain.json (presente de NPC, compra em loja, evento
-    // estático - nunca rota de encontro selvagem comum, ver comentário de
-    // HOW_TO_OBTAIN acima). Ausência de card aqui não significa "não
-    // documentado", só que ainda não foi curado - mesma semântica de builds.json.
-    var howToObtainHtml = "";
-    var htoEntry = HOW_TO_OBTAIN[sp.sname];
-    if (htoEntry) {
-      howToObtainHtml = '<div class="card"><h3>Como obter</h3>' +
-        '<p style="margin:0 0 6px;"><b>' + escapeHtml(htoEntry.method) + '</b></p>' +
-        '<p style="color:var(--text-dim);font-size:12.5px;margin:0;">' + escapeHtml(htoEntry.note) + '</p>' +
-        '</div>';
-    }
+    var howToObtainHtml = fichaComoObterHtml(sp);
 
     var lm = sp.lm.slice().sort(function (a, b) { return a[0] - b[0]; });
     var lmHtml = renderMovesTable(lm, "Golpes por Nível", "Sem golpes por nível registrados.");
@@ -548,61 +572,47 @@
       if (detailPanel) detailPanel.scrollTop = 0;
     }
 
-    var backBtn = document.getElementById("back-to-list");
-    if (backBtn) backBtn.addEventListener("click", function () {
-      document.getElementById("dex-shell").classList.remove("show-detail");
-    });
+    // Botões fixos da ficha: ouvinte único em #species-detail (logo abaixo).
+    // O editor só preenche os campos (os ouvintes dele também são únicos).
+    wireMyBuildEditor(sp);
+  }
 
-    var addBtn = document.getElementById("add-team-btn");
-    if (addBtn && !inTeam) {
-      addBtn.addEventListener("click", function () {
+  // Um ouvinte só pros botões fixos da ficha (fase 5 da refatoração,
+  // 2026-09-24): voltar, + Time, + Caixa, ir pro time, salvar anotação e abrir o
+  // detalhe de um golpe - antes religados a cada abertura de ficha.
+  (function () {
+    var painel = document.getElementById("species-detail");
+    painel.addEventListener("click", function (e) {
+      var x = state.selected;
+      var sp = x !== null && x !== undefined ? getSpeciesByX(x) : null;
+      var alvo = e.target.closest("button, .move-row");
+      if (!alvo || !painel.contains(alvo) || !sp) return;
+      if (alvo.id === "back-to-list") {
+        document.getElementById("dex-shell").classList.remove("show-detail");
+      } else if (alvo.id === "add-team-btn") {
+        if (alvo.disabled || state.team.indexOf(x) !== -1) return;
         if (state.team.length >= 6) { openSwapModal(x); return; }
         if (rosterMove(x, null)) flashToast(sp.n + " entrou no time (" + state.team.length + "/6)");
-      });
-    }
-
-    var gotoTeamLink = document.getElementById("goto-team-link");
-    if (gotoTeamLink) {
-      gotoTeamLink.addEventListener("click", function () {
-        document.querySelector('.tab-btn[data-tab="team"]').click();
-      });
-    }
-
-    var notesSaveBtn = document.getElementById("species-notes-save");
-    if (notesSaveBtn) {
-      notesSaveBtn.addEventListener("click", function () {
-        var text = document.getElementById("species-notes-input").value.trim();
-        acao([], function () { if (text) state.notes[sp.sname] = text; else delete state.notes[sp.sname]; });
-        var status = document.getElementById("species-notes-status");
-        if (status) status.textContent = "Salvo.";
-      });
-    }
-
-    wireMyBuildEditor(sp);
-    wireStrategySets(sp);
-    wireCompareCard(sp);
-
-    var addBoxBtn = document.getElementById("add-box-btn");
-    if (addBoxBtn && !inBox) {
-      addBoxBtn.addEventListener("click", function () {
-        // Defesa em profundidade: o próprio botão já vem desabilitado
-        // quando `inTeam`, mas confere de novo aqui (não confia só no
-        // estado do botão no momento do render) antes de escrever no
-        // array - mesmo x nunca deve estar em time E caixa ao mesmo tempo.
+      } else if (alvo.id === "add-box-btn") {
+        // Defesa em profundidade: o botão já vem desabilitado no time/caixa,
+        // mas a regra é conferida de novo aqui (mesmo x nunca nos dois).
         acao(telasDeElenco(x), function () {
           if (state.team.indexOf(x) !== -1 || state.box.indexOf(x) !== -1) return false;
           state.box.push(x);
         });
-      });
-    }
-
-    document.querySelectorAll(".move-row").forEach(function (row) {
-      row.addEventListener("click", function () {
-        var target = document.getElementById(row.dataset.target);
-        if (target) target.classList.toggle("hidden");
-      });
+      } else if (alvo.id === "goto-team-link") {
+        document.querySelector('.tab-btn[data-tab="team"]').click();
+      } else if (alvo.id === "species-notes-save") {
+        var text = document.getElementById("species-notes-input").value.trim();
+        acao([], function () { if (text) state.notes[sp.sname] = text; else delete state.notes[sp.sname]; });
+        var status = document.getElementById("species-notes-status");
+        if (status) status.textContent = "Salvo.";
+      } else if (alvo.classList.contains("move-row")) {
+        var detalhe = document.getElementById(alvo.dataset.target);
+        if (detalhe) detalhe.classList.toggle("hidden");
+      }
     });
-  }
+  })();
 
   // Auditoria de performance, 2026-09-11 (pedido do usuário: "focar em
   // performance e velocidade"): os contadores do time/caixa (hoje a tela

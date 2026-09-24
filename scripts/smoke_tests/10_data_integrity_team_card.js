@@ -396,7 +396,7 @@ async function section10() {
   // de quantos membros o time seed desta seção já tinha acumulado.
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(30);
-  [...document.querySelectorAll(".team-slot .remove-btn")].forEach(function (b) { b.click(); });
+  esvaziarTimePelosBotoes();
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
   await addByName("Squirtle", false);

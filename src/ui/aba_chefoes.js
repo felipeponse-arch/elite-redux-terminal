@@ -55,6 +55,32 @@
     });
 
     document.getElementById("boss-detail").addEventListener("click", function (e) {
+      var btnDetalhe = e.target.closest && e.target.closest("button");
+      if (btnDetalhe && btnDetalhe.id === "boss-back-to-list") {
+        document.getElementById("boss-shell").classList.remove("show-detail");
+        return;
+      }
+      if (btnDetalhe && btnDetalhe.dataset.diff) {
+        bossState.diff = btnDetalhe.dataset.diff; // estado de tela (variante mostrada)
+        renderBossDetail();
+        return;
+      }
+      // Aplica a troca sugerida da caixa (fase 3) - a única ação do card de
+      // confronto, porque é a única que muda algo de verdade. Lote: todas as
+      // trocas, uma gravação e um redesenho no fim (rosterMove é ação).
+      if (btnDetalhe && btnDetalhe.classList.contains("cf-apply-swap")) {
+        var bossTroca = BOSSES[bossState.selected];
+        var feitas = 0;
+        acao([], function () {
+          btnDetalhe.dataset.trocas.split(",").forEach(function (par) {
+            var p = par.split(">");
+            if (rosterMove(parseInt(p[1], 10), p[0] === "" ? null : parseInt(p[0], 10))) feitas++;
+          });
+          return feitas > 0;
+        });
+        if (feitas && bossTroca) flashToast(feitas + (feitas === 1 ? " troca aplicada" : " trocas aplicadas") + " para " + bossTroca.name + ".");
+        return;
+      }
       if (e.target && e.target.id === "boss-export-copy") {
         var ta = document.getElementById("boss-export-text");
         copyText(ta.value, document.getElementById("boss-export-status"), "Copiado! Cole na conversa com o Claude.", ta);
@@ -76,6 +102,37 @@
         }, "manual"); // ação: grava e redesenha o que mostra build
         flashToast("Build do " + m.n + " copiado pro seu \"Meu build\" - vá na Dex pra ver/ajustar");
       }
+    });
+    document.getElementById("boss-detail").addEventListener("change", function (e) {
+      // "change" (fires on blur/Enter), not "input" (fires every keystroke) -
+      // renderBossDetail() replaces the whole card via innerHTML, which would
+      // yank focus off this very input after the first digit if it re-rendered
+      // on every keystroke, making a 2-digit level impossible to type.
+      if (e.target.id === "boss-level-input") {
+        var v = parseInt(e.target.value, 10);
+        if (isNaN(v) || v < 1) v = 1;
+        bossState.level = Math.min(100, v);
+        renderBossDetail();
+        return;
+      }
+      var cb = e.target.closest && e.target.closest("[data-gymskill]");
+      var gymCard = cb && cb.closest("[data-gym-leader]");
+      if (cb && gymCard) {
+        var leaderName = gymCard.dataset.gymLeader;
+        var id = cb.dataset.gymskill;
+        var marcado = cb.checked;
+        acao(["chefao", "contadores"], function () {
+          var cleared = state.gymSkillsCleared[leaderName] || [];
+          if (marcado) { if (cleared.indexOf(id) === -1) cleared = cleared.concat([id]); }
+          else { cleared = cleared.filter(function (x) { return x !== id; }); }
+          if (cleared.length) state.gymSkillsCleared[leaderName] = cleared;
+          else delete state.gymSkillsCleared[leaderName];
+        });
+      }
+    });
+    document.getElementById("boss-list").addEventListener("click", function (e) {
+      var li = e.target.closest(".species-row[data-i]");
+      if (li) selectBoss(parseInt(li.dataset.i, 10));
     });
 
     renderBossList();
@@ -126,9 +183,7 @@
         '<span class="sname">' + escapeHtml(row.b.name) + (row.b.db ? " (dupla)" : "") + '</span>' +
         '<span class="boss-cat-tag" style="color:' + catColor + ';background:color-mix(in srgb, ' + catColor + ' 16%, var(--surface-2));">' + escapeHtml(row.b.cat) + '</span></li>';
     }).join("");
-    ul.querySelectorAll(".species-row").forEach(function (li) {
-      li.addEventListener("click", function () { selectBoss(parseInt(li.dataset.i, 10)); });
-    });
+    // Clique numa linha: ouvinte único em #boss-list (initBosses).
   }
 
   var DIFF_LABELS = { party: "Padrão", insane: "Insane", hell: "Hell" };
@@ -189,6 +244,98 @@
     '</div>';
   }
 
+  // Card de um Pokémon do time do chefão (tirado de dentro de renderBossDetail na
+  // fase 5 da refatoração). Status finais no nível digitado (bossState.level).
+  function bossMonCardHtml(m, idx) {
+    var sp = getSpeciesByX(m.x);
+    // Mega Evolution / Primal Reversion, 2026-09-09 (user's follow-up
+    // question on the held-item pass): a Mega Stone or Primal orb doesn't
+    // change a stat, it turns the holder into an entirely different
+    // species (own stats/types/abilities), already modeled as its own
+    // dex entry (e.g. "Miloticite" -> "Milotic Mega"). MEGA_FORMS maps
+    // item name -> that species' sname, built from this hack's own
+    // Pokemon Showdown fork (megaStone/megaEvolves fields) cross-checked
+    // against a species-name matcher run on the real game data - not
+    // guessed. Deliberately does NOT try to model which of the Mega
+    // form's OWN choosable abilities activates (its 3 choosable slots
+    // are a completely different id pool from the base form's - checked
+    // directly on Milotic vs Milotic Mega, zero overlap - so nothing in
+    // this data says which one a given boss "picked"), and does NOT
+    // touch weather/terrain/Trick-Room persistence across the
+    // transformation - that needs real turn-order + multi-Pokemon battle
+    // state, the same category of simulation this calculator has always
+    // stayed out of (see the level-cap caveat below).
+    var megaSname = MEGA_FORMS[m.item];
+    var megaSp = megaSname ? getSpeciesBySname(megaSname) : null;
+    var effectiveSp = megaSp || sp;
+    var displayX = megaSp ? megaSp.x : m.x;
+    var displayName = megaSp ? megaSp.n : m.n;
+    var typesHtml = effectiveSp ? speciesTypeNames(effectiveSp).map(function (n) { return typePill(n, true); }).join("") : "";
+    var transformNote = megaSp
+      ? '<div class="bm-row bm-transform">Entra como <b>' + escapeHtml(m.n) + '</b>, muda pra isso com ' + escapeHtml(m.item) + '</div>'
+      : "";
+    // Final stats at the level typed in above - only computable at all
+    // when the species resolves (need base stats) and the boss data has
+    // real EV/IV arrays (should always be true post-2026-09-09, but a
+    // species that fails to resolve degrades safely to no stats shown
+    // rather than a crash or a fabricated number).
+    var statsHtml = "";
+    if (effectiveSp && m.evsRaw && m.ivsRaw) {
+      var vals = effectiveSp.b.map(function (base, i) {
+        return calcFinalStat(base, m.ivsRaw[i], m.evsRaw[i], bossState.level, i, m.nat, m.item, m.n);
+      });
+      statsHtml = '<div class="bm-stats">' + vals.map(function (v, i) {
+        // Flag which stat(s) the held item actually changed - same "*" +
+        // tooltip pattern already used for ability-adjusted type
+        // multipliers (Meu Time's coverage table), not a new convention.
+        // A species-gated item (Light Ball) can flag more than one stat,
+        // each possibly at a different multiplier - re-check per stat
+        // rather than reusing one item-wide flag like the simpler items.
+        // Mega/Primal items are never in ITEM_STAT_MODS, so this simply
+        // stays unflagged for them - the whole stat block already
+        // reflects the transformation, no single stat to point at.
+        var rule = itemRuleFor(m.item, i, m.n);
+        var flag = rule
+          ? '<span class="cov-flag" title="' + escapeHtml(m.item) + ' (x' + rule.mult + ')">*</span>' : "";
+        return '<span class="bm-stat"><span class="bm-stat-label">' + STAT_LABELS_SHORT[i] + '</span><span class="mono">' + v + '</span>' + flag + '</span>';
+      }).join("") + '</div>';
+    }
+    var abiHtml;
+    if (megaSp) {
+      var megaInnNames = (megaSp.inn || []).map(function (id) { return ABILITIES[id] ? ABILITIES[id][0] : null; }).filter(Boolean);
+      abiHtml = '<div class="bm-row"><b>Entra com:</b> ' + escapeHtml(m.abi || "?") + '</div>' +
+        '<div class="bm-row"><b>Após transformar:</b> ' +
+        (megaInnNames.length ? escapeHtml(megaInnNames.join(", ")) + ' (inata' + (megaInnNames.length > 1 ? "s" : "") + ')' + (megaSp.ab && megaSp.ab.length ? " + " : "") : "") +
+        (megaSp.ab && megaSp.ab.length ? '1 escolhível própria da forma (não sabemos qual das ' + megaSp.ab.length + ')' : "") +
+        '</div>';
+    } else {
+      abiHtml = '<div class="bm-row"><b>Habilidade:</b> ' + escapeHtml(m.abi || "?") + '</div>';
+    }
+    return '<div class="boss-mon-card">' +
+      '<div class="bm-head goto-species" tabindex="0" role="button" data-x="' + displayX + '" title="Ver na Dex">' + spriteImgHtml(displayX, displayName, 36) +
+      '<div><div class="bm-name">' + escapeHtml(displayName) + '</div>' +
+      '<div class="bm-types">' + typesHtml + '</div></div></div>' +
+      transformNote +
+      abiHtml +
+      '<div class="bm-row"><b>Item:</b> ' + escapeHtml(m.item || "nenhum") + '</div>' +
+      '<div class="bm-row"><b>Nature:</b> ' + escapeHtml(m.nat || "?") + '</div>' +
+      (m.evs ? '<div class="bm-row"><b>EVs:</b> ' + escapeHtml(m.evs) + '</div>' : "") +
+      '<div class="bm-row"><b>Golpes:</b> ' + escapeHtml(m.mv.join(" / ")) + '</div>' +
+      statsHtml +
+      // Copies this boss party member's build straight into "Meu build"
+      // for the same species - 2026-09-09, user feedback: the only way to
+      // act on a boss's set was to export text and paste it into a chat.
+      // Saved under the BASE (held) species' sname, even when Mega/Primal
+      // transformed - the held item IS the mega stone/orb itself, so a
+      // player's own copy of that Pokemon holding the same item would
+      // transform the same way. Only offered when the base species and
+      // its raw EV/IV arrays actually resolve (same guard as statsHtml).
+      (sp && m.evsRaw && m.ivsRaw
+        ? '<button class="text-action-btn use-boss-build-btn" data-idx="' + idx + '" type="button" style="margin-top:8px;">+ Usar como meu build (' + escapeHtml(m.n) + ')</button>'
+        : "") +
+    '</div>';
+  }
+
   var STAT_LABELS_SHORT = ROTULOS_EV; // mesma lista das regras (plano_build.js)
   function renderBossDetail() {
     var boss = BOSSES[bossState.selected];
@@ -205,95 +352,7 @@
       return '<button class="chip-btn' + active + '" data-diff="' + k + '" type="button" style="margin-right:6px;">' + DIFF_LABELS[k] + '</button>';
     }).join("") : "";
 
-    var monsHtml = party.map(function (m, idx) {
-      var sp = getSpeciesByX(m.x);
-      // Mega Evolution / Primal Reversion, 2026-09-09 (user's follow-up
-      // question on the held-item pass): a Mega Stone or Primal orb doesn't
-      // change a stat, it turns the holder into an entirely different
-      // species (own stats/types/abilities), already modeled as its own
-      // dex entry (e.g. "Miloticite" -> "Milotic Mega"). MEGA_FORMS maps
-      // item name -> that species' sname, built from this hack's own
-      // Pokemon Showdown fork (megaStone/megaEvolves fields) cross-checked
-      // against a species-name matcher run on the real game data - not
-      // guessed. Deliberately does NOT try to model which of the Mega
-      // form's OWN choosable abilities activates (its 3 choosable slots
-      // are a completely different id pool from the base form's - checked
-      // directly on Milotic vs Milotic Mega, zero overlap - so nothing in
-      // this data says which one a given boss "picked"), and does NOT
-      // touch weather/terrain/Trick-Room persistence across the
-      // transformation - that needs real turn-order + multi-Pokemon battle
-      // state, the same category of simulation this calculator has always
-      // stayed out of (see the level-cap caveat below).
-      var megaSname = MEGA_FORMS[m.item];
-      var megaSp = megaSname ? getSpeciesBySname(megaSname) : null;
-      var effectiveSp = megaSp || sp;
-      var displayX = megaSp ? megaSp.x : m.x;
-      var displayName = megaSp ? megaSp.n : m.n;
-      var typesHtml = effectiveSp ? speciesTypeNames(effectiveSp).map(function (n) { return typePill(n, true); }).join("") : "";
-      var transformNote = megaSp
-        ? '<div class="bm-row bm-transform">Entra como <b>' + escapeHtml(m.n) + '</b>, muda pra isso com ' + escapeHtml(m.item) + '</div>'
-        : "";
-      // Final stats at the level typed in above - only computable at all
-      // when the species resolves (need base stats) and the boss data has
-      // real EV/IV arrays (should always be true post-2026-09-09, but a
-      // species that fails to resolve degrades safely to no stats shown
-      // rather than a crash or a fabricated number).
-      var statsHtml = "";
-      if (effectiveSp && m.evsRaw && m.ivsRaw) {
-        var vals = effectiveSp.b.map(function (base, i) {
-          return calcFinalStat(base, m.ivsRaw[i], m.evsRaw[i], bossState.level, i, m.nat, m.item, m.n);
-        });
-        statsHtml = '<div class="bm-stats">' + vals.map(function (v, i) {
-          // Flag which stat(s) the held item actually changed - same "*" +
-          // tooltip pattern already used for ability-adjusted type
-          // multipliers (Meu Time's coverage table), not a new convention.
-          // A species-gated item (Light Ball) can flag more than one stat,
-          // each possibly at a different multiplier - re-check per stat
-          // rather than reusing one item-wide flag like the simpler items.
-          // Mega/Primal items are never in ITEM_STAT_MODS, so this simply
-          // stays unflagged for them - the whole stat block already
-          // reflects the transformation, no single stat to point at.
-          var rule = itemRuleFor(m.item, i, m.n);
-          var flag = rule
-            ? '<span class="cov-flag" title="' + escapeHtml(m.item) + ' (x' + rule.mult + ')">*</span>' : "";
-          return '<span class="bm-stat"><span class="bm-stat-label">' + STAT_LABELS_SHORT[i] + '</span><span class="mono">' + v + '</span>' + flag + '</span>';
-        }).join("") + '</div>';
-      }
-      var abiHtml;
-      if (megaSp) {
-        var megaInnNames = (megaSp.inn || []).map(function (id) { return ABILITIES[id] ? ABILITIES[id][0] : null; }).filter(Boolean);
-        abiHtml = '<div class="bm-row"><b>Entra com:</b> ' + escapeHtml(m.abi || "?") + '</div>' +
-          '<div class="bm-row"><b>Após transformar:</b> ' +
-          (megaInnNames.length ? escapeHtml(megaInnNames.join(", ")) + ' (inata' + (megaInnNames.length > 1 ? "s" : "") + ')' + (megaSp.ab && megaSp.ab.length ? " + " : "") : "") +
-          (megaSp.ab && megaSp.ab.length ? '1 escolhível própria da forma (não sabemos qual das ' + megaSp.ab.length + ')' : "") +
-          '</div>';
-      } else {
-        abiHtml = '<div class="bm-row"><b>Habilidade:</b> ' + escapeHtml(m.abi || "?") + '</div>';
-      }
-      return '<div class="boss-mon-card">' +
-        '<div class="bm-head goto-species" tabindex="0" role="button" data-x="' + displayX + '" title="Ver na Dex">' + spriteImgHtml(displayX, displayName, 36) +
-        '<div><div class="bm-name">' + escapeHtml(displayName) + '</div>' +
-        '<div class="bm-types">' + typesHtml + '</div></div></div>' +
-        transformNote +
-        abiHtml +
-        '<div class="bm-row"><b>Item:</b> ' + escapeHtml(m.item || "nenhum") + '</div>' +
-        '<div class="bm-row"><b>Nature:</b> ' + escapeHtml(m.nat || "?") + '</div>' +
-        (m.evs ? '<div class="bm-row"><b>EVs:</b> ' + escapeHtml(m.evs) + '</div>' : "") +
-        '<div class="bm-row"><b>Golpes:</b> ' + escapeHtml(m.mv.join(" / ")) + '</div>' +
-        statsHtml +
-        // Copies this boss party member's build straight into "Meu build"
-        // for the same species - 2026-09-09, user feedback: the only way to
-        // act on a boss's set was to export text and paste it into a chat.
-        // Saved under the BASE (held) species' sname, even when Mega/Primal
-        // transformed - the held item IS the mega stone/orb itself, so a
-        // player's own copy of that Pokemon holding the same item would
-        // transform the same way. Only offered when the base species and
-        // its raw EV/IV arrays actually resolve (same guard as statsHtml).
-        (sp && m.evsRaw && m.ivsRaw
-          ? '<button class="text-action-btn use-boss-build-btn" data-idx="' + idx + '" type="button" style="margin-top:8px;">+ Usar como meu build (' + escapeHtml(m.n) + ')</button>'
-          : "") +
-      '</div>';
-    }).join("");
+    var monsHtml = party.map(function (m, idx) { return bossMonCardHtml(m, idx); }).join("");
 
     var exportText = buildBossExportText(boss, diffKey, party);
 
@@ -320,64 +379,5 @@
         '<div id="boss-export-status" style="font-size:11.5px;color:var(--badge-accent2);margin-top:6px;min-height:14px;"></div>' +
       '</div>';
 
-    var backBtn = document.getElementById("boss-back-to-list");
-    if (backBtn) backBtn.addEventListener("click", function () {
-      document.getElementById("boss-shell").classList.remove("show-detail");
-    });
-
-    // Aplica a troca sugerida da caixa (fase 3) - a única ação do card, porque é
-    // a única que muda algo de verdade. Tudo passa por rosterMove, a mesma
-    // regra de sempre (quem sai vai pra caixa, ninguém é apagado).
-    document.querySelectorAll("#boss-detail .cf-apply-swap").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        // Lote: todas as trocas, uma gravação e um redesenho no fim (antes era um
-        // persist + push de sync por troca, e depois 5 redesenhos à mão).
-        var feitas = 0;
-        acao([], function () {
-          btn.dataset.trocas.split(",").forEach(function (par) {
-            var p = par.split(">");
-            if (rosterMove(parseInt(p[1], 10), p[0] === "" ? null : parseInt(p[0], 10))) feitas++;
-          });
-          return feitas > 0;
-        });
-        if (feitas) flashToast(feitas + (feitas === 1 ? " troca aplicada" : " trocas aplicadas") + " para " + boss.name + ".");
-      });
-    });
-
-    document.querySelectorAll("#boss-detail [data-diff]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        bossState.diff = btn.dataset.diff;
-        renderBossDetail();
-      });
-    });
-
-    // "change" (fires on blur/Enter), not "input" (fires every keystroke) -
-    // renderBossDetail() replaces the whole card via innerHTML, which would
-    // yank focus off this very input after the first digit if it re-rendered
-    // on every keystroke, making a 2-digit level impossible to type.
-    var levelInput = document.getElementById("boss-level-input");
-    if (levelInput) levelInput.addEventListener("change", function () {
-      var v = parseInt(levelInput.value, 10);
-      if (isNaN(v) || v < 1) v = 1;
-      bossState.level = Math.min(100, v);
-      renderBossDetail();
-    });
-
-    var gymCard = document.querySelector("#boss-detail [data-gym-leader]");
-    if (gymCard) {
-      var leaderName = gymCard.dataset.gymLeader;
-      gymCard.querySelectorAll("[data-gymskill]").forEach(function (cb) {
-        cb.addEventListener("change", function () {
-          var id = cb.dataset.gymskill;
-          var marcado = cb.checked;
-          acao(["chefao", "contadores"], function () {
-            var cleared = state.gymSkillsCleared[leaderName] || [];
-            if (marcado) { if (cleared.indexOf(id) === -1) cleared = cleared.concat([id]); }
-            else { cleared = cleared.filter(function (x) { return x !== id; }); }
-            if (cleared.length) state.gymSkillsCleared[leaderName] = cleared;
-            else delete state.gymSkillsCleared[leaderName];
-          });
-        });
-      });
-    }
+    // Cliques e mudanças do detalhe: ouvintes únicos em #boss-detail (initBosses).
   }

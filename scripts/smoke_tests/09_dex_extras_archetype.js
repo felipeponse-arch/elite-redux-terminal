@@ -41,7 +41,10 @@ async function section09() {
     // abaixo desta seção espera a caixa "limpa", sem seleção, igual ficava
     // depois de uma remoção de verdade. Clicar de novo no MESMO slot
     // desmarca (o clique é um toggle - ver o listener de .pcbox-slot).
-    slotForRemoveTest.click();
+    // Reconsulta: renderBox() trocou o nó. Desde a fase 5 (2026-09-24) o
+    // clique é tratado por UM ouvinte na caixa, então clicar no nó antigo (já
+    // fora da página) não faz nada - igual na tela de verdade.
+    document.querySelector('.pcbox-slot[data-x="' + slotForRemoveTest.dataset.x + '"]').click();
     await wait(30);
   } else {
     check("caixa tinha pelo menos 1 membro pro teste de dashboardDirty", false);
@@ -284,7 +287,7 @@ async function section09() {
   // Fire puro, que resiste Grass (0.5x) em qualquer tabela de tipos padrão -
   // boxFitNote() deve achar exatamente essa combinação e ignorar Electric
   // (Fire é neutro contra Electric, não conta como resistência).
-  [...document.querySelectorAll(".team-slot .remove-btn")].forEach(b => b.click());
+  esvaziarTimePelosBotoes();
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
   await addByName("Squirtle", false);
@@ -308,7 +311,7 @@ async function section09() {
 
     // Sem time (nenhuma fraqueza compartilhada possível), a nota some -
     // confirma que ela depende do time real, não é um texto fixo por espécie.
-    [...document.querySelectorAll(".team-slot .remove-btn")].forEach(b => b.click());
+    esvaziarTimePelosBotoes();
     document.querySelector('.tab-btn[data-tab="box"]').click();
     await wait(50);
     const charSlotAgain = [...document.querySelectorAll(".pcbox-slot:not(.empty)")].find(function (b) {

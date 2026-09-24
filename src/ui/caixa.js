@@ -87,19 +87,23 @@
       '<div class="pcbox-grid">' + slotsHtml + '</div>' +
       detailHtml;
 
-    document.getElementById("pcbox-prev").addEventListener("click", function () { pcBoxPage--; renderBox(); });
-    document.getElementById("pcbox-next").addEventListener("click", function () { pcBoxPage++; renderBox(); });
-    content.querySelectorAll(".pcbox-slot:not(.empty)").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var x = parseInt(btn.dataset.x, 10);
-        pcBoxSelectedX = (pcBoxSelectedX === x) ? null : x;
+    // Cliques: ouvinte único em #pcbox-content (logo abaixo).
+  }
+
+  // Um ouvinte só pra caixa inteira (fase 5 da refatoração, 2026-09-24): setas,
+  // os 30 slots e os botões do detalhe eram religados a cada redesenho.
+  (function () {
+    var content = document.getElementById("pcbox-content");
+    content.addEventListener("click", function (e) {
+      var btn = e.target.closest("button");
+      if (!btn || !content.contains(btn)) return;
+      var x = parseInt(btn.dataset.x, 10);
+      if (btn.id === "pcbox-prev") { pcBoxPage--; renderBox(); }
+      else if (btn.id === "pcbox-next") { pcBoxPage++; renderBox(); }
+      else if (btn.classList.contains("pcbox-slot") && !btn.classList.contains("empty")) {
+        pcBoxSelectedX = (pcBoxSelectedX === x) ? null : x; // estado de tela, nada a gravar
         renderBox();
-      });
-    });
-    var removeBtn = content.querySelector(".pcbox-detail .remove-btn");
-    if (removeBtn) {
-      removeBtn.addEventListener("click", function () {
-        var x = parseInt(removeBtn.dataset.x, 10);
+      } else if (btn.classList.contains("remove-btn") && btn.closest(".pcbox-detail")) {
         var sp = getSpeciesByX(x);
         // Achado GRAVE na auditoria de 2026-09-18: ao contrário do "remover"
         // do Time (que banca pra caixa, nada se perde), este "×" tira o
@@ -121,24 +125,19 @@
             flashToast((sp ? sp.n : "Pokémon") + " removido da caixa.");
           }
         );
-      });
-    }
-    var toTeamBtn = content.querySelector(".pcbox-detail .box-to-team");
-    if (toTeamBtn) {
-      toTeamBtn.addEventListener("click", function () {
-        var x = parseInt(toTeamBtn.dataset.x, 10);
+      } else if (btn.classList.contains("box-to-team") && btn.closest(".pcbox-detail")) {
         if (state.team.length >= 6) { openSwapModal(x); return; }
-        var sp = getSpeciesByX(x);
+        var spTime = getSpeciesByX(x);
         // Lote: a seleção da caixa é limpa antes do redesenho da própria ação.
         var foi = acao([], function () {
           var ok = rosterMove(x, null);
           if (ok) pcBoxSelectedX = null;
           return ok;
         });
-        if (foi) flashToast(sp.n + " foi para o time (" + state.team.length + "/6)");
-      });
-    }
-  }
+        if (foi) flashToast(spTime.n + " foi para o time (" + state.team.length + "/6)");
+      }
+    });
+  })();
 
   // Busca da PC Box: salta pra caixa+slot certos e seleciona, em vez de
   // filtrar a grade (a grade representa POSIÇÃO real, filtrar quebraria a

@@ -113,7 +113,9 @@ async function section20() {
   selecionarArquetipo("pace", "Hyper Offense");
   await wait(30);
 
-  buildBtnCompleto.click();
+  // O card foi redesenhado ao escolher o Ritmo: busca o botão de novo (o
+  // ouvinte é delegado ao painel, um nó desanexado não recebe mais o clique).
+  document.getElementById("archetype-build-complete").click();
   await pollUntil(function () { return estagios.length >= 4; }, 4000);
   await wait(150);
 

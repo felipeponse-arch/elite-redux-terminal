@@ -71,9 +71,26 @@
     }
     slotsEl.innerHTML = slots.join("");
 
-    slotsEl.querySelectorAll(".remove-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var x = parseInt(btn.dataset.x, 10);
+    // Cliques dos cards: ouvinte único em #team-slots (ver abaixo de renderTeam).
+
+    // Contadores e resumo da Dex são das ações (TELAS.contadores/resumo), não
+    // do desenho do time - chamá-los daqui recalculava o confronto 2 vezes.
+    renderTeamStrategy(members);
+    renderTeamAnalysis(members);
+    renderSavedTeams();
+    renderNextFightCard();
+  }
+
+  // Um ouvinte só pra todos os cards do time (fase 5 da refatoração,
+  // 2026-09-24). Antes renderTeam religava ~5 ouvintes por card a cada
+  // redesenho (remover, trocar, copiar, gerar com IA, escolher da caixa, atalhos).
+  (function () {
+    var slotsEl = document.getElementById("team-slots");
+    slotsEl.addEventListener("click", function (e) {
+      var btn = e.target.closest("button");
+      if (!btn || !slotsEl.contains(btn)) return;
+      var x = parseInt(btn.dataset.x, 10);
+      if (btn.classList.contains("remove-btn")) {
         // Achado em auditoria completa da equipe (2026-09-13): isto
         // descartava o Pokémon direto, ao contrário de
         // rosterMove()/applyRecommendedTeam()/renderSavedTeams() "Carregar",
@@ -86,53 +103,27 @@
           if (state.box.indexOf(x) === -1) state.box.push(x);
           teamSwapIdx = null;
         });
-      });
-    });
-    slotsEl.querySelectorAll(".ts-swap-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
+      } else if (btn.classList.contains("ts-swap-btn")) {
         var idx = parseInt(btn.dataset.idx, 10);
-        teamSwapIdx = (teamSwapIdx === idx) ? null : idx;
+        teamSwapIdx = (teamSwapIdx === idx) ? null : idx; // estado de tela (painel aberto), nada a gravar
         renderTeam();
-      });
+      } else if (btn.classList.contains("ts-build-copy")) {
+        var spCopia = getSpeciesByX(x);
+        copyText(showdownSet(spCopia, effectiveBuild(spCopia)), null, "");
+        flashToast("Set do " + spCopia.n + " copiado (formato Showdown)");
+      } else if (btn.classList.contains("ts-ai-generate-btn")) {
+        var spIa = getSpeciesByX(x);
+        if (spIa) generateBuildWithAI(spIa, "ts-ai-status-" + x);
+      } else if (btn.classList.contains("swap-pick")) {
+        rosterMove(x, state.team[parseInt(btn.dataset.idx, 10)]); // a ação redesenha o time
+      } else if (btn.id === "ts-goto-dex") {
+        document.querySelector('.tab-btn[data-tab="dex"]').click();
+        document.getElementById("search-input").focus();
+      } else if (btn.id === "ts-goto-box") {
+        document.querySelector('.tab-btn[data-tab="box"]').click();
+      }
     });
-    slotsEl.querySelectorAll(".ts-build-copy").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var sp = getSpeciesByX(parseInt(btn.dataset.x, 10));
-        copyText(showdownSet(sp, effectiveBuild(sp)), null, "");
-        flashToast("Set do " + sp.n + " copiado (formato Showdown)");
-      });
-    });
-    slotsEl.querySelectorAll(".ts-ai-generate-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var x = parseInt(btn.dataset.x, 10);
-        var sp = getSpeciesByX(x);
-        if (sp) generateBuildWithAI(sp, "ts-ai-status-" + x);
-      });
-    });
-    slotsEl.querySelectorAll(".swap-pick").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var slotIdx = parseInt(btn.dataset.idx, 10);
-        var outX = state.team[slotIdx];
-        rosterMove(parseInt(btn.dataset.x, 10), outX); // a ação redesenha o time
-      });
-    });
-    var gotoDex = document.getElementById("ts-goto-dex");
-    if (gotoDex) gotoDex.addEventListener("click", function () {
-      document.querySelector('.tab-btn[data-tab="dex"]').click();
-      document.getElementById("search-input").focus();
-    });
-    var gotoBox = document.getElementById("ts-goto-box");
-    if (gotoBox) gotoBox.addEventListener("click", function () {
-      document.querySelector('.tab-btn[data-tab="box"]').click();
-    });
-
-    // Contadores e resumo da Dex são das ações (TELAS.contadores/resumo), não
-    // do desenho do time - chamá-los daqui recalculava o confronto 2 vezes.
-    renderTeamStrategy(members);
-    renderTeamAnalysis(members);
-    renderSavedTeams();
-    renderNextFightCard();
-  }
+  })();
 
   // ---- team <-> box swapping ----
   var teamSwapIdx = null;
@@ -234,83 +225,85 @@
     saveBtn.disabled = !(state.team.length && freeSlots);
     saveBtn.title = !state.team.length ? "Monte um time primeiro" : !freeSlots ? "Os 3 slots já estão ocupados — exclua um pra salvar outro" : "";
 
-    grid.querySelectorAll(".stc-load").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var idx = parseInt(btn.dataset.idx, 10);
-        var slot = state.savedTeams[idx];
-        if (!slot) return;
-        // Achado em auditoria (2026-09-13): esta troca costumava substituir
-        // state.team direto, ao contrário de rosterMove()/
-        // applyRecommendedTeam() - quem estava no time atual e não pertence
-        // ao slot salvo simplesmente sumia (nunca ia pra caixa), e qualquer
-        // sname do slot que a build de dados atual não reconhece (ex: um
-        // save sincronizado de um aparelho com dado de versão diferente)
-        // era descartado sem rastro. Agora segue o MESMO critério dos
-        // outros dois: quem sai do time é banido pra caixa, nunca
-        // descartado, e órfãos entram em state.orphans pra sobreviver ao
-        // próximo persist() (mesmo mecanismo do save principal, ver
-        // snamesToXs()/state.orphans acima).
-        var loadOrphans = [];
-        var xs = snamesToXs(slot.team, loadOrphans).slice(0, 6);
-        acao(TELAS_ELENCO.concat(["ficha"]), function () {
-          state.team.forEach(function (x) {
-            if (xs.indexOf(x) === -1 && state.box.indexOf(x) === -1) state.box.push(x);
-          });
-          state.box = state.box.filter(function (x) { return xs.indexOf(x) === -1; });
-          state.team = xs;
-          loadOrphans.forEach(function (sn) {
-            if (state.orphans.team.indexOf(sn) === -1) state.orphans.team.push(sn);
-          });
-        });
-        document.getElementById("saved-teams-status").textContent = "Time \"" + (slot.name || ("Time " + (idx + 1))) + "\" carregado.";
-      });
-    });
-    grid.querySelectorAll(".stc-delete").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var idx = parseInt(btn.dataset.idx, 10);
-        var slot = state.savedTeams[idx];
-        if (!slot) return;
-        // Achado na auditoria de 2026-09-18: excluía na hora, sem confirmar
-        // - botão "Excluir" fica ao lado de "Carregar", um clique errado
-        // perdia o layout salvo sem aviso nenhum e sem como desfazer (os
-        // Pokémon em si continuam no time/caixa, só a referência salva some).
-        // Mesmo <dialog> de confirmação do "Novo jogo" - já pronto e
-        // testado, reaproveitado aqui em vez de duplicar a lógica.
-        openConfirmModal(
-          "Excluir time salvo?",
-          "Isso apaga o layout \"" + (slot.name || ("Time " + (idx + 1))) + "\" salvo. Os Pokémon continuam no seu time/caixa - só a referência salva é removida, e não dá pra desfazer.",
-          "Excluir",
-          function () {
-            acao(["timesSalvos", "contadores"], function () { state.savedTeams.splice(idx, 1); });
-          }
-        );
-      });
-    });
-    grid.querySelectorAll(".stc-rename").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        savedTeamEditingIdx = parseInt(btn.dataset.idx, 10);
-        renderSavedTeams();
-        var input = document.getElementById("stc-rename-input");
-        if (input) { input.focus(); input.select(); }
-      });
-    });
-    grid.querySelectorAll(".stc-rename-save").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var idx = parseInt(btn.dataset.idx, 10);
-        var input = document.getElementById("stc-rename-input");
-        var newName = input ? input.value.trim() : "";
-        savedTeamEditingIdx = null;
-        acao(["timesSalvos"], function () { if (newName && state.savedTeams[idx]) state.savedTeams[idx].name = newName; });
-      });
-    });
-    var renameInput = document.getElementById("stc-rename-input");
-    if (renameInput) {
-      renameInput.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") { document.querySelector(".stc-rename-save").click(); }
-        if (e.key === "Escape") { savedTeamEditingIdx = null; renderSavedTeams(); }
-      });
-    }
+    // Cliques e teclas da grade: ouvintes únicos em #saved-teams-grid (logo abaixo).
   }
+
+  // ---- times salvos: ações e ouvintes únicos (fase 5 da refatoração) ----
+  function carregarTimeSalvo(idx) {
+    var slot = state.savedTeams[idx];
+    if (!slot) return;
+    // Achado em auditoria (2026-09-13): esta troca costumava substituir
+    // state.team direto, ao contrário de rosterMove()/
+    // applyRecommendedTeam() - quem estava no time atual e não pertence
+    // ao slot salvo simplesmente sumia (nunca ia pra caixa), e qualquer
+    // sname do slot que a build de dados atual não reconhece (ex: um
+    // save sincronizado de um aparelho com dado de versão diferente)
+    // era descartado sem rastro. Agora segue o MESMO critério dos
+    // outros dois: quem sai do time é banido pra caixa, nunca
+    // descartado, e órfãos entram em state.orphans pra sobreviver ao
+    // próximo persist() (mesmo mecanismo do save principal, ver
+    // snamesToXs()/state.orphans acima).
+    var loadOrphans = [];
+    var xs = snamesToXs(slot.team, loadOrphans).slice(0, 6);
+    acao(TELAS_ELENCO.concat(["ficha"]), function () {
+      state.team.forEach(function (x) {
+        if (xs.indexOf(x) === -1 && state.box.indexOf(x) === -1) state.box.push(x);
+      });
+      state.box = state.box.filter(function (x) { return xs.indexOf(x) === -1; });
+      state.team = xs;
+      loadOrphans.forEach(function (sn) {
+        if (state.orphans.team.indexOf(sn) === -1) state.orphans.team.push(sn);
+      });
+    });
+    document.getElementById("saved-teams-status").textContent = "Time \"" + (slot.name || ("Time " + (idx + 1))) + "\" carregado.";
+  }
+  function excluirTimeSalvo(idx) {
+    var slot = state.savedTeams[idx];
+    if (!slot) return;
+    // Achado na auditoria de 2026-09-18: excluía na hora, sem confirmar
+    // - botão "Excluir" fica ao lado de "Carregar", um clique errado
+    // perdia o layout salvo sem aviso nenhum e sem como desfazer (os
+    // Pokémon em si continuam no time/caixa, só a referência salva some).
+    // Mesmo <dialog> de confirmação do "Novo jogo" - já pronto e
+    // testado, reaproveitado aqui em vez de duplicar a lógica.
+    openConfirmModal(
+      "Excluir time salvo?",
+      "Isso apaga o layout \"" + (slot.name || ("Time " + (idx + 1))) + "\" salvo. Os Pokémon continuam no seu time/caixa - só a referência salva é removida, e não dá pra desfazer.",
+      "Excluir",
+      function () {
+        acao(["timesSalvos", "contadores"], function () { state.savedTeams.splice(idx, 1); });
+      }
+    );
+  }
+  function comecarRenomearTimeSalvo(idx) {
+    savedTeamEditingIdx = idx; // estado de tela (campo aberto), nada a gravar
+    renderSavedTeams();
+    var input = document.getElementById("stc-rename-input");
+    if (input) { input.focus(); input.select(); }
+  }
+  function salvarNomeTimeSalvo(idx) {
+    var input = document.getElementById("stc-rename-input");
+    var newName = input ? input.value.trim() : "";
+    savedTeamEditingIdx = null;
+    acao(["timesSalvos"], function () { if (newName && state.savedTeams[idx]) state.savedTeams[idx].name = newName; });
+  }
+  (function () {
+    var grid = document.getElementById("saved-teams-grid");
+    grid.addEventListener("click", function (e) {
+      var btn = e.target.closest("button");
+      if (!btn || !grid.contains(btn)) return;
+      var idx = parseInt(btn.dataset.idx, 10);
+      if (btn.classList.contains("stc-load")) carregarTimeSalvo(idx);
+      else if (btn.classList.contains("stc-delete")) excluirTimeSalvo(idx);
+      else if (btn.classList.contains("stc-rename")) comecarRenomearTimeSalvo(idx);
+      else if (btn.classList.contains("stc-rename-save")) salvarNomeTimeSalvo(idx);
+    });
+    grid.addEventListener("keydown", function (e) {
+      if (e.target.id !== "stc-rename-input") return;
+      if (e.key === "Enter") { var b = grid.querySelector(".stc-rename-save"); if (b) salvarNomeTimeSalvo(parseInt(b.dataset.idx, 10)); }
+      if (e.key === "Escape") { savedTeamEditingIdx = null; renderSavedTeams(); }
+    });
+  })();
 
   document.getElementById("save-team-btn").addEventListener("click", function () {
     if (state.savedTeams.length >= 3 || !state.team.length) return;

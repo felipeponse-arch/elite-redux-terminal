@@ -49,20 +49,24 @@
       '</tbody></table>';
   }
 
-  function wireCompareCard(sp) {
-    var input = document.getElementById("compare-input");
-    var out = document.getElementById("compare-result");
-    if (!input || !out) return;
-    input.addEventListener("input", function () {
+  // Campo "Comparar com outro Pokémon": ouvinte único no painel da ficha (fase 5
+  // da refatoração) - a espécie é a da ficha aberta.
+  (function () {
+    var painel = document.getElementById("species-detail");
+    painel.addEventListener("input", function (e) {
+      if (e.target.id !== "compare-input") return;
+      var out = document.getElementById("compare-result");
+      var sp = state.selected !== null && state.selected !== undefined ? getSpeciesByX(state.selected) : null;
+      if (!out || !sp) return;
       // A datalist only ever gives back an exact option value or free text
       // the user is still mid-typing - only render once the typed text is
       // a real, exact species name, same "silently do nothing until valid"
       // idiom the move/item pickers elsewhere already use.
-      var other = SPECIES_BY_NAME[input.value];
+      var other = SPECIES_BY_NAME[e.target.value];
       if (!other || other.sname === sp.sname) { out.innerHTML = ""; return; }
       out.innerHTML = compareResultHtml(sp, other);
     });
-  }
+  })();
 
   // Used by the Dex detail card and the team-slot card (renderTeam).
   // ---------------- notes, build history & boss references ----------------

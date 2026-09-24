@@ -67,23 +67,26 @@
     '</div>';
   }
 
-  function wireArchetypeCard(members) {
-    document.querySelectorAll(".arch-chip").forEach(function (chip) {
-      chip.addEventListener("click", function () {
-        var axis = chip.dataset.axis;
-        var value = chip.dataset.value || null;
-        // O Ritmo decide qual curada o time mostra (estilo) - por isso "time" e
-        // "builds", não só o card de arquétipo.
-        acao(["time", "builds", "resumo"], function () {
-          state.archetype[axis] = value;
-          teamRecommendation = null; // alvo mudou, sugestão antiga não vale mais
-          if (axis === "monotype") generatedTeamResult = null; // arquétipo mudou, o time gerado antigo não corresponde mais ao que foi pedido
-        });
+  // Chips de arquétipo e "Montar time completo": ouvinte único em #team-strategy
+  // (fase 5 da refatoração, 2026-09-24) - antes religados a cada renderTeamStrategy.
+  (function () {
+    var painel = document.getElementById("team-strategy");
+    painel.addEventListener("click", function (e) {
+      var alvo = e.target.closest("button");
+      if (!alvo || !painel.contains(alvo)) return;
+      if (alvo.id === "archetype-build-complete") { generateCompleteTeam(); return; }
+      if (!alvo.classList.contains("arch-chip")) return;
+      var axis = alvo.dataset.axis;
+      var value = alvo.dataset.value || null;
+      // O Ritmo decide qual curada o time mostra (estilo) - por isso "time" e
+      // "builds", não só o card de arquétipo.
+      acao(["time", "builds", "resumo"], function () {
+        state.archetype[axis] = value;
+        teamRecommendation = null; // alvo mudou, sugestão antiga não vale mais
+        if (axis === "monotype") generatedTeamResult = null; // arquétipo mudou, o time gerado antigo não corresponde mais ao que foi pedido
       });
     });
-    var buildCompleteBtn = document.getElementById("archetype-build-complete");
-    if (buildCompleteBtn) buildCompleteBtn.addEventListener("click", function () { generateCompleteTeam(); });
-  }
+  })();
 
   // IA monta o MELHOR TIME possível (até 6) usando só espécies que o
   // jogador realmente possui (time ∪ caixa) - nunca decide sozinha: o
@@ -328,7 +331,6 @@
       return;
     }
     el.innerHTML = generatedTeamCardHtml(members) + archetypeCardHtml(members);
-    wireArchetypeCard(members);
   }
 
   function renderTeamAnalysis(members) {
