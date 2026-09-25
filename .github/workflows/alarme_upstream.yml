@@ -1,0 +1,30 @@
+name: Alarme de versão nova
+
+# Toda segunda às 9h de Brasília, confere se saiu versão nova do Elite Redux
+# ou se os dados oficiais mudaram (scripts/alarme_upstream.mjs). Só falha
+# quando algo mudou - e execução agendada que falha manda e-mail pra quem fez
+# o último commit deste arquivo. Em dia: nenhum aviso.
+on:
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  conferir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Sem npm ci: o script usa só o Node (fetch e crypto nativos).
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Confere a fonte oficial
+        run: node scripts/alarme_upstream.mjs
