@@ -253,9 +253,14 @@ async function section09() {
   // generateCompleteTeam, sem botão próprio.
   document.querySelector('.tab-btn[data-tab="team"]').click();
   await wait(50);
-  const archCard = [...document.querySelectorAll(".card")].find(c => c.querySelector("h3") && c.querySelector("h3").textContent === "Arquétipo do time");
-  check("card 'Arquétipo do time' é o primeiro item da #team-strategy (não tem mais Leitura estratégica abaixo)",
+  // Redesenho 2026-09-24: o card virou um <details> recolhido numa linha (o
+  // time vem primeiro na tela), com o que está escolhido no resumo.
+  const archCard = document.querySelector("#team-strategy details.arquetipo");
+  check("card de arquétipo é o primeiro item da #team-strategy (não tem mais Leitura estratégica abaixo)",
     !!archCard && document.getElementById("team-strategy").firstElementChild === archCard);
+  check("arquétipo começa recolhido, com as escolhas no resumo",
+    !!archCard && !archCard.open && /Ritmo:\s*nenhum/.test(archCard.querySelector("summary").textContent),
+    archCard && archCard.querySelector("summary").textContent);
   // <select> viraram chips (.arch-chip) no redesign de 2026-09-18.
   const paceChips = [...document.querySelectorAll('.arch-chip[data-axis="pace"]')];
   const weatherChips = [...document.querySelectorAll('.arch-chip[data-axis="weather"]')];

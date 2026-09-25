@@ -39,7 +39,7 @@ button { font-family: inherit; }
   height: min(46vw, 480px);
   z-index: -1;
   pointer-events: none;
-  opacity: .08;
+  opacity: .05;
 }
 #brand-watermark svg { width: 100%; height: 100%; display: block; }
 #brand-watermark .wm-body { stroke: var(--accent-2); }
@@ -48,14 +48,14 @@ button { font-family: inherit; }
    sem a marca d'água virar "sujeira" atrás do texto) - claro fica mais
    contido de propósito. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) #brand-watermark { opacity: .14; }
+  :root:not([data-theme="light"]) #brand-watermark { opacity: .08; }
 }
-:root[data-theme="dark"] #brand-watermark { opacity: .14; }
+:root[data-theme="dark"] #brand-watermark { opacity: .08; }
 /* Alto contraste é o eixo de acessibilidade, não de identidade visual -
    nenhuma decoração compete com legibilidade nesse modo. */
 :root[data-high-contrast="true"] #brand-watermark { display: none; }
 @media (max-width: 620px) {
-  #brand-watermark { opacity: .06; }
+  #brand-watermark { opacity: .04; }
 }
 
 #app {

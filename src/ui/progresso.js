@@ -23,9 +23,10 @@
     document.getElementById("cap-display").textContent = cap === null ? "Sem limite" : "Nível " + cap;
     if (LEVELCAPS) document.getElementById("settings-note").textContent = LEVELCAPS.note;
   }
-  // Trilha visual da jornada (redesign 2026-09-18) - só lê LEVELCAPS e
-  // state.settings.milestone, nunca escreve; #settings-milestone continua
-  // sendo o único jeito de mudar o valor.
+  // Trilha visual da jornada (redesign 2026-09-18) - lê LEVELCAPS e
+  // state.settings.milestone. Desde 2026-09-24 cada etapa é clicável, mas o
+  // clique só escolhe o valor no #settings-milestone - quem grava continua
+  // sendo o ouvinte dele (um caminho só pra mudar o badge).
   function renderProgressTrail() {
     var el = document.getElementById("progress-trail");
     if (!el || !LEVELCAPS || !Array.isArray(LEVELCAPS.rows) || !LEVELCAPS.rows.length) return;
@@ -34,10 +35,15 @@
     var nodes = LEVELCAPS.rows.map(function (r, idx) {
       var st = idx < current ? "done" : idx === current ? "active" : "locked";
       var dotContent = idx < current ? "&check;" : String(idx);
-      return '<div class="trail-node">' +
-        '<div class="trail-dot ' + st + '">' + dotContent + '</div>' +
+      // Cada etapa é um botão (2026-09-24, pedido do usuário: marcar a
+      // insígnia levava 3 cliques na lista). O clique usa o mesmo caminho do
+      // <select> #settings-milestone (ouvinte logo abaixo).
+      return '<button type="button" class="trail-node" data-marco="' + idx + '"' +
+        (idx === current ? ' aria-current="step"' : "") +
+        ' aria-label="' + escapeHtml(r.milestone) + (idx === current ? " (atual)" : " - marcar como último badge") + '">' +
+        '<span class="trail-dot ' + st + '">' + dotContent + '</span>' +
         '<span class="trail-label' + (idx === current ? " active" : "") + '">' + escapeHtml(r.milestone) + '</span>' +
-        '</div>';
+        '</button>';
     }).join("");
     var pct = last > 0 ? Math.max(0, Math.min(100, (current / last) * 100)) : 0;
     el.innerHTML = '<div class="trail-track">' +
@@ -45,7 +51,39 @@
       '<div class="trail-line-fill" style="width: ' + pct + '%;"></div>' +
       nodes +
       '</div>';
+    // Linhas medidas em pixels reais (2026-09-24): em % da largura visível a
+    // linha verde passava da etapa atual no computador e parava antes dela
+    // quando a trilha rolava; a tracejada não cobria a parte rolada.
+    var trilha = el.querySelector(".trail-track");
+    var atual = el.querySelector('.trail-node[aria-current]');
+    // Aba escondida não tem medida (tudo 0): fica o valor aproximado em %, e a
+    // aba redesenha a trilha ao abrir (abas.js).
+    if (!trilha || !trilha.clientWidth) return;
+    var fundo = trilha.querySelector(".trail-line-bg");
+    var cheia = trilha.querySelector(".trail-line-fill");
+    var ultimo = trilha.querySelector(".trail-node:last-of-type");
+    if (fundo && ultimo) { fundo.style.right = "auto"; fundo.style.width = Math.max(0, ultimo.offsetLeft + ultimo.offsetWidth / 2 - 4) + "px"; }
+    if (cheia) cheia.style.width = atual ? Math.max(0, atual.offsetLeft + atual.offsetWidth / 2 - 4) + "px" : "0";
+    // Em tela estreita a trilha rola de lado: centraliza a etapa atual (antes
+    // ela ficava cortada na borda).
+    if (atual && trilha.scrollWidth > trilha.clientWidth) {
+      trilha.scrollLeft = Math.max(0, atual.offsetLeft - trilha.clientWidth / 2 + atual.offsetWidth / 2);
+    }
   }
+  // Clique numa etapa da trilha = escolher esse badge no <select> (a mesma
+  // ação, com a mesma gravação, log e redesenho de quando se usa a lista).
+  (function () {
+    var trilha = document.getElementById("progress-trail");
+    if (!trilha) return;
+    trilha.addEventListener("click", function (e) {
+      var no = e.target.closest(".trail-node[data-marco]");
+      var sel = document.getElementById("settings-milestone");
+      if (!no || !sel || String(state.settings.milestone) === no.dataset.marco) return;
+      sel.value = no.dataset.marco;
+      sel.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  })();
+
   // "Novidades" - Fase 1 quality-of-life item, 2026-09-09: the user asked
   // to see what changed without having to ask. Static, hand-authored list
   // (data/changelog.json) - no attempt to auto-generate from git log, which

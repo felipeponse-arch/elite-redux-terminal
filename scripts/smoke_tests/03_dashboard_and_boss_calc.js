@@ -17,11 +17,13 @@ async function section03() {
     getComputedStyle(morePanel).display === "none");
   moreToggle.click();
   check("Mais panel opens on click", morePanel.hidden === false);
-  const progressInPanel = morePanel.querySelector('[data-tab="progress"]');
-  if (progressInPanel) progressInPanel.click();
+  // Tipos fica sempre no "Mais"; Progresso vai pra barra principal em tela
+  // larga (2026-09-24).
+  const typesInPanel = morePanel.querySelector('[data-tab="types"]');
+  if (typesInPanel) typesInPanel.click();
   await wait(30);
-  check("selecting Progresso inside the panel activates that view",
-    document.getElementById("view-progress").classList.contains("active"));
+  check("selecting Tipos inside the panel activates that view",
+    document.getElementById("view-types").classList.contains("active"));
   check("panel closes after selecting an item inside it", morePanel.hidden === true);
   check("Mais toggle highlights while Progresso/Tipos is active", moreToggle.classList.contains("active"));
   moreToggle.click();

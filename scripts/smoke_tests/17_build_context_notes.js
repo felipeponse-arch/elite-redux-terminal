@@ -89,7 +89,7 @@ async function section17() {
   // pelo seletor de verdade, em vez de herdar o cap da seção 14 (Q1).
   document.getElementById("tabs-more-toggle").click();
   await wait(20);
-  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
   await wait(50);
   var msSelD3 = document.getElementById("settings-milestone");
   var msOriginalD3 = msSelD3.value;

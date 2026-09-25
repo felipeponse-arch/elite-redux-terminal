@@ -40,7 +40,7 @@ async function section19() {
     // Levantamento de 2026-09-24: mudar a dificuldade no Progresso não mudava o
     // time do chefão que já estava aberto (só ao reabrir).
     timeSelecionadoPara("ace");
-    document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+    document.querySelector('.tab-btn[data-tab="progress"]').click();
     await wait(30);
     var diffSel = document.getElementById("settings-difficulty");
     diffSel.value = "elite";
@@ -257,7 +257,7 @@ async function section19() {
     T.state.settings.milestone = 0;
     document.getElementById("tabs-more-toggle").click();
     await wait(20);
-    document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+    document.querySelector('.tab-btn[data-tab="progress"]').click();
     await wait(50);
     var msSel19 = document.getElementById("settings-milestone");
     msSel19.value = "0";

@@ -9,7 +9,7 @@ async function section11() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
   document.getElementById("tabs-more-toggle").click();
-  const progressInPanel = document.getElementById("tabs-more-panel").querySelector('[data-tab="progress"]');
+  const progressInPanel = document.querySelector('.tab-btn[data-tab="progress"]');
   progressInPanel.click();
   await wait(30);
 

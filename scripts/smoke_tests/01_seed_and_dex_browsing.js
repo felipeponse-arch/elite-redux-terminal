@@ -25,7 +25,7 @@ async function section01() {
   await wait(30);
   document.getElementById("tabs-more-toggle").click();
   await wait(20);
-  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
   await wait(50);
   document.getElementById("settings-milestone").value = "9"; // Champion / Alto Comando
   document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));

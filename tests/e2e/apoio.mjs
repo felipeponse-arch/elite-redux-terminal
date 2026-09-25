@@ -83,7 +83,14 @@ export async function abrirApp(page, { mockDb = false, semente = null, arquivo =
 // a fonte de reserva. Print e medida de layout só depois delas.
 async function esperarFontes(page) {
   await page.waitForFunction(() => window.__fontesProntas === true, null, { timeout: 15_000 });
-  await page.evaluate(() => document.fonts.ready);
+  // document.fonts.ready não garante os pesos que ainda não apareceram na
+  // tela (o navegador baixa cada peso sob demanda) - um print de referência
+  // já saiu com um peso ainda chegando (2026-09-24). Pede todos os usados.
+  await page.evaluate(() => Promise.all([
+    '400 15px "Figtree"', '500 15px "Figtree"', '600 15px "Figtree"', '700 15px "Figtree"',
+    '700 20px "Bricolage Grotesque"', '800 20px "Bricolage Grotesque"',
+    '400 13px "IBM Plex Mono"', '600 13px "IBM Plex Mono"',
+  ].map((f) => document.fonts.load(f).catch(() => null))).then(() => document.fonts.ready));
 }
 
 // Liga o db falso a partir da PRÓXIMA navegação (addInitScript vale pras

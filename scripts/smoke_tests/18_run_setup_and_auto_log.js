@@ -290,7 +290,7 @@ async function section18() {
     check("pré-condição da checagem de combo autossuficiente (fixtures reais achadas)", false);
   }
 
-  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
   await wait(30);
   escolher(diff, "ace");
 

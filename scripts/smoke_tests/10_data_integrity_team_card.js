@@ -41,7 +41,9 @@ async function section10() {
     await wait(50);
     const addBoxBtnAfterTeam = document.getElementById("add-box-btn");
     check("botão '+ Caixa' fica desabilitado quando a espécie já está no time (não só quando já está na caixa)",
-      !!addBoxBtnAfterTeam && addBoxBtnAfterTeam.disabled && addBoxBtnAfterTeam.textContent === "No time",
+      // Rótulo continua "+ Caixa" (redesenho 2026-09-24: os dois botões diziam
+      // "No time" lado a lado); o motivo fica no title.
+      !!addBoxBtnAfterTeam && addBoxBtnAfterTeam.disabled && addBoxBtnAfterTeam.textContent === "+ Caixa" && addBoxBtnAfterTeam.title === "Já está no time",
       addBoxBtnAfterTeam && { disabled: addBoxBtnAfterTeam.disabled, text: addBoxBtnAfterTeam.textContent });
     addBoxBtnAfterTeam.click(); // deveria ser um no-op de verdade, não só visual
     await wait(30);

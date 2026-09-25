@@ -96,14 +96,16 @@
 .detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
 .detail-titles h2 { font-size: var(--fs-display); font-weight: 700; }
 .detail-dexno { color: var(--text-dim); font-size: var(--fs-texto); }
-.detail-sname { color: var(--text-dim); font-size: var(--fs-pequeno); margin-top: 2px; }
+.detail-acoes { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
 .detail-types { display: flex; gap: 6px; margin: 10px 0 14px; }
 /* Botão de ação primária como o "farol" da tela (achado de auditoria,
    2026-09-18: era um botão laranja igual a qualquer outro - agora é o
    único elemento com gradiente + glow do app, pra sobrar exatamente 1
    coisa em destaque por tela, não um botão a mais entre muitos). */
+/* Redesenho 2026-09-24: cor sólida, sem o brilho - continua sendo o único
+   botão cheio de magenta da tela, mas sem gradiente e glow decorativos. */
 .add-team-btn {
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  background: var(--accent);
   color: var(--accent-ink);
   border: none;
   padding: 10px 18px;
@@ -112,8 +114,8 @@
   font-size: var(--fs-texto);
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--accent) 65%, transparent);
 }
+.add-team-btn:hover:not(:disabled) { background: var(--accent-strong); }
 .add-team-btn:disabled { background: var(--surface-3); color: var(--text-dim); cursor: default; box-shadow: none; }
 .flavor { color: var(--text-dim); font-size: var(--fs-destaque); font-style: italic; max-width: 65ch; margin-bottom: 20px; }
 /* "Como conseguir" (Fase 2, 2026-09-11) - uma frase, não um card (decisão
@@ -182,10 +184,17 @@
   background: repeating-linear-gradient(90deg, var(--border) 0 6px, transparent 6px 12px);
 }
 .trail-line-fill {
-  position: absolute; top: 25px; left: 4px; height: 2px; max-width: calc(100% - 8px);
+  /* Largura em px vem de renderProgressTrail (centro da etapa atual). */
+  position: absolute; top: 25px; left: 4px; height: 2px;
   background: var(--accent-2); box-shadow: 0 0 8px color-mix(in srgb, var(--accent-2) 70%, transparent);
 }
-.trail-node { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; flex: none; width: 74px; }
+.trail-node {
+  position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; flex: none; width: 74px;
+  /* Botão (clicar marca o badge): sem o visual padrão de botão. */
+  background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer;
+}
+.trail-node:hover .trail-dot.locked { border-color: var(--accent-2); }
+.trail-node[aria-current] { cursor: default; }
 .trail-dot {
   width: 34px; height: 34px; border-radius: var(--radius-pill); flex: none;
   display: flex; align-items: center; justify-content: center;

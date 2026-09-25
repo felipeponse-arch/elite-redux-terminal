@@ -54,8 +54,26 @@
     return '<div class="archetype-chips">' + noneChip + chips + '</div>';
   }
 
+  // Redesenho 2026-09-24 (pedido do usuário: "ainda não está bonito"): o card
+  // ocupava a primeira tela inteira do Meu Time e empurrava o próprio time pra
+  // fora da vista. Agora é um <details> fechado por padrão, com o que está
+  // escolhido numa linha; abre ao clicar e lembra se ficou aberto (o
+  // conteúdo é redesenhado a cada escolha, e fechar a cada clique seria pior).
+  var arquetipoAberto = false;
+  function resumoDoArquetipo() {
+    var partes = [
+      ["Ritmo", state.archetype.pace],
+      ["Clima", state.archetype.weather],
+      ["Monotype", state.archetype.monotype],
+    ].map(function (p) {
+      return '<span class="arquetipo-item">' + p[0] + ': <b>' + escapeHtml(p[1] || "nenhum") + '</b></span>';
+    });
+    return partes.join("");
+  }
   function archetypeCardHtml(members) {
-    return '<div class="card"><h3>Arquétipo do time</h3>' +
+    return '<details class="card arquetipo"' + (arquetipoAberto ? " open" : "") + '>' +
+      '<summary class="arquetipo-resumo"><span class="arquetipo-titulo">Arquétipo</span>' + resumoDoArquetipo() +
+        '<span class="arquetipo-ajustar" aria-hidden="true">' + (arquetipoAberto ? "Fechar" : "Ajustar") + '</span></summary>' +
       '<p class="mybuild-hint">Escolha um Ritmo, Clima e/ou Monotype e peça o melhor time de até 6, usando só os Pokémon que você já tem (time + caixa). "Gerar time completo" monta a composição, gera a build de cada um e escreve o guia de como jogar - tudo numa ação só.</p>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Ritmo</span>' + archetypeChipsHtml("pace", PACE_ARCHETYPES, state.archetype.pace || "", false) + '</div>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Clima</span>' + archetypeChipsHtml("weather", WEATHER_ARCHETYPES, state.archetype.weather || "", false) + '</div>' +
@@ -64,13 +82,20 @@
         '<button id="archetype-build-complete" class="add-team-btn" type="button" title="Composição + build de cada um + guia de como jogar, tudo de uma vez">Gerar time completo</button>' +
       '</div>' +
       '<span id="archetype-status" class="notes-status" role="status" aria-live="polite"></span>' +
-    '</div>';
+    '</details>';
   }
 
   // Chips de arquétipo e "Montar time completo": ouvinte único em #team-strategy
   // (fase 5 da refatoração, 2026-09-24) - antes religados a cada renderTeamStrategy.
   (function () {
     var painel = document.getElementById("team-strategy");
+    // "toggle" não borbulha - captura no painel.
+    painel.addEventListener("toggle", function (e) {
+      if (!e.target.classList || !e.target.classList.contains("arquetipo")) return;
+      arquetipoAberto = e.target.open;
+      var rotulo = e.target.querySelector(".arquetipo-ajustar");
+      if (rotulo) rotulo.textContent = arquetipoAberto ? "Fechar" : "Ajustar";
+    }, true);
     painel.addEventListener("click", function (e) {
       var alvo = e.target.closest("button");
       if (!alvo || !painel.contains(alvo)) return;

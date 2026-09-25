@@ -28,7 +28,10 @@
             megaModeBuildNoteHtml(sp, build) +
             buildContextNotesHtml(sp, build) +
             buildSynergyHtml(sp, build) +
-            buildNoteHtml(build.note && escapeHtml(build.note)) +
+            // Nota da curada (fonte + observações do autor): no card fica em 3
+            // linhas, com o texto inteiro no title; completa na ficha
+            // (redesenho 2026-09-24 - ocupava metade do card).
+            (build.note ? '<div class="ts-nota-fonte" title="' + escapeHtml(build.note) + '">' + buildNoteHtml(escapeHtml(build.note)) + '</div>' : "") +
           '</div>'
         ) : (
           // Achado real do usuário, 2026-09-13: "não achei o botão de criar
@@ -46,7 +49,7 @@
         );
         var swapOpen = teamSwapIdx === i;
         slots.push('<div class="team-slot' + (swapOpen ? ' swapping' : '') + '"><div>' +
-          '<div class="ts-head goto-species" tabindex="0" role="button" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 40) +
+          '<div class="ts-head goto-species" tabindex="0" role="button" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 64) +
           '<div><div class="ts-name">' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + megaLockedTagHtml(sp) + '</div>' +
           '<div class="ts-types">' + names.map(function (n) { return typePill(n, true); }).join("") + '</div></div></div>' +
           '<div class="ts-abis"><b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + otherFormsHtml(sp) + '</div>' +
@@ -133,7 +136,7 @@
       return state.team.indexOf(sp.x) === -1;
     });
     if (!boxMembers.length) {
-      return '<div class="swap-panel"><div class="swap-empty">Nenhum Pokémon disponível na caixa. Adicione capturas na aba Caixa primeiro.</div></div>';
+      return '<div class="swap-panel"><div class="swap-empty">Nenhum Pokémon disponível na caixa. Adicione capturas na aba PC Box primeiro.</div></div>';
     }
     return '<div class="swap-panel">' +
       '<div class="swap-title">Trocar ' + escapeHtml(currentSp.n) + ' por:</div>' +

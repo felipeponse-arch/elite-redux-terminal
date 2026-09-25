@@ -13,7 +13,10 @@
       "Abre mais rápido: a tela não espera mais as fontes do Google pra aparecer",
       "Cabeçalho numa linha só no computador e a tela não \"pula\" mais ao abrir",
       "Tamanhos de texto padronizados em todo o app; campos (buscas, listas, anotações) com a fonte do app",
-      "Corrigido: a busca dos Chefões estava sem estilo; digitar na busca da Dex com uma ficha aberta deixava a ficha sem atualizar (\"+ Time\" continuava ativo)"
+      "Corrigido: a busca dos Chefões estava sem estilo; digitar na busca da Dex com uma ficha aberta deixava a ficha sem atualizar (\"+ Time\" continuava ativo)",
+      "Visual renovado: no Meu Time o time aparece primeiro (o arquétipo virou uma linha que abre ao clicar), cards em 3 colunas com o Pokémon maior e a build sem corte",
+      "Ficha com o Pokémon em destaque; cores mais calmas (o magenta forte ficou só pro botão principal) e rodapé numa linha",
+      "Progresso direto na barra de abas no computador, e clicar numa etapa de \"Sua jornada\" marca o badge"
     ]
   },
   {

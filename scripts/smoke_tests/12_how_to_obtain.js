@@ -63,7 +63,7 @@ async function section12() {
   // Fama - nossa nota antiga dizia o oposto, "nao aumentada de novo depois").
   document.getElementById("tabs-more-toggle").click();
   await wait(30);
-  document.getElementById("tabs-more-panel").querySelector('[data-tab="progress"]').click();
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
   await wait(60);
   var noteText = document.getElementById("settings-note").textContent;
   check("nota de level cap não afirma mais que a dificuldade não pode ser aumentada de novo (achado corrigido contra a FAQ oficial)",

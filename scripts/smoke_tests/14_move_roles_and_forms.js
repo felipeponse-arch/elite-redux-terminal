@@ -122,7 +122,7 @@ async function section14() {
   if (volc && selen) {
     document.getElementById("tabs-more-toggle").click();
     await wait(20);
-    document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+    document.querySelector('.tab-btn[data-tab="progress"]').click();
     await wait(50);
     var diff = document.getElementById("settings-level-cap");
     var ms = document.getElementById("settings-milestone");

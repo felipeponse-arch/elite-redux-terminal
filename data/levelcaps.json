@@ -1,6 +1,6 @@
 {
   "source": "https://eliteredux.net/level-caps/",
-  "note": "As colunas seguem a opção Level Cap do setup do jogo (Easy/More/Elite), separada da Dificuldade (Easy/Ace/Elite), que muda os times dos chefões. Se você passar do cap, o Pokémon acima do nível pode parar de obedecer. Não existe opção pra desativar o level cap em si. A dificuldade pode ser mudada em qualquer Centro Pokémon, nos dois sentidos; aumentar depois de ter abaixado marca seu Hall da Fama com um ícone (anti-cheat pra challenge runs), mas o app permite normalmente.",
+  "note": "As colunas seguem a opção Level Cap do setup do jogo (Easy/More/Elite), separada da Dificuldade (Easy/Ace/Elite) - só o Elite muda os times dos chefões. Se você passar do cap, o Pokémon acima do nível pode parar de obedecer. Não existe opção pra desativar o level cap em si. A dificuldade pode ser mudada em qualquer Centro Pokémon, nos dois sentidos; aumentar depois de ter abaixado marca seu Hall da Fama com um ícone (anti-cheat pra challenge runs), mas o app permite normalmente.",
   "rows": [
     { "milestone": "Sem Badge (inicio)", "easy": 20, "more": 18, "elite": 16 },
     { "milestone": "Stone Badge (1o ginasio)", "easy": 28, "more": 25, "elite": 23 },

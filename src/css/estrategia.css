@@ -12,10 +12,30 @@
   cursor: pointer; font-family: inherit;
 }
 .arch-chip:hover { border-color: var(--accent-2); }
+/* Escolhido = tinta leve do acento, não o gradiente cheio (redesenho
+   2026-09-24): o magenta forte fica reservado pra ação principal da tela.
+   "Nenhum" escolhido é o estado neutro - não pode ser o elemento mais
+   chamativo da tela, como era. */
 .arch-chip.active {
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  border-color: transparent; color: var(--accent-ink);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-color: var(--accent); color: var(--badge-accent);
 }
+.arch-chip.active[data-value=""] { background: var(--surface-3); border-color: var(--border); color: var(--text); }
+
+/* Arquétipo recolhido numa linha (redesenho 2026-09-24): o time vem primeiro. */
+.arquetipo { padding: 0; }
+.arquetipo > summary.arquetipo-resumo {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px;
+  padding: 12px 18px; cursor: pointer; list-style: none; font-size: var(--fs-texto); color: var(--text-dim);
+}
+.arquetipo > summary::-webkit-details-marker { display: none; }
+.arquetipo-titulo { font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif; font-weight: 700; color: var(--text); font-size: var(--fs-destaque); }
+.arquetipo-item b { color: var(--text); font-weight: 600; }
+.arquetipo-ajustar { margin-left: auto; color: var(--badge-accent2); font-weight: 600; }
+.arquetipo[open] > summary { border-bottom: 1px solid var(--border); }
+.arquetipo > :not(summary) { margin-left: 18px; margin-right: 18px; }
+.arquetipo > .mybuild-hint { margin-top: 14px; }
+.arquetipo > #archetype-status { display: block; margin-bottom: 14px; }
 /* Monotype usa a cor real do tipo (mesma fonte que typePill/.type-check
    já usam), não o gradiente de marca - a cor JÁ É a informação aqui. */
 .arch-chip-type.active { background: var(--chip-color); border-color: transparent; color: var(--chip-ink); }

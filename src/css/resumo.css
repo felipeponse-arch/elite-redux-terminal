@@ -55,7 +55,9 @@
 .stat-row .stat-label { font-size: var(--fs-pequeno); color: var(--text-dim); font-weight: 600; }
 .stat-row .stat-val { font-size: var(--fs-texto); text-align: right; }
 .stat-bar-track { height: 8px; background: var(--surface-2); border-radius: var(--radius-pill); overflow: hidden; }
-.stat-bar-fill { height: 100%; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+/* Cor sólida (redesenho 2026-09-24): o degradê verde->magenta era enfeite e
+   competia com as faixas que significam algo (fraco/bom/elite, abaixo). */
+.stat-bar-fill { height: 100%; border-radius: var(--radius-pill); background: var(--accent-2); }
 /* Color banding so a glance tells "weak/average/good/elite" apart, not
    just the bar length - see statTier() and AUDITORIA-DOSSIE.md UX 2. */
 .stat-bar-fill.tier-weak { background: var(--sem-weak); }

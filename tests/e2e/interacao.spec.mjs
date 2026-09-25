@@ -67,12 +67,42 @@ test("espécie com duas curadas mostra a do estilo do Ritmo", async ({ page }) =
   await abrirAba(page, "team");
   const card = page.locator(".team-slot").first();
   await expect(card).toContainText("Gooey");
+  // O arquétipo fica recolhido numa linha (redesenho 2026-09-24): abre e
+  // continua aberto depois de cada escolha (a tela é redesenhada).
+  await page.locator("details.arquetipo > summary").click();
   await page.locator('.arch-chip[data-axis="pace"][data-value="Hyper Offense"]').click();
+  await expect(page.locator("details.arquetipo")).toHaveAttribute("open", "");
+  await expect(page.locator("details.arquetipo > summary")).toContainText("Hyper Offense");
   await expect(card).toContainText("ofensivo", { ignoreCase: true });
   await expect(card).toContainText("Gladiator");
   await page.locator('.arch-chip[data-axis="pace"][data-value="Stall"]').click();
   await expect(card).toContainText("defensivo", { ignoreCase: true });
   await expect(card).toContainText("Gooey");
+});
+
+// Marcar o badge (2026-09-24, pedido do usuário: custava 3 cliques escondidos
+// em "Mais"): no computador o Progresso fica na barra principal, no celular
+// volta pro "Mais"; e clicar numa etapa da trilha marca o badge.
+test("Progresso na barra principal no computador e no Mais no celular", async ({ page }) => {
+  await abrirApp(page);
+  await expect(page.locator('.tabs .tab-btn[data-tab="progress"]')).toBeVisible();
+  // O cabeçalho continua numa linha só com a aba a mais (a partir de 1024 px).
+  const topoAbas = await page.locator(".tabs-row").evaluate((el) => el.getBoundingClientRect().top);
+  const topoMarca = await page.locator(".brand").evaluate((el) => el.getBoundingClientRect().top);
+  expect(Math.abs(topoAbas - topoMarca)).toBeLessThan(20);
+  await page.setViewportSize({ width: 390, height: 800 });
+  await expect(page.locator('#tabs-more-panel .tab-btn[data-tab="progress"]')).toHaveCount(1);
+  await expect(page.locator('.tabs .tab-btn[data-tab="progress"]')).toHaveCount(0);
+});
+
+test("clicar numa etapa da trilha marca o badge", async ({ page }) => {
+  await abrirApp(page);
+  await abrirAba(page, "progress");
+  await page.locator('#progress-trail .trail-node[data-marco="3"]').click();
+  await expect(page.locator("#settings-milestone")).toHaveValue("3");
+  await expect(page.locator('#progress-trail .trail-node[data-marco="3"]')).toHaveAttribute("aria-current", "step");
+  const salvo = await page.evaluate(() => JSON.parse(localStorage.getItem("er_terminal_save")).settings.milestone);
+  expect(salvo).toBe(3);
 });
 
 test("no celular, digitar na busca volta pra lista e a ficha some", async ({ page }) => {

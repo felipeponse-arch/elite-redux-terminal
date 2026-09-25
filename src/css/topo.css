@@ -41,7 +41,8 @@
 .brand-sub-info, .brand-sub-sync { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .brand-sub-info { flex: 0 1000 auto; }
 .brand-sub-sync { flex: 0 1 auto; }
-.brand-sub .mono { color: var(--badge-accent2); }
+/* Texto comum (redesenho 2026-09-24): fonte de código colorida no subtítulo era ruído. */
+.brand-sub .mono { font-family: inherit; color: inherit; }
 
 /* Groups .tabs + .tabs-more so .topbar's justify-content:space-between
    (brand <-> nav area) only fires once, between brand and this whole row -

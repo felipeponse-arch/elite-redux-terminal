@@ -22,7 +22,7 @@ async function section08() {
   // encadeamento completo de verdade, em vez de assumir 1 etapa isolada.
   document.getElementById("tabs-more-toggle").click();
   await wait(20);
-  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
   await wait(50);
   // Achado em auditoria de QA (2026-09-13): este bloco mudava o milestone
   // e nunca restaurava, ao contrário do padrão disciplinado já usado mais
@@ -102,7 +102,7 @@ async function section08() {
     // então deve evoluir EXATAMENTE 1 vez, não encadear até Charizard.
     document.getElementById("tabs-more-toggle").click();
     await wait(20);
-    document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+    document.querySelector('.tab-btn[data-tab="progress"]').click();
     await wait(50);
     document.getElementById("settings-milestone").value = "2";
     document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));
@@ -157,7 +157,7 @@ async function section08() {
   } else { check("Charmander encontrado pro teste de level cap", false); }
   document.getElementById("tabs-more-toggle").click();
   await wait(20);
-  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
   await wait(50);
   document.getElementById("settings-milestone").value = milestoneSelBeforeCharm;
   document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));

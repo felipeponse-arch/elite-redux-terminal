@@ -105,6 +105,19 @@
       </div>
     </div>
   </header>
+  <!-- Progresso vai pra barra principal em tela larga ANTES da primeira
+       pintura (2026-09-24): se o script principal fizesse isso depois, a
+       barra alargava com a tela já desenhada e o cabeçalho pulava. O
+       script principal (src/ui/abas.js) cuida das mudanças de largura
+       depois. Mesmo limite (1024 px) nos dois lugares. -->
+  <script id="posicionar-progresso">
+    (function () {
+      if (!window.matchMedia || !window.matchMedia("(min-width: 1024px)").matches) return;
+      var btn = document.querySelector('#tabs-more-panel .tab-btn[data-tab="progress"]');
+      var nav = document.querySelector(".tabs");
+      if (btn && nav) nav.appendChild(btn);
+    })();
+  </script>
 
   <main>
     <section id="view-dex" class="view active">
@@ -263,7 +276,7 @@
                 <option value="ace">Ace</option>
                 <option value="elite">Elite</option>
               </select>
-              <span class="rotulo-ajuste-dica">Muda os times dos chefões. Não muda o level cap.</span>
+              <span class="rotulo-ajuste-dica">Só o Elite muda os times dos chefões (Easy e Ace usam os mesmos). Não muda o level cap.</span>
             </label>
             <label class="rotulo-ajuste">Level Cap
               <select id="settings-level-cap" class="campo campo-ajuste">
@@ -362,8 +375,7 @@
   </main>
 
   <footer class="footer">
-    <p class="footer-full">Dados extraídos do <a href="https://forwardfeed.github.io/ER-nextdex/static/" target="_blank" rel="noopener">Elite Redux NextDex</a> oficial (build 2.65beta), mantido por ForwardFeed. Para encontros selvagens, times de treinadores e rotas de mono run, veja a <a href="https://eliteredux.net/full-documentation/" target="_blank" rel="noopener">documentação completa</a> e o <a href="https://discord.elite-redux.com" target="_blank" rel="noopener">Discord oficial</a>.</p>
-    <p class="footer-compact"><a href="https://forwardfeed.github.io/ER-nextdex/static/" target="_blank" rel="noopener">NextDex</a> · <a href="https://eliteredux.net/full-documentation/" target="_blank" rel="noopener">Documentação</a> · <a href="https://discord.elite-redux.com" target="_blank" rel="noopener">Discord</a></p>
+    <p class="rodape">Dados do <a href="https://forwardfeed.github.io/ER-nextdex/static/" target="_blank" rel="noopener">Elite Redux NextDex</a> (ForwardFeed) · <a href="https://eliteredux.net/full-documentation/" target="_blank" rel="noopener">Documentação</a> · <a href="https://discord.elite-redux.com" target="_blank" rel="noopener">Discord</a></p>
   </footer>
   <div id="toast" role="status" aria-live="polite"></div>
 
@@ -783,7 +795,7 @@
   });
   document.getElementById("run-setup-open").addEventListener("click", function () {
     document.getElementById("run-setup-banner").hidden = true;
-    var tab = document.querySelector('#tabs-more-panel [data-tab="progress"]');
+    var tab = document.querySelector('.tab-btn[data-tab="progress"]');
     if (tab) tab.click();
     var title = document.getElementById("run-setup-title");
     if (title) title.scrollIntoView({ block: "start" });

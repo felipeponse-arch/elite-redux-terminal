@@ -436,13 +436,14 @@
     var inBox = state.box.indexOf(x) !== -1;
     var names = speciesTypeNames(sp);
     return '<button class="back-btn" id="back-to-list">&larr; Voltar para a lista</button>' +
-      // 48 matches the atlas cell size, so the largest sprite in the UI is shown
-      // 1:1 and never upscaled.
-      '<div class="detail-head"><div class="ts-head">' + spriteImgHtml(sp.x, sp.n, 48) + '<div class="detail-titles">' +
+      // 96 = o dobro exato da célula de 48 do atlas (redesenho 2026-09-24: o
+      // Pokémon é o protagonista da ficha, e com image-rendering: pixelated o
+      // dobro exato fica nítido). O identificador interno (SPECIES_...) saiu da
+      // tela - era ruído técnico pro jogador.
+      '<div class="detail-head"><div class="ts-head">' + spriteImgHtml(sp.x, sp.n, 96) + '<div class="detail-titles">' +
         '<h2>' + escapeHtml(sp.n) + '</h2>' +
         '<div class="detail-dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</div>' +
-        '<div class="detail-sname mono">' + escapeHtml(sp.sname) + '</div>' +
-      '</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '</div></div><div class="detail-acoes">' +
         // Texto curto + title/aria-label com a frase completa (mesmo padrão
         // já usado no botão equivalente da PC Box) - achado real do usuário,
         // 2026-09-12: "⇄ Trocar com o time" + "+ Adicionar à caixa" juntos
@@ -464,7 +465,9 @@
         '<button class="add-team-btn" id="add-box-btn" style="background:var(--surface-3);color:var(--text);" ' + ((inBox || inTeam) ? "disabled" : "") +
           ' title="' + (inBox ? "Já está na caixa" : inTeam ? "Já está no time" : "Adicionar à caixa") + '"' +
           ' aria-label="' + (inBox ? "Já está na caixa" : inTeam ? "Já está no time" : "Adicionar à caixa") + '">' +
-          (inBox ? "Na caixa" : inTeam ? "No time" : "+ Caixa") + '</button>' +
+          // Com o Pokémon no time, fica "+ Caixa" desativado (o motivo vai no
+          // title) - antes os dois botões diziam "No time" lado a lado.
+          (inBox ? "Na caixa" : "+ Caixa") + '</button>' +
         // Only relevant once the Pokemon IS on the team: on mobile the species
         // list is hidden while a detail is open (.dex-shell.show-detail), so
         // without this the only way to see the team update is back -> scroll

@@ -68,7 +68,7 @@ async function section02() {
   await wait(30);
   document.getElementById("tabs-more-toggle").click();
   await wait(20);
-  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
   await wait(50);
   const milestoneSelBefore = document.getElementById("settings-milestone").value;
   document.getElementById("settings-milestone").value = "1"; // muitos chefões ainda faltam
@@ -115,7 +115,7 @@ async function section02() {
   // restaura o milestone "sem limite" que o resto da suíte inteira depende
   document.getElementById("tabs-more-toggle").click();
   await wait(20);
-  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
   await wait(50);
   document.getElementById("settings-milestone").value = milestoneSelBefore;
   document.getElementById("settings-milestone").dispatchEvent(new Event("change", { bubbles: true }));

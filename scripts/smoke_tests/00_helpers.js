@@ -102,7 +102,7 @@ async function prepararRunPadrao() {
   }
   document.getElementById("tabs-more-toggle").click();
   await wait(20);
-  document.querySelector('#tabs-more-panel [data-tab="progress"]').click();
+  document.querySelector('.tab-btn[data-tab="progress"]').click();
   await wait(50);
   function escolher(id, valor) {
     var el = document.getElementById(id);
