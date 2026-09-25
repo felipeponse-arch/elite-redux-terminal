@@ -95,6 +95,17 @@ test("Progresso na barra principal no computador e no Mais no celular", async ({
   await expect(page.locator('.tabs .tab-btn[data-tab="progress"]')).toHaveCount(0);
 });
 
+// A ~900 px o subtítulo cortava até sobrar só "Dex …" e a versão do jogo sumia
+// (2026-09-24). A versão nunca corta; o resto encolhe antes dela.
+test("versão do jogo aparece inteira no subtítulo em tela estreita", async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 700 });
+  await abrirApp(page);
+  const versao = page.locator(".brand-sub-versao");
+  await expect(versao).toContainText("2.65beta");
+  const cortada = await versao.evaluate((el) => el.scrollWidth > el.clientWidth + 1 || el.getBoundingClientRect().width < 20);
+  expect(cortada, "a versão do jogo foi cortada").toBe(false);
+});
+
 test("clicar numa etapa da trilha marca o badge", async ({ page }) => {
   await abrirApp(page);
   await abrirAba(page, "progress");

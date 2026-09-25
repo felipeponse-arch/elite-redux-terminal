@@ -35,9 +35,12 @@
   box-shadow: var(--shadow);
 }
 .brand-text h1 { font-size: var(--fs-titulo); font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; }
-/* Duas partes: a informação fixa corta primeiro (encolhe 1000x mais), o status
-   da sincronização por último - é ele que avisa "só neste aparelho". */
+/* Três partes por prioridade: a versão do jogo nunca corta; espécies/data/"Dex
+   offline" cortam primeiro (encolhem 1000x mais); o status da sincronização por
+   último - é ele que avisa "só neste aparelho". Antes a versão ficava no trecho
+   que corta e a ~900 px sobrava só "Dex …" (2026-09-24). */
 .brand-sub { margin: 2px 0 0; font-size: var(--fs-texto); color: var(--text-dim); display: flex; white-space: nowrap; }
+.brand-sub-versao { flex: none; }
 .brand-sub-info, .brand-sub-sync { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .brand-sub-info { flex: 0 1000 auto; }
 .brand-sub-sync { flex: 0 1 auto; }

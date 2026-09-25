@@ -399,6 +399,26 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
   `title`) e o resumo da Dex reserva a altura de uma linha enquanto vazio. Medido antes: CLS ~0,53
   no computador; `desempenho.spec.mjs` confere a forma do cabeçalho e a reserva do resumo direto, e
   o CLS < 0,1 em quatro larguras.
+- RNF20 — **O Pokémon é o protagonista da tela** (redesenho visual, 2026-09-24, pedido do usuário:
+  "ainda sinto que ele não está bonito"): na aba Time o time aparece antes de qualquer ajuste - o
+  arquétipo fica recolhido numa linha com as escolhas atuais no resumo e lembra se ficou aberto; os
+  cards ocupam 3 colunas no notebook (sem card sozinho na última linha) e o texto da build nunca é
+  cortado. Sprites em múltiplo exato da célula do atlas (96 px na ficha, 64 px no time), pra pixel
+  art continuar nítida. A cor de destaque forte fica só no botão principal; escolha "nenhum" é
+  neutra; identificadores internos (`SPECIES_…`) não aparecem pro jogador. No computador (a partir
+  de 1024 px) o Progresso fica na barra de abas, posicionado antes da primeira pintura (movê-lo
+  depois deslocava o cabeçalho: CLS 0,376 medido); no celular volta pro "Mais". Clicar numa etapa
+  da trilha "Sua jornada" marca a insígnia. `interacao.spec.mjs` confere a posição do Progresso, o
+  clique na trilha e o arquétipo recolhido; as referências visuais foram revistas e regravadas.
+- RNF21 — **Alarme de versão nova** (2026-09-24, pedido do usuário): toda segunda às 9h (Brasília)
+  o GitHub Actions (`.github/workflows/alarme_upstream.yml`) roda `scripts/alarme_upstream.mjs`, que
+  confere a versão padrão do NextDex oficial, se o arquivo de dados dessa versão continua idêntico
+  ao snapshot (`data/gameData_265beta.json`, hash ignorando fim de linha) e a "Latest Version" da
+  página de download do eliteredux.net. Só falha - e o GitHub avisa o jogador por e-mail - quando
+  algo mudou ou uma página mudou de formato (alarme cego também pede atenção); falha de rede depois
+  de 3 tentativas vira só aviso. Em dia: nenhuma notificação. A leitura das páginas tem teste de
+  unidade sem rede (`tests/unit/alarme_upstream.test.mjs`). Quando tocar: extrair o dado novo
+  (`scripts/build.ps1` sem `-SkipExtract`) e atualizar as versões esperadas no script.
 
 ### Build que acompanha o jogador e banco de builds (2026-09-24)
 
