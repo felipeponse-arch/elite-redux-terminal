@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "gluttony-sem-berry",
+    descricao: "habilidade que come berry aceita qualquer item",
+    arquivo: "validacao_build_ia.js",
+    de: "var serve = regraConsumivel.precisa === \"berry\" ? ehBerry(item) : itemSeGastaNaLuta(item);",
+    para: "var serve = true;",
+  },
+  {
+    id: "unburden-aceita-item-fixo",
+    descricao: "item que não se gasta (King's Rock) conta como gasto na luta",
+    arquivo: "validacao_build_ia.js",
+    de: "return ehBerry(item) || / Gem$/.test(item || \"\") || ITENS_GASTOS_NA_LUTA.indexOf(item) !== -1;",
+    para: "return !!item;",
+  },
+  {
     id: "status-invertido",
     descricao: "comparação de split invertida (a classe do bug \"Status\" x \"STATUS\")",
     arquivo: "golpes.js",

@@ -33,8 +33,20 @@
     "Muscle Band", "Wise Glasses", "Metronome", "Wide Lens", "Air Balloon",
     "Safety Goggles", "Mental Herb", "Lum Berry", "Toxic Orb", "Flame Orb",
     "Booster Energy", "Loaded Dice", "Clear Amulet", "Covert Cloak",
-    "Punching Glove", "Throat Spray"
-  ].filter(function (n) { return ITEMS.indexOf(n) !== -1; });
+    "Punching Glove", "Throat Spray",
+    // Berries (2026-09-26, pedido do usuário: "as berry do jogo não são
+    // sugeridas nas build, pq?"): a lista tinha só Sitrus/Lum/Custap, das 67
+    // do jogo - e as builds curadas da comunidade usam as de pânico. Entram as
+    // de pânico, as de resistência (uma por tipo) e as que reagem a golpe
+    // físico/especial. Leppa fica de fora: neste hack o PP é sempre o máximo.
+    "Liechi Berry", "Salac Berry", "Petaya Berry", "Apicot Berry", "Ganlon Berry", "Starf Berry",
+    "Occa Berry", "Passho Berry", "Wacan Berry", "Rindo Berry", "Yache Berry", "Chople Berry",
+    "Kebia Berry", "Shuca Berry", "Coba Berry", "Payapa Berry", "Tanga Berry", "Charti Berry",
+    "Kasib Berry", "Haban Berry", "Colbur Berry", "Babiri Berry", "Roseli Berry", "Chilan Berry",
+    "Kee Berry", "Maranga Berry", "Jaboca Berry", "Rowap Berry",
+    // Gastos na luta, pro Unburden ter opção além de berry.
+    "White Herb", "Power Herb", "Weakness Policy"
+  ].filter(function (n, i, lista) { return ITEMS.indexOf(n) !== -1 && lista.indexOf(n) === i; });
 
   // Orientação real de build por Ritmo/Clima do time (achado do usuário,
   // 2026-09-13, com print do time montado via "Montar melhor time": a
@@ -201,9 +213,14 @@
     if (regraPedra) out += regraPedra.prompt + "\n";
     return out;
   }
-  function blocoItensIA(plural) {
+  function blocoItensIA(sp, plural) {
     return "Itens de batalha reais disponiveis - " + (plural ? "cada set escolhe UM destes (ou deixa vazio)" : "escolha UM destes (ou deixe vazio se nenhum fizer sentido)") +
-      ": " + AI_ITEM_POOL.join(", ") + "\n";
+      ": " + AI_ITEM_POOL.join(", ") + "\n" +
+      "Berries: as de panico (Liechi, Salac, Petaya, Apicot, Ganlon, Starf) sobem um status com HP baixo; as de resistencia (Occa=Fire, Passho=Water, " +
+      "Wacan=Electric, Rindo=Grass, Yache=Ice, Chople=Fighting, Kebia=Poison, Shuca=Ground, Coba=Flying, Payapa=Psychic, Tanga=Bug, Charti=Rock, " +
+      "Kasib=Ghost, Haban=Dragon, Colbur=Dark, Babiri=Steel, Roseli=Fairy, Chilan=Normal) enfraquecem um golpe super efetivo daquele tipo - use a " +
+      "da fraqueza mais perigosa desta especie.\n" +
+      regraItemConsumivelPrompt(sp);
   }
   // O que o resto do time já usa (só a build de 1 membro recebe: as Estratégias
   // são leitura exploratória da espécie, não do time).
@@ -227,7 +244,7 @@
       blocoMovepoolIA(sp, false) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, false) +
-      blocoItensIA(false) +
+      blocoItensIA(sp, false) +
       blocoTimeEmUsoIA(sp) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
@@ -307,7 +324,7 @@
       blocoMovepoolIA(sp, true) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, true) +
-      blocoItensIA(true) +
+      blocoItensIA(sp, true) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       curadoPromptLine +
       "Antes de responder, use getSpeciesRank e getAbilityMovepoolSynergy pra fundamentar os papeis escolhidos - " +

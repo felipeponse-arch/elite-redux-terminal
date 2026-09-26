@@ -20,6 +20,53 @@
       prompt: "ITEM OBRIGATORIO: no modo temporario esta forma so existe segurando a pedra - item tem que ser " + stones.join(" ou ") + "."
     };
   }
+  // Habilidades que só funcionam gastando o item segurado (2026-09-26, pedido do
+  // usuário: "as berry do jogo não são sugeridas nas build, pq?"). Medido: 36
+  // espécies têm uma destas como INNATE (sempre ativa) e a IA quase não tinha
+  // berry pra escolher - a habilidade ficava sem efeito nenhum. Descrições do
+  // próprio jogo: Gluttony "Eats berries early", Ripen "Doubles ... provided by
+  // Berries", Harvest "recycle a used Berry", Cud Chew "Eats berries again" -
+  // precisam de BERRY; Unburden "Consuming its held item doubles Speed" - vale
+  // qualquer item que se gasta em batalha. (Cheek Pouch: "This ability has no
+  // effect" neste hack, fica de fora.)
+  var HABILIDADES_DE_BERRY = ["Gluttony", "Ripen", "Harvest", "Cud Chew"];
+  var ITENS_GASTOS_NA_LUTA = [
+    "Focus Sash", "White Herb", "Mental Herb", "Power Herb", "Weakness Policy",
+    "Blunder Policy", "Air Balloon", "Booster Energy", "Throat Spray", "Room Service",
+    "Adrenaline Orb", "Eject Button", "Eject Pack", "Red Card", "Snowball",
+    "Cell Battery", "Absorb Bulb", "Luminous Moss", "Electric Seed", "Psychic Seed",
+    "Misty Seed", "Grassy Seed"
+  ];
+  function ehBerry(item) { return /Berry$/.test(item || ""); }
+  function itemSeGastaNaLuta(item) {
+    return ehBerry(item) || / Gem$/.test(item || "") || ITENS_GASTOS_NA_LUTA.indexOf(item) !== -1;
+  }
+  // Qual exigência vale pra esta build: innate manda sempre; habilidade
+  // escolhível só se for a escolhida. Berry é mais restrita que "gasta na
+  // luta", então ganha quando as duas valem. null = sem exigência.
+  function regraItemConsumivelPara(sp, habilidadeEscolhida) {
+    var innates = uniqueIds(sp.inn || []).map(function (id) { return ABILITIES[id] ? ABILITIES[id][0] : ""; });
+    var ativas = innates.concat(habilidadeEscolhida ? [habilidadeEscolhida] : []);
+    var deBerry = ativas.filter(function (n) { return HABILIDADES_DE_BERRY.indexOf(n) !== -1; })[0];
+    if (deBerry) return { habilidade: deBerry, precisa: "berry" };
+    if (ativas.indexOf("Unburden") !== -1) return { habilidade: "Unburden", precisa: "consumivel" };
+    return null;
+  }
+  // Linha pro prompt, antes da IA escolher a habilidade: a exigência da innate
+  // e, pras escolhíveis, a condição "se escolher X".
+  function regraItemConsumivelPrompt(sp) {
+    if (megaStoneRuleFor(sp)) return ""; // a pedra ocupa o slot de item
+    var textoDe = function (r) {
+      return r.precisa === "berry" ? "o item TEM que ser uma Berry" : "o item TEM que ser um que se gasta na luta (Berry, Gem, Focus Sash, White Herb, Weakness Policy...)";
+    };
+    var daInnate = regraItemConsumivelPara(sp, null);
+    if (daInnate) return "ITEM OBRIGATORIO: a innate " + daInnate.habilidade + " so funciona consumindo o item - " + textoDe(daInnate) + ".\n";
+    var linhas = uniqueIds(sp.ab || []).map(function (id) { return ABILITIES[id] ? ABILITIES[id][0] : ""; })
+      .map(function (n) { var r = regraItemConsumivelPara(sp, n); return r ? "se escolher " + n + ", " + textoDe(r) : ""; })
+      .filter(Boolean);
+    return linhas.length ? "ITEM x HABILIDADE: " + linhas.join("; ") + ".\n" : "";
+  }
+
   // Checks an AI-suggested build against this species' REAL data before
   // it's ever allowed to become a saved build - 2026-09-09, the Meta
   // Pokémon specialist's own non-negotiable rule: an LLM call can propose
@@ -112,6 +159,18 @@
       } else {
         if (motivo) motivo.txt = "No modo de mega temporária a " + sp.n + " precisa segurar a pedra (" + stoneRule.stones.join(" ou ") + ") - a build sugerida usou outro item. Tente gerar de novo.";
         return null;
+      }
+    }
+    // Habilidade que depende de gastar o item (ver regraItemConsumivelPara).
+    // Dura, como a da sinergia: sem o item certo a habilidade não faz nada. A
+    // pedra da mega temporária tem prioridade - o slot já é dela.
+    var regraConsumivel = stoneRule ? null : regraItemConsumivelPara(sp, raw.ability);
+    if (regraConsumivel) {
+      var serve = regraConsumivel.precisa === "berry" ? ehBerry(item) : itemSeGastaNaLuta(item);
+      if (!serve) {
+        return rejeita("A habilidade " + regraConsumivel.habilidade + " do " + sp.n + " só funciona gastando o item, mas a build usou " +
+          (item ? "\"" + item + "\"" : "nenhum item") + " - precisa de " +
+          (regraConsumivel.precisa === "berry" ? "uma Berry" : "um item que se gasta na luta (Berry, Gem, Focus Sash, White Herb...)") + ". Tente gerar de novo.");
       }
     }
     var evs = Array.isArray(raw.evs) && raw.evs.length === 6 ? raw.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0];
