@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "mono-novos-inclui-antigos",
+    descricao: "mono run: 'novos nesta etapa' inclui tudo de antes",
+    arquivo: "mono_run.js",
+    de: "novos: itens.filter(function (i) { return i.etapa === etapa; }),",
+    para: "novos: itens.filter(function (i) { return i.etapa <= etapa; }),",
+  },
+  {
+    id: "mono-ja-tem-ignora-evolucao",
+    descricao: "mono run: quem tem a evolução ainda é mandado pegar a pré-evolução",
+    arquivo: "mono_run.js",
+    de: "jaTem: linhaEvolutivaDe(sp).some(function (s) { return tem[s.x]; })",
+    para: "jaTem: !!tem[sp.x]",
+  },
+  {
     id: "gluttony-sem-berry",
     descricao: "habilidade que come berry aceita qualquer item",
     arquivo: "validacao_build_ia.js",

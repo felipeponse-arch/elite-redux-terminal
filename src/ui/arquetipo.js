@@ -100,6 +100,7 @@
       var alvo = e.target.closest("button");
       if (!alvo || !painel.contains(alvo)) return;
       if (alvo.id === "archetype-build-complete") { generateCompleteTeam(); return; }
+      if (alvo.classList.contains("mono-nome")) { goToDexSpecies(Number(alvo.dataset.x)); return; }
       if (!alvo.classList.contains("arch-chip")) return;
       var axis = alvo.dataset.axis;
       var value = alvo.dataset.value || null;
@@ -355,7 +356,45 @@
       el.innerHTML = "";
       return;
     }
-    el.innerHTML = generatedTeamCardHtml(members) + archetypeCardHtml(members);
+    el.innerHTML = generatedTeamCardHtml(members) + archetypeCardHtml(members) + monoRunCardHtml();
+  }
+
+  // Mono run (2026-09-26, pedido do usuário): com um Monotype escolhido, aparece
+  // sozinho o que dá pra pegar desse tipo até a sua etapa e o que libera no
+  // próximo líder - sem pergunta nem clique a mais (RNF09). Dado: mono_run.js.
+  function monoRunCardHtml() {
+    var tipo = state.archetype.monotype;
+    if (!tipo || !MONO_DISP) return "";
+    var etapa = state.settings.milestone || 0;
+    var d = monoDisponibilidade(tipo, etapa, state.team.concat(state.box));
+    if (!d.novos.length && !d.antes.length && !d.proxima.length) return "";
+    function itemHtml(i) {
+      var marcas = i.marcas.map(function (m) {
+        return '<span class="mono-marca" title="' + escapeHtml(MONO_MARCAS[m]) + '">' + escapeHtml(MONO_MARCAS[m]) + '</span>';
+      }).join("");
+      return '<li class="mono-item' + (i.jaTem ? " mono-tem" : "") + '">' +
+        '<button type="button" class="mono-nome" data-x="' + i.sp.x + '" title="Abrir a ficha na Dex">' + escapeHtml(i.sp.n) + '</button>' +
+        (i.tier ? '<span class="rank-badge-mono ' + (RANK_TIER_CLASS[i.tier] || "tier-C") + '" title="Rank entre os Pokémon ' + escapeHtml(tipo) + '">' + i.tier + '</span>' : "") +
+        (i.jaTem ? '<span class="mono-ja-tem">já tem</span>' : "") +
+        '<span class="mono-local">' + escapeHtml(i.local || "local não informado") + '</span>' + marcas +
+      '</li>';
+    }
+    function grupo(titulo, itens, aberto) {
+      if (!itens.length) return "";
+      var lista = '<ul class="mono-lista">' + itens.map(itemHtml).join("") + '</ul>';
+      return aberto
+        ? '<h4 class="mono-grupo">' + titulo + ' <span class="mono-conta">' + itens.length + '</span></h4>' + lista
+        : '<details class="mono-mais"><summary>' + titulo + ' <span class="mono-conta">' + itens.length + '</span></summary>' + lista + '</details>';
+    }
+    var etapaTxt = LEVELCAPS && LEVELCAPS.rows[etapa] ? LEVELCAPS.rows[etapa].milestone : "";
+    return '<div class="card mono-run">' +
+      '<h3>Mono ' + escapeHtml(tipo) + ': onde pegar</h3>' +
+      '<p class="mybuild-hint">Sua etapa: ' + escapeHtml(etapaTxt) + '. Os melhores do tipo primeiro; clique no nome pra abrir a ficha. ' +
+        'Fonte: planilha da comunidade <a href="' + escapeHtml(MONO_DISP.fonte) + '" target="_blank" rel="noopener">Mono earliest locations</a> (índice oficial), conferida com os dados do jogo.</p>' +
+      grupo(etapa === 0 ? "Desde o início" : "Novos depois de " + escapeHtml(d.liderAnterior || ""), d.novos, true) +
+      grupo("Disponíveis desde antes", d.antes, false) +
+      (d.proximoLider ? grupo("Depois de vencer " + escapeHtml(d.proximoLider), d.proxima, false) : "") +
+    '</div>';
   }
 
   function renderTeamAnalysis(members) {

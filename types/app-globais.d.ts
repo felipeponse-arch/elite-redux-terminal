@@ -24,5 +24,7 @@ declare var state: any;
 declare var BOSSES: any[];
 /** Buffs de ginásio por líder (data/gym_skills.json). */
 declare var GYM_SKILLS: any;
+/** Mono run: por tipo, desde qual etapa dá pra pegar cada espécie (data/mono_disponibilidade.json). */
+declare var MONO_DISP: any;
 /** Papel natural por espécie (data/species_role.json). */
 declare var SPECIES_ROLE: Record<string, any>;

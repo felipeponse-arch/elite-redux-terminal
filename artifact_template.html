@@ -459,6 +459,7 @@
 <script id="bossdata" type="application/json">__BOSSES_JSON__</script>
 <script id="levelcapdata" type="application/json">__LEVELCAPS_JSON__</script>
 <script id="gymskillsdata" type="application/json">__GYM_SKILLS_JSON__</script>
+<script id="monodisp" type="application/json">__MONO_DISP_JSON__</script>
 <script id="savedteamsseed" type="application/json">__SAVEDTEAMS_JSON__</script>
 <script id="abilitypt" type="application/json">__ABILITY_PT_JSON__</script>
 <script id="movept" type="application/json">__MOVE_PT_JSON__</script>
@@ -609,6 +610,9 @@
   var CHANGELOG = JSON.parse(document.getElementById("changelog").textContent || "[]");
   var BOSSES = JSON.parse(document.getElementById("bossdata").textContent || "[]");
   var LEVELCAPS = JSON.parse(document.getElementById("levelcapdata").textContent || "null");
+  // Mono run (2026-09-26): por tipo, desde qual etapa dá pra pegar cada espécie
+  // (planilha oficial da comunidade, scripts/importar_mono.mjs). Ver mono_run.js.
+  var MONO_DISP = JSON.parse(document.getElementById("monodisp").textContent || "null");
   // Gym Skills (item pedido pelo usuario, 2026-09-17): buffs que o lider de
   // cada ginasio perde quando voce vence o treinador de apoio correspondente,
   // ANTES de desafia-lo. Confirmado linha a linha no script de cada ginasio
@@ -677,6 +681,7 @@
 /*@regras evolucao.js*/
 /*@regras builds.js*/
 /*@regras chefoes.js*/
+/*@regras mono_run.js*/
 /*@regras prompts_ia.js*/
 
   function typePill(name, small) {

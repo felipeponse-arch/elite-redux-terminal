@@ -135,3 +135,21 @@
   width: 34px; height: 30px; border-radius: var(--radius-sm);
   font-weight: 700; font-family: "IBM Plex Mono", monospace;
 }
+
+/* Mono run (2026-09-26): o que dá pra pegar do tipo escolhido até a etapa
+   atual. Lista densa em colunas; quem o jogador já tem fica apagado, não some
+   (serve de conferência). */
+.mono-run h3 { margin: 0 0 6px; }
+.mono-grupo { margin: 12px 0 6px; font-size: var(--fs-destaque); }
+.mono-conta { color: var(--text-dim); font-weight: 400; font-size: var(--fs-pequeno); }
+.mono-mais { margin-top: 10px; }
+.mono-mais > summary { cursor: pointer; font-weight: 600; font-size: var(--fs-destaque); }
+.mono-lista { list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 4px 18px; }
+.mono-item { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 6px; font-size: var(--fs-texto); padding: 3px 0; border-bottom: 1px solid var(--border); }
+.mono-nome { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: var(--text); cursor: pointer; }
+.mono-nome:hover { text-decoration: underline; }
+.mono-nome:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.mono-local { color: var(--text-dim); font-size: var(--fs-pequeno); }
+.mono-marca { font-size: var(--fs-legenda); color: var(--text-dim); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 5px; }
+.mono-ja-tem { font-size: var(--fs-legenda); color: var(--sem-resist); font-weight: 600; }
+.mono-tem .mono-nome { color: var(--text-dim); }

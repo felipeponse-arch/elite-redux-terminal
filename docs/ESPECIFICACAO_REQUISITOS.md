@@ -472,6 +472,21 @@ builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   inteira se a criatura regredir (cap desceu). Ajuste feito num save vindo de outro aparelho é gravado e
   devolvido pro sync.
 
+### Berries na IA e mono run (2026-09-26)
+
+- RF81 — **Item que ativa a habilidade**: a lista de itens da IA inclui as berries de pânico, as de
+  resistência (uma por tipo, com o tipo dito no prompt) e as que reagem a golpe. Gluttony, Ripen,
+  Harvest e Cud Chew ativos (innate sempre; escolhível só se for a escolhida) exigem Berry; Unburden
+  exige item que se gasta na luta. O prompt avisa antes e a validação rejeita com o motivo; a pedra da
+  mega temporária tem prioridade. Leppa fica de fora (PP sempre no máximo neste hack).
+- RF82 — **Mono run: onde pegar**: com um Monotype escolhido, a aba Time mostra sozinha, pro tipo,
+  o que dá pra pegar até a insígnia atual (novos desta etapa + os de antes), o que libera depois do
+  próximo líder, o local de cada um e quem o jogador já tem (a espécie ou uma evolução dela), os
+  melhores do tipo primeiro (rank Monotype). Nome abre a ficha. Dado: planilha da comunidade "Mono
+  earliest locations" (índice oficial), importada por `scripts/importar_mono.mjs`; cada nome é casado
+  com o dado 2.65 e o que diverge fica de fora (a planilha é da 2.5). Marca "só é do tipo na forma
+  Mega" separada de "vira do tipo ao evoluir".
+
 **Nota da auditoria de 2026-09-23**: a numeração de Regras de Negócio pula de RN13 (seção 3) direto
 para RN15 — não existe RN14 em nenhuma versão deste documento. Não confirmado se é uma regra perdida
 numa edição anterior ou renumeração deliberada; fica registrado aqui para quem for investigar depois.

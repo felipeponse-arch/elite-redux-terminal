@@ -49,6 +49,7 @@ const ARQUIVOS_DE_DADOS = {
   __ITEM_DESC_JSON__: "item_descriptions.json",
   __ITEM_PT_JSON__: "item_translations_pt.json",
   __GYM_SKILLS_JSON__: "gym_skills.json",
+  __MONO_DISP_JSON__: "mono_disponibilidade.json",
 };
 
 for (const nome of Object.values(ARQUIVOS_DE_DADOS)) {

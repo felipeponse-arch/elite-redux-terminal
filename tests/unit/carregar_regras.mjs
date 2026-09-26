@@ -27,6 +27,7 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
     MOVE_ROLES: lerJson("move_roles.json"),
     BOSSES: lerJson("bosses.json"),
     GYM_SKILLS: lerJson("gym_skills.json"),
+    MONO_DISP: lerJson("mono_disponibilidade.json"),
     // Mesmo formato do `state` inicial do template (var state = {...}): desde a
     // fase 3 da refatoração (2026-09-24) save, evolução, builds e chefões moram
     // em src/regras e leem o state inteiro.

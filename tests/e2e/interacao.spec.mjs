@@ -116,6 +116,25 @@ test("rodapé ocupa uma linha só em janela pequena de celular", async ({ page }
   await expect(page.locator(".footer .rodape a")).toHaveCount(3);
 });
 
+// Mono run (2026-09-26): escolher um Monotype mostra sozinho onde pegar
+// Pokémon do tipo, e o nome leva pra ficha.
+test("Monotype mostra onde pegar o tipo e o nome abre a ficha", async ({ page }) => {
+  await abrirApp(page);
+  await adicionarAoTimePelaDex(page, "Charmander");
+  await abrirAba(page, "team");
+  await expect(page.locator(".mono-run")).toHaveCount(0);
+  await page.locator("details.arquetipo > summary").click();
+  await page.locator('.arch-chip[data-axis="monotype"][data-value="Fire"]').click();
+  const card = page.locator(".mono-run");
+  await expect(card.locator("h3")).toHaveText("Mono Fire: onde pegar");
+  await expect(card.locator(".mono-item", { hasText: "Charmander" })).toContainText("já tem");
+  const primeiro = card.locator(".mono-nome").first();
+  const nome = await primeiro.textContent();
+  await primeiro.click();
+  await expect(page.locator("#view-dex")).toBeVisible();
+  await expect(page.locator("#species-detail h2")).toHaveText(nome);
+});
+
 test("clicar numa etapa da trilha marca o badge", async ({ page }) => {
   await abrirApp(page);
   await abrirAba(page, "progress");

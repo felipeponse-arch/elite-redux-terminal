@@ -198,7 +198,9 @@ async function section18() {
     await wait(120);
     var rowComTipo = document.querySelector("#species-list .species-row");
     if (rowComTipo) { rowComTipo.click(); await wait(30); }
-    var badgeMono = document.querySelector(".rank-badge-mono");
+    // Só na ficha: desde 2026-09-26 o card de mono run (aba Time) também usa o
+    // selo de rank Monotype.
+    var badgeMono = document.querySelector("#species-detail .rank-badge-mono");
     var tierEsperado = T.SPECIES_RANK[especieComTipo.sname].monoRanks[tipoMonotype].tier;
     check("badge de rank Monotype aparece na ficha de uma espécie do tipo ativo, com o tier certo",
       !!badgeMono && badgeMono.textContent.trim() === tierEsperado,
@@ -211,7 +213,7 @@ async function section18() {
     var rowSemTipo = document.querySelector("#species-list .species-row");
     if (rowSemTipo) { rowSemTipo.click(); await wait(30); }
     check("badge de rank Monotype NÃO aparece na ficha de uma espécie sem o tipo ativo",
-      !document.querySelector(".rank-badge-mono"));
+      !document.querySelector("#species-detail .rank-badge-mono"));
     document.getElementById("back-to-list").click();
     await wait(30);
     setSearch("");
@@ -236,7 +238,7 @@ async function section18() {
     var rowDepoisDeLimpar = document.querySelector("#species-list .species-row");
     if (rowDepoisDeLimpar) { rowDepoisDeLimpar.click(); await wait(30); }
     check("badge de rank Monotype some depois de limpar o arquétipo (mesma espécie que mostrava antes)",
-      !document.querySelector(".rank-badge-mono"));
+      !document.querySelector("#species-detail .rank-badge-mono"));
     document.getElementById("back-to-list").click();
     await wait(30);
     setSearch("");
