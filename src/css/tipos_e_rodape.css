@@ -38,6 +38,14 @@
 .footer p { margin: 0; }
 .footer a { color: var(--badge-accent2); text-decoration: none; }
 .footer a:hover { text-decoration: underline; }
-@media (max-width: 620px) {
-  .footer { padding: 7px 14px; }
+/* Celular e janela baixa (2026-09-26, pedido do usuário: "no celular em janela
+   flutuante fica muito ruim de usar"): numa janela de 360x520 o rodapé quebrava
+   em 2 linhas (51 px, ~10% da tela) e a lista da Dex ficava com 138 px. Aqui
+   ele vira uma linha só (~22 px): somem "Dados do" e "(ForwardFeed)" - o
+   crédito continua no title do link do NextDex - e o texto corta com "…" em
+   vez de quebrar. */
+@media (max-width: 620px), (max-height: 600px) {
+  .footer { padding: 4px 14px; }
+  .footer .rodape { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rodape-extra { display: none; }
 }

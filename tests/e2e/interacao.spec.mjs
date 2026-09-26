@@ -106,6 +106,16 @@ test("versão do jogo aparece inteira no subtítulo em tela estreita", async ({ 
   expect(cortada, "a versão do jogo foi cortada").toBe(false);
 });
 
+// Janela flutuante do celular (2026-09-26): o rodapé quebrava em 2 linhas
+// (51 px) e roubava espaço da lista. Uma linha só, com os 3 destinos.
+test("rodapé ocupa uma linha só em janela pequena de celular", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 520 });
+  await abrirApp(page);
+  const rodape = page.locator(".footer");
+  expect((await rodape.boundingBox()).height).toBeLessThan(32);
+  await expect(page.locator(".footer .rodape a")).toHaveCount(3);
+});
+
 test("clicar numa etapa da trilha marca o badge", async ({ page }) => {
   await abrirApp(page);
   await abrirAba(page, "progress");
