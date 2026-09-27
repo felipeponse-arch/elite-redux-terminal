@@ -163,10 +163,13 @@
   function contextoDoModoPrompt(sp, opts, cap) {
     if (opts.modo === "revisao" && opts.anterior) {
       var a = opts.anterior;
-      return "REVISAO DEPOIS DA EVOLUCAO: este Pokemon acabou de evoluir" + (opts.deNome ? " de " + opts.deNome : "") +
-        ". A build que ele usava era: habilidade " + dadoExterno(a.ability || "?") + ", golpes " + (a.moves || []).map(dadoExterno).join(", ") +
-        ". Mantenha o mesmo PAPEL e os golpes que continuam bons; troque so o que a forma nova faz claramente melhor (habilidade, stats e movepool mudaram). " +
-        "Na rationale, diga o que mudou e por que.\n";
+      // Build NOVA do zero (2026-09-27, pedido do usuário: "zerar aquela build do
+      // level 18 e o sistema sugerir uma build nova"). Antes pedia pra manter o
+      // papel e os golpes da antiga - saía uma adaptação da build da pré-evolução.
+      return "BUILD NOVA DEPOIS DA EVOLUCAO: este Pokemon acabou de evoluir" + (opts.deNome ? " de " + opts.deNome : "") +
+        ". Monte uma build NOVA do zero pra esta forma, seguindo a ordem de decisao abaixo como se fosse a primeira - NAO use a build antiga como base " +
+        "(ela foi pensada pra forma anterior, com outro level cap; fica salva como secundaria). So pra referencia, ela era: habilidade " + dadoExterno(a.ability || "?") +
+        ", golpes " + (a.moves || []).map(dadoExterno).join(", ") + ". O papel pode mudar se a forma nova pede outro.\n";
     }
     if (opts.modo === "ponte" && opts.alvo) {
       var trav = golpesTravadosNoCap(sp, opts.alvo.moves).filter(function (g) { return g.nivel !== null; });

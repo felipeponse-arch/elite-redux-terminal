@@ -207,7 +207,10 @@
     var de = getSpeciesBySname(fromSname), para = getSpeciesBySname(toSname);
     if (!de || !para || !(de.ev || []).some(function (ev) { return ev[2] === para.x; })) return; // só evolução pra frente
     var ativa = getActiveBuild(toSname);
-    if (ativa && ativa.source !== "curada") { ativa.revisar = "evolucao"; ativa.revisadaDe = de.n; ativa.tentativasRevisao = 0; }
+    // Curada também (2026-09-27, pedido do usuário: "zerar aquela build do level
+    // 18 e sugerir uma build nova pro Pokémon que evoluiu") - a curada que veio
+    // da pré-evolução foi pensada pra ELA, não pra forma nova.
+    if (ativa) { ativa.revisar = "evolucao"; ativa.revisadaDe = de.n; ativa.tentativasRevisao = 0; }
   }
 
   // Há algo da run pra zerar? Habilita o botão "Novo jogo" (ver zerarRun no template).

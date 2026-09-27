@@ -523,6 +523,13 @@ builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   de troca quando a forma tem um) e item que se anula pela descrição do jogo (Choice com golpe de
   status exceto Trick/Switcheroo, Assault/Tactical Vest com status, Eviolite em quem não evolui).
   O papel aparece na justificativa. Vale também pras Estratégias.
+- RF87 — **Build nova depois da evolução** (2026-09-27, pedido do usuário: "zerar a build do level 18
+  e sugerir uma nova pro Pokémon que evoluiu"): na evolução pra frente a build ativa (inclusive curada)
+  fica marcada; a IA monta uma build NOVA do zero pra forma nova (a antiga vai só como referência) e a
+  de antes fica de reserva, com o chip "Antes de evoluir" na ficha - com 3 builds, sai a variante mais
+  antiga, nunca ela. Curada da forma nova no estilo do time entra sem IA. Se a IA não estiver liberada,
+  o card do time mostra "Gerar build nova (evoluiu)" (o clique libera a IA); com ela liberada, a
+  revisão automática faz sozinha.
 
 **Nota da auditoria de 2026-09-23**: a numeração de Regras de Negócio pula de RN13 (seção 3) direto
 para RN15 — não existe RN14 em nenhuma versão deste documento. Não confirmado se é uma regra perdida

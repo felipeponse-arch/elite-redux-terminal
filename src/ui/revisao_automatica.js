@@ -39,9 +39,20 @@
     }
     return null;
   }
+  // A revisão automática já está gerando a build desta espécie agora?
+  function revisaoEmAndamento(sname) { return revisandoAgora === sname; }
   function revisaoStatusHtml(sname) {
     if (revisandoAgora === sname) return ' <span class="mega-lock-tag" role="status">atualizando…</span>';
     var ativa = getActiveBuild(sname);
+    // Evoluiu (2026-09-27, decisão do usuário: "botão no card"): a build ainda é
+    // a da forma anterior. Um clique gera a nova agora - o clique também libera
+    // a IA; sem ele, a nova sai sozinha quando a IA já estiver liberada.
+    if (ativa && ativa.revisar === "evolucao") {
+      var sp = getSpeciesBySname(sname);
+      return ' <button type="button" class="ts-evo-gerar" data-x="' + (sp ? sp.x : "") + '" title="Esta build ainda é a de ' +
+        escapeHtml(ativa.revisadaDe || "antes de evoluir") + '. Gera uma build nova pra forma atual; a antiga fica salva na ficha.">Gerar build nova (evoluiu)</button>' +
+        '<span id="ts-evo-status-' + (sp ? sp.x : "") + '" class="notes-status" role="status" aria-live="polite"></span>';
+    }
     if (ativa && ativa.revisar && (ativa.tentativasRevisao || 0) < 2) {
       return ' <span class="mega-lock-tag" title="O app revisa esta build sozinho com IA assim que a IA estiver liberada nesta página.">revisão pendente</span>';
     }
@@ -76,14 +87,15 @@
               ivs: [31, 31, 31, 31, 31, 31], evs: evsTextoParaArray(cur.evs), rationale: "Build curada de " + sp.n + " (" + (cur.fonte || "curadoria") + ")." };
             if (cur.plano) curEntrada.plano = cur.plano;
             acao(telasDeBuild(sp.sname).concat(["log"]), function () {
-              var cheia = getBuildList(sp.sname).length >= 3;
-              if (cheia) setOrReplaceActiveBuild(sp.sname, curEntrada, "curada");
-              else {
-                addBuildVariant(sp.sname, curEntrada, "curada");
-                delete tarefa.entry.revisar; delete tarefa.entry.revisadaDe; delete tarefa.entry.tentativasRevisao;
-              }
-              logAutoAction("Build de " + sp.n + " trocada pela curada depois da evolução (antes: " + (tarefa.entry.ability || "?") + "; " + tarefa.entry.moves.join(", ") + ")" +
-                (cheia ? "." : ". A build anterior continua salva nos chips da ficha."));
+              // Mesma regra da build nova por IA (2026-09-27): a de antes fica de
+              // reserva, marcada "Antes de evoluir".
+              var deNome = tarefa.entry.revisadaDe || "forma anterior";
+              var saiu = abrirVagaPreservando(sp.sname, tarefa.entry);
+              if (!addBuildVariant(sp.sname, curEntrada, "curada")) setOrReplaceActiveBuild(sp.sname, curEntrada, "curada");
+              delete tarefa.entry.revisar; delete tarefa.entry.revisadaDe; delete tarefa.entry.tentativasRevisao;
+              tarefa.entry.antesDeEvoluir = deNome;
+              logAutoAction("Build de " + sp.n + " trocada pela curada depois da evolução. A de antes (" + (tarefa.entry.ability || "?") + "; " + tarefa.entry.moves.join(", ") +
+                ") ficou salva no chip \"Antes de evoluir\" da ficha." + (saiu ? " Pra caber, saiu a variante mais antiga." : ""));
             });
             continue;
           }

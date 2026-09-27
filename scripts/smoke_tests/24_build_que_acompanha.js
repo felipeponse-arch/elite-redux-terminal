@@ -194,6 +194,37 @@ async function section24() {
       check("revisão pós-evolução: a nova vira a ativa e a anterior continua salva, sem marca de revisão",
         r3 === true && l3.length === 2 && !l3[0].active && l3[0] === marcada && !marcada.revisar && l3[1].active && l3[1].source === "ia" && l3[1].planoConsultado === true,
         l3.map((b) => b.moves.join("/") + (b.active ? "*" : "")));
+      // Build NOVA depois da evolução (2026-09-27, pedido do usuário).
+      check("a build de antes fica marcada 'antes de evoluir' e o chip da ficha diz isso",
+        marcada.antesDeEvoluir === "Marshtomp" && /Antes de evoluir/.test(TE.buildChipsHtml(l3)), marcada.antesDeEvoluir);
+      check("o pedido à IA é de build NOVA do zero, não de adaptar a antiga",
+        /BUILD NOVA DEPOIS DA EVOLUCAO[\s\S]*NAO use a build antiga como base/.test(TE.montarPromptBuild(swampert, { modo: "revisao", anterior: marcada, deNome: "Marshtomp" })));
+      // Lista cheia: sai a variante mais antiga, nunca a de antes de evoluir.
+      const v1 = build({ moves: ["Surf"], savedAt: "2026-01-01T00:00:00Z" });
+      const v2 = build({ moves: ["Muddy Water"], savedAt: "2026-02-01T00:00:00Z" });
+      const marcada2 = build({ moves: ["Earthquake"], source: "ia", revisar: "evolucao", revisadaDe: "Marshtomp", savedAt: "2026-03-01T00:00:00Z" });
+      v1.active = false; v2.active = false; marcada2.active = true;
+      S.customBuilds = { SPECIES_SWAMPERT: [v1, v2, marcada2] };
+      const r4 = await TE.generateBuildWithAI(swampert, "sem-status", { modo: "revisao", anterior: marcada2, deNome: "Marshtomp", silencioso: true });
+      const l4 = S.customBuilds.SPECIES_SWAMPERT;
+      check("lista cheia: sai a variante mais antiga e a de antes de evoluir fica",
+        r4 === true && l4.length === 3 && l4.indexOf(v1) === -1 && l4.indexOf(marcada2) !== -1 && marcada2.antesDeEvoluir === "Marshtomp" && l4[2].active,
+        l4.map((b) => b.moves.join("/") + (b.active ? "*" : "")));
+      // Botão no card do time enquanto a build ainda é a da forma anterior.
+      const pendente = build({ moves: ["Earthquake"], source: "ia", revisar: "evolucao", revisadaDe: "Marshtomp" });
+      pendente.active = true;
+      S.customBuilds = { SPECIES_SWAMPERT: [pendente] };
+      TE.renderTeam();
+      const botaoEvo = document.querySelector('#team-slots .ts-evo-gerar[data-x="' + swampert.x + '"]');
+      check("card do time mostra 'Gerar build nova (evoluiu)' enquanto a build é a da forma anterior", !!botaoEvo && /evoluiu/.test(botaoEvo.textContent));
+      // Curada que veio da pré-evolução também é marcada pra build nova.
+      const marsh = TE.getSpeciesBySname("SPECIES_MARSHTOMP");
+      if (marsh) {
+        S.customBuilds = { SPECIES_MARSHTOMP: [build({ moves: ["Earthquake"], source: "curada" })] };
+        TE.carryUserData("SPECIES_MARSHTOMP", "SPECIES_SWAMPERT");
+        const levada = TE.getActiveBuild("SPECIES_SWAMPERT");
+        check("curada da pré-evolução também fica marcada pra build nova", levada && levada.revisar === "evolucao" && levada.revisadaDe === "Marshtomp", levada && levada.revisar);
+      }
     }
 
     // ---- "+" da lista da Dex com a ficha do mesmo Pokémon aberta ao lado

@@ -115,6 +115,14 @@
         var spCopia = getSpeciesByX(x);
         copyText(showdownSet(spCopia, effectiveBuild(spCopia)), null, "");
         flashToast("Set do " + spCopia.n + " copiado (formato Showdown)");
+      } else if (btn.classList.contains("ts-evo-gerar")) {
+        // Build nova depois da evolução, pedida com um clique (2026-09-27).
+        var spEvo = getSpeciesByX(x);
+        var antiga = spEvo && getActiveBuild(spEvo.sname);
+        if (spEvo && antiga && antiga.revisar === "evolucao" && !revisaoEmAndamento(spEvo.sname)) {
+          btn.disabled = true;
+          generateBuildWithAI(spEvo, "ts-evo-status-" + x, { modo: "revisao", anterior: antiga, deNome: antiga.revisadaDe });
+        }
       } else if (btn.classList.contains("ts-ai-generate-btn")) {
         var spIa = getSpeciesByX(x);
         if (spIa) generateBuildWithAI(spIa, "ts-ai-status-" + x);

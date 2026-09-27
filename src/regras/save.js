@@ -147,7 +147,7 @@
             source: BUILD_SOURCES.indexOf(b.source) !== -1 ? b.source : "manual",
             active: !!b.active,
             savedAt: typeof b.savedAt === "string" ? b.savedAt : new Date().toISOString(),
-            rationale: typeof b.rationale === "string" ? b.rationale.slice(0, 280) : ""
+            rationale: typeof b.rationale === "string" ? b.rationale.slice(0, 360) : ""
           };
           // Campos de 2026-09-24 (build que acompanha o jogador). Só o formato é
           // conferido aqui; o que vale pra espécie é conferido por reconciliarBuild
@@ -160,6 +160,9 @@
           if (typeof b.revisadaDe === "string") entrada.revisadaDe = b.revisadaDe.slice(0, 40);
           if (typeof b.tentativasRevisao === "number") entrada.tentativasRevisao = clampInt(b.tentativasRevisao, 0, 9, 0);
           if (b.planoConsultado === true) entrada.planoConsultado = true;
+          // Build que ficou de reserva quando a criatura evoluiu (2026-09-27): o
+          // chip mostra "Antes de evoluir" em vez de "IA 2".
+          if (typeof b.antesDeEvoluir === "string" && b.antesDeEvoluir) entrada.antesDeEvoluir = b.antesDeEvoluir.slice(0, 40);
           return entrada;
         }).filter(function (b) {
           if (!b) return false;

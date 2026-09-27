@@ -388,25 +388,23 @@
   // desta espécie, confronto). Devolve false se não salvou (lista cheia).
   function salvarBuildDaIa(sp, validated, opts, cap) {
     return acao(telasDeBuild(sp.sname).concat(["log"]), function () {
-      var salvou;
-      if (opts.modo === "revisao" && getBuildList(sp.sname).length >= 3) {
-        // Lista cheia (3 builds): a revisada entra no lugar da ativa, e a de
-        // antes vai inteira pro log (habilidade, natureza, item, EVs e golpes).
-        salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia");
-      } else {
-        // A revisada vira a ativa e a de antes continua salva como variante -
-        // o jogador volta pra ela com um toque no chip, nada se perde.
-        salvou = addBuildVariant(sp.sname, validated, opts.modo === "ponte" ? "curada" : "ia");
-        if (salvou && opts.modo === "revisao") {
-          delete opts.anterior.revisar; delete opts.anterior.revisadaDe; delete opts.anterior.tentativasRevisao;
-        }
+      var salvou, saiu = null;
+      // Build nova depois da evolução (2026-09-27, decisão do usuário: "guarda
+      // como secundária"): a nova vira a ativa e a de antes fica de reserva,
+      // marcada "Antes de evoluir" no chip - nunca é ela que sai pra abrir vaga.
+      if (opts.modo === "revisao") saiu = abrirVagaPreservando(sp.sname, opts.anterior);
+      salvou = addBuildVariant(sp.sname, validated, opts.modo === "ponte" ? "curada" : "ia");
+      if (!salvou && opts.modo === "revisao") salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia"); // último recurso
+      if (salvou && opts.modo === "revisao" && opts.anterior) {
+        delete opts.anterior.revisar; delete opts.anterior.revisadaDe; delete opts.anterior.tentativasRevisao;
+        opts.anterior.antesDeEvoluir = opts.deNome || "forma anterior";
       }
+      if (saiu) logAutoAction("Pra caber a build nova de " + sp.n + ", saiu a variante mais antiga (" + (saiu.ability || "?") + "; " + (saiu.moves || []).join(", ") + ").");
       if (!salvou) return false;
       if (opts.modo === "revisao") {
         var a = opts.anterior;
-        logAutoAction("Build de " + sp.n + " revisada depois da evolução" + (a ? " (antes: " + (a.ability || "?") + ", " + (a.nature || "?") + ", " + (a.item || "sem item") + ", " +
-          (evsToShowdownText(a.evs || []) || "sem EV") + "; " + (a.moves || []).join(", ") + ")" : "") +
-          ": " + validated.ability + "; " + validated.moves.join(", ") + (getBuildList(sp.sname).length > 1 ? ". A build anterior continua salva nos chips da ficha." : "."));
+        logAutoAction("Build nova de " + sp.n + " depois da evolução: " + validated.ability + "; " + validated.moves.join(", ") +
+          (a ? ". A de antes (" + (a.ability || "?") + "; " + (a.moves || []).join(", ") + ") ficou salva no chip \"Antes de evoluir\" da ficha." : "."));
       } else if (opts.modo === "ponte") {
         logAutoAction("Build curada de " + sp.n + " adaptada ao level cap " + cap + ": " + validated.moves.join(", ") +
           (validated.plano ? " (troca pelos golpes da curada quando liberarem)" : "") + ".");

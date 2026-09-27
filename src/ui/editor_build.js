@@ -210,7 +210,10 @@
     if (!list.length) return "";
     return '<div class="mybuild-chips">' + list.map(function (b, i) {
       var label = (b.source === "ia" ? "IA" : "Manual") + " " + (i + 1);
-      return '<button type="button" class="mybuild-chip' + (b.active ? " active" : "") + '" data-idx="' + i + '">' + label + '</button>';
+      // A que ficou de reserva quando a criatura evoluiu (2026-09-27).
+      var titulo = "";
+      if (b.antesDeEvoluir) { label = "Antes de evoluir"; titulo = ' title="Build de ' + escapeHtml(b.antesDeEvoluir) + ', de antes da evolução"'; }
+      return '<button type="button" class="mybuild-chip' + (b.active ? " active" : "") + '" data-idx="' + i + '"' + titulo + '>' + label + '</button>';
     }).join("") + '</div>';
   }
 
