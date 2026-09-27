@@ -25,28 +25,71 @@
   // ITEM_STAT_MODS/ITEM_MOVE_POWER_MODS acima) - é um menu real e limitado
   // pra escolher, exatamente o mesmo tratamento que golpes/habilidades já
   // recebem.
-  var AI_ITEM_POOL = [
+  // Por grupo (2026-09-26, pedido do usuário: "temos mais itens que podem ajudar
+  // na construção de builds como gemas e demais"): o prompt apresenta cada grupo
+  // com o papel dele, e AI_ITEM_POOL é a soma (o que a IA pode escolher). Todo
+  // nome é conferido contra ITEMS - nome que não existe neste hack cai fora.
+  function soExistentes(lista) {
+    return lista.filter(function (n, i) { return ITEMS.indexOf(n) !== -1 && lista.indexOf(n) === i; });
+  }
+  var ITENS_IA_GERAIS = soExistentes([
     "Leftovers", "Life Orb", "Choice Band", "Choice Specs", "Choice Scarf",
     "Assault Vest", "Tactical Vest", "Black Sludge", "Rocky Helmet",
     "Heavy-Duty Boots", "Eviolite", "Focus Sash", "Weakness Policy",
-    "Expert Belt", "Sitrus Berry", "Custap Berry", "Shell Bell",
+    "Expert Belt", "Shell Bell",
     "Muscle Band", "Wise Glasses", "Metronome", "Wide Lens", "Air Balloon",
-    "Safety Goggles", "Mental Herb", "Lum Berry", "Toxic Orb", "Flame Orb",
+    "Safety Goggles", "Mental Herb", "White Herb", "Power Herb", "Toxic Orb", "Flame Orb",
     "Booster Energy", "Loaded Dice", "Clear Amulet", "Covert Cloak",
-    "Punching Glove", "Throat Spray",
-    // Berries (2026-09-26, pedido do usuário: "as berry do jogo não são
-    // sugeridas nas build, pq?"): a lista tinha só Sitrus/Lum/Custap, das 67
-    // do jogo - e as builds curadas da comunidade usam as de pânico. Entram as
-    // de pânico, as de resistência (uma por tipo) e as que reagem a golpe
-    // físico/especial. Leppa fica de fora: neste hack o PP é sempre o máximo.
+    "Punching Glove", "Throat Spray"
+  ]);
+  // Berries: a lista tinha só Sitrus/Lum/Custap, das 67 do jogo - e as builds
+  // curadas da comunidade usam as de pânico. Leppa fica de fora: neste hack o PP
+  // é sempre o máximo.
+  var ITENS_IA_BERRIES = soExistentes([
+    "Sitrus Berry", "Lum Berry", "Custap Berry",
     "Liechi Berry", "Salac Berry", "Petaya Berry", "Apicot Berry", "Ganlon Berry", "Starf Berry",
     "Occa Berry", "Passho Berry", "Wacan Berry", "Rindo Berry", "Yache Berry", "Chople Berry",
     "Kebia Berry", "Shuca Berry", "Coba Berry", "Payapa Berry", "Tanga Berry", "Charti Berry",
     "Kasib Berry", "Haban Berry", "Colbur Berry", "Babiri Berry", "Roseli Berry", "Chilan Berry",
-    "Kee Berry", "Maranga Berry", "Jaboca Berry", "Rowap Berry",
-    // Gastos na luta, pro Unburden ter opção além de berry.
-    "White Herb", "Power Herb", "Weakness Policy"
-  ].filter(function (n, i, lista) { return ITEMS.indexOf(n) !== -1 && lista.indexOf(n) === i; });
+    "Kee Berry", "Maranga Berry", "Jaboca Berry", "Rowap Berry"
+  ]);
+  // Reforço de tipo (+dano do tipo sempre) - o tipo vai junto no prompt.
+  var ITENS_IA_TIPO = {
+    "Charcoal": "Fire", "Mystic Water": "Water", "Miracle Seed": "Grass", "Magnet": "Electric",
+    "Never-MeltIce": "Ice", "Black Belt": "Fighting", "Poison Barb": "Poison", "Soft Sand": "Ground",
+    "Sharp Beak": "Flying", "Twisted Spoon": "Psychic", "Silver Powder": "Bug", "Hard Stone": "Rock",
+    "Spell Tag": "Ghost", "Dragon Fang": "Dragon", "Black Glasses": "Dark", "Metal Coat": "Steel",
+    "Silk Scarf": "Normal", "Fairy Feather": "Fairy"
+  };
+  // Gemas: dano do tipo reforçado UMA vez e o item se gasta.
+  var ITENS_IA_GEMAS = ITEMS.filter(function (n) { return / Gem$/.test(n); });
+  // Utilidade: efeito que a IA não deduz pelo nome - vai com a descrição do
+  // próprio jogo (Swirly Glasses e Frost Orb são deste hack).
+  var ITENS_IA_UTILIDADE = soExistentes([
+    "Scope Lens", "Razor Claw", "King's Rock", "Razor Fang", "Zoom Lens", "Quick Claw", "Focus Band",
+    "Big Root", "Binding Band", "Grip Claw", "Light Clay", "Terrain Extender",
+    "Damp Rock", "Heat Rock", "Smooth Rock", "Icy Rock", "Utility Umbrella",
+    "Shed Shell", "Protective Pads", "Ability Shield", "Mirror Herb", "Room Service", "Blunder Policy",
+    "Eject Button", "Eject Pack", "Red Card", "Absorb Bulb", "Cell Battery", "Luminous Moss", "Snowball",
+    "Bright Powder", "Frost Orb", "Swirly Glasses"
+  ]);
+  // Exclusivos de espécie (a descrição do jogo diz de quem): só entram no
+  // prompt da espécie certa, e a validação descarta se vierem pra outra.
+  var ITENS_DE_ESPECIE = {
+    "Light Ball": ["Pikachu", "Raichu"], "Thick Club": ["Cubone", "Marowak"], "Leek": ["Farfetch'd", "Sirfetch'd"],
+    "Lucky Punch": ["Chansey"], "Soul Dew": ["Latios", "Latias"], "DeepSeaTooth": ["Clamperl"],
+    "DeepSeaScale": ["Clamperl"], "Metal Powder": ["Ditto"]
+  };
+  // Nome base: "Marowak Alolan" e "Raichu Mega X" contam como Marowak/Raichu.
+  function itensDeEspeciePara(sp) {
+    return Object.keys(ITENS_DE_ESPECIE).filter(function (item) {
+      return ITEMS.indexOf(item) !== -1 && ITENS_DE_ESPECIE[item].some(function (base) {
+        return sp.n === base || sp.n.indexOf(base + " ") === 0;
+      });
+    });
+  }
+  var AI_ITEM_POOL = soExistentes([].concat(ITENS_IA_GERAIS, ITENS_IA_BERRIES, Object.keys(ITENS_IA_TIPO),
+    ITENS_IA_GEMAS, ITENS_IA_UTILIDADE));
 
   // Orientação real de build por Ritmo/Clima do time (achado do usuário,
   // 2026-09-13, com print do time montado via "Montar melhor time": a
@@ -214,12 +257,22 @@
     return out;
   }
   function blocoItensIA(sp, plural) {
-    return "Itens de batalha reais disponiveis - " + (plural ? "cada set escolhe UM destes (ou deixa vazio)" : "escolha UM destes (ou deixe vazio se nenhum fizer sentido)") +
-      ": " + AI_ITEM_POOL.join(", ") + "\n" +
-      "Berries: as de panico (Liechi, Salac, Petaya, Apicot, Ganlon, Starf) sobem um status com HP baixo; as de resistencia (Occa=Fire, Passho=Water, " +
+    var tipo = Object.keys(ITENS_IA_TIPO).filter(function (n) { return ITEMS.indexOf(n) !== -1; })
+      .map(function (n) { return n + "=" + ITENS_IA_TIPO[n]; });
+    var comDescricao = function (n) { return "- " + n + ": " + dadoExterno(ITEM_DESC[n] || "sem descricao"); };
+    var daEspecie = itensDeEspeciePara(sp);
+    return "Itens de batalha reais disponiveis - " + (plural ? "cada set escolhe UM (ou deixa vazio)" : "escolha UM (ou deixe vazio se nenhum fizer sentido)") +
+      ", nenhum fora destes grupos:\n" +
+      "Gerais: " + ITENS_IA_GERAIS.join(", ") + "\n" +
+      "Reforco de tipo (+dano daquele tipo em todo golpe; use o do golpe de dano principal): " + tipo.join(", ") + "\n" +
+      "Gemas (+dano forte do tipo UMA vez e a gema se gasta - bom pra um golpe decisivo, combina com Unburden e Acrobatics): " + ITENS_IA_GEMAS.join(", ") + "\n" +
+      "Berries: " + ITENS_IA_BERRIES.join(", ") + ". As de panico (Liechi, Salac, Petaya, Apicot, Ganlon, Starf) sobem um status com HP baixo; as de resistencia (Occa=Fire, Passho=Water, " +
       "Wacan=Electric, Rindo=Grass, Yache=Ice, Chople=Fighting, Kebia=Poison, Shuca=Ground, Coba=Flying, Payapa=Psychic, Tanga=Bug, Charti=Rock, " +
       "Kasib=Ghost, Haban=Dragon, Colbur=Dark, Babiri=Steel, Roseli=Fairy, Chilan=Normal) enfraquecem um golpe super efetivo daquele tipo - use a " +
       "da fraqueza mais perigosa desta especie.\n" +
+      "Utilidade (efeito deste jogo - leia, nao assuma pelo nome; pedra de clima so se a especie arma aquele clima):\n<dados_do_jogo>\n" +
+      ITENS_IA_UTILIDADE.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" +
+      (daEspecie.length ? "Exclusivo desta especie:\n<dados_do_jogo>\n" + daEspecie.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" : "") +
       regraItemConsumivelPrompt(sp);
   }
   // O que o resto do time já usa (só a build de 1 membro recebe: as Estratégias

@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "item-de-especie-pra-qualquer-um",
+    descricao: "Light Ball e cia. oferecidos pra qualquer espécie",
+    arquivo: "prompts_ia.js",
+    de: "return sp.n === base || sp.n.indexOf(base + \" \") === 0;",
+    para: "return true;",
+  },
+  {
     id: "mono-novos-inclui-antigos",
     descricao: "mono run: 'novos nesta etapa' inclui tudo de antes",
     arquivo: "mono_run.js",

@@ -149,6 +149,10 @@
       }
     }
     var item = (typeof raw.item === "string" && ITEMS.indexOf(raw.item) !== -1) ? raw.item : "";
+    // Item exclusivo de outra espécie (Light Ball num Pokémon que não é
+    // Pikachu/Raichu...) não faz nada: cai pra "sem item", o mesmo tratamento
+    // suave de item desconhecido (ITENS_DE_ESPECIE em prompts_ia.js).
+    if (item && ITENS_DE_ESPECIE[item] && itensDeEspeciePara(sp).indexOf(item) === -1) item = "";
     // Modo de mega temporária: build de forma mega PRECISA segurar a pedra
     // (ver megaStoneRuleFor). Com uma pedra só, corrige sozinho em vez de
     // rejeitar - mesmo espírito "soft" do resto do item.

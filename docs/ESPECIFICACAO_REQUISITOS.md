@@ -478,7 +478,11 @@ builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   resistência (uma por tipo, com o tipo dito no prompt) e as que reagem a golpe. Gluttony, Ripen,
   Harvest e Cud Chew ativos (innate sempre; escolhível só se for a escolhida) exigem Berry; Unburden
   exige item que se gasta na luta. O prompt avisa antes e a validação rejeita com o motivo; a pedra da
-  mega temporária tem prioridade. Leppa fica de fora (PP sempre no máximo neste hack).
+  mega temporária tem prioridade. Leppa fica de fora (PP sempre no máximo neste hack). A IA recebe os
+  itens por grupo com o papel de cada um: gerais, reforço de tipo (com o tipo), gemas (dano forte uma
+  vez), berries, utilidade (com a descrição do próprio jogo - Swirly Glasses e Frost Orb são deste hack)
+  e os exclusivos da espécie (Light Ball, Thick Club...), que só aparecem pra ela; vindo pra outra, a
+  validação troca por "sem item".
 - RF82 — **Mono run: onde pegar**: com um Monotype escolhido, a aba Time mostra sozinha, pro tipo,
   o que dá pra pegar até a insígnia atual (novos desta etapa + os de antes), o que libera depois do
   próximo líder, o local de cada um e quem o jogador já tem (a espécie ou uma evolução dela), os

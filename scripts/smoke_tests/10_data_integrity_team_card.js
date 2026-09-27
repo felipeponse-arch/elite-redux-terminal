@@ -137,7 +137,14 @@ async function section10() {
   }
   var capPrompt = window.__genAiPrompts[0] || "";
   var aboveCapMoves = ["Bind", "Giga Drain", "Grass Whistle", "Natural Gift", "Power Whip", "Synthesis", "Petal Blizzard", "Grassy Glide", "Leaf Storm", "Magical Leaf", "Venoshock"];
-  var leakedMoves = aboveCapMoves.filter(function (m) { return capPrompt.indexOf(m) !== -1; });
+  // Só o bloco do movepool: desde 2026-09-26 o prompt também traz a descrição
+  // de itens ("Binding Band: ... binding moves" contém "Bind").
+  var iniMovepool = capPrompt.indexOf("Movepool real");
+  var blocoMovepool = iniMovepool === -1 ? capPrompt : capPrompt.slice(iniMovepool, capPrompt.indexOf("</dados_do_jogo>", iniMovepool));
+  // Linha do movepool: "- Nome [tipo, ...]" (movePromptLine).
+  var leakedMoves = aboveCapMoves.filter(function (m) { return blocoMovepool.indexOf("\n- " + m + " [") !== -1; });
+  check("o bloco do movepool do prompt tem linhas de golpe no formato esperado (a checagem acima não é vazia)",
+    /\n- [^\n]+ \[/.test(blocoMovepool));
   check("prompt de build por IA não lista golpes de nível acima do level cap atual (18)",
     !!capPrompt && leakedMoves.length === 0, leakedMoves);
 

@@ -19,6 +19,31 @@ test("a IA tem berries de pânico e de resistência pra escolher, todas existent
   assert.ok(!R.AI_ITEM_POOL.includes("Leppa Berry"), "PP é sempre o máximo neste hack");
 });
 
+test("gemas, reforço de tipo e utilidade entram na lista da IA, com o tipo certo", () => {
+  assert.equal(R.ITENS_IA_GEMAS.length, 18, "uma gema por tipo");
+  const tipos = Object.values(R.ITENS_IA_TIPO);
+  assert.equal(new Set(tipos).size, 18, "um item de reforço por tipo");
+  for (const [item, tipo] of Object.entries(R.ITENS_IA_TIPO)) {
+    assert.ok(R.ITEMS.includes(item), item + " existe no jogo (grafia do jogo)");
+    assert.match(R.ITEM_DESC[item], new RegExp(tipo, "i"), item + " reforça " + tipo + " segundo o próprio jogo");
+  }
+  for (const n of ["Flying Gem", "Charcoal", "Scope Lens", "Swirly Glasses", "Frost Orb", "Light Clay"]) {
+    assert.ok(R.AI_ITEM_POOL.includes(n), n + " na lista da IA");
+  }
+  assert.ok(R.ITENS_IA_UTILIDADE.every((n) => R.ITEM_DESC[n]), "todo item de utilidade vai com a descrição do jogo");
+});
+
+test("item exclusivo de espécie só aparece e só vale pra espécie certa", () => {
+  const pikachu = R.SPECIES.find((s) => s.n === "Pikachu");
+  const charizard = R.SPECIES.find((s) => s.n === "Charizard");
+  assert.deepEqual([...R.itensDeEspeciePara(pikachu)], ["Light Ball"]);
+  assert.equal(R.itensDeEspeciePara(charizard).length, 0);
+  const marowak = R.SPECIES.find((s) => s.n.startsWith("Marowak "));
+  if (marowak) assert.ok(R.itensDeEspeciePara(marowak).includes("Thick Club"), "forma regional conta");
+  assert.match(R.montarPromptBuild(pikachu, {}), /Exclusivo desta especie:[\s\S]*Light Ball/);
+  assert.doesNotMatch(R.montarPromptBuild(charizard, {}), /Light Ball/);
+});
+
 test("innate que come berry exige berry, na regra e no prompt", () => {
   const sp = R.SPECIES.find((s) => naoMega(s) && inn(s).includes("Gluttony"));
   assert.ok(sp, "fixture: espécie com Gluttony innate");
