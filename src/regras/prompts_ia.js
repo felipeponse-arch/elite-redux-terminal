@@ -295,6 +295,11 @@
       ? "Golpes de PRIORIDADE que esta forma usa agora: " + prioridade.join(", ") + ". Inclua um entre os 4 sempre que possivel (no 1x1 prioridade decide troca); se nao incluir, diga o motivo na rationale."
       : "Esta forma nao tem golpe de prioridade de dano no level cap atual.");
     if (pivos.length) linhas.push("Golpes de PIVÔ que esta forma usa agora: " + pivos.join(", ") + ".");
+    // Achado no teste com o time real do usuário (2026-09-27): Kirlia ainda
+    // evolui e a build usava Babiri Berry - a IA não pesava o Eviolite.
+    if (evoluiAinda(sp) && ITEMS.indexOf("Eviolite") !== -1) {
+      linhas.push("Esta forma AINDA EVOLUI: Eviolite (aumenta Def e Def. Especial de quem ainda evolui) costuma ser o item defensivo mais forte aqui - considere.");
+    }
     if (comTime) {
       var membros = state.team.map(getSpeciesByX).filter(function (m) { return m && m.x !== sp.x; });
       var riscos = computeSharedRisks(membros);

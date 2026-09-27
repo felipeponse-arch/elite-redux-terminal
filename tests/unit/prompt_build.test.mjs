@@ -48,6 +48,11 @@ test("o prompt leva papel natural, tabela de papéis, prioridade, pivô e ordem 
   assert.match(R.montarPromptEstrategias(gengar), /"papel":"Tanque\|Pivô\|Wallbreaker\|Sweeper"/);
 });
 
+test("forma que ainda evolui recebe a dica do Eviolite; forma final não", () => {
+  assert.match(R.montarPromptBuild(porNome("Kirlia"), {}), /AINDA EVOLUI: Eviolite/);
+  assert.doesNotMatch(R.montarPromptBuild(porNome("Gardevoir"), {}), /AINDA EVOLUI/);
+});
+
 test("golpe de pivô e de prioridade vêm do dado do jogo", () => {
   for (const g of ["U-turn", "Volt Switch", "Flip Turn", "Parting Shot"]) assert.ok(R.ehGolpeDePivo(g), g);
   for (const g of ["Earthquake", "Stealth Rock", "Recover"]) assert.ok(!R.ehGolpeDePivo(g), g);
