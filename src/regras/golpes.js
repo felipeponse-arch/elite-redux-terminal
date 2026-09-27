@@ -34,6 +34,22 @@
       (mv[3] ? " " + mv[3] : "") + (mv[7] ? " p" + mv[7] : "") +
       " " + role + "]" + (desc ? ": " + desc : "");
   }
+  // Golpe de pivô (2026-09-27, revisão do prompt de build): papel "pivo" (troca
+  // sem dano: Parting Shot, Teleport...) ou golpe de DANO cuja descrição do
+  // próprio jogo diz que troca o usuário (U-turn, Volt Switch, Flip Turn,
+  // Fluttering Leaf, Ghastly Echo) - esses o moveRoleOf chama de "dano".
+  function ehGolpeDePivo(nome) {
+    var papel = moveRoleOf(nome);
+    if (papel === "pivo") return true;
+    if (papel !== "dano") return false;
+    var desc = MOVE_PT[String(MOVE_ID_BY_NAME[nome])] || "";
+    return /troca o usu[aá]rio|volta correndo para trocar/i.test(desc);
+  }
+  // Golpe de prioridade que causa dano (o que decide troca no 1x1).
+  function ehPrioridadeDeDano(nome) {
+    var mv = MOVE_BY_NAME[nome];
+    return !!mv && mv[7] > 0 && moveRoleOf(nome) === "dano";
+  }
   function moveRoleOf(moveName) {
     var id = MOVE_ID_BY_NAME[moveName];
     if (id === undefined) return null;

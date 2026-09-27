@@ -245,13 +245,59 @@
   function cabecalhoIA() {
     return "Você é o especialista em meta do Pokemon Elite Redux (ROM hack de Pokemon). " + PROMPT_DADOS_AVISO + " ";
   }
+  // Habilidade com o efeito do jogo (2026-09-27, revisão do prompt de build):
+  // antes só ia o NOME - e neste hack muitas habilidades são novas ou mudaram
+  // (Garchomp: Overwhelm, Keen Edge, Hyper Aggressive, Speed Force). Sem a
+  // descrição a IA escolhia habilidade e sinergia no escuro.
+  function linhaHabilidadeIA(id) {
+    var a = ABILITIES[id];
+    return "- " + a[0] + ": " + dadoExterno(ABILITY_PT[String(id)] || a[1] || "sem descricao");
+  }
   function blocoEspecieIA(sp, plural) {
-    var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
-    var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; });
+    var abiIds = uniqueIds(sp.ab);
+    var abiNames = abiIds.map(function (id) { return ABILITIES[id][0]; });
     return "Tipo: " + speciesTypeNames(sp).join("/") + "\n" +
       "Status base (HP/Atk/Def/SpA/SpD/Spe): " + sp.b.join("/") + "\n" +
-      "Habilidades escolhiveis - " + (plural ? "cada set escolhe" : "escolha") + " exatamente UMA destas, escrita EXATAMENTE assim: " + abiNames.join(", ") + "\n" +
-      "Innates sempre ativas (nao escolhiveis, so contexto): " + innNames.join(", ") + "\n";
+      "Habilidades escolhiveis - " + (plural ? "cada set escolhe" : "escolha") + " exatamente UMA destas, escrita EXATAMENTE assim: " + abiNames.join(", ") + ". Efeito de cada uma NESTE jogo:\n" +
+      "<dados_do_jogo>\n" + abiIds.map(linhaHabilidadeIA).join("\n") + "\n</dados_do_jogo>\n" +
+      "Innates SEMPRE ativas (nao escolhiveis, mas contam na sinergia - a build deve aproveitar o maximo delas):\n" +
+      "<dados_do_jogo>\n" + uniqueIds(sp.inn).map(linhaHabilidadeIA).join("\n") + "\n</dados_do_jogo>\n";
+  }
+
+  // Papel conduz a build (2026-09-27, pedido do usuário: "se um Pokémon é
+  // tanque, ele não prioriza a velocidade, prioriza defesa ou HP; se é pivô,
+  // prioriza as coisas de pivô; se é wallbreaker, as de wallbreaker"). Os 4
+  // papéis são a taxonomia do app (SPECIES_ROLE / ROLE_LABEL_PT). A validação
+  // confere os EVs contra o papel declarado (conferirPapelDaBuild).
+  var PAPEIS_DA_BUILD = {
+    "Tanque": "EVs em HP e na defesa do lado mais ameacador (nature defensiva); Velocidade no maximo 100 EVs (se uma habilidade ativa depende de Velocidade, o papel certo nao e Tanque); golpes: recuperacao, status, hazard e 1-2 de dano estaveis; item que aumente a resistencia (Leftovers, Rocky Helmet, Assault Vest, berry de resistencia).",
+    "Pivô": "golpe de troca real e obrigatorio quando o movepool tiver (U-turn, Volt Switch, Flip Turn, Parting Shot...); bulk pra entrar em golpes que resiste; Velocidade moderada; item que ajude a entrar e sair (Heavy-Duty Boots, Rocky Helmet, Leftovers, Assault Vest).",
+    "Wallbreaker": "ataque maximo (252 no atributo de ataque, nature que o aumenta); golpes mais fortes + cobertura contra quem resiste ao STAB; Velocidade so o necessario; item que aumente o dano (Choice Band/Specs, Life Orb, reforco de tipo, gema, Expert Belt).",
+    "Sweeper": "ataque + Velocidade (252/252); golpe de setup quando tiver; prioridade pra fechar; item que ajude a varrer (Life Orb, Choice Scarf, berry de panico, Weakness Policy, Focus Sash)."
+  };
+  function nomePapel(r) { return ROLE_LABEL_PT[r] || r; }
+  function blocoPapelIA(sp, plural, comTime) {
+    var natural = SPECIES_ROLE[sp.sname];
+    var golpes = availableMovesFor(sp).names;
+    var prioridade = golpes.filter(ehPrioridadeDeDano);
+    var pivos = golpes.filter(ehGolpeDePivo);
+    var linhas = [];
+    if (natural && natural.roles && natural.roles.length) {
+      linhas.push("Papel natural desta especie (calculado pelos status reais): " + natural.roles.map(nomePapel).join(" / ") +
+        ", ataque " + (natural.split || "?") + (natural.spePct !== undefined ? ", mais rapida que " + Math.round(natural.spePct) + "% das especies" : "") + ".");
+    }
+    linhas.push("PAPEL CONDUZ A BUILD - " + (plural ? "cada set declara" : "declare") + " um papel (Tanque, Pivô, Wallbreaker ou Sweeper) e faca TODAS as escolhas servirem a ele:");
+    Object.keys(PAPEIS_DA_BUILD).forEach(function (p) { linhas.push("- " + p + ": " + PAPEIS_DA_BUILD[p]); });
+    linhas.push(prioridade.length
+      ? "Golpes de PRIORIDADE que esta forma usa agora: " + prioridade.join(", ") + ". Inclua um entre os 4 sempre que possivel (no 1x1 prioridade decide troca); se nao incluir, diga o motivo na rationale."
+      : "Esta forma nao tem golpe de prioridade de dano no level cap atual.");
+    if (pivos.length) linhas.push("Golpes de PIVÔ que esta forma usa agora: " + pivos.join(", ") + ".");
+    if (comTime) {
+      var membros = state.team.map(getSpeciesByX).filter(function (m) { return m && m.x !== sp.x; });
+      var riscos = computeSharedRisks(membros);
+      if (riscos.length) linhas.push("Fraquezas que o resto do time divide: " + riscos.map(function (r) { return r.t + " (" + r.n + " membros)"; }).join(", ") + " - resistir/cobrir isso vale mais.");
+    }
+    return linhas.join("\n") + "\n";
   }
   // Movepool liberado no cap (mesma trava do editor manual - golpe de tutor
   // nunca trava), dentro de UM bloco <dados_do_jogo>.
@@ -302,7 +348,11 @@
       "Utilidade (efeito deste jogo - leia, nao assuma pelo nome; pedra de clima so se a especie arma aquele clima):\n<dados_do_jogo>\n" +
       ITENS_IA_UTILIDADE.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" +
       (daEspecie.length ? "Exclusivo desta especie:\n<dados_do_jogo>\n" + daEspecie.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" : "") +
-      regraItemConsumivelPrompt(sp);
+      regraItemConsumivelPrompt(sp) +
+      // Item que reforça + travas (2026-09-27; travas pela descrição do jogo,
+      // conferidas em conflitoDeItem, validacao_build_ia.js).
+      "ITEM x BUILD: o item precisa reforcar o papel, a habilidade ou os golpes escolhidos - diga na rationale o que ele reforca. " +
+      "Sao REJEITADOS: Choice Band/Specs/Scarf com golpe de status (exceto Trick/Switcheroo, que passam o item); Assault Vest ou Tactical Vest com golpe de status (o jogo impede usar); Eviolite numa forma que nao evolui mais.\n";
   }
   // O que o resto do time já usa (só a build de 1 membro recebe: as Estratégias
   // são leitura exploratória da espécie, não do time).
@@ -324,6 +374,7 @@
       " (build " + versaoDosDados() + ").\n" +
       blocoEspecieIA(sp, false) +
       blocoMovepoolIA(sp, false) +
+      blocoPapelIA(sp, false, true) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, false) +
       blocoItensIA(sp, false) +
@@ -332,49 +383,25 @@
       (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
       contextoDoModoPrompt(sp, opts, cap) +
       planoPromptBlock(sp, cap) +
-      "Antes de responder, use as ferramentas disponiveis pra ver as fraquezas reais do time atual " +
-      "do jogador, o rank real desta especie, e quais chefoes/lideres de ginasio ainda faltam ate o " +
-      "final do jogo a partir de onde o jogador esta agora - use tudo isso pra decidir o PAPEL que " +
-      "este Pokemon deve cumprir dai pra frente" +
-      (archetypeParts.length ? " - SEMPRE alinhado ao Estilo/Clima e campo/Tatica do time informado acima, isso pesa mais que qualquer outra consideracao de papel" : "") +
-      " (ofensivo, defensivo, suporte, resposta a uma fraqueza " +
-      "especifica do time, ou resposta a uma ameaca recorrente nos chefoes que ainda vem pela frente), " +
-      "nao so um set generico isolado pro momento atual. Use tambem getPriorityMoveOptions pra ver se " +
-      "esta especie tem acesso a algum golpe de prioridade real e avalie se vale a pena incluir um " +
-      "dos 4 golpes - o formato aqui e 1x1, entao golpe de prioridade pode decidir uma troca sozinho, " +
-      "mas so inclua se fizer sentido pro papel escolhido (ex: um wallbreaker lento se beneficia mais " +
-      "de prioridade do que um sweeper que ja e mais rapido que a maioria).\n" +
-      "Antes de decidir EV de Velocidade, use getSpeedBenchmark pra ver a posicao REAL desta especie no " +
-      "ranking de Velocidade - nao chute se 252 EV 'e rapido o bastante', confira quantas especies ela " +
-      "ultrapassa investindo. Se ela ja e rapida o bastante sem EV total (ou quase), considere investir " +
-      "menos em Velocidade e mais em bulk/ataque, e explique isso na rationale.\n" +
-      "Use tambem getAbilityMovepoolSynergy pra ver se alguma das habilidades desta especie (escolhivel " +
-      "ou innate) aumenta de verdade o poder de golpes que ela REALMENTE aprende (ex: Mighty Horn com um " +
-      "golpe de chifre/broca real no movepool).\n" +
-      "REGRA OBRIGATORIA (pedido do usuario, 2026-09-15): se getAbilityMovepoolSynergy retornar QUALQUER " +
-      "sinergia real pra esta especie, a build PRECISA incluir pelo menos um desses golpes entre os 4, e a " +
-      "sinergia precisa estar ATIVA - ou seja, ou ela vem de uma innate (sempre ativa), ou a habilidade " +
-      "escolhivel que voce escolher tem que ser exatamente a que ativa essa sinergia. Uma build que ignore " +
-      "isso vai ser REJEITADA pela validacao e o usuario tera que pedir de novo, entao confira antes de " +
-      "responder. Lista vazia = nenhuma sinergia real confirmada, escolha normalmente.\n" +
-      "Use tambem getConditionMoveSynergy pra ver se esta especie tem algum combo autossuficiente real entre " +
-      "uma habilidade condicional (clima ou HP baixo) e um golpe que ela mesma aprende pra satisfazer essa " +
-      "condicao sozinha, sem apoio de outro membro do time. Nao e obrigatorio incluir - varios destes golpes " +
-      "sao de clima/status e podem nao caber no papel escolhido (ex: nao force Hail num set 100% ofensivo que " +
-      "so quer dano) - mas quando o golpe combina com o papel, prefira incluir e escolher a habilidade que " +
-      "ativa o combo, e cite isso na rationale.\n" +
-      "Use tambem getNextBossRoster: ele traz o elenco real da proxima luta e os buracos do time atual. Nao e " +
-      "obrigatorio, mas quando um dos 4 golpes ou o papel deste Pokemon puder responder a uma ameaca concreta " +
-      "dessa luta (ex: um golpe que acerta um chefao que ninguem do time acerta super efetivo, ou resistir ao " +
-      "golpe mais perigoso dele), prefira isso a um set generico - e cite o chefao na rationale.\n" +
-      "Use tambem getBoxCandidatesForBoss - se ela sugerir ESTA MESMA especie como o melhor candidato da " +
-      "caixa pra proxima luta que falta, pode citar isso na rationale (ex: 'bom encaixe pra proxima luta, " +
-      "contra X'), mas so se for esta especie mesmo, senao ignore.\n" +
+      // Ordem de decisão (2026-09-27, revisão do prompt: antes era uma lista de
+      // "use também a ferramenta X" sem ordem; o papel só aparecia no fim).
+      "ORDEM DE DECISAO - siga nesta ordem:\n" +
+      "1. PAPEL: escolha o papel (Tanque, Pivô, Wallbreaker, Sweeper) pelo papel natural acima, pelo que o time precisa (use as ferramentas pra ver as fraquezas do time e o rank desta especie) e pelos chefoes que faltam" +
+      (archetypeParts.length ? " - SEMPRE alinhado ao Estilo/Clima e campo/Tatica/Monotype do time informado acima, isso pesa mais que qualquer outra consideracao" : "") + ".\n" +
+      "2. HABILIDADE e SINERGIA: leia o efeito de cada habilidade e innate acima e escolha a habilidade que, somada as innates, mais reforca o papel; depois os golpes devem ATIVAR o maximo dessas habilidades (nao so uma). " +
+      "Use getAbilityMovepoolSynergy pra confirmar quais golpes do movepool cada habilidade reforca. REGRA OBRIGATORIA (pedido do usuario, 2026-09-15): se ela retornar QUALQUER sinergia real, " +
+      "a build PRECISA incluir pelo menos um desses golpes e a sinergia precisa estar ATIVA (innate, ou a habilidade escolhida ser a que ativa) - senao e REJEITADA. " +
+      "Use getConditionMoveSynergy pra combos de habilidade condicional (clima ou HP baixo) com golpe que a propria especie usa - inclua quando combinar com o papel e cite na rationale.\n" +
+      "3. GOLPES: STAB mais forte do papel, golpes que ativam as habilidades, prioridade (veja acima), pivô se o papel for Pivô, cobertura pro que resiste ao STAB. " +
+      "Use getNextBossRoster: quando um golpe responder a uma ameaca concreta da proxima luta, prefira e cite o chefao na rationale. getBoxCandidatesForBoss: se sugerir ESTA especie pra proxima luta, pode citar.\n" +
+      "4. ITEM: o que mais reforca o papel/habilidade/golpes, respeitando as regras de item acima.\n" +
+      "5. NATURE e EVs: seguem o papel (tabela acima). Antes de decidir EV de Velocidade use getSpeedBenchmark - nao chute se 252 e rapido o bastante; se ja e rapida o suficiente, invista o resto em bulk/ataque.\n" +
+      "6. TIME: confira que a build nao repete item/golpe/papel do time sem motivo e cobre alguma fraqueza dele.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
-      '{"ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"plano":{"golpe de agora":"golpe futuro"},"rationale":"..."}' +
+      '{"papel":"Tanque|Pivô|Wallbreaker|Sweeper","ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"plano":{"golpe de agora":"golpe futuro"},"rationale":"..."}' +
       ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
       "evs sao 6 numeros inteiros de 0 a 252, somando no maximo 510. " +
-      "rationale e uma frase curta em portugues explicando a escolha com base no time/rank/momento do jogo" +
+      "rationale e 1-2 frases curtas em portugues: o papel e como habilidade, golpes e item servem a ele, com base no time/rank/momento do jogo" +
       (archetypeParts.length ? "/Estilo, Clima e campo ou Tatica do time" : "") + ". " +
       "Nao invente golpes, habilidades ou items fora do que foi listado.";
   }
@@ -404,6 +431,7 @@
       "genuinamente fizer sentido pra esta espécie neste hack; 2 sets bons valem mais que 3 forçados.\n" +
       blocoEspecieIA(sp, true) +
       blocoMovepoolIA(sp, true) +
+      blocoPapelIA(sp, true, false) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, true) +
       blocoItensIA(sp, true) +
@@ -420,7 +448,7 @@
       "use getSpeedBenchmark pra confirmar que o EV de Velocidade escolhido realmente ultrapassa uma fatia " +
       "relevante do jogo - nao chute.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
-      '{"sets":[{"name":"...","ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"rationale":"..."}]}' +
+      '{"sets":[{"name":"...","papel":"Tanque|Pivô|Wallbreaker|Sweeper","ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"rationale":"..."}]}' +
       ". 'name' e um rotulo curto do papel (2-4 palavras, ex: 'Wallbreaker Especial'). nature precisa ser uma " +
       "nature real de Pokemon. evs sao 6 numeros de 0 a 252, somando no maximo 510. rationale e 1-2 frases curtas " +
       "em portugues explicando a escolha. Nao invente golpes, habilidades ou items fora do que foi listado.";

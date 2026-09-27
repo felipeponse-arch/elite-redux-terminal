@@ -7,6 +7,27 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "tanque-rapido-passa",
+    descricao: "tanque com Velocidade maxada passa",
+    arquivo: "validacao_build_ia.js",
+    de: "if (evs[5] > 100) return",
+    para: "if (evs[5] > 999) return",
+  },
+  {
+    id: "vest-com-status-passa",
+    descricao: "Assault/Tactical Vest com golpe de status passa",
+    arquivo: "validacao_build_ia.js",
+    de: "if (ITENS_VEST.indexOf(item) !== -1 && status.length) {",
+    para: "if (false) {",
+  },
+  {
+    id: "habilidade-sem-descricao",
+    descricao: "prompt volta a mandar só o nome da habilidade",
+    arquivo: "prompts_ia.js",
+    de: "return \"- \" + a[0] + \": \" + dadoExterno(ABILITY_PT[String(id)] || a[1] || \"sem descricao\");",
+    para: "return \"- \" + a[0];",
+  },
+  {
     id: "clima-inventado-pra-rock",
     descricao: "sugere areia pra Rock sem bônus confirmado neste jogo",
     arquivo: "mono_run.js",

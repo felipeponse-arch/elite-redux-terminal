@@ -513,6 +513,16 @@ builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   dano), Ice→Hail (+50% de Defesa), Ghost/Psychic→Eerie Fog (20% menos dano recebido, aumentos de
   status não caem). Um clique põe no "Clima e campo"; a IA recebe a mesma sugestão. Tipo sem bônus
   confirmado (ex.: areia pra Rock, que é do jogo original) não recebe sugestão.
+- RF86 — **Build por IA conduzida pelo papel** (2026-09-27, revisão do prompt pedida pelo usuário:
+  viabilidade, sinergia habilidade x golpes, prioridade, Velocidade, encaixe no time): o prompt leva o
+  efeito de cada habilidade escolhível e innate (antes só o nome), o papel natural da espécie, a
+  tabela papel -> prioridades (Tanque, Pivô, Wallbreaker, Sweeper), os golpes de prioridade e de pivô
+  disponíveis e uma ordem de decisão (papel, habilidade/sinergia, golpes, item, EVs, time). A IA
+  declara o papel e a validação reprova contradição clara (tanque com mais de 100 EVs em Velocidade
+  ou menos de 252 em bulk, sweeper lento fora de Trick Room, wallbreaker sem ataque, pivô sem golpe
+  de troca quando a forma tem um) e item que se anula pela descrição do jogo (Choice com golpe de
+  status exceto Trick/Switcheroo, Assault/Tactical Vest com status, Eviolite em quem não evolui).
+  O papel aparece na justificativa. Vale também pras Estratégias.
 
 **Nota da auditoria de 2026-09-23**: a numeração de Regras de Negócio pula de RN13 (seção 3) direto
 para RN15 — não existe RN14 em nenhuma versão deste documento. Não confirmado se é uma regra perdida

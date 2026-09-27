@@ -67,6 +67,66 @@
     return linhas.length ? "ITEM x HABILIDADE: " + linhas.join("; ") + ".\n" : "";
   }
 
+  // ---- Papel e item (2026-09-27, revisão do prompt de build pedida pelo
+  // usuário: "se um Pokémon é tanque ele não prioriza a velocidade, prioriza
+  // defesa ou HP; se é pivô prioriza as coisas de pivô..."; "os itens que ele
+  // usa também devem melhorar alguma coisa"). Só contradição CLARA reprova -
+  // a IA decide os detalhes dentro do papel que ela mesma declarou.
+  var PAPEIS_VALIDOS = { "tanque": "Tanque", "pivo": "Pivô", "pivô": "Pivô", "wallbreaker": "Wallbreaker", "sweeper": "Sweeper" };
+  function papelNormalizado(p) {
+    return typeof p === "string" ? (PAPEIS_VALIDOS[p.trim().toLowerCase()] || null) : null;
+  }
+  // evs = [hp, atk, def, spa, spd, spe]
+  function conferirPapelDaBuild(papel, evs, moves, sp) {
+    var bulk = evs[0] + evs[2] + evs[4];
+    if (papel === "Tanque") {
+      if (evs[5] > 100) return "A build foi declarada Tanque mas tem " + evs[5] + " EVs em Velocidade - tanque investe em HP e defesa, não em Velocidade. Tente gerar de novo.";
+      if (bulk < 252) return "A build foi declarada Tanque com só " + bulk + " EVs em HP/Defesa/Def. Especial - tanque precisa de bulk. Tente gerar de novo.";
+    }
+    // Trick Room inverte a ordem: sweeper lento é o certo lá.
+    if (papel === "Sweeper" && state.archetype.weather !== "Trick Room" && evs[5] < 180) {
+      return "A build foi declarada Sweeper com só " + evs[5] + " EVs em Velocidade - sweeper precisa ser rápido. Tente gerar de novo.";
+    }
+    if (papel === "Wallbreaker" && Math.max(evs[1], evs[3]) < 200) {
+      return "A build foi declarada Wallbreaker sem investir no ataque (máx. " + Math.max(evs[1], evs[3]) + " EVs) - wallbreaker maximiza dano. Tente gerar de novo.";
+    }
+    if (papel === "Pivô") {
+      var disponiveis = availableMovesFor(sp).names.filter(ehGolpeDePivo);
+      if (disponiveis.length && !moves.some(ehGolpeDePivo)) {
+        return "A build foi declarada Pivô sem golpe de troca, mas esta forma tem " + disponiveis.join(", ") + ". Tente gerar de novo.";
+      }
+    }
+    return null;
+  }
+  // Combinações que se anulam, pela descrição do próprio jogo: Choice "permits
+  // only that move" (status trava o Pokémon num golpe sem dano - Trick e
+  // Switcheroo passam o item e são a exceção clássica), Assault/Tactical Vest
+  // "prevents the use of status moves", Eviolite só pra "Pokémon that can evolve".
+  var ITENS_CHOICE = ["Choice Band", "Choice Specs", "Choice Scarf"];
+  var ITENS_VEST = ["Assault Vest", "Tactical Vest"];
+  var GOLPES_QUE_PASSAM_ITEM = ["Trick", "Switcheroo"];
+  function evoluiAinda(sp) {
+    return (sp.ev || []).some(function (e) {
+      var k = DATA.evoKinds[e[0]];
+      return k !== "EVO_MEGA_EVOLUTION" && k !== "EVO_PRIMAL_REVERSION" && k !== "EVO_MOVE_MEGA_EVOLUTION";
+    });
+  }
+  function conflitoDeItem(item, moves, sp) {
+    if (!item) return null;
+    var status = moves.filter(function (m) { var mv = MOVE_BY_NAME[m]; return mv && DATA.splits[mv[2]] === SPLIT_STATUS; });
+    if (ITENS_CHOICE.indexOf(item) !== -1) {
+      var travado = status.filter(function (m) { return GOLPES_QUE_PASSAM_ITEM.indexOf(m) === -1; })[0];
+      if (travado) return item + " trava o Pokémon num golpe só, e a build tem " + travado + " (golpe de status) - com Choice ele ficaria preso sem causar dano. Tente gerar de novo.";
+    }
+    if (ITENS_VEST.indexOf(item) !== -1 && status.length) {
+      return item + " impede golpe de status neste jogo, mas a build tem " + status.join(", ") + ". Tente gerar de novo.";
+    }
+    if (item === "Eviolite" && !evoluiAinda(sp)) {
+      return "Eviolite só funciona em quem ainda evolui, e " + sp.n + " não evolui mais. Tente gerar de novo.";
+    }
+    return null;
+  }
+
   // Checks an AI-suggested build against this species' REAL data before
   // it's ever allowed to become a saved build - 2026-09-09, the Meta
   // Pokémon specialist's own non-negotiable rule: an LLM call can propose
@@ -212,6 +272,13 @@
         return null;
       }
     }
+    var conflito = conflitoDeItem(item, raw.moves, sp);
+    if (conflito) return rejeita(conflito);
+    // Papel declarado (2026-09-27): sem papel não há o que conferir (modos
+    // antigos de revisão não pedem); com papel, contradição clara reprova.
+    var papel = papelNormalizado(raw.papel);
+    var problemaDoPapel = papel ? conferirPapelDaBuild(papel, evs, raw.moves, sp) : null;
+    if (problemaDoPapel) return rejeita(problemaDoPapel);
     // Justificativa, 2026-09-10 (revisão da equipe sobre "Gerar build com
     // IA"): uma frase livre, NÃO validada contra dados reais como tudo
     // acima - não há o que checar, é texto corrido, não uma referência de
@@ -219,7 +286,10 @@
     // renderizar (myBuildEditorHtml), igual qualquer outro texto exibido pro
     // usuário. A ausência dela não é motivo de rejeição - uma build
     // válida sem justificativa ainda assim é salva.
-    var rationale = typeof raw.rationale === "string" ? raw.rationale.trim().slice(0, 280) : "";
+    var rationale = typeof raw.rationale === "string" ? raw.rationale.trim().slice(0, 360) : "";
+    // O papel aparece pro jogador na própria justificativa (o save guarda uma
+    // lista fixa de campos da build - campo novo se perderia no sync).
+    if (papel && rationale.indexOf(papel) === -1) rationale = "Papel: " + papel + ". " + rationale;
     // Corte de EV desperdiçado, direto na build que a IA propõe (pedido do
     // usuário, 2026-09-18: "esse negócio do ev aí devia estar na calculadora
     // do montador de build", em vez de só um aviso depois em "Meu build").
