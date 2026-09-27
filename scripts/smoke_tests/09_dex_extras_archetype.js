@@ -259,7 +259,7 @@ async function section09() {
   check("card de arquétipo é o primeiro item da #team-strategy (não tem mais Leitura estratégica abaixo)",
     !!archCard && document.getElementById("team-strategy").firstElementChild === archCard);
   check("arquétipo começa recolhido, com as escolhas no resumo",
-    !!archCard && !archCard.open && /Ritmo:\s*nenhum/.test(archCard.querySelector("summary").textContent),
+    !!archCard && !archCard.open && /Estilo:\s*nenhum/.test(archCard.querySelector("summary").textContent),
     archCard && archCard.querySelector("summary").textContent);
   // <select> viraram chips (.arch-chip) no redesign de 2026-09-18.
   const paceChips = [...document.querySelectorAll('.arch-chip[data-axis="pace"]')];

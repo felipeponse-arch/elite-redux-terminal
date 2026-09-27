@@ -178,10 +178,13 @@
     // customBuilds acima: só aceita valor que já é uma das opções reais
     // (um save editado à mão ou de outra versão não pode injetar algo fora
     // da taxonomia conhecida).
-    state.archetype = { pace: null, weather: null, monotype: null, reasoning: "" };
+    state.archetype = { pace: null, weather: null, monotype: null, tatica: null, reasoning: "" };
     if (save.archetype && typeof save.archetype === "object") {
       if (PACE_ARCHETYPES.indexOf(save.archetype.pace) !== -1) state.archetype.pace = save.archetype.pace;
-      if (WEATHER_ARCHETYPES.indexOf(save.archetype.weather) !== -1) state.archetype.weather = save.archetype.weather;
+      // "Snow" de save anterior a 2026-09-26 é o mesmo clima, agora "Hail".
+      var climaSalvo = save.archetype.weather === "Snow" ? "Hail" : save.archetype.weather;
+      if (WEATHER_ARCHETYPES.indexOf(climaSalvo) !== -1) state.archetype.weather = climaSalvo;
+      if (TATICA_ARCHETYPES.indexOf(save.archetype.tatica) !== -1) state.archetype.tatica = save.archetype.tatica;
       if (MONOTYPE_ARCHETYPES.indexOf(save.archetype.monotype) !== -1) state.archetype.monotype = save.archetype.monotype;
       if (typeof save.archetype.reasoning === "string") state.archetype.reasoning = save.archetype.reasoning.slice(0, 500);
     }

@@ -15,7 +15,7 @@ beforeEach(() => {
   const s = R.state;
   s.team = []; s.box = []; s.savedTeams = []; s.orphans = { team: [], box: [] }; s.notes = {};
   s.autoEvolved = {}; s.autoLog = []; s.gymSkillsCleared = {}; s.customBuilds = {}; s.strategySets = {};
-  s.archetype = { pace: null, weather: null, monotype: null, reasoning: "" };
+  s.archetype = { pace: null, weather: null, monotype: null, tatica: null, reasoning: "" };
   s.settings = { difficulty: "ace", levelCapMode: "more", milestone: 0, megaMode: "temporaria", runConfirmedAt: null };
 });
 
@@ -67,6 +67,24 @@ test("save: applySave é defensivo com save malformado ou de outra versão", () 
   assert.equal(s.archetype.weather, "Rain");
   assert.equal(Object.keys(s.gymSkillsCleared).length, 0, "líder que não existe sai");
   assert.equal(s.autoLog.length, R.AUTO_LOG_MAX, "registro limitado");
+});
+
+test("save: 'Snow' de save antigo vira 'Hail' e a Tática é guardada (2026-09-26)", () => {
+  R.applySave({ team: [], box: [], archetype: { pace: "Balance", weather: "Snow", tatica: "Telas" } });
+  assert.equal(R.state.archetype.weather, "Hail", "no Elite Redux o Snow Warning invoca granizo");
+  assert.equal(R.state.archetype.tatica, "Telas");
+  R.applySave({ team: [], box: [], archetype: { tatica: "Tática Inventada" } });
+  assert.equal(R.state.archetype.tatica, null, "tática fora da taxonomia sai");
+  assert.ok(!R.WEATHER_ARCHETYPES.includes("Snow"));
+  for (const t of ["Hail", "Eerie Fog", "Electric Terrain", "Toxic Terrain"]) assert.ok(R.WEATHER_ARCHETYPES.includes(t), t);
+});
+
+test("todo valor de arquétipo tem orientação pra IA, e a Tática entra no prompt", () => {
+  for (const v of R.PACE_ARCHETYPES) assert.ok(R.PACE_BUILD_GUIDANCE[v], "Estilo " + v);
+  for (const v of R.WEATHER_ARCHETYPES) assert.ok(R.WEATHER_BUILD_GUIDANCE[v], "Clima e campo " + v);
+  for (const v of R.TATICA_ARCHETYPES) assert.ok(R.TATICA_BUILD_GUIDANCE[v], "Tática " + v);
+  R.state.archetype.tatica = "Armadilhas e pivô";
+  assert.match(R.montarPromptBuild(sp("SPECIES_GARCHOMP"), {}), /Tatica do time: Armadilhas e pivô .*Stealth Rock/);
 });
 
 test("save: syncContentDiffers ignora datas e o log, e vê qualquer outro campo (inclusive só de um lado)", () => {

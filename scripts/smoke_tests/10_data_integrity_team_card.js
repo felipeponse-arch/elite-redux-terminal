@@ -333,8 +333,8 @@ async function section10() {
     if (aiBtn27d) { aiBtn27d.click(); await wait(150); }
   }
   var archPrompt = window.__genAiPrompts[0] || "";
-  check("prompt de build por IA menciona o Clima do time (Trick Room) quando um arquétipo está escolhido",
-    archPrompt.indexOf("Clima do time: Trick Room") !== -1 && archPrompt.indexOf("Velocidade BAIXA") !== -1,
+  check("prompt de build por IA menciona o Clima e campo do time (Trick Room) quando um arquétipo está escolhido",
+    archPrompt.indexOf("Clima e campo do time: Trick Room") !== -1 && archPrompt.indexOf("Velocidade BAIXA") !== -1,
     archPrompt.slice(0, 500));
 
   document.querySelector('.tab-btn[data-tab="team"]').click();
@@ -349,8 +349,8 @@ async function section10() {
     if (aiBtn27e) { aiBtn27e.click(); await wait(150); }
   }
   var noArchPrompt = window.__genAiPrompts[0] || "";
-  check("sem arquétipo escolhido, o prompt NÃO menciona Ritmo/Clima do time (condicional de verdade)",
-    !!noArchPrompt && noArchPrompt.indexOf("Ritmo do time") === -1 && noArchPrompt.indexOf("Clima do time") === -1,
+  check("sem arquétipo escolhido, o prompt NÃO menciona Estilo/Clima e campo/Tática do time (condicional de verdade)",
+    !!noArchPrompt && noArchPrompt.indexOf("Estilo do time") === -1 && noArchPrompt.indexOf("Clima e campo do time") === -1 && noArchPrompt.indexOf("Tatica do time") === -1,
     noArchPrompt.slice(0, 300));
 
   delete window.claude;

@@ -35,8 +35,8 @@
   var generatedTeamResult = null;
 
   // Chips no lugar de <select> (redesign 2026-09-18: "battle prep" tocável
-  // em vez de formulário) - Ritmo/Clima só têm 5 opções cada, cabem bem
-  // como chips. Monotype (18 tipos) usa a MESMA cor real de tipo que o
+  // em vez de formulário) - Estilo, Clima e campo e Tática têm poucas
+  // opções, cabem bem como chips. Monotype (18 tipos) usa a MESMA cor real de tipo que o
   // resto do app já usa (typePill/TYPE_META) - reconhecer pela cor é mais
   // rápido que ler 18 nomes numa lista.
   function archetypeChipsHtml(axis, options, current, typeColored) {
@@ -62,8 +62,9 @@
   var arquetipoAberto = false;
   function resumoDoArquetipo() {
     var partes = [
-      ["Ritmo", state.archetype.pace],
-      ["Clima", state.archetype.weather],
+      ["Estilo", state.archetype.pace],
+      ["Clima e campo", state.archetype.weather],
+      ["Tática", state.archetype.tatica],
       ["Monotype", state.archetype.monotype],
     ].map(function (p) {
       return '<span class="arquetipo-item">' + p[0] + ': <b>' + escapeHtml(p[1] || "nenhum") + '</b></span>';
@@ -74,9 +75,10 @@
     return '<details class="card arquetipo"' + (arquetipoAberto ? " open" : "") + '>' +
       '<summary class="arquetipo-resumo"><span class="arquetipo-titulo">Arquétipo</span>' + resumoDoArquetipo() +
         '<span class="arquetipo-ajustar" aria-hidden="true">' + (arquetipoAberto ? "Fechar" : "Ajustar") + '</span></summary>' +
-      '<p class="mybuild-hint">Escolha um Ritmo, Clima e/ou Monotype e peça o melhor time de até 6, usando só os Pokémon que você já tem (time + caixa). "Gerar time completo" monta a composição, gera a build de cada um e escreve o guia de como jogar - tudo numa ação só.</p>' +
-      '<div class="archetype-axis"><span class="archetype-axis-label">Ritmo</span>' + archetypeChipsHtml("pace", PACE_ARCHETYPES, state.archetype.pace || "", false) + '</div>' +
-      '<div class="archetype-axis"><span class="archetype-axis-label">Clima</span>' + archetypeChipsHtml("weather", WEATHER_ARCHETYPES, state.archetype.weather || "", false) + '</div>' +
+      '<p class="mybuild-hint">Escolha um Estilo, Clima e campo, Tática e/ou Monotype e peça o melhor time de até 6, usando só os Pokémon que você já tem (time + caixa). "Gerar time completo" monta a composição, gera a build de cada um e escreve o guia de como jogar - tudo numa ação só.</p>' +
+      '<div class="archetype-axis"><span class="archetype-axis-label">Estilo</span>' + archetypeChipsHtml("pace", PACE_ARCHETYPES, state.archetype.pace || "", false) + '</div>' +
+      '<div class="archetype-axis"><span class="archetype-axis-label">Clima e campo</span>' + archetypeChipsHtml("weather", WEATHER_ARCHETYPES, state.archetype.weather || "", false) + '</div>' +
+      '<div class="archetype-axis"><span class="archetype-axis-label">Tática</span>' + archetypeChipsHtml("tatica", TATICA_ARCHETYPES, state.archetype.tatica || "", false) + '</div>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Monotype</span>' + archetypeChipsHtml("monotype", MONOTYPE_ARCHETYPES, state.archetype.monotype || "", true) + '</div>' +
       '<div class="archetype-row">' +
         '<button id="archetype-build-complete" class="add-team-btn" type="button" title="Composição + build de cada um + guia de como jogar, tudo de uma vez">Gerar time completo</button>' +
@@ -104,7 +106,7 @@
       if (!alvo.classList.contains("arch-chip")) return;
       var axis = alvo.dataset.axis;
       var value = alvo.dataset.value || null;
-      // O Ritmo decide qual curada o time mostra (estilo) - por isso "time" e
+      // O Estilo decide qual curada o time mostra (estilo) - por isso "time" e
       // "builds", não só o card de arquétipo.
       acao(["time", "builds", "resumo"], function () {
         state.archetype[axis] = value;
@@ -129,8 +131,8 @@
       var pace = state.archetype.pace;
       var weather = state.archetype.weather;
       var monotype = state.archetype.monotype;
-      if (!pace && !weather && !monotype) {
-        if (statusEl) statusEl.textContent = "Escolha um Ritmo, Clima ou Monotype primeiro, pra eu focar o time em algo.";
+      if (!pace && !weather && !monotype && !state.archetype.tatica) {
+        if (statusEl) statusEl.textContent = "Escolha um Estilo, Clima e campo, Tática ou Monotype primeiro, pra eu focar o time em algo.";
         return false;
       }
       if (statusEl) statusEl.textContent = "Consultando o Claude...";
@@ -288,8 +290,8 @@
       if (el) el.textContent = msg;
     }
     var pace = state.archetype.pace, weather = state.archetype.weather, monotype = state.archetype.monotype;
-    if (!pace && !weather && !monotype) {
-      setStatus("Escolha um Ritmo, Clima ou Monotype primeiro, pra eu focar o time em algo.");
+    if (!pace && !weather && !monotype && !state.archetype.tatica) {
+      setStatus("Escolha um Estilo, Clima e campo, Tática ou Monotype primeiro, pra eu focar o time em algo.");
       return;
     }
     setStatus("Etapa 1/4 - montando a composição do time...");
@@ -304,7 +306,7 @@
       await generateBuildWithAI(sp, "archetype-status");
     }
     setStatus("Etapa 3/4 - escrevendo o guia de como jogar este time...");
-    var focusDesc = [pace ? "Ritmo: " + pace : "", weather ? "Clima: " + weather : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
+    var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + weather : "", state.archetype.tatica ? "Tática: " + state.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
     var guide = await generateTeamUsageGuide(members, focusDesc);
     setStatus("Etapa 4/4 - validando a equipe...");
     generatedTeamResult = { archetypeLabel: focusDesc, guide: guide, validation: computeTeamGenerationValidation(members), forTeamKey: teamKeyFor(members) };

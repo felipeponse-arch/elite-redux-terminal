@@ -75,7 +75,7 @@
     // Purely additive, mesmo padrão {} -> null-fields de notes/customBuilds.
     // Monotype adicionado como terceiro eixo (2026-09-17) - null = não
     // definido, mesma disciplina dos outros dois.
-    archetype: { pace: null, weather: null, monotype: null, reasoning: "" }
+    archetype: { pace: null, weather: null, monotype: null, tatica: null, reasoning: "" }
   };
 
   var STORE_KEY = "er_terminal_save";

@@ -122,7 +122,7 @@ async function prepararRunPadrao() {
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 }
-// Chips de arquétipo (Ritmo/Clima/Monotype) substituíram os 3 <select>
+// Chips de arquétipo (Estilo/Clima e campo/Tática/Monotype) substituíram os 3 <select>
 // antigos no redesign de 2026-09-18 - clica o chip .arch-chip do eixo/
 // valor pedido (value="" acha o chip "Nenhum"). Devolve o chip clicado
 // (ou undefined se não achou), pra quem chamar decidir se isso é falha.

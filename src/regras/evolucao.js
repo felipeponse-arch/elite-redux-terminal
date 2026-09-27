@@ -212,6 +212,6 @@
 
   // Há algo da run pra zerar? Habilita o botão "Novo jogo" (ver zerarRun no template).
   function runTemAlgoPraZerar() {
-    return !!(state.team.length || state.box.length || state.archetype.pace || state.archetype.weather || state.archetype.monotype ||
+    return !!(state.team.length || state.box.length || state.archetype.pace || state.archetype.weather || state.archetype.monotype || state.archetype.tatica ||
       Object.keys(state.autoEvolved).length || Object.keys(state.gymSkillsCleared).length || state.settings.milestone > 0);
   }

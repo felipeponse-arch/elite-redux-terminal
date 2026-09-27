@@ -490,6 +490,13 @@ builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   earliest locations" (índice oficial), importada por `scripts/importar_mono.mjs`; cada nome é casado
   com o dado 2.65 e o que diverge fica de fora (a planilha é da 2.5). Marca "só é do tipo na forma
   Mega" separada de "vira do tipo ao evoluir".
+- RF83 — **Arquétipo com os nomes e opções certos**: os eixos são Estilo (Hyper Offense, Balance,
+  Bulky Offense, Semi-Stall, Stall - o termo da comunidade é playstyle), Clima e campo (Sand, Rain,
+  Sun, Hail, Eerie Fog, Trick Room e os 5 terrenos, incluindo o Toxic Terrain deste jogo), Tática
+  (Telas; Armadilhas e pivô) e Monotype. "Snow" virou "Hail" (neste jogo o Snow Warning invoca
+  granizo; save antigo é convertido). Cada valor leva à IA uma orientação de build com as
+  habilidades que armam/aproveitam, conferidas no dado; efeito que a descrição do jogo não confirma
+  não entra.
 
 **Nota da auditoria de 2026-09-23**: a numeração de Regras de Negócio pula de RN13 (seção 3) direto
 para RN15 — não existe RN14 em nenhuma versão deste documento. Não confirmado se é uma regra perdida

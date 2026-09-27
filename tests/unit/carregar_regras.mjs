@@ -36,7 +36,7 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
       settings: { difficulty, levelCapMode, milestone, megaMode, runConfirmedAt: null },
       savedTeams: [], orphans: { team: [], box: [] }, notes: {}, autoEvolved: {}, autoLog: [],
       gymSkillsCleared: {}, customBuilds: {}, strategySets: {},
-      archetype: { pace: null, weather: null, monotype: null, reasoning: "" },
+      archetype: { pace: null, weather: null, monotype: null, tatica: null, reasoning: "" },
     },
   };
   vm.createContext(contexto);

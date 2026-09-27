@@ -347,7 +347,7 @@
     acao(TELAS_ELENCO.concat(["ficha", "progresso", "log"]), function () {
       state.team = [];
       state.box = [];
-      state.archetype = { pace: null, weather: null, monotype: null, reasoning: "" };
+      state.archetype = { pace: null, weather: null, monotype: null, tatica: null, reasoning: "" };
       state.autoEvolved = {};
       state.gymSkillsCleared = {};
       state.settings.milestone = 0;

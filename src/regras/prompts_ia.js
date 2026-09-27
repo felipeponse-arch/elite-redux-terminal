@@ -111,17 +111,38 @@
     "Sand": "se esta espécie tiver Sand Stream (ou outra habilidade real que ative areia) ou um golpe/tipo que se beneficia de areia real no movepool, prioriza isso - senão, mantém o papel calculado normalmente.",
     "Rain": "se esta espécie tiver Drizzle, Swift Swim ou um golpe de Água real que se beneficia de chuva, prioriza isso - senão, mantém o papel calculado normalmente.",
     "Sun": "se esta espécie tiver Drought, Chlorophyll ou um golpe de Fogo/Grama real que se beneficia de sol, prioriza isso - senão, mantém o papel calculado normalmente.",
-    "Snow": "se esta espécie tiver Snow Warning ou um golpe/habilidade real que se beneficia de neve, prioriza isso - senão, mantém o papel calculado normalmente.",
-    "Trick Room": "Trick Room inverte a ordem de turno - prioriza Velocidade BAIXA de propósito (EVs 0 em Speed, considera uma nature que reduz Speed) junto com golpes ofensivos reais, já que quem for mais lento ataca primeiro."
+    "Hail": "neste jogo o granizo vem de Snow Warning (\"Summons hail\") ou do golpe Hail, e tipo Ice ganha Defesa no granizo - se esta espécie arma o granizo ou tem golpe/habilidade real que se beneficia dele, prioriza isso - senão, mantém o papel calculado normalmente.",
+    // Clima deste hack (2026-09-26): nomes das habilidades conferidos no dado.
+    "Eerie Fog": "clima deste jogo - Low Visibility e Fog Machine armam a nevoa; varias habilidades so funcionam nela (Ectoplasm, Ethereal Rush, Rest in Peace, Soul Tap, Foggy Eye, Echolocation, Greater Spirit, Shallow Grave, Smokey Maneuvers). Se esta espécie tiver uma delas, prioriza; a nevoa DRENA aumentos de status, então evita depender de golpe de setup - senão, mantém o papel calculado normalmente.",
+    "Trick Room": "Trick Room inverte a ordem de turno - prioriza Velocidade BAIXA de propósito (EVs 0 em Speed, considera uma nature que reduz Speed) junto com golpes ofensivos reais, já que quem for mais lento ataca primeiro.",
+    // Terrenos (2026-09-26): habilidades que armam/aproveitam e o efeito, tudo
+    // conferido no dado deste jogo (descrição do golpe de terreno) - efeito do
+    // jogo original que a descrição não confirma fica de fora.
+    "Electric Terrain": "8 turnos, impede o sono. Electro Surge arma o terreno; Surge Surfer, Quark Drive, Hadron Engine, Power Leak e Backup Power se beneficiam dele. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
+    "Psychic Terrain": "8 turnos, bloqueia prioridade. Psychic Surge arma o terreno; Zen Garden e Brain Overload se beneficiam. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
+    "Grassy Terrain": "8 turnos, restaura HP. Grassy Surge e Seed Sower armam o terreno; Grass Pelt, Harukaze, Flower Necklace e Jungle Fever se beneficiam. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
+    "Misty Terrain": "8 turnos, bloqueia status. Misty Surge arma o terreno; Celestial Blessing se beneficia. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
+    "Toxic Terrain": "terreno deste jogo: 8 turnos, fortalece golpes Poison e causa dano nos Pokemon a cada turno. Toxic Surge arma; Biofilm se beneficia. Se esta espécie tiver uma dessas ou golpes Poison fortes, prioriza - senão, mantém o papel calculado normalmente."
   };
 
+  // Tática do time (2026-09-26): o que o time faz em campo, independente de
+  // estilo e clima.
+  var TATICA_BUILD_GUIDANCE = {
+    "Telas": "o time joga com Reflect/Light Screen/Aurora Veil (neste jogo a Aurora Veil so funciona com granizo) - se o movepool real desta espécie tiver um desses, um set de suporte que arma telas (Light Clay estende) serve ao time; se for atacante, aproveita o turno protegido pra um golpe de setup real.",
+    "Armadilhas e pivô": "o time espalha armadilhas e troca sem perder turno - prioriza golpes reais de armadilha (Stealth Rock, Spikes, Toxic Spikes, Sticky Web) e de pivô (U-turn, Volt Switch, Flip Turn, Parting Shot) quando o movepool tiver; Heavy-Duty Boots protege de armadilha inimiga."
+  };
+
+  // Rótulos que a IA lê (2026-09-26): "Estilo", "Clima e campo", "Tática".
   function archetypeBuildGuidance() {
     var parts = [];
     if (state.archetype.pace && PACE_BUILD_GUIDANCE[state.archetype.pace]) {
-      parts.push("Ritmo do time: " + state.archetype.pace + " - " + PACE_BUILD_GUIDANCE[state.archetype.pace]);
+      parts.push("Estilo do time: " + state.archetype.pace + " - " + PACE_BUILD_GUIDANCE[state.archetype.pace]);
     }
     if (state.archetype.weather && WEATHER_BUILD_GUIDANCE[state.archetype.weather]) {
-      parts.push("Clima do time: " + state.archetype.weather + " - " + WEATHER_BUILD_GUIDANCE[state.archetype.weather]);
+      parts.push("Clima e campo do time: " + state.archetype.weather + " - " + WEATHER_BUILD_GUIDANCE[state.archetype.weather]);
+    }
+    if (state.archetype.tatica && TATICA_BUILD_GUIDANCE[state.archetype.tatica]) {
+      parts.push("Tatica do time: " + state.archetype.tatica + " - " + TATICA_BUILD_GUIDANCE[state.archetype.tatica]);
     }
     return parts;
   }
@@ -307,7 +328,7 @@
       "do jogador, o rank real desta especie, e quais chefoes/lideres de ginasio ainda faltam ate o " +
       "final do jogo a partir de onde o jogador esta agora - use tudo isso pra decidir o PAPEL que " +
       "este Pokemon deve cumprir dai pra frente" +
-      (archetypeParts.length ? " - SEMPRE alinhado ao Ritmo/Clima do time informado acima, isso pesa mais que qualquer outra consideracao de papel" : "") +
+      (archetypeParts.length ? " - SEMPRE alinhado ao Estilo/Clima e campo/Tatica do time informado acima, isso pesa mais que qualquer outra consideracao de papel" : "") +
       " (ofensivo, defensivo, suporte, resposta a uma fraqueza " +
       "especifica do time, ou resposta a uma ameaca recorrente nos chefoes que ainda vem pela frente), " +
       "nao so um set generico isolado pro momento atual. Use tambem getPriorityMoveOptions pra ver se " +
@@ -346,7 +367,7 @@
       ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
       "evs sao 6 numeros inteiros de 0 a 252, somando no maximo 510. " +
       "rationale e uma frase curta em portugues explicando a escolha com base no time/rank/momento do jogo" +
-      (archetypeParts.length ? "/Ritmo ou Clima do time" : "") + ". " +
+      (archetypeParts.length ? "/Estilo, Clima e campo ou Tatica do time" : "") + ". " +
       "Nao invente golpes, habilidades ou items fora do que foi listado.";
   }
 
@@ -451,7 +472,7 @@
         ", innate: " + innNames.join(", ") +
         (build ? ", habilidade escolhida: " + build.ability : ", habilidades escolhíveis: " + abiNames.join(", "));
     }).join("\n");
-    var focusDesc = [pace ? "Ritmo: " + pace : "", weather ? "Clima: " + weather : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
+    var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + weather : "", state.archetype.tatica ? "Tatica: " + state.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
     return "Você é o especialista em meta do Pokemon Elite Redux (ROM hack), build " +
       versaoDosDados() + ". Monte o MELHOR time possível de até 6 Pokémon, usando " +
       "SOMENTE espécies desta lista real que o jogador já possui (time + caixa) - nunca invente nem sugira " +

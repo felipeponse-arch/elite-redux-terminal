@@ -129,8 +129,20 @@
   // eixos independentes - um time pode ser "Sand" (clima) E "Balance"
   // (ritmo) ao mesmo tempo. Vazio ("") = não definido, sempre a primeira
   // opção dos dois <select> - nunca chuta um valor padrão.
+  // 2026-09-26 (pedido do usuário, conferido na Smogon e nos dados do jogo): o
+  // eixo "pace" aparece como "Estilo" (o termo da comunidade é playstyle; "Ritmo"
+  // confundia com velocidade) e o "weather" como "Clima e campo" (Trick Room e
+  // terrenos não são clima). "Snow" virou "Hail": neste jogo o Snow Warning
+  // "Summons hail" e o golpe é Hail (não existe Snowscape) - save antigo é
+  // convertido em save.js. Eerie Fog é clima deste hack (Low Visibility/Fog
+  // Machine armam; várias habilidades ativam "in fog"); Toxic Terrain também
+  // (Toxic Surge).
   var PACE_ARCHETYPES = ["Hyper Offense", "Balance", "Bulky Offense", "Stall", "Semi-Stall"];
-  var WEATHER_ARCHETYPES = ["Sand", "Rain", "Sun", "Snow", "Trick Room"];
+  var WEATHER_ARCHETYPES = ["Sand", "Rain", "Sun", "Hail", "Eerie Fog", "Trick Room",
+    "Electric Terrain", "Psychic Terrain", "Grassy Terrain", "Misty Terrain", "Toxic Terrain"];
+  // Quarto eixo, "Tática" (2026-09-26): o que o time faz em campo, combinável
+  // com estilo e clima (ex.: Rain + Armadilhas e pivô).
+  var TATICA_ARCHETYPES = ["Telas", "Armadilhas e pivô"];
   // Terceiro eixo, independente dos outros dois (Gerador Inteligente de
   // Times, 2026-09-17, pedido do usuário): Monotype restringe o time a UM
   // tipo só. Ao contrário de Ritmo/Clima (guia de estilo, a IA decide os

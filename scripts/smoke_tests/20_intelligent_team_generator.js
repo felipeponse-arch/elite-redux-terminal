@@ -105,15 +105,15 @@ async function section20() {
   // ---- P1: sem nenhum foco escolhido, o botão avisa em vez de gastar chamada ----
   buildBtnCompleto.click();
   await wait(50);
-  check("sem Ritmo/Clima/Monotype escolhido, avisa em vez de chamar a IA",
+  check("sem Estilo/Clima e campo/Tática/Monotype escolhido, avisa em vez de chamar a IA",
     estagios.length === 0 && document.getElementById("archetype-status").textContent.indexOf("Escolha") !== -1,
     document.getElementById("archetype-status").textContent);
 
-  // ---- roda o pipeline completo, com Ritmo escolhido ----
+  // ---- roda o pipeline completo, com Estilo escolhido ----
   selecionarArquetipo("pace", "Hyper Offense");
   await wait(30);
 
-  // O card foi redesenhado ao escolher o Ritmo: busca o botão de novo (o
+  // O card foi redesenhado ao escolher o Estilo: busca o botão de novo (o
   // ouvinte é delegado ao painel, um nó desanexado não recebe mais o clique).
   document.getElementById("archetype-build-complete").click();
   await pollUntil(function () { return estagios.length >= 4; }, 4000);
@@ -145,7 +145,7 @@ async function section20() {
 
   var cardGerado = document.querySelector(".ts-generated-team");
   if (achou("card \"Time gerado\" aparece depois do pipeline", cardGerado)) {
-    check("card mostra o foco escolhido (Ritmo) no título",
+    check("card mostra o foco escolhido (Estilo) no título",
       cardGerado.querySelector("h3").textContent.indexOf("Hyper Offense") !== -1, cardGerado.querySelector("h3").textContent);
     check("guia de uso mostra as 5 seções pedidas (conceito/abertura/desenvolvimento/vitória/ameaças)",
       /Conceito:/.test(cardGerado.textContent) && /Abertura:/.test(cardGerado.textContent) &&

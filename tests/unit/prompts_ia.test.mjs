@@ -13,7 +13,7 @@ const conta = (txt, trecho) => txt.split(trecho).length - 1;
 beforeEach(() => {
   R.state.team = []; R.state.box = []; R.state.customBuilds = {};
   R.state.settings.milestone = 0;
-  R.state.archetype = { pace: null, weather: null, monotype: null, reasoning: "" };
+  R.state.archetype = { pace: null, weather: null, monotype: null, tatica: null, reasoning: "" };
 });
 
 test("prompt da build: aviso de dado antes do bloco, movepool num bloco só, formato com plano", () => {
@@ -43,9 +43,9 @@ test("prompt da build cita o que o resto do time já usa; sozinho, não cita nad
   assert.match(b, /Golpes JA EM USO.*Waterfall/);
 });
 
-test("Ritmo/Clima do time entram no prompt da build", () => {
+test("Estilo/Clima e campo do time entram no prompt da build", () => {
   R.state.archetype.weather = "Trick Room";
-  assert.match(R.montarPromptBuild(sp("SPECIES_GARCHOMP"), {}), /Clima do time: Trick Room.*Velocidade BAIXA/);
+  assert.match(R.montarPromptBuild(sp("SPECIES_GARCHOMP"), {}), /Clima e campo do time: Trick Room.*Velocidade BAIXA/);
 });
 
 test("prompt de plano: vazio quando não há golpe por liberar (não há o que perguntar)", () => {
