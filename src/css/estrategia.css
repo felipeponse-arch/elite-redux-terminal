@@ -139,11 +139,8 @@
 /* Mono run (2026-09-26): o que dá pra pegar do tipo escolhido até a etapa
    atual. Lista densa em colunas; quem o jogador já tem fica apagado, não some
    (serve de conferência). */
-.mono-run h3 { margin: 0 0 6px; }
 .mono-grupo { margin: 12px 0 6px; font-size: var(--fs-destaque); }
 .mono-conta { color: var(--text-dim); font-weight: 400; font-size: var(--fs-pequeno); }
-.mono-mais { margin-top: 10px; }
-.mono-mais > summary { cursor: pointer; font-weight: 600; font-size: var(--fs-destaque); }
 .mono-lista { list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 4px 18px; }
 .mono-item { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 6px; font-size: var(--fs-texto); padding: 3px 0; border-bottom: 1px solid var(--border); }
 .mono-nome { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: var(--text); cursor: pointer; }
@@ -152,10 +149,23 @@
 .mono-local { color: var(--text-dim); font-size: var(--fs-pequeno); }
 .mono-marca { font-size: var(--fs-legenda); color: var(--text-dim); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 5px; }
 .mono-ja-tem { font-size: var(--fs-legenda); color: var(--sem-resist); font-weight: 600; }
-.mono-tem .mono-nome { color: var(--text-dim); }.mono-fraquezas { margin: 4px 0; font-size: var(--fs-texto); }
-.mono-aviso { margin: 4px 0 8px; font-size: var(--fs-texto); color: var(--text-dim); }
+.mono-tem .mono-nome { color: var(--text-dim); }
 .mono-aviso-forte { color: var(--sem-weak); font-weight: 600; }
-.mono-cobre { color: var(--sem-resist); border-color: var(--sem-resist); }.mono-clima { margin: 4px 0; font-size: var(--fs-texto); display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
 .mono-usar-clima { background: none; border: 1px solid var(--accent-2); color: var(--accent-2); border-radius: var(--radius-sm); padding: 1px 8px; font: inherit; font-size: var(--fs-pequeno); font-weight: 600; cursor: pointer; }
 .mono-usar-clima:hover { background: color-mix(in srgb, var(--accent-2) 14%, transparent); }
 .mono-usar-clima:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+/* Revisão de front/CX (2026-09-27): resumo em linhas de rótulo + valor, listas
+   completas recolhidas em "Tudo o que dá pra pegar". */
+.mono-run h3 { margin: 0 0 8px; }
+.mono-resumo { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: var(--fs-texto); }
+.mono-resumo > li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.mono-rotulo { flex: 0 0 96px; color: var(--text-dim); font-size: var(--fs-pequeno); font-weight: 400; }
+.mono-dim { color: var(--text-dim); font-size: var(--fs-pequeno); }
+.mono-valor { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.mono-sugestao { display: inline-flex; align-items: baseline; gap: 4px; margin-right: 4px; }
+.mono-tudo { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 8px; }
+.mono-tudo > summary { cursor: pointer; font-weight: 600; font-size: var(--fs-destaque); }
+.mono-fonte { margin: 10px 0 0; font-size: var(--fs-legenda); color: var(--text-dim); }
+.mono-aviso-forte .mono-rotulo { color: var(--text-dim); } /* só o valor fica em alerta */
+/* Sem Monotype o contêiner fica vazio e não pode ocupar o espaçamento da coluna. */
+#team-mono:empty { display: none; }

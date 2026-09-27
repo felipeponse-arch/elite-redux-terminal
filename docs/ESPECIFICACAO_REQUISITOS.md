@@ -490,6 +490,10 @@ builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   earliest locations" (índice oficial), importada por `scripts/importar_mono.mjs`; cada nome é casado
   com o dado 2.65 e o que diverge fica de fora (a planilha é da 2.5). Marca "só é do tipo na forma
   Mega" separada de "vira do tipo ao evoluir".
+  Revisão de front/CX (2026-09-27, "a tela está muito carregada"): o card fica ABAIXO do time
+  (antes, no celular, empurrava o time pra fora da primeira tela), mostra à vista só o resumo
+  (fraco a, próximo líder, clima, pegar agora) e as listas completas ficam em "Tudo o que dá pra
+  pegar", recolhido (lembra se ficou aberto). Notebook: card 373 -> 204 px; celular: 727 -> 225 px.
 - RF83 — **Arquétipo com os nomes e opções certos**: os eixos são Estilo (Hyper Offense, Balance,
   Bulky Offense, Semi-Stall, Stall - o termo da comunidade é playstyle), Clima e campo (Sand, Rain,
   Sun, Hail, Eerie Fog, Trick Room e os 5 terrenos, incluindo o Toxic Terrain deste jogo), Tática

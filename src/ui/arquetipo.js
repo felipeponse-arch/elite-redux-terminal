@@ -102,15 +102,6 @@
       var alvo = e.target.closest("button");
       if (!alvo || !painel.contains(alvo)) return;
       if (alvo.id === "archetype-build-complete") { generateCompleteTeam(); return; }
-      if (alvo.classList.contains("mono-nome")) { goToDexSpecies(Number(alvo.dataset.x)); return; }
-      if (alvo.classList.contains("mono-usar-clima")) {
-        var clima = alvo.dataset.clima;
-        acao(["time", "builds", "resumo"], function () {
-          state.archetype.weather = clima;
-          teamRecommendation = null; // alvo mudou, sugestão antiga não vale mais
-        });
-        return;
-      }
       if (!alvo.classList.contains("arch-chip")) return;
       var axis = alvo.dataset.axis;
       var value = alvo.dataset.value || null;
@@ -366,7 +357,7 @@
       el.innerHTML = "";
       return;
     }
-    el.innerHTML = generatedTeamCardHtml(members) + archetypeCardHtml(members) + monoRunCardHtml();
+    el.innerHTML = generatedTeamCardHtml(members) + archetypeCardHtml(members);
   }
 
   // Clima que combina com o tipo (só bônus confirmado - ver CLIMA_QUE_COMBINA):
@@ -375,70 +366,105 @@
     var c = climaQueCombina(tipo);
     if (!c) return "";
     var jaE = state.archetype.weather === c.clima;
-    return '<p class="mono-clima">Clima que combina: <b>' + escapeHtml(c.clima) + '</b> - ' + escapeHtml(c.porque) + '. ' +
+    return '<li class="mono-clima" title="' + escapeHtml(c.porque) + '"><span class="mono-rotulo">Clima</span>' +
+      '<span class="mono-valor"><b>' + escapeHtml(c.clima) + '</b> <span class="mono-dim">' + escapeHtml(c.curto) + '</span>' +
       (jaE ? '<span class="mono-ja-tem">é o clima do seu time</span>'
-        : '<button type="button" class="mono-usar-clima" data-clima="' + escapeHtml(c.clima) + '">Usar ' + escapeHtml(c.clima) + '</button>') +
-      '</p>';
+        : '<button type="button" class="mono-usar-clima" data-clima="' + escapeHtml(c.clima) + '">Usar</button>') +
+      '</span></li>';
   }
 
   // Mono run (2026-09-26, pedido do usuário): com um Monotype escolhido, aparece
   // sozinho o que dá pra pegar desse tipo até a sua etapa e o que libera no
   // próximo líder - sem pergunta nem clique a mais (RNF09). Dado: mono_run.js.
+  // Revisão da equipe de front/CX (2026-09-27, pedido do usuário: "a tela está
+  // muito carregada"): o card ficava ACIMA do time (no celular o time começava
+  // a 1.096 px, fora da tela) com 7 blocos e ~80 itens à vista. Agora mora
+  // abaixo do time (#team-mono), mostra só o resumo (fraquezas, próximo líder,
+  // clima, quem pegar agora) e as listas completas ficam recolhidas - o app
+  // lembra se ficou aberto (o card é redesenhado a cada ação).
+  var monoTudoAberto = false;
   function monoRunCardHtml() {
     var tipo = state.archetype.monotype;
     if (!tipo || !MONO_DISP) return "";
     var etapa = state.settings.milestone || 0;
     var d = monoDisponibilidade(tipo, etapa, state.team.concat(state.box));
     if (!d.novos.length && !d.antes.length && !d.proxima.length) return "";
+    function nomeHtml(i) {
+      return '<button type="button" class="mono-nome" data-x="' + i.sp.x + '" title="Abrir a ficha na Dex">' + escapeHtml(i.sp.n) + '</button>';
+    }
     function itemHtml(i) {
       var marcas = i.marcas.map(function (m) {
-        return '<span class="mono-marca" title="' + escapeHtml(MONO_MARCAS[m]) + '">' + escapeHtml(MONO_MARCAS[m]) + '</span>';
+        return '<span class="mono-marca">' + escapeHtml(MONO_MARCAS[m]) + '</span>';
       }).join("");
-      return '<li class="mono-item' + (i.jaTem ? " mono-tem" : "") + '">' +
-        '<button type="button" class="mono-nome" data-x="' + i.sp.x + '" title="Abrir a ficha na Dex">' + escapeHtml(i.sp.n) + '</button>' +
+      return '<li class="mono-item' + (i.jaTem ? " mono-tem" : "") + '">' + nomeHtml(i) +
         (i.tier ? '<span class="rank-badge-mono ' + (RANK_TIER_CLASS[i.tier] || "tier-C") + '" title="Rank entre os Pokémon ' + escapeHtml(tipo) + '">' + i.tier + '</span>' : "") +
         (i.jaTem ? '<span class="mono-ja-tem">já tem</span>' : "") +
         '<span class="mono-local">' + escapeHtml(i.local || "local não informado") + '</span>' + marcas +
       '</li>';
     }
-    function grupo(titulo, itens, aberto) {
+    function grupo(titulo, itens) {
       if (!itens.length) return "";
-      var lista = '<ul class="mono-lista">' + itens.map(itemHtml).join("") + '</ul>';
-      return aberto
-        ? '<h4 class="mono-grupo">' + titulo + ' <span class="mono-conta">' + itens.length + '</span></h4>' + lista
-        : '<details class="mono-mais"><summary>' + titulo + ' <span class="mono-conta">' + itens.length + '</span></summary>' + lista + '</details>';
+      return '<h4 class="mono-grupo">' + titulo + ' <span class="mono-conta">' + itens.length + '</span></h4>' +
+        '<ul class="mono-lista">' + itens.map(itemHtml).join("") + '</ul>';
     }
-    var etapaTxt = LEVELCAPS && LEVELCAPS.rows[etapa] ? LEVELCAPS.rows[etapa].milestone : "";
-    // Topo do card (2026-09-26): o que o time inteiro divide e o próximo líder
-    // contra o seu tipo; depois, quem dá pra pegar JÁ e cobre essas fraquezas.
     var fracas = fraquezasDoTipo(tipo);
     var aviso = avisoProximoLider(tipo);
     var avisoHtml = aviso && aviso.total
-      ? '<p class="mono-aviso' + (aviso.batemForte.length * 2 >= aviso.total ? " mono-aviso-forte" : "") + '">Próximo líder, ' + escapeHtml(aviso.lider) + ': ' +
-        (aviso.batemForte.length
-          ? aviso.batemForte.length + ' de ' + aviso.total + ' têm golpe super efetivo em ' + escapeHtml(tipo) + ' (' + escapeHtml(aviso.batemForte.join(", ")) + ').'
-          : 'nenhum dos ' + aviso.total + ' tem golpe super efetivo em ' + escapeHtml(tipo) + '.') + '</p>'
+      ? '<li class="' + (aviso.batemForte.length * 2 >= aviso.total ? "mono-aviso-forte" : "") + '"' +
+          (aviso.batemForte.length ? ' title="Com golpe super efetivo em ' + escapeHtml(tipo) + ': ' + escapeHtml(aviso.batemForte.join(", ")) + '"' : "") + '>' +
+          '<span class="mono-rotulo">Próximo líder</span>' + escapeHtml(aviso.lider) + ': ' +
+          (aviso.batemForte.length ? aviso.batemForte.length + ' de ' + aviso.total + ' batem forte' : 'nenhum bate forte') + '</li>'
       : "";
     var cobrem = d.novos.concat(d.antes).filter(function (i) { return !i.jaTem && i.cobre.length && i.marcas.indexOf("M") === -1; }).slice(0, 3);
     var cobremHtml = cobrem.length
-      ? '<h4 class="mono-grupo">Pegar agora pra cobrir as fraquezas</h4><ul class="mono-lista">' + cobrem.map(function (i) {
-          return '<li class="mono-item"><button type="button" class="mono-nome" data-x="' + i.sp.x + '" title="Abrir a ficha na Dex">' + escapeHtml(i.sp.n) + '</button>' +
-            '<span class="mono-marca mono-cobre">cobre ' + escapeHtml(i.cobre.join(", ")) + '</span>' +
-            '<span class="mono-local">' + escapeHtml(i.local || "local não informado") + '</span></li>';
-        }).join("") + '</ul>'
+      ? '<li class="mono-pegar"><span class="mono-rotulo">Pegar agora</span><span class="mono-valor">' + cobrem.map(function (i) {
+          return '<span class="mono-sugestao" title="Cobre ' + escapeHtml(i.cobre.join(", ")) + '">' + nomeHtml(i) +
+            ' <span class="mono-dim">' + escapeHtml(i.local || "") + '</span></span>';
+        }).join("") + '</span></li>'
       : "";
+    var total = d.novos.length + d.antes.length + d.proxima.length;
+    var etapaTxt = LEVELCAPS && LEVELCAPS.rows[etapa] ? LEVELCAPS.rows[etapa].milestone : "";
     return '<div class="card mono-run">' +
-      '<h3>Mono ' + escapeHtml(tipo) + ': onde pegar</h3>' +
-      '<p class="mono-fraquezas">Fraquezas que o time inteiro divide: <b>' + escapeHtml(fracas.join(", ")) + '</b></p>' +
-      climaQueCombinaHtml(tipo) +
-      avisoHtml + cobremHtml +
-      '<p class="mybuild-hint">Sua etapa: ' + escapeHtml(etapaTxt) + '. Os melhores do tipo primeiro; clique no nome pra abrir a ficha. ' +
-        'Fonte: planilha da comunidade <a href="' + escapeHtml(MONO_DISP.fonte) + '" target="_blank" rel="noopener">Mono earliest locations</a> (índice oficial), conferida com os dados do jogo.</p>' +
-      grupo(etapa === 0 ? "Desde o início" : "Novos depois de " + escapeHtml(d.liderAnterior || ""), d.novos, true) +
-      grupo("Disponíveis desde antes", d.antes, false) +
-      (d.proximoLider ? grupo("Depois de vencer " + escapeHtml(d.proximoLider), d.proxima, false) : "") +
+      '<h3>Mono ' + escapeHtml(tipo) + '</h3>' +
+      '<ul class="mono-resumo">' +
+        '<li><span class="mono-rotulo">Fraco a</span><b>' + escapeHtml(fracas.join(", ")) + '</b></li>' +
+        avisoHtml + climaQueCombinaHtml(tipo) + cobremHtml +
+      '</ul>' +
+      '<details class="mono-tudo"' + (monoTudoAberto ? " open" : "") + '><summary>Tudo o que dá pra pegar <span class="mono-conta">' + total + '</span></summary>' +
+        grupo(etapa === 0 ? "Desde o início" : "Novos depois de " + escapeHtml(d.liderAnterior || ""), d.novos) +
+        grupo("Disponíveis desde antes", d.antes) +
+        (d.proximoLider ? grupo("Depois de vencer " + escapeHtml(d.proximoLider), d.proxima) : "") +
+        '<p class="mono-fonte">Até ' + escapeHtml(etapaTxt) + ', os melhores do tipo primeiro. Fonte: planilha da comunidade ' +
+          '<a href="' + escapeHtml(MONO_DISP.fonte) + '" target="_blank" rel="noopener">Mono earliest locations</a> (índice oficial), conferida com os dados do jogo.</p>' +
+      '</details>' +
     '</div>';
   }
+
+  function renderMonoRun() {
+    var el = document.getElementById("team-mono");
+    if (el) el.innerHTML = state.team.length ? monoRunCardHtml() : "";
+  }
+  // Nome abre a ficha; "Usar" põe o clima no arquétipo; lembra se "Tudo o que dá
+  // pra pegar" ficou aberto. Ouvinte único no contêiner (padrão da fase 5).
+  (function () {
+    var painel = document.getElementById("team-mono");
+    if (!painel) return;
+    painel.addEventListener("toggle", function (e) {
+      if (e.target.classList && e.target.classList.contains("mono-tudo")) monoTudoAberto = e.target.open;
+    }, true);
+    painel.addEventListener("click", function (e) {
+      var alvo = e.target.closest("button");
+      if (!alvo || !painel.contains(alvo)) return;
+      if (alvo.classList.contains("mono-nome")) { goToDexSpecies(Number(alvo.dataset.x)); return; }
+      if (alvo.classList.contains("mono-usar-clima")) {
+        var clima = alvo.dataset.clima;
+        acao(["time", "builds", "resumo"], function () {
+          state.archetype.weather = clima;
+          teamRecommendation = null; // alvo mudou, sugestão antiga não vale mais
+        });
+      }
+    });
+  })();
 
   function renderTeamAnalysis(members) {
     var el = document.getElementById("team-analysis");

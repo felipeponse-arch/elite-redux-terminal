@@ -79,6 +79,7 @@
     // Contadores e resumo da Dex são das ações (TELAS.contadores/resumo), não
     // do desenho do time - chamá-los daqui recalculava o confronto 2 vezes.
     renderTeamStrategy(members);
+    renderMonoRun(); // abaixo do time (revisão de front/CX, 2026-09-27)
     renderTeamAnalysis(members);
     renderSavedTeams();
     renderNextFightCard();

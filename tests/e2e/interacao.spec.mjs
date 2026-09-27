@@ -126,7 +126,14 @@ test("Monotype mostra onde pegar o tipo e o nome abre a ficha", async ({ page })
   await page.locator("details.arquetipo > summary").click();
   await page.locator('.arch-chip[data-axis="monotype"][data-value="Fire"]').click();
   const card = page.locator(".mono-run");
-  await expect(card.locator("h3")).toHaveText("Mono Fire: onde pegar");
+  await expect(card.locator("h3")).toHaveText("Mono Fire");
+  // Revisão de front/CX (2026-09-27): o card fica ABAIXO do time e as listas
+  // completas ficam recolhidas.
+  const topoTime = await page.locator("#team-slots").evaluate((el) => el.getBoundingClientRect().top);
+  const topoCard = await card.evaluate((el) => el.getBoundingClientRect().top);
+  expect(topoCard).toBeGreaterThan(topoTime);
+  await expect(card.locator("details.mono-tudo")).not.toHaveAttribute("open", "");
+  await card.locator("details.mono-tudo > summary").click();
   await expect(card.locator(".mono-item", { hasText: "Charmander" })).toContainText("já tem");
   // Clima que combina (Fire -> Sun): um clique põe no arquétipo.
   await card.locator(".mono-usar-clima").click();

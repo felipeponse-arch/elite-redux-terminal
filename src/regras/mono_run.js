@@ -88,11 +88,11 @@
   // status de quem NÃO é Ghost/Psychic caem 1 por turno). Areia pra Rock é do
   // jogo original e não aparece nas páginas oficiais deste hack - fica de fora.
   var CLIMA_QUE_COMBINA = {
-    Fire: { clima: "Sun", porque: "golpes Fire causam 20% a mais no sol" },
-    Water: { clima: "Rain", porque: "golpes Water causam 20% a mais na chuva" },
-    Ice: { clima: "Hail", porque: "tipo Ice ganha 50% de Defesa no granizo" },
-    Ghost: { clima: "Eerie Fog", porque: "Ghost recebe 20% menos dano e seus aumentos de status não caem na névoa" },
-    Psychic: { clima: "Eerie Fog", porque: "Psychic recebe 20% menos dano e seus aumentos de status não caem na névoa" }
+    Fire: { clima: "Sun", curto: "+20% em golpes Fire", porque: "golpes Fire causam 20% a mais no sol" },
+    Water: { clima: "Rain", curto: "+20% em golpes Water", porque: "golpes Water causam 20% a mais na chuva" },
+    Ice: { clima: "Hail", curto: "+50% de Defesa pra Ice", porque: "tipo Ice ganha 50% de Defesa no granizo" },
+    Ghost: { clima: "Eerie Fog", curto: "-20% de dano recebido", porque: "Ghost recebe 20% menos dano e seus aumentos de status não caem na névoa" },
+    Psychic: { clima: "Eerie Fog", curto: "-20% de dano recebido", porque: "Psychic recebe 20% menos dano e seus aumentos de status não caem na névoa" }
   };
   function climaQueCombina(tipo) { return CLIMA_QUE_COMBINA[tipo] || null; }
 
