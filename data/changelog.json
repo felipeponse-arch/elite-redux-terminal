@@ -12,7 +12,8 @@
       "Mono run: a troca sugerida da caixa respeita o Monotype (antes podia sugerir outro tipo)",
       "Mono run: o card mostra as fraquezas que o time inteiro divide, quantos do próximo líder batem forte no seu tipo e quem pegar agora pra cobrir isso",
       "Mono run: a IA (build, Estratégias e time) passa a considerar as fraquezas do tipo, quem vira do tipo ao evoluir e quem sai dele",
-      "Mono run: o card sugere o clima que combina com o seu tipo (Sol pra Fire, Chuva pra Water, Granizo pra Ice, Eerie Fog pra Ghost/Psychic), com botão pra usar"
+      "Mono run: o card sugere o clima que combina com o seu tipo (Sol pra Fire, Chuva pra Water, Granizo pra Ice, Eerie Fog pra Ghost/Psychic), com botão pra usar",
+      "Chamadas da IA mais leves (~15% menos texto): golpes num formato compacto e a descrição dos itens de utilidade consultada só quando a IA precisa"
     ]
   },
   {

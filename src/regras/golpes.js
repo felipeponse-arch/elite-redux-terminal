@@ -19,14 +19,20 @@
   function dadoExterno(txt) {
     return String(txt || "").replace(/[<>]/g, " ").replace(/[\r\n]+/g, " / ").replace(/\s{2,}/g, " ").trim().slice(0, 400);
   }
+  // Formato compacto (2026-09-26, pedido do usuário: "o prompt tá muito grande,
+  // temos como melhorar?"): mesma informação, ~22% menos texto no movepool
+  // (Mew: 276 golpes). "- Nome [" continua igual - a validação e os testes
+  // procuram o nome exato. LEGENDA_GOLPE vai uma vez em cada bloco que usa.
+  var LEGENDA_GOLPE = "Formato: - Nome [Tipo Categoria Poder pPrioridade Papel]: descricao do jogo (Categoria F=fisico, E=especial, S=status; poder e prioridade so aparecem quando existem).";
+  var SIGLA_CATEGORIA = { PHYSICAL: "F", SPECIAL: "E", STATUS: "S" };
   function movePromptLine(id) {
     var mv = MOVES[id];
     var role = moveRoleOf(mv[0]);
     var split = DATA.splits[mv[2]] || "";
     var desc = dadoExterno(MOVE_PT[String(id)] || mv[6] || "");
-    return "- " + mv[0] + " [" + (TYPES[mv[1]] || "?") + ", " + split +
-      (mv[3] ? ", poder " + mv[3] : "") + (mv[7] ? ", prioridade " + mv[7] : "") +
-      ", papel " + role + "]" + (desc ? ": " + desc : "");
+    return "- " + mv[0] + " [" + (TYPES[mv[1]] || "?") + " " + (SIGLA_CATEGORIA[split] || split) +
+      (mv[3] ? " " + mv[3] : "") + (mv[7] ? " p" + mv[7] : "") +
+      " " + role + "]" + (desc ? ": " + desc : "");
   }
   function moveRoleOf(moveName) {
     var id = MOVE_ID_BY_NAME[moveName];

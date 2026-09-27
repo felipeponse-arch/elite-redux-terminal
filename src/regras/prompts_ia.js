@@ -153,7 +153,7 @@
   function planoPromptBlock(sp, cap) {
     var futuros = golpesFuturosDe(sp, cap);
     if (!futuros.length) return "";
-    return "PLANO DE GOLPES: o jogador sobe de nivel ao longo do jogo. Estes golpes esta forma ainda NAO aprende (liberam no nivel indicado):\n" +
+    return "PLANO DE GOLPES: o jogador sobe de nivel ao longo do jogo. Estes golpes esta forma ainda NAO aprende (liberam no nivel indicado). " + LEGENDA_GOLPE + "\n" +
       "<dados_do_jogo>\n" + futuros.map(function (f) { return "nivel " + f.nivel + ": " + movePromptLine(f.id); }).join("\n") + "\n</dados_do_jogo>\n" +
       "Para cada um dos 4 golpes escolhidos, se um destes golpes futuros for claramente melhor PARA O MESMO PAPEL deste slot, aponte a troca no campo " +
       "\"plano\" ({\"golpe de agora\": \"golpe futuro\"}). So aponte troca que voce faria de verdade; slot sem troca melhor fica fora do plano. " +
@@ -259,7 +259,7 @@
     var linhas = availableMovesFor(sp).ids.map(movePromptLine);
     return "Movepool real - " + (plural ? "cada set escolhe" : "escolha") + " exatamente 4 desta lista, nenhum golpe fora dela. Cada linha traz o que o golpe " +
       "FAZ NESTE HACK (tipo, categoria, poder, prioridade, papel e descricao do proprio jogo) - leia a descricao, " +
-      "nao assuma pelo nome, golpes deste hack podem ser diferentes do jogo original:\n<dados_do_jogo>\n" + linhas.join("\n") + "\n</dados_do_jogo>\n";
+      "nao assuma pelo nome, golpes deste hack podem ser diferentes do jogo original. " + LEGENDA_GOLPE + "\n<dados_do_jogo>\n" + linhas.join("\n") + "\n</dados_do_jogo>\n";
   }
   function blocoRegrasDePapelIA() {
     return "COERENCIA PAPEL x GOLPE: cada um dos 4 golpes precisa servir ao papel escolhido. Build 100% ofensiva " +
@@ -294,8 +294,10 @@
       "Wacan=Electric, Rindo=Grass, Yache=Ice, Chople=Fighting, Kebia=Poison, Shuca=Ground, Coba=Flying, Payapa=Psychic, Tanga=Bug, Charti=Rock, " +
       "Kasib=Ghost, Haban=Dragon, Colbur=Dark, Babiri=Steel, Roseli=Fairy, Chilan=Normal) enfraquecem um golpe super efetivo daquele tipo - use a " +
       "da fraqueza mais perigosa desta especie.\n" +
-      "Utilidade (efeito deste jogo - leia, nao assuma pelo nome; pedra de clima so se a especie arma aquele clima):\n<dados_do_jogo>\n" +
-      ITENS_IA_UTILIDADE.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" +
+      // Só os nomes (2026-09-26, prompt mais leve): a descrição do jogo sai pela
+      // ferramenta getItemInfo, que já existia - ~2,4 mil caracteres a menos.
+      "Utilidade (efeito deste jogo pode diferir do original - antes de escolher um destes, consulte getItemInfo; pedra de clima so se a especie arma aquele clima): " +
+      ITENS_IA_UTILIDADE.join(", ") + "\n" +
       (daEspecie.length ? "Exclusivo desta especie:\n<dados_do_jogo>\n" + daEspecie.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" : "") +
       regraItemConsumivelPrompt(sp);
   }
