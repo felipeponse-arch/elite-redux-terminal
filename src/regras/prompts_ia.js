@@ -294,10 +294,13 @@
       "Wacan=Electric, Rindo=Grass, Yache=Ice, Chople=Fighting, Kebia=Poison, Shuca=Ground, Coba=Flying, Payapa=Psychic, Tanga=Bug, Charti=Rock, " +
       "Kasib=Ghost, Haban=Dragon, Colbur=Dark, Babiri=Steel, Roseli=Fairy, Chilan=Normal) enfraquecem um golpe super efetivo daquele tipo - use a " +
       "da fraqueza mais perigosa desta especie.\n" +
-      // Só os nomes (2026-09-26, prompt mais leve): a descrição do jogo sai pela
-      // ferramenta getItemInfo, que já existia - ~2,4 mil caracteres a menos.
-      "Utilidade (efeito deste jogo pode diferir do original - antes de escolher um destes, consulte getItemInfo; pedra de clima so se a especie arma aquele clima): " +
-      ITENS_IA_UTILIDADE.join(", ") + "\n" +
+      // Com a descrição do jogo no próprio prompt. Tentamos só os nomes + a
+      // ferramenta getItemInfo (2026-09-26, -2,4 mil caracteres) e o usuário
+      // preferiu desfazer: sem consultar, a IA não sabe o que fazem os itens
+      // deste hack (Swirly Glasses, Frost Orb) nem os que ele fortaleceu (Big
+      // Root) - não reabrir esse corte.
+      "Utilidade (efeito deste jogo - leia, nao assuma pelo nome; pedra de clima so se a especie arma aquele clima):\n<dados_do_jogo>\n" +
+      ITENS_IA_UTILIDADE.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" +
       (daEspecie.length ? "Exclusivo desta especie:\n<dados_do_jogo>\n" + daEspecie.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" : "") +
       regraItemConsumivelPrompt(sp);
   }
