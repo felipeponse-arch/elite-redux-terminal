@@ -1,5 +1,11 @@
 [
   {
+    "date": "2026-09-27",
+    "items": [
+      "Mono run: o card ficou enxuto e foi pra baixo do time - só o resumo à vista, a lista completa em 'Tudo o que dá pra pegar'"
+    ]
+  },
+  {
     "date": "2026-09-26",
     "items": [
       "Rodapé numa linha só no celular e em janela pequena - sobra mais espaço pra lista",
@@ -13,8 +19,7 @@
       "Mono run: o card mostra as fraquezas que o time inteiro divide, quantos do próximo líder batem forte no seu tipo e quem pegar agora pra cobrir isso",
       "Mono run: a IA (build, Estratégias e time) passa a considerar as fraquezas do tipo, quem vira do tipo ao evoluir e quem sai dele",
       "Mono run: o card sugere o clima que combina com o seu tipo (Sol pra Fire, Chuva pra Water, Granizo pra Ice, Eerie Fog pra Ghost/Psychic), com botão pra usar",
-      "Chamadas da IA mais leves: a lista de golpes vai num formato compacto (mesma informação, menos texto)",
-      "Mono run: o card ficou enxuto e foi pra baixo do time - só o resumo à vista, a lista completa em 'Tudo o que dá pra pegar'"
+      "Chamadas da IA mais leves: a lista de golpes vai num formato compacto (mesma informação, menos texto)"
     ]
   },
   {
