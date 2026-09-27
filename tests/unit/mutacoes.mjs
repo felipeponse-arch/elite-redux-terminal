@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "mega-tardia-libera-na-4a",
+    descricao: "Haxorusite/Dragoninite Y/Gyaradosite Y liberam na 4ª insígnia",
+    arquivo: "formas_mega.js",
+    de: "function megaFormLiberada(f) { return !isMegaForm(f) || state.settings.milestone >= etapaDaMega(f); }",
+    para: "function megaFormLiberada(f) { return !isMegaForm(f) || state.settings.milestone >= MEGA_UNLOCK_MILESTONE; }",
+  },
+  {
     id: "tanque-rapido-passa",
     descricao: "tanque com Velocidade maxada passa",
     arquivo: "validacao_build_ia.js",
@@ -229,8 +236,8 @@ export const MUTACOES = [
     id: "mega-sem-trava-de-insignia",
     descricao: "battleUnitsOf conta mega como disponível antes da 4ª insígnia",
     arquivo: "formas_mega.js",
-    de: "return megaEvolutionUnlocked() ? fam : fam.slice(0, 1);",
-    para: "return fam;",
+    de: "return formFamilyOf(sp).filter(function (f, i) { return i === 0 || megaFormLiberada(f); });",
+    para: "return formFamilyOf(sp);",
   },
   {
     id: "reconciliar-nao-confere-habilidade",
@@ -264,7 +271,7 @@ export const MUTACOES = [
     id: "mega-usable-ignora-trava",
     descricao: "forma Mega no time/caixa antes da 4ª insígnia deixa de contar como a base (sugestão de time volta a ver a Mega)",
     arquivo: "formas_mega.js",
-    de: "return (!megaEvolutionUnlocked() && isMegaForm(sp)) ? formFamilyOf(sp)[0] : sp;",
+    de: "return (isMegaForm(sp) && !megaFormLiberada(sp)) ? formFamilyOf(sp)[0] : sp;",
     para: "return sp;",
   },
   {

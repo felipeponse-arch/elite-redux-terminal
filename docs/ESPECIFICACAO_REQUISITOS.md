@@ -531,6 +531,13 @@ builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   antiga, nunca ela. Curada da forma nova no estilo do time entra sem IA. Se a IA não estiver liberada,
   o card do time mostra "Gerar build nova (evoluiu)" (o clique libera a IA); com ela liberada, a
   revisão automática faz sozinha.
+- RF88 — **Megas de pedra tardia** (2026-09-27, pedido do usuário): Haxorusite, Dragoninite Y e
+  Gyaradosite Y só contam como disponíveis a partir da 7ª insígnia (Tate & Liza); as outras Megas
+  seguem liberando na 4ª (Flannery). Vale pra toda sugestão (unidades de batalha, time por IA,
+  prompts de build) e pra etiqueta "Mega só na 7ª insígnia". Fonte: Discord oficial (comunidade,
+  2.65 - a Haxorusite é a luta contra o Totem Haxorus no Meteor Falls, liberada depois do 7º
+  ginásio); Dragoninite Y e Gyaradosite Y por decisão do usuário, sem confirmação. Lista em
+  MEGA_PEDRAS_TARDIAS (formas_mega.js).
 
 **Nota da auditoria de 2026-09-23**: a numeração de Regras de Negócio pula de RN13 (seção 3) direto
 para RN15 — não existe RN14 em nenhuma versão deste documento. Não confirmado se é uma regra perdida

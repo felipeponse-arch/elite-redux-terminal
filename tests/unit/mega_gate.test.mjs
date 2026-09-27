@@ -67,3 +67,33 @@ test("prompt: espécie sem linha de mega nunca ganha bloco de Mega", () => {
 test("prompt: a própria forma Mega continua tendo o bloco normal (é uma build pra ela, não uma sugestão de mega)", () => {
   comMilestone(2, () => assert.match(R.megaPromptBlock(especie("SPECIES_ALTARIA_MEGA")), /MODO DE MEGA EVOLUCAO/));
 });
+
+// Pedras tardias (2026-09-27, pedido do usuário: "algumas mega evoluções só são
+// liberadas quando a gente ganha da Tate e da Liza"): Haxorusite, Dragoninite Y
+// e Gyaradosite Y só na 7ª insígnia; as outras seguem na 4ª.
+test("Megas de pedra tardia só contam a partir da 7ª insígnia (Tate & Liza)", () => {
+  const hax = especie("SPECIES_HAXORUS"), haxMega = especie("SPECIES_HAXORUS_MEGA");
+  assert.equal(R.etapaDaMega(haxMega), 7);
+  assert.equal(R.etapaDaMega(especie("SPECIES_DRAGONITE_MEGA_Y")), 7);
+  assert.equal(R.etapaDaMega(especie("SPECIES_GYARADOS_MEGA_Y")), 7);
+  assert.equal(R.etapaDaMega(especie("SPECIES_ALTARIA_MEGA")), 4, "as outras continuam na 4ª");
+  for (const m of [4, 6]) comMilestone(m, () => {
+    assert.ok(!R.battleFamilyOf(hax).some((s) => s.sname === "SPECIES_HAXORUS_MEGA"), "etapa " + m + ": Mega Haxorus fora");
+    assert.equal(R.usableSpeciesFor(haxMega).sname, "SPECIES_HAXORUS", "Mega na caixa conta como a base");
+    assert.match(R.megaPromptBlock(hax), /DESTA ESPECIE: AINDA NAO DISPONIVEL.*7ª insígnia \(Tate & Liza\)/);
+  });
+  comMilestone(7, () => {
+    assert.ok(R.battleFamilyOf(hax).some((s) => s.sname === "SPECIES_HAXORUS_MEGA"), "7ª insígnia: libera");
+    assert.doesNotMatch(R.megaPromptBlock(hax), /AINDA NAO DISPONIVEL/);
+  });
+  // Espécie com uma Mega liberada e outra tardia: só a tardia fica de fora.
+  const drag = especie("SPECIES_DRAGONITE");
+  comMilestone(5, () => {
+    const nomes = R.battleFamilyOf(drag).map((s) => s.sname);
+    assert.ok(!nomes.includes("SPECIES_DRAGONITE_MEGA_Y"));
+    if (R.formFamilyOf(drag).length > 2) {
+      assert.ok(nomes.length > 1, "a outra Mega do Dragonite continua valendo");
+      assert.match(R.megaPromptBlock(drag), /Ainda travada\(s\).*Dragonite Mega Y/);
+    }
+  });
+});

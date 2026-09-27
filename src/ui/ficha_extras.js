@@ -194,9 +194,11 @@
   // Etiqueta em criatura que é forma Mega enquanto a Mega ainda não existe pro
   // jogador (antes da 4ª insígnia): o rank SS dela é dado real, mas nenhuma
   // sugestão a conta - a etiqueta diz isso na própria tela.
+  // Desde 2026-09-27 a etapa é a da pedra (algumas só depois da Tate & Liza).
   function megaLockedTagHtml(sp) {
-    if (!sp || !isMegaForm(sp) || megaEvolutionUnlocked()) return "";
-    return ' <span class="mega-lock-tag" title="Mega Evolução só a partir da 4ª insígnia (Flannery). Até lá as sugestões contam esta criatura como a forma base.">Mega só na 4ª insígnia</span>';
+    if (!sp || !isMegaForm(sp) || megaFormLiberada(sp)) return "";
+    var quando = rotuloEtapaDaMega(sp);
+    return ' <span class="mega-lock-tag" title="Esta Mega só a partir da ' + escapeHtml(quando) + '. Até lá as sugestões contam esta criatura como a forma base.">Mega só na ' + escapeHtml(quando.split(" (")[0]) + '</span>';
   }
   // Linha "Outra forma: Mega X" no card do time (2026-09-16) - lembra que a
   // mesma criatura tem outra forma disponível, com link pra ficha dela.
@@ -205,5 +207,10 @@
     if (!others.length) return "";
     return '<br><b>' + (others.length > 1 ? 'Outras formas' : 'Outra forma') + ':</b> ' + others.map(function (f) {
       return '<span class="goto-species" tabindex="0" role="button" data-x="' + f.x + '">' + escapeHtml(f.n) + '</span>';
-    }).join(", ") + (!megaEvolutionUnlocked() && others.some(isMegaForm) ? ' <span class="mega-lock-tag" title="Mega Evolução só a partir da 4ª insígnia (Flannery).">Mega só na 4ª insígnia</span>' : "");
+    }).join(", ") + (function () {
+      var travada = others.filter(function (f) { return isMegaForm(f) && !megaFormLiberada(f); })[0];
+      if (!travada) return "";
+      var quando = rotuloEtapaDaMega(travada);
+      return ' <span class="mega-lock-tag" title="Mega Evolução só a partir da ' + escapeHtml(quando) + '.">Mega só na ' + escapeHtml(quando.split(" (")[0]) + '</span>';
+    })();
   }

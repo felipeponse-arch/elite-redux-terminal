@@ -87,6 +87,28 @@
   var MEGA_UNLOCK_MILESTONE = 4;
   function megaEvolutionUnlocked() { return state.settings.milestone >= MEGA_UNLOCK_MILESTONE; }
 
+  // Pedras que só aparecem mais tarde (2026-09-27, pedido do usuário: "tem
+  // algumas mega evoluções que só são liberadas quando a gente ganha da Tate e
+  // da Liza"). Não está no dado do NextDex nem nas páginas oficiais; vem do
+  // Discord oficial (comunidade, versão 2.65): a Haxorusite é a luta contra o
+  // Totem Haxorus no Meteor Falls, liberada depois do 7º ginásio (Nash Gold,
+  // 27/04/2026); Dragoninite Y e Gyaradosite Y foram incluídas por decisão do
+  // usuário (citadas junto por quem tinha acabado de vencer a Tate & Liza, sem
+  // confirmação). Valor = etapa (índice de levelcaps.json) em que a pedra libera.
+  var MEGA_PEDRAS_TARDIAS = { "Haxorusite": 7, "Dragoninite Y": 7, "Gyaradosite Y": 7 };
+  var ROTULO_ETAPA_MEGA = { 4: "4ª insígnia (Flannery)", 7: "7ª insígnia (Tate & Liza)" };
+  // Etapa em que esta forma Mega fica disponível: a da pedra, se for tardia.
+  function etapaDaMega(megaSp) {
+    return stonesOf(megaSp).reduce(function (et, pedra) {
+      return Math.max(et, MEGA_PEDRAS_TARDIAS[pedra] || MEGA_UNLOCK_MILESTONE);
+    }, MEGA_UNLOCK_MILESTONE);
+  }
+  function megaFormLiberada(f) { return !isMegaForm(f) || state.settings.milestone >= etapaDaMega(f); }
+  function rotuloEtapaDaMega(megaSp) {
+    var et = etapaDaMega(megaSp);
+    return ROTULO_ETAPA_MEGA[et] || (LEVELCAPS && LEVELCAPS.rows[et] ? LEVELCAPS.rows[et].milestone : "etapa " + et);
+  }
+
   // Achado do usuário (print, 2026-09-24): com a insígnia em "Knuckle Badge (2o
   // ginásio)", a caixa tinha "Altaria Mega" (SS) e a sugestão de time a tratava
   // como opção real. A trava de battleUnitsOf só cobria a avaliação de duelo;
@@ -98,21 +120,30 @@
   //                      no time/caixa antes de liberar conta como a base dela;
   //   megaPromptBlock  - o trecho de prompt sobre Mega (ou o aviso de que ainda
   //                      não existe pro jogador).
+  // Cada forma Mega conta só depois da etapa da pedra dela (megaFormLiberada) -
+  // a maioria na 4ª insígnia, as de MEGA_PEDRAS_TARDIAS depois.
   function battleFamilyOf(sp) {
-    var fam = formFamilyOf(sp);
-    return megaEvolutionUnlocked() ? fam : fam.slice(0, 1);
+    return formFamilyOf(sp).filter(function (f, i) { return i === 0 || megaFormLiberada(f); });
   }
   function usableSpeciesFor(sp) {
     if (!sp) return sp;
-    return (!megaEvolutionUnlocked() && isMegaForm(sp)) ? formFamilyOf(sp)[0] : sp;
+    return (isMegaForm(sp) && !megaFormLiberada(sp)) ? formFamilyOf(sp)[0] : sp;
   }
   function megaPromptBlock(sp) {
-    if (!megaFormsOf(sp).length && !isMegaForm(sp)) return "";
+    var megas = megaFormsOf(sp);
+    if (!megas.length && !isMegaForm(sp)) return "";
     if (!megaEvolutionUnlocked() && !isMegaForm(sp)) {
       return "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da 4a insignia (Flannery) e agora NAO tem essa opcao. " +
         "NAO considere, cite nem recomende nenhuma forma mega nem pedra mega nesta resposta; avalie so a forma base.";
     }
-    return megaModePromptLine();
+    var travadas = isMegaForm(sp) ? [] : megas.filter(function (m) { return !megaFormLiberada(m); });
+    if (travadas.length && travadas.length === megas.length) {
+      return "MEGA EVOLUCAO DESTA ESPECIE: AINDA NAO DISPONIVEL - a pedra so aparece depois da " + rotuloEtapaDaMega(travadas[0]) +
+        ". NAO considere, cite nem recomende a forma mega nem a pedra nesta resposta; avalie so a forma base.";
+    }
+    return megaModePromptLine() + (travadas.length
+      ? " Ainda travada(s) pro jogador (pedra so depois de uma insignia futura): " + travadas.map(function (m) { return m.n + " (" + rotuloEtapaDaMega(m) + ")"; }).join(", ") + " - nao recomende."
+      : "");
   }
 
   // Pedras de cada forma mega, a partir de data/mega_forms.json (pedra ->
