@@ -360,13 +360,17 @@
       // Item que reforça + travas (2026-09-27; travas pela descrição do jogo,
       // conferidas em conflitoDeItem, validacao_build_ia.js).
       "ITEM x BUILD: o item precisa reforcar o papel, a habilidade ou os golpes escolhidos - diga na rationale o que ele reforca. " +
+      "Escolha o item que MAIS ajuda este Pokemon, mesmo que outro membro do time ja use o mesmo - repetir item no time e permitido. " +
       "Sao REJEITADOS: Choice Band/Specs/Scarf com golpe de status (exceto Trick/Switcheroo, que passam o item); Assault Vest ou Tactical Vest com golpe de status (o jogo impede usar); Eviolite numa forma que nao evolui mais.\n";
   }
   // O que o resto do time já usa (só a build de 1 membro recebe: as Estratégias
   // são leitura exploratória da espécie, não do time).
   function blocoTimeEmUsoIA(sp) {
-    var itens = teamItemsInUse(sp.x), golpes = teamMovesInUse(sp.x), papeis = teamRolesInUse(sp.x);
-    return (itens.length ? ("Itens JA EM USO por outros membros do time atual - NUNCA repita nenhum destes, escolha outro item ou deixe vazio: " + itens.join(", ") + "\n") : "") +
+    // Item pode repetir no time (2026-09-27, pedido do usuário: "cada Pokémon
+    // pode ter um item e esse item pode ser repetido pelo time") - a lista de
+    // itens em uso saiu do prompt; golpes e papéis continuam como preferência.
+    var golpes = teamMovesInUse(sp.x), papeis = teamRolesInUse(sp.x);
+    return "" +
       (golpes.length ? ("Golpes JA EM USO por outros membros do time atual: " + golpes.join(", ") + ". Evite repetir estes golpes nesta build - o time fica mais forte e menos repetitivo quando cada membro cobre uma ameaca/papel diferente. So repita um destes se for claramente a melhor opcao sem alternativa real equivalente (ex: o STAB mais forte do movepool desta especie) - nesse caso, diga na rationale por que nao havia alternativa melhor.\n") : "") +
       (papeis.length ? ("Papeis JA COBERTOS por outros membros do time atual (perfil natural de cada especie, nao a build escolhida): " + papeis.map(function (r) { return ROLE_LABEL_PT[r] || r; }).join(", ") + ". Pese isso na hora de decidir o papel deste Pokemon - um time com varios atacantes puros e nenhuma bulk/suporte fica fragil contra qualquer coisa que sobreviva o primeiro golpe. Nao e proibido repetir papel (as vezes o time PRECISA de 2+ sweepers de proposito), mas se for repetir um papel ja bem coberto, diga na rationale por que faz sentido mesmo assim.\n") : "");
   }
@@ -404,7 +408,7 @@
       "Use getNextBossRoster: quando um golpe responder a uma ameaca concreta da proxima luta, prefira e cite o chefao na rationale. getBoxCandidatesForBoss: se sugerir ESTA especie pra proxima luta, pode citar.\n" +
       "4. ITEM: o que mais reforca o papel/habilidade/golpes, respeitando as regras de item acima.\n" +
       "5. NATURE e EVs: seguem o papel (tabela acima). Antes de decidir EV de Velocidade use getSpeedBenchmark - nao chute se 252 e rapido o bastante; se ja e rapida o suficiente, invista o resto em bulk/ataque.\n" +
-      "6. TIME: confira que a build nao repete item/golpe/papel do time sem motivo e cobre alguma fraqueza dele.\n" +
+      "6. TIME: confira que a build nao repete golpe/papel do time sem motivo (item pode repetir) e cobre alguma fraqueza dele.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
       '{"papel":"Tanque|Pivô|Wallbreaker|Sweeper","ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"plano":{"golpe de agora":"golpe futuro"},"rationale":"..."}' +
       ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +

@@ -246,10 +246,11 @@ resto do documento.
   do(s) mesmo(s) tipo(s) dela ("Rank Monotype"), visível apenas quando o jogador tiver um arquétipo
   Monotype ativo — mesmo princípio do rank por estágio evolutivo (RF52), eixo de comparação diferente
   (tipo, não estágio).
-- RF63 — Ao gerar uma build por IA para um membro do time, o Terminal deve informar quais itens,
-  golpes e papéis já estão em uso por outros membros do time atual, para reduzir repetição
-  desnecessária — item é regra dura (nunca repete), golpe e papel são preferência forte (pode repetir
-  quando genuinamente a melhor opção, com justificativa na rationale).
+- RF63 — Ao gerar uma build por IA para um membro do time, o Terminal deve informar quais golpes
+  e papéis já estão em uso por outros membros do time atual, para reduzir repetição desnecessária —
+  preferência forte (pode repetir quando genuinamente a melhor opção, com justificativa na
+  rationale). **Revisado em 2026-09-27 (pedido do usuário):** item deixou de ser regra dura - cada
+  Pokémon usa o item que mais o ajuda, e o mesmo item pode repetir no time.
 - RF64 — O Terminal deve calcular e expor (na ficha da Dex e como ferramenta do gerador de build por
   IA) combos autossuficientes reais entre uma habilidade condicional (clima específico ou HP baixo) e
   um golpe que a própria espécie aprende para satisfazer essa condição sozinha, sem depender de outro

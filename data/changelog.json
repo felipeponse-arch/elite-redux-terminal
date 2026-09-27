@@ -4,7 +4,8 @@
     "items": [
       "Mono run: o card ficou enxuto e foi pra baixo do time - só o resumo à vista, a lista completa em 'Tudo o que dá pra pegar'",
       "Builds da IA mais inteligentes: ela lê o efeito das habilidades, escolhe um papel (tanque, pivô, wallbreaker, sweeper) e monta EVs, golpes, prioridade e item a serviço dele - e o app recusa combinações que se anulam (ex.: Assault Vest com golpe de status)",
-      "Quando um Pokémon evolui, a IA monta uma build NOVA pra forma nova (não adapta mais a antiga); a de antes fica salva no chip \"Antes de evoluir\". Se a IA não estiver liberada, o card mostra o botão \"Gerar build nova (evoluiu)\""
+      "Quando um Pokémon evolui, a IA monta uma build NOVA pra forma nova (não adapta mais a antiga); a de antes fica salva no chip \"Antes de evoluir\". Se a IA não estiver liberada, o card mostra o botão \"Gerar build nova (evoluiu)\"",
+      "Item pode repetir no time: a IA escolhe pra cada Pokémon o item que mais o ajuda, mesmo que outro membro já use (antes era proibido)"
     ]
   },
   {

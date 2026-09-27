@@ -357,30 +357,20 @@
   }
 
   // Acertos na build validada antes de gravar (tirados de generateBuildWithAI na
-  // fase 5 da refatoração). Devolve true se o item foi descartado.
-  function ajustarBuildDaIa(sp, validated, opts, takenItems, cap) {
-    // Defesa em profundidade (achado real do usuário, 2026-09-12): o
-    // prompt já pede pra IA não repetir item de outro membro do time,
-    // mas nunca confia cegamente nisso (mesma disciplina de todo o
-    // resto de validateAiBuild) - se mesmo assim vier um item já em uso,
-    // some o item em vez de rejeitar a build inteira (item já era um
-    // campo "soft fallback" antes disto, nunca motivo de rejeição total).
-    var itemWasDropped = false;
-    if (validated.item && takenItems.indexOf(validated.item) !== -1) {
-      itemWasDropped = true;
-      validated.item = "";
-    }
+  // fase 5 da refatoração). Item repetido no time é permitido desde 2026-09-27
+  // (pedido do usuário: "cada Pokémon pode ter um item e esse item pode ser
+  // repetido pelo time") - antes o item já em uso por outro membro era apagado.
+  function ajustarBuildDaIa(sp, validated, opts, cap) {
     if (opts.modo === "ponte" && opts.alvo) {
       // A build de agora é a curada com golpes-ponte: habilidade, natureza,
       // item e EVs continuam os da curada (quando valem pra esta forma).
       var alvoAb = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
       if (alvoAb.indexOf(opts.alvo.ability) !== -1) validated.ability = opts.alvo.ability;
       if (opts.alvo.nature) validated.nature = opts.alvo.nature;
-      if (takenItems.indexOf(opts.alvo.item) === -1) validated.item = opts.alvo.item || "";
+      validated.item = opts.alvo.item || "";
       validated.evs = evsTextoParaArray(opts.alvo.evs);
       validated.rationale = "Build curada adaptada ao level cap " + cap + ": golpes-ponte até liberar os da curada.";
     }
-    return itemWasDropped;
   }
 
   // Uma ação só: gravar a build, limpar a marca de revisão e registrar no
@@ -425,7 +415,6 @@
       var aviso = function (texto) { if (statusEl) statusEl.textContent = texto; };
       aviso("Consultando o Claude...");
       var cap = getCurrentCap();
-      var takenItems = teamItemsInUse(sp.x);
       // Uma nova tentativa automática, já dizendo à IA por que a primeira foi
       // rejeitada (item U3 da pauta técnica, 2026-09-16) - antes o trabalho de
       // "tente de novo" ficava com o jogador. Só UMA: cada chamada custa, e se a
@@ -458,7 +447,7 @@
       // uma escolha feita enquanto esperava. "obsoleta" não conta como falha.
       if (opts.modo === "revisao" && (getActiveBuild(sp.sname) !== opts.anterior || state.team.indexOf(sp.x) === -1)) return "obsoleta";
       if (opts.modo === "ponte" && (getActiveBuild(sp.sname) || state.team.indexOf(sp.x) === -1)) return "obsoleta";
-      var itemWasDropped = ajustarBuildDaIa(sp, validated, opts, takenItems, cap);
+      ajustarBuildDaIa(sp, validated, opts, cap);
       var planoCheck = anexarPlanoDaIa(sp, validated, raw && raw.plano, cap,
         opts.modo === "ponte" && opts.alvo ? opts.alvo.moves : null);
       validated.planoConsultado = true; // o prompt já pediu o plano - não pedir de novo
@@ -468,7 +457,7 @@
         return false;
       }
       if (!opts.silencioso) {
-        flashToast("Build gerada por IA salva para " + sp.n + (itemWasDropped ? " (sem item - já em uso por outro membro do time)" : "") +
+        flashToast("Build gerada por IA salva para " + sp.n +
           (validated.plano ? " - com " + Object.keys(validated.plano).length + " troca(s) planejada(s) para quando o cap subir" : ""));
       }
       if (planoCheck.descartados.length && statusEl) {

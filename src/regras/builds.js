@@ -76,9 +76,10 @@
     return parts.join(" / ");
   }
 
-  // Itens já em uso por OUTROS membros do time (achado real do usuário,
-  // 2026-09-12: "todos os poke tem praticamente os mesmos itens... nenhum
-  // outro pode ter a build montada com life orb"). Olha só a build ATIVA
+  // Itens já em uso por OUTROS membros do time. Nasceu de um pedido de
+  // 2026-09-12 ("nenhum outro pode ter a build montada com life orb") e deixou
+  // de ser regra em 2026-09-27, a pedido do mesmo usuário: item PODE repetir no
+  // time - não vai mais pro prompt nem apaga item da IA. Olha só a build ATIVA
   // de cada outro membro (effectiveBuild - a mesma noção de "a build" que
   // o resto do app usa, não as até 3 variantes salvas), e só membros do
   // TIME (não a caixa inteira) - é o item já em uso NA PRÓXIMA LUTA, não

@@ -39,7 +39,9 @@ test("prompt da build cita o que o resto do time já usa; sozinho, não cita nad
   R.state.team = [g.x, s.x];
   R.state.customBuilds.SPECIES_SWAMPERT = [{ ability: "", nature: "Jolly", item: "Leftovers", moves: ["Waterfall"], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0], source: "manual", active: true }];
   const b = R.blocoTimeEmUsoIA(g);
-  assert.match(b, /Itens JA EM USO.*Leftovers/);
+  // Item pode repetir no time desde 2026-09-27 (pedido do usuário).
+  assert.doesNotMatch(b, /Itens JA EM USO/);
+  assert.match(R.montarPromptBuild(g, {}), /repetir item no time e permitido/);
   assert.match(b, /Golpes JA EM USO.*Waterfall/);
 });
 
