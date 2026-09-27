@@ -389,8 +389,28 @@
         : '<details class="mono-mais"><summary>' + titulo + ' <span class="mono-conta">' + itens.length + '</span></summary>' + lista + '</details>';
     }
     var etapaTxt = LEVELCAPS && LEVELCAPS.rows[etapa] ? LEVELCAPS.rows[etapa].milestone : "";
+    // Topo do card (2026-09-26): o que o time inteiro divide e o próximo líder
+    // contra o seu tipo; depois, quem dá pra pegar JÁ e cobre essas fraquezas.
+    var fracas = fraquezasDoTipo(tipo);
+    var aviso = avisoProximoLider(tipo);
+    var avisoHtml = aviso && aviso.total
+      ? '<p class="mono-aviso' + (aviso.batemForte.length * 2 >= aviso.total ? " mono-aviso-forte" : "") + '">Próximo líder, ' + escapeHtml(aviso.lider) + ': ' +
+        (aviso.batemForte.length
+          ? aviso.batemForte.length + ' de ' + aviso.total + ' têm golpe super efetivo em ' + escapeHtml(tipo) + ' (' + escapeHtml(aviso.batemForte.join(", ")) + ').'
+          : 'nenhum dos ' + aviso.total + ' tem golpe super efetivo em ' + escapeHtml(tipo) + '.') + '</p>'
+      : "";
+    var cobrem = d.novos.concat(d.antes).filter(function (i) { return !i.jaTem && i.cobre.length && i.marcas.indexOf("M") === -1; }).slice(0, 3);
+    var cobremHtml = cobrem.length
+      ? '<h4 class="mono-grupo">Pegar agora pra cobrir as fraquezas</h4><ul class="mono-lista">' + cobrem.map(function (i) {
+          return '<li class="mono-item"><button type="button" class="mono-nome" data-x="' + i.sp.x + '" title="Abrir a ficha na Dex">' + escapeHtml(i.sp.n) + '</button>' +
+            '<span class="mono-marca mono-cobre">cobre ' + escapeHtml(i.cobre.join(", ")) + '</span>' +
+            '<span class="mono-local">' + escapeHtml(i.local || "local não informado") + '</span></li>';
+        }).join("") + '</ul>'
+      : "";
     return '<div class="card mono-run">' +
       '<h3>Mono ' + escapeHtml(tipo) + ': onde pegar</h3>' +
+      '<p class="mono-fraquezas">Fraquezas que o time inteiro divide: <b>' + escapeHtml(fracas.join(", ")) + '</b></p>' +
+      avisoHtml + cobremHtml +
       '<p class="mybuild-hint">Sua etapa: ' + escapeHtml(etapaTxt) + '. Os melhores do tipo primeiro; clique no nome pra abrir a ficha. ' +
         'Fonte: planilha da comunidade <a href="' + escapeHtml(MONO_DISP.fonte) + '" target="_blank" rel="noopener">Mono earliest locations</a> (índice oficial), conferida com os dados do jogo.</p>' +
       grupo(etapa === 0 ? "Desde o início" : "Novos depois de " + escapeHtml(d.liderAnterior || ""), d.novos, true) +

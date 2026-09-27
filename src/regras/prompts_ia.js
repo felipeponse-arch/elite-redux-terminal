@@ -144,6 +144,9 @@
     if (state.archetype.tatica && TATICA_BUILD_GUIDANCE[state.archetype.tatica]) {
       parts.push("Tatica do time: " + state.archetype.tatica + " - " + TATICA_BUILD_GUIDANCE[state.archetype.tatica]);
     }
+    // Monotype (2026-09-26): antes só o gerador de time sabia; a build e as
+    // Estratégias agora cobrem as fraquezas que o time inteiro divide.
+    if (state.archetype.monotype) parts.push("Monotype do time: " + orientacaoMono(state.archetype.monotype));
     return parts;
   }
 
@@ -459,6 +462,26 @@
     });
     return { roster: roster, validSnames: validSnames };
   }
+  // Mono run (2026-09-26): por candidato, as fraquezas do time que ele cobre e
+  // se sai do tipo ao evoluir; e quem o jogador tem que ainda não é do tipo mas
+  // vira (evolução ou Mega) - fica fora do time, mas a IA pode citar.
+  function notaMonoDoCandidato(sp, tipo) {
+    var cobre = cobreFraquezas(sp, fraquezasDoTipo(tipo));
+    var muda = mudancaDeTipo(sp, tipo);
+    return (cobre.length ? ", cobre fraqueza do time a " + cobre.join("/") : "") +
+      (muda && muda.sai ? ", SAI do tipo " + tipo + " ao evoluir pra " + muda.sai.join("/") + " (nao evolua ou segure Everstone)" : "");
+  }
+  function viramDoTipoPrompt(tipo) {
+    var vistos = {};
+    var viram = state.team.concat(state.box).map(getSpeciesByX).filter(function (sp) {
+      if (!sp || vistos[sp.x]) return false;
+      vistos[sp.x] = true;
+      var m = mudancaDeTipo(sp, tipo);
+      return !!(m && m.vira);
+    }).map(function (sp) { return sp.n + (mudancaDeTipo(sp, tipo).vira === "M" ? " (so na Mega)" : " (ao evoluir)"); });
+    return viram.length ? "O jogador tambem tem, ainda fora do tipo " + tipo + " mas que viram " + tipo + ": " + viram.join(", ") +
+      " - NAO entram no time agora; se valer a pena esperar a evolucao, diga no reasoning.\n" : "";
+  }
   function montarPromptTimeArquetipo(roster, pace, weather, monotype) {
     var rosterDesc = roster.map(function (sp) {
       var role = SPECIES_ROLE[sp.sname];
@@ -470,7 +493,8 @@
       return sp.sname + " " + sp.n + " (" + speciesTypeNames(sp).join("/") + formFamilyPromptNote(sp) + "), Velocidade base " + sp.b[5] +
         (r ? ", rank " + r.tier : "") + (roleNames.length ? ", papel " + roleNames.join("/") : "") +
         ", innate: " + innNames.join(", ") +
-        (build ? ", habilidade escolhida: " + build.ability : ", habilidades escolhíveis: " + abiNames.join(", "));
+        (build ? ", habilidade escolhida: " + build.ability : ", habilidades escolhíveis: " + abiNames.join(", ")) +
+        (monotype ? notaMonoDoCandidato(sp, monotype) : "");
     }).join("\n");
     var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + weather : "", state.archetype.tatica ? "Tatica: " + state.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
     return "Você é o especialista em meta do Pokemon Elite Redux (ROM hack), build " +
@@ -479,7 +503,9 @@
       "algo fora dela:\n" + rosterDesc + "\n\n" +
       "Foco pedido: " + focusDesc + ".\n" +
       (megaEvolutionUnlocked() ? "" : "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da 4a insignia (Flannery). NAO sugira nenhuma forma mega nem conte com mega no time; use so as formas base da lista.\n") +
-      (monotype ? "A lista acima JÁ está filtrada só pro tipo " + monotype + " (Monotype) - todos servem, escolha pela sinergia entre eles.\n" : "") +
+      (monotype ? "A lista acima JÁ está filtrada só pro tipo " + monotype + " (Monotype) - todos servem, escolha pela sinergia entre eles.\n" +
+        "Na " + orientacaoMono(monotype) + " Entre candidatos parecidos, prefira quem cobre mais dessas fraquezas.\n" +
+        viramDoTipoPrompt(monotype) : "") +
       "Use as ferramentas disponíveis pra checar rank/papel/sinergia real de candidatos específicos antes de " +
       "decidir - não confie só no resumo acima. Evite concentrar o mesmo papel sem necessidade real (ex: 4 " +
       "tanques só faz sentido pra um time Stall de verdade) - a menos que o foco pedido exija isso. Use a " +

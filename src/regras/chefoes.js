@@ -184,7 +184,7 @@
     var atkTypes = computeBossAttackTypes(boss);
     if (!atkTypes.length) return null;
     var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
-    var boxMembers = state.box.map(getSpeciesByX).filter(Boolean);
+    var boxMembers = state.box.map(getSpeciesByX).filter(Boolean).filter(serveProMono); // Monotype vale aqui também
     if (!teamMembers.length || !boxMembers.length) return null;
 
     // Cada membro (time e caixa) é avaliado pelas unidades de batalha dele
@@ -284,9 +284,11 @@
 
   // Caixa inteira na mesma régua (nunca quem já está no time). Só é calculada
   // quando a tela precisa de trocas - a caixa pode ter centenas de criaturas.
+  // Numa run Monotype, só quem é do tipo (serveProMono, mono_run.js) - a troca
+  // tem botão Aplicar, e sugerir outro tipo quebraria a run (2026-09-26).
   function confrontoUnidadesDaCaixa(foes) {
     return state.box.filter(function (x) { return state.team.indexOf(x) === -1; })
-      .map(getSpeciesByX).filter(Boolean).map(function (owned) {
+      .map(getSpeciesByX).filter(Boolean).filter(serveProMono).map(function (owned) {
         return confrontoMelhorUnidade(owned, foes);
       }).filter(Boolean);
   }

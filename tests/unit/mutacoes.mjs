@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "mono-caixa-sem-filtro",
+    descricao: "troca da caixa ignora o Monotype",
+    arquivo: "mono_run.js",
+    de: "return !tipo || speciesTypeNames(sp).indexOf(tipo) !== -1;",
+    para: "return true;",
+  },
+  {
+    id: "mono-fraqueza-invertida",
+    descricao: "fraquezas do tipo viram resistências",
+    arquivo: "mono_run.js",
+    de: "return USABLE_TYPES.filter(function (atk) { return typeMultiplier(atk, [tipo]) > 1; });",
+    para: "return USABLE_TYPES.filter(function (atk) { return typeMultiplier(atk, [tipo]) < 1; });",
+  },
+  {
     id: "item-de-especie-pra-qualquer-um",
     descricao: "Light Ball e cia. oferecidos pra qualquer espécie",
     arquivo: "prompts_ia.js",

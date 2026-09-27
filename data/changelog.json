@@ -8,7 +8,10 @@
       "Novo pra mono run: escolhendo um Monotype na aba Time aparece onde pegar Pokémon do tipo até a sua insígnia, o que libera no próximo líder e quem você já tem",
       "A IA agora escolhe entre mais itens: gemas, itens que reforçam um tipo (Charcoal, Black Belt...), Scope Lens, Light Clay, Swirly Glasses e outros - e item exclusivo (Light Ball, Thick Club) só pra espécie certa",
       "Arquétipo com nomes certos: 'Ritmo' virou 'Estilo', 'Clima' virou 'Clima e campo' e 'Snow' virou 'Hail' (como no jogo)",
-      "Novas opções no arquétipo: Eerie Fog e os terrenos (inclusive o Toxic Terrain do Elite Redux), e um eixo novo, Tática: Telas ou Armadilhas e pivô"
+      "Novas opções no arquétipo: Eerie Fog e os terrenos (inclusive o Toxic Terrain do Elite Redux), e um eixo novo, Tática: Telas ou Armadilhas e pivô",
+      "Mono run: a troca sugerida da caixa respeita o Monotype (antes podia sugerir outro tipo)",
+      "Mono run: o card mostra as fraquezas que o time inteiro divide, quantos do próximo líder batem forte no seu tipo e quem pegar agora pra cobrir isso",
+      "Mono run: a IA (build, Estratégias e time) passa a considerar as fraquezas do tipo, quem vira do tipo ao evoluir e quem sai dele"
     ]
   },
   {

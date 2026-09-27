@@ -152,4 +152,7 @@
 .mono-local { color: var(--text-dim); font-size: var(--fs-pequeno); }
 .mono-marca { font-size: var(--fs-legenda); color: var(--text-dim); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 5px; }
 .mono-ja-tem { font-size: var(--fs-legenda); color: var(--sem-resist); font-weight: 600; }
-.mono-tem .mono-nome { color: var(--text-dim); }
+.mono-tem .mono-nome { color: var(--text-dim); }.mono-fraquezas { margin: 4px 0; font-size: var(--fs-texto); }
+.mono-aviso { margin: 4px 0 8px; font-size: var(--fs-texto); color: var(--text-dim); }
+.mono-aviso-forte { color: var(--sem-weak); font-weight: 600; }
+.mono-cobre { color: var(--sem-resist); border-color: var(--sem-resist); }

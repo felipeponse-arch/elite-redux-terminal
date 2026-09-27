@@ -497,6 +497,13 @@ builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   granizo; save antigo é convertido). Cada valor leva à IA uma orientação de build com as
   habilidades que armam/aproveitam, conferidas no dado; efeito que a descrição do jogo não confirma
   não entra.
+- RF84 — **Monotype vale em tudo**: com um Monotype escolhido, nenhuma sugestão automática propõe
+  Pokémon de outro tipo (melhor troca da caixa - que tem "Aplicar" -, candidato da caixa pro chefão,
+  gerador de time). A IA de build, Estratégias e time recebe as fraquezas que o time inteiro divide,
+  a berry de resistência delas e os tipos que resistem ao do time; o gerador de time vê, por
+  candidato, que fraqueza ele cobre e se sai do tipo ao evoluir (Everstone), e quem o jogador tem
+  que ainda vai virar do tipo. O card de mono run mostra essas fraquezas, quantos membros do
+  próximo líder têm golpe super efetivo no tipo e até 3 capturas disponíveis que as cobrem.
 
 **Nota da auditoria de 2026-09-23**: a numeração de Regras de Negócio pula de RN13 (seção 3) direto
 para RN15 — não existe RN14 em nenhuma versão deste documento. Não confirmado se é uma regra perdida

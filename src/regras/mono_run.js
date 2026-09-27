@@ -31,6 +31,83 @@
     return linha;
   }
 
+  // ---- Monotype valendo em tudo (2026-09-26, pedido do usuário: "tem algo
+  // que pode ajudar nas mono runs?"). Antes só o gerador de time respeitava o
+  // Monotype; a melhor troca da caixa (com botão Aplicar) sugeria Pokémon de
+  // outro tipo e quebrava a run. ----
+  function monotypeAtivo() { return state.archetype.monotype || null; }
+  // Pode lutar numa run Monotype: já tem o tipo (sem Monotype, todo mundo pode).
+  function serveProMono(sp) {
+    var tipo = monotypeAtivo();
+    return !tipo || speciesTypeNames(sp).indexOf(tipo) !== -1;
+  }
+
+  // Fraquezas que o time inteiro divide (o tipo sozinho) e quem resiste ao tipo.
+  function fraquezasDoTipo(tipo) {
+    return USABLE_TYPES.filter(function (atk) { return typeMultiplier(atk, [tipo]) > 1; });
+  }
+  function resistemAoTipo(tipo) {
+    return USABLE_TYPES.filter(function (def) { return typeMultiplier(tipo, [def]) < 1; });
+  }
+  // Quais dessas fraquezas a espécie cobre (resiste ou é imune), pelo tipo
+  // secundário ou por habilidade sempre ativa.
+  function cobreFraquezas(sp, fraquezas) {
+    return fraquezas.filter(function (atk) { return abilityTypeMod(atk, sp).mult < 1; });
+  }
+
+  // Muda de tipo com a evolução? Pra quem NÃO tem o tipo: "#" se uma evolução
+  // normal tem, "M" se só uma Mega da linha tem. Pra quem TEM: as evoluções
+  // que perdem o tipo (o jogador pode segurar a evolução).
+  function mudancaDeTipo(sp, tipo) {
+    var tem = function (s) { return speciesTypeNames(s).indexOf(tipo) !== -1; };
+    var linha = linhaEvolutivaDe(sp).slice(1);
+    if (!tem(sp)) {
+      if (linha.some(tem)) return { vira: "#" };
+      var megas = [sp].concat(linha).reduce(function (acc, s) {
+        return acc.concat(formFamilyOf(s).filter(function (f) { return isMegaForm(f) && acc.indexOf(f) === -1; }));
+      }, []);
+      return megas.some(tem) ? { vira: "M" } : null;
+    }
+    var perdem = linha.filter(function (s) { return !tem(s); });
+    return perdem.length ? { sai: perdem.map(function (s) { return s.n; }) } : null;
+  }
+
+  // Berry de resistência de cada tipo (as mesmas do prompt de itens).
+  var BERRY_DE_RESISTENCIA = {
+    Fire: "Occa Berry", Water: "Passho Berry", Electric: "Wacan Berry", Grass: "Rindo Berry", Ice: "Yache Berry",
+    Fighting: "Chople Berry", Poison: "Kebia Berry", Ground: "Shuca Berry", Flying: "Coba Berry", Psychic: "Payapa Berry",
+    Bug: "Tanga Berry", Rock: "Charti Berry", Ghost: "Kasib Berry", Dragon: "Haban Berry", Dark: "Colbur Berry",
+    Steel: "Babiri Berry", Fairy: "Roseli Berry", Normal: "Chilan Berry"
+  };
+
+  // Texto pra IA (build, Estratégias e time): o que um time mono precisa cobrir.
+  function orientacaoMono(tipo) {
+    var fracas = fraquezasDoTipo(tipo);
+    var berries = fracas.map(function (t) { return BERRY_DE_RESISTENCIA[t]; }).filter(function (b) { return b && ITEMS.indexOf(b) !== -1; });
+    return "run Monotype " + tipo + ": o time INTEIRO e " + tipo + " e divide as mesmas fraquezas (" + fracas.join(", ") + "). " +
+      "Priorize o que cobre isso - tipo secundario ou habilidade que resista/anule essas fraquezas" +
+      (berries.length ? ", berry de resistencia da fraqueza mais perigosa (" + berries.join(", ") + ")" : "") +
+      " - e golpe de cobertura contra quem resiste a " + tipo + " (" + resistemAoTipo(tipo).join(", ") + ").";
+  }
+
+  // Próximo líder x seu tipo: quantos membros têm golpe de dano super efetivo
+  // no tipo (o time mono inteiro sente isso junto).
+  function avisoProximoLider(tipo) {
+    var boss = getRemainingBossEntries()[0];
+    if (!boss) return null;
+    var party = bossPartyPorDificuldade(boss) || [];
+    var fortes = party.filter(function (m) {
+      return (m.mv || []).some(function (nome) {
+        var mv = MOVE_BY_NAME[nome];
+        return mv && moveRoleOf(nome) === "dano" && typeMultiplier(TYPES[mv[1]], [tipo]) > 1;
+      });
+    });
+    return {
+      lider: gymLeaderBaseName(boss.name), total: party.length, // "Wattson 1" -> "Wattson"
+      batemForte: fortes.map(function (m) { var s = getSpeciesByX(m.x); return s ? s.n : "?"; })
+    };
+  }
+
   // possuidos: lista de x (time + caixa). Já tem = tem a espécie OU algo que
   // ela vira (quem tem Charmeleon não precisa correr atrás de Charmander).
   function monoDisponibilidade(tipo, etapa, possuidos) {
@@ -47,6 +124,7 @@
         sp: sp, local: e.l, etapa: e.e,
         marcas: (e.m || "").split("").filter(function (m) { return MONO_MARCAS[m]; }),
         tier: mono ? mono.tier : null, score: mono ? mono.score : -1,
+        cobre: cobreFraquezas(sp, fraquezasDoTipo(tipo)),
         jaTem: linhaEvolutivaDe(sp).some(function (s) { return tem[s.x]; })
       };
     }).filter(Boolean);

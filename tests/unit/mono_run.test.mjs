@@ -54,6 +54,52 @@ test("separa novos, anteriores e próxima etapa, e marca quem o jogador já tem"
   assert.deepEqual(notas, [...notas].sort((a, b) => b - a), "melhores do tipo primeiro");
 });
 
+const tipos = (s) => R.speciesTypeNames(s);
+const porNome = (n) => { const s = R.SPECIES.find((x) => x.n === n); assert.ok(s, n); return s; };
+
+test("Monotype vale na troca da caixa: só entra quem é do tipo", () => {
+  R.state.archetype.monotype = "Fire";
+  R.state.team = [porNome("Charmander").x];
+  R.state.box = [porNome("Squirtle").x, porNome("Vulpix").x, porNome("Pidgey").x];
+  const foes = R.confrontoFoesDe(R.bossPartyPorDificuldade(R.BOSSES[0]));
+  const caixa = R.confrontoUnidadesDaCaixa(foes);
+  assert.ok(caixa.length >= 1, "o Vulpix continua valendo");
+  assert.ok(caixa.every((u) => u.main && tipos(u.main).includes("Fire")), "só unidades do tipo Fire");
+  assert.ok(!caixa.some((u) => ["Squirtle", "Pidgey"].includes(u.main.n)));
+  assert.ok(!R.serveProMono(porNome("Squirtle")) && R.serveProMono(porNome("Vulpix")));
+  R.state.archetype.monotype = null;
+  assert.ok(R.serveProMono(porNome("Squirtle")), "sem Monotype, todo mundo serve");
+  assert.equal(R.confrontoUnidadesDaCaixa(foes).length, 3);
+  R.state.team = []; R.state.box = [];
+});
+
+test("fraquezas do tipo, quem cobre, e quem vira/sai do tipo", () => {
+  assert.deepEqual([...R.fraquezasDoTipo("Fire")].sort(), ["Ground", "Rock", "Water"]);
+  // Alguém do tipo Fire que resiste a Water pelo tipo secundário ou habilidade.
+  const cobre = R.SPECIES.find((s) => tipos(s).includes("Fire") && R.cobreFraquezas(s, ["Water"]).length);
+  assert.ok(cobre, "fixture: Fire que cobre Water");
+  assert.ok(R.abilityTypeMod("Water", cobre).mult < 1);
+  // Vira do tipo ao evoluir / sai do tipo ao evoluir (achados no dado).
+  const vira = R.SPECIES.find((s) => !tipos(s).includes("Water") && R.linhaEvolutivaDe(s).slice(1).some((e) => tipos(e).includes("Water")));
+  assert.equal(R.mudancaDeTipo(vira, "Water").vira, "#");
+  const sai = R.SPECIES.find((s) => tipos(s).includes("Water") && R.linhaEvolutivaDe(s).slice(1).some((e) => !tipos(e).includes("Water")));
+  assert.ok(R.mudancaDeTipo(sai, "Water").sai.length);
+  assert.equal(R.mudancaDeTipo(porNome("Squirtle"), "Water"), null, "a linha toda é Water");
+});
+
+test("Monotype entra no prompt da build e do time; aviso do próximo líder", () => {
+  R.state.archetype.monotype = "Fire";
+  const pb = R.montarPromptBuild(porNome("Charmander"), {});
+  assert.match(pb, /Monotype do time: run Monotype Fire/);
+  assert.match(pb, /Passho Berry/, "berry contra Water, a fraqueza do time");
+  R.state.team = [porNome("Charmander").x];
+  const pt = R.montarPromptTimeArquetipo(R.rosterParaTimeIA("Fire").roster, null, null, "Fire");
+  assert.match(pt, /divide as mesmas fraquezas \(Water, Ground, Rock\)|divide as mesmas fraquezas/);
+  const aviso = R.avisoProximoLider("Fire");
+  assert.ok(aviso && aviso.total > 0 && aviso.batemForte.length <= aviso.total);
+  R.state.archetype.monotype = null; R.state.team = [];
+});
+
 test("importador: marcas e formas regionais da planilha", () => {
   assert.deepEqual(lerNome("Zigzagoon (Galarian)"), { nome: "Zigzagoon Galarian", marcas: "" });
   assert.deepEqual(lerNome("Sylvally (%)"), { nome: "Sylvally", marcas: "%" });
