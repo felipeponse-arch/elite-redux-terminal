@@ -504,6 +504,11 @@ builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   candidato, que fraqueza ele cobre e se sai do tipo ao evoluir (Everstone), e quem o jogador tem
   que ainda vai virar do tipo. O card de mono run mostra essas fraquezas, quantos membros do
   próximo líder têm golpe super efetivo no tipo e até 3 capturas disponíveis que as cobrem.
+- RF85 — **Clima que combina com o tipo**: numa run Monotype o card sugere o clima com bônus
+  confirmado em fonte oficial (Full Features "Weather Rework" e FAQ): Fire→Sun e Water→Rain (+20% de
+  dano), Ice→Hail (+50% de Defesa), Ghost/Psychic→Eerie Fog (20% menos dano recebido, aumentos de
+  status não caem). Um clique põe no "Clima e campo"; a IA recebe a mesma sugestão. Tipo sem bônus
+  confirmado (ex.: areia pra Rock, que é do jogo original) não recebe sugestão.
 
 **Nota da auditoria de 2026-09-23**: a numeração de Regras de Negócio pula de RN13 (seção 3) direto
 para RN15 — não existe RN14 em nenhuma versão deste documento. Não confirmado se é uma regra perdida

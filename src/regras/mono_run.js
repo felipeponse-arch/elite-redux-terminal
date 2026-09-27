@@ -80,14 +80,33 @@
     Steel: "Babiri Berry", Fairy: "Roseli Berry", Normal: "Chilan Berry"
   };
 
+  // Clima que combina com o tipo (2026-09-26, pedido do usuário) - SÓ bônus
+  // confirmado em fonte oficial: "Weather Rework" da página Full Features
+  // (eliteredux.net/full-features: "Damage bonus reduced to 20% for Sun/Rain",
+  // "Ice-types get 50% defense boost in Hail") e o FAQ (Eerie Fog: "Ghost- and
+  // Psychic-types get a 20% damage reduction from moves", e os aumentos de
+  // status de quem NÃO é Ghost/Psychic caem 1 por turno). Areia pra Rock é do
+  // jogo original e não aparece nas páginas oficiais deste hack - fica de fora.
+  var CLIMA_QUE_COMBINA = {
+    Fire: { clima: "Sun", porque: "golpes Fire causam 20% a mais no sol" },
+    Water: { clima: "Rain", porque: "golpes Water causam 20% a mais na chuva" },
+    Ice: { clima: "Hail", porque: "tipo Ice ganha 50% de Defesa no granizo" },
+    Ghost: { clima: "Eerie Fog", porque: "Ghost recebe 20% menos dano e seus aumentos de status não caem na névoa" },
+    Psychic: { clima: "Eerie Fog", porque: "Psychic recebe 20% menos dano e seus aumentos de status não caem na névoa" }
+  };
+  function climaQueCombina(tipo) { return CLIMA_QUE_COMBINA[tipo] || null; }
+
   // Texto pra IA (build, Estratégias e time): o que um time mono precisa cobrir.
   function orientacaoMono(tipo) {
     var fracas = fraquezasDoTipo(tipo);
     var berries = fracas.map(function (t) { return BERRY_DE_RESISTENCIA[t]; }).filter(function (b) { return b && ITEMS.indexOf(b) !== -1; });
+    var clima = climaQueCombina(tipo);
     return "run Monotype " + tipo + ": o time INTEIRO e " + tipo + " e divide as mesmas fraquezas (" + fracas.join(", ") + "). " +
       "Priorize o que cobre isso - tipo secundario ou habilidade que resista/anule essas fraquezas" +
       (berries.length ? ", berry de resistencia da fraqueza mais perigosa (" + berries.join(", ") + ")" : "") +
-      " - e golpe de cobertura contra quem resiste a " + tipo + " (" + resistemAoTipo(tipo).join(", ") + ").";
+      " - e golpe de cobertura contra quem resiste a " + tipo + " (" + resistemAoTipo(tipo).join(", ") + ")." +
+      (clima ? " Clima que combina com " + tipo + " (bonus confirmado neste jogo): " + clima.clima + " - " + clima.porque +
+        "; quem arma esse clima (habilidade ou golpe real) vale mais neste time." : "");
   }
 
   // Próximo líder x seu tipo: quantos membros têm golpe de dano super efetivo

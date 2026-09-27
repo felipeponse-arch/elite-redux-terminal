@@ -103,6 +103,14 @@
       if (!alvo || !painel.contains(alvo)) return;
       if (alvo.id === "archetype-build-complete") { generateCompleteTeam(); return; }
       if (alvo.classList.contains("mono-nome")) { goToDexSpecies(Number(alvo.dataset.x)); return; }
+      if (alvo.classList.contains("mono-usar-clima")) {
+        var clima = alvo.dataset.clima;
+        acao(["time", "builds", "resumo"], function () {
+          state.archetype.weather = clima;
+          teamRecommendation = null; // alvo mudou, sugestão antiga não vale mais
+        });
+        return;
+      }
       if (!alvo.classList.contains("arch-chip")) return;
       var axis = alvo.dataset.axis;
       var value = alvo.dataset.value || null;
@@ -361,6 +369,18 @@
     el.innerHTML = generatedTeamCardHtml(members) + archetypeCardHtml(members) + monoRunCardHtml();
   }
 
+  // Clima que combina com o tipo (só bônus confirmado - ver CLIMA_QUE_COMBINA):
+  // um clique põe no "Clima e campo" do arquétipo; já escolhido, só confirma.
+  function climaQueCombinaHtml(tipo) {
+    var c = climaQueCombina(tipo);
+    if (!c) return "";
+    var jaE = state.archetype.weather === c.clima;
+    return '<p class="mono-clima">Clima que combina: <b>' + escapeHtml(c.clima) + '</b> - ' + escapeHtml(c.porque) + '. ' +
+      (jaE ? '<span class="mono-ja-tem">é o clima do seu time</span>'
+        : '<button type="button" class="mono-usar-clima" data-clima="' + escapeHtml(c.clima) + '">Usar ' + escapeHtml(c.clima) + '</button>') +
+      '</p>';
+  }
+
   // Mono run (2026-09-26, pedido do usuário): com um Monotype escolhido, aparece
   // sozinho o que dá pra pegar desse tipo até a sua etapa e o que libera no
   // próximo líder - sem pergunta nem clique a mais (RNF09). Dado: mono_run.js.
@@ -410,6 +430,7 @@
     return '<div class="card mono-run">' +
       '<h3>Mono ' + escapeHtml(tipo) + ': onde pegar</h3>' +
       '<p class="mono-fraquezas">Fraquezas que o time inteiro divide: <b>' + escapeHtml(fracas.join(", ")) + '</b></p>' +
+      climaQueCombinaHtml(tipo) +
       avisoHtml + cobremHtml +
       '<p class="mybuild-hint">Sua etapa: ' + escapeHtml(etapaTxt) + '. Os melhores do tipo primeiro; clique no nome pra abrir a ficha. ' +
         'Fonte: planilha da comunidade <a href="' + escapeHtml(MONO_DISP.fonte) + '" target="_blank" rel="noopener">Mono earliest locations</a> (índice oficial), conferida com os dados do jogo.</p>' +

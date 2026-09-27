@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "clima-inventado-pra-rock",
+    descricao: "sugere areia pra Rock sem bônus confirmado neste jogo",
+    arquivo: "mono_run.js",
+    de: "function climaQueCombina(tipo) { return CLIMA_QUE_COMBINA[tipo] || null; }",
+    para: "function climaQueCombina(tipo) { return CLIMA_QUE_COMBINA[tipo] || { clima: \"Sand\", porque: \"?\" }; }",
+  },
+  {
     id: "mono-caixa-sem-filtro",
     descricao: "troca da caixa ignora o Monotype",
     arquivo: "mono_run.js",

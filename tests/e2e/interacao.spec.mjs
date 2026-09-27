@@ -128,6 +128,10 @@ test("Monotype mostra onde pegar o tipo e o nome abre a ficha", async ({ page })
   const card = page.locator(".mono-run");
   await expect(card.locator("h3")).toHaveText("Mono Fire: onde pegar");
   await expect(card.locator(".mono-item", { hasText: "Charmander" })).toContainText("já tem");
+  // Clima que combina (Fire -> Sun): um clique põe no arquétipo.
+  await card.locator(".mono-usar-clima").click();
+  await expect(page.locator("details.arquetipo > summary")).toContainText("Clima e campo: Sun");
+  await expect(page.locator(".mono-run .mono-clima")).toContainText("é o clima do seu time");
   const primeiro = card.locator(".mono-nome").first();
   const nome = await primeiro.textContent();
   await primeiro.click();

@@ -100,6 +100,20 @@ test("Monotype entra no prompt da build e do time; aviso do próximo líder", ()
   R.state.archetype.monotype = null; R.state.team = [];
 });
 
+test("clima que combina: só bônus confirmado nas páginas oficiais", () => {
+  assert.equal(R.climaQueCombina("Fire").clima, "Sun");
+  assert.equal(R.climaQueCombina("Water").clima, "Rain");
+  assert.equal(R.climaQueCombina("Ice").clima, "Hail");
+  assert.equal(R.climaQueCombina("Ghost").clima, "Eerie Fog");
+  assert.equal(R.climaQueCombina("Psychic").clima, "Eerie Fog");
+  assert.equal(R.climaQueCombina("Rock"), null, "areia pra Rock não está confirmada neste jogo");
+  for (const t of Object.keys(R.CLIMA_QUE_COMBINA)) {
+    assert.ok(R.WEATHER_ARCHETYPES.includes(R.CLIMA_QUE_COMBINA[t].clima), "o clima sugerido existe no arquétipo");
+  }
+  assert.match(R.orientacaoMono("Ice"), /Clima que combina com Ice .*Hail - tipo Ice ganha 50% de Defesa/);
+  assert.doesNotMatch(R.orientacaoMono("Rock"), /Clima que combina/);
+});
+
 test("importador: marcas e formas regionais da planilha", () => {
   assert.deepEqual(lerNome("Zigzagoon (Galarian)"), { nome: "Zigzagoon Galarian", marcas: "" });
   assert.deepEqual(lerNome("Sylvally (%)"), { nome: "Sylvally", marcas: "%" });
