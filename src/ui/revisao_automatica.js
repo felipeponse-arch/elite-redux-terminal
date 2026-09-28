@@ -190,6 +190,7 @@
       // (um set ruim entre 2 bons não derruba os outros 2).
       var resp = await pedirIA({
         prompt: montarPromptEstrategias(sp),
+        ferramentas: false, // contexto já vai no prompt (blocoContextoIA)
         validar: function (bruto) {
           var sets = setsValidosDaResposta(sp, bruto);
           return sets.length ? { valor: sets } : { motivo: "Não consegui montar nenhum set válido dessa vez (já tentei 2 vezes) - tente de novo." };
@@ -197,7 +198,7 @@
         retentativa: function () {
           return "\n\nSUA RESPOSTA ANTERIOR NAO TROUXE NENHUM SET VALIDO (golpe/habilidade/natureza fora do que foi listado). Tente de novo, com mais cuidado.";
         },
-        aoTentarDeNovo: function () { aviso("Nenhum set veio válido - pedindo de novo..."); }
+        aviso: aviso
       });
       if (!resp.ok) { aviso(resp.mensagem); return false; }
       // Grava (a próxima visita mostra estes sets sem nova chamada) e redesenha a

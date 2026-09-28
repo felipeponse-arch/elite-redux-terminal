@@ -274,6 +274,14 @@
     }
     var conflito = conflitoDeItem(item, raw.moves, sp);
     if (conflito) return rejeita(conflito);
+    // Habilidade condicional sem a condição garantida (2026-09-28, auditoria
+    // das builds salvas: Goodra com Poison Heal e Choice Specs, Kingdra com
+    // Swift Swim sem chuva no time) - ver condicaoDaBuild.
+    var cond = condicaoDaBuild(sp, { ability: raw.ability, item: item, moves: raw.moves });
+    if (cond && !cond.garantidaPor) {
+      return rejeita("A habilidade " + cond.habilidade + " só funciona com " + cond.condicao + ", e nada na build nem no time garante isso" +
+        (cond.comoGarantir.length ? " - para usá-la: " + cond.comoGarantir.join(" ou ") + "; ou" : " -") + " escolha outra habilidade. Tente gerar de novo.");
+    }
     // Papel declarado (2026-09-27): sem papel não há o que conferir (modos
     // antigos de revisão não pedem); com papel, contradição clara reprova.
     var papel = papelNormalizado(raw.papel);
@@ -304,7 +312,17 @@
     // a classificação tem que julgar a INTENÇÃO original da IA, só o número
     // final salvo é otimizado).
     evs = trimAndReallocateEvs(sp, evs, getCurrentCap() || 50, raw.nature, item);
-    return { ability: raw.ability, nature: raw.nature, item: item, moves: raw.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: evs, rationale: rationale };
+    // Trick Room (2026-09-28): quem é mais lento age primeiro, então a build
+    // lenta de propósito (0 EV em Velocidade, nature que reduz Velocidade)
+    // também zera o IV - o jogo tem o item pra isso, Iron Pill: "Sets Speed
+    // IVs to 0. Use again to set back to 31." (descrição do próprio jogo).
+    var ivs = [31, 31, 31, 31, 31, 31];
+    var mods = NATURE_MODS[raw.nature];
+    if (state.archetype.weather === "Trick Room" && evs[5] === 0 && mods && mods[1] === 5) {
+      ivs[5] = 0;
+      rationale = ("IV de Velocidade 0 (use a Iron Pill). " + rationale).trim().slice(0, 360);
+    }
+    return { ability: raw.ability, nature: raw.nature, item: item, moves: raw.moves.slice(0, 4), ivs: ivs, evs: evs, rationale: rationale };
   }
 
   // Resposta das Estratégias ({"sets":[...]}) -> só os sets que passam na MESMA

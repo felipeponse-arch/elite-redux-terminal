@@ -294,9 +294,11 @@ async function section10() {
   check("prompt de build por IA avisa quais papéis já estão cobertos por outros membros do time",
     rolePrompt.indexOf("Papeis JA COBERTOS") !== -1 && rolePrompt.indexOf("Pivô") !== -1,
     rolePrompt.slice(0, 700));
-  check("prompt de build por IA manda usar getNextBossRoster e a ferramenta está registrada",
-    rolePrompt.indexOf("getNextBossRoster") !== -1 &&
-      window.__erTest.buildStandardAiTools().some(function (t) { return t.name === "getNextBossRoster"; }));
+  // Desde 2026-09-28 o elenco da próxima luta vai no próprio prompt
+  // (blocoContextoIA) - a build sai numa chamada só, sem ferramentas.
+  check("prompt de build por IA traz o contexto já calculado, sem mandar usar ferramenta",
+    rolePrompt.indexOf("CONTEXTO JA CALCULADO PELO APP") !== -1 && rolePrompt.indexOf("getNextBossRoster") === -1,
+    rolePrompt.slice(-900));
   setSearch("");
   await wait(30);
 

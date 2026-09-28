@@ -686,6 +686,7 @@
 /*@regras builds.js*/
 /*@regras chefoes.js*/
 /*@regras mono_run.js*/
+/*@regras condicoes_habilidade.js*/
 /*@regras prompts_ia.js*/
 
   function typePill(name, small) {
@@ -849,6 +850,8 @@
     acao: acao,
     TELAS: TELAS,
     pedirIA: pedirIA,
+    // Testes não esperam os segundos reais entre novas tentativas de IA.
+    definirPausasIA: function (p) { PAUSAS_IA_MS = p; },
     sampleErrorMessage: sampleErrorMessage,
     desligarRevisaoAutomatica: function (sim) { revisaoAutomaticaDesligada = !!sim; },
     strategySetsHtml: strategySetsHtml,

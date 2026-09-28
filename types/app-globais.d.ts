@@ -13,6 +13,8 @@ declare var DATA: any;
 /** Builds curadas (data/builds.json): sname -> build ou lista de builds. */
 declare var BUILDS: Record<string, any>;
 declare var ABILITY_SYNERGY: Record<string, any[]>;
+/** Combo habilidade condicional x golpe da própria espécie, por sname (reindexado no template; ausente nos testes do Node). */
+declare var CONDITION_MOVE_SYNERGY: Record<string, any[]>;
 declare var LEVELCAPS: any;
 declare var MEGA_FORMS: any;
 declare var MOVE_PT: Record<string, string>;

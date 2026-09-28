@@ -146,6 +146,7 @@
         prompt: montarPromptTimeArquetipo(r.roster, pace, weather, monotype),
         tentativas: 1,
         oQue: "Montagem",
+        aviso: function (texto) { if (statusEl) statusEl.textContent = texto; },
         validar: function (bruto) {
           var snames = snamesValidosDoTime(bruto, r.validSnames);
           return snames.length ? { valor: snames } : { motivo: "A resposta não trouxe nenhuma espécie real da sua caixa/time - tente de novo." };
@@ -246,6 +247,7 @@
       var resp = await pedirIA({
         prompt: montarPromptGuia(members, focusDesc),
         tentativas: 1,
+        aviso: function (texto) { if (statusEl) statusEl.textContent = texto; },
         validar: function (bruto) { var g = guiaDaResposta(bruto, members); return g ? { valor: g } : { motivo: "o guia não veio no formato pedido." }; }
       });
       if (!resp.ok) {

@@ -114,7 +114,7 @@
     "Hail": "neste jogo o granizo vem de Snow Warning (\"Summons hail\") ou do golpe Hail, e tipo Ice ganha Defesa no granizo - se esta espécie arma o granizo ou tem golpe/habilidade real que se beneficia dele, prioriza isso - senão, mantém o papel calculado normalmente.",
     // Clima deste hack (2026-09-26): nomes das habilidades conferidos no dado.
     "Eerie Fog": "clima deste jogo - Low Visibility e Fog Machine armam a nevoa; varias habilidades so funcionam nela (Ectoplasm, Ethereal Rush, Rest in Peace, Soul Tap, Foggy Eye, Echolocation, Greater Spirit, Shallow Grave, Smokey Maneuvers). Se esta espécie tiver uma delas, prioriza; a nevoa DRENA aumentos de status, então evita depender de golpe de setup - senão, mantém o papel calculado normalmente.",
-    "Trick Room": "Trick Room inverte a ordem de turno - prioriza Velocidade BAIXA de propósito (EVs 0 em Speed, considera uma nature que reduz Speed) junto com golpes ofensivos reais, já que quem for mais lento ataca primeiro.",
+    "Trick Room": "Trick Room inverte a ordem de turno - prioriza Velocidade BAIXA de propósito (EVs 0 em Speed, considera uma nature que reduz Speed) junto com golpes ofensivos reais, já que quem for mais lento ataca primeiro. Com 0 EV em Speed e nature que reduz Speed, o app zera sozinho o IV de Velocidade (Iron Pill, do jogo: \"Sets Speed IVs to 0\").",
     // Terrenos (2026-09-26): habilidades que armam/aproveitam e o efeito, tudo
     // conferido no dado deste jogo (descrição do golpe de terreno) - efeito do
     // jogo original que a descrição não confirma fica de fora.
@@ -375,6 +375,89 @@
       (papeis.length ? ("Papeis JA COBERTOS por outros membros do time atual (perfil natural de cada especie, nao a build escolhida): " + papeis.map(function (r) { return ROLE_LABEL_PT[r] || r; }).join(", ") + ". Pese isso na hora de decidir o papel deste Pokemon - um time com varios atacantes puros e nenhuma bulk/suporte fica fragil contra qualquer coisa que sobreviva o primeiro golpe. Nao e proibido repetir papel (as vezes o time PRECISA de 2+ sweepers de proposito), mas se for repetir um papel ja bem coberto, diga na rationale por que faz sentido mesmo assim.\n") : "");
   }
 
+  // Contexto que antes a IA buscava por ferramenta, já no prompt (reunião de
+  // 2026-09-28, usuário: "algumas chamadas para gerar build estão demorando e
+  // às vezes dão o retorno que não gera nada"). Cada consulta a uma ferramenta
+  // era mais uma ida e volta ao modelo, reenviando o prompt inteiro - e o
+  // prompt mandava usar umas 6. Os mesmos dados das ferramentas (mesmas
+  // funções: SPECIES_RANK, ABILITY_SYNERGY, computeSpeedTiers,
+  // confrontoParaParty...) entram aqui e a build sai numa chamada só.
+  function linhaVelocidadeIA(sp) {
+    var st = computeSpeedTiers("");
+    var idx = st.rows.findIndex(function (r) { return r.sp.sname === sp.sname; });
+    if (idx === -1) return "";
+    var row = st.rows[idx];
+    var txt = "Velocidade no nivel " + st.level + " (base " + row.base + "): sem EV " + row.neutral +
+      "; 252 EV + nature que sobe Velocidade " + row.invested + " (passa " + (st.rows.length - idx - 1) + " de " + st.rows.length +
+      " especies tambem investidas); com Choice Scarf " + row.scarf + ".";
+    if (state.archetype.weather === "Trick Room") {
+      txt += " Minima pra Trick Room (0 EV, IV 0 com Iron Pill, nature que reduz Velocidade): " +
+        calcFinalStat(row.base, 0, 0, st.level, 5, "Brave", null, sp.n) + ".";
+    }
+    return txt;
+  }
+  function linhasProximaLutaIA(sp) {
+    var boss = getRemainingBossEntries()[0];
+    if (!boss) return [];
+    var party = bossPartyPorDificuldade(boss);
+    var cx = confrontoParaParty(party, false);
+    var linhas = ["Proxima luta: " + boss.name + (boss.db ? " (batalha em DUPLA)" : "") + ". Time dele (tipos, habilidade, item, golpes):"];
+    confrontoFoesDe(party).forEach(function (f) {
+      linhas.push("  " + f.name + " (" + speciesTypeNames(f.sp).join("/") + ") " + (f.ability || "habilidade desconhecida") +
+        " @ " + (f.item || "sem item") + ": " + (f.moves || []).join(", "));
+    });
+    if (cx) {
+      var buracos = cx.c.buracos.map(function (f) { return f.name; });
+      var ameacas = cx.c.ameacas.map(function (f) { return f.name; });
+      if (buracos.length) linhas.push("  O time atual NAO acerta super efetivo: " + buracos.join(", ") + ".");
+      if (ameacas.length) linhas.push("  Ameacam metade ou mais do time: " + ameacas.join(", ") + ".");
+      var fecha = coberturaSugerida(cx.minhas, cx.c).map(function (s) {
+        return cx.minhas[s.idx].main.n + " com " + s.move + " (fecha " + s.resolve.map(function (f) { return f.name; }).join(", ") + ")";
+      });
+      if (fecha.length) linhas.push("  Golpes do time que fechariam esses buracos: " + fecha.join("; ") + ".");
+    }
+    var cand = bestBoxCandidateForBoss(boss);
+    if (cand && cand.sp.sname === sp.sname) {
+      linhas.push("  O app sugere ESTA especie pra essa luta: " + (cand.reasonMult === 0 ? "imune a " : "resiste bem a ") + cand.reasonType + ".");
+    }
+    return linhas;
+  }
+  function blocoContextoIA(sp) {
+    var linhas = [];
+    var rank = SPECIES_RANK[sp.sname];
+    if (rank) linhas.push("Rank desta especie neste hack: tier " + rank.tier + " (pontuacao " + rank.score + ").");
+    var sin = ABILITY_SYNERGY[sp.sname] || [];
+    linhas.push(sin.length
+      ? "Sinergia habilidade x golpe CONFIRMADA no movepool real: " + sin.map(function (h) {
+        return h.name + (h.kind === "inn" ? " (innate)" : " (escolhivel)") + " reforca " + (h.golpes || []).join(", ");
+      }).join("; ") + "."
+      : "Sinergia habilidade x golpe confirmada: nenhuma.");
+    var combos = typeof CONDITION_MOVE_SYNERGY !== "undefined" ? (CONDITION_MOVE_SYNERGY[sp.sname] || []) : [];
+    if (combos.length) {
+      linhas.push("Combos que a propria especie ativa sozinha: " + combos.map(function (c) {
+        return c.habilidade + (c.kind === "inn" ? " (innate)" : " (escolhivel)") + " + " + c.golpes.join("/") +
+          (c.tipo === "clima" ? " (arma o clima " + c.clima + ")" : " (recuo baixa o HP)");
+      }).join("; ") + ".");
+    }
+    var vel = linhaVelocidadeIA(sp);
+    if (vel) linhas.push(vel);
+    var faltam = getRemainingBossEntries();
+    if (faltam.length) {
+      var contagem = {};
+      faltam.forEach(function (b) {
+        b.party.forEach(function (m) {
+          var f = getSpeciesByX(m.x);
+          if (f) speciesTypeNames(f).forEach(function (t) { contagem[t] = (contagem[t] || 0) + 1; });
+        });
+      });
+      linhas.push("Chefoes que faltam: " + faltam.map(function (b) { return b.name; }).join(", ") + ". Tipos mais comuns neles: " +
+        Object.keys(contagem).sort(function (a, b) { return contagem[b] - contagem[a]; }).slice(0, 6).join(", ") + ".");
+    }
+    linhas = linhas.concat(linhasProximaLutaIA(sp));
+    return "CONTEXTO JA CALCULADO PELO APP (dado real do jogo e do seu progresso - use direto; nesta consulta nao ha ferramentas):\n" +
+      "<dados_do_jogo>\n" + linhas.join("\n") + "\n</dados_do_jogo>\n";
+  }
+
   // Prompt da build de UM membro (botão "Gerar com IA", revisão pós-evolução,
   // golpe-ponte da curada). Texto e dados só - quem pede é pedirIA().
   function montarPromptBuild(sp, opts) {
@@ -387,27 +470,29 @@
       blocoEspecieIA(sp, false) +
       blocoMovepoolIA(sp, false) +
       blocoPapelIA(sp, false, true) +
+      blocoCondicoesIA(sp) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, false) +
       blocoItensIA(sp, false) +
       blocoTimeEmUsoIA(sp) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
+      blocoContextoIA(sp) +
       contextoDoModoPrompt(sp, opts, cap) +
       planoPromptBlock(sp, cap) +
       // Ordem de decisão (2026-09-27, revisão do prompt: antes era uma lista de
       // "use também a ferramenta X" sem ordem; o papel só aparecia no fim).
       "ORDEM DE DECISAO - siga nesta ordem:\n" +
-      "1. PAPEL: escolha o papel (Tanque, Pivô, Wallbreaker, Sweeper) pelo papel natural acima, pelo que o time precisa (use as ferramentas pra ver as fraquezas do time e o rank desta especie) e pelos chefoes que faltam" +
+      "1. PAPEL: escolha o papel (Tanque, Pivô, Wallbreaker, Sweeper) pelo papel natural acima, pelo que o time precisa (fraquezas do time e rank desta especie acima) e pelos chefoes que faltam" +
       (archetypeParts.length ? " - SEMPRE alinhado ao Estilo/Clima e campo/Tatica/Monotype do time informado acima, isso pesa mais que qualquer outra consideracao" : "") + ".\n" +
       "2. HABILIDADE e SINERGIA: leia o efeito de cada habilidade e innate acima e escolha a habilidade que, somada as innates, mais reforca o papel; depois os golpes devem ATIVAR o maximo dessas habilidades (nao so uma). " +
-      "Use getAbilityMovepoolSynergy pra confirmar quais golpes do movepool cada habilidade reforca. REGRA OBRIGATORIA (pedido do usuario, 2026-09-15): se ela retornar QUALQUER sinergia real, " +
+      "A sinergia habilidade x golpe confirmada esta no CONTEXTO. REGRA OBRIGATORIA (pedido do usuario, 2026-09-15): se houver QUALQUER sinergia la, " +
       "a build PRECISA incluir pelo menos um desses golpes e a sinergia precisa estar ATIVA (innate, ou a habilidade escolhida ser a que ativa) - senao e REJEITADA. " +
-      "Use getConditionMoveSynergy pra combos de habilidade condicional (clima ou HP baixo) com golpe que a propria especie usa - inclua quando combinar com o papel e cite na rationale.\n" +
+      "Habilidade condicional so vale com a condicao garantida (lista HABILIDADES CONDICIONAIS acima); os combos que a propria especie ativa sozinha estao no CONTEXTO - inclua quando combinar com o papel e cite na rationale.\n" +
       "3. GOLPES: STAB mais forte do papel, golpes que ativam as habilidades, prioridade (veja acima), pivô se o papel for Pivô, cobertura pro que resiste ao STAB. " +
-      "Use getNextBossRoster: quando um golpe responder a uma ameaca concreta da proxima luta, prefira e cite o chefao na rationale. getBoxCandidatesForBoss: se sugerir ESTA especie pra proxima luta, pode citar.\n" +
+      "Proxima luta (CONTEXTO): quando um golpe responder a uma ameaca concreta dela, prefira e cite o chefao na rationale.\n" +
       "4. ITEM: o que mais reforca o papel/habilidade/golpes, respeitando as regras de item acima.\n" +
-      "5. NATURE e EVs: seguem o papel (tabela acima). Antes de decidir EV de Velocidade use getSpeedBenchmark - nao chute se 252 e rapido o bastante; se ja e rapida o suficiente, invista o resto em bulk/ataque.\n" +
+      "5. NATURE e EVs: seguem o papel (tabela acima). Decida EV de Velocidade pelos numeros de Velocidade do CONTEXTO - nao chute se 252 e rapido o bastante; se ja e rapida o suficiente, invista o resto em bulk/ataque.\n" +
       "6. TIME: confira que a build nao repete golpe/papel do time sem motivo (item pode repetir) e cobre alguma fraqueza dele.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
       '{"papel":"Tanque|Pivô|Wallbreaker|Sweeper","ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"plano":{"golpe de agora":"golpe futuro"},"rationale":"..."}' +
@@ -444,21 +529,22 @@
       blocoEspecieIA(sp, true) +
       blocoMovepoolIA(sp, true) +
       blocoPapelIA(sp, true, false) +
+      blocoCondicoesIA(sp) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, true) +
       blocoItensIA(sp, true) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       curadoPromptLine +
-      "Antes de responder, use getSpeciesRank e getAbilityMovepoolSynergy pra fundamentar os papeis escolhidos - " +
-      "se getAbilityMovepoolSynergy retornar sinergia real, PELO MENOS UM dos sets precisa usar um golpe dela com " +
-      "a habilidade que ativa a sinergia (innate conta sempre). Use tambem getConditionMoveSynergy - se ela " +
-      "retornar um combo autossuficiente real (habilidade condicional + golpe que a propria especie usa pra " +
-      "satisfazer a condicao) e ele fizer sentido pro papel de algum dos sets, use-o nesse set e cite na " +
-      "rationale; nao force em todos, alguns papeis nao combinam com o golpe. Use tambem getNextBossRoster: pelo " +
-      "menos um dos sets deve responder a uma ameaca concreta da proxima luta (golpe ou resistencia contra o " +
-      "elenco real dela), citando o chefao na rationale. Se algum set for um sweeper/atacante rapido, " +
-      "use getSpeedBenchmark pra confirmar que o EV de Velocidade escolhido realmente ultrapassa uma fatia " +
-      "relevante do jogo - nao chute.\n" +
+      blocoContextoIA(sp) +
+      "Fundamente os papeis no rank e na sinergia do CONTEXTO - " +
+      "se houver sinergia habilidade x golpe confirmada, PELO MENOS UM dos sets precisa usar um golpe dela com " +
+      "a habilidade que ativa a sinergia (innate conta sempre). Se o CONTEXTO trouxer um combo que a propria " +
+      "especie ativa sozinha (habilidade condicional + golpe que satisfaz a condicao) e ele fizer sentido pro " +
+      "papel de algum dos sets, use-o nesse set e cite na rationale; nao force em todos, alguns papeis nao " +
+      "combinam com o golpe. Pelo menos um dos sets deve responder a uma ameaca concreta da proxima luta do " +
+      "CONTEXTO (golpe ou resistencia contra o elenco real dela), citando o chefao na rationale. Se algum set " +
+      "for um sweeper/atacante rapido, confira nos numeros de Velocidade do CONTEXTO que o EV escolhido " +
+      "realmente ultrapassa uma fatia relevante do jogo - nao chute.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
       '{"sets":[{"name":"...","papel":"Tanque|Pivô|Wallbreaker|Sweeper","ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"rationale":"..."}]}' +
       ". 'name' e um rotulo curto do papel (2-4 palavras, ex: 'Wallbreaker Especial'). nature precisa ser uma " +

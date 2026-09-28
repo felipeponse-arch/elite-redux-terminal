@@ -239,83 +239,25 @@ async function section07() {
       if (aiBtn) {
         aiBtn.click();
         await wait(80);
-        check("o mock chamou getTeamWeaknesses (ferramenta real, não simulada por fora)",
-          window.__mockToolCalls.some(c => c.name === "getTeamWeaknesses" && typeof c.result.teamSize === "number"),
-          JSON.stringify(window.__mockToolCalls.find(c => c.name === "getTeamWeaknesses")));
-        const rankCall = window.__mockToolCalls.find(c => c.name === "getSpeciesRank");
-        check("o mock chamou getSpeciesRank e recebeu um tier real (ou null, mas nunca inventado)",
-          rankCall && ("tier" in rankCall.result), rankCall && JSON.stringify(rankCall.result));
-        // Papel/arquétipo (RF35) + golpe de prioridade (RF37) - 2026-09-11,
-        // pedido do usuário na reunião sobre montagem de build. getSpeciesRank
-        // agora também devolve roles/split (SPECIES_ROLE), e uma 4a ferramenta
-        // real, getPriorityMoveOptions, devolve os golpes de prioridade que a
-        // espécie realmente aprende (nível/tutor, mesmo escopo que
-        // validateAiBuild aceita). Squirtle não tem golpe de prioridade real
-        // nesta hack, então a lista esperada aqui é vazia - o ponto do teste
-        // é confirmar que a ferramenta foi chamada de verdade e devolveu um
-        // array (nunca undefined/erro), não que Squirtle tenha prioridade.
-        check("getSpeciesRank também devolve roles/split (nunca undefined)",
-          rankCall && Array.isArray(rankCall.result.roles) && typeof rankCall.result.split !== "undefined",
-          rankCall && JSON.stringify(rankCall.result));
-        const prioCall = window.__mockToolCalls.find(c => c.name === "getPriorityMoveOptions");
-        check("o mock chamou getPriorityMoveOptions (quarta ferramenta real, nao simulada por fora)",
-          prioCall && Array.isArray(prioCall.result.priorityMoves),
-          prioCall && JSON.stringify(prioCall.result));
-        // Fase 3 (sinergia habilidade x movepool real, 2026-09-11): Squirtle
-        // tem um caso real e nao-trivial pra testar - Torrent (innate) e um
-        // bonus de TIPO (Water), nao de flag, e a especie realmente aprende
-        // varios golpes Water (Surf, Hydro Pump, Bubble...). Confirma que a
-        // 5a ferramenta foi chamada de verdade e devolveu o combo real, nao
-        // um array vazio por engano (o que aconteceria se o sname nao fosse
-        // repassado certo pro mock, ou se ABILITY_SYNERGY nao tivesse sido
-        // carregado).
-        const synergyCall = window.__mockToolCalls.find(c => c.name === "getAbilityMovepoolSynergy");
-        check("o mock chamou getAbilityMovepoolSynergy (quinta ferramenta real, nao simulada por fora)",
-          synergyCall && Array.isArray(synergyCall.result.synergies),
-          synergyCall && JSON.stringify(synergyCall.result));
-        check("getAbilityMovepoolSynergy confirma Torrent (Water) com golpes Water reais de Squirtle",
-          synergyCall && synergyCall.result.synergies.some(function (s) {
-            return s.ability === "Torrent" && s.categoria === "Water" && s.golpesReaisQueSeBeneficiam.indexOf("Surf") !== -1;
-          }),
-          synergyCall && JSON.stringify(synergyCall.result.synergies));
-        // getSpeedBenchmark (achado em auditoria, 2026-09-18, item 14): a
-        // tabela de Speed Tiers nunca tinha chegado até o gerador de build
-        // por IA. Confere contra T.computeSpeedTiers("") de verdade - não
-        // só que a ferramenta foi chamada, mas que os números batem exato.
-        const speedCall = window.__mockToolCalls.find(c => c.name === "getSpeedBenchmark");
-        check("o mock chamou getSpeedBenchmark (sexta ferramenta real, não simulada por fora)",
-          speedCall && typeof speedCall.result.posicaoNoRankingInvestido === "number",
-          speedCall && JSON.stringify(speedCall.result));
-        if (speedCall) {
-          var Terr = window.__erTest;
-          var stReal = Terr.computeSpeedTiers("");
-          var idxReal = stReal.rows.findIndex(function (r) { return r.sp.sname === "SPECIES_SQUIRTLE"; });
-          check("getSpeedBenchmark bate exatamente com a tabela real de Speed Tiers (posição/total/velocidades)",
-            idxReal !== -1 &&
-            speedCall.result.posicaoNoRankingInvestido === idxReal + 1 &&
-            speedCall.result.totalDeEspecies === stReal.rows.length &&
-            speedCall.result.especiesQueUltrapassaInvestindo === stReal.rows.length - idxReal - 1 &&
-            speedCall.result.velocidadeComInvestimento === stReal.rows[idxReal].invested &&
-            speedCall.result.velocidadeComChoiceScarf === stReal.rows[idxReal].scarf,
-            { esperado: idxReal !== -1 ? { pos: idxReal + 1, total: stReal.rows.length, invested: stReal.rows[idxReal].invested } : null, real: speedCall.result });
-        }
-        // getRemainingBosses - 2026-09-10, contexto de progressao para a IA
-        // (pedido do usuario: "daqui ate o final o que faz sentido nesse
-        // poke agora"). Sem interacao nova - le so state.settings.milestone,
-        // ja configurado na aba Progresso. A suite inteira ja rodou com
-        // milestone="9" (Champion / Alto Comando, configurado la em cima
-        // pra destravar o seletor de golpes) - nesse milestone NAO falta
-        // nenhum chefe, entao a lista deve vir vazia. O teste de exclusao
-        // parcial (ex: milestone 2 -> Wattson em diante) foi verificado a
-        // mao ao vivo, nao aqui (mudar milestone aqui quebraria os outros
-        // testes de golpe por nivel que dependem de "sem limite").
-        const bossesCall = window.__mockToolCalls.find(c => c.name === "getRemainingBosses");
-        check("o mock chamou getRemainingBosses (terceira ferramenta real, nao simulada por fora)",
-          !window.__missingRemainingBossesTool && bossesCall && Array.isArray(bossesCall.result.remainingBossNames) && Array.isArray(bossesCall.result.mostCommonTypesAhead),
-          bossesCall && JSON.stringify(bossesCall.result));
-        check("com milestone 9 (Champion / Alto Comando) ja configurado, nao falta nenhum chefe",
-          bossesCall && bossesCall.result.remainingBossNames.length === 0,
-          bossesCall && JSON.stringify(bossesCall.result.remainingBossNames));
+        // Desde 2026-09-28 a build sai numa chamada só, sem ferramentas: o que
+        // as ferramentas devolviam (rank, sinergia, Velocidade, chefões) vai
+        // no próprio prompt (blocoContextoIA). Confere que foi mesmo, com os
+        // números reais - não só que o bloco existe.
+        var P = window.__mockLastPrompt || "";
+        check("build por IA sai sem ferramentas (uma chamada só)", window.__missingRemainingBossesTool === true && window.__mockToolCalls.length === 0, window.__mockToolCalls.length);
+        check("o prompt traz o CONTEXTO já calculado pelo app", P.indexOf("CONTEXTO JA CALCULADO PELO APP") !== -1);
+        check("o contexto traz a sinergia real Torrent (innate) com Surf",
+          /Torrent \(innate\) reforca [^;\n]*Surf/.test(P), (P.match(/Sinergia habilidade x golpe[^\n]*/) || [""])[0]);
+        var Terr = window.__erTest;
+        var stReal = Terr.computeSpeedTiers("");
+        var idxReal = stReal.rows.findIndex(function (r) { return r.sp.sname === "SPECIES_SQUIRTLE"; });
+        var rowReal = stReal.rows[idxReal];
+        check("a Velocidade do contexto bate com a tabela real de Speed Tiers",
+          idxReal !== -1 && P.indexOf("252 EV + nature que sobe Velocidade " + rowReal.invested + " (passa " + (stReal.rows.length - idxReal - 1) + " de " + stReal.rows.length) !== -1 &&
+          P.indexOf("com Choice Scarf " + rowReal.scarf) !== -1,
+          (P.match(/Velocidade no nivel[^\n]*/) || [""])[0]);
+        // A suíte roda com milestone 9 (Champion) - não falta chefe nenhum.
+        check("com milestone 9 já configurado, o contexto não lista chefão que falta", P.indexOf("Chefoes que faltam") === -1 && P.indexOf("Proxima luta:") === -1);
         check("build gerada por IA foi validada e salva (aparece 1 chip 'IA 1')",
           document.querySelectorAll(".mybuild-chip").length === 1 &&
           document.querySelector(".mybuild-chip").textContent.indexOf("IA 1") !== -1,
@@ -343,6 +285,7 @@ async function section07() {
         // desconhecido (sample.d.ts manda tratar como upstream_error -
         // "falha transitória, tentar de novo é uma ação real" - nunca cair
         // de volta na mensagem genérica antiga).
+        window.__erTest.definirPausasIA([0, 0]);
         async function checkErrorCode(code, expectedSubstr) {
           window.claude = { use: async function (name) { return name === "sample" ? { json: async function () { throw { code: code, message: "teste" }; } } : null; } };
           document.getElementById("mybuild-ai-generate") && document.getElementById("mybuild-ai-generate").click();
@@ -362,6 +305,7 @@ async function section07() {
       delete window.__mockToolCalls;
       delete window.__mockLastPrompt;
       delete window.__missingRemainingBossesTool;
+      window.__erTest.definirPausasIA([4000, 10000]);
     } else { check("Squirtle tem opções reais suficientes (ability/nature/4 golpes) pro teste de mock", false); }
   } else { check("Squirtle encontrado pro teste de mock da IA", false); }
   setSearch("");

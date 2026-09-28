@@ -20,6 +20,7 @@ async function section26() {
     };
     return chamadas;
   };
+  TE.definirPausasIA([0, 0]);
   try {
     delete window.claude;
     let r = await TE.pedirIA({ prompt: "x" });
@@ -62,7 +63,30 @@ async function section26() {
     r = await TE.pedirIA({ prompt: "P" });
     check("erro da plataforma vira a mensagem construtiva de sampleErrorMessage (limite de uso)",
       !r.ok && !r.rejeitada && r.mensagem === TE.sampleErrorMessage(erro), r.mensagem);
+
+    // Reunião de 2026-09-28: falha passageira tenta de novo sozinha; falha
+    // definitiva não; e um pedido por vez (fila única).
+    chamadas = simular([erro, erro, erro]);
+    r = await TE.pedirIA({ prompt: "P" });
+    check("falha passageira persistente: 3 chamadas (1 + 2 novas tentativas) antes do erro", chamadas.length === 3 && !r.ok, chamadas.length);
+    const upstream = new Error("caiu"); upstream.code = "upstream_error";
+    chamadas = simular([upstream, { n: 7 }]);
+    avisos = [];
+    r = await TE.pedirIA({ prompt: "P", aviso: (t) => avisos.push(t) });
+    check("falha passageira seguida de resposta: pede de novo sozinho e dá certo", r.ok && r.valor.n === 7 && chamadas.length === 2, chamadas.length);
+    check("o jogador vê que a IA estava ocupada e que está tentando de novo", avisos.some((t) => /ocupada - tentando de novo/.test(t)), avisos);
+    const recusa = new Error("não"); recusa.code = "refused";
+    chamadas = simular([recusa, { n: 1 }]);
+    r = await TE.pedirIA({ prompt: "P" });
+    check("falha definitiva (refused) não tenta de novo", chamadas.length === 1 && !r.ok, chamadas.length);
+    let ativos = 0, pico = 0;
+    window.claude = { use: async () => ({ json: async () => { ativos++; pico = Math.max(pico, ativos); await new Promise((ok) => setTimeout(ok, 30)); ativos--; return { n: 1 }; } }) };
+    avisos = [];
+    const [r1, r2] = await Promise.all([TE.pedirIA({ prompt: "A" }), TE.pedirIA({ prompt: "B", aviso: (t) => avisos.push(t) })]);
+    check("dois pedidos ao mesmo tempo: um por vez (fila única)", r1.ok && r2.ok && pico === 1, pico);
+    check("o segundo pedido avisa que está na fila", /Na fila/.test(avisos[0] || ""), avisos[0]);
   } finally {
+    TE.definirPausasIA([4000, 10000]);
     if (claudeAntes === undefined) delete window.claude; else window.claude = claudeAntes;
   }
 }

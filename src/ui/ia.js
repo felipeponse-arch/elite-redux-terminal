@@ -329,7 +329,61 @@
   // Devolve { ok: true, valor, bruto } ou { ok: false, mensagem } (mensagem já
   // pronta pro jogador; `rejeitada` true quando o modelo respondeu mas nenhuma
   // resposta passou na validação).
-  async function pedirIA(o) {
+  //   o.aviso(texto)  status pro jogador: fila, tempo decorrido, nova tentativa
+  //   o.pausasMs      espera antes de cada nova tentativa por falha passageira
+  //                   (padrão PAUSAS_IA_MS; os testes passam [0, 0])
+  //
+  // Reunião de 2026-09-28 (usuário: "algumas chamadas demoram e às vezes dão
+  // o retorno que não gera nada, como se a IA estivesse ocupada"). Três
+  // defesas, todas aqui pra valer em todo pedido:
+  //  - FILA ÚNICA: um pedido por vez. A revisão automática (até 3 ao abrir a
+  //    página) e o clique do jogador disputavam o serviço ao mesmo tempo, o
+  //    que provoca justamente o "muitos pedidos"/serviço ocupado.
+  //  - FALHA PASSAGEIRA tenta de novo sozinha, com espera crescente, antes de
+  //    mostrar erro. Os códigos seguem sample.d.ts (código desconhecido conta
+  //    como upstream_error, passageiro).
+  //  - TEMPO VISÍVEL: "Consultando o Claude... 14 s" em vez de texto parado.
+  var PAUSAS_IA_MS = [4000, 10000];
+  var ERROS_IA_PASSAGEIROS = ["upstream_error", "rate_limited", "empty_completion", "invalid_json"];
+  var ERROS_IA_DEFINITIVOS = ["not_granted", "session_expired", "refused", "prompt_too_large", "sampling_disabled",
+    "not_declared", "capability_disabled", "capability_removed", "tools_unavailable"];
+  function erroIAPassageiro(e) {
+    var code = e && e.code;
+    return ERROS_IA_PASSAGEIROS.indexOf(code) !== -1 || ERROS_IA_DEFINITIVOS.indexOf(code) === -1;
+  }
+  var filaIA = Promise.resolve();
+  var pedidosIAPendentes = 0;
+  function esperarMs(ms) { return new Promise(function (ok) { setTimeout(ok, ms); }); }
+  function pedirIA(o) {
+    var aviso = o.aviso || function () {};
+    if (pedidosIAPendentes > 0) aviso("Na fila - esperando outra consulta à IA terminar...");
+    pedidosIAPendentes++;
+    var vez = filaIA.then(function () { return pedirIAAgora(o); });
+    // A fila anda mesmo se este pedido falhar.
+    filaIA = vez.catch(function () {}).then(function () { pedidosIAPendentes--; });
+    return vez;
+  }
+  // Uma chamada ao modelo, com as novas tentativas de falha passageira.
+  async function chamarModelo(sample, prompt, opts, o, rotulo) {
+    var aviso = o.aviso || function () {};
+    var pausas = o.pausasMs || PAUSAS_IA_MS;
+    for (var i = 0; ; i++) {
+      var inicio = Date.now();
+      var base = i === 0 ? rotulo : rotulo.replace(/...$/, "") + " - tentativa " + (i + 1) + " de " + (pausas.length + 1) + "...";
+      aviso(base);
+      var relogio = setInterval(function () { aviso(base + " " + Math.round((Date.now() - inicio) / 1000) + " s"); }, 1000);
+      try {
+        return await sample.json(prompt, opts);
+      } catch (e) {
+        if (i >= pausas.length || !erroIAPassageiro(e)) throw e;
+        aviso("A IA está ocupada - tentando de novo em " + Math.round(pausas[i] / 1000) + " s...");
+        await esperarMs(pausas[i]);
+      } finally {
+        clearInterval(relogio);
+      }
+    }
+  }
+  async function pedirIAAgora(o) {
     var oQue = o.oQue || "Geração";
     if (typeof claude === "undefined" || !claude.use) return { ok: false, mensagem: oQue + " por IA não disponível neste ambiente." };
     var sample = await claude.use("sample");
@@ -339,7 +393,8 @@
     var ultimo = null;
     try {
       for (var t = 1; t <= tentativas; t++) {
-        var bruto = await sample.json(prompt, o.ferramentas === false ? undefined : { tools: buildStandardAiTools() });
+        var bruto = await chamarModelo(sample, prompt, o.ferramentas === false ? undefined : { tools: buildStandardAiTools() }, o,
+          t === 1 ? "Consultando o Claude..." : "A primeira sugestão não passou na validação - pedindo outra...");
         var r = o.validar ? o.validar(bruto) : { valor: bruto };
         if (r && !r.motivo) return { ok: true, valor: r.valor, bruto: bruto };
         // `motivo` vai pro modelo na nova tentativa; `motivoParaJogador` (se
@@ -421,6 +476,7 @@
       // segunda também falha o problema provavelmente não é azar.
       var resp = await pedirIA({
         prompt: montarPromptBuild(sp, opts),
+        ferramentas: false, // contexto já vai no prompt (blocoContextoIA): uma chamada só
         validar: function (bruto) {
           var m = {};
           var v = validateAiBuild(sp, bruto, m);
@@ -434,7 +490,7 @@
         retentativa: function (motivo) {
           return "\n\nSUA RESPOSTA ANTERIOR FOI REJEITADA pela validacao automatica. Motivo: " + motivo + " Corrija isso e responda de novo, no mesmo formato JSON.";
         },
-        aoTentarDeNovo: function () { aviso("A primeira sugestão não passou na validação - pedindo outra..."); }
+        aviso: aviso
       });
       if (!resp.ok) {
         aviso(resp.rejeitada ? resp.mensagem + " (já tentei 2 vezes)" : resp.mensagem);
