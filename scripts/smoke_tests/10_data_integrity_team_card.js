@@ -181,16 +181,17 @@ async function section10() {
     if (aiBtn27b) { aiBtn27b.click(); await wait(150); }
   }
   var itemPrompt = window.__genAiPrompts[0] || "";
-  // Invertido em 2026-09-27 (pedido do usuário: "cada Pokémon pode ter um item e
-  // esse item pode ser repetido pelo time"): antes o item já em uso era proibido.
-  check("prompt de build por IA diz que repetir item no time é permitido (sem lista de itens proibidos)",
-    itemPrompt.indexOf("repetir item no time e permitido") !== -1 && itemPrompt.indexOf("Itens JA EM USO") === -1, itemPrompt.slice(0, 400));
+  // 2026-09-27 o item passou a poder repetir; 2026-09-29 o usuário viu Hyper
+  // Offense com Life Orb em todo mundo e decidiu: no máximo 2 iguais no time.
+  // A IA volta a ver o que o time já segura.
+  check("prompt de build por IA mostra os itens do time e o limite de 2 iguais",
+    /Itens JA EM USO[^\n]*Life Orb/.test(itemPrompt) && /no MAXIMO 2 membros com o mesmo item/.test(itemPrompt), itemPrompt.slice(0, 400));
   var saveAfter27 = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
   // Busca pela origem, não pela posição: desde 2026-09-16 a auto-evolução é
   // reversível, e o Charizard que a seção 08 evoluiu volta a Charmeleon quando
   // o cap cai pra 18 - trazendo a build salva dele junto (mesma criatura).
   var charBuild27 = (saveAfter27.customBuilds["SPECIES_CHARMELEON"] || []).filter(function (b) { return b.source === "ia"; })[0];
-  check("build por IA com o mesmo item de outro membro do time mantém o item (repetir é permitido)",
+  check("build por IA com o mesmo item de UM outro membro mantém o item (o 2º igual ainda é permitido)",
     !!charBuild27 && charBuild27.item === "Life Orb" && charBuild27.ability === "Flame Body",
     charBuild27);
 

@@ -39,10 +39,37 @@ test("prompt da build cita o que o resto do time já usa; sozinho, não cita nad
   R.state.team = [g.x, s.x];
   R.state.customBuilds.SPECIES_SWAMPERT = [{ ability: "", nature: "Jolly", item: "Leftovers", moves: ["Waterfall"], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0], source: "manual", active: true }];
   const b = R.blocoTimeEmUsoIA(g);
-  // Item pode repetir no time desde 2026-09-27 (pedido do usuário).
-  assert.doesNotMatch(b, /Itens JA EM USO/);
-  assert.match(R.montarPromptBuild(g, {}), /repetir item no time e permitido/);
+  // Itens em uso de volta (2026-09-29, decisão do usuário: no máximo 2 iguais).
+  assert.match(b, /Itens JA EM USO por outros membros do time: Leftovers \(Swampert\)/);
+  assert.doesNotMatch(b, /JA ESGOTADOS/);
+  assert.match(R.montarPromptBuild(g, {}), /no MAXIMO 2 membros com o mesmo item/);
   assert.match(b, /Golpes JA EM USO.*Waterfall/);
+});
+
+test("no máximo 2 membros com o mesmo item: o 3º é recusado, o 2º passa", () => {
+  const g = sp("SPECIES_GARCHOMP"), s = sp("SPECIES_SWAMPERT"), t = sp("SPECIES_TYRANITAR");
+  const comItem = (item) => [{ ability: "", nature: "Jolly", item, moves: ["Waterfall"], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0], source: "manual", active: true }];
+  R.state.team = [g.x, s.x, t.x];
+  R.state.customBuilds.SPECIES_SWAMPERT = comItem("Life Orb");
+  R.state.customBuilds.SPECIES_TYRANITAR = comItem("Life Orb");
+  assert.match(R.blocoTimeEmUsoIA(g), /JA ESGOTADOS \(2 no time[^)]*\): Life Orb/);
+  // Build válida qualquer do Garchomp, com o item em questão.
+  const golpes = R.availableMovesFor(g).names.filter((m) => R.moveRoleOf(m) === "dano");
+  const sinergia = (R.ABILITY_SYNERGY[g.sname] || []).flatMap((h) => h.golpes || []).filter((m) => golpes.includes(m));
+  const moves = [...new Set([...sinergia.slice(0, 1), ...golpes])].slice(0, 4);
+  const ab = R.ABILITIES[R.uniqueIds(g.ab)[0]][0];
+  const build = (item) => ({ ability: ab, nature: "Jolly", item, moves, evs: [0, 252, 0, 0, 4, 252], rationale: "t" });
+  const m = {};
+  assert.equal(R.validateAiBuild(g, build("Life Orb"), m), null);
+  assert.match(m.txt, /Life Orb já está com Swampert e Tyranitar - no time vale no máximo 2/);
+  R.state.customBuilds.SPECIES_TYRANITAR = comItem("Leftovers");
+  const m2 = {};
+  assert.ok(R.validateAiBuild(g, build("Life Orb"), m2), m2.txt);
+  // Fora do time, os itens do time não barram a build (feita na Dex, pra caixa).
+  R.state.customBuilds.SPECIES_TYRANITAR = comItem("Life Orb");
+  R.state.team = [s.x, t.x];
+  const m3 = {};
+  assert.ok(R.validateAiBuild(g, build("Life Orb"), m3), m3.txt);
 });
 
 test("Estilo/Clima e campo do time entram no prompt da build", () => {

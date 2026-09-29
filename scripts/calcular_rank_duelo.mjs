@@ -49,201 +49,16 @@ import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const R = carregarRegras({ milestone: 9 });
 const NIVEL_DO_DUELO = 50;
-const ROLAGEM_MEDIA = 0.925;
 const TIERS_DOS_CHEFOES = ["party", "insane", "hell"];
-const MOVES = R.MOVES, MOVE_PT = R.MOVE_PT, TYPES = R.TYPES;
-const nomeHab = (id) => (R.ABILITIES[id] ? R.ABILITIES[id][0] : "");
-const textoHab = (id) => R.descricaoDeHabilidade(nomeHab(id)); // já junta as partes de "A + B"
 
-// ---------- golpes ----------
-const SPLIT = (m) => R.DATA.splits[m[2]];
-function acertosDoGolpe(id) {
-  const d = MOVE_PT[id] || "";
-  if (/2 a 5 vezes|de 2 a 5/i.test(d) && !/turnos/i.test(d)) return 3;
-  if (/10 vezes/i.test(d)) return 6;
-  if (/tr[eê]s vezes|3 vezes/i.test(d)) return 3;
-  if (/duas vezes|2 vezes/i.test(d)) return 2;
-  return 1;
-}
-function golpeUtil(id) {
-  const m = MOVES[id];
-  if (!m || !(m[3] > 0) || SPLIT(m) === "STATUS") return false;
-  return !/no primeiro turno|turno seguinte|desmaia|descansa no turno/i.test(MOVE_PT[id] || "");
-}
-function categoriaDoGolpe(m, atk, spa) {
-  const s = SPLIT(m);
-  if (s === "PHYSICAL" || s === "HITS_DEF") return "F";
-  if (s === "SPECIAL" || s === "HITS_SPDEF") return "E";
-  return atk >= spa ? "F" : "E";
-}
-const temContato = (m) => (m[8] || []).some((i) => R.DATA.flags[i] === "Makes Contact");
-
-// ---------- habilidades (texto do jogo) ----------
-const CLIMA_DO_TEXTO = { rain: "chuva", sun: "sol", sand: "areia", sandstorm: "areia", hail: "granizo", fog: "nevoa" };
-const cacheEfeito = new Map();
-function efeitoDasHabilidades(ids, sname) {
-  const chave = sname + "|" + ids.join(",");
-  if (cacheEfeito.has(chave)) return cacheEfeito.get(chave);
-  const ef = { ate: null, ateMult: 1, stabMult: 1.5, stabExtra: [], atkMult: 1, spaMult: 1, speMult: 1,
-    reducao: { F: 1, E: 1, todos: 1, superEf: 1, contato: 1 }, intimida: false, prioridadeNoPrimeiro: false,
-    bonusTipo: {}, bonusGolpes: {}, golpeExtra: 1, seguimento: null };
-  // Clima que o próprio Pokémon arma (innate ou a escolhida) - só esse conta.
-  const nomes = ids.map(nomeHab);
-  const climaProprio = {};
-  ["chuva", "sol", "areia", "granizo", "nevoa"].forEach((c) => { if (nomes.some((n) => R.habilidadeArma(n, c))) climaProprio[c] = true; });
-  const climaOk = (palavra) => climaProprio[CLIMA_DO_TEXTO[palavra.toLowerCase()]];
-  ids.forEach((id) => {
-    const n = nomeHab(id), t = textoHab(id);
-    let x;
-    if ((x = t.match(/Normal(?:-type)? moves become (\w+)/i)) && TYPES.indexOf(x[1]) !== -1) { ef.ate = x[1]; ef.ateMult = 1.1; }
-    if (/Increases STAB from 1\.5x to 2x/i.test(t)) ef.stabMult = 2;
-    if ((x = t.match(/gains? (\w+)-type STAB|Adds (\w+)-type/i))) ef.stabExtra.push(x[1] || x[2]);
-    if (/Doubles own Attack/i.test(t)) ef.atkMult *= 2;
-    if (/Doubles own Sp\.?\s?Atk/i.test(t)) ef.spaMult *= 2;
-    if (/Lowers foes'? Atk by one stage on entry|^Intimidate/i.test(t)) ef.intimida = true;
-    if (/\+1 priority for the first turn/i.test(t)) ef.prioridadeNoPrimeiro = true;
-    // Bônus a tipo, sem condição ("Boosts the power of Dragon-type moves by 1.5x", "Ups own Flying moves by 1.25x").
-    for (const m of t.matchAll(/Boosts (?:the power of )?(\w+)-type moves by ([\d.]+)x|Ups own (\w+) moves by ([\d.]+)x/gi)) {
-      const tipo = m[1] || m[3], mult = parseFloat(m[2] || m[4]);
-      if (TYPES.indexOf(tipo) !== -1) ef.bonusTipo[tipo] = Math.max(ef.bonusTipo[tipo] || 1, mult);
-    }
-    // Status/Velocidade com clima que ELE MESMO arma.
-    if ((x = t.match(/Ups highest attacking stat by ([\d.]+)x in (rain|sun|sand|hail|fog)/i)) && climaOk(x[2])) {
-      ef.atkMult *= parseFloat(x[1]); ef.spaMult *= parseFloat(x[1]);
-    }
-    if ((x = t.match(/Speed gets a ([\d.]+)x boost (?:if|in) (?:a )?(rain|sun|sandstorm|hail|fog)/i)) && climaOk(x[2])) ef.speMult *= parseFloat(x[1]);
-    // Golpe extra.
-    if ((x = t.match(/hit twice\. (?:1st hit at 100% power, )?2nd hit (?:at|does) (\d+)%/i)) || (x = t.match(/Second hit does (\d+)% damage/i))) {
-      ef.golpeExtra = Math.max(ef.golpeExtra, 1 + parseInt(x[1], 10) / 100);
-    }
-    if (/Hits as many times, as it has heads/i.test(t)) ef.golpeExtra = Math.max(ef.golpeExtra, 1.5);
-    if ((x = t.match(/After using a (\w+) move, follow up with a (\d+)\s?BP/i))) ef.seguimento = { tipo: x[1], poder: parseInt(x[2], 10) };
-    // Redução de dano sem condição.
-    if (!/\bif\b|\bwhen\b|\bwhile\b|\bin (rain|sun|sand|hail|fog)\b/i.test(t)) {
-      if (/Halves damage taken by Physical/i.test(t)) ef.reducao.F *= 0.5;
-      if (/Halves damage taken by Special/i.test(t)) ef.reducao.E *= 0.5;
-      if ((x = t.match(/Takes (\d+)% less damage from Super-?effective/i))) ef.reducao.superEf *= 1 - parseInt(x[1], 10) / 100;
-      if (/1\/2 dmg from contact/i.test(t)) ef.reducao.contato *= 0.5;
-      if ((x = t.match(/Weakens incoming physical and special moves by (\d+)%/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
-      if (/deal min damage/i.test(t)) ef.reducao.todos *= 0.85 / ROLAGEM_MEDIA; // rolagem mínima em vez da média
-    }
-    // Multiscale/Shadow Shield: só com HP cheio (o 1º golpe) - meia redução.
-    if (/At full HP, halves damage/i.test(t)) ef.reducao.todos *= 0.75;
-    void n;
-  });
-  // Bônus a categorias de golpe já confirmados no movepool real (ABILITY_SYNERGY), com o multiplicador do texto.
-  (R.ABILITY_SYNERGY[sname] || []).forEach((h) => {
-    const id = ids.find((i) => nomeHab(i) === h.name);
-    if (id === undefined) return;
-    const t = textoHab(id);
-    const x = t.match(/(\d+(?:\.\d+)?)x/) || t.match(/(\d+)%/);
-    const mult = x ? (x[0].endsWith("%") ? 1 + parseInt(x[1], 10) / 100 : parseFloat(x[1])) : 1.3;
-    (h.golpes || []).forEach((g) => { ef.bonusGolpes[g] = Math.max(ef.bonusGolpes[g] || 1, Math.min(mult, 2)); });
-  });
-  cacheEfeito.set(chave, ef);
-  return ef;
-}
-
-// ---------- status ----------
-const SETS = [
-  { nome: "fisico", evs: [4, 252, 0, 0, 0, 252], nature: "Adamant" },
-  { nome: "especial", evs: [4, 0, 0, 252, 0, 252], nature: "Modest" },
-  { nome: "tanque", evs: [252, 0, 128, 0, 128, 0], nature: "Hardy" }
-];
-const statsDoSet = (sp, set) => [0, 1, 2, 3, 4, 5].map((i) => R.calcFinalStat(sp.b[i], 31, set.evs[i], NIVEL_DO_DUELO, i, set.nature, null, sp.n));
-
-// ---------- dano ----------
-// Golpe já "preparado" pro atacante: tipo final, categoria, poder efetivo.
-function prepararGolpes(ids, unidade) {
-  const lista = [];
-  for (const id of ids) {
-    const m = MOVES[id];
-    let tipo = TYPES[m[1]], mult = 1;
-    if (tipo === "Normal" && unidade.ef.ate) { tipo = unidade.ef.ate; mult *= unidade.ef.ateMult; }
-    const cat = categoriaDoGolpe(m, unidade.stats[1], unidade.stats[3]);
-    if (unidade.tipos.indexOf(tipo) !== -1 || unidade.ef.stabExtra.indexOf(tipo) !== -1) mult *= unidade.ef.stabMult;
-    mult *= unidade.ef.bonusTipo[tipo] || 1;
-    mult *= unidade.ef.bonusGolpes[m[0]] || 1;
-    mult *= unidade.ef.golpeExtra;
-    let poder = m[3];
-    if (unidade.ef.seguimento && unidade.ef.seguimento.tipo === tipo) poder += unidade.ef.seguimento.poder;
-    const precisao = m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1;
-    lista.push({ tipo, cat, contato: temContato(m), prio: m[7] || 0, forca: poder * mult * precisao * acertosDoGolpe(id) * (unidade.itemMult || 1) });
-  }
-  // Poda: por (tipo, categoria, contato) fica só o mais forte - e o melhor de prioridade.
-  const melhores = new Map();
-  let prio = null;
-  for (const g of lista) {
-    const k = g.tipo + g.cat + g.contato;
-    if (!melhores.has(k) || melhores.get(k).forca < g.forca) melhores.set(k, g);
-    if (g.prio > 0 && (!prio || prio.forca < g.forca)) prio = g;
-  }
-  const out = [...melhores.values()];
-  if (prio && out.indexOf(prio) === -1) out.push(prio);
-  return out;
-}
-function danoContra(atq, def, intimidado) {
-  let melhor = { dano: 0, prio: 0 }, melhorPrio = { dano: 0 };
-  for (const g of atq.golpesProntos) {
-    const efTipo = R.abilityTypeModFor(g.tipo, def.tipos, def.ids).mult;
-    if (efTipo === 0) continue;
-    const A = g.cat === "F" ? atq.stats[1] * atq.ef.atkMult * (intimidado ? 2 / 3 : 1) : atq.stats[3] * atq.ef.spaMult;
-    const D = g.cat === "F" ? def.stats[2] : def.stats[4];
-    let red = def.ef.reducao.todos * (g.cat === "F" ? def.ef.reducao.F : def.ef.reducao.E);
-    if (efTipo >= 2) red *= def.ef.reducao.superEf;
-    if (g.contato) red *= def.ef.reducao.contato;
-    const dano = ((((2 * NIVEL_DO_DUELO) / 5 + 2) * g.forca * A / D) / 50 + 2) * efTipo * red * ROLAGEM_MEDIA;
-    if (dano > melhor.dano) melhor = { dano, prio: g.prio };
-    if (g.prio > 0 && dano > melhorPrio.dano) melhorPrio = { dano };
-  }
-  return { melhor, melhorPrio };
-}
-const golpesNec = (hp, d) => (d > 0 ? Math.ceil(hp / d) : Infinity);
-
-// Um duelo, do ponto de vista de "eu" (0..1).
-function duelo(eu, foe) {
-  const meu = danoContra(eu, foe, foe.ef.intimida);
-  const dele = danoContra(foe, eu, eu.ef.intimida);
-  const euPreciso = golpesNec(foe.stats[0], meu.melhor.dano);
-  const elePrecisa = golpesNec(eu.stats[0], dele.melhor.dano);
-  if (euPreciso === Infinity && elePrecisa === Infinity) return 0.5;
-  const comPrio = golpesNec(foe.stats[0], meu.melhorPrio.dano);
-  const prioDele = dele.melhor.prio > 0;
-  let nec = euPreciso, euPrimeiro;
-  if (comPrio <= elePrecisa && !prioDele) { nec = Math.min(euPreciso, comPrio); euPrimeiro = true; }
-  else if (eu.ef.prioridadeNoPrimeiro && euPreciso === 1 && !prioDele) euPrimeiro = true;
-  else if (prioDele && !(meu.melhor.prio > 0)) euPrimeiro = false;
-  else {
-    const v1 = eu.stats[5] * eu.ef.speMult, v2 = foe.stats[5] * foe.ef.speMult;
-    euPrimeiro = v1 > v2 ? true : v1 < v2 ? false : null;
-  }
-  if (nec < elePrecisa) return 1;
-  if (nec === elePrecisa && euPrimeiro) return 1;
-  if (nec === elePrecisa && euPrimeiro === null) return 0.5;
-  const turnos = euPrimeiro ? elePrecisa : elePrecisa - 1;
-  return 0.5 * Math.min(1, (turnos * meu.melhor.dano) / foe.stats[0]);
-}
-
-// ---------- campo: Pokémon reais dos chefões ----------
-const ITEM_DANO = { "Life Orb": 1.3, "Choice Band": 1.5, "Choice Specs": 1.5, "Expert Belt": 1.1 };
+// ---------- motor: src/regras/duelo.js (o mesmo do botão da aba Chefões) ----------
+// O simulador morava aqui; foi pro app em 2026-09-28 pra rank e botão
+// "Montar time contra este chefão" usarem um motor só.
 const cacheFoe = new Map();
 function montarFoe(m) {
   const chave = JSON.stringify([m.x, m.abi, m.item, m.nat, m.evsRaw, m.ivsRaw, m.mv]);
-  if (cacheFoe.has(chave)) return cacheFoe.get(chave);
-  const megaSname = R.MEGA_FORMS[m.item];
-  const sp = (megaSname && R.getSpeciesBySname(megaSname)) || R.getSpeciesByX(m.x);
-  let foe = null;
-  if (sp) {
-    const abiId = R.ABILITY_ID_BY_NAME[m.abi];
-    const ids = R.uniqueIds((sp.inn || []).concat(abiId !== undefined && !megaSname ? [abiId] : []));
-    const ev = m.evsRaw || [0, 0, 0, 0, 0, 0], iv = m.ivsRaw || [31, 31, 31, 31, 31, 31];
-    foe = { sp, nome: m.n, tipos: R.speciesTypeNames(sp), ids, itemMult: ITEM_DANO[m.item] || 1,
-      stats: [0, 1, 2, 3, 4, 5].map((i) => R.calcFinalStat(sp.b[i], iv[i], ev[i], NIVEL_DO_DUELO, i, m.nat, m.item, sp.n)) };
-    foe.ef = efeitoDasHabilidades(ids, sp.sname);
-    foe.golpesProntos = prepararGolpes((m.mv || []).map((n) => R.MOVE_ID_BY_NAME[n]).filter((id) => id !== undefined && golpeUtil(id)), foe);
-  }
-  cacheFoe.set(chave, foe);
-  return foe;
+  if (!cacheFoe.has(chave)) cacheFoe.set(chave, R.foeDeDuelo(m, NIVEL_DO_DUELO, null));
+  return cacheFoe.get(chave);
 }
 const encontros = [];
 for (const b of R.BOSSES) {
@@ -256,26 +71,23 @@ for (const b of R.BOSSES) {
 }
 
 // ---------- cada espécie ----------
+// Nota = média, por encontro, da fração de duelos vencidos; vale o melhor set
+// e a melhor habilidade escolhível. Sem clima (rank é da espécie, não da luta).
 function notaDaEspecie(sp) {
-  const golpeIds = R.uniqueIds(sp.lm.map((p) => p[1]).concat(sp.tu)).filter(golpeUtil);
-  const tipos = R.speciesTypeNames(sp);
-  const inn = R.uniqueIds(sp.inn || []);
+  const golpeIds = R.golpesDeDueloAte(sp, null);
   const escolhas = R.uniqueIds(sp.ab || []);
   let melhor = null;
-  for (const set of SETS) {
-    const stats = statsDoSet(sp, set);
+  for (const set of R.SETS_DE_DUELO) {
     for (const ab of escolhas.length ? escolhas : [null]) {
-      const ids = ab === null ? inn : R.uniqueIds(inn.concat([ab]));
-      const u = { sp, tipos, stats, ids, ef: efeitoDasHabilidades(ids, sp.sname) };
-      u.golpesProntos = prepararGolpes(golpeIds, u);
+      const u = R.unidadeDeDuelo(sp, set, ab, NIVEL_DO_DUELO, golpeIds, null);
       let soma = 0;
       for (const e of encontros) {
         let s = 0;
-        for (const f of e.foes) s += duelo(u, f);
+        for (const f of e.foes) s += R.resultadoDoDuelo(u, f, NIVEL_DO_DUELO);
         soma += s / e.foes.length;
       }
       const nota = soma / encontros.length;
-      if (!melhor || nota > melhor.nota) melhor = { nota, set: set.nome, ab: ab === null ? "" : nomeHab(ab) };
+      if (!melhor || nota > melhor.nota) melhor = { nota, set: set.nome, ab: u.ab };
     }
   }
   return melhor;

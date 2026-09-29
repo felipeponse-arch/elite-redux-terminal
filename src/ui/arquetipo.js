@@ -102,6 +102,14 @@
       var alvo = e.target.closest("button");
       if (!alvo || !painel.contains(alvo)) return;
       if (alvo.id === "archetype-build-complete") { generateCompleteTeam(); return; }
+      // Desfaz o "Montar time contra este chefão": volta o time de antes (as
+      // builds novas ficam salvas como variantes - nada se perde).
+      if (alvo.id === "chefao-restaurar" && generatedTeamResult && generatedTeamResult.anterior) {
+        teamRecommendation = { snames: generatedTeamResult.anterior.snames.slice(), reasoning: state.archetype.reasoning || "" };
+        generatedTeamResult = null;
+        applyRecommendedTeam();
+        return;
+      }
       if (!alvo.classList.contains("arch-chip")) return;
       var axis = alvo.dataset.axis;
       var value = alvo.dataset.value || null;
@@ -323,8 +331,50 @@
   // cards de renderTeamAnalysis) - este card cobre só o que mais faltava:
   // nome do foco, guia de uso e validação. Some sozinho se o time mudar
   // depois (forTeamKey), igual teamRecommendation.
+  // Modo chefão (botão "Montar time contra este chefão", 2026-09-29): no lugar
+  // do guia da IA, o plano da luta do simulador de duelo - na ordem em que o
+  // chefão manda os Pokémon, quem do time responde a cada um e com que golpe.
+  function planoContraChefaoHtml(res) {
+    var cobertos = res.plano.filter(function (p) { return p.coberto; }).length;
+    var itens = res.plano.map(function (p) {
+      var resp = p.respostas.length
+        ? p.respostas.map(function (a) {
+            return '<span class="goto-species" tabindex="0" role="button" data-x="' + a.x + '">' + escapeHtml(a.nome) + '</span>' +
+              (a.golpe ? " (" + escapeHtml(a.golpe) + (a.efTipo >= 2 ? ", super efetivo" : "") + ")" : "");
+          }).join(" ou ")
+        : '<span class="plano-sem-resposta">ninguém do seu time vence este duelo com folga - evite deixá-lo montar</span>';
+      return '<li><b>' + escapeHtml(p.foe) + '</b> <span class="plano-tipos">' + p.tipos.map(function (t) { return typePill(t, true); }).join("") + '</span>: ' + resp + '</li>';
+    }).join("");
+    return '<div class="ts-usage-guide">' +
+      '<p class="mybuild-hint">Escolhido pelo simulador de duelo do app (o mesmo do rank): ' + cobertos + ' de ' + res.plano.length +
+        ' Pokémon dele têm resposta clara no seu time. A ordem abaixo é a em que ele manda os Pokémon.' +
+        (res.estrategia
+          ? "" : (res.clima ? " Ele arma " + (res.clima === "sol" ? "sol: golpes Fire ficam mais fortes." : "chuva: golpes Water ficam mais fortes.") : "")) + '</p>' +
+      (res.estrategia
+        ? '<p class="plano-estrategia"><b>Estratégia do time:</b> ' + escapeHtml(res.estrategia.armador) + ' arma ' + escapeHtml(NOME_DA_CONDICAO[res.estrategia.clima] || res.estrategia.clima) +
+          ' ao entrar (' + escapeHtml(res.estrategia.habilidade) + ')' +
+          (res.estrategia.aproveitam.length ? '; aproveitam: ' + escapeHtml(res.estrategia.aproveitam.join(", ")) : "") +
+          '. Abra com ele pra ligar o clima.</p>'
+        : "") +
+      '<ol class="plano-chefao">' + itens + '</ol>' +
+    '</div>';
+  }
   function generatedTeamCardHtml(members) {
     if (!generatedTeamResult || generatedTeamResult.forTeamKey !== teamKeyFor(members)) return "";
+    if (generatedTeamResult.plano) {
+      var res = generatedTeamResult;
+      var vc = computeTeamGenerationValidation(members);
+      var restaurar = res.anterior && res.anterior.snames.length
+        ? '<button type="button" id="chefao-restaurar" class="text-action-btn">Voltar ao time anterior</button>' +
+          (res.anterior.salvo ? "" : '<span class="mybuild-hint"> (os 3 espaços de Times salvos estão ocupados - o time anterior só fica guardado enquanto esta página estiver aberta)</span>')
+        : "";
+      return '<div class="card ts-generated-team"><h3>Time gerado ' + escapeHtml(res.archetypeLabel) + '</h3>' +
+        planoContraChefaoHtml(res) +
+        '<p id="chefao-build-status" class="notes-status" role="status" aria-live="polite">' + escapeHtml(res.progresso || "") + '</p>' +
+        '<div class="ts-validation' + (vc.allBuilt ? "" : " ts-validation-warn") + '">' +
+          (vc.total - vc.withoutBuild.length) + "/" + vc.total + ' membros com build.' +
+        '</div>' + restaurar + '</div>';
+    }
     var g = generatedTeamResult.guide;
     var v = generatedTeamResult.validation;
     var guideHtml = g

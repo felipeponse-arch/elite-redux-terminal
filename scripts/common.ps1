@@ -233,6 +233,26 @@ $TYPE_MOD_ABILITIES = @{
     946 = @{ resist = @{ Fire = 2 } }                                 # Massive Pelt (fraqueza)
     1010 = @{ resist = @{ Fire = 0.5 } }                              # Thermal Entropy
     1015 = @{ resist = @{ Fire = 0.5 } }                              # Droideka
+    # Imunidades "absorve/redireciona/em vez de ser atingido" (2026-09-28) -
+    # mesmas entradas acrescentadas em src/regras/tipos.js.
+    10  = @{ immune = @("Electric") }                                 # Volt Absorb
+    11  = @{ immune = @("Water") }                                    # Water Absorb
+    31  = @{ immune = @("Electric") }                                 # Lightning Rod
+    78  = @{ immune = @("Electric") }                                 # Motor Drive
+    114 = @{ immune = @("Water") }                                    # Storm Drain
+    154 = @{ immune = @("Dark") }                                     # Justified
+    157 = @{ immune = @("Grass") }                                    # Sap Sipper
+    282 = @{ immune = @("Flying") }                                   # Aerodynamics
+    344 = @{ immune = @("Poison") }                                   # Poison Absorb
+    379 = @{ immune = @("Ice") }                                      # Ice Dew
+    446 = @{ immune = @("Fire") }                                     # Well Baked Body
+    665 = @{ immune = @("Water") }                                    # Elemental Vortex
+    746 = @{ immune = @("Ground") }                                   # Desolate Sun
+    749 = @{ immune = @("Water") }                                    # Reservoir
+    865 = @{ immune = @("Fire") }                                     # Heat Sink
+    868 = @{ immune = @("Electric") }                                 # Lightning Aspect
+    869 = @{ immune = @("Fire") }                                     # Fire Aspect
+    872 = @{ immune = @("Rock") }                                     # Molten Core
 }
 
 # Porta de alwaysActiveAbilities() - quais ids de habilidade desta espécie

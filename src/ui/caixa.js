@@ -159,10 +159,3 @@
     }
   });
 
-  function settingsSummaryText() {
-    var cap = getCurrentCap();
-    var milestone = LEVELCAPS && LEVELCAPS.rows[state.settings.milestone] ? LEVELCAPS.rows[state.settings.milestone].milestone : "?";
-    var diffLabel = { easy: "Easy", ace: "Ace", elite: "Elite" }[state.settings.difficulty] || state.settings.difficulty;
-    var capLabel = { easy: "Easy", more: "More", elite: "Elite" }[levelCapMode()];
-    return "Dificuldade " + diffLabel + ", Level Cap " + capLabel + ", progresso " + milestone + ", level cap atual " + (cap === null ? "sem limite" : cap) + ".";
-  }

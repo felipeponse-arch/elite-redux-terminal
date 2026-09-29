@@ -263,6 +263,18 @@
           (regraConsumivel.precisa === "berry" ? "uma Berry" : "um item que se gasta na luta (Berry, Gem, Focus Sash, White Herb...)") + ". Tente gerar de novo.");
       }
     }
+    // No máximo 2 membros do time com o mesmo item (2026-09-29, decisão do
+    // usuário depois de ver Hyper Offense com Life Orb em todo mundo). A pedra
+    // da mega temporária não entra na conta - o slot é obrigatoriamente dela.
+    // Só pra quem está NO time: build feita na Dex pra um Pokémon da caixa não é
+    // barrada pelos itens do time (achado no teste da mega permanente).
+    if (item && !stoneRule && state.team.indexOf(sp.x) !== -1) {
+      var comEsteItem = itensEmUsoComQuem(sp.x)[item] || [];
+      if (comEsteItem.length >= MAX_MESMO_ITEM_NO_TIME) {
+        return rejeita(item + " já está com " + comEsteItem.join(" e ") + " - no time vale no máximo " + MAX_MESMO_ITEM_NO_TIME +
+          " com o mesmo item. Escolha outro item que reforce o papel deste Pokémon. Tente gerar de novo.");
+      }
+    }
     var evs = Array.isArray(raw.evs) && raw.evs.length === 6 ? raw.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0];
     var evSum = evs.reduce(function (a, v) { return a + v; }, 0);
     if (evSum > 510) {

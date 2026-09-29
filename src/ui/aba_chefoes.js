@@ -81,10 +81,7 @@
         if (feitas && bossTroca) flashToast(feitas + (feitas === 1 ? " troca aplicada" : " trocas aplicadas") + " para " + bossTroca.name + ".");
         return;
       }
-      if (e.target && e.target.id === "boss-export-copy") {
-        var ta = document.getElementById("boss-export-text");
-        copyText(ta.value, document.getElementById("boss-export-status"), "Copiado! Cole na conversa com o Claude.", ta);
-      }
+      if (e.target && e.target.id === "boss-montar-time") { montarTimeContraEsteChefao(); return; }
       var buildBtn = e.target && e.target.closest && e.target.closest(".use-boss-build-btn");
       if (buildBtn) {
         var boss = BOSSES[bossState.selected];
@@ -188,20 +185,140 @@
 
   var DIFF_LABELS = { party: "Padrão", insane: "Insane", hell: "Hell" };
 
-  function buildBossExportText(boss, diffKey, party) {
-    var lines = [];
-    var diffNote = diffKey === "party" ? "" : " [dificuldade: " + DIFF_LABELS[diffKey] + "]";
-    lines.push("Perdi para " + boss.name + diffNote + " (" + boss.cat + (boss.db ? ", batalha em dupla" : "") + ") no Elite Redux (build 2.65beta).");
-    lines.push("Time dele: " + party.map(function (m) {
-      return m.n + " [hab. " + (m.abi || "?") + ", item " + (m.item || "nenhum") + ", nature " + (m.nat || "?") + ", golpes: " + m.mv.join("/") + "]";
-    }).join("; ") + ".");
-    var teamMembers = state.team.map(getSpeciesByX).filter(Boolean);
-    lines.push("Meu time atual: " + (teamMembers.length ? teamMembers.map(function (sp) { return sp.n; }).join(", ") : "(vazio)") + ".");
-    var boxMembers = state.box.map(getSpeciesByX).filter(Boolean);
-    lines.push("Minha caixa (" + boxMembers.length + "): " + (boxMembers.length ? boxMembers.map(function (sp) { return sp.n; }).join(", ") : "(vazia)") + ".");
-    lines.push(settingsSummaryText());
-    lines.push("Me ajuda a montar um time e estratégia pra vencer esse chefão.");
-    return lines.join("\n");
+
+  // ---- "Montar time contra este chefão" (2026-09-29) ----
+  // Pedido do usuário: no lugar do texto que ele copiava e colava na conversa,
+  // um botão que já monta o time, com build e item, na tela Meu time.
+  // Decisões dele: troca o time na hora guardando o antigo; gera build nova
+  // mirando este chefão pra todos (vira a ativa, a antiga fica de variante).
+  //  1. escolha dos 6 SEM IA: o simulador de duelo (duelo.js, o mesmo do rank)
+  //     testa cada criatura do jogador (time + caixa, Monotype e level cap
+  //     respeitados, mega só se já liberada) contra o time real do chefão;
+  //  2. o time antigo vai pra "Times salvos" ("Antes de <chefão>");
+  //  3. builds pela IA, uma por membro, em fila, mirando este chefão;
+  //  4. o plano da luta (quem responde a quem) sai do mesmo simulador.
+  var montagemContraChefaoRodando = false;
+  function candidatosDoJogador() {
+    var owned = state.team.concat(state.box).filter(function (x, i, a) { return a.indexOf(x) === i; });
+    var out = [];
+    owned.forEach(function (x) {
+      var sp = getSpeciesByX(x);
+      if (!sp) return;
+      battleUnitsOf(sp).forEach(function (u) { if (serveProMono(u.main)) out.push({ sp: u.main, owned: x }); });
+    });
+    return out;
+  }
+  // Guarda o time atual em "Times salvos" (3 vagas): usa uma vaga livre ou a de
+  // um "Antes de ..." anterior; nunca apaga um time que o jogador salvou.
+  function guardarTimeAnterior(bossName) {
+    if (!state.team.length) return { salvo: false, snames: [] };
+    var snames = xsToSnames(state.team);
+    // Primeiro reaproveita a vaga de um "Antes de ..." anterior (achado no teste
+    // visual: clicar duas vezes criava dois "Antes de Flannery 1" e gastava as
+    // 3 vagas); só então usa uma vaga livre.
+    var idx = -1;
+    state.savedTeams.forEach(function (t, i) { if (idx === -1 && /^Antes de /.test(t.name || "")) idx = i; });
+    if (idx === -1 && state.savedTeams.length < 3) idx = state.savedTeams.length;
+    if (idx === -1) return { salvo: false, snames: snames };
+    acao(["timesSalvos"], function () { state.savedTeams[idx] = { name: "Antes de " + bossName, team: snames }; });
+    return { salvo: true, snames: snames };
+  }
+  // Plano da luta em texto curto, por Pokémon do chefão, na ordem em que ele entra.
+  function planoDaLuta(r) {
+    return r.plano.map(function (p) {
+      return {
+        foe: p.foe.nome,
+        tipos: p.foe.tipos,
+        coberto: p.coberto,
+        respostas: p.respostas.filter(function (a) { return a.nota >= 0.5; }).map(function (a) {
+          return { nome: a.sp.n, x: a.sp.x, golpe: a.golpe, efTipo: a.efTipo };
+        })
+      };
+    });
+  }
+  async function montarTimeContraEsteChefao() {
+    var boss = BOSSES[bossState.selected];
+    if (!boss || montagemContraChefaoRodando) return;
+    var diffKey = bossState.diff || "party";
+    var party = boss[diffKey] && boss[diffKey].length ? boss[diffKey] : boss.party;
+    var statusChefao = function (t) { var el = document.getElementById("boss-team-status"); if (el) el.textContent = t; };
+    var cands = candidatosDoJogador();
+    if (!cands.length) {
+      statusChefao(monotypeAtivo()
+        ? "Nenhum Pokémon do tipo " + monotypeAtivo() + " no seu time ou caixa ainda - pegue algum na Dex primeiro."
+        : "Nenhum Pokémon no seu time ou caixa ainda - pegue algum na Dex primeiro.");
+      return;
+    }
+    montagemContraChefaoRodando = true;
+    try {
+      statusChefao("Simulando os duelos contra " + boss.name + "...");
+      await new Promise(function (ok) { setTimeout(ok, 0); }); // deixa o texto aparecer antes da conta
+      var nivel = getCurrentCap() || 100;
+      var r = montarTimeContraChefao(cands, party, nivel);
+      if (!r.escolhidos.length) { statusChefao("Não consegui montar um time com os Pokémon que você tem."); return; }
+      // Clicou de novo e o simulador escolheu o MESMO time que já está montado:
+      // não regrava o backup (senão o "Antes de ..." viraria o próprio time do
+      // botão e o time original do jogador se perderia).
+      var mesmoTime = xsToSnames(state.team).slice().sort().join(",") ===
+        r.escolhidos.map(function (e) { return e.sp.sname; }).sort().join(",");
+      var anterior;
+      if (mesmoTime) {
+        var slotAntigo = state.savedTeams.filter(function (t) { return /^Antes de /.test(t.name || ""); })[0];
+        anterior = (generatedTeamResult && generatedTeamResult.anterior) ||
+          (slotAntigo ? { salvo: true, snames: slotAntigo.team.slice() } : { salvo: false, snames: [] });
+      } else {
+        anterior = guardarTimeAnterior(boss.name);
+      }
+      teamRecommendation = { snames: r.escolhidos.map(function (e) { return e.sp.sname; }), reasoning: "Montado pelo simulador de duelo contra " + boss.name + "." };
+      if (!applyRecommendedTeam()) { statusChefao("Não consegui aplicar o time - tente de novo."); return; }
+      statusChefao("");
+      var members = state.team.map(getSpeciesByX).filter(Boolean);
+      var plano = planoDaLuta(r);
+      // Quem responde a quem: cada Pokémon do chefão aponta a melhor resposta.
+      var responde = {};
+      r.plano.forEach(function (p) {
+        var a = p.respostas[0];
+        if (a && a.nota >= 0.5) (responde[a.sp.sname] = responde[a.sp.sname] || []).push(p.foe.nome);
+      });
+      generatedTeamResult = {
+        archetypeLabel: "contra " + boss.name, chefao: boss.name, plano: plano, clima: r.clima, estrategia: r.estrategia,
+        progresso: "Gerando as builds...", anterior: anterior, forTeamKey: teamKeyFor(members)
+      };
+      var aba = document.querySelector('.tab-btn[data-tab="team"]');
+      if (aba) aba.click();
+      TELAS.time();
+      var ultimoMotivo = "";
+      for (var i = 0; i < members.length; i++) {
+        var sp = members[i];
+        if (!generatedTeamResult || generatedTeamResult.chefao !== boss.name) return; // outra montagem começou por cima
+        generatedTeamResult.progresso = "Build " + (i + 1) + "/" + members.length + ": " + sp.n + "...";
+        TELAS.time();
+        var ok = await generateBuildWithAI(sp, "chefao-build-status", {
+          silencioso: true,
+          chefao: { boss: boss, party: party, responde: responde[sp.sname] || [], clima: r.clima, estrategia: r.estrategia }
+        });
+        // O motivo da falha fica no status até o próximo redesenho - guarda pra
+        // mostrar no fim (sem isso o jogador só via "faltou build", sem saber por quê).
+        if (ok !== true && ok !== "obsoleta") {
+          var el = document.getElementById("chefao-build-status");
+          if (el && el.textContent) ultimoMotivo = el.textContent;
+        }
+      }
+      if (generatedTeamResult && generatedTeamResult.chefao === boss.name) {
+        var faltou = computeTeamGenerationValidation(state.team.map(getSpeciesByX).filter(Boolean)).withoutBuild;
+        generatedTeamResult.progresso = faltou.length
+          ? "Faltou build pra: " + faltou.join(", ") + (ultimoMotivo ? " (" + ultimoMotivo.replace(/\.$/, "") + ")" : "") +
+            " - use \"Gerar build com IA\" no card de cada um."
+          : "";
+        TELAS.time();
+      }
+      flashToast("Time contra " + boss.name + " montado" + (anterior.salvo ? " - o anterior ficou em Times salvos." : "."));
+    } catch (e) {
+      if (typeof console !== "undefined") console.error(e);
+      statusChefao("Não consegui montar o time - tente de novo.");
+    } finally {
+      montagemContraChefaoRodando = false;
+    }
   }
 
   function selectBoss(i) {
@@ -354,7 +471,15 @@
 
     var monsHtml = party.map(function (m, idx) { return bossMonCardHtml(m, idx); }).join("");
 
-    var exportText = buildBossExportText(boss, diffKey, party);
+    // Botão que substituiu o "Enviar para o Claude" (texto pra copiar e colar na
+    // conversa) em 2026-09-29 - agora o app monta o time sozinho.
+    var montarHtml = '<div class="card boss-montar-card"><h3>Montar time contra este chefão</h3>' +
+      '<p class="mybuild-hint">Testa cada Pokémon seu (time e caixa' + (monotypeAtivo() ? ", só do tipo " + escapeHtml(monotypeAtivo()) : "") +
+        ') contra o time dele e troca o seu time pelos 6 que mais vencem. Depois gera, com a IA, a build com item de cada um pensando nesta luta. ' +
+        'O time de agora fica guardado em Times salvos.</p>' +
+      '<button id="boss-montar-time" class="add-team-btn" type="button">Montar time contra ' + escapeHtml(boss.name) + '</button>' +
+      '<div id="boss-team-status" class="notes-status" role="status" aria-live="polite"></div>' +
+    '</div>';
 
     document.getElementById("boss-detail").innerHTML =
       '<button class="back-btn" id="boss-back-to-list">&larr; Voltar para a lista</button>' +
@@ -364,20 +489,13 @@
       '</div></div>' +
       (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:6px 0 0;max-width:65ch;">Nomes crus dos dados do jogo — não temos 100% de certeza que "Insane"/"Hell" batem exatamente com os modos "Ace"/"Elite" do menu do jogo atual. Confira sua dificuldade no Centro Pokémon se quiser ter certeza.</p></div>' : "") +
       bossConfrontoHtml(boss, party) +
+      montarHtml +
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
         '<div class="boss-level-row"><label for="boss-level-input">Status final calculados pro nível</label>' +
           '<input type="number" id="boss-level-input" class="campo campo-numero" min="1" max="100" value="' + bossState.level + '"></div>' +
         '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:4px 0 12px;max-width:65ch;">Você digita o nível — não temos como saber o nível real de um treinador nos dados do jogo (por isso não existe uma calculadora de dano completa aqui, só isso). EVs/IVs são reais, extraídos do jogo. Considera o item quando é Choice Band/Specs/Scarf, Assault Vest, Tactical Vest, Thick Club ou Light Ball (marcado com *). Quando é Mega Stone ou orbe de reversão primal, os status já são calculados na forma transformada (types e stats reais dessa forma) — mas não sabemos qual das habilidades escolhíveis DA FORMA MEGA fica ativa (os dados não dizem), e não simulamos clima/campo/Trick Room já ativos antes da transformação (isso exigiria simular a ordem dos turnos, que este cálculo não faz). Efeito de habilidade em geral e itens ainda não identificados também não entram na conta.</p>' +
         '<div class="boss-mon-grid">' + monsHtml + '</div></div>' +
-      renderGymSkillsCardHtml(boss) +
-      '<div class="card"><h3>Enviar para o Claude</h3>' +
-        '<p style="color:var(--text-dim);font-size:var(--fs-texto);margin:0 0 10px;max-width:65ch;">Junta o time dele com o seu time e sua caixa num texto só. Copie e cole na conversa pra eu montar a contra-estratégia.</p>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">' +
-          '<textarea id="boss-export-text" class="campo campo-texto mono" readonly rows="5" style="flex:1;min-width:220px;font-size:var(--fs-pequeno);resize:vertical;">' + escapeHtml(exportText) + '</textarea>' +
-          '<button id="boss-export-copy" class="add-team-btn" type="button">Copiar</button>' +
-        '</div>' +
-        '<div id="boss-export-status" style="font-size:var(--fs-pequeno);color:var(--badge-accent2);margin-top:6px;min-height:14px;"></div>' +
-      '</div>';
+      renderGymSkillsCardHtml(boss);
 
     // Cliques e mudanças do detalhe: ouvintes únicos em #boss-detail (initBosses).
   }

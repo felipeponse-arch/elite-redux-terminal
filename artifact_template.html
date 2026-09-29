@@ -260,7 +260,7 @@
 
     <section id="view-progress" class="view">
       <div class="types-shell">
-        <p class="hint">Isso define o que a ferramenta assume em toda a run: qual variante de time (Padrão/Insane/Hell) aparece por padrão na aba Chefões (Dificuldade), qual coluna de level cap conta (Level Cap), e o que entra automaticamente no texto de "Enviar para o Claude" de cada chefão. Use os mesmos valores da tela de setup do jogo.</p>
+        <p class="hint">Isso define o que a ferramenta assume em toda a run: qual variante de time (Padrão/Insane/Hell) aparece por padrão na aba Chefões (Dificuldade), qual coluna de level cap conta (Level Cap), e o level cap que o botão "Montar time contra este chefão" usa pra escolher golpes. Use os mesmos valores da tela de setup do jogo.</p>
         <!-- Trilha visual da jornada (achado de auditoria, 2026-09-18: "Progresso"
              era só um formulário de selects, sem nenhuma sensação de jornada -
              pedido explícito do usuário no briefing de redesign). Puramente
@@ -687,6 +687,7 @@
 /*@regras chefoes.js*/
 /*@regras mono_run.js*/
 /*@regras condicoes_habilidade.js*/
+/*@regras duelo.js*/
 /*@regras prompts_ia.js*/
 
   function typePill(name, small) {

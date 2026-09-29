@@ -452,8 +452,12 @@
       // como secundária"): a nova vira a ativa e a de antes fica de reserva,
       // marcada "Antes de evoluir" no chip - nunca é ela que sai pra abrir vaga.
       if (opts.modo === "revisao") saiu = abrirVagaPreservando(sp.sname, opts.anterior);
+      // Build contra um chefão (2026-09-29, decisão do usuário: "gera uma nova pra
+      // este chefão" e ela vira a ativa): abre vaga como a da evolução.
+      else if (opts.chefao) saiu = abrirVagaPreservando(sp.sname, getActiveBuild(sp.sname));
       salvou = addBuildVariant(sp.sname, validated, opts.modo === "ponte" ? "curada" : "ia");
-      if (!salvou && opts.modo === "revisao") salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia"); // último recurso
+      if (!salvou && (opts.modo === "revisao" || opts.chefao)) salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia"); // último recurso
+      if (salvou && opts.chefao) logAutoAction("Build nova de " + sp.n + " para vencer " + opts.chefao.boss.name + ": " + validated.ability + "; " + validated.moves.join(", ") + (validated.item ? " @ " + validated.item : "") + ".");
       if (salvou && opts.modo === "revisao" && opts.anterior) {
         delete opts.anterior.revisar; delete opts.anterior.revisadaDe; delete opts.anterior.tentativasRevisao;
         opts.anterior.antesDeEvoluir = opts.deNome || "forma anterior";
@@ -481,7 +485,12 @@
     try {
       opts = opts || {};
       var statusEl = document.getElementById(statusElId || "mybuild-ai-status");
-      var aviso = function (texto) { if (statusEl) statusEl.textContent = texto; };
+      // Procura o elemento a cada aviso: no "Montar time contra este chefão" o
+      // cartão é redesenhado a cada build, e o elemento do início sai da tela.
+      var aviso = function (texto) {
+        var el = document.getElementById(statusElId || "mybuild-ai-status") || statusEl;
+        if (el) el.textContent = texto;
+      };
       aviso("Consultando o Claude...");
       var cap = getCurrentCap();
       // Uma nova tentativa automática, já dizendo à IA por que a primeira foi
@@ -518,6 +527,7 @@
       // uma escolha feita enquanto esperava. "obsoleta" não conta como falha.
       if (opts.modo === "revisao" && (getActiveBuild(sp.sname) !== opts.anterior || state.team.indexOf(sp.x) === -1)) return "obsoleta";
       if (opts.modo === "ponte" && (getActiveBuild(sp.sname) || state.team.indexOf(sp.x) === -1)) return "obsoleta";
+      if (opts.chefao && state.team.indexOf(sp.x) === -1) return "obsoleta"; // saiu do time enquanto esperava
       ajustarBuildDaIa(sp, validated, opts, cap);
       var planoCheck = anexarPlanoDaIa(sp, validated, raw && raw.plano, cap,
         opts.modo === "ponte" && opts.alvo ? opts.alvo.moves : null);

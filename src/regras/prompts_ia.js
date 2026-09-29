@@ -100,7 +100,12 @@
   // nome do arquétipo - a IA já recebe as ferramentas reais (rank, papel,
   // sinergia) pra decidir os detalhes finos dentro dessa direção.
   var PACE_BUILD_GUIDANCE = {
-    "Hyper Offense": "prioriza dano imediato - nature/EVs ofensivos (Atk ou SpA + Speed), os 4 golpes reais de maior dano/utilidade ofensiva direta, item ofensivo quando fizer sentido (ex: Life Orb, Choice Band/Specs/Scarf).",
+    // Item por papel (2026-09-29): o exemplo único "Life Orb" puxava todo mundo
+    // pro mesmo item - agora cada papel tem o seu, e o time não repete mais de 2.
+    "Hyper Offense": "prioriza dano imediato - nature/EVs ofensivos (Atk ou SpA + Speed) e os 4 golpes reais de maior dano/utilidade ofensiva direta. " +
+      "Varie o item pelo papel de cada um: o mais rapido/limpador de fim de jogo com Choice Scarf; o wallbreaker com Choice Band/Specs; " +
+      "quem abre a luta com Focus Sash; STAB principal com o item de reforco de tipo ou uma gema (sem o custo de HP da Life Orb); " +
+      "quem tem cobertura larga com Expert Belt; setup com Weakness Policy ou berry de panico; Life Orb so pra quem se beneficia de verdade.",
     "Balance": "não força um extremo - segue o papel real já calculado pra esta espécie (ofensivo, defensivo ou misto), misturando ataque com pelo menos uma opção de utilidade real (status/hazard/recuperação) quando o movepool permitir.",
     "Bulky Offense": "EVs/nature que aguentam pelo menos um hit relevante mas ainda batem forte - geralmente HP + a defesa relevante junto com o stat ofensivo principal, não Speed puro.",
     "Stall": "bulk máximo (EVs em HP + a defesa relevante) e golpes reais de recuperação/status/hazard quando o movepool tiver - evita golpe de setup ofensivo puro (Swords Dance etc.) a menos que não haja opção melhor no movepool real.",
@@ -178,6 +183,22 @@
         trav.map(function (g) { return dadoExterno(g.nome) + " (nivel " + g.nivel + ")"; }).join(", ") +
         ". Monte a build de AGORA: mantenha todos os golpes da curada que ja estao liberados e, pra cada golpe travado, escolha um golpe-ponte " +
         "liberado agora que cumpra o mesmo papel. No campo \"plano\", aponte cada golpe-ponte para o golpe travado da curada que ele substitui.\n";
+    }
+    // Botão "Montar time contra este chefão" (2026-09-29): o time foi escolhido
+    // pelo simulador de duelo (duelo.js) e cada membro tem Pokémon do chefão
+    // pra responder - a build mira isso.
+    if (opts.chefao) {
+      var c = opts.chefao;
+      return "OBJETIVO DESTA BUILD: vencer " + dadoExterno(c.boss.name) + " (time dele no CONTEXTO). O time foi escolhido pelo simulador de duelo do app" +
+        (c.responde && c.responde.length ? " e este Pokemon e a resposta do time para: " + c.responde.map(dadoExterno).join(", ") +
+          " - golpes, item e EVs precisam vencer ESSES duelos" : "") +
+        (c.estrategia
+          ? ". ESTRATEGIA DO TIME: " + dadoExterno(c.estrategia.armador) + " arma " + (NOME_DA_CONDICAO[c.estrategia.clima] || c.estrategia.clima) +
+            " ao entrar (" + dadoExterno(c.estrategia.habilidade) + ")" +
+            (c.estrategia.aproveitam.length ? " e " + c.estrategia.aproveitam.map(dadoExterno).join(", ") + " jogam nesse clima" : "") +
+            " - aproveite habilidades e golpes que rendem nele"
+          : (c.clima ? ". O chefao arma " + (c.clima === "sol" ? "sol (golpes Fire mais fortes)" : "chuva (golpes Water mais fortes)") + " - leve isso em conta" : "")) +
+        ". Cite o chefao e os Pokemon dele na rationale.\n";
     }
     return "";
   }
@@ -364,7 +385,7 @@
       // Item que reforça + travas (2026-09-27; travas pela descrição do jogo,
       // conferidas em conflitoDeItem, validacao_build_ia.js).
       "ITEM x BUILD: o item precisa reforcar o papel, a habilidade ou os golpes escolhidos - diga na rationale o que ele reforca. " +
-      "Escolha o item que MAIS ajuda este Pokemon, mesmo que outro membro do time ja use o mesmo - repetir item no time e permitido. " +
+      "Escolha o item que MAIS ajuda este Pokemon; no time vale no MAXIMO " + MAX_MESMO_ITEM_NO_TIME + " membros com o mesmo item (a lista de itens ja em uso vem abaixo, quando houver). " +
       "Sao REJEITADOS: Choice Band/Specs/Scarf com golpe de status (exceto Trick/Switcheroo, que passam o item); Assault Vest ou Tactical Vest com golpe de status (o jogo impede usar); Eviolite numa forma que nao evolui mais.\n";
   }
   // O que o resto do time já usa (só a build de 1 membro recebe: as Estratégias
@@ -374,7 +395,17 @@
     // pode ter um item e esse item pode ser repetido pelo time") - a lista de
     // itens em uso saiu do prompt; golpes e papéis continuam como preferência.
     var golpes = teamMovesInUse(sp.x), papeis = teamRolesInUse(sp.x);
+    // Itens em uso de volta ao prompt (2026-09-29): sem isso a IA não sabia o que
+    // os outros seguravam e todo Hyper Offense saía com Life Orb.
+    var itens = itensEmUsoComQuem(sp.x);
+    var nomesItens = Object.keys(itens);
+    var esgotados = nomesItens.filter(function (i) { return itens[i].length >= MAX_MESMO_ITEM_NO_TIME; });
     return "" +
+      (nomesItens.length ? ("Itens JA EM USO por outros membros do time: " + nomesItens.map(function (i) {
+        return dadoExterno(i) + " (" + itens[i].map(dadoExterno).join(", ") + ")";
+      }).join("; ") + "." +
+        (esgotados.length ? " JA ESGOTADOS (" + MAX_MESMO_ITEM_NO_TIME + " no time, qualquer outro e REJEITADO): " + esgotados.map(dadoExterno).join(", ") + "." : "") +
+        " Prefira um item que o time ainda nao usa quando ele servir igual ao papel.\n") : "") +
       (golpes.length ? ("Golpes JA EM USO por outros membros do time atual: " + golpes.join(", ") + ". Evite repetir estes golpes nesta build - o time fica mais forte e menos repetitivo quando cada membro cobre uma ameaca/papel diferente. So repita um destes se for claramente a melhor opcao sem alternativa real equivalente (ex: o STAB mais forte do movepool desta especie) - nesse caso, diga na rationale por que nao havia alternativa melhor.\n") : "") +
       (papeis.length ? ("Papeis JA COBERTOS por outros membros do time atual (perfil natural de cada especie, nao a build escolhida): " + papeis.map(function (r) { return ROLE_LABEL_PT[r] || r; }).join(", ") + ". Pese isso na hora de decidir o papel deste Pokemon - um time com varios atacantes puros e nenhuma bulk/suporte fica fragil contra qualquer coisa que sobreviva o primeiro golpe. Nao e proibido repetir papel (as vezes o time PRECISA de 2+ sweepers de proposito), mas se for repetir um papel ja bem coberto, diga na rationale por que faz sentido mesmo assim.\n") : "");
   }
@@ -440,12 +471,14 @@
     }
     return txt;
   }
-  function linhasProximaLutaIA(sp) {
-    var boss = getRemainingBossEntries()[0];
+  // `chefao` ({ boss, party }): luta escolhida pelo jogador no botão "Montar
+  // time contra este chefão" (2026-09-29) - sem ele, a próxima luta que falta.
+  function linhasProximaLutaIA(sp, chefao) {
+    var boss = chefao ? chefao.boss : getRemainingBossEntries()[0];
     if (!boss) return [];
-    var party = bossPartyPorDificuldade(boss);
+    var party = chefao ? chefao.party : bossPartyPorDificuldade(boss);
     var cx = confrontoParaParty(party, false);
-    var linhas = ["Proxima luta: " + boss.name + (boss.db ? " (batalha em DUPLA)" : "") + ". Time dele (tipos, habilidade, item, golpes):"];
+    var linhas = [(chefao ? "Luta alvo desta build: " : "Proxima luta: ") + boss.name + (boss.db ? " (batalha em DUPLA)" : "") + ". Time dele (tipos, habilidade, item, golpes):"];
     confrontoFoesDe(party).forEach(function (f) {
       linhas.push("  " + f.name + " (" + speciesTypeNames(f.sp).join("/") + ") " + (f.ability || "habilidade desconhecida") +
         " @ " + (f.item || "sem item") + ": " + (f.moves || []).join(", "));
@@ -460,13 +493,13 @@
       });
       if (fecha.length) linhas.push("  Golpes do time que fechariam esses buracos: " + fecha.join("; ") + ".");
     }
-    var cand = bestBoxCandidateForBoss(boss);
+    var cand = chefao ? null : bestBoxCandidateForBoss(boss);
     if (cand && cand.sp.sname === sp.sname) {
       linhas.push("  O app sugere ESTA especie pra essa luta: " + (cand.reasonMult === 0 ? "imune a " : "resiste bem a ") + cand.reasonType + ".");
     }
     return linhas;
   }
-  function blocoContextoIA(sp) {
+  function blocoContextoIA(sp, chefao) {
     var linhas = [];
     var rank = SPECIES_RANK[sp.sname];
     if (rank) linhas.push("Rank desta especie neste hack: tier " + rank.tier + " (pontuacao " + rank.score + ").");
@@ -497,7 +530,7 @@
       linhas.push("Chefoes que faltam: " + faltam.map(function (b) { return b.name; }).join(", ") + ". Tipos mais comuns neles: " +
         Object.keys(contagem).sort(function (a, b) { return contagem[b] - contagem[a]; }).slice(0, 6).join(", ") + ".");
     }
-    linhas = linhas.concat(linhasProximaLutaIA(sp));
+    linhas = linhas.concat(linhasProximaLutaIA(sp, chefao));
     return "CONTEXTO JA CALCULADO PELO APP (dado real do jogo e do seu progresso - use direto; nesta consulta nao ha ferramentas):\n" +
       "<dados_do_jogo>\n" + linhas.join("\n") + "\n</dados_do_jogo>\n";
   }
@@ -522,7 +555,7 @@
       blocoTimeEmUsoIA(sp) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
-      blocoContextoIA(sp) +
+      blocoContextoIA(sp, opts.chefao) +
       contextoDoModoPrompt(sp, opts, cap) +
       planoPromptBlock(sp, cap) +
       // Ordem de decisão (2026-09-27, revisão do prompt: antes era uma lista de

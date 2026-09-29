@@ -115,7 +115,32 @@
     936: { resist: { Fire: 0.5, Ice: 0.5 } },               // Sumo Guard (Juggernaut + Thick Fat)
     946: { resist: { Fire: 2 } },                           // Massive Pelt (Tangling Hair + Fluffy, fraqueza)
     1010:{ resist: { Fire: 0.5 } },                         // Thermal Entropy (Thermal Exchange + Heatproof)
-    1015:{ resist: { Fire: 0.5 } }                          // Droideka (Heatproof + Shell Armor)
+    1015:{ resist: { Fire: 0.5 } },                         // Droideka (Heatproof + Shell Armor)
+    // Imunidades escritas como "absorve"/"redireciona"/"em vez de ser atingido"
+    // (2026-09-28, achado ao montar o time contra a Flannery 1: o Azumarill
+    // com Sap Sipper aparecia perdendo para o Extreme Speed Grass do Arcanine
+    // Redux, e o Alcremie com Well Baked Body apanhando de Fire). A varredura
+    // de 2026-09-12 só pegou "Imune a golpes do tipo X". "Cura 25% ao ser
+    // atingido por golpe X" segue o precedente do Earth Eater (450) acima.
+    // Flash Fire (18) fica de fora: o texto deste jogo não diz que é imune.
+    10:  { immune: ["Electric"], healPct: 25 },            // Volt Absorb
+    11:  { immune: ["Water"], healPct: 25 },               // Water Absorb
+    31:  { immune: ["Electric"] },                         // Lightning Rod ("Redireciona golpes Electric. Absorve-os")
+    78:  { immune: ["Electric"] },                         // Motor Drive ("Velocidade em vez de ser atingido")
+    114: { immune: ["Water"] },                            // Storm Drain
+    154: { immune: ["Dark"] },                             // Justified ("Ataque em vez de ser atingido por Dark")
+    157: { immune: ["Grass"] },                            // Sap Sipper
+    282: { immune: ["Flying"] },                           // Aerodynamics ("Velocidade em vez de ser atingido por Flying")
+    344: { immune: ["Poison"], healPct: 25 },              // Poison Absorb
+    379: { immune: ["Ice"] },                              // Ice Dew
+    446: { immune: ["Fire"] },                             // Well Baked Body
+    665: { immune: ["Water"], healPct: 25 },               // Elemental Vortex (Flash Fire + Water Absorb)
+    746: { immune: ["Ground"], healPct: 25 },              // Desolate Sun (Desolate Land + Earth Eater)
+    749: { immune: ["Water"] },                            // Reservoir (Water Absorb + Storm Drain)
+    865: { immune: ["Fire"] },                             // Heat Sink
+    868: { immune: ["Electric"] },                         // Lightning Aspect
+    869: { immune: ["Fire"] },                             // Fire Aspect
+    872: { immune: ["Rock"] }                              // Molten Core (Furnace + absorve Rock)
   };
 
   // Which of a species' abilities are safe to treat as ALWAYS active without

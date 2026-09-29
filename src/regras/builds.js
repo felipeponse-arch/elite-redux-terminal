@@ -79,7 +79,8 @@
   // Itens já em uso por OUTROS membros do time. Nasceu de um pedido de
   // 2026-09-12 ("nenhum outro pode ter a build montada com life orb") e deixou
   // de ser regra em 2026-09-27, a pedido do mesmo usuário: item PODE repetir no
-  // time - não vai mais pro prompt nem apaga item da IA. Olha só a build ATIVA
+  // time. Em 2026-09-29 voltou como limite (no máximo 2 iguais) - ver
+  // itensEmUsoComQuem logo abaixo, que diz também QUEM segura. Olha só a build ATIVA
   // de cada outro membro (effectiveBuild - a mesma noção de "a build" que
   // o resto do app usa, não as até 3 variantes salvas), e só membros do
   // TIME (não a caixa inteira) - é o item já em uso NA PRÓXIMA LUTA, não
@@ -130,6 +131,23 @@
   // escolheu numa build anterior. Ainda mais "preferência", nunca proibição,
   // que golpe: times de verdade às vezes precisam de 2+ sweepers de
   // propósito - o objetivo é a IA PESAR isso, não ser forçada a evitar.
+  // Itens já segurados por OUTROS membros do time, com quem segura cada um
+  // (2026-09-29, usuário: "nos times hyper offensive todos os pokés têm a
+  // recomendação de usar Life Orb... isso compromete o time"). Decisão dele:
+  // no máximo 2 membros com o mesmo item. { item: [nomes] }.
+  var MAX_MESMO_ITEM_NO_TIME = 2;
+  function itensEmUsoComQuem(excludeX) {
+    var usados = {};
+    state.team.forEach(function (x) {
+      if (x === excludeX) return;
+      var otherSp = getSpeciesByX(x);
+      if (!otherSp) return;
+      var b = effectiveBuild(otherSp);
+      if (b && b.item) (usados[b.item] = usados[b.item] || []).push(otherSp.n);
+    });
+    return usados;
+  }
+
   function teamRolesInUse(excludeX) {
     var roles = [];
     state.team.forEach(function (x) {
