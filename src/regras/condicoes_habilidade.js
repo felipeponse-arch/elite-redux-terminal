@@ -148,12 +148,14 @@
   // O que o jogador/IA pode fazer pra garantir (movepool liberado + itens).
   function comoGarantir(sp, conds, habilidadesAtivas) {
     var golpes = availableMovesFor(sp).names;
+    // Mega no modo temporário: o slot de item é da pedra - orbe não cabe.
+    var itemLivre = !megaStoneRuleFor(sp);
     var out = [];
     conds.forEach(function (cond) {
-      if (ITEMS.indexOf(cond) !== -1) { out.push("segurar " + cond); return; }
+      if (ITEMS.indexOf(cond) !== -1) { if (itemLivre) out.push("segurar " + cond); return; }
       var status = cond === "status" ? ["veneno", "queimadura"] : (ORBES_DE_STATUS[cond] ? [cond] : []);
       status.forEach(function (s) {
-        if (ITEMS.indexOf(ORBES_DE_STATUS[s]) !== -1 && podeTerStatus(sp, s, habilidadesAtivas)) out.push("segurar " + ORBES_DE_STATUS[s]);
+        if (itemLivre && ITEMS.indexOf(ORBES_DE_STATUS[s]) !== -1 && podeTerStatus(sp, s, habilidadesAtivas)) out.push("segurar " + ORBES_DE_STATUS[s]);
       });
       (GOLPES_QUE_ARMAM[cond] || []).forEach(function (g) {
         if (golpes.indexOf(g) !== -1 && (g !== "Rest" || podeTerStatus(sp, "sono", habilidadesAtivas))) out.push("usar " + g);
@@ -189,6 +191,12 @@
       var doTime = conds.map(function (c) { return GOLPES_QUE_ARMAM[c] && !ORBES_DE_STATUS[c] && c !== "status" && c !== "sono" ? garantiaDoTime(sp, c) : null; }).filter(Boolean)[0];
       var daEspecie = conds.map(function (c) { return innates.filter(function (n) { return habilidadeArma(n, c); })[0]; }).filter(Boolean)[0];
       var como = comoGarantir(sp, conds, ativas);
+      // Innate condicional: uma escolhível desta espécie que arma a condição
+      // (ex.: Drizzle pra uma innate Swift Swim) também garante.
+      if (ehInnate) {
+        escolhiveis.filter(function (n) { return conds.some(function (c) { return habilidadeArma(n, c); }); })
+          .forEach(function (n) { como.push("escolher a habilidade " + n); });
+      }
       linhas.push("- " + nome + (ehInnate ? " (innate)" : " (escolhivel)") + ": so funciona com " +
         conds.map(function (c) { return NOME_DA_CONDICAO[c] || c; }).join(" ou ") + ". " +
         (daEspecie ? "Ja garantida pela innate " + daEspecie + "." : doTime ? "Ja garantida por " + doTime + "." :

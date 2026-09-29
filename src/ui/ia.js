@@ -347,9 +347,23 @@
   var ERROS_IA_PASSAGEIROS = ["upstream_error", "rate_limited", "empty_completion", "invalid_json"];
   var ERROS_IA_DEFINITIVOS = ["not_granted", "session_expired", "refused", "prompt_too_large", "sampling_disabled",
     "not_declared", "capability_disabled", "capability_removed", "tools_unavailable"];
+  // Só erro DA PLATAFORMA (com code) pode ser passageiro; erro sem code é bug do
+  // app (TypeError numa ferramenta...) e não passa sozinho - mostra na hora.
   function erroIAPassageiro(e) {
     var code = e && e.code;
+    if (typeof code !== "string") return false;
     return ERROS_IA_PASSAGEIROS.indexOf(code) !== -1 || ERROS_IA_DEFINITIVOS.indexOf(code) === -1;
+  }
+  // Tempo-limite de uma chamada: sem ele, uma chamada que nunca responde
+  // prenderia a fila única e todo pedido seguinte ficaria "Na fila" até
+  // recarregar a página. A chamada em si continua lá; a fila é que anda.
+  var TEMPO_LIMITE_IA_MS = 180000;
+  function comTempoLimite(promessa) {
+    var timer;
+    var limite = new Promise(function (_, falha) {
+      timer = setTimeout(function () { var e = new Error("tempo esgotado"); e.code = "tempo_esgotado"; falha(e); }, TEMPO_LIMITE_IA_MS);
+    });
+    return Promise.race([promessa, limite]).finally(function () { clearTimeout(timer); });
   }
   var filaIA = Promise.resolve();
   var pedidosIAPendentes = 0;
@@ -369,11 +383,11 @@
     var pausas = o.pausasMs || PAUSAS_IA_MS;
     for (var i = 0; ; i++) {
       var inicio = Date.now();
-      var base = i === 0 ? rotulo : rotulo.replace(/...$/, "") + " - tentativa " + (i + 1) + " de " + (pausas.length + 1) + "...";
+      var base = i === 0 ? rotulo : rotulo.replace(/\.\.\.$/, "") + " - tentativa " + (i + 1) + " de " + (pausas.length + 1) + "...";
       aviso(base);
       var relogio = setInterval(function () { aviso(base + " " + Math.round((Date.now() - inicio) / 1000) + " s"); }, 1000);
       try {
-        return await sample.json(prompt, opts);
+        return await comTempoLimite(sample.json(prompt, opts));
       } catch (e) {
         if (i >= pausas.length || !erroIAPassageiro(e)) throw e;
         aviso("A IA está ocupada - tentando de novo em " + Math.round(pausas[i] / 1000) + " s...");
@@ -496,6 +510,7 @@
         aviso(resp.rejeitada ? resp.mensagem + " (já tentei 2 vezes)" : resp.mensagem);
         return false;
       }
+      aviso(""); // o relógio "Consultando o Claude... N s" não fica na tela depois de salvar
       var validated = resp.valor, raw = resp.bruto;
       // A IA leva de segundos a minutos. Nos modos automáticos, se o mundo mudou
       // nesse meio-tempo (o jogador editou/criou a build, a criatura saiu do time

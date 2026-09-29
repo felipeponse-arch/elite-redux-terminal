@@ -86,3 +86,24 @@ test("Trick Room: build lenta de propósito sai com IV de Velocidade 0 (Iron Pil
   R.state.archetype.weather = null;
   assert.equal(R.validateAiBuild(sp, { ability: ab, nature: "Brave", item: "Sitrus Berry", moves, evs: [252, 252, 4, 0, 0, 0], rationale: "t" }).ivs[5], 31);
 });
+
+test("innate condicional: a escolhível da espécie que arma a condição aparece como forma de garantir", () => {
+  const nomeHab = (id) => (R.ABILITIES[id] ? R.ABILITIES[id][0] : "");
+  const sp = R.SPECIES.find((s) => s && R.uniqueIds(s.inn || []).some((id) => {
+    const conds = R.CONDICAO_DE_HABILIDADE[nomeHab(id)];
+    return conds && R.uniqueIds(s.ab || []).some((ab) => conds.some((c) => R.habilidadeArma(nomeHab(ab), c)));
+  }));
+  assert.ok(sp, "fixture: espécie com innate condicional e escolhível que arma a condição");
+  assert.match(R.blocoCondicoesIA(sp), /\(innate\)[^\n]*escolher a habilidade /);
+});
+
+test("mega no modo temporário: a dica não manda segurar orbe (o slot é da pedra)", () => {
+  R.state.settings.megaMode = "temporaria";
+  const nomeHab = (id) => (R.ABILITIES[id] ? R.ABILITIES[id][0] : "");
+  const mega = R.SPECIES.find((s) => s && R.megaStoneRuleFor(s) && R.uniqueIds((s.ab || []).concat(s.inn || [])).some((id) => {
+    const c = R.CONDICAO_DE_HABILIDADE[nomeHab(id)];
+    return c && (c.includes("veneno") || c.includes("status") || c.includes("queimadura"));
+  }));
+  if (!mega) return; // nenhuma mega com habilidade de status neste dado - nada a conferir
+  assert.doesNotMatch(R.blocoCondicoesIA(mega), /segurar (Toxic|Flame) Orb/);
+});

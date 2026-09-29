@@ -218,6 +218,10 @@
       case "empty_completion":
       case "invalid_json":
         return "A resposta da IA veio incompleta ou num formato inesperado - tente de novo.";
+      case "tempo_esgotado":
+        // Não é código da plataforma: é o tempo-limite do próprio app (pedirIA),
+        // que solta a fila única quando uma chamada não responde.
+        return "A IA demorou demais para responder - tente de novo em instantes.";
       case "prompt_too_large":
         // Achado na auditoria de mensagens (2026-09-12): único código sem
         // nenhuma próxima ação sugerida - "tente de novo mais tarde" é

@@ -85,6 +85,20 @@ async function section26() {
     const [r1, r2] = await Promise.all([TE.pedirIA({ prompt: "A" }), TE.pedirIA({ prompt: "B", aviso: (t) => avisos.push(t) })]);
     check("dois pedidos ao mesmo tempo: um por vez (fila única)", r1.ok && r2.ok && pico === 1, pico);
     check("o segundo pedido avisa que está na fila", /Na fila/.test(avisos[0] || ""), avisos[0]);
+
+    // Revisão de código de 2026-09-28: chamada que nunca responde não pode
+    // prender a fila única; erro sem code (bug do app) não é "passageiro".
+    TE.definirTempoLimiteIA(50);
+    window.claude = { use: async () => ({ json: () => new Promise(() => {}) }) };
+    r = await TE.pedirIA({ prompt: "P", tentativas: 1 });
+    check("chamada que nunca responde esgota o tempo-limite com mensagem própria", !r.ok && /demorou demais/.test(r.mensagem), r.mensagem);
+    chamadas = simular([{ n: 9 }]);
+    r = await TE.pedirIA({ prompt: "P", tentativas: 1 });
+    check("depois do tempo esgotado a fila anda: o pedido seguinte é atendido", r.ok && r.valor.n === 9, r);
+    TE.definirTempoLimiteIA(180000);
+    chamadas = simular([new TypeError("bug do app"), { n: 1 }]);
+    r = await TE.pedirIA({ prompt: "P" });
+    check("erro sem code (bug do app) não é tratado como passageiro: 1 chamada só", chamadas.length === 1 && !r.ok, chamadas.length);
   } finally {
     TE.definirPausasIA([4000, 10000]);
     if (claudeAntes === undefined) delete window.claude; else window.claude = claudeAntes;

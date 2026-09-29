@@ -115,10 +115,14 @@
   // atributo de ataque que TODOS os golpes de dano usam, ou a Velocidade de um
   // Sweeper fora de Trick Room, é desperdício puro - regra básica de nature
   // (guias de iniciante do Smogon), aqui só a contradição clara reprova.
+  var GOLPES_SEM_O_PROPRIO_ATAQUE = ["Body Press", "Foul Play"];
   function conflitoDeNature(nature, moves, papel) {
     var mods = NATURE_MODS[nature];
     if (!mods) return null;
-    var cats = moves.filter(function (m) { return moveRoleOf(m) === "dano"; }).map(function (m) {
+    // Body Press ("maior for o Def do usuário") e Foul Play ("maior o Ataque do
+    // oponente") são físicos mas não usam o Ataque do usuário (texto do jogo) -
+    // um tanque de nature -Atk com Body Press é o set certo, não um conflito.
+    var cats = moves.filter(function (m) { return moveRoleOf(m) === "dano" && GOLPES_SEM_O_PROPRIO_ATAQUE.indexOf(m) === -1; }).map(function (m) {
       var mv = MOVE_BY_NAME[m];
       return mv ? DATA.splits[mv[2]] : "";
     });

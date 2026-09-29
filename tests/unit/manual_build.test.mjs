@@ -56,3 +56,9 @@ test("o prompt traz o manual e só as combinações das habilidades da espécie"
   assert.doesNotMatch(p2, /COMBINACOES DAS HABILIDADES DESTA ESPECIE/);
   assert.match(R.montarPromptEstrategias(tecnico), /- Technician/);
 });
+
+test("Body Press e Foul Play não contam como golpe que usa o próprio Ataque (texto do jogo)", () => {
+  // Tanque de nature -Atk com Body Press como único golpe de dano é o set certo.
+  assert.equal(R.conflitoDeNature("Bold", ["Body Press", "Recover", "Toxic", "Protect"], "Tanque"), null);
+  assert.equal(R.conflitoDeNature("Modest", ["Foul Play", "Recover", "Toxic", "Protect"], null), null);
+});
