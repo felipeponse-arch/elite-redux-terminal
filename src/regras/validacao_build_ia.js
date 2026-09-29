@@ -111,8 +111,30 @@
       return k !== "EVO_MEGA_EVOLUTION" && k !== "EVO_PRIMAL_REVERSION" && k !== "EVO_MOVE_MEGA_EVOLUTION";
     });
   }
+  // Nature contra a própria build (manual competitivo, 2026-09-28): derrubar o
+  // atributo de ataque que TODOS os golpes de dano usam, ou a Velocidade de um
+  // Sweeper fora de Trick Room, é desperdício puro - regra básica de nature
+  // (guias de iniciante do Smogon), aqui só a contradição clara reprova.
+  function conflitoDeNature(nature, moves, papel) {
+    var mods = NATURE_MODS[nature];
+    if (!mods) return null;
+    var cats = moves.filter(function (m) { return moveRoleOf(m) === "dano"; }).map(function (m) {
+      var mv = MOVE_BY_NAME[m];
+      return mv ? DATA.splits[mv[2]] : "";
+    });
+    var fisicos = cats.filter(function (c) { return c === "PHYSICAL"; }).length;
+    var especiais = cats.filter(function (c) { return c === "SPECIAL"; }).length;
+    if (fisicos && !especiais && mods[1] === 1) return "A nature " + nature + " reduz o Ataque, mas todos os golpes de dano da build são físicos. Tente gerar de novo.";
+    if (especiais && !fisicos && mods[1] === 3) return "A nature " + nature + " reduz o Ataque Especial, mas todos os golpes de dano da build são especiais. Tente gerar de novo.";
+    if (papel === "Sweeper" && mods[1] === 5 && state.archetype.weather !== "Trick Room") return "A nature " + nature + " reduz a Velocidade de um Sweeper. Tente gerar de novo.";
+    return null;
+  }
   function conflitoDeItem(item, moves, sp) {
     if (!item) return null;
+    // Texto do jogo: "Gradually restores HP of Poison-types. Damages others."
+    if (item === "Black Sludge" && speciesTypeNames(sp).indexOf("Poison") === -1) {
+      return "Black Sludge causa dano em quem não é tipo Poison, e " + sp.n + " não é. Tente gerar de novo.";
+    }
     var status = moves.filter(function (m) { var mv = MOVE_BY_NAME[m]; return mv && DATA.splits[mv[2]] === SPLIT_STATUS; });
     if (ITENS_CHOICE.indexOf(item) !== -1) {
       var travado = status.filter(function (m) { return GOLPES_QUE_PASSAM_ITEM.indexOf(m) === -1; })[0];
@@ -287,6 +309,8 @@
     var papel = papelNormalizado(raw.papel);
     var problemaDoPapel = papel ? conferirPapelDaBuild(papel, evs, raw.moves, sp) : null;
     if (problemaDoPapel) return rejeita(problemaDoPapel);
+    var problemaDaNature = conflitoDeNature(raw.nature, raw.moves, papel);
+    if (problemaDaNature) return rejeita(problemaDaNature);
     // Justificativa, 2026-09-10 (revisão da equipe sobre "Gerar build com
     // IA"): uma frase livre, NÃO validada contra dados reais como tudo
     // acima - não há o que checar, é texto corrido, não uma referência de

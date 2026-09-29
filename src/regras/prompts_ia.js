@@ -375,6 +375,46 @@
       (papeis.length ? ("Papeis JA COBERTOS por outros membros do time atual (perfil natural de cada especie, nao a build escolhida): " + papeis.map(function (r) { return ROLE_LABEL_PT[r] || r; }).join(", ") + ". Pese isso na hora de decidir o papel deste Pokemon - um time com varios atacantes puros e nenhuma bulk/suporte fica fragil contra qualquer coisa que sobreviva o primeiro golpe. Nao e proibido repetir papel (as vezes o time PRECISA de 2+ sweepers de proposito), mas se for repetir um papel ja bem coberto, diga na rationale por que faz sentido mesmo assim.\n") : "");
   }
 
+  // Manual de build competitivo (reunião de 2026-09-28, usuário: "a sugestão de
+  // builds não está extraindo o melhor dos pokes... associar isso aos moves,
+  // ivs e evs, nature e itens além das habilidades"). Duas partes:
+  //  - regras gerais curtas (nature, cobertura, Velocidade) - princípios básicos
+  //    de build competitiva (guias de iniciante do Smogon), nada específico de
+  //    um hack que precisasse de fonte do jogo;
+  //  - combinações item/golpe x habilidade SÓ das habilidades que esta espécie
+  //    tem, cada uma apoiada no texto do próprio jogo (descrição da habilidade
+  //    ou do item, citada no comentário ao lado).
+  var MANUAL_POR_HABILIDADE = {
+    "Magic Guard": "Magic Guard (\"Only damaged by attacks\"): o custo de HP da Life Orb e o dano de clima nao o atingem - Life Orb vira bonus puro.", // Life Orb: "at the cost of HP"
+    "Skill Link": "Skill Link: golpes de 2 a 5 acertos sempre acertam o maximo - prefira golpes de varios acertos do movepool; Loaded Dice fica redundante.",
+    "Super Luck": "Super Luck (+1 no critico): Scope Lens (\"improves the critical-hit rate\") soma - golpes de critico alto rendem mais.",
+    "Sniper": "Sniper (critico 2,25x): combine com Scope Lens e golpes de critico alto.",
+    "Technician": "Technician (golpe de 60 de poder ou menos x1,5): priorize os golpes fracos do movepool que ele transforma em fortes, inclusive os de varios acertos.",
+    "Sheer Force": "Sheer Force (x1,3 em golpe com efeito extra, que perde o efeito): prefira golpes com efeito secundario.",
+    "Serene Grace": "Serene Grace (dobra a chance de efeito extra): prefira golpes com efeito secundario (flinch, status, queda de status).",
+    "Contrary": "Contrary (queda de status vira aumento): golpes cuja descricao (no movepool acima) diz que baixam os status do proprio usuario viram setup - se houver, use.",
+    "Simple": "Simple (dobra mudancas de status): um golpe de setup rende em dobro - inclua um se o movepool tiver.",
+    "Speed Boost": "Speed Boost (+1 de Velocidade por turno): Protect ou um setup no primeiro turno e comum; EV de Velocidade pode ceder para bulk/ataque.",
+    "Moxie": "Moxie (+1 de Ataque a cada nocaute): combina com golpes fortes e item de Velocidade (Choice Scarf) para varrer.",
+    "Prankster": "Prankster (golpe de status com +1 de prioridade, falha contra Dark): golpes de status valem mais - setup, telas, status no oponente.",
+    "Regenerator": "Regenerator (cura 1/3 ao sair): combina com papel de Pivô e golpe de troca.",
+    "Tinted Lens": "Tinted Lens (dano dobrado quando resistido): a cobertura importa menos - pode concentrar em STAB e item de dano.",
+    "Unburden": "Unburden: item que se gasta na luta (berry, gem, Focus Sash, White Herb) ativa a Velocidade dobrada."
+  };
+  function blocoManualIA(sp) {
+    var habs = uniqueIds((sp.ab || []).concat(sp.inn || [])).map(function (id) { return ABILITIES[id] ? ABILITIES[id][0] : ""; });
+    var combos = habs.filter(function (n) { return MANUAL_POR_HABILIDADE[n]; }).map(function (n) { return "- " + MANUAL_POR_HABILIDADE[n]; });
+    var linhas = [
+      "MANUAL DE BUILD (regras gerais):",
+      "- Nature: sobe o atributo que o papel mais usa (ataque dos golpes de dano, ou a defesa do tanque) e reduz um atributo que a build NAO usa (Ataque se so ha golpes especiais, Ataque Especial se so fisicos). Nature que reduz o ataque que os golpes usam, ou a Velocidade de um Sweeper, e REJEITADA.",
+      "- Golpes: dois STAB quando der; o resto e cobertura para os tipos que resistem aos STAB e para a proxima luta. Nao gaste dois slots no mesmo tipo de cobertura.",
+      "- EVs: 252 onde o papel manda; o resto em HP ou Velocidade conforme os numeros de Velocidade do CONTEXTO. IV 31 em tudo, salvo Velocidade 0 em Trick Room (Iron Pill).",
+      "- Poison: Black Sludge cura so tipo Poison e causa dano nos outros (texto do jogo) - em quem nao e Poison ela e REJEITADA."
+    ];
+    if (combos.length) linhas.push("COMBINACOES DAS HABILIDADES DESTA ESPECIE (texto do jogo) - use quando servirem ao papel:");
+    return linhas.concat(combos).join("\n") + "\n";
+  }
+
   // Contexto que antes a IA buscava por ferramenta, já no prompt (reunião de
   // 2026-09-28, usuário: "algumas chamadas para gerar build estão demorando e
   // às vezes dão o retorno que não gera nada"). Cada consulta a uma ferramenta
@@ -471,6 +511,7 @@
       blocoMovepoolIA(sp, false) +
       blocoPapelIA(sp, false, true) +
       blocoCondicoesIA(sp) +
+      blocoManualIA(sp) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, false) +
       blocoItensIA(sp, false) +
@@ -530,6 +571,7 @@
       blocoMovepoolIA(sp, true) +
       blocoPapelIA(sp, true, false) +
       blocoCondicoesIA(sp) +
+      blocoManualIA(sp) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, true) +
       blocoItensIA(sp, true) +

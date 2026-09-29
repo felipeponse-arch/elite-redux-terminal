@@ -26,7 +26,9 @@ async function section16() {
   });
   if (!achou("espécie pra testar a nova tentativa da build por IA", fx)) return;
 
-  var valida = { ability: fx.abi, nature: "Bold", item: "", moves: fx.moves, evs: [252, 0, 252, 0, 4, 0], rationale: "teste retry" };
+  // Nature neutra (Hardy): desde 2026-09-28 a validação recusa nature que reduz
+  // o ataque que todos os golpes de dano usam - Bold com golpes físicos caía nela.
+  var valida = { ability: fx.abi, nature: "Hardy", item: "", moves: fx.moves, evs: [252, 0, 252, 0, 4, 0], rationale: "teste retry" };
   var invalida = Object.assign({}, valida, { moves: ["Golpe Que Nao Existe", fx.moves[1], fx.moves[2], fx.moves[3]] });
 
   async function gerarCom(respostas) {
@@ -113,8 +115,8 @@ async function section16() {
   // generateBuildWithAI).
   document.getElementById("back-to-list") && document.getElementById("back-to-list").click();
   await wait(30);
-  var setValido = { name: "Set de Teste", ability: fx.abi, nature: "Bold", item: "", moves: fx.moves, evs: [252, 0, 252, 0, 4, 0], rationale: "set valido" };
-  var setInvalido = { name: "Set Quebrado", ability: fx.abi, nature: "Bold", item: "", moves: ["Golpe Que Nao Existe", fx.moves[1], fx.moves[2], fx.moves[3]], evs: [0, 0, 0, 0, 0, 0], rationale: "x" };
+  var setValido = { name: "Set de Teste", ability: fx.abi, nature: "Hardy", item: "", moves: fx.moves, evs: [252, 0, 252, 0, 4, 0], rationale: "set valido" };
+  var setInvalido = { name: "Set Quebrado", ability: fx.abi, nature: "Hardy", item: "", moves: ["Golpe Que Nao Existe", fx.moves[1], fx.moves[2], fx.moves[3]], evs: [0, 0, 0, 0, 0, 0], rationale: "x" };
   var setsPrompts = [];
   window.claude = {
     use: async function (name) {

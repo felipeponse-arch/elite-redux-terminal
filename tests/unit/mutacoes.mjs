@@ -471,6 +471,27 @@ export const MUTACOES = [
     para: "",
   },
   {
+    id: "nature-contra-build-passa",
+    descricao: "nature que reduz o Ataque de uma build só física passa",
+    arquivo: "validacao_build_ia.js",
+    de: "if (fisicos && !especiais && mods[1] === 1)",
+    para: "if (false)",
+  },
+  {
+    id: "black-sludge-em-qualquer-tipo",
+    descricao: "Black Sludge em quem não é Poison passa",
+    arquivo: "validacao_build_ia.js",
+    de: "if (item === \"Black Sludge\" && speciesTypeNames(sp).indexOf(\"Poison\") === -1) {",
+    para: "if (false) {",
+  },
+  {
+    id: "manual-sem-combinacoes",
+    descricao: "o manual deixa de trazer as combinações das habilidades da espécie",
+    arquivo: "prompts_ia.js",
+    de: "return linhas.concat(combos).join(\"\\n\") + \"\\n\";",
+    para: "return linhas.join(\"\\n\") + \"\\n\";",
+  },
+  {
     id: "trick-room-iv-nao-zera",
     descricao: "build lenta de Trick Room mantém IV 31 de Velocidade",
     arquivo: "validacao_build_ia.js",
