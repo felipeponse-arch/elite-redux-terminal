@@ -464,6 +464,7 @@
 <script id="levelcapdata" type="application/json">__LEVELCAPS_JSON__</script>
 <script id="gymskillsdata" type="application/json">__GYM_SKILLS_JSON__</script>
 <script id="monodisp" type="application/json">__MONO_DISP_JSON__</script>
+<script id="movecategorias" type="application/json">__MOVE_CATEGORIAS_JSON__</script>
 <script id="savedteamsseed" type="application/json">__SAVEDTEAMS_JSON__</script>
 <script id="abilitypt" type="application/json">__ABILITY_PT_JSON__</script>
 <script id="movept" type="application/json">__MOVE_PT_JSON__</script>
@@ -617,6 +618,9 @@
   // Mono run (2026-09-26): por tipo, desde qual etapa dá pra pegar cada espécie
   // (planilha oficial da comunidade, scripts/importar_mono.mjs). Ver mono_run.js.
   var MONO_DISP = JSON.parse(document.getElementById("monodisp").textContent || "null");
+  // Categoria de golpe (soco, mordida, corte...) e chance de efeito extra, do NextDex
+  // (scripts/extrair_categorias_golpes.mjs, 2026-09-29).
+  var MOVE_CATEGORIAS = JSON.parse(document.getElementById("movecategorias").textContent || "{}");
   // Gym Skills (item pedido pelo usuario, 2026-09-17): buffs que o lider de
   // cada ginasio perde quando voce vence o treinador de apoio correspondente,
   // ANTES de desafia-lo. Confirmado linha a linha no script de cada ginasio
@@ -828,6 +832,7 @@
     validateAiBuild: validateAiBuild,
     buildSynergyHtml: buildSynergyHtml,
     ABILITY_SYNERGY: ABILITY_SYNERGY,
+    sinergiasDaEspecie: sinergiasDaEspecie,
     CONDITION_MOVE_SYNERGY: CONDITION_MOVE_SYNERGY,
     carryUserData: carryUserData,
     reconciliarBuildsSalvas: reconciliarBuildsSalvas,

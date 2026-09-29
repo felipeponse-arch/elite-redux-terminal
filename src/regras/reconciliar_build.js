@@ -25,7 +25,7 @@
   // validação da IA usa); sem sinergia, a primeira escolhível da espécie.
   function habilidadeSubstitutaPara(sp, moves) {
     var escolhiveis = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
-    var hits = ABILITY_SYNERGY[sp.sname] || [];
+    var hits = sinergiasDaEspecie(sp);
     for (var i = 0; i < hits.length; i++) {
       var h = hits[i];
       if (h.kind === "inn" || escolhiveis.indexOf(h.name) === -1) continue;

@@ -30,10 +30,12 @@ async function section27() {
     if (!achou("botão 'Montar time contra este chefão'", botao)) return;
     botao.click();
     // Espera o fluxo inteiro (duelos + 1 build por membro, IA simulada).
-    for (var i = 0; i < 100; i++) {
+    // Só "Faltou build" encerra: o aviso fica vazio ENQUANTO as builds são pedidas
+    // (parar no vazio cortava a espera no meio quando o duelo ficou mais pesado).
+    for (var i = 0; i < 300; i++) {
       await wait(50);
       var st = document.getElementById("chefao-build-status");
-      if (st && /^Faltou build|^$/.test(st.textContent) && prompts.length) break;
+      if (st && /^Faltou build/.test(st.textContent) && prompts.length) break;
     }
     check("o botão leva pra aba Meu time", document.querySelector('.tab-btn[data-tab="team"]').classList.contains("active"));
     var time = T.state.team.slice();
@@ -50,6 +52,10 @@ async function section27() {
     var itens = document.querySelectorAll(".plano-chefao li");
     check("o plano lista os 6 Pokémon dela, em ordem", itens.length === 6 && /Sunflora/.test(itens[0].textContent), [].map.call(itens, function (li) { return li.textContent.slice(0, 40); }));
     check("o plano avisa que ela arma sol", !!card && /Ele arma sol/.test(card.textContent));
+    // Luta inteira (2026-09-29): o cartão mostra o placar e a ordem das lutas.
+    var passos = document.querySelectorAll(".plano-luta li");
+    check("o cartão mostra a luta simulada inteira, passo a passo", !!card && /Luta simulada inteira/.test(card.textContent) && passos.length >= 1,
+      [].map.call(passos, function (li) { return li.textContent.slice(0, 60); }));
     check("pediu uma build por membro, mirando a Flannery 1",
       prompts.length >= time.length && prompts.every(function (p) { return /OBJETIVO DESTA BUILD: vencer Flannery 1/.test(p); }), prompts.length);
     check("build recusada vira aviso de 'faltou build', sem travar o fluxo",
@@ -58,7 +64,7 @@ async function section27() {
     document.querySelector('.tab-btn[data-tab="bosses"]').click();
     await wait(50);
     document.getElementById("boss-montar-time").click();
-    for (var j = 0; j < 100; j++) {
+    for (var j = 0; j < 300; j++) {
       await wait(50);
       var st2 = document.getElementById("chefao-build-status");
       if (st2 && /^Faltou build/.test(st2.textContent)) break;

@@ -75,6 +75,11 @@ if (-not $SkipExtract) {
     # Rank por duelo simulado (2026-09-28): reescreve tier/score/estagio/
     # Monotype de species_rank.json. Precisa da sinergia acima (bonus de
     # habilidade a golpe) - por isso roda depois dela. Leva ~6 min.
+    # Categoria de golpe (soco, mordida, corte...) e chance de efeito extra, da
+    # descricao longa do NextDex (2026-09-29) - o rank por duelo abaixo usa.
+    Write-Output "--- categorias de golpe do NextDex (extrair_categorias_golpes.mjs) ---"
+    node (Join-Path $PSScriptRoot "extrair_categorias_golpes.mjs")
+    if ($LASTEXITCODE -ne 0) { throw "extrair_categorias_golpes.mjs falhou" }
     Write-Output "--- rank por duelo contra os chefoes (calcular_rank_duelo.mjs) ---"
     node (Join-Path $PSScriptRoot "calcular_rank_duelo.mjs") --gravar
     if ($LASTEXITCODE -ne 0) { throw "calcular_rank_duelo.mjs falhou" }

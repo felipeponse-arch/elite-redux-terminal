@@ -22,7 +22,7 @@ function baseDe(sp, extra) {
   const ab = R.ABILITIES[R.uniqueIds(sp.ab)[0]][0];
   return Object.assign({ ability: ab, nature: "Adamant", item: "", moves: dano.slice(0, 4), evs: [252, 252, 0, 0, 4, 0], rationale: "teste" }, extra);
 }
-const semSinergia = () => R.SPECIES.find((s) => !R.isMegaForm(s) && !(R.ABILITY_SYNERGY[s.sname] || []).length &&
+const semSinergia = () => R.SPECIES.find((s) => !R.isMegaForm(s) && !R.sinergiasDaEspecie(s).length &&
   R.availableMovesFor(s).names.filter((m) => R.moveRoleOf(m) === "dano").length >= 8 && !R.evoluiAinda(s));
 
 test("o prompt leva a descrição de cada habilidade escolhível e innate", () => {
@@ -78,7 +78,7 @@ test("papel declarado: contradição clara reprova, coerência passa com o papel
 });
 
 test("pivô sem golpe de troca reprova quando a forma tem um", () => {
-  const sp = R.SPECIES.find((s) => !R.isMegaForm(s) && !(R.ABILITY_SYNERGY[s.sname] || []).length && R.availableMovesFor(s).names.includes("U-turn") &&
+  const sp = R.SPECIES.find((s) => !R.isMegaForm(s) && !R.sinergiasDaEspecie(s).length && R.availableMovesFor(s).names.includes("U-turn") &&
     R.availableMovesFor(s).names.filter((m) => R.moveRoleOf(m) === "dano" && !R.ehGolpeDePivo(m)).length >= 4);
   assert.ok(sp, "fixture: espécie com U-turn");
   const m = {};

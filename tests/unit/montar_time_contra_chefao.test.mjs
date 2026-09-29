@@ -18,13 +18,17 @@ test("o time da Flannery 1 arma sol (Drought de innate)", () => {
   assert.equal(R.climaDoTimeDoChefao(party), "sol");
 });
 
-test("monta 6, sem repetir criatura, e o Azumarill (Sap Sipper) entra", () => {
+// Desde a luta inteira (2026-09-29) o time é conferido na sequência: com o HP
+// passando de uma luta pra outra, a Florges White (Harvest + Sitrus) pode tomar a
+// vaga do Azumarill - os dois times varrem a Flannery; decide o HP que sobra.
+test("monta 6, sem repetir criatura, e vence a luta inteira simulada", () => {
   const r = R.montarTimeContraChefao(candidatos(), party, 50);
   assert.equal(r.escolhidos.length, 6);
   assert.equal(new Set(r.escolhidos.map((e) => e.owned)).size, 6);
+  assert.ok(r.simulacao && r.simulacao.venceu, JSON.stringify(r.simulacao && r.simulacao.log));
+  assert.equal(r.simulacao.derrubados, party.length);
   const az = r.escolhidos.find((e) => e.sp.n === "Azumarill");
-  assert.ok(az, "Azumarill escolhido: " + r.escolhidos.map((e) => e.sp.n).join(", "));
-  assert.equal(az.ab, "Sap Sipper");
+  if (az) assert.equal(az.ab, "Sap Sipper");
 });
 
 test("o plano cobre os 6 Pokémon dela, na ordem em que ela manda", () => {

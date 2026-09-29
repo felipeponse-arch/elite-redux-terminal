@@ -55,9 +55,11 @@ test("no máximo 2 membros com o mesmo item: o 3º é recusado, o 2º passa", ()
   assert.match(R.blocoTimeEmUsoIA(g), /JA ESGOTADOS \(2 no time[^)]*\): Life Orb/);
   // Build válida qualquer do Garchomp, com o item em questão.
   const golpes = R.availableMovesFor(g).names.filter((m) => R.moveRoleOf(m) === "dano");
-  const sinergia = (R.ABILITY_SYNERGY[g.sname] || []).flatMap((h) => h.golpes || []).filter((m) => golpes.includes(m));
+  // Habilidade que ATIVA a sinergia (desde as categorias do NextDex o Garchomp tem Keen Edge).
+  const hit = R.sinergiasDaEspecie(g).find((h) => (h.golpes || []).some((m) => golpes.includes(m)));
+  const sinergia = hit ? hit.golpes.filter((m) => golpes.includes(m)) : [];
   const moves = [...new Set([...sinergia.slice(0, 1), ...golpes])].slice(0, 4);
-  const ab = R.ABILITIES[R.uniqueIds(g.ab)[0]][0];
+  const ab = hit && hit.kind !== "inn" ? hit.name : R.ABILITIES[R.uniqueIds(g.ab)[0]][0];
   const build = (item) => ({ ability: ab, nature: "Jolly", item, moves, evs: [0, 252, 0, 0, 4, 252], rationale: "t" });
   const m = {};
   assert.equal(R.validateAiBuild(g, build("Life Orb"), m), null);

@@ -30,26 +30,40 @@
 //    status, que é o que importa pra comparar espécies.
 //  - Três sets por espécie, vale o melhor: físico (252 Atk / 252 Spe, +Atk),
 //    especial (252 SpA / 252 Spe, +SpA) e tanque (252 HP / 128 Def / 128 SpD).
-//    Sem item (compara a espécie, não o item).
+//    Com item (2026-09-29, decisão do usuário): o que a habilidade pede (Guts
+//    com Flame Orb...) ou o do set (Life Orb, Leftovers, Eviolite) - itemDoSetDuelo.
 //  - Golpes: nível + tutor, sem os de carga/recarga ou que desmaiam o usuário.
 //    Precisão entra como fator; "2 a 5 vezes" conta 3.
-//  - Dano pela fórmula padrão com rolagem média (0,925), sem crítico.
+//  - Dano pela fórmula padrão com rolagem média (0,925), crítico como valor
+//    esperado, status por chance, estágios, campo, cura e recuo (duelo.js).
 //    Multi-Headed ("tantos acertos quantas cabeças") conta 1,5 - o dado não
 //    diz quantas cabeças cada espécie tem.
 //  - Duelo: quantos golpes cada lado precisa pra nocautear; quem é mais rápido
 //    (ou usa prioridade) bate primeiro. Vitória = 1; derrota = metade da
 //    fração de HP que tirou antes de cair.
+//  - Duas notas (2026-09-29, decisão do usuário): simples (todos os encontros)
+//    e dupla (só os chefões em dupla do dado, `db`): o mesmo duelo com o golpe
+//    de área valendo 1,5x e o suporte ao parceiro somado (unidadeParaDupla,
+//    suporteEmDupla). A luta 2x2 completa fica pro botão da aba Chefões.
 //
-// Uso: node scripts/calcular_rank_duelo.mjs [--gravar]
+// Uso: node scripts/calcular_rank_duelo.mjs [--gravar] [--um-nucleo]
+// Roda em paralelo (2026-09-29): as espécies são divididas entre workers, um por
+// núcleo livre - cada worker carrega o mesmo motor e calcula a sua parte; o
+// principal junta e grava. A conta é a mesma; só o tempo cai (o duelo ficou
+// bem mais pesado com status, itens, campo e golpes de status).
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { cpus } from "node:os";
+import { Worker, isMainThread, parentPort, workerData } from "node:worker_threads";
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const R = carregarRegras({ milestone: 9 });
 const NIVEL_DO_DUELO = 50;
 const TIERS_DOS_CHEFOES = ["party", "insane", "hell"];
+// --sem-planos: duelo sem golpes de status (só pra comparar o peso deles).
+const OPCOES_DUELO = process.argv.includes("--sem-planos") ? { semPlanos: true } : undefined;
 
 // ---------- motor: src/regras/duelo.js (o mesmo do botão da aba Chefões) ----------
 // O simulador morava aqui; foi pro app em 2026-09-28 pra rank e botão
@@ -66,7 +80,7 @@ for (const b of R.BOSSES) {
     const party = b[tier];
     if (!party || !party.length) continue;
     const foes = party.map(montarFoe).filter(Boolean);
-    if (foes.length) encontros.push({ nome: b.name + " (" + tier + ")", foes });
+    if (foes.length) encontros.push({ nome: b.name + " (" + tier + ")", foes, dupla: !!b.db });
   }
 }
 
@@ -80,22 +94,52 @@ function notaDaEspecie(sp) {
   for (const set of R.SETS_DE_DUELO) {
     for (const ab of escolhas.length ? escolhas : [null]) {
       const u = R.unidadeDeDuelo(sp, set, ab, NIVEL_DO_DUELO, golpeIds, null);
-      let soma = 0;
+      const ud = R.unidadeParaDupla(u), suporte = R.suporteEmDupla(u.ef);
+      let soma = 0, somaDupla = 0, nDupla = 0;
       for (const e of encontros) {
         let s = 0;
-        for (const f of e.foes) s += R.resultadoDoDuelo(u, f, NIVEL_DO_DUELO);
+        for (const f of e.foes) s += R.resultadoDoDuelo(u, f, NIVEL_DO_DUELO, OPCOES_DUELO);
         soma += s / e.foes.length;
+        if (e.dupla) {
+          let d = 0;
+          for (const f of e.foes) d += Math.min(1, R.resultadoDoDuelo(ud, f, NIVEL_DO_DUELO, OPCOES_DUELO) + suporte);
+          somaDupla += d / e.foes.length; nDupla++;
+        }
       }
-      const nota = soma / encontros.length;
-      if (!melhor || nota > melhor.nota) melhor = { nota, set: set.nome, ab: u.ab };
+      const nota = soma / encontros.length, notaDupla = nDupla ? somaDupla / nDupla : 0;
+      if (!melhor || nota > melhor.nota) melhor = Object.assign(melhor || {}, { nota, set: set.nome, ab: u.ab, item: u.item });
+      if (!melhor.dupla || notaDupla > melhor.dupla.nota) melhor.dupla = { nota: notaDupla, set: set.nome, ab: u.ab, item: u.item };
     }
   }
   return melhor;
 }
 
+// Worker: calcula só a sua parte e devolve.
+if (!isMainThread) {
+  const parte = {};
+  for (const sname of workerData.snames) parte[sname] = notaDaEspecie(R.getSpeciesBySname(sname));
+  parentPort.postMessage(parte);
+  process.exit(0);
+}
 const inicio = Date.now();
 const resultado = {};
-for (const sp of R.SPECIES) if (sp && sp.sname) resultado[sp.sname] = notaDaEspecie(sp);
+// --amostra=N: uma espécie a cada N (só pra conferir o script rápido; não grava nada útil).
+const amostra = parseInt((process.argv.find((x) => x.startsWith("--amostra=")) || "").split("=")[1], 10) || 1;
+const todas = R.SPECIES.filter((sp) => sp && sp.sname).map((sp) => sp.sname).filter((_, i) => i % amostra === 0);
+const nucleos = process.argv.includes("--um-nucleo") ? 1 : Math.max(1, Math.min(cpus().length - 2, 10));
+if (nucleos === 1) {
+  for (const sname of todas) resultado[sname] = notaDaEspecie(R.getSpeciesBySname(sname));
+} else {
+  // Espécies intercaladas (não em blocos): as pesadas ficam espalhadas entre os workers.
+  const partes = Array.from({ length: nucleos }, (_, i) => todas.filter((_, j) => j % nucleos === i));
+  const respostas = await Promise.all(partes.map((snames) => new Promise((ok, erro) => {
+    const w = new Worker(new URL(import.meta.url), { workerData: { snames }, argv: process.argv.slice(2).filter((a) => a !== "--gravar") });
+    w.once("message", ok);
+    w.once("error", erro);
+    w.once("exit", (c) => { if (c !== 0) erro(new Error("worker saiu com " + c)); });
+  })));
+  respostas.forEach((p) => Object.assign(resultado, p));
+}
 const segundos = ((Date.now() - inicio) / 1000).toFixed(1);
 
 // ---------- percentil -> tier (mesmos cortes do rank atual) ----------
@@ -113,6 +157,7 @@ function percentis(valores) {
 const tierDe = (p) => (p >= 97 ? "SS" : p >= 90 ? "S" : p >= 75 ? "A" : p >= 50 ? "B" : p >= 20 ? "C" : "D");
 const snames = Object.keys(resultado);
 const pct = percentis(snames.map((s) => resultado[s].nota));
+const pctDupla = percentis(snames.map((s) => resultado[s].dupla.nota));
 const antigo = JSON.parse(readFileSync(join(RAIZ, "data", "species_rank.json"), "utf8"));
 
 // ---------- relatório ----------
@@ -128,6 +173,7 @@ const linha = (n) => {
   const a = antigo[sp.sname], r = resultado[sp.sname], p = pct.get(r.nota);
   return { n, antes: a ? a.tier + " " + a.score : "-", depois: tierDe(p) + " " + Math.round(p), p, pa: a ? a.score : 0, detalhe: r.set + " / " + (r.ab || "-") };
 };
+console.log(`núcleos: ${nucleos}`);
 console.log(`duelos: ${encontros.length} encontros, ${cacheFoe.size} Pokémon de chefão distintos, ${snames.length} espécies, ${segundos} s`);
 for (const [rotulo, lista] of [["FORTES segundo a comunidade", FORTES], ["FRACOS segundo a comunidade", FRACOS]]) {
   console.log("\n" + rotulo + "\nespécie                 antes     depois   (melhor set / habilidade)");
@@ -142,7 +188,12 @@ console.log(`\ncom build curada do Discord (${curadas.length}): percentil médio
 console.log("\ntop 25 depois:");
 snames.slice().sort((a, b) => resultado[b].nota - resultado[a].nota).slice(0, 25).forEach((s, i) => {
   const sp = R.getSpeciesBySname(s);
-  console.log(`${String(i + 1).padStart(2)}. ${sp.n.padEnd(24)} ${(resultado[s].nota * 100).toFixed(1)}% dos duelos  (${resultado[s].set} / ${resultado[s].ab || "-"})`);
+  console.log(`${String(i + 1).padStart(2)}. ${sp.n.padEnd(24)} ${(resultado[s].nota * 100).toFixed(1)}% dos duelos  (${resultado[s].set} / ${resultado[s].ab || "-"} / ${resultado[s].item || "-"})`);
+});
+console.log("\ntop 15 em dupla:");
+snames.slice().sort((a, b) => resultado[b].dupla.nota - resultado[a].dupla.nota).slice(0, 15).forEach((s, i) => {
+  const sp = R.getSpeciesBySname(s);
+  console.log(`${String(i + 1).padStart(2)}. ${sp.n.padEnd(24)} ${(resultado[s].dupla.nota * 100).toFixed(1)}%  (${resultado[s].dupla.set} / ${resultado[s].dupla.ab || "-"})`);
 });
 
 // Grava no MESMO data/species_rank.json que o app já lê (roda depois de
@@ -170,7 +221,9 @@ if (process.argv.includes("--gravar")) {
     const e = Object.assign({}, a, { tier: tierDe(p), score: Math.round(p) });
     if (a.stageTier) { e.stageTier = tierDe(pctEstagio[s]); e.stageScore = Math.round(pctEstagio[s]); }
     e.monoRanks = Object.fromEntries(Object.entries(pctTipo[s] || {}).map(([t, v]) => [t, { score: Math.round(v), tier: tierDe(v) }]));
-    e.duelo = { vitorias: Math.round(resultado[s].nota * 1000) / 10, set: resultado[s].set, habilidade: resultado[s].ab };
+    e.duelo = { vitorias: Math.round(resultado[s].nota * 1000) / 10, set: resultado[s].set, habilidade: resultado[s].ab, item: resultado[s].item };
+    const pd = pctDupla.get(resultado[s].dupla.nota);
+    e.dupla = { tier: tierDe(pd), score: Math.round(pd), vitorias: Math.round(resultado[s].dupla.nota * 1000) / 10, set: resultado[s].dupla.set, habilidade: resultado[s].dupla.ab, item: resultado[s].dupla.item };
     novo[s] = e;
   });
   writeFileSync(join(RAIZ, "data", "species_rank.json"), JSON.stringify(novo));

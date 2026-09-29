@@ -236,6 +236,17 @@
       };
     });
   }
+  // A luta inteira simulada (HP passando de uma luta pra outra), em frases curtas.
+  function resumoDaLuta(sim) {
+    if (!sim) return null;
+    return { venceu: sim.venceu, derrubados: sim.derrubados, total: sim.total, vivos: sim.vivos, dupla: !!sim.dupla,
+      passos: sim.log.map(function (l) {
+        if (l.derruba) return l.quem + " derruba " + l.derruba + (l.golpe ? " (" + l.golpe + ")" : "");
+        if (l.troca) return "troque " + l.sai + " por " + l.entra + " contra " + l.contra;
+        var hp = Math.round((l.fracEu || 0) * 100);
+        return l.meu + " contra " + l.contra + ": " + (l.venceu === true ? "vence, fica com " + hp + "% de HP" : "cai");
+      }) };
+  }
   async function montarTimeContraEsteChefao() {
     var boss = BOSSES[bossState.selected];
     if (!boss || montagemContraChefaoRodando) return;
@@ -254,7 +265,8 @@
       statusChefao("Simulando os duelos contra " + boss.name + "...");
       await new Promise(function (ok) { setTimeout(ok, 0); }); // deixa o texto aparecer antes da conta
       var nivel = getCurrentCap() || 100;
-      var r = montarTimeContraChefao(cands, party, nivel);
+      // Chefão em dupla (db no dado): a luta é simulada 2 contra 2.
+      var r = montarTimeContraChefao(cands, party, nivel, { dupla: !!boss.db });
       if (!r.escolhidos.length) { statusChefao("Não consegui montar um time com os Pokémon que você tem."); return; }
       // Clicou de novo e o simulador escolheu o MESMO time que já está montado:
       // não regrava o backup (senão o "Antes de ..." viraria o próprio time do
@@ -281,7 +293,7 @@
         if (a && a.nota >= 0.5) (responde[a.sp.sname] = responde[a.sp.sname] || []).push(p.foe.nome);
       });
       generatedTeamResult = {
-        archetypeLabel: "contra " + boss.name, chefao: boss.name, plano: plano, clima: r.clima, estrategia: r.estrategia,
+        archetypeLabel: "contra " + boss.name, chefao: boss.name, plano: plano, clima: r.clima, estrategia: r.estrategia, luta: resumoDaLuta(r.simulacao),
         progresso: "Gerando as builds...", anterior: anterior, forTeamKey: teamKeyFor(members)
       };
       var aba = document.querySelector('.tab-btn[data-tab="team"]');

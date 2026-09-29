@@ -41,7 +41,7 @@
   // defeito onde não existe defeito. Silêncio é neutro; o selo é só ganho.
   function buildSynergyHtml(sp, build) {
     if (!sp || !build || !build.moves) return "";
-    var hits = ABILITY_SYNERGY[sp.sname];
+    var hits = sinergiasDaEspecie(sp);
     if (!hits || !hits.length) return "";
     for (var i = 0; i < hits.length; i++) {
       var h = hits[i];
@@ -173,8 +173,8 @@
     var title = r.duelo
       ? "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100. Duelo simulado 1x1 contra cada Pokémon " +
         "real dos chefões do jogo (golpes, habilidade, item e EVs do jogo): venceu " + r.duelo.vitorias + "% dos duelos com o " +
-        "melhor set genérico (" + r.duelo.set + (r.duelo.habilidade ? ", " + r.duelo.habilidade : "") + "). Conta dano dos dois " +
-        "lados, velocidade, prioridade e as habilidades (inclusive clima que ele mesmo arma). Não conta item nem o resto do time."
+        "melhor set genérico (" + r.duelo.set + (r.duelo.habilidade ? ", " + r.duelo.habilidade : "") + (r.duelo.item ? ", " + r.duelo.item : "") + "). Conta dano dos dois " +
+        "lados, velocidade, prioridade, item, status, crítico, campo e as habilidades (inclusive clima que ele mesmo arma). Não conta o resto do time."
       : "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100.";
     return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.tier + '</span>';
   }
@@ -187,6 +187,15 @@
   // Mega/Primal-only lineages like most box legendaries - see
   // compute_species_rank.ps1) has no stageTier and renders nothing, same
   // safe-degrade as everywhere else.
+  // Nota em dupla (2026-09-29, decisão do usuário: duas notas): o mesmo duelo
+  // contra os chefões em dupla, com golpe de área e suporte ao parceiro.
+  function rankDuplaBadgeHtml(sname) {
+    var r = SPECIES_RANK[sname];
+    if (!r || !r.dupla) return "";
+    var title = "Rank " + r.dupla.tier + " em batalha em dupla (score " + r.dupla.score + "/100): duelo contra os Pokémon dos chefões em dupla, " +
+      "com golpe de área acertando os dois (0,75x cada) e o que a habilidade faz pelo parceiro (Friend Guard, Power Spot, Intimidate nos dois...).";
+    return '<span class="rank-badge-stage ' + (RANK_TIER_CLASS[r.dupla.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.dupla.tier + '</span>';
+  }
   var STAGE_LABEL = { 1: "1º estágio", 2: "2º estágio", 3: "3º estágio", 4: "4º estágio" };
   function rankStageBadgeHtml(sname) {
     var r = SPECIES_RANK[sname];
@@ -294,6 +303,8 @@
       var label = STAGE_LABEL[r.stage] || (r.stage + "º estágio");
       items += '<span class="rank-info-item"><span class="rank-info-label">Rank no ' + label + '</span>' + rankStageBadgeHtml(sp.sname) + '</span>';
     }
+    var duplaBadge = rankDuplaBadgeHtml(sp.sname);
+    if (duplaBadge) items += '<span class="rank-info-item"><span class="rank-info-label">Rank em dupla</span>' + duplaBadge + '</span>';
     var monoBadge = rankMonoBadgeHtml(sp.sname);
     if (monoBadge) {
       items += '<span class="rank-info-item"><span class="rank-info-label">Rank Monotype ' + escapeHtml(state.archetype.monotype) + '</span>' + monoBadge + '</span>';
@@ -487,7 +498,7 @@
   // Ficha: bloco "Conhecer a espécie" (stats, habilidades, evolução, formas).
   function fichaConhecerHtml(sp) {
     var statsHtml = fichaStatsHtml(sp);
-    var synergyHits = ABILITY_SYNERGY[sp.sname];
+    var synergyHits = sinergiasDaEspecie(sp);
     var abiHtml = uniqueIds(sp.ab).map(function (id) { return abilityCard(id, "Escolhível", "choosable", synergyHits); }).join("");
     var innHtml = sp.inn.map(function (id) { return abilityCard(id, "Innate", "innate", synergyHits); }).join("");
     var evoHtml = fichaEvolucaoHtml(sp);

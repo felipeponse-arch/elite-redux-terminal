@@ -73,7 +73,7 @@ async function section15() {
     if (!sp || !sp.ab || !sp.ab.length) return false;
     var stones = T.stonesOf(sp);
     if (stones.length !== 1) return false;
-    var syn = T.ABILITY_SYNERGY[sp.sname];
+    var syn = T.sinergiasDaEspecie(sp);
     if (syn && syn.length) return false;
     var lm = sp.lm.filter(function (p) { return cap === null || cap === undefined || p[0] <= cap; });
     var dano = T.uniqueIds(lm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return T.MOVES[id][0]; })

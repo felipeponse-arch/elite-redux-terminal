@@ -75,7 +75,7 @@ test("Trick Room: build lenta de propósito sai com IV de Velocidade 0 (Iron Pil
   R.state.archetype.weather = "Trick Room";
   const sp = porNome("Snorlax"); // innate Gluttony pede berry
   const dano = R.availableMovesFor(sp).names.filter((m) => R.moveRoleOf(m) === "dano");
-  const sinergia = (R.ABILITY_SYNERGY[sp.sname] || []).flatMap((h) => h.golpes || []);
+  const sinergia = R.sinergiasDaEspecie(sp).flatMap((h) => h.golpes || []);
   const moves = [...new Set([...sinergia.filter((g) => dano.includes(g)).slice(0, 1), ...dano])].slice(0, 4);
   const ab = R.ABILITIES[R.uniqueIds(sp.ab).find((id) => !R.CONDICAO_DE_HABILIDADE[R.ABILITIES[id][0]])][0];
   const m = {};

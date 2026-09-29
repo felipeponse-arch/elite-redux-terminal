@@ -341,7 +341,7 @@ async function section06() {
     for (var ei = 0; ei < curadas.length && !soEscolhivel; ei++) {
       var spE = T.getSpeciesBySname(curadas[ei].sname);
       if (!spE) continue;
-      var hitsE = T.ABILITY_SYNERGY[spE.sname] || [];
+      var hitsE = T.sinergiasDaEspecie(spE);
       if (hitsE.length && hitsE.every(function (h) { return h.kind !== "inn"; }) && T.buildSynergyHtml(spE, curadas[ei].b)) {
         soEscolhivel = { sp: spE, b: curadas[ei].b };
       }
@@ -355,10 +355,10 @@ async function section06() {
   var spSinergia = null;
   for (var si = 0; T && si < T.SPECIES.length && !spSinergia; si++) {
     var cand = T.SPECIES[si];
-    if (!cand || !T.ABILITY_SYNERGY[cand.sname] || !T.ABILITY_SYNERGY[cand.sname].length) continue;
+    if (!cand || !T.sinergiasDaEspecie(cand) || !T.sinergiasDaEspecie(cand).length) continue;
     // precisa de uma sinergia cuja habilidade seja ESCOLHÍVEL, pra dar pra
     // montar tanto o caso que cumpre quanto o que não cumpre
-    var hitEsc = T.ABILITY_SYNERGY[cand.sname].find(function (h) { return h.kind !== "inn" && h.golpes && h.golpes.length; });
+    var hitEsc = T.sinergiasDaEspecie(cand).find(function (h) { return h.kind !== "inn" && h.golpes && h.golpes.length; });
     if (hitEsc) spSinergia = { sp: cand, hit: hitEsc };
   }
   check("achou uma espécie com sinergia de habilidade escolhível pra testar a regra", !!spSinergia);
@@ -369,7 +369,7 @@ async function section06() {
     var golpesSemSinergia = movesReais.filter(function (m) {
       // só golpes de DANO: a fixture usa EVs 100% ofensivos, e desde 2026-09-16
       // build assim com golpe de cura é rejeitada por outra regra (seção 14).
-      return T.moveRoleOf(m) === "dano" && !T.ABILITY_SYNERGY[spS.sname].some(function (h) { return (h.golpes || []).indexOf(m) !== -1; });
+      return T.moveRoleOf(m) === "dano" && !T.sinergiasDaEspecie(spS).some(function (h) { return (h.golpes || []).indexOf(m) !== -1; });
     });
     var base = { ability: spSinergia.hit.name, nature: "Adamant", item: "", evs: [4, 252, 0, 0, 0, 252], rationale: "teste" };
 

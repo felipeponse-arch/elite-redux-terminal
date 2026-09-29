@@ -32,5 +32,7 @@ declare var ABILITY_PT: Record<string, string>;
 declare var ITEM_DESC: Record<string, string>;
 /** Mono run: por tipo, desde qual etapa dá pra pegar cada espécie (data/mono_disponibilidade.json). */
 declare var MONO_DISP: any;
+/** Categoria de golpe (soco, mordida, corte...) e chance de efeito extra, por id (data/move_categorias.json). */
+declare var MOVE_CATEGORIAS: Record<string, { c?: string[]; ch?: number; ef?: string; rc?: number; dr?: number; al?: string; se?: string }>;
 /** Papel natural por espécie (data/species_role.json). */
 declare var SPECIES_ROLE: Record<string, any>;

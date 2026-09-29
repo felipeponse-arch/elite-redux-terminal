@@ -15,7 +15,7 @@ async function section16() {
   var fx = null;
   T.SPECIES.some(function (sp) {
     if (!sp || !sp.ab || !sp.ab.length || T.formFamilyOf(sp).length > 1) return false;
-    if ((T.ABILITY_SYNERGY[sp.sname] || []).length) return false;
+    if (T.sinergiasDaEspecie(sp).length) return false;
     if (save.customBuilds && save.customBuilds[sp.sname]) return false;
     var lm = sp.lm.filter(function (p) { return cap === null || cap === undefined || p[0] <= cap; });
     var dano = T.uniqueIds(lm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return T.MOVES[id][0]; })

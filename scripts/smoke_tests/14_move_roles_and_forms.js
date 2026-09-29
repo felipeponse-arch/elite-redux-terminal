@@ -35,7 +35,7 @@ async function section14() {
   for (var i = 0; i < T.SPECIES.length && !fx; i++) {
     var sp = T.SPECIES[i];
     if (!sp || !sp.ab || !sp.ab.length) continue;
-    var syn = T.ABILITY_SYNERGY[sp.sname];
+    var syn = T.sinergiasDaEspecie(sp);
     if (syn && syn.length) continue; // isola a regra nova da regra de sinergia
     var mv = movesAllowed(sp);
     if (mv.indexOf("Roost") === -1) continue;

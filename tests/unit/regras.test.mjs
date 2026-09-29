@@ -148,7 +148,7 @@ test("level cap vem da opção Level Cap, não da dificuldade", () => {
 // ---- validação da build por IA ----
 function fixtureValidacao() {
   const sp = R.SPECIES.find((s) => {
-    if (!s.ab.length || (R.ABILITY_SYNERGY[s.sname] || []).length || R.formFamilyOf(s).length > 1) return false;
+    if (!s.ab.length || R.sinergiasDaEspecie(s).length || R.formFamilyOf(s).length > 1) return false;
     const av = R.availableMovesFor(s);
     const dano = av.names.filter((m) => R.moveRoleOf(m) === "dano");
     return dano.length >= 4 && av.names.includes("Roost");
@@ -190,7 +190,7 @@ test("rejeições da build por IA dizem exatamente o que falhou", () => {
 test("build por IA de forma mega no modo temporário recebe a pedra", () => {
   R.state.settings.megaMode = "temporaria";
   const sp = R.SPECIES.find((s) => {
-    if (R.stonesOf(s).length !== 1 || (R.ABILITY_SYNERGY[s.sname] || []).length) return false;
+    if (R.stonesOf(s).length !== 1 || R.sinergiasDaEspecie(s).length) return false;
     return R.availableMovesFor(s).names.filter((m) => R.moveRoleOf(m) === "dano").length >= 4;
   });
   assert.ok(sp, "fixture: mega com pedra única");
@@ -204,7 +204,7 @@ test("build por IA de forma mega no modo temporário recebe a pedra", () => {
 
 test("build por IA com golpe que só funciona em dupla é rejeitada, citando o golpe", () => {
   const sp = R.SPECIES.find((s) => {
-    if (!s.ab.length || (R.ABILITY_SYNERGY[s.sname] || []).length || R.formFamilyOf(s).length > 1) return false;
+    if (!s.ab.length || R.sinergiasDaEspecie(s).length || R.formFamilyOf(s).length > 1) return false;
     const nomes = R.availableMovesFor(s).names;
     return nomes.some((m) => R.moveRoleOf(m) === "dupla") && nomes.filter((m) => R.moveRoleOf(m) === "dano").length >= 3;
   });
@@ -223,10 +223,10 @@ test("build por IA precisa usar a sinergia ativa quando a espécie tem uma", () 
   // espécie cuja sinergia vem de habilidade ESCOLHÍVEL, com golpes com e sem sinergia liberados
   let f = null;
   for (const s of R.SPECIES) {
-    const hit = (R.ABILITY_SYNERGY[s.sname] || []).find((h) => h.kind !== "inn" && h.golpes && h.golpes.length);
-    if (!hit || (R.ABILITY_SYNERGY[s.sname] || []).some((h) => h.kind === "inn") || R.formFamilyOf(s).length > 1) continue;
+    const hit = R.sinergiasDaEspecie(s).find((h) => h.kind !== "inn" && h.golpes && h.golpes.length);
+    if (!hit || R.sinergiasDaEspecie(s).some((h) => h.kind === "inn") || R.formFamilyOf(s).length > 1) continue;
     const nomes = R.availableMovesFor(s).names;
-    const todosComSinergia = new Set((R.ABILITY_SYNERGY[s.sname] || []).flatMap((h) => h.golpes || []));
+    const todosComSinergia = new Set(R.sinergiasDaEspecie(s).flatMap((h) => h.golpes || []));
     const comSinergia = hit.golpes.find((g) => nomes.includes(g) && R.moveRoleOf(g) === "dano");
     const semSinergia = nomes.filter((m) => !todosComSinergia.has(m) && R.moveRoleOf(m) === "dano");
     if (comSinergia && semSinergia.length >= 4) { f = { s, hit, comSinergia, semSinergia }; break; }

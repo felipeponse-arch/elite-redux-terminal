@@ -503,7 +503,7 @@
     var linhas = [];
     var rank = SPECIES_RANK[sp.sname];
     if (rank) linhas.push("Rank desta especie neste hack: tier " + rank.tier + " (pontuacao " + rank.score + ").");
-    var sin = ABILITY_SYNERGY[sp.sname] || [];
+    var sin = sinergiasDaEspecie(sp);
     linhas.push(sin.length
       ? "Sinergia habilidade x golpe CONFIRMADA no movepool real: " + sin.map(function (h) {
         return h.name + (h.kind === "inn" ? " (innate)" : " (escolhivel)") + " reforca " + (h.golpes || []).join(", ");

@@ -218,7 +218,7 @@
     // justamente a habilidade escolhida nesta build. Espécie sem nenhuma
     // sinergia conhecida não é penalizada - a regra é inaplicável, não
     // violada.
-    var synergyHitsAi = ABILITY_SYNERGY[sp.sname];
+    var synergyHitsAi = sinergiasDaEspecie(sp);
     if (synergyHitsAi && synergyHitsAi.length) {
       var ativas = synergyHitsAi.filter(function (h) {
         return h.kind === "inn" || h.name === raw.ability;

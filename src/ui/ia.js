@@ -76,7 +76,8 @@
   // desta seção (dado pronto, não alucinado dentro da chamada de IA).
   function aiTool_getAbilityMovepoolSynergy(input) {
     var sname = input && input.sname;
-    var hits = sname ? ABILITY_SYNERGY[sname] : null;
+    var spSin = sname ? getSpeciesBySname(sname) : null;
+    var hits = spSin ? sinergiasDaEspecie(spSin) : null;
     if (!hits) return { synergies: [] };
     return {
       synergies: hits.map(function (h) {

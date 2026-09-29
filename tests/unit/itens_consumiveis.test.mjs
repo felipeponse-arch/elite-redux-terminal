@@ -76,7 +76,7 @@ test("validação rejeita Gluttony sem berry e aceita com berry", () => {
   const sp = R.SPECIES.find((s) => naoMega(s) && inn(s).includes("Gluttony") && R.availableMovesFor(s).names.length >= 8);
   assert.ok(sp, "fixture: Gluttony innate com movepool");
   const livres = R.availableMovesFor(sp).names.filter((g) => R.moveRoleOf(g) !== "dupla" && R.moveRoleOf(g) !== "cura");
-  const sinergia = (R.ABILITY_SYNERGY[sp.sname] || []).filter((h) => h.kind === "inn" || h.name === ab(sp)[0])
+  const sinergia = R.sinergiasDaEspecie(sp).filter((h) => h.kind === "inn" || h.name === ab(sp)[0])
     .flatMap((h) => h.golpes).find((g) => livres.includes(g));
   const golpes = [...new Set([sinergia, ...livres.filter((g) => R.moveRoleOf(g) === "dano")].filter(Boolean))].slice(0, 4);
   assert.equal(golpes.length, 4, "fixture: 4 golpes válidos");

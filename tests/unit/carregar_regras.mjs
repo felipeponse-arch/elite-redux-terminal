@@ -29,6 +29,7 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
     BOSSES: lerJson("bosses.json"),
     GYM_SKILLS: lerJson("gym_skills.json"),
     MONO_DISP: lerJson("mono_disponibilidade.json"),
+    MOVE_CATEGORIAS: lerJson("move_categorias.json"),
     // Mesmo formato do `state` inicial do template (var state = {...}): desde a
     // fase 3 da refatoração (2026-09-24) save, evolução, builds e chefões moram
     // em src/regras e leem o state inteiro.
@@ -50,7 +51,9 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
     ? { arquivo: process.env.MUTACAO_ARQUIVO, de: process.env.MUTACAO_DE, para: process.env.MUTACAO_PARA || "" }
     : null;
   for (const nome of nomes) {
-    let codigo = readFileSync(join(root, "src", "regras", nome), "utf8");
+    // Quebra de linha sempre LF: com core.autocrlf o checkout do Windows vem em
+    // CRLF, e os trechos das sabotagens (com "\n") deixavam de ser achados.
+    let codigo = readFileSync(join(root, "src", "regras", nome), "utf8").replace(/\r\n/g, "\n");
     if (mutacao && mutacao.arquivo === nome) {
       if (codigo.split(mutacao.de).length !== 2) throw new Error("trecho da sabotagem não encontrado (ou repetido) em " + nome + ": " + mutacao.de);
       codigo = codigo.replace(mutacao.de, () => mutacao.para);

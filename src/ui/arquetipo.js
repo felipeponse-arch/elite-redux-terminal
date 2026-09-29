@@ -357,6 +357,11 @@
           '. Abra com ele pra ligar o clima.</p>'
         : "") +
       '<ol class="plano-chefao">' + itens + '</ol>' +
+      (res.luta
+        ? '<p class="mybuild-hint"><b>Luta simulada inteira' + (res.luta.dupla ? " em dupla" : "") + '</b> (o HP passa de uma luta pra outra): ' +
+          (res.luta.venceu ? "vence, com " + res.luta.vivos + " de pé" : "derruba " + res.luta.derrubados + " de " + res.luta.total) + ".</p>" +
+          '<ol class="plano-luta">' + res.luta.passos.map(function (t) { return "<li>" + escapeHtml(t) + "</li>"; }).join("") + "</ol>"
+        : "") +
     '</div>';
   }
   function generatedTeamCardHtml(members) {

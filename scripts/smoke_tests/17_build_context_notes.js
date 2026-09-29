@@ -19,7 +19,7 @@ async function section17() {
   var cap = T.getCurrentCap();
   var fx = null;
   T.SPECIES.some(function (sp) {
-    if (!sp || !sp.ab || !sp.ab.length || (T.ABILITY_SYNERGY[sp.sname] || []).length) return false;
+    if (!sp || !sp.ab || !sp.ab.length || T.sinergiasDaEspecie(sp).length) return false;
     var lm = sp.lm.filter(function (p) { return cap === null || cap === undefined || p[0] <= cap; });
     var mv = T.uniqueIds(lm.map(function (p) { return p[1]; }).concat(sp.tu)).map(function (id) { return T.MOVES[id][0]; });
     var dupla = mv.filter(function (m) { return T.moveRoleOf(m) === "dupla"; })[0];
