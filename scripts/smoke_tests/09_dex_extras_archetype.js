@@ -213,30 +213,27 @@ async function section09() {
   pcSearchBox.dispatchEvent(new Event("input", { bubbles: true }));
   await wait(30);
 
-  // --- 22. Rank robusto por simulação (vigésima-quarta passagem,
-  // 2026-09-12) - âncora de calibração pedida pela QA na própria reunião da
-  // equipe ("calibração roda ANTES de qualquer publish, com espécies de
-  // controle conhecidas"). Probopass é a âncora: SS estabelecido em VÁRIAS
-  // passagens anteriores (sexta passagem em diante) por causa de Levitate +
-  // Solid Rock - a primeira versão desta simulação (só tipagem crua, sem
-  // ajuste por habilidade) derrubava ele pra C, porque Rock/Steel sozinho é
-  // FRACO 4x a Ground - só a Levitate (habilidade) resolve isso de verdade.
-  // Este teste existe pra pegar exatamente essa classe de regressão se
-  // Get-AbilityAdjustedTypeMultiplier algum dia parar de ser chamado.
-  setSearch("Probopass");
+  // --- 22. Âncoras de calibração do rank (QA: "calibração roda ANTES de
+  // qualquer publish, com espécies de controle conhecidas"). Desde 2026-09-28
+  // o rank é o duelo simulado (scripts/calcular_rank_duelo.mjs) e a âncora
+  // antiga (Probopass SS, calibrada pra fórmula de tipagem defensiva) saiu.
+  // Primal Kyogre é a âncora nova: SS porque a Primordial Sea que ele mesmo
+  // arma ativa o Raging Storm (1,5x no ataque) - se o duelo parar de contar
+  // "clima que o próprio Pokémon arma", ele cai e este teste pega.
+  setSearch("Kyogre Primal");
   await wait(120);
-  const probopassRow = document.querySelector("#species-list .species-row");
-  if (probopassRow) {
-    probopassRow.click();
+  const kyogreRow = [...document.querySelectorAll("#species-list .species-row")].find((r) => /Primal/.test(r.textContent));
+  if (kyogreRow) {
+    kyogreRow.click();
     await wait(30);
     const rankBadge = document.querySelector(".rank-badge");
-    check("Probopass continua SS (âncora de calibração - Levitate anula a fraqueza 4x a Ground de Rock/Steel)",
+    check("Primal Kyogre é SS (âncora: clima que ele mesmo arma ativa o Raging Storm no duelo)",
       !!rankBadge && rankBadge.textContent === "SS", rankBadge && rankBadge.textContent);
-    check("tooltip do rank badge menciona a simulação contra chefões (não a fórmula antiga de uso-em-chefão)",
-      !!rankBadge && rankBadge.title.indexOf("simulação de") !== -1 && rankBadge.title.indexOf("uso em chefões") === -1,
+    check("tooltip do rank badge explica o duelo simulado contra os chefões (não a fórmula antiga)",
+      !!rankBadge && rankBadge.title.indexOf("Duelo simulado") !== -1 && rankBadge.title.indexOf("Sinal principal") === -1,
       rankBadge && rankBadge.title);
   } else {
-    check("Probopass encontrado pro teste de calibração do rank", false);
+    check("Primal Kyogre encontrado pro teste de calibração do rank", false);
   }
   setSearch("");
   await wait(120);

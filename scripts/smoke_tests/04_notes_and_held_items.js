@@ -123,7 +123,19 @@ async function section04() {
   // paragraph - visually stacked into a column of single words. The team
   // seeded at the top of this suite is full (6/6), so the suggestion
   // should be showing.
-  const dashVal = document.querySelector(".dash-suggestion .dash-value");
+  // Desde o rank por duelo (2026-09-28) o time semeado aqui não gera mais a
+  // sugestão de troca (a diferença de rank caiu abaixo de 15) - a presença da
+  // sugestão depende do dado, a regra de CSS não. Sem sugestão na tela, o
+  // teste monta um item igual ao real, confere e remove.
+  let dashVal = document.querySelector(".dash-suggestion .dash-value");
+  let dashTemp = null;
+  if (!dashVal) {
+    dashTemp = document.createElement("div");
+    dashTemp.className = "dashboard-card";
+    dashTemp.innerHTML = '<div class="dash-item dash-suggestion"><span class="dash-label">Sugestão</span><span class="dash-value">A <span class="goto-species">X</span> rende mais que <span class="goto-species">Y</span></span></div>';
+    document.body.appendChild(dashTemp);
+    dashVal = dashTemp.querySelector(".dash-value");
+  }
   // The fix sets `display: inline`, but a flex item's outer display is
   // always "blockified" per spec regardless of the specified value, so the
   // COMPUTED style correctly reports "block" here, not "inline" - checked
@@ -134,6 +146,7 @@ async function section04() {
   check("dashboard suggestion text flows as a paragraph (not flex children)",
     dashVal && getComputedStyle(dashVal).display !== "flex" && getComputedStyle(dashVal).display !== "inline-flex",
     dashVal && getComputedStyle(dashVal).display);
+  if (dashTemp) dashTemp.remove();
 
   // Team-slot cards used to force the whole page to scroll horizontally on
   // a narrow screen - a CSS grid item's default min-width:auto blocked it

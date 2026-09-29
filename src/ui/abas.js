@@ -56,7 +56,11 @@
         if (chefaoDesatualizado && bossState.selected !== null) { renderBossDetail(); chefaoDesatualizado = false; }
       }
       if (btn.dataset.tab === "progress") { initProgress(); renderProgressTrail(); } // trilha mede posições: só dá com a aba visível
-      if (btn.dataset.tab === "types") { renderTypeMatrix(); wireSpeedTiersOnce(); renderSpeedTiers(); }
+      // O compêndio de papéis redesenha a cada abertura (2026-09-28): ele destaca
+      // o Monotype ativo e ficava preso à 1ª abertura junto com a tabela de
+      // tipos (renderTypeMatrix só desenha uma vez) - mudar o Monotype depois
+      // deixava os destaques velhos.
+      if (btn.dataset.tab === "types") { renderTypeMatrix(); renderRoleCompendium(); wireSpeedTiersOnce(); renderSpeedTiers(); }
       // dashboardDirty (auditoria de performance, 2026-09-11): o dashboard só
       // recalcula de verdade quando o jogador volta pra Dex depois de mexer
       // no time/caixa noutra aba - ver scheduleDashboardRefresh().

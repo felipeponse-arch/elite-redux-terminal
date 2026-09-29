@@ -168,11 +168,14 @@
   function rankBadgeHtml(sname) {
     var r = SPECIES_RANK[sname];
     if (!r) return "";
-    var title = "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100. Sinal principal: simulação de " +
-      "defesa contra os times reais dos 107 chefões do jogo (percentil " + r.bossDefPct + "). Desempate: BST (percentil " +
-      r.bstPct + "), habilidades (percentil " + r.abilityPct + "), movepool real (percentil " + r.movepoolPct + ") e " +
-      "qualidade de tipagem (percentil " + r.typePct + "). Mede só sobrevivência contra ataques reais - não avalia dano " +
-      "ofensivo (depende do build escolhido) nem sinergia com o resto do time.";
+    // Rank por duelo simulado desde 2026-09-28 (scripts/calcular_rank_duelo.mjs):
+    // o método antigo media só a tipagem defensiva e deixava Garchomp em C.
+    var title = r.duelo
+      ? "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100. Duelo simulado 1x1 contra cada Pokémon " +
+        "real dos chefões do jogo (golpes, habilidade, item e EVs do jogo): venceu " + r.duelo.vitorias + "% dos duelos com o " +
+        "melhor set genérico (" + r.duelo.set + (r.duelo.habilidade ? ", " + r.duelo.habilidade : "") + "). Conta dano dos dois " +
+        "lados, velocidade, prioridade e as habilidades (inclusive clima que ele mesmo arma). Não conta item nem o resto do time."
+      : "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100.";
     return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.tier + '</span>';
   }
 

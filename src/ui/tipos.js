@@ -30,7 +30,6 @@
       }).join("");
       document.getElementById("levelcap-table").innerHTML = '<thead>' + lcHead + '</thead><tbody>' + lcRows + '</tbody>';
     }
-    renderRoleCompendium();
   }
 
   function renderSpeedTiers() {

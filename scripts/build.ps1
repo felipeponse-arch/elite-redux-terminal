@@ -72,6 +72,12 @@ if (-not $SkipExtract) {
     # (expand_combo_abilities.ps1), por isso roda depois dos dois.
     Write-Output "--- computing ability x movepool synergy (Fase 3) ---"
     & (Join-Path $PSScriptRoot "compute_ability_movepool_synergy.ps1")
+    # Rank por duelo simulado (2026-09-28): reescreve tier/score/estagio/
+    # Monotype de species_rank.json. Precisa da sinergia acima (bonus de
+    # habilidade a golpe) - por isso roda depois dela. Leva ~6 min.
+    Write-Output "--- rank por duelo contra os chefoes (calcular_rank_duelo.mjs) ---"
+    node (Join-Path $PSScriptRoot "calcular_rank_duelo.mjs") --gravar
+    if ($LASTEXITCODE -ne 0) { throw "calcular_rank_duelo.mjs falhou" }
     # Papel de cada golpe de status (cura/setup/pivo...) a partir do efeito
     # real do jogo - usado pela coerencia papel x golpe da build por IA.
     Write-Output "--- classificando golpes de status pelo efeito real ---"
