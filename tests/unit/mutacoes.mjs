@@ -847,7 +847,7 @@ export const MUTACOES = [
     id: "f4-bleed-nao-corta-cura",
     descricao: "Bleed deixa de impedir a cura",
     arquivo: "duelo.js",
-    de: "if (presNele.sangrar) ganha = curaAntes + (ganha - curaAntes) * (1 - presNele.sangrar);",
+    de: "if (presNele.sangrar) ganha *= 1 - presNele.sangrar;",
     para: "",
   },
   {
@@ -891,5 +891,27 @@ export const MUTACOES = [
     arquivo: "duelo.js",
     de: "if (escolhido > de) { var t = deles[de]; deles[de] = deles[escolhido]; deles[escolhido] = t; }",
     para: "",
+  },
+  // Revisão da equipe, 30/09 (depois da v156).
+  {
+    id: "rev-dupla-ordem-fixa",
+    descricao: "na luta em dupla, o chefão volta a repor na ordem do time",
+    arquivo: "duelo.js",
+    de: "var prox = meusEmCampo.length ? escolherProximoDoChefao(restantes, meusEmCampo, nivel) : restantes[0];",
+    para: "var prox = restantes[0];",
+  },
+  {
+    id: "rev-vantagem-so-golpe-mais-forte",
+    descricao: "vantagem volta a contar só o golpe mais forte do Pokémon do chefão",
+    arquivo: "duelo.js",
+    de: "return (dele.golpesProntos || []).some(function (g) { return g.cat !== \"S\" && efetividadeNoDuelo(dele, g.tipo, meu) >= 2; });",
+    para: "return (danoNoDuelo(dele, meu, nivel).melhor.efTipo || 0) >= 2;",
+  },
+  {
+    id: "rev-embody-aspect-nao-lido",
+    descricao: "\"+1 Attack/Defense on Entry\" (Embody Aspect) deixa de ser lido - a auditoria do motor tem que acusar",
+    arquivo: "duelo.js",
+    de: "|Speed|Attack|Defense|Sp\\. Atk|Sp\\. Def) on entry/i",
+    para: "|Speed) on entry/i",
   },
 ];

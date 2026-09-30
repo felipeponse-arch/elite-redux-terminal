@@ -79,3 +79,25 @@ test("sem ninguém com vantagem, entra quem mais resiste ao meu Pokémon", () =>
   const derrubados = s.log.filter((l) => l.contra && !l.troca).map((l) => l.contra);
   assert.equal(derrubados.join(","), ["Abre", "Resiste", "Neutro"].join(","), JSON.stringify(s.log));
 });
+
+// Revisão de 2026-09-30: "vantagem" é QUALQUER golpe de dano super efetivo, não só o
+// mais forte - e a luta em dupla segue a mesma regra.
+test("vantagem conta golpe super efetivo mesmo que não seja o mais forte do Pokémon do chefão", () => {
+  const eu = { u: unidade(efDe([]), golpe("F", { tipo: "Water" }), { tipos: ["Water"] }), frac: 1, vivo: true, status: {}, bonus: { estagios: {}, crit: 0, mult: 1, semGolpe: [] } };
+  const part = (nome, golpes, tipos) => ({ u: unidade(efDe([]), golpes[0], { sp: { n: nome, sname: nome }, nome, tipos, golpesProntos: golpes }), frac: 1, vivo: true, status: {}, bonus: { estagios: {}, crit: 0, mult: 1, semGolpe: [] } });
+  const forteNeutro = golpe("F", { forca: 300, forcaBase: 300 });
+  const fracoSe = golpe("E", { tipo: "Grass", forca: 20, forcaBase: 20 });
+  const comSe = part("ComSe", [forteNeutro, fracoSe], ["Normal"]);
+  const semSe = part("SemSe", [forteNeutro], ["Normal"]);
+  assert.equal(R.escolherProximoDoChefao([semSe, comSe], [eu], 50), comSe);
+});
+
+test("luta em dupla: o chefão repõe quem tem vantagem, não a ordem do time", () => {
+  const forte = golpe("F", { forca: 900, forcaBase: 900, tipo: "Water" });
+  const eu1 = unidade(efDe([]), forte, { tipos: ["Water"], stats: [5000, 100, 100, 100, 100, 200] });
+  const eu2 = unidade(efDe([]), forte, { tipos: ["Water"], stats: [5000, 100, 100, 100, 100, 200] });
+  const f = (nome, g, tipos) => unidade(efDe([]), g, { sp: { n: nome, sname: nome, inn: [] }, nome, tipos, statusIds: [] });
+  const s = R.simularDuplaContraChefao([eu1, eu2], [f("A", golpe("F"), ["Normal"]), f("B", golpe("F"), ["Normal"]), f("Neutro", golpe("F"), ["Normal"]), f("Planta", golpe("E", { tipo: "Grass" }), ["Normal"])], 50);
+  const ordem = s.log.filter((l) => l.derruba).map((l) => l.derruba);
+  assert.ok(ordem.indexOf("Planta") !== -1 && ordem.indexOf("Planta") < ordem.indexOf("Neutro"), JSON.stringify(ordem));
+});

@@ -497,7 +497,9 @@
     var planoCheck = anexarPlanoDaIa(sp, validated, raw && raw.plano, cap,
       opts.modo === "ponte" && opts.alvo ? opts.alvo.moves : null);
     validated.planoConsultado = true; // o prompt já pediu o plano - não pedir de novo
-    if (opts.chefao) validated.feitaPara = { chefao: opts.chefao.boss.name, cap: cap || 0 }; // clicar de novo não regera à toa
+    // Chefão + variante do time (Padrão/Insane/Hell têm times diferentes - revisão de
+    // 2026-09-30): clicar de novo no MESMO time e cap não regera à toa.
+    if (opts.chefao) validated.feitaPara = { chefao: opts.chefao.chave || opts.chefao.boss.name, cap: cap || 0 };
     var ok = salvarBuildDaIa(sp, validated, opts, cap);
     if (!ok) {
       aviso((opts.chefao || opts.timeNovo)

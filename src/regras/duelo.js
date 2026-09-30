@@ -306,7 +306,9 @@
     var x, re, stat, tipos;
     // Entrada.
     if ((x = f.match(/On entry, raises (Attack|Defense|Sp\. Atk|SpAtk|Sp\. Def|SpDef|Speed) by (one|two) stages?/i)) && (stat = estagioDoTexto(x[1]))) ef.estagioEntrada[stat] = (ef.estagioEntrada[stat] || 0) + NUM_DO_TEXTO_DUELO[x[2].toLowerCase()];
-    if ((x = f.match(/\+(\d) (SpDef|Spdef|Def|Atk|SpAtk|Speed) on entry/i)) && (stat = estagioDoTexto(x[2]))) ef.estagioEntrada[stat] = (ef.estagioEntrada[stat] || 0) + parseInt(x[1], 10);
+    // Também "+1 Attack/Defense on Entry" (Embody Aspect do Ogerpon - achado pelo teste de
+    // auditoria do motor, 2026-09-30: as formas de Ataque e Defesa não eram lidas).
+    if ((x = f.match(/\+(\d) (SpDef|Spdef|Def|Atk|SpAtk|Speed|Attack|Defense|Sp\. Atk|Sp\. Def) on entry/i)) && (stat = estagioDoTexto(x[2]))) ef.estagioEntrada[stat] = (ef.estagioEntrada[stat] || 0) + parseInt(x[1], 10);
     if (/Raises Atk\/Sp\. Atk by one stage depending on opponent/i.test(f)) ef.download = true;
     // Ao ser atingido (no próprio Pokémon).
     if ((x = f.match(/Getting hit raises (Def|Atk|SpAtk)(?: by \+(\d))?/i))) ef.aoApanhar.push({ stat: estagioDoTexto(x[1]), n: x[2] ? parseInt(x[2], 10) : 1 });
@@ -1838,7 +1840,6 @@
       (u.ef.campoResiduo || []).forEach(function (c) { if (c.rouba && !(outro.ef.semResiduo)) ganha += c.pct * outro.stats[0]; });
       var dreno = g ? ((g.dreno || 0) * comItem(it.drenoMult, ativo) + it.drenoPct * ativo) * entra : 0; // Big Root, Shell Bell - sobre o dano que entra
       if (outro.ef.liquidOoze) { if (!u.ef.semResiduo) perde += dreno; dreno = 0; }
-      var curaAntes = ganha;
       if (!outro.ef.bloqueiaCura) {
         ganha += u.ef.curaPorTurno * hp + dreno + noTerrenoDuelo(u, "cura") * hp + it.curaTurno * hp * ativo; // + Leftovers
         if (CAMPO_DUELO && CAMPO_DUELO.terreno === "grama" && aterradoDuelo(u)) ganha += hp / 16; // Grassy Terrain
@@ -1846,7 +1847,8 @@
       }
       // Bleed (FAQ oficial, 2026-09-30): "Prevents effects of healing" - vale na
       // parte da luta em que está sangrando.
-      if (presNele.sangrar) ganha = curaAntes + (ganha - curaAntes) * (1 - presNele.sangrar);
+      // Toda cura, inclusive a de campo por habilidade (revisão do mesmo dia).
+      if (presNele.sangrar) ganha *= 1 - presNele.sangrar;
       return perde - ganha;
     }
     var atqMeu = meuDano(meu.melhor.dano) - nele.residuo - extraMeu, atqDele = deleDano(dele.melhor.dano) - nMim.residuo - extraDele;
@@ -2844,7 +2846,10 @@
       // Repõe quem caiu.
       frenteDeles = frenteDeles.map(function (f) {
         if (f.vivo) return f;
-        var prox = deles.filter(function (d) { return d.vivo && frenteDeles.indexOf(d) === -1; })[0];
+        // Mesma regra da luta simples (escolherProximoDoChefao) contra os meus em campo.
+        var restantes = deles.filter(function (d) { return d.vivo && frenteDeles.indexOf(d) === -1; });
+        var meusEmCampo = vivos(frenteMinha);
+        var prox = meusEmCampo.length ? escolherProximoDoChefao(restantes, meusEmCampo, nivel) : restantes[0];
         if (prox) entrarNoLadoDuelo(prox, ladoDele);
         return prox || f;
       });
@@ -2976,6 +2981,25 @@
     if (p === "aco") return (preso.tipos || []).indexOf("Steel") !== -1;
     return true;
   }
+  // Qual Pokémon do chefão entra depois de um nocaute (regra do usuário, 2026-09-30,
+  // pela run - Flannery): primeiro quem tem golpe super efetivo em algum dos meus em
+  // campo (qualquer golpe de dano dele, não só o mais forte - revisão do mesmo dia);
+  // sem isso, quem mais resiste aos meus (o melhor golpe de cada um meu contra ele).
+  // Serve à luta simples e à dupla. `restantes` e `meus`: participantes vivos.
+  function escolherProximoDoChefao(restantes, meus, nivel) {
+    var escolhido = restantes[0] || null, melhor = null;
+    restantes.forEach(function (c) {
+      var dele = comoEstaDuelo(c);
+      var vantagem = meus.some(function (m) {
+        var meu = comoEstaDuelo(m);
+        return (dele.golpesProntos || []).some(function (g) { return g.cat !== "S" && efetividadeNoDuelo(dele, g.tipo, meu) >= 2; });
+      }) ? 1 : 0;
+      var levaDosMeus = meus.reduce(function (s, m) { var ef = danoNoDuelo(comoEstaDuelo(m), dele, nivel).melhor.efTipo; return s + (ef === undefined ? 0 : ef); }, 0);
+      var nota = [vantagem, -levaDosMeus];
+      if (!melhor || nota[0] > melhor[0] || (nota[0] === melhor[0] && nota[1] > melhor[1])) { melhor = nota; escolhido = c; }
+    });
+    return escolhido;
+  }
   function participanteDuelo(u) { return { u: u, frac: 1, vivo: true, status: {}, bonus: { estagios: {}, crit: 0, mult: 1, semGolpe: [] } }; }
   function simularLutaContraChefao(meus, foes, nivel) {
     var time = meus.map(participanteDuelo), deles = foes.map(participanteDuelo);
@@ -3007,15 +3031,8 @@
     // continua o primeiro do time do dado.
     function proximoDoChefao(de) {
       if (!atual || !atual.vivo) return;
-      var meu = comoEstaDuelo(atual), escolhido = -1, melhor = null;
-      for (var k = de; k < deles.length; k++) {
-        if (!deles[k].vivo) continue;
-        var dele = comoEstaDuelo(deles[k]);
-        var vantagem = (danoNoDuelo(dele, meu, nivel).melhor.efTipo || 0) >= 2 ? 1 : 0;
-        var levaDeMim = danoNoDuelo(meu, dele, nivel).melhor.efTipo;
-        var nota = [vantagem, -(levaDeMim === undefined ? 0 : levaDeMim)];
-        if (!melhor || nota[0] > melhor[0] || (nota[0] === melhor[0] && nota[1] > melhor[1])) { melhor = nota; escolhido = k; }
-      }
+      var restantes = deles.slice(de).filter(function (d) { return d.vivo; });
+      var escolhido = deles.indexOf(escolherProximoDoChefao(restantes, [atual], nivel));
       if (escolhido > de) { var t = deles[de]; deles[de] = deles[escolhido]; deles[escolhido] = t; }
     }
     // Quem vence ganha o bônus do nocaute; quem cai deixa o efeito do desmaio.
@@ -3078,11 +3095,11 @@
       poeHazardComGolpe(f, atual, ladoMeu);
       if (!atual.vivo) continue;
       var r = luta(atual, f);
-      // Prisão (Shadow Tag, Arena Trap, Magnet Pull...): não dá pra trocar. Fear
-      // também prende por 2 turnos (FAQ oficial, 2026-09-30) - a troca aqui é
-      // decidida no começo do confronto, então vale o medo que já vem na entrada.
-      var preso = prendeDuelo(f.u, atual.u) ||
-        ((f.u.ef.statusNaEntrada || {}).medo >= 0.5 && podeSofrerStatusDuelo(atual.u, "medo"));
+      // Prisão (Shadow Tag, Arena Trap, Magnet Pull...): não dá pra trocar. O Fear
+      // também prende 2 turnos (FAQ), mas a troca aqui é decidida no começo do
+      // confronto, antes de qualquer golpe - e nenhuma habilidade do jogo causa medo
+      // na entrada; a trava fica pra quando houver (revisão de 2026-09-30).
+      var preso = prendeDuelo(f.u, atual.u);
       if (r.venceu === false && !preso) {
         // Troca: outro vivo que vence mesmo levando um golpe na entrada.
         var troca = time.filter(function (c) { return c.vivo && c !== atual; }).map(function (c) {

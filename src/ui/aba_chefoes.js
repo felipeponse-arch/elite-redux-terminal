@@ -206,7 +206,10 @@
       if (!sp) return;
       battleUnitsOf(sp).forEach(function (u) { if (serveProMono(u.main)) out.push({ sp: u.main, owned: x }); });
     });
-    return out;
+    // Ordem fixa (revisão de 2026-09-30): em empate o simulador fica com o primeiro da
+    // lista, e "time + caixa" muda depois de cada montagem - clicar de novo no mesmo
+    // chefão trocava um membro sem nada ter mudado.
+    return out.sort(function (a, b) { return a.sp.sname < b.sp.sname ? -1 : a.sp.sname > b.sp.sname ? 1 : a.owned - b.owned; });
   }
   // Guarda o time atual em "Times salvos" (3 vagas): usa uma vaga livre ou a de
   // um "Antes de ..." anterior; nunca apaga um time que o jogador salvou.
@@ -325,14 +328,15 @@
       // Economia de IA (2026-09-30): quem já tem build ativa feita pra ESTE chefão
       // neste level cap fica com ela - clicar de novo não pede as mesmas builds.
       var capAgora = getCurrentCap() || 0;
+      var chaveDoTime = boss.name + "|" + diffKey; // o mesmo chefão tem 3 times (Padrão/Insane/Hell)
       var jaFeitas = members.filter(function (sp) {
         var b = getActiveBuild(sp.sname);
-        return !!b && !!b.feitaPara && b.feitaPara.chefao === boss.name && b.feitaPara.cap === capAgora;
+        return !!b && !!b.feitaPara && b.feitaPara.chefao === chaveDoTime && b.feitaPara.cap === capAgora;
       });
       members = members.filter(function (sp) { return jaFeitas.indexOf(sp) === -1; });
       comecarLoteDeBuilds(members.map(function (m) { return m.x; })); // encerrado no finally
       // As builds numa consulta só (lote, 2026-09-30); quem falhar é pedido sozinho.
-      var chefaoDaBuild = { boss: boss, party: party, clima: r.clima, estrategia: r.estrategia };
+      var chefaoDaBuild = { boss: boss, party: party, clima: r.clima, estrategia: r.estrategia, chave: chaveDoTime };
       var feitas = await gerarBuildsDoTimeComIA(members, "chefao-build-status",
         function (sp) { return { silencioso: true, chefao: Object.assign({ responde: responde[sp.sname] || [] }, chefaoDaBuild) }; },
         { chefao: chefaoDaBuild, responde: responde },

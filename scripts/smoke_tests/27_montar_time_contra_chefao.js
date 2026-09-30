@@ -77,7 +77,7 @@ async function section27() {
     T.state.team.forEach(function (x) {
       var spT = T.getSpeciesByX(x);
       T.state.customBuilds[spT.sname] = [{ ability: "", nature: "Hardy", item: "", moves: ["Tackle"], evs: [0, 0, 0, 0, 0, 0], ivs: [31, 31, 31, 31, 31, 31],
-        source: "ia", active: true, savedAt: "2026-09-30", rationale: "", feitaPara: { chefao: "Flannery 1", cap: capAgora } }];
+        source: "ia", active: true, savedAt: "2026-09-30", rationale: "", feitaPara: { chefao: "Flannery 1|" + (T.bossState.diff || "party"), cap: capAgora } }];
     });
     var pedidosAntes = prompts.length;
     document.querySelector('.tab-btn[data-tab="bosses"]').click();
@@ -91,6 +91,24 @@ async function section27() {
     check("clicar de novo com builds já feitas pra este chefão não pede nenhuma build à IA",
       prompts.length === pedidosAntes && /Mantidas as builds que já eram contra Flannery 1/.test((document.getElementById("chefao-build-status") || {}).textContent || ""),
       { pedidos: prompts.length - pedidosAntes, status: (document.getElementById("chefao-build-status") || {}).textContent });
+    // Revisão de 2026-09-30: o mesmo chefão tem 3 times (Padrão/Insane/Hell) - trocar a
+    // variante e clicar de novo tem que pedir build nova (a marca é chefão + variante).
+    document.querySelector('.tab-btn[data-tab="bosses"]').click();
+    await wait(50);
+    var outraVariante = [].filter.call(document.querySelectorAll("#boss-detail [data-diff]"), function (b) { return b.dataset.diff !== (T.bossState.diff || "party"); })[0];
+    if (achou("botão de outra variante (Insane/Hell) da Flannery 1", outraVariante)) {
+      outraVariante.click();
+      await wait(50);
+      var pedidosVariante = prompts.length;
+      document.getElementById("boss-montar-time").click();
+      for (var v = 0; v < 300; v++) {
+        await wait(50);
+        var stV = document.getElementById("chefao-build-status");
+        if (stV && /^Faltou build/.test(stV.textContent) && prompts.length > pedidosVariante) break;
+      }
+      check("outra variante do mesmo chefão (outro time) pede build nova",
+        prompts.length > pedidosVariante, { variante: T.bossState.diff, pedidos: prompts.length - pedidosVariante });
+    }
     // Segundo chefão (revisão de 2026-09-30): montar contra outro chefão com o time
     // do botão na tela NÃO pode trocar o backup do time do jogador pelo do botão.
     var snamesAntes = timeAntes.map(function (x) { return T.getSpeciesByX(x).sname; }).sort().join(",");
