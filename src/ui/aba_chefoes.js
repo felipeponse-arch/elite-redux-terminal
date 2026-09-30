@@ -261,6 +261,23 @@
         return l.meu + " contra " + l.contra + ": " + (l.venceu === true ? "vence, fica com " + hp + "% de HP" : "cai");
       }) };
   }
+  // Simulador sem travar a tela (Fase 3, 2026-09-30): a conta leva 1-4 s no
+  // desktop e mais no celular; roda em passos (montarTimeContraChefaoEmPassos) e
+  // devolve a vez pra tela a cada ~40 ms, com o progresso no aviso.
+  var FATIA_DO_SIMULADOR_MS = 40;
+  async function simularSemTravarATela(cands, party, nivel, opcoes, aoProgresso) {
+    var passos = montarTimeContraChefaoEmPassos(cands, party, nivel, opcoes);
+    var total = totalDePassosContraChefao(cands), feitos = 0, r, inicio = Date.now();
+    while (!(r = passos.next()).done) {
+      feitos += r.value;
+      if (Date.now() - inicio >= FATIA_DO_SIMULADOR_MS) {
+        aoProgresso(feitos, total);
+        await new Promise(function (ok) { setTimeout(ok, 0); });
+        inicio = Date.now();
+      }
+    }
+    return r.value;
+  }
   async function montarTimeContraEsteChefao() {
     var boss = BOSSES[bossState.selected];
     if (!boss || montagemContraChefaoRodando) return;
@@ -280,7 +297,9 @@
       await new Promise(function (ok) { setTimeout(ok, 0); }); // deixa o texto aparecer antes da conta
       var nivel = getCurrentCap() || 100;
       // Chefão em dupla (db no dado): a luta é simulada 2 contra 2.
-      var r = montarTimeContraChefao(cands, party, nivel, { dupla: !!boss.db });
+      var r = await simularSemTravarATela(cands, party, nivel, { dupla: !!boss.db }, function (feitos, total) {
+        statusChefao("Simulando os duelos contra " + boss.name + "... " + Math.min(feitos, total) + " de " + total);
+      });
       if (!r.escolhidos.length) { statusChefao("Não consegui montar um time com os Pokémon que você tem."); return; }
       // guardarTimeAnterior reconhece o time que o próprio botão montou (slot.depois)
       // e nunca troca o backup do time do jogador por ele.

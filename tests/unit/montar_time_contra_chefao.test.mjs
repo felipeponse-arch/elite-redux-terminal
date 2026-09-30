@@ -125,3 +125,15 @@ test("a build pedida pelo botão mira o chefão escolhido, não o próximo", () 
   assert.match(p, /arma sol/);
   assert.doesNotMatch(R.montarPromptBuild(sp, {}), /OBJETIVO DESTA BUILD/);
 });
+
+// Simulador em passos (Fase 3, 2026-09-30): o botão devolve a vez pra tela entre
+// os passos; o progresso "N de total" precisa fechar e o resultado ser o mesmo.
+test("em passos: soma dos passos = total anunciado, e o mesmo time da versão direta", () => {
+  const cands = candidatos();
+  const passos = R.montarTimeContraChefaoEmPassos(cands, party, 50);
+  let soma = 0, r;
+  while (!(r = passos.next()).done) soma += r.value;
+  assert.equal(soma, R.totalDePassosContraChefao(cands));
+  const direto = R.montarTimeContraChefao(cands, party, 50);
+  assert.deepEqual(r.value.escolhidos.map((e) => e.sp.n), direto.escolhidos.map((e) => e.sp.n));
+});

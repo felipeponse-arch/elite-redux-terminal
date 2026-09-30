@@ -1321,10 +1321,17 @@
   // Clima no campo entre os dois lados: o que cada um arma (habilidade) ou o do
   // time (u.clima). Se os dois armam climas diferentes, depende de quem entra por
   // último - fica sem clima (não dá pra saber no modelo por valor esperado).
+  // Sem criar listas: roda em todo cálculo de dano, o ponto mais quente do motor
+  // (medido na Fase 3, 2026-09-30: a versão com concat/filter deixava o botão do
+  // chefão ~1 s mais lento).
   function climaNoCampoDuelo(a, b) {
-    var climas = [a.clima, b.clima].concat(a.ef.climasProprios || [], b.ef.climasProprios || [])
-      .filter(function (c, i, l) { return c && l.indexOf(c) === i; });
-    return climas.length === 1 ? climas[0] : null;
+    var achado = null, conflito = false;
+    function ve(c) { if (!c || conflito) return; if (achado === null) achado = c; else if (achado !== c) conflito = true; }
+    ve(a.clima); ve(b.clima);
+    var pa = a.ef.climasProprios, pb = b.ef.climasProprios, i;
+    if (pa) for (i = 0; i < pa.length; i++) ve(pa[i]);
+    if (pb) for (i = 0; i < pb.length; i++) ve(pb[i]);
+    return conflito ? null : achado;
   }
 
   // ---------- golpes prontos e dano ----------
@@ -3044,15 +3051,21 @@
       pontos: derrubados + (venceu ? 6 + vivosNoFim.length * 0.5 + vivosNoFim.reduce(function (s, c) { return s + c.frac; }, 0) * 0.5 : 0) +
         deles.reduce(function (s, f) { return s + (f.vivo ? 1 - f.frac : 0); }, 0) * 0.5 };
   }
-  function montarTimeNoClima(candidatos, party, nivel, clima, armador, dupla) {
+  // Em passos (gerador, 2026-09-30): cada `yield` é um ponto em que o botão da aba
+  // Chefões pode devolver a vez pra tela (antes a conta travava 1-3 s no desktop).
+  // Quem quer tudo de uma vez (rank, testes) usa montarTimeContraChefao.
+  function* montarTimeNoClimaEmPassos(candidatos, party, nivel, clima, armador, dupla) {
     var simular = dupla ? simularDuplaContraChefao : simularLutaContraChefao;
     var foes = party.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean);
-    var avaliados = candidatos.map(function (c) {
+    var avaliados = [];
+    for (var ci = 0; ci < candidatos.length; ci++) {
+      var c = candidatos[ci];
       // Quem arma com habilidade escolhível entra com ela; se arma por innate, qualquer escolhível serve.
       var forcada = armador && c === armador.cand ? armador.abForcada : undefined;
-      var r = melhorUnidadeContra(c.sp, foes, nivel, clima, golpesDeDueloAte(c.sp, nivel), forcada);
-      return { sp: c.sp, owned: c.owned, nota: r.nota, set: r.set, ab: r.ab, porFoe: r.porFoe, unidade: r.unidade, cand: c };
-    });
+      var rc = melhorUnidadeContra(c.sp, foes, nivel, clima, golpesDeDueloAte(c.sp, nivel), forcada);
+      avaliados.push({ sp: c.sp, owned: c.owned, nota: rc.nota, set: rc.set, ab: rc.ab, porFoe: rc.porFoe, unidade: rc.unidade, cand: c });
+      yield 1;
+    }
     var escolhidos = [], cobertura = foes.map(function () { return 0; }), usados = [];
     if (armador) {
       var a0 = avaliados.filter(function (a) { return a.cand === armador.cand; })[0];
@@ -3077,15 +3090,17 @@
     var sim = simular(escolhidos.map(function (e) { return e.unidade; }), foes, nivel);
     var reserva = avaliados.filter(function (a) { return usados.indexOf(a.owned) === -1; })
       .sort(function (a, b) { return b.nota - a.nota; }).slice(0, 8);
-    escolhidos.forEach(function (e, idx) {
-      if (armador && idx === 0) return;
-      reserva.forEach(function (r, ri) {
-        if (!r) return;
-        var teste = escolhidos.slice(); teste[idx] = r;
+    for (var idx = 0; idx < escolhidos.length; idx++) {
+      if (armador && idx === 0) continue;
+      for (var ri = 0; ri < reserva.length; ri++) {
+        var rr = reserva[ri];
+        if (!rr) continue;
+        var teste = escolhidos.slice(); teste[idx] = rr;
         var s2 = simular(teste.map(function (x) { return x.unidade; }), foes, nivel);
-        if (s2.pontos > sim.pontos + 1e-9) { reserva[ri] = escolhidos[idx]; escolhidos[idx] = r; sim = s2; }
-      });
-    });
+        if (s2.pontos > sim.pontos + 1e-9) { reserva[ri] = escolhidos[idx]; escolhidos[idx] = rr; sim = s2; }
+        yield 0;
+      }
+    }
     usados = escolhidos.map(function (e) { return e.owned; });
     cobertura = foes.map(function (f, i) { return escolhidos.reduce(function (mx, e) { return Math.max(mx, e.porFoe[i]); }, 0); });
     // Plano por Pokémon do chefão: quem do time resolve melhor e com que golpe.
@@ -3102,13 +3117,22 @@
   }
   // opcoes.dupla: a batalha é em dupla (chefão `db` no dado) - a luta é simulada 2 contra 2.
   function montarTimeContraChefao(candidatos, party, nivel, opcoes) {
+    var passos = montarTimeContraChefaoEmPassos(candidatos, party, nivel, opcoes), r;
+    while (!(r = passos.next()).done) { /* tudo de uma vez */ }
+    return r.value;
+  }
+  // Quantos candidatos o simulador avalia (pro progresso "12 de 44" do botão).
+  function totalDePassosContraChefao(candidatos) { return candidatos.length * (1 + armadoresDeClima(candidatos).length); }
+  function* montarTimeContraChefaoEmPassos(candidatos, party, nivel, opcoes) {
     var dupla = !!(opcoes && opcoes.dupla);
     var climaChefao = climaDoTimeDoChefao(party);
-    var melhor = montarTimeNoClima(candidatos, party, nivel, climaChefao, null, dupla);
+    var melhor = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, climaChefao, null, dupla);
     var base = melhor;
     melhor.estrategia = null;
-    armadoresDeClima(candidatos).forEach(function (arm) {
-      var r = montarTimeNoClima(candidatos, party, nivel, arm.clima, arm, dupla);
+    var armadores = armadoresDeClima(candidatos);
+    for (var ai = 0; ai < armadores.length; ai++) {
+      var arm = armadores[ai];
+      var r = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, arm.clima, arm, dupla);
       if (r.valor >= melhor.valor + (melhor === base ? GANHO_MINIMO_ESTRATEGIA : 0.001)) {
         // Quem ganha com o clima: nota no clima do time bem acima da nota sem ele.
         var notaBase = {};
@@ -3120,6 +3144,6 @@
         };
         melhor = r;
       }
-    });
+    }
     return melhor;
   }

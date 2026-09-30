@@ -15,7 +15,8 @@ import js from "@eslint/js";
 import globals from "globals";
 import { readFileSync, readdirSync } from "node:fs";
 
-const DECL = /^( {0,2})(?:async\s+)?function\s+([A-Za-z_$][\w$]*)|^( {0,2})(?:var|let|const)\s+([A-Za-z_$][\w$]*)/;
+// `function*` (gerador, 2026-09-30: simulador do chefão em passos) também conta.
+const DECL = /^( {0,2})(?:async\s+)?function\s*\*?\s*([A-Za-z_$][\w$]*)|^( {0,2})(?:var|let|const)\s+([A-Za-z_$][\w$]*)/;
 function nomesDoTopo(texto, recuo) {
   const nomes = new Set();
   for (const linha of texto.split("\n")) {

@@ -21,3 +21,7 @@ node_modules/
 # referências em tests/visual_baselines/ são fonte; isto é gerado a cada execução.
 test-results*/
 playwright-report*/
+
+# Cache do teste de sabotagem (2026-09-30): qual arquivo de teste pegou cada
+# sabotagem na última rodada. Só atalho - apagar não muda o resultado.
+tests/.sabotagem_cache.json
