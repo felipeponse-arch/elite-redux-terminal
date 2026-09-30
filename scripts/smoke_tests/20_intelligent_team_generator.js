@@ -19,10 +19,8 @@ async function section20() {
       if (!sp || !sp.ab || !sp.ab.length || T.formFamilyOf(sp).length > 1) return false;
       if (NOMES_JA_NO_ROSTER.indexOf(sp.n) !== -1) return false;
       if (evitar && evitar.indexOf(sp.sname) !== -1) return false;
-      // Nunca já ter build própria (curada em BUILDS ou salva em
-      // customBuilds) - senão o orquestrador pula a geração por IA pra essa
-      // espécie de propósito (não gera build por cima de uma que já existe),
-      // e o teste conta menos chamadas de IA do que o esperado.
+      // Sem build curada (BUILDS): a fixture começa sem build nenhuma, e a
+      // checagem de "time novo substitui a build" mais abaixo parte de 1 build.
       if (T.BUILDS[sp.sname]) return false;
       // Pelo menos um tipo que a OUTRA fixture não tem - garante que existe
       // um "tipoAlvo" de verdade pra testar o filtro de Monotype depois,
@@ -173,6 +171,24 @@ async function section20() {
         { especieAberta: (document.querySelector(".detail-titles h2") || {}).textContent, estrategiasAberta: detAberto && detAberto.open });
     }
   }
+
+  // ---- Time novo substitui a build da tela (pedido do usuário, 2026-09-29):
+  // gerar de novo com os mesmos membros, que JÁ têm build, gera build nova pra
+  // cada um - ela vira a ativa e a de antes fica de variante (nada se perde). ----
+  document.querySelector('.tab-btn[data-tab="team"]').click();
+  await wait(50);
+  var antesDoNovo = [fx1, fx2].map(function (fx) { return T.getBuildList(fx.sp.sname).length; });
+  estagios.length = 0;
+  document.getElementById("archetype-build-complete").click();
+  await pollUntil(function () { return estagios.length >= 4; }, 4000);
+  await wait(150);
+  check("gerar o time de novo pede build nova até pra quem já tinha build (2 pedidos de build)",
+    estagios.filter(function (p) { return p.indexOf("Monte um set competitivo") !== -1; }).length === 2,
+    estagios.map(function (p) { return p.slice(0, 30); }));
+  var listas = [fx1, fx2].map(function (fx) { return T.getBuildList(fx.sp.sname); });
+  check("a build nova vira a ativa (a da tela) e a antiga fica de variante",
+    listas.every(function (l, i) { return l.length === antesDoNovo[i] + 1 && l[l.length - 1].active && l.filter(function (b) { return b.active; }).length === 1; }),
+    listas.map(function (l) { return l.map(function (b) { return b.active; }); }));
 
   // ---- P2: Monotype filtra o roster deterministicamente (não confia na IA) ----
   // O time já é só [fx1, fx2] a esta altura (resultado do pipeline acima) -

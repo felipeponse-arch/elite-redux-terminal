@@ -287,7 +287,7 @@
   // 2026-09-17): uma única ação que encadeia os módulos que já existiam
   // soltos - Arquétipo (generateTeamForArchetype), aplica sozinho
   // (applyRecommendedTeam), Builds (generateBuildWithAI, uma vez por
-  // membro sem build salva - reaproveita a MESMA função que "Gerar build
+  // membro, sempre nova - reaproveita a MESMA função que "Gerar build
   // com IA" já usa em cada slot do time, então já respeita level cap,
   // item já em uso por outro membro e sinergia habilidade x movepool),
   // Guia de uso (generateTeamUsageGuide, novo) e por fim uma validação
@@ -310,9 +310,11 @@
     var members = state.team.map(getSpeciesByX).filter(Boolean);
     for (var i = 0; i < members.length; i++) {
       var sp = members[i];
-      if (effectiveBuild(sp)) continue; // já tinha build salva (ex: já jogava com este Pokémon) - não gera de novo por cima
+      // Time novo = build nova pra todos (2026-09-29, pedido do usuário): antes quem
+      // já tinha build era pulado e a antiga continuava na tela. Agora a nova vira
+      // a ativa e a antiga fica de variante no chip da ficha (nada se perde).
       setStatus("Etapa 2/4 - gerando build " + (i + 1) + "/" + members.length + " (" + sp.n + ")...");
-      await generateBuildWithAI(sp, "archetype-status");
+      await generateBuildWithAI(sp, "archetype-status", { timeNovo: true });
     }
     setStatus("Etapa 3/4 - escrevendo o guia de como jogar este time...");
     var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + weather : "", state.archetype.tatica ? "Tática: " + state.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");

@@ -455,9 +455,12 @@
       if (opts.modo === "revisao") saiu = abrirVagaPreservando(sp.sname, opts.anterior);
       // Build contra um chefão (2026-09-29, decisão do usuário: "gera uma nova pra
       // este chefão" e ela vira a ativa): abre vaga como a da evolução.
-      else if (opts.chefao) saiu = abrirVagaPreservando(sp.sname, getActiveBuild(sp.sname));
+      // Time novo pelo "Montar time completo" (2026-09-29, decisão do usuário: a
+      // build nova substitui a da tela e a antiga fica de variante): mesma regra.
+      else if (opts.chefao || opts.timeNovo) saiu = abrirVagaPreservando(sp.sname, getActiveBuild(sp.sname));
       salvou = addBuildVariant(sp.sname, validated, opts.modo === "ponte" ? "curada" : "ia");
-      if (!salvou && (opts.modo === "revisao" || opts.chefao)) salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia"); // último recurso
+      if (!salvou && (opts.modo === "revisao" || opts.chefao || opts.timeNovo)) salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia"); // último recurso
+      if (salvou && opts.timeNovo) logAutoAction("Build nova de " + sp.n + " para o time gerado: " + validated.ability + "; " + validated.moves.join(", ") + (validated.item ? " @ " + validated.item : "") + ".");
       if (salvou && opts.chefao) logAutoAction("Build nova de " + sp.n + " para vencer " + opts.chefao.boss.name + ": " + validated.ability + "; " + validated.moves.join(", ") + (validated.item ? " @ " + validated.item : "") + ".");
       if (salvou && opts.modo === "revisao" && opts.anterior) {
         delete opts.anterior.revisar; delete opts.anterior.revisadaDe; delete opts.anterior.tentativasRevisao;
