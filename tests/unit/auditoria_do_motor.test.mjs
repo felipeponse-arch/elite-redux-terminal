@@ -77,11 +77,11 @@ test("habilidade composta ('A + B') aplica o efeito de TODAS as partes", () => {
 // pelo nome. Parte é tratada por outro caminho (texto do golpe, marcação); os outros são
 // lacunas conhecidas, a revisar (planner de 30/09). Efeito NOVO faz o teste falhar.
 const EFEITOS_DE_GOLPE_SEM_REGRA_EXPLICITA = ["Accuracy Down Hit", "Argument Hit", "Argument Hit If Stat Up", "Bug Bite", "Bulldoze", "Burn Up",
-  "Clear Smog", "Creeping Thorns Hit", "Curse Hit", "Defog", "Drench Hit", "Electro Shot", "Eruption", "Fairy Terrain Hit", "Fake Out", "Feint",
-  "Flame Burst", "Flinch Recoil 33", "Fling", "Freeze Dry", "Grassy Terrain Hit", "Grav Apple", "Hammer Arm", "Heat Crash", "Hex", "Hit",
-  "Hit Prevent Escape", "Hit Switch Target", "Hurricane", "Hyperspace Fury", "Incinerate", "Infernal Parade", "Knock Off", "Leech Seed Hit",
+  "Clear Smog", "Creeping Thorns Hit", "Curse Hit", "Defog", "Drench Hit", "Electro Shot", "Fairy Terrain Hit", "Feint",
+  "Flame Burst", "Flinch Recoil 33", "Fling", "Freeze Dry", "Grassy Terrain Hit", "Grav Apple", "Hammer Arm", "Heat Crash", "Hit",
+  "Hit Prevent Escape", "Hit Switch Target", "Hurricane", "Hyperspace Fury", "Incinerate", "Infernal Parade", "Leech Seed Hit",
   "Matcha Gotcha", "Mind Blown", "Misc Hit", "Mortal Spin", "Multi Hit", "Natural Gift", "Nightmare", "Pay Day", "Rain Hit", "Rampage",
-  "Recoil 33", "Recoil If Miss", "Remove Terrain No Fail", "Rip And Tear", "Round", "Sandstorm Hit", "Semi Invulnerable", "Sleep Hit",
+  "Recoil 33", "Recoil If Miss", "Remove Terrain No Fail", "Rip And Tear", "Round", "Sandstorm Hit", "Sleep Hit",
   "Smack Down", "Snap Jaw", "Snore", "Sparkling Aria", "Spectral Thief", "Spike Hit", "Stealth Rock Hit", "Sticky Web Hit", "Tailwind Hit",
   "Thief", "Thunder", "Trepidation", "Two Turn Retaliation", "Upper Hand", "V Create", "Wake Up Slap"];
 

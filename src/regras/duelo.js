@@ -767,6 +767,11 @@
     var f = 1;
     if (outro.ef.desligaItem) f *= 0.5;
     if (!u.ef.seguraItem && ((outro.ef.roubaContato && gOutroContato === true) || (outro.ef.roubaSemContato && gOutroContato === false))) f *= 0.5;
+    // Knock Off ("Knocks down the foe's held item to prevent its use during the battle",
+    // NextDex; sem bônus de dano neste hack): como o roubo acima, o item vale ~metade da
+    // luta. Pedra de Mega e orbe primal não caem; Sticky Hold segura (2026-09-30).
+    var pedraFixa = /ite(?: [XYZ])?$/.test(u.it.nome) || /^(Red|Blue) Orb$/.test(u.it.nome);
+    if (!u.ef.seguraItem && !pedraFixa && (outro.golpesProntos || []).some(function (g) { return g.efeito === "Knock Off"; })) f *= 0.5;
     return f;
   }
   function comItem(mult, ativo) { return 1 + (mult - 1) * ativo; }
@@ -1356,7 +1361,12 @@
       // aparecia entre os golpes mais fortes do Garchomp).
       var cat = typeof MOVE_CATEGORIAS !== "undefined" ? MOVE_CATEGORIAS[id] : null;
       if (cat && cat.ef === "False Swipe") return false;
-      if (!/no primeiro turno|turno seguinte/i.test(MOVE_PT[id] || "")) return true;
+      // Grupo do Fake Out não carrega - só vale no 1º turno (regra própria em danoNoDuelo).
+      // O "Só funciona no primeiro turno" da tradução do First Impression caía no filtro de carga.
+      if (cat && cat.ef === "Fake Out") return true;
+      // Golpe de dois turnos: pela descrição ou pelo efeito "Semi Invulnerable" do dado
+      // (o Rock Climb é "A charging attack" no NextDex, mas a tradução não diz - escapava).
+      if (!/no primeiro turno|turno seguinte/i.test(MOVE_PT[id] || "") && !(cat && cat.ef === "Semi Invulnerable")) return true;
       if (u.ef.cargaInstantanea || (u.it && u.it.cargaUmaVez)) return true; // Accelerate, Power Herb
       return /^Solar (Beam|Blade)$/.test(MOVES[id][0]) && (clima === "sol" || u.ef.chloroplast);
     });
@@ -1429,6 +1439,7 @@
           cats.some(function (c) { return u.ef.prioCheioCategoria[c]; }),
         precisao: Math.max(m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, u.ef.precisaoGolpe[m[0]] || 0), forcaBase: base, forca: base * hab };
       g.area = extra && extra.al ? extra.al : null; // dupla: ambos/todos/aleatorio
+      g.efeito = extra && extra.ef ? extra.ef : ""; // efeito do golpe no dado (Fake Out, Hex, Eruption, Knock Off...)
       // -2 de Sp. Atk no próprio usuário a cada uso (grupo do Overheat no dado); Simple
       // dobra e Contrary inverte (estagioMult), como em qualquer mudança de estágio.
       if (extra && extra.ef === "Overheat") g.quedaPropriaSpa = 2 * (u.ef.estagioMult || 1);
@@ -1598,6 +1609,9 @@
         for (var uso = 0; uso < usos; uso++) somaMult += multDoEstagio(-g.quedaPropriaSpa * uso); // multDoEstagio já limita a ±6
         dano *= somaMult / usos;
       }
+      // Fake Out/Astonish/First Impression: "usable only on 1st turn" (NextDex) - vale
+      // um golpe só; a média cai com os golpes que a luta pede.
+      if (g.efeito === "Fake Out" && dano > 0) dano /= Math.min(6, golpesNecessariosDuelo(def.stats[0], dano));
       // Segundo melhor golpe (outro golpe): o que sobra com Disable/Torment.
       if (dano > melhor.dano) { if (melhor.golpe) segundo = { dano: melhor.dano }; } else if (dano > segundo.dano) segundo = { dano: dano };
       if (dano > melhor.dano) melhor = { dano: dano, prio: prioAqui, golpe: g, efTipo: efTipo, crit: crit, razaoMenorDef: razaoMenorDef };
@@ -1627,6 +1641,22 @@
   // aumenta o meu dano, e o que ele sofre (queimadura, frostbite, paralisia,
   // paixão, recuar) corta o dano DELE. Simétrico: roda dos dois lados.
   var TURNOS_MAX_STATUS = 8;
+  // Golpe cuja força depende da luta (2026-09-30, textos do NextDex):
+  // - Hex (Plasma Pulse): "Double damage against status" - dobra na parte da luta em que
+  //   o alvo está com status (a presença maior entre os status que contam);
+  // - Eruption (Water Spout): "Does more damage at high HP" - força proporcional ao HP de
+  //   quem usa (série: poder x HP/HP máx.), na média dos golpes enquanto ele apanha.
+  var STATUS_DO_HEX = ["queimar", "congelar", "paralisar", "envenenar", "envenenarForte", "sangrar", "sono"];
+  function golpeCondicionalDuelo(u, g, presNoAlvo, danoQueLeva, turnos) {
+    if (!g) return 1;
+    if (g.efeito === "Hex") return 1 + STATUS_DO_HEX.reduce(function (mx, s) { return Math.max(mx, presNoAlvo[s] || 0); }, 0);
+    if (g.efeito === "Eruption") {
+      var n = Math.max(1, turnos || 1), soma = 0;
+      for (var t = 0; t < n; t++) soma += Math.max(1 / 150, 1 - t * (danoQueLeva || 0) / u.stats[0]);
+      return soma / n;
+    }
+    return 1;
+  }
   function danoComStatusNoDuelo(eu, foe, meu, dele, turnos, euAntes) {
     var sobreEle = chancesDeStatusNoDuelo(eu, foe, meu.melhor.golpe, dele.melhor.golpe);
     var sobreMim = chancesDeStatusNoDuelo(foe, eu, dele.melhor.golpe, meu.melhor.golpe);
@@ -1797,8 +1827,10 @@
     }
     var ritmoMeu = ritmo(eu, meu.melhor.golpe, nele.pres, meu.melhor), ritmoDele = ritmo(foe, dele.melhor.golpe, nMim.pres, dele.melhor);
     var extraMeu = extraPorTurno(eu, meu.melhor.dano, meu.melhor.golpe, dele.melhor.golpe), extraDele = extraPorTurno(foe, dele.melhor.dano, dele.melhor.golpe, meu.melhor.golpe);
-    function meuDano(d) { return d > 0 ? d * critMeu * spMeu.ataque * spDele.defesa * ordemMeu * estagioMeu * ritmoMeu * nele.recebeMais * nMim.corte + extraMeu + nele.residuo : nele.residuo; }
-    function deleDano(d) { return d > 0 ? d * critDele * spDele.ataque * spMeu.defesa * ordemDele * estagioDele * ritmoDele * nMim.recebeMais * nele.corte + extraDele + nMim.residuo : nMim.residuo; }
+    var condMeu = golpeCondicionalDuelo(eu, meu.melhor.golpe, nele.pres, dele.melhor.dano, turnos);
+    var condDele = golpeCondicionalDuelo(foe, dele.melhor.golpe, nMim.pres, meu.melhor.dano, turnos);
+    function meuDano(d) { return d > 0 ? d * critMeu * spMeu.ataque * spDele.defesa * ordemMeu * estagioMeu * ritmoMeu * condMeu * nele.recebeMais * nMim.corte + extraMeu + nele.residuo : nele.residuo; }
+    function deleDano(d) { return d > 0 ? d * critDele * spDele.ataque * spMeu.defesa * ordemDele * estagioDele * ritmoDele * condDele * nMim.recebeMais * nele.corte + extraDele + nMim.residuo : nMim.residuo; }
     // Balanço de HP de cada lado por turno: o que ele mesmo perde (recuo, custo,
     // Rough Skin do outro ao fazer contato) entra como dano a mais contra ele; o
     // que ele recupera (cura por turno, dreno, Poison Heal) sai. Magic Guard anula

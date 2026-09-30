@@ -914,4 +914,40 @@ export const MUTACOES = [
     de: "|Speed|Attack|Defense|Sp\\. Atk|Sp\\. Def) on entry/i",
     para: "|Speed) on entry/i",
   },
+  // Efeitos de golpe (2026-09-30, apontados pela auditoria do motor).
+  {
+    id: "golpe-rock-climb-sem-carga",
+    descricao: "Rock Climb volta a contar como golpe de um turno",
+    arquivo: "duelo.js",
+    de: " && !(cat && cat.ef === \"Semi Invulnerable\")) return true;",
+    para: ") return true;",
+  },
+  {
+    id: "golpe-fake-out-todo-turno",
+    descricao: "First Impression/Fake Out voltam a valer em todo turno",
+    arquivo: "duelo.js",
+    de: "if (g.efeito === \"Fake Out\" && dano > 0) dano /= Math.min(6, golpesNecessariosDuelo(def.stats[0], dano));",
+    para: "",
+  },
+  {
+    id: "golpe-hex-sem-dobro",
+    descricao: "Plasma Pulse (Hex) deixa de dobrar contra alvo com status",
+    arquivo: "duelo.js",
+    de: "if (g.efeito === \"Hex\") return 1 + STATUS_DO_HEX",
+    para: "if (g.efeito === \"Hex\") return 1 + 0 * STATUS_DO_HEX",
+  },
+  {
+    id: "golpe-eruption-hp-cheio",
+    descricao: "Water Spout (Eruption) volta a bater como se o HP estivesse sempre cheio",
+    arquivo: "duelo.js",
+    de: "for (var t = 0; t < n; t++) soma += Math.max(1 / 150, 1 - t * (danoQueLeva || 0) / u.stats[0]);",
+    para: "for (var t = 0; t < n; t++) soma += 1;",
+  },
+  {
+    id: "golpe-knock-off-nao-derruba",
+    descricao: "Knock Off deixa de tirar o item do alvo",
+    arquivo: "duelo.js",
+    de: "return g.efeito === \"Knock Off\"; })) f *= 0.5;",
+    para: "return g.efeito === \"Knock Off\"; })) f *= 1;",
+  },
 ];
