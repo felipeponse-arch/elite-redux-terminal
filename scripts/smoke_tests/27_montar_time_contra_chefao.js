@@ -71,6 +71,29 @@ async function section27() {
     }
     check("clicar de novo reaproveita a vaga do 'Antes de ...' (não gasta outra das 3)",
       T.state.savedTeams.filter(function (t) { return /^Antes de /.test(t.name); }).length === 1, T.state.savedTeams.map(function (t) { return t.name; }));
+    // Segundo chefão (revisão de 2026-09-30): montar contra outro chefão com o time
+    // do botão na tela NÃO pode trocar o backup do time do jogador pelo do botão.
+    var snamesAntes = timeAntes.map(function (x) { return T.getSpeciesByX(x).sname; }).sort().join(",");
+    busca = document.getElementById("boss-search-input");
+    busca.value = "Wattson";
+    busca.dispatchEvent(new Event("input", { bubbles: true }));
+    await wait(30);
+    var row2 = document.querySelector("#boss-list .species-row");
+    if (achou("Wattson na lista de chefões", row2)) {
+      row2.click();
+      await wait(30);
+      prompts.length = 0;
+      document.getElementById("boss-montar-time").click();
+      for (var k = 0; k < 300; k++) {
+        await wait(50);
+        var st3 = document.getElementById("chefao-build-status");
+        if (st3 && /^Faltou build/.test(st3.textContent) && prompts.length) break;
+      }
+      var backup = T.state.savedTeams.filter(function (t) { return /^Antes de /.test(t.name); });
+      check("com um 2º chefão, o backup continua sendo o time do JOGADOR (não o montado pelo botão)",
+        backup.length === 1 && backup[0].team.slice().sort().join(",") === snamesAntes,
+        backup.map(function (t) { return t.name + ": " + t.team.join(","); }));
+    }
     var voltar = document.getElementById("chefao-restaurar");
     if (achou("botão 'Voltar ao time anterior'", voltar)) {
       voltar.click();

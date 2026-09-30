@@ -127,11 +127,14 @@
   // Build nova depois da evolução (2026-09-27): com a lista cheia (3), sai a
   // variante mais antiga que não é a ativa nem `preservar` (a de antes de
   // evoluir). Devolve a build que saiu (pro registro) ou null.
-  function abrirVagaPreservando(sname, preservar) {
+  // `protegerManuais` (2026-09-30, revisão): time novo e chefão nunca tiram uma
+  // build feita à mão pelo jogador - sem vaga, a build nova é recusada (mesma regra
+  // de addBuildVariant: escolha deliberada não some em silêncio).
+  function abrirVagaPreservando(sname, preservar, protegerManuais) {
     var lista = getBuildList(sname);
     if (lista.length < 3) return null;
     var velha = lista.map(function (b, i) { return { b: b, i: i }; })
-      .filter(function (o) { return o.b !== preservar && !o.b.active; })
+      .filter(function (o) { return o.b !== preservar && !o.b.active && !(protegerManuais && o.b.source === "manual"); })
       .sort(function (x, y) { return String(x.b.savedAt).localeCompare(String(y.b.savedAt)); })[0];
     if (!velha) return null;
     removeBuildIndex(sname, velha.i);

@@ -87,12 +87,16 @@
   // Psychic-types get a 20% damage reduction from moves", e os aumentos de
   // status de quem NÃO é Ghost/Psychic caem 1 por turno). Areia pra Rock é do
   // jogo original e não aparece nas páginas oficiais deste hack - fica de fora.
+  // Números oficiais num lugar só (2026-09-30): o motor do duelo (duelo.js) usa
+  // estes mesmos - antes ele dava +50% no sol/chuva enquanto este texto dizia +20%.
+  var CLIMA_OFICIAL = { reforcoSolChuva: 1.2, defesaIceNoGranizo: 1.5, danoGhostPsychicNaNevoa: 0.8 };
+  var pctClima = function (mult) { return Math.round(Math.abs(mult - 1) * 100) + "%"; };
   var CLIMA_QUE_COMBINA = {
-    Fire: { clima: "Sun", curto: "+20% em golpes Fire", porque: "golpes Fire causam 20% a mais no sol" },
-    Water: { clima: "Rain", curto: "+20% em golpes Water", porque: "golpes Water causam 20% a mais na chuva" },
-    Ice: { clima: "Hail", curto: "+50% de Defesa pra Ice", porque: "tipo Ice ganha 50% de Defesa no granizo" },
-    Ghost: { clima: "Eerie Fog", curto: "-20% de dano recebido", porque: "Ghost recebe 20% menos dano e seus aumentos de status não caem na névoa" },
-    Psychic: { clima: "Eerie Fog", curto: "-20% de dano recebido", porque: "Psychic recebe 20% menos dano e seus aumentos de status não caem na névoa" }
+    Fire: { clima: "Sun", curto: "+" + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " em golpes Fire", porque: "golpes Fire causam " + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " a mais no sol" },
+    Water: { clima: "Rain", curto: "+" + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " em golpes Water", porque: "golpes Water causam " + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " a mais na chuva" },
+    Ice: { clima: "Hail", curto: "+" + pctClima(CLIMA_OFICIAL.defesaIceNoGranizo) + " de Defesa pra Ice", porque: "tipo Ice ganha " + pctClima(CLIMA_OFICIAL.defesaIceNoGranizo) + " de Defesa no granizo" },
+    Ghost: { clima: "Eerie Fog", curto: "-" + pctClima(CLIMA_OFICIAL.danoGhostPsychicNaNevoa) + " de dano recebido", porque: "Ghost recebe " + pctClima(CLIMA_OFICIAL.danoGhostPsychicNaNevoa) + " menos dano e seus aumentos de status não caem na névoa" },
+    Psychic: { clima: "Eerie Fog", curto: "-" + pctClima(CLIMA_OFICIAL.danoGhostPsychicNaNevoa) + " de dano recebido", porque: "Psychic recebe " + pctClima(CLIMA_OFICIAL.danoGhostPsychicNaNevoa) + " menos dano e seus aumentos de status não caem na névoa" }
   };
   function climaQueCombina(tipo) { return CLIMA_QUE_COMBINA[tipo] || null; }
 

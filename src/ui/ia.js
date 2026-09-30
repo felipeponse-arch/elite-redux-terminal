@@ -457,9 +457,11 @@
       // este chefão" e ela vira a ativa): abre vaga como a da evolução.
       // Time novo pelo "Montar time completo" (2026-09-29, decisão do usuário: a
       // build nova substitui a da tela e a antiga fica de variante): mesma regra.
-      else if (opts.chefao || opts.timeNovo) saiu = abrirVagaPreservando(sp.sname, getActiveBuild(sp.sname));
+      else if (opts.chefao || opts.timeNovo) saiu = abrirVagaPreservando(sp.sname, getActiveBuild(sp.sname), true);
       salvou = addBuildVariant(sp.sname, validated, opts.modo === "ponte" ? "curada" : "ia");
-      if (!salvou && (opts.modo === "revisao" || opts.chefao || opts.timeNovo)) salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia"); // último recurso
+      // Último recurso: troca a ativa - mas nunca uma feita à mão no time novo/chefão.
+      var ativaManual = (getActiveBuild(sp.sname) || {}).source === "manual";
+      if (!salvou && (opts.modo === "revisao" || ((opts.chefao || opts.timeNovo) && !ativaManual))) salvou = setOrReplaceActiveBuild(sp.sname, validated, "ia");
       if (salvou && opts.timeNovo) logAutoAction("Build nova de " + sp.n + " para o time gerado: " + validated.ability + "; " + validated.moves.join(", ") + (validated.item ? " @ " + validated.item : "") + ".");
       if (salvou && opts.chefao) logAutoAction("Build nova de " + sp.n + " para vencer " + opts.chefao.boss.name + ": " + validated.ability + "; " + validated.moves.join(", ") + (validated.item ? " @ " + validated.item : "") + ".");
       if (salvou && opts.modo === "revisao" && opts.anterior) {
@@ -531,14 +533,16 @@
       // uma escolha feita enquanto esperava. "obsoleta" não conta como falha.
       if (opts.modo === "revisao" && (getActiveBuild(sp.sname) !== opts.anterior || state.team.indexOf(sp.x) === -1)) return "obsoleta";
       if (opts.modo === "ponte" && (getActiveBuild(sp.sname) || state.team.indexOf(sp.x) === -1)) return "obsoleta";
-      if (opts.chefao && state.team.indexOf(sp.x) === -1) return "obsoleta"; // saiu do time enquanto esperava
+      if ((opts.chefao || opts.timeNovo) && state.team.indexOf(sp.x) === -1) return "obsoleta"; // saiu do time enquanto esperava
       ajustarBuildDaIa(sp, validated, opts, cap);
       var planoCheck = anexarPlanoDaIa(sp, validated, raw && raw.plano, cap,
         opts.modo === "ponte" && opts.alvo ? opts.alvo.moves : null);
       validated.planoConsultado = true; // o prompt já pediu o plano - não pedir de novo
       var ok = salvarBuildDaIa(sp, validated, opts, cap);
       if (!ok) {
-        if (statusEl) statusEl.textContent = "Limite de 3 builds atingido.";
+        aviso((opts.chefao || opts.timeNovo)
+          ? "Limite de 3 builds de " + sp.n + " com builds feitas por você - apague uma na ficha pra caber a nova."
+          : "Limite de 3 builds atingido.");
         return false;
       }
       if (!opts.silencioso) {

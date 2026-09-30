@@ -984,7 +984,9 @@
   // Imunidade de tipo e de habilidade ao status.
   function podeSofrerStatusDuelo(u, s) {
     if (u.ef.imuneStatus[s]) return false;
-    if (s === "sono" && u.it && (u.it.nome === "Lum Berry" || u.it.nome === "Chesto Berry")) return false; // acorda na hora
+    // Lum/Chesto Berry não entram aqui (revisão de 2026-09-30): são de uso único e
+    // o Unnerve do rival barra - o sono por chance já desconta a Lum (itemAtivoDuelo
+    // em "fica"), e o plano de sono usa podeDormirDuelo.
     if (s === "sono" && CAMPO_DUELO && CAMPO_DUELO.terreno === "eletrico" && aterradoDuelo(u)) return false;
     if (CAMPO_DUELO && CAMPO_DUELO.terreno === "nevoa" && s !== "recuar" && aterradoDuelo(u)) return false; // Misty Terrain
     return !(STATUS_DUELO[s].imunes || []).some(function (tp) { return u.tipos.indexOf(tp) !== -1; });
@@ -1312,8 +1314,17 @@
       var mult = x ? (/%$/.test(x[0]) ? 1 + parseInt(x[1], 10) / 100 : parseFloat(x[1])) : 1.3;
       (h.golpes || []).forEach(function (g) { ef.bonusGolpes[g] = Math.max(ef.bonusGolpes[g] || 1, Math.min(mult, 2)); });
     });
+    ef.climasProprios = Object.keys(climaProprio); // climas que as próprias habilidades armam
     cacheEfeitoDuelo[chave] = ef;
     return ef;
+  }
+  // Clima no campo entre os dois lados: o que cada um arma (habilidade) ou o do
+  // time (u.clima). Se os dois armam climas diferentes, depende de quem entra por
+  // último - fica sem clima (não dá pra saber no modelo por valor esperado).
+  function climaNoCampoDuelo(a, b) {
+    var climas = [a.clima, b.clima].concat(a.ef.climasProprios || [], b.ef.climasProprios || [])
+      .filter(function (c, i, l) { return c && l.indexOf(c) === i; });
+    return climas.length === 1 ? climas[0] : null;
   }
 
   // ---------- golpes prontos e dano ----------
@@ -1363,15 +1374,17 @@
       hab *= Math.max(porCategoria, u.ef.bonusGolpes[m[0]] || 1);
       hab *= cats.reduce(function (mx, c) { return Math.max(mx, u.ef.categoriaExtra[c] || 1); }, 1);
       hab *= u.ef.golpeExtra;
+      // Golpe alterado pela habilidade (Giant Shuriken, Wrestle Showman). Lido ANTES
+      // do poder (revisão de 2026-09-30: lido depois, o poder novo nunca valia e a
+      // Giant Shuriken deixava o Water Shuriken mais fraco - 1 acerto de 15).
+      var alt = u.ef.golpeAlterado[m[0]];
       var poder = alt && alt.poder ? alt.poder : m[3] + (alt && alt.mais ? alt.mais : 0);
       if (u.ef.tecnico && poder <= u.ef.tecnico.limite) hab *= u.ef.tecnico.mult;
       if ((m[7] || 0) > 0) hab *= u.ef.prioMult;
-      if (reforcado && tipo === reforcado) base *= 1.5;
+      if (reforcado && tipo === reforcado) base *= CLIMA_OFICIAL.reforcoSolChuva; // oficial: +20% (Weather Rework), não o 1,5x da série
       // Série: Water no sol e Fire na chuva saem pela metade (Catastrophe: reforçam; Nika: Water normal no sol).
       var enfraquecido = { sol: "Water", chuva: "Fire" }[clima];
-      if (enfraquecido && tipo === enfraquecido && !(clima === "sol" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? 1.5 : 0.5;
-      // Golpe alterado pela habilidade (Giant Shuriken, Wrestle Showman).
-      var alt = u.ef.golpeAlterado[m[0]];
+      if (enfraquecido && tipo === enfraquecido && !(clima === "sol" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? CLIMA_OFICIAL.reforcoSolChuva : 0.5; // Catastrophe: o mesmo reforço do clima
       if (u.ef.seguimento && u.ef.seguimento.tipo === tipo) hab *= (poder + u.ef.seguimento.poder) / poder;
       u.ef.seguimentoCategoria.forEach(function (sg) {
         var vale = sg.quais === "todos" || (sg.quais === "som" && som) || (sg.quais === "danca" && flags.indexOf("Dance Move") !== -1) || cats.indexOf(sg.quais) !== -1;
@@ -1487,6 +1500,11 @@
     var ativoA = itemAtivoDuelo(atq, def, contatoDe(def)), ativoD = itemAtivoDuelo(def, atq, contatoDe(atq));
     var precisaoAtq = atq.ef.semErrar || def.ef.semErrarContraMim;
     var abreDef = !atq.ef.quebraHabilidade;
+    // Clima no campo (Weather Rework oficial, 2026-09-30): Ice ganha Defesa no
+    // granizo; Ghost/Psychic recebem menos dano na Eerie Fog.
+    var climaCampo = climaNoCampoDuelo(atq, def);
+    var defNoClima = climaCampo === "granizo" && def.tipos.indexOf("Ice") !== -1 ? CLIMA_OFICIAL.defesaIceNoGranizo : 1;
+    var danoNoClima = climaCampo === "nevoa" && (def.tipos.indexOf("Ghost") !== -1 || def.tipos.indexOf("Psychic") !== -1) ? CLIMA_OFICIAL.danoGhostPsychicNaNevoa : 1;
     atq.golpesProntos.forEach(function (g) {
       var flags = g.flags || [];
       // Bulletproof, Soundproof: imune pela marcação do golpe.
@@ -1526,6 +1544,7 @@
       if (def.ef.defesaExtraVel && abreDef) D += def.stats[5] * def.ef.defesaExtraVel; // Sleek Scales
       D *= noTerrenoDuelo(def, fisico && !g.defEspecial ? "def" : "spd"); // Grass Pelt, Flower Necklace
       D *= comItem(fisico && !g.defEspecial ? itD.defMult : itD.spdMult, ativoD); // Eviolite
+      if (fisico && !g.defEspecial) D *= defNoClima; // Ice no granizo: +50% de Defesa
       // Eternal Flower: as outras Megas perdem 20% dos atributos.
       if (atq.ef.contraMega < 1 && /Mega/.test(def.sp && def.sp.n || "")) D *= atq.ef.contraMega;
       if (def.ef.contraMega < 1 && /Mega/.test(atq.sp && atq.sp.n || "")) A *= def.ef.contraMega;
@@ -1536,6 +1555,7 @@
         if (efTipo >= 2) red *= def.ef.reducao.superEf;
         if (g.contato) red *= def.ef.reducao.contato;
       }
+      red *= danoNoClima; // Eerie Fog: Ghost/Psychic recebem 20% menos
       if (efTipo >= 2 && !semBonus) red *= atq.ef.seBonus;
       if (efTipo >= 2) red *= comItem(itA.seMult, ativoA); // Expert Belt
       // Tera Shell: com HP cheio todo golpe é pouco efetivo - vale no 1º de ~2 golpes.
@@ -2005,7 +2025,7 @@
       // Golpe de status que a habilidade usa ao entrar (sem gastar turno).
       function naEntradaDe(x, y, golpeY, danoY) {
         var r = { perdeY: 0, multY: 1, danoY: 0 };
-        if (x.ef.entradaSono && !y.ef.imuneStatus.sono && statusPassaDuelo(x, y) && podeDormirDuelo(y, x)) r.perdeY += (y.ef.acordaCedo ? 1 : 2) * (1 - (y.ef.curaStatus || 0)); // Yawn: dorme 1-3 turnos
+        if (x.ef.entradaSono && !y.ef.imuneStatus.sono && statusPassaDuelo(x, y) && podeDormirDuelo(y, x) === true) r.perdeY += (y.ef.acordaCedo ? 1 : 2) * (1 - (y.ef.curaStatus || 0)); // Yawn: dorme 1-3 turnos
         if ((x.ef.entradaDisable || x.ef.entradaTorment) && golpeY && danoY && danoY.melhor.dano > 0 && statusPassaDuelo(x, y)) {
           var razao = danoY.segundo.dano / danoY.melhor.dano;
           r.multY *= x.ef.entradaDisable ? razao : (1 + razao) / 2; // Torment: alterna o melhor e o segundo
@@ -2451,12 +2471,15 @@
     u.stats = u.stats.map(function (v, i) { return Math.round(v * (1 - p) + sa[i] * p); });
     if (p >= 0.5) u.tipos = tiposNaBatalha(alt, u.ef);
   }
-  // Dá pra fazer dormir? Lum/Chesto Berry acordam na hora (Unnerve do outro barra a baga),
-  // Electric Terrain impede quem está no chão, Misty Terrain já barra pelo status.
+  // Dá pra fazer dormir? Electric Terrain impede quem está no chão, Misty Terrain já
+  // barra pelo status. Lum/Chesto Berry acordam na hora, mas UMA vez só (revisão de
+  // 2026-09-30: antes valia a luta inteira): devolve "baga" - a 1ª tentativa se perde.
+  // Unnerve do outro lado ou Klutz de quem segura anulam a baga.
   function podeDormirDuelo(y, x) {
-    if (y.it && (y.it.nome === "Lum Berry" || y.it.nome === "Chesto Berry") && !x.ef.nervoso && !y.ef.klutz) return false;
     if (CAMPO_DUELO && CAMPO_DUELO.terreno === "eletrico" && aterradoDuelo(y)) return false;
-    return podeSofrerStatusDuelo(y, "sono");
+    if (!podeSofrerStatusDuelo(y, "sono")) return false;
+    if (y.it && (y.it.nome === "Lum Berry" || y.it.nome === "Chesto Berry") && !x.ef.nervoso && !y.ef.klutz) return "baga";
+    return true;
   }
   // Pode usar golpe de status contra o alvo? Magic Bounce devolve, Good As Gold
   // é imune; Prankster ganha prioridade mas falha em Dark.
@@ -2499,7 +2522,8 @@
       var s = p.status;
       if (s === "sono") {
         if (y.ef.imuneStatus.sono || y.ef.aliadoImuneStatus && y.ef.aliadoImuneStatus.sono) return null;
-        if (!podeDormirDuelo(y, x)) return null;
+        var podeDormir = podeDormirDuelo(y, x);
+        if (!podeDormir) return null;
         var turnosDormindo = (y.ef.acordaCedo ? 1 : 2) * acc; // série: 1 a 3 turnos (média 2); Early Bird acorda na metade
         turnosDormindo *= 1 - (y.ef.curaStatus || 0); // Shed Skin, Hydration...: acorda antes
         if (y.dormindoAtaca) turnosDormindo *= 0.5; // Sleep Talk: ataca dormindo (golpe ao acaso)
@@ -2507,6 +2531,7 @@
         if (x.ef.bonusVsSono) r.multX *= 1 + (x.ef.bonusVsSono - 1) * Math.min(1, turnosDormindo / Math.max(1, base.nX || 1));
         if (x.ef.pesadelo) r.residuoY += x.ef.pesadelo * base.hpY * Math.min(1, turnosDormindo / Math.max(1, base.nX || 1));
         if (p.adiado) r.atraso = 1; // Yawn: dorme no fim do turno seguinte - o rival ainda age
+        if (podeDormir === "baga") r.atraso = (r.atraso || 0) + 1; // a baga cura a 1ª tentativa: repete o golpe
         return r;
       }
       var regra = STATUS_DUELO[s];

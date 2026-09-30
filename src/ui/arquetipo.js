@@ -308,13 +308,19 @@
     if (!composed || !teamRecommendation) return; // generateTeamForArchetype já deixou o motivo no status
     if (!applyRecommendedTeam()) return; // idem, applyRecommendedTeam já deixou o motivo no status/toast
     var members = state.team.map(getSpeciesByX).filter(Boolean);
-    for (var i = 0; i < members.length; i++) {
-      var sp = members[i];
-      // Time novo = build nova pra todos (2026-09-29, pedido do usuário): antes quem
-      // já tinha build era pulado e a antiga continuava na tela. Agora a nova vira
-      // a ativa e a antiga fica de variante no chip da ficha (nada se perde).
-      setStatus("Etapa 2/4 - gerando build " + (i + 1) + "/" + members.length + " (" + sp.n + ")...");
-      await generateBuildWithAI(sp, "archetype-status", { timeNovo: true });
+    comecarLoteDeBuilds(members.map(function (m) { return m.x; }));
+    try {
+      for (var i = 0; i < members.length; i++) {
+        var sp = members[i];
+        // Time novo = build nova pra todos (2026-09-29, pedido do usuário): antes quem
+        // já tinha build era pulado e a antiga continuava na tela. Agora a nova vira
+        // a ativa e a antiga fica de variante no chip da ficha (nada se perde).
+        setStatus("Etapa 2/4 - gerando build " + (i + 1) + "/" + members.length + " (" + sp.n + ")...");
+        await generateBuildWithAI(sp, "archetype-status", { timeNovo: true });
+        concluirBuildDoLote(sp.x);
+      }
+    } finally {
+      encerrarLoteDeBuilds();
     }
     setStatus("Etapa 3/4 - escrevendo o guia de como jogar este time...");
     var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + weather : "", state.archetype.tatica ? "Tática: " + state.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");

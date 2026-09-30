@@ -670,7 +670,7 @@ export const MUTACOES = [
     id: "clima-agua-no-sol-normal",
     descricao: "Water no sol volta a sair com força normal",
     arquivo: "duelo.js",
-    de: "      if (enfraquecido && tipo === enfraquecido && !(clima === \"sol\" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? 1.5 : 0.5;",
+    de: "      if (enfraquecido && tipo === enfraquecido && !(clima === \"sol\" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? CLIMA_OFICIAL.reforcoSolChuva : 0.5; // Catastrophe: o mesmo reforço do clima",
     para: "",
   },
   {
@@ -777,5 +777,48 @@ export const MUTACOES = [
     arquivo: "validacao_build_ia.js",
     de: "      ivs[5] = 0;\n",
     para: "",
+  },
+  // Reunião de alinhamento, 2026-09-30.
+  {
+    id: "clima-volta-a-50",
+    descricao: "sol/chuva voltam a reforçar 50% (a série) no lugar dos 20% oficiais",
+    arquivo: "duelo.js",
+    de: "if (reforcado && tipo === reforcado) base *= CLIMA_OFICIAL.reforcoSolChuva;",
+    para: "if (reforcado && tipo === reforcado) base *= 1.5;",
+  },
+  {
+    id: "golpe-alterado-ignorado",
+    descricao: "golpe alterado pela habilidade (Giant Shuriken) deixa de valer no poder",
+    arquivo: "duelo.js",
+    de: "      var alt = u.ef.golpeAlterado[m[0]];\n      var poder",
+    para: "      var alt = null;\n      var poder",
+  },
+  {
+    id: "granizo-sem-defesa-ice",
+    descricao: "Ice no granizo perde os +50% de Defesa",
+    arquivo: "duelo.js",
+    de: "if (fisico && !g.defEspecial) D *= defNoClima;",
+    para: "if (fisico && !g.defEspecial) D *= 1;",
+  },
+  {
+    id: "nevoa-sem-reducao",
+    descricao: "Eerie Fog deixa de cortar o dano em Ghost/Psychic",
+    arquivo: "duelo.js",
+    de: "red *= danoNoClima;",
+    para: "red *= 1;",
+  },
+  {
+    id: "baga-barra-sono-a-luta-toda",
+    descricao: "Lum/Chesto Berry volta a barrar o sono a luta inteira (e Unnerve não anula)",
+    arquivo: "duelo.js",
+    de: "!x.ef.nervoso && !y.ef.klutz) return \"baga\";",
+    para: "true) return false;",
+  },
+  {
+    id: "lote-conta-build-velha",
+    descricao: "no lote de builds, a build antiga de quem vai ser trocado volta a contar na trava de itens",
+    arquivo: "builds.js",
+    de: "return x !== excludeX && buildsPendentesNoLote.indexOf(x) === -1;",
+    para: "return x !== excludeX;",
   },
 ];

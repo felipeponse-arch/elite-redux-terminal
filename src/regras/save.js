@@ -37,6 +37,7 @@
   var STRATEGY_SETS_MAX = 60;
 
   var SCHEMA_VERSION = 2;
+  var reconciliouAoAplicar = false; // antes de applySave (no-use-before-define, 2026-09-30)
 
   function applySave(save) {
     if (!save || typeof save !== "object") return;
@@ -52,7 +53,11 @@
       state.savedTeams = save.savedTeams.filter(function (t) {
         return t && Array.isArray(t.team);
       }).slice(0, 3).map(function (t) {
-        return { name: String(t.name || ""), team: t.team.filter(function (s) { return typeof s === "string"; }) };
+        var slot = { name: String(t.name || ""), team: t.team.filter(function (s) { return typeof s === "string"; }) };
+        // "depois" (2026-09-30): no backup "Antes de <chefão>", o time que o botão
+        // "Montar time contra este chefão" montou - diz se o time atual é do botão.
+        if (Array.isArray(t.depois)) slot.depois = t.depois.filter(function (s) { return typeof s === "string"; });
+        return slot;
       });
     }
     if (save.settings && typeof save.settings === "object") {
@@ -197,8 +202,6 @@
     // outro (sincronização) - ver reconciliarBuildsDe().
     reconciliouAoAplicar = reconciliarBuildsSalvas();
   }
-
-  var reconciliouAoAplicar = false;
 
   // Versões anteriores de uma build (pilha da evolução em etapas - ver
   // reconciliarBuildsDe). Profundidade máxima 3: é o máximo de etapas de uma

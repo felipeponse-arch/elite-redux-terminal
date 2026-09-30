@@ -100,6 +100,10 @@ export default [
       "no-unused-vars": ["error", { args: "none", caughtErrors: "none", vars: "local" }],
       // O nome declarado aqui também aparece na lista de globais derivada.
       "no-redeclare": ["error", { builtinGlobals: false }],
+      // Variável lida antes da declaração (2026-09-30): o `var alt` do duelo era
+      // lido antes de receber valor e a Giant Shuriken enfraquecia o golpe, sem
+      // nenhum teste perceber. Funções podem (içamento de função é intencional).
+      "no-use-before-define": ["error", { functions: false, classes: false, variables: true }],
     },
   },
   {

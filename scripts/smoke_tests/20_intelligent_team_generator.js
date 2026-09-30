@@ -190,6 +190,21 @@ async function section20() {
     listas.every(function (l, i) { return l.length === antesDoNovo[i] + 1 && l[l.length - 1].active && l.filter(function (b) { return b.active; }).length === 1; }),
     listas.map(function (l) { return l.map(function (b) { return b.active; }); }));
 
+  // ---- Build feita à mão nunca some (revisão de 2026-09-30): com as 3 vagas
+  // ocupadas por builds do jogador, o time novo não apaga nenhuma - recusa a nova
+  // e diz por quê. ----
+  var manual = function (nat) { return { ability: fx1.abi, nature: nat, item: "", moves: fx1.moves.slice(), evs: [0, 0, 0, 0, 0, 0], ivs: [31, 31, 31, 31, 31, 31], source: "manual", active: false, savedAt: "2026-09-0" + nat.length, rationale: "" }; };
+  T.state.customBuilds[fx1.sp.sname] = [manual("Adamant"), manual("Jolly"), manual("Modest")];
+  T.state.customBuilds[fx1.sp.sname][0].active = true;
+  estagios.length = 0;
+  document.getElementById("archetype-build-complete").click();
+  await pollUntil(function () { return estagios.length >= 4; }, 4000);
+  await wait(150);
+  var listaManual = T.getBuildList(fx1.sp.sname);
+  check("time novo não apaga build feita à mão (3 manuais continuam, a da IA é recusada)",
+    listaManual.length === 3 && listaManual.every(function (b) { return b.source === "manual"; }),
+    listaManual.map(function (b) { return b.source + "/" + b.nature; }));
+
   // ---- P2: Monotype filtra o roster deterministicamente (não confia na IA) ----
   // O time já é só [fx1, fx2] a esta altura (resultado do pipeline acima) -
   // não precisa mexer no roster de novo, só trocar o eixo escolhido.

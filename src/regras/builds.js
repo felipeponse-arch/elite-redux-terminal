@@ -108,10 +108,20 @@
   // de "defesa em profundidade" pós-validação que os itens têm (não dá pra
   // simplesmente apagar 1 dos 4 golpes de uma build sem deixá-la quebrada,
   // ao contrário do item, que tem "vazio" como fallback válido).
+  // Lote de builds em andamento (2026-09-30, revisão): no "Montar time completo" e
+  // no botão do chefão, quem ainda vai ganhar build nova não conta como "em uso" -
+  // a build antiga dele vai sair. Antes a trava de 2 itens iguais rejeitava item
+  // válido por causa dessas builds velhas e gastava mais uma chamada de IA.
+  var buildsPendentesNoLote = [];
+  function comecarLoteDeBuilds(xs) { buildsPendentesNoLote = xs.slice(); }
+  function concluirBuildDoLote(x) { buildsPendentesNoLote = buildsPendentesNoLote.filter(function (p) { return p !== x; }); }
+  function encerrarLoteDeBuilds() { buildsPendentesNoLote = []; }
+  function contaNoTime(x, excludeX) { return x !== excludeX && buildsPendentesNoLote.indexOf(x) === -1; }
+
   function teamMovesInUse(excludeX) {
     var moves = [];
     state.team.forEach(function (x) {
-      if (x === excludeX) return;
+      if (!contaNoTime(x, excludeX)) return;
       var otherSp = getSpeciesByX(x);
       if (!otherSp) return;
       var b = effectiveBuild(otherSp);
@@ -139,7 +149,7 @@
   function itensEmUsoComQuem(excludeX) {
     var usados = {};
     state.team.forEach(function (x) {
-      if (x === excludeX) return;
+      if (!contaNoTime(x, excludeX)) return;
       var otherSp = getSpeciesByX(x);
       if (!otherSp) return;
       var b = effectiveBuild(otherSp);

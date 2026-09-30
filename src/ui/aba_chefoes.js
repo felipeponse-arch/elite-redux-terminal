@@ -210,17 +210,31 @@
   }
   // Guarda o time atual em "Times salvos" (3 vagas): usa uma vaga livre ou a de
   // um "Antes de ..." anterior; nunca apaga um time que o jogador salvou.
-  function guardarTimeAnterior(bossName) {
-    if (!state.team.length) return { salvo: false, snames: [] };
+  // `novo`: snames do time que o botão vai aplicar (fica em slot.depois).
+  var mesmoConjunto = function (a, b) { return !!a && !!b && a.slice().sort().join(",") === b.slice().sort().join(","); };
+  function guardarTimeAnterior(bossName, novo) {
     var snames = xsToSnames(state.team);
     // Primeiro reaproveita a vaga de um "Antes de ..." anterior (achado no teste
     // visual: clicar duas vezes criava dois "Antes de Flannery 1" e gastava as
     // 3 vagas); só então usa uma vaga livre.
     var idx = -1;
     state.savedTeams.forEach(function (t, i) { if (idx === -1 && /^Antes de /.test(t.name || "")) idx = i; });
+    // O time atual é o que o próprio botão montou antes (outro chefão ou o mesmo
+    // de novo): o backup do time do JOGADOR fica como está (revisão de 2026-09-30:
+    // antes ele era sobrescrito pelo time do botão e o time original se perdia).
+    if (idx !== -1 && mesmoConjunto(state.savedTeams[idx].depois, snames)) {
+      acao(["timesSalvos"], function () { state.savedTeams[idx].depois = novo.slice(); });
+      return { salvo: true, snames: state.savedTeams[idx].team.slice() };
+    }
+    // Sem vaga no save, o time de antes só existe na tela: se o atual é o do
+    // botão, o "anterior" continua sendo o de antes dele.
+    var naTela = generatedTeamResult && generatedTeamResult.anterior && generatedTeamResult.chefao &&
+      generatedTeamResult.forTeamKey === teamKeyFor(state.team.map(getSpeciesByX).filter(Boolean));
+    if (naTela && !generatedTeamResult.anterior.salvo) return generatedTeamResult.anterior;
+    if (!state.team.length) return { salvo: false, snames: [] };
     if (idx === -1 && state.savedTeams.length < 3) idx = state.savedTeams.length;
     if (idx === -1) return { salvo: false, snames: snames };
-    acao(["timesSalvos"], function () { state.savedTeams[idx] = { name: "Antes de " + bossName, team: snames }; });
+    acao(["timesSalvos"], function () { state.savedTeams[idx] = { name: "Antes de " + bossName, team: snames, depois: novo.slice() }; });
     return { salvo: true, snames: snames };
   }
   // Plano da luta em texto curto, por Pokémon do chefão, na ordem em que ele entra.
@@ -268,19 +282,9 @@
       // Chefão em dupla (db no dado): a luta é simulada 2 contra 2.
       var r = montarTimeContraChefao(cands, party, nivel, { dupla: !!boss.db });
       if (!r.escolhidos.length) { statusChefao("Não consegui montar um time com os Pokémon que você tem."); return; }
-      // Clicou de novo e o simulador escolheu o MESMO time que já está montado:
-      // não regrava o backup (senão o "Antes de ..." viraria o próprio time do
-      // botão e o time original do jogador se perderia).
-      var mesmoTime = xsToSnames(state.team).slice().sort().join(",") ===
-        r.escolhidos.map(function (e) { return e.sp.sname; }).sort().join(",");
-      var anterior;
-      if (mesmoTime) {
-        var slotAntigo = state.savedTeams.filter(function (t) { return /^Antes de /.test(t.name || ""); })[0];
-        anterior = (generatedTeamResult && generatedTeamResult.anterior) ||
-          (slotAntigo ? { salvo: true, snames: slotAntigo.team.slice() } : { salvo: false, snames: [] });
-      } else {
-        anterior = guardarTimeAnterior(boss.name);
-      }
+      // guardarTimeAnterior reconhece o time que o próprio botão montou (slot.depois)
+      // e nunca troca o backup do time do jogador por ele.
+      var anterior = guardarTimeAnterior(boss.name, r.escolhidos.map(function (e) { return e.sp.sname; }));
       teamRecommendation = { snames: r.escolhidos.map(function (e) { return e.sp.sname; }), reasoning: "Montado pelo simulador de duelo contra " + boss.name + "." };
       if (!applyRecommendedTeam()) { statusChefao("Não consegui aplicar o time - tente de novo."); return; }
       statusChefao("");
@@ -300,6 +304,7 @@
       if (aba) aba.click();
       TELAS.time();
       var ultimoMotivo = "";
+      comecarLoteDeBuilds(members.map(function (m) { return m.x; })); // encerrado no finally
       for (var i = 0; i < members.length; i++) {
         var sp = members[i];
         if (!generatedTeamResult || generatedTeamResult.chefao !== boss.name) return; // outra montagem começou por cima
@@ -309,6 +314,7 @@
           silencioso: true,
           chefao: { boss: boss, party: party, responde: responde[sp.sname] || [], clima: r.clima, estrategia: r.estrategia }
         });
+        concluirBuildDoLote(sp.x);
         // O motivo da falha fica no status até o próximo redesenho - guarda pra
         // mostrar no fim (sem isso o jogador só via "faltou build", sem saber por quê).
         if (ok !== true && ok !== "obsoleta") {
@@ -330,6 +336,7 @@
       statusChefao("Não consegui montar o time - tente de novo.");
     } finally {
       montagemContraChefaoRodando = false;
+      encerrarLoteDeBuilds();
     }
   }
 
