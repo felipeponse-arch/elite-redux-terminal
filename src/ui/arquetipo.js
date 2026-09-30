@@ -308,17 +308,24 @@
     if (!composed || !teamRecommendation) return; // generateTeamForArchetype já deixou o motivo no status
     if (!applyRecommendedTeam()) return; // idem, applyRecommendedTeam já deixou o motivo no status/toast
     var members = state.team.map(getSpeciesByX).filter(Boolean);
+    // Time novo = build nova pra todos (2026-09-29, pedido do usuário): antes quem
+    // já tinha build era pulado e a antiga continuava na tela. Agora a nova vira
+    // a ativa e a antiga fica de variante no chip da ficha (nada se perde).
+    // Todas numa consulta só (lote, 2026-09-30); quem falhar é pedido sozinho.
     comecarLoteDeBuilds(members.map(function (m) { return m.x; }));
     try {
-      for (var i = 0; i < members.length; i++) {
-        var sp = members[i];
-        // Time novo = build nova pra todos (2026-09-29, pedido do usuário): antes quem
-        // já tinha build era pulado e a antiga continuava na tela. Agora a nova vira
-        // a ativa e a antiga fica de variante no chip da ficha (nada se perde).
-        setStatus("Etapa 2/4 - gerando build " + (i + 1) + "/" + members.length + " (" + sp.n + ")...");
-        await generateBuildWithAI(sp, "archetype-status", { timeNovo: true });
-        concluirBuildDoLote(sp.x);
+      // Curada do estilo sem IA (2026-09-30, decisão do usuário: só quando não há
+      // Clima/Tática - a curada não é ajustada a eles).
+      var paraIA = members;
+      if (!weather && !state.archetype.tatica) {
+        paraIA = members.filter(function (sp) {
+          if (!aplicarCuradaNoTimeNovo(sp, pace)) return true;
+          concluirBuildDoLote(sp.x);
+          return false;
+        });
       }
+      await gerarBuildsDoTimeComIA(paraIA, "archetype-status", function () { return { timeNovo: true }; }, {},
+        function (texto) { setStatus("Etapa 2/4 - " + texto.charAt(0).toLowerCase() + texto.slice(1)); });
     } finally {
       encerrarLoteDeBuilds();
     }

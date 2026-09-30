@@ -168,6 +168,11 @@
           // Build que ficou de reserva quando a criatura evoluiu (2026-09-27): o
           // chip mostra "Antes de evoluir" em vez de "IA 2".
           if (typeof b.antesDeEvoluir === "string" && b.antesDeEvoluir) entrada.antesDeEvoluir = b.antesDeEvoluir.slice(0, 40);
+          // Build feita pelo botão "Montar time contra este chefão" (2026-09-30):
+          // pra qual chefão e level cap - clicar de novo não regera à toa.
+          if (b.feitaPara && typeof b.feitaPara.chefao === "string" && typeof b.feitaPara.cap === "number") {
+            entrada.feitaPara = { chefao: b.feitaPara.chefao.slice(0, 60), cap: clampInt(b.feitaPara.cap, 0, 100, 0) };
+          }
           return entrada;
         }).filter(function (b) {
           if (!b) return false;

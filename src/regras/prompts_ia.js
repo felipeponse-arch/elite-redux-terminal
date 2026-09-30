@@ -359,11 +359,23 @@
     if (regraPedra) out += regraPedra.prompt + "\n";
     return out;
   }
+  var comDescricaoIA = function (n) { return "- " + n + ": " + dadoExterno(ITEM_DESC[n] || "sem descricao"); };
+  // Parte do bloco de itens que é da espécie (item exclusivo e regra do item que
+  // se gasta) - no lote de builds do time (2026-09-30) vai dentro de cada espécie.
+  function blocoItensDaEspecieIA(sp) {
+    var daEspecie = itensDeEspeciePara(sp);
+    return (daEspecie.length ? "Exclusivo desta especie:\n<dados_do_jogo>\n" + daEspecie.map(comDescricaoIA).join("\n") + "\n</dados_do_jogo>\n" : "") +
+      regraItemConsumivelPrompt(sp);
+  }
   function blocoItensIA(sp, plural) {
+    return blocoItensComunsIA(plural, blocoItensDaEspecieIA(sp));
+  }
+  // `meio`: o que entra entre a lista de utilidade e as travas (a parte da
+  // espécie no prompt de 1 build; vazio no lote, onde ela vai em cada espécie).
+  function blocoItensComunsIA(plural, meio) {
     var tipo = Object.keys(ITENS_IA_TIPO).filter(function (n) { return ITEMS.indexOf(n) !== -1; })
       .map(function (n) { return n + "=" + ITENS_IA_TIPO[n]; });
-    var comDescricao = function (n) { return "- " + n + ": " + dadoExterno(ITEM_DESC[n] || "sem descricao"); };
-    var daEspecie = itensDeEspeciePara(sp);
+    var comDescricao = comDescricaoIA;
     return "Itens de batalha reais disponiveis - " + (plural ? "cada set escolhe UM (ou deixa vazio)" : "escolha UM (ou deixe vazio se nenhum fizer sentido)") +
       ", nenhum fora destes grupos:\n" +
       "Gerais: " + ITENS_IA_GERAIS.join(", ") + "\n" +
@@ -380,8 +392,7 @@
       // Root) - não reabrir esse corte.
       "Utilidade (efeito deste jogo - leia, nao assuma pelo nome; pedra de clima so se a especie arma aquele clima):\n<dados_do_jogo>\n" +
       ITENS_IA_UTILIDADE.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" +
-      (daEspecie.length ? "Exclusivo desta especie:\n<dados_do_jogo>\n" + daEspecie.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" : "") +
-      regraItemConsumivelPrompt(sp) +
+      meio +
       // Item que reforça + travas (2026-09-27; travas pela descrição do jogo,
       // conferidas em conflitoDeItem, validacao_build_ia.js).
       "ITEM x BUILD: o item precisa reforcar o papel, a habilidade ou os golpes escolhidos - diga na rationale o que ele reforca. " +
@@ -493,13 +504,23 @@
       });
       if (fecha.length) linhas.push("  Golpes do time que fechariam esses buracos: " + fecha.join("; ") + ".");
     }
-    var cand = chefao ? null : bestBoxCandidateForBoss(boss);
+    var cand = chefao || !sp ? null : bestBoxCandidateForBoss(boss); // sem sp: parte comum do lote
     if (cand && cand.sp.sname === sp.sname) {
       linhas.push("  O app sugere ESTA especie pra essa luta: " + (cand.reasonMult === 0 ? "imune a " : "resiste bem a ") + cand.reasonType + ".");
     }
     return linhas;
   }
   function blocoContextoIA(sp, chefao) {
+    return envelopeContextoIA(linhasContextoDaEspecieIA(sp).concat(linhasContextoComumIA(sp, chefao)));
+  }
+  function envelopeContextoIA(linhas) {
+    return "CONTEXTO JA CALCULADO PELO APP (dado real do jogo e do seu progresso - use direto; nesta consulta nao ha ferramentas):\n" +
+      "<dados_do_jogo>\n" + linhas.join("\n") + "\n</dados_do_jogo>\n";
+  }
+  // Contexto em duas partes (2026-09-30, lote de builds do time): o que é da
+  // espécie (rank, sinergia, velocidade) e o que é igual pro time todo (chefões
+  // que faltam, time da próxima luta) - no lote, a parte comum vai uma vez só.
+  function linhasContextoDaEspecieIA(sp) {
     var linhas = [];
     var rank = SPECIES_RANK[sp.sname];
     if (rank) linhas.push("Rank desta especie neste hack: tier " + rank.tier + " (pontuacao " + rank.score + ").");
@@ -518,6 +539,11 @@
     }
     var vel = linhaVelocidadeIA(sp);
     if (vel) linhas.push(vel);
+    return linhas;
+  }
+  // `sp` opcional: com ele, entra a linha "o app sugere ESTA espécie" da próxima luta.
+  function linhasContextoComumIA(sp, chefao) {
+    var linhas = [];
     var faltam = getRemainingBossEntries();
     if (faltam.length) {
       var contagem = {};
@@ -530,11 +556,11 @@
       linhas.push("Chefoes que faltam: " + faltam.map(function (b) { return b.name; }).join(", ") + ". Tipos mais comuns neles: " +
         Object.keys(contagem).sort(function (a, b) { return contagem[b] - contagem[a]; }).slice(0, 6).join(", ") + ".");
     }
-    linhas = linhas.concat(linhasProximaLutaIA(sp, chefao));
-    return "CONTEXTO JA CALCULADO PELO APP (dado real do jogo e do seu progresso - use direto; nesta consulta nao ha ferramentas):\n" +
-      "<dados_do_jogo>\n" + linhas.join("\n") + "\n</dados_do_jogo>\n";
+    return linhas.concat(linhasProximaLutaIA(sp, chefao));
   }
 
+  // Formato JSON de uma build (o mesmo no prompt individual e no lote).
+  var FORMATO_BUILD_IA = '{"papel":"Tanque|Pivô|Wallbreaker|Sweeper","ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"plano":{"golpe de agora":"golpe futuro"},"rationale":"..."}';
   // Prompt da build de UM membro (botão "Gerar com IA", revisão pós-evolução,
   // golpe-ponte da curada). Texto e dados só - quem pede é pedirIA().
   function montarPromptBuild(sp, opts) {
@@ -558,9 +584,21 @@
       blocoContextoIA(sp, opts.chefao) +
       contextoDoModoPrompt(sp, opts, cap) +
       planoPromptBlock(sp, cap) +
-      // Ordem de decisão (2026-09-27, revisão do prompt: antes era uma lista de
-      // "use também a ferramenta X" sem ordem; o papel só aparecia no fim).
-      "ORDEM DE DECISAO - siga nesta ordem:\n" +
+      textoOrdemDeDecisaoIA(archetypeParts) +
+      "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " + FORMATO_BUILD_IA +
+      textoRegrasDoFormatoIA(archetypeParts);
+  }
+  function textoRegrasDoFormatoIA(archetypeParts) {
+    return ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
+      "evs sao 6 numeros inteiros de 0 a 252, somando no maximo 510. " +
+      "rationale e 1-2 frases curtas em portugues: o papel e como habilidade, golpes e item servem a ele, com base no time/rank/momento do jogo" +
+      (archetypeParts.length ? "/Estilo, Clima e campo ou Tatica do time" : "") + ". " +
+      "Nao invente golpes, habilidades ou items fora do que foi listado.";
+  }
+  // Ordem de decisão (2026-09-27, revisão do prompt: antes era uma lista de
+  // "use também a ferramenta X" sem ordem; o papel só aparecia no fim).
+  function textoOrdemDeDecisaoIA(archetypeParts) {
+    return "ORDEM DE DECISAO - siga nesta ordem:\n" +
       "1. PAPEL: escolha o papel (Tanque, Pivô, Wallbreaker, Sweeper) pelo papel natural acima, pelo que o time precisa (fraquezas do time e rank desta especie acima) e pelos chefoes que faltam" +
       (archetypeParts.length ? " - SEMPRE alinhado ao Estilo/Clima e campo/Tatica/Monotype do time informado acima, isso pesa mais que qualquer outra consideracao" : "") + ".\n" +
       "2. HABILIDADE e SINERGIA: leia o efeito de cada habilidade e innate acima e escolha a habilidade que, somada as innates, mais reforca o papel; depois os golpes devem ATIVAR o maximo dessas habilidades (nao so uma). " +
@@ -571,14 +609,59 @@
       "Proxima luta (CONTEXTO): quando um golpe responder a uma ameaca concreta dela, prefira e cite o chefao na rationale.\n" +
       "4. ITEM: o que mais reforca o papel/habilidade/golpes, respeitando as regras de item acima.\n" +
       "5. NATURE e EVs: seguem o papel (tabela acima). Decida EV de Velocidade pelos numeros de Velocidade do CONTEXTO - nao chute se 252 e rapido o bastante; se ja e rapida o suficiente, invista o resto em bulk/ataque.\n" +
-      "6. TIME: confira que a build nao repete golpe/papel do time sem motivo (item pode repetir) e cobre alguma fraqueza dele.\n" +
+      "6. TIME: confira que a build nao repete golpe/papel do time sem motivo (item pode repetir) e cobre alguma fraqueza dele.\n";
+  }
+
+  // Lote de builds do time (2026-09-30, decisão do usuário na reunião de
+  // alinhamento: "sim, uma chamada pro time"). As 6 builds numa consulta só: o que
+  // é igual pro time (regras, itens, chefões, ordem de decisão, formato) vai UMA
+  // vez; cada espécie leva só o que é dela. Medido: ~20 mil caracteres por build
+  // individual, ~8-10 mil deles iguais entre espécies.
+  // opts: { chefao: { boss, party, clima, estrategia }, responde: { sname: [nomes] } }.
+  function montarPromptBuildsDoTime(members, opts) {
+    opts = opts || {};
+    var cap = getCurrentCap();
+    var archetypeParts = archetypeBuildGuidance();
+    var c = opts.chefao;
+    var objetivo = c
+      ? "OBJETIVO DESTE TIME: vencer " + dadoExterno(c.boss.name) + " (time dele no CONTEXTO). O time foi escolhido pelo simulador de duelo do app; " +
+        "abaixo, em cada Pokemon, os Pokemon do chefao a que ele responde - golpes, item e EVs precisam vencer ESSES duelos" +
+        (c.estrategia
+          ? ". ESTRATEGIA DO TIME: " + dadoExterno(c.estrategia.armador) + " arma " + (NOME_DA_CONDICAO[c.estrategia.clima] || c.estrategia.clima) +
+            " ao entrar (" + dadoExterno(c.estrategia.habilidade) + ")" +
+            (c.estrategia.aproveitam.length ? " e " + c.estrategia.aproveitam.map(dadoExterno).join(", ") + " jogam nesse clima" : "") + " - aproveite habilidades e golpes que rendem nele"
+          : (c.clima ? ". O chefao arma " + (c.clima === "sol" ? "sol (golpes Fire mais fortes)" : "chuva (golpes Water mais fortes)") + " - leve isso em conta" : "")) +
+        ". Cite o chefao e os Pokemon dele na rationale.\n"
+      : "";
+    var especies = members.map(function (sp, i) {
+      var resp = (opts.responde && opts.responde[sp.sname]) || [];
+      return "=== POKEMON " + (i + 1) + " de " + members.length + ": " + sp.n + " (chave \"" + sp.sname + "\") ===\n" +
+        blocoEspecieIA(sp, false) +
+        blocoMovepoolIA(sp, false) +
+        blocoPapelIA(sp, false, true) +
+        blocoCondicoesIA(sp) +
+        blocoManualIA(sp) +
+        blocoMegaIA(sp, false) +
+        blocoItensDaEspecieIA(sp) +
+        envelopeContextoIA(linhasContextoDaEspecieIA(sp)) +
+        (c && resp.length ? "Este Pokemon e a resposta do time para: " + resp.map(dadoExterno).join(", ") + ".\n" : "") +
+        planoPromptBlock(sp, cap);
+    }).join("");
+    return cabecalhoIA() +
+      "Monte um set competitivo, formato Pokemon Showdown, para CADA um dos " + members.length + " Pokemon deste time (build " + versaoDosDados() + "). " +
+      "Eles jogam JUNTOS: varie papeis e golpes entre eles, cubra as fraquezas uns dos outros e no MAXIMO " + MAX_MESMO_ITEM_NO_TIME +
+      " do time com o mesmo item. Primeiro o que vale pro time todo; depois, os dados de cada Pokemon.\n" +
+      blocoRegrasDePapelIA() +
+      blocoItensComunsIA(false, "") +
+      (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
+      (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
+      envelopeContextoIA(linhasContextoComumIA(null, c)) +
+      objetivo +
+      especies +
+      textoOrdemDeDecisaoIA(archetypeParts) + "Faca isso para CADA Pokemon.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
-      '{"papel":"Tanque|Pivô|Wallbreaker|Sweeper","ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"plano":{"golpe de agora":"golpe futuro"},"rationale":"..."}' +
-      ". nature precisa ser uma nature real de Pokemon (ex: Adamant, Modest, Jolly, Timid). " +
-      "evs sao 6 numeros inteiros de 0 a 252, somando no maximo 510. " +
-      "rationale e 1-2 frases curtas em portugues: o papel e como habilidade, golpes e item servem a ele, com base no time/rank/momento do jogo" +
-      (archetypeParts.length ? "/Estilo, Clima e campo ou Tatica do time" : "") + ". " +
-      "Nao invente golpes, habilidades ou items fora do que foi listado.";
+      '{"builds":{"CHAVE_DO_POKEMON":' + FORMATO_BUILD_IA + ', ...}} - uma entrada por Pokemon, usando a chave dada no titulo de cada um' +
+      textoRegrasDoFormatoIA(archetypeParts);
   }
 
   // Prompt das Estratégias (2 a 3 sets de papéis diferentes da espécie).

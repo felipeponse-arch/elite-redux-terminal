@@ -2,9 +2,15 @@
 // defeito de tests/unit/mutacoes.mjs, um por vez e só na memória, e exige que
 // os testes unitários FALHEM. Sabotagem que "sobrevive" = regra sem proteção.
 //   npm run test:sabotage
+//   node tests/run_sabotage.mjs lote- clima-   (só as que começam com esses nomes)
+// O filtro (2026-09-30) é pra conferir sabotagem nova sem rodar as 118 - o
+// usuário achou a rodada inteira demorada; a revisão completa fica pra depois.
 import { spawnSync } from "node:child_process";
 import { readdirSync } from "node:fs";
-import { MUTACOES } from "./unit/mutacoes.mjs";
+import { MUTACOES as TODAS } from "./unit/mutacoes.mjs";
+
+const FILTROS = process.argv.slice(2);
+const MUTACOES = FILTROS.length ? TODAS.filter((m) => FILTROS.some((f) => m.id.startsWith(f))) : TODAS;
 
 // Todo arquivo *.test.mjs da pasta, igual ao npm run test:unit - antes era uma
 // lista fixa, e um arquivo de teste novo ficava fora da sabotagem sem aviso.

@@ -77,6 +77,13 @@ async function section20() {
           if (prompt.indexOf("Monte o MELHOR time possível") !== -1) {
             return { team: [fx1.sp.sname, fx2.sp.sname], reasoning: "Mock: dupla de teste automatizado." };
           }
+          // Lote (2026-09-30): as builds do time numa consulta só, por chave de espécie.
+          if (prompt.indexOf("para CADA um dos") !== -1) {
+            var builds = {};
+            builds[fx1.sp.sname] = buildValidaPara(fx1);
+            builds[fx2.sp.sname] = buildValidaPara(fx2);
+            return { builds: builds };
+          }
           if (prompt.indexOf("Monte um set competitivo") !== -1) {
             var alvo = prompt.indexOf("para o Pokemon " + fx1.sp.n + " ") !== -1 ? fx1 : fx2;
             return buildValidaPara(alvo);
@@ -114,24 +121,27 @@ async function section20() {
   // O card foi redesenhado ao escolher o Estilo: busca o botão de novo (o
   // ouvinte é delegado ao painel, um nó desanexado não recebe mais o clique).
   document.getElementById("archetype-build-complete").click();
-  await pollUntil(function () { return estagios.length >= 4; }, 4000);
+  await pollUntil(function () { return estagios.length >= 3; }, 4000);
   await wait(150);
 
-  check("o pipeline chama IA nas 3 etapas esperadas, na ordem certa (composição, build x2, guia)",
-    estagios.length === 4 &&
+  // Lote (2026-09-30): as 2 builds numa consulta só - 3 chamadas no total, não 4.
+  check("o pipeline chama IA nas 3 etapas, na ordem certa (composição, builds do time numa consulta só, guia)",
+    estagios.length === 3 &&
     estagios[0].indexOf("Monte o MELHOR time possível") !== -1 &&
-    estagios[1].indexOf("Monte um set competitivo") !== -1 &&
-    estagios[2].indexOf("Monte um set competitivo") !== -1 &&
-    estagios[3].indexOf("Escreva um guia PRÁTICO") !== -1,
+    estagios[1].indexOf("para CADA um dos 2 Pokemon") !== -1 &&
+    estagios[1].indexOf(fx1.sp.sname) !== -1 && estagios[1].indexOf(fx2.sp.sname) !== -1 &&
+    estagios[2].indexOf("Escreva um guia PRÁTICO") !== -1,
     estagios.map(function (p) { return p.slice(0, 30); }));
+  check("no lote, as regras de item vão UMA vez (não uma por Pokémon)",
+    estagios[1] && estagios[1].split("Itens de batalha reais disponiveis").length === 2, estagios[1] && estagios[1].split("Itens de batalha reais disponiveis").length - 1);
 
   // ---- referência do Smogon (thread de sample teams, 2026-09-18): o
   // "threats" do guia agora exige citar um CHEFÃO REAL (getRemainingBosses),
   // não só "tipo X genérico" - mesma lição da descrição de time de lá
   // (nomeia a ameaça de verdade, não uma categoria vaga). ----
   check("o prompt do guia de uso agora exige citar um chefão/líder REAL (getRemainingBosses), não só 'tipo genérico'",
-    estagios[3].indexOf("chefão ou líder de ginásio REAL") !== -1 && estagios[3].indexOf("getRemainingBosses") !== -1,
-    estagios[3].slice(0, 400));
+    estagios[2].indexOf("chefão ou líder de ginásio REAL") !== -1 && estagios[2].indexOf("getRemainingBosses") !== -1,
+    estagios[2].slice(0, 400));
 
   var saveDepois = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
   check("o time foi aplicado sozinho, sem precisar clicar em \"Usar este time\" à parte",
@@ -180,10 +190,10 @@ async function section20() {
   var antesDoNovo = [fx1, fx2].map(function (fx) { return T.getBuildList(fx.sp.sname).length; });
   estagios.length = 0;
   document.getElementById("archetype-build-complete").click();
-  await pollUntil(function () { return estagios.length >= 4; }, 4000);
+  await pollUntil(function () { return estagios.length >= 3; }, 4000);
   await wait(150);
-  check("gerar o time de novo pede build nova até pra quem já tinha build (2 pedidos de build)",
-    estagios.filter(function (p) { return p.indexOf("Monte um set competitivo") !== -1; }).length === 2,
+  check("gerar o time de novo pede build nova até pra quem já tinha build (as 2 no lote)",
+    estagios.filter(function (p) { return p.indexOf("para CADA um dos 2 Pokemon") !== -1; }).length === 1,
     estagios.map(function (p) { return p.slice(0, 30); }));
   var listas = [fx1, fx2].map(function (fx) { return T.getBuildList(fx.sp.sname); });
   check("a build nova vira a ativa (a da tela) e a antiga fica de variante",
@@ -198,12 +208,34 @@ async function section20() {
   T.state.customBuilds[fx1.sp.sname][0].active = true;
   estagios.length = 0;
   document.getElementById("archetype-build-complete").click();
-  await pollUntil(function () { return estagios.length >= 4; }, 4000);
+  await pollUntil(function () { return estagios.length >= 3; }, 4000);
   await wait(150);
   var listaManual = T.getBuildList(fx1.sp.sname);
   check("time novo não apaga build feita à mão (3 manuais continuam, a da IA é recusada)",
     listaManual.length === 3 && listaManual.every(function (b) { return b.source === "manual"; }),
     listaManual.map(function (b) { return b.source + "/" + b.nature; }));
+  check("sem vaga pra build nova, não repete o pedido sozinho (3 chamadas: composição, lote, guia)",
+    estagios.length === 3, estagios.map(function (p) { return p.slice(0, 30); }));
+
+  // ---- Curada do estilo sem IA (2026-09-30, decisão do usuário: só sem Clima/
+  // Tática): fx2 ganha curada ofensiva (o time está em Hyper Offense) e entra sem
+  // consultar a IA; só fx1 vai pra IA, sozinho. ----
+  T.state.customBuilds[fx1.sp.sname] = [];
+  T.BUILDS[fx2.sp.sname] = { estilo: "ofensivo", ability: fx2.abi, nature: "Jolly", evs: "252 Atk / 4 SpD / 252 Spe", item: "", moves: fx2.moves.slice(), fonte: "teste" };
+  try {
+    estagios.length = 0;
+    document.getElementById("archetype-build-complete").click();
+    await pollUntil(function () { return estagios.length >= 3; }, 4000);
+    await wait(150);
+    var ativaFx2 = T.getActiveBuild(fx2.sp.sname);
+    check("com curada do estilo, o membro entra com ela, sem consultar a IA",
+      !!ativaFx2 && ativaFx2.source === "curada" && estagios.every(function (p) { return p.indexOf('(chave "' + fx2.sp.sname + '")') === -1 && p.indexOf("para o Pokemon " + fx2.sp.n + " ") === -1; }),
+      { fonte: ativaFx2 && ativaFx2.source, chamadas: estagios.map(function (p) { return p.slice(0, 40); }) });
+    check("o outro membro vai pra IA sozinho (composição, 1 build, guia)",
+      estagios.length === 3 && estagios[1].indexOf("para o Pokemon " + fx1.sp.n + " ") !== -1, estagios.map(function (p) { return p.slice(0, 40); }));
+  } finally {
+    delete T.BUILDS[fx2.sp.sname];
+  }
 
   // ---- P2: Monotype filtra o roster deterministicamente (não confia na IA) ----
   // O time já é só [fx1, fx2] a esta altura (resultado do pipeline acima) -

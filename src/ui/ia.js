@@ -482,6 +482,126 @@
     });
   }
 
+  // Depois de validada: confere se a resposta ainda vale, ajusta, anexa o plano e
+  // grava. Tirada de generateBuildWithAI (2026-09-30) pra servir também ao lote de
+  // builds do time. Devolve true, false ou "obsoleta".
+  function gravarBuildValidadaDaIa(sp, validated, raw, opts, cap, aviso) {
+    // A IA leva de segundos a minutos. Nos modos automáticos, se o mundo mudou
+    // nesse meio-tempo (o jogador editou/criou a build, a criatura saiu do time
+    // ou voltou de forma), a resposta é descartada - nunca passa por cima de
+    // uma escolha feita enquanto esperava. "obsoleta" não conta como falha.
+    if (opts.modo === "revisao" && (getActiveBuild(sp.sname) !== opts.anterior || state.team.indexOf(sp.x) === -1)) return "obsoleta";
+    if (opts.modo === "ponte" && (getActiveBuild(sp.sname) || state.team.indexOf(sp.x) === -1)) return "obsoleta";
+    if ((opts.chefao || opts.timeNovo) && state.team.indexOf(sp.x) === -1) return "obsoleta"; // saiu do time enquanto esperava
+    ajustarBuildDaIa(sp, validated, opts, cap);
+    var planoCheck = anexarPlanoDaIa(sp, validated, raw && raw.plano, cap,
+      opts.modo === "ponte" && opts.alvo ? opts.alvo.moves : null);
+    validated.planoConsultado = true; // o prompt já pediu o plano - não pedir de novo
+    if (opts.chefao) validated.feitaPara = { chefao: opts.chefao.boss.name, cap: cap || 0 }; // clicar de novo não regera à toa
+    var ok = salvarBuildDaIa(sp, validated, opts, cap);
+    if (!ok) {
+      aviso((opts.chefao || opts.timeNovo)
+        ? "Limite de 3 builds de " + sp.n + " com builds feitas por você - apague uma na ficha pra caber a nova."
+        : "Limite de 3 builds atingido.");
+      return false;
+    }
+    if (!opts.silencioso) {
+      flashToast("Build gerada por IA salva para " + sp.n +
+        (validated.plano ? " - com " + Object.keys(validated.plano).length + " troca(s) planejada(s) para quando o cap subir" : ""));
+    }
+    if (planoCheck.descartados.length) {
+      aviso("Trocas do plano descartadas: " + planoCheck.descartados.map(function (d) { return d.motivo; }).join("; ") + ".");
+    }
+    // A ação acima já redesenhou a ficha (só se for desta espécie - nunca
+    // puxa o jogador de volta pra ela, bug de 2026-09-11) e o card do time.
+    return true;
+  }
+
+  // Curada no lugar da IA no time novo (2026-09-30, decisão do usuário: "só quando
+  // não houver Clima/Tática"). Entra se: há curada do estilo do time, todos os
+  // golpes dela já estão liberados no level cap, o item não passa de 2 no time e há
+  // vaga sem tirar build feita à mão. Devolve true se aplicou (sem chamada de IA).
+  function aplicarCuradaNoTimeNovo(sp, pace) {
+    var cur = curadaParaEstilo(sp.sname, estiloDoRitmo(pace), true);
+    if (!cur || golpesTravadosNoCap(sp, cur.moves).some(function (g) { return g.nivel !== null; })) return false;
+    var item = stripNote(cur.item);
+    if (item && (itensEmUsoComQuem(sp.x)[item] || []).length >= MAX_MESMO_ITEM_NO_TIME) return false;
+    var lista = getBuildList(sp.sname);
+    if (lista.length >= 3 && lista.every(function (b) { return b.source === "manual"; })) return false;
+    var entrada = { ability: cur.ability, nature: cur.nature, item: cur.item, moves: cur.moves.slice(), planoConsultado: true,
+      ivs: [31, 31, 31, 31, 31, 31], evs: evsTextoParaArray(cur.evs), rationale: "Build curada de " + sp.n + " (" + (cur.fonte || "curadoria") + "), no estilo do time." };
+    if (cur.plano) entrada.plano = cur.plano;
+    return acao(telasDeBuild(sp.sname).concat(["log"]), function () {
+      abrirVagaPreservando(sp.sname, getActiveBuild(sp.sname), true);
+      var ok = addBuildVariant(sp.sname, entrada, "curada");
+      if (!ok && (getActiveBuild(sp.sname) || {}).source !== "manual") ok = setOrReplaceActiveBuild(sp.sname, entrada, "curada");
+      if (ok) logAutoAction("Build curada de " + sp.n + " usada no time novo (sem consultar a IA): " + entrada.moves.join(", ") + ".");
+      return !!ok;
+    });
+  }
+
+  // Lote de builds do time (2026-09-30, decisão do usuário: "sim, uma chamada pro
+  // time"): UMA consulta pras builds de todos os membros (montarPromptBuildsDoTime,
+  // ~37% menos texto que 6 consultas e um pedido só). Cada build da resposta passa
+  // pela MESMA validação da build individual e é gravada na hora (a trava de 2
+  // itens iguais já enxerga as gravadas); só quem ficou sem build válida é pedido
+  // de novo, sozinho, pelo caminho individual (generateBuildWithAI).
+  // `opts`: o de cada membro vem de optsDe(sp) (chefão: quem ele responde).
+  // Devolve { [sname]: true | false | "obsoleta" }.
+  async function gerarBuildsDoTimeComIA(members, statusElId, optsDe, optsLote, aoProgresso) {
+    var resultado = {};
+    var cap = getCurrentCap();
+    var aviso = function (texto) { var el = document.getElementById(statusElId); if (el) el.textContent = texto; };
+    var progresso = aoProgresso || function () {};
+    var faltam = members.slice();
+    if (members.length > 1) {
+      progresso("Gerando as " + members.length + " builds numa consulta só...");
+      var resp = await pedirIA({
+        prompt: montarPromptBuildsDoTime(members, optsLote),
+        ferramentas: false,
+        tentativas: 1, // quem falhar vai pelo caminho individual (com a nova tentativa dele)
+        oQue: "Builds do time",
+        aviso: aviso,
+        validar: function (bruto) {
+          return bruto && bruto.builds && typeof bruto.builds === "object" ? { valor: bruto.builds } : { motivo: "a resposta não trouxe o campo builds." };
+        }
+      });
+      aviso("");
+      if (resp.ok) {
+        faltam = [];
+        members.forEach(function (sp) {
+          var bruto = resp.valor[sp.sname] || resp.valor[sp.n];
+          var v = bruto ? validateAiBuild(sp, bruto, {}) : null;
+          var r = v ? gravarBuildValidadaDaIa(sp, v, bruto, optsDe(sp), cap, aviso) : false;
+          // Só sai do lote quem ganhou build: quem vai ser pedido de novo continua
+          // fora da conta de itens em uso (a build velha dele ainda vai sair).
+          if (r === false) faltam.push(sp); else { resultado[sp.sname] = r; concluirBuildDoLote(sp.x); }
+        });
+      }
+    }
+    // Sem vaga (3 builds, todas feitas pelo jogador): pedir de novo só gastaria
+    // outra chamada - a build nova não teria onde ficar.
+    var semVaga = function (s) { var l = getBuildList(s.sname); return l.length >= 3 && l.every(function (b) { return b.source === "manual"; }); };
+    faltam = faltam.filter(function (s) {
+      if (!semVaga(s)) return true;
+      resultado[s.sname] = false;
+      resultado.ultimoMotivo = "Limite de 3 builds de " + s.n + " com builds feitas por você - apague uma na ficha pra caber a nova.";
+      concluirBuildDoLote(s.x);
+      return false;
+    });
+    for (var i = 0; i < faltam.length; i++) {
+      var sp = faltam[i];
+      progresso("Build " + (members.length - faltam.length + i + 1) + "/" + members.length + ": " + sp.n + " (sozinha)...");
+      resultado[sp.sname] = await generateBuildWithAI(sp, statusElId, optsDe(sp));
+      concluirBuildDoLote(sp.x);
+      // O motivo da falha fica no status só até o próximo redesenho - guarda pra
+      // quem chamou mostrar no fim (sem isso o jogador só via "faltou build").
+      var elMotivo = document.getElementById(statusElId);
+      if (resultado[sp.sname] === false && elMotivo && elMotivo.textContent) resultado.ultimoMotivo = elMotivo.textContent;
+    }
+    return resultado;
+  }
+
   // Modos (opts.modo): normal (botão "Gerar com IA": sempre uma build NOVA, nunca
   // uma do banco - é o que o jogador pediu); "revisao" (a criatura acabou de
   // evoluir; opts.anterior = build da forma anterior, a nova substitui a ativa);
@@ -526,35 +646,7 @@
         return false;
       }
       aviso(""); // o relógio "Consultando o Claude... N s" não fica na tela depois de salvar
-      var validated = resp.valor, raw = resp.bruto;
-      // A IA leva de segundos a minutos. Nos modos automáticos, se o mundo mudou
-      // nesse meio-tempo (o jogador editou/criou a build, a criatura saiu do time
-      // ou voltou de forma), a resposta é descartada - nunca passa por cima de
-      // uma escolha feita enquanto esperava. "obsoleta" não conta como falha.
-      if (opts.modo === "revisao" && (getActiveBuild(sp.sname) !== opts.anterior || state.team.indexOf(sp.x) === -1)) return "obsoleta";
-      if (opts.modo === "ponte" && (getActiveBuild(sp.sname) || state.team.indexOf(sp.x) === -1)) return "obsoleta";
-      if ((opts.chefao || opts.timeNovo) && state.team.indexOf(sp.x) === -1) return "obsoleta"; // saiu do time enquanto esperava
-      ajustarBuildDaIa(sp, validated, opts, cap);
-      var planoCheck = anexarPlanoDaIa(sp, validated, raw && raw.plano, cap,
-        opts.modo === "ponte" && opts.alvo ? opts.alvo.moves : null);
-      validated.planoConsultado = true; // o prompt já pediu o plano - não pedir de novo
-      var ok = salvarBuildDaIa(sp, validated, opts, cap);
-      if (!ok) {
-        aviso((opts.chefao || opts.timeNovo)
-          ? "Limite de 3 builds de " + sp.n + " com builds feitas por você - apague uma na ficha pra caber a nova."
-          : "Limite de 3 builds atingido.");
-        return false;
-      }
-      if (!opts.silencioso) {
-        flashToast("Build gerada por IA salva para " + sp.n +
-          (validated.plano ? " - com " + Object.keys(validated.plano).length + " troca(s) planejada(s) para quando o cap subir" : ""));
-      }
-      if (planoCheck.descartados.length && statusEl) {
-        statusEl.textContent = "Trocas do plano descartadas: " + planoCheck.descartados.map(function (d) { return d.motivo; }).join("; ") + ".";
-      }
-      // A ação acima já redesenhou a ficha (só se for desta espécie - nunca
-      // puxa o jogador de volta pra ela, bug de 2026-09-11) e o card do time.
-      return true;
+      return gravarBuildValidadaDaIa(sp, resp.valor, resp.bruto, opts, cap, aviso);
     } catch (e) {
       // Erro no app (não da IA - esses o pedirIA já trata) ao aplicar a resposta.
       if (typeof console !== "undefined") console.error(e);

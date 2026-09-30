@@ -33,6 +33,7 @@
     // editar natureza/EV/item sem mexer nos golpes não pede de novo.
     var mesmosGolpes = !!substituida && (substituida.moves || []).slice().sort().join("|") === (build.moves || []).slice().sort().join("|");
     if (build.planoConsultado || (mesmosGolpes && substituida.planoConsultado)) e.planoConsultado = true;
+    if (build.feitaPara) e.feitaPara = { chefao: build.feitaPara.chefao, cap: build.feitaPara.cap }; // botão do chefão (2026-09-30)
     if (!plano && !e.planoConsultado && (e.source !== "ia" || build.pedirPlano)) {
       var sp = getSpeciesBySname(sname);
       if (sp && golpesFuturosDe(sp, getCurrentCap()).length) { e.revisar = "plano"; e.tentativasRevisao = 0; }

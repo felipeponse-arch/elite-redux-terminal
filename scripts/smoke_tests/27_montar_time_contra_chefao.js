@@ -57,7 +57,7 @@ async function section27() {
     check("o cartão mostra a luta simulada inteira, passo a passo", !!card && /Luta simulada inteira/.test(card.textContent) && passos.length >= 1,
       [].map.call(passos, function (li) { return li.textContent.slice(0, 60); }));
     check("pediu uma build por membro, mirando a Flannery 1",
-      prompts.length >= time.length && prompts.every(function (p) { return /OBJETIVO DESTA BUILD: vencer Flannery 1/.test(p); }), prompts.length);
+      prompts.length >= time.length && prompts.every(function (p) { return /OBJETIVO DEST[AE] (BUILD|TIME): vencer Flannery 1/.test(p); }), prompts.length);
     check("build recusada vira aviso de 'faltou build', sem travar o fluxo",
       /^Faltou build/.test(document.getElementById("chefao-build-status").textContent), document.getElementById("chefao-build-status").textContent);
     // Clicar de novo não cria um segundo "Antes de ..." (reaproveita a vaga).
@@ -71,6 +71,26 @@ async function section27() {
     }
     check("clicar de novo reaproveita a vaga do 'Antes de ...' (não gasta outra das 3)",
       T.state.savedTeams.filter(function (t) { return /^Antes de /.test(t.name); }).length === 1, T.state.savedTeams.map(function (t) { return t.name; }));
+    // Economia de IA (2026-09-30): quem já tem build ativa feita pra este chefão
+    // neste level cap não pede build de novo ao clicar outra vez.
+    var capAgora = T.getCurrentCap() || 0;
+    T.state.team.forEach(function (x) {
+      var spT = T.getSpeciesByX(x);
+      T.state.customBuilds[spT.sname] = [{ ability: "", nature: "Hardy", item: "", moves: ["Tackle"], evs: [0, 0, 0, 0, 0, 0], ivs: [31, 31, 31, 31, 31, 31],
+        source: "ia", active: true, savedAt: "2026-09-30", rationale: "", feitaPara: { chefao: "Flannery 1", cap: capAgora } }];
+    });
+    var pedidosAntes = prompts.length;
+    document.querySelector('.tab-btn[data-tab="bosses"]').click();
+    await wait(50);
+    document.getElementById("boss-montar-time").click();
+    for (var m = 0; m < 300; m++) {
+      await wait(50);
+      var stM = document.getElementById("chefao-build-status");
+      if (stM && /Mantidas/.test(stM.textContent)) break;
+    }
+    check("clicar de novo com builds já feitas pra este chefão não pede nenhuma build à IA",
+      prompts.length === pedidosAntes && /Mantidas as builds que já eram contra Flannery 1/.test((document.getElementById("chefao-build-status") || {}).textContent || ""),
+      { pedidos: prompts.length - pedidosAntes, status: (document.getElementById("chefao-build-status") || {}).textContent });
     // Segundo chefão (revisão de 2026-09-30): montar contra outro chefão com o time
     // do botão na tela NÃO pode trocar o backup do time do jogador pelo do botão.
     var snamesAntes = timeAntes.map(function (x) { return T.getSpeciesByX(x).sname; }).sort().join(",");

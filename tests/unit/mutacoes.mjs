@@ -821,4 +821,18 @@ export const MUTACOES = [
     de: "return x !== excludeX && buildsPendentesNoLote.indexOf(x) === -1;",
     para: "return x !== excludeX;",
   },
+  {
+    id: "lote-sem-item-da-especie",
+    descricao: "no lote de builds, o item exclusivo da espécie some do bloco dela",
+    arquivo: "prompts_ia.js",
+    de: "        blocoItensDaEspecieIA(sp) +\n        envelopeContextoIA(linhasContextoDaEspecieIA(sp)) +",
+    para: "        envelopeContextoIA(linhasContextoDaEspecieIA(sp)) +",
+  },
+  {
+    id: "lote-sem-quem-responde",
+    descricao: "no lote contra o chefão, cada Pokémon deixa de saber a quem responde",
+    arquivo: "prompts_ia.js",
+    de: "(c && resp.length ? \"Este Pokemon e a resposta do time para: \"",
+    para: "(false ? \"Este Pokemon e a resposta do time para: \"",
+  },
 ];

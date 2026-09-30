@@ -303,31 +303,34 @@
       var aba = document.querySelector('.tab-btn[data-tab="team"]');
       if (aba) aba.click();
       TELAS.time();
-      var ultimoMotivo = "";
+      // Economia de IA (2026-09-30): quem já tem build ativa feita pra ESTE chefão
+      // neste level cap fica com ela - clicar de novo não pede as mesmas builds.
+      var capAgora = getCurrentCap() || 0;
+      var jaFeitas = members.filter(function (sp) {
+        var b = getActiveBuild(sp.sname);
+        return !!b && !!b.feitaPara && b.feitaPara.chefao === boss.name && b.feitaPara.cap === capAgora;
+      });
+      members = members.filter(function (sp) { return jaFeitas.indexOf(sp) === -1; });
       comecarLoteDeBuilds(members.map(function (m) { return m.x; })); // encerrado no finally
-      for (var i = 0; i < members.length; i++) {
-        var sp = members[i];
-        if (!generatedTeamResult || generatedTeamResult.chefao !== boss.name) return; // outra montagem começou por cima
-        generatedTeamResult.progresso = "Build " + (i + 1) + "/" + members.length + ": " + sp.n + "...";
-        TELAS.time();
-        var ok = await generateBuildWithAI(sp, "chefao-build-status", {
-          silencioso: true,
-          chefao: { boss: boss, party: party, responde: responde[sp.sname] || [], clima: r.clima, estrategia: r.estrategia }
+      // As builds numa consulta só (lote, 2026-09-30); quem falhar é pedido sozinho.
+      var chefaoDaBuild = { boss: boss, party: party, clima: r.clima, estrategia: r.estrategia };
+      var feitas = await gerarBuildsDoTimeComIA(members, "chefao-build-status",
+        function (sp) { return { silencioso: true, chefao: Object.assign({ responde: responde[sp.sname] || [] }, chefaoDaBuild) }; },
+        { chefao: chefaoDaBuild, responde: responde },
+        function (texto) {
+          if (!generatedTeamResult || generatedTeamResult.chefao !== boss.name) return; // outra montagem começou por cima
+          generatedTeamResult.progresso = texto;
+          TELAS.time();
         });
-        concluirBuildDoLote(sp.x);
-        // O motivo da falha fica no status até o próximo redesenho - guarda pra
-        // mostrar no fim (sem isso o jogador só via "faltou build", sem saber por quê).
-        if (ok !== true && ok !== "obsoleta") {
-          var el = document.getElementById("chefao-build-status");
-          if (el && el.textContent) ultimoMotivo = el.textContent;
-        }
-      }
+      var ultimoMotivo = feitas.ultimoMotivo || "";
       if (generatedTeamResult && generatedTeamResult.chefao === boss.name) {
         var faltou = computeTeamGenerationValidation(state.team.map(getSpeciesByX).filter(Boolean)).withoutBuild;
-        generatedTeamResult.progresso = faltou.length
+        generatedTeamResult.progresso = (faltou.length
           ? "Faltou build pra: " + faltou.join(", ") + (ultimoMotivo ? " (" + ultimoMotivo.replace(/\.$/, "") + ")" : "") +
             " - use \"Gerar build com IA\" no card de cada um."
-          : "";
+          : "") +
+          (jaFeitas.length ? (faltou.length ? " " : "") + "Mantidas as builds que já eram contra " + boss.name + " neste level cap: " +
+            jaFeitas.map(function (sp) { return sp.n; }).join(", ") + "." : "");
         TELAS.time();
       }
       flashToast("Time contra " + boss.name + " montado" + (anterior.salvo ? " - o anterior ficou em Times salvos." : "."));
