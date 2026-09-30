@@ -40,7 +40,7 @@
   var TIPO_REFORCADO_PELO_CLIMA = { sol: "Fire", chuva: "Water" };
 
   function nomeHabDuelo(id) { return ABILITIES[id] ? ABILITIES[id][0] : ""; }
-  function textoHabDuelo(id) { return descricaoDeHabilidade(nomeHabDuelo(id)); }
+  function textoHabDuelo(id) { return descricaoDeHabilidadePorId(id); } // pelo número: nomes repetidos (As One)
 
   // ---------- golpes ----------
   function acertosDoGolpeDuelo(id) {
@@ -848,6 +848,12 @@
     return { alvo: regra.alvo || null, proprio: regra.proprio || null, p: Math.min(1, e.ch / 100 * (regra.alvo || e.ch < 100 ? u.ef.chanceMult : 1)) };
   }
   // Estágio médio de cada atributo de "u" na luta contra "outro" (n turnos).
+  // Eerie Fog: subida s cai 1 por turno até 0 - média em n turnos (s, s-1, ..., 0).
+  function subidaMediaNaNevoa(s, n) {
+    var soma = 0;
+    for (var t = 0; t < n; t++) soma += Math.max(0, s - t);
+    return soma / n;
+  }
   function estagiosMediosDuelo(u, outro, gU, gOutro, n) {
     var s = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, acumula = Math.max(0, (n - 1) / 2);
     var mult = u.ef.estagioMult;
@@ -1343,6 +1349,11 @@
     // Golpe de carga só entra se não precisa carregar: Solar Beam/Solar Blade no
     // sol ou com Chloroplast ("Solar Beam/Blade ... act as if used in sun").
     ids = ids.filter(function (id) {
+      // False Swipe/Hold Back (120 de poder neste hack) deixam o alvo com 1 HP: numa
+      // luta por nocaute não fecham nada (revisão de 2026-09-30 - o False Swipe
+      // aparecia entre os golpes mais fortes do Garchomp).
+      var cat = typeof MOVE_CATEGORIAS !== "undefined" ? MOVE_CATEGORIAS[id] : null;
+      if (cat && cat.ef === "False Swipe") return false;
       if (!/no primeiro turno|turno seguinte/i.test(MOVE_PT[id] || "")) return true;
       if (u.ef.cargaInstantanea || (u.it && u.it.cargaUmaVez)) return true; // Accelerate, Power Herb
       return /^Solar (Beam|Blade)$/.test(MOVES[id][0]) && (clima === "sol" || u.ef.chloroplast);
@@ -1414,8 +1425,11 @@
       var g = { nome: m[0], tipo: tipo, cat: cat, defEspecial: defEspecial, contato: temContatoDuelo(m), som: som, prio: m[7] || 0,
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
           cats.some(function (c) { return u.ef.prioCheioCategoria[c]; }),
-        precisao: m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, forcaBase: base, forca: base * hab };
+        precisao: Math.max(m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, u.ef.precisaoGolpe[m[0]] || 0), forcaBase: base, forca: base * hab };
       g.area = extra && extra.al ? extra.al : null; // dupla: ambos/todos/aleatorio
+      // -2 de Sp. Atk no próprio usuário a cada uso (grupo do Overheat no dado); Simple
+      // dobra e Contrary inverte (estagioMult), como em qualquer mudança de estágio.
+      if (extra && extra.ef === "Overheat") g.quedaPropriaSpa = 2 * (u.ef.estagioMult || 1);
       g.status = statusDoGolpeDuelo(id, g, cats, u);
       g.crit = criticoDoGolpeDuelo(m, g, cats, u);
       if (alt && alt.crit) g.crit.estagio += alt.crit;
@@ -1574,6 +1588,14 @@
       if ((atq.ef.critSuperEf || atq.ef.seQuebra) && efTipo >= 2) precisao = 1; // Fatal/Deadly Precision: "never miss"
       var crit = fatorCriticoDuelo(atq, def, g, efTipo);
       var dano = ((((2 * nivel) / 5 + 2) * forca * A / D) / 50 + 2) * efTipo * red * ROLAGEM_MEDIA_DUELO * precisao * crit.fator * noCampo * comItem(itA.danoMult, ativoA);
+      // Golpe que baixa o próprio Sp. Atk em 2 a cada uso (Overheat, Draco Meteor, Leaf
+      // Storm...; revisão de 2026-09-30 - antes contava força cheia todo turno):
+      // média do dano ao longo dos golpes que precisa pra derrubar.
+      if (g.quedaPropriaSpa && dano > 0) {
+        var usos = Math.min(6, golpesNecessariosDuelo(def.stats[0], dano)), somaMult = 0;
+        for (var uso = 0; uso < usos; uso++) somaMult += multDoEstagio(-g.quedaPropriaSpa * uso); // multDoEstagio já limita a ±6
+        dano *= somaMult / usos;
+      }
       // Segundo melhor golpe (outro golpe): o que sobra com Disable/Torment.
       if (dano > melhor.dano) { if (melhor.golpe) segundo = { dano: melhor.dano }; } else if (dano > segundo.dano) segundo = { dano: dano };
       if (dano > melhor.dano) melhor = { dano: dano, prio: prioAqui, golpe: g, efTipo: efTipo, crit: crit, razaoMenorDef: razaoMenorDef };
@@ -1689,6 +1711,21 @@
     var estMeu = estagiosMediosDuelo(eu, foe, meu.melhor.golpe, dele.melhor.golpe, turnos);
     var estDele = estagiosMediosDuelo(foe, eu, dele.melhor.golpe, meu.melhor.golpe, turnos);
     ajustaEstagiosEntreOsDois(eu, foe, estMeu, estDele);
+    // Regras oficiais das subidas (FAQ, 2026-09-30): Bleed "negates any stat boosts"
+    // (na parte da luta em que sangra) e, na Eerie Fog, as subidas de quem não é
+    // Ghost/Psychic caem 1 por turno até +0 (média ao longo dos turnos da luta).
+    var climaDaLuta = climaNoCampoDuelo(eu, foe);
+    function regrasDasSubidas(u, est, pres) {
+      var nevoa = climaDaLuta === "nevoa" && u.tipos.indexOf("Ghost") === -1 && u.tipos.indexOf("Psychic") === -1;
+      var sangra = pres.sangrar || 0;
+      Object.keys(est).forEach(function (k) {
+        if (est[k] <= 0) return;
+        if (nevoa) est[k] = subidaMediaNaNevoa(est[k], Math.max(1, turnos));
+        est[k] *= 1 - sangra;
+      });
+    }
+    regrasDasSubidas(eu, estMeu, nMim.pres);
+    regrasDasSubidas(foe, estDele, nele.pres);
     function porEstagio(atq, def, estAtq, estDef, g) {
       if (!g) return 1;
       var fisico = g.cat === "F", f = 1;
@@ -1801,11 +1838,15 @@
       (u.ef.campoResiduo || []).forEach(function (c) { if (c.rouba && !(outro.ef.semResiduo)) ganha += c.pct * outro.stats[0]; });
       var dreno = g ? ((g.dreno || 0) * comItem(it.drenoMult, ativo) + it.drenoPct * ativo) * entra : 0; // Big Root, Shell Bell - sobre o dano que entra
       if (outro.ef.liquidOoze) { if (!u.ef.semResiduo) perde += dreno; dreno = 0; }
+      var curaAntes = ganha;
       if (!outro.ef.bloqueiaCura) {
         ganha += u.ef.curaPorTurno * hp + dreno + noTerrenoDuelo(u, "cura") * hp + it.curaTurno * hp * ativo; // + Leftovers
         if (CAMPO_DUELO && CAMPO_DUELO.terreno === "grama" && aterradoDuelo(u)) ganha += hp / 16; // Grassy Terrain
         if (u.ef.curaEnvenenado) ganha += u.ef.curaEnvenenado * hp * Math.max(presNele.envenenar || 0, presNele.envenenarForte || 0);
       }
+      // Bleed (FAQ oficial, 2026-09-30): "Prevents effects of healing" - vale na
+      // parte da luta em que está sangrando.
+      if (presNele.sangrar) ganha = curaAntes + (ganha - curaAntes) * (1 - presNele.sangrar);
       return perde - ganha;
     }
     var atqMeu = meuDano(meu.melhor.dano) - nele.residuo - extraMeu, atqDele = deleDano(dele.melhor.dano) - nMim.residuo - extraDele;
@@ -2236,7 +2277,7 @@
       var q = {}; q[st] = -(x[2] ? parseInt(x[2], 10) : 1); return { tipo: "queda", estagios: q };
     }
     if (STATUS_DO_GOLPE_DUELO[se]) return { tipo: "status", status: STATUS_DO_GOLPE_DUELO[se], adiado: se === "Yawn", ignoraTipo: /Ignore Type/.test(se), provoca: se === "Swagger" ? { atk: 2 } : se === "Flatter" ? { spa: 1 } : null };
-    if (CURA_DUELO[se]) return { tipo: "cura", cura: CURA_DUELO[se], dorme: se === "Rest" };
+    if (CURA_DUELO[se]) return { tipo: "cura", cura: CURA_DUELO[se], dorme: se === "Rest", peloClima: /^(Morning Sun|Synthesis|Moonlight)$/.test(se) };
     if (se === "Reflect") return { tipo: "tela", cat: "F" };
     if (se === "Light Screen") return { tipo: "tela", cat: "E" };
     if (/^Aurora Veil$/.test(se)) return { tipo: "tela", cat: "todos" };
@@ -2266,6 +2307,9 @@
     if (/Status moves become sound-based/i.test(f)) ef.statusSom = true;
     if ((x = f.match(/^(Hypnosis|Sing) accuracy is (\d+)%/i))) ef.precisaoGolpe[x[1]] = parseInt(x[2], 10) / 100;
     if (/Hypnosis never misses and also causes Confusion/i.test(f)) { ef.precisaoGolpe.Hypnosis = 1; ef.encadeiaStatus.sono = "confundir"; }
+    // Aurora Borealis: "Moves always benefit from hail" - o changelog 2.65.3b confirma o
+    // efeito: Blizzard e Sheer Cold com a precisão do granizo (não erram).
+    if (/Moves always benefit from hail/i.test(f)) { ef.precisaoGolpe.Blizzard = 1; ef.precisaoGolpe["Sheer Cold"] = 1; }
     if (/Moves that have a healing effect gain \+3 priority/i.test(f)) ef.triage = true;
     // Golpe de status que a habilidade usa sozinha ao entrar.
     if (/Uses String Shot on switch-in/i.test(f)) ef.quedaNaEntrada.spe = (ef.quedaNaEntrada.spe || 0) - 2;
@@ -2558,6 +2602,13 @@
       // Sustenta quando cura mais do que o rival tira por turno (alternando cura e ataque).
       if (y.ef.bloqueiaCura) return null;
       var cura = p.cura * base.hpX;
+      // Cura pelo clima (Morning Sun, Synthesis, Moonlight): 2/3 no sol, 1/4 nos outros
+      // climas - a Eerie Fog também (FAQ: "halves weather-based recovery").
+      if (p.peloClima) {
+        var climaDaCura = climaNoCampoDuelo(x, y);
+        if (climaDaCura === "sol") cura = base.hpX * 2 / 3;
+        else if (climaDaCura) cura = base.hpX / 4;
+      }
       // Alternando cura e ataque: leva 2 golpes por cura (Rest: cura tudo, mas dorme 2 turnos - 4 golpes por cura).
       r.sustenta = p.dorme ? base.dY * 4 < base.hpX * (1 + 3 * (x.ef.sonoCura || 0)) : base.dY * 2 < cura; // Sweet Dreams cura dormindo
       if (!r.sustenta) return null;
@@ -2948,6 +2999,25 @@
       f.u.ef.hazards.forEach(function (h) { if (h.quando === "entrada") poeHazardDuelo(ladoMeu, h.tipo); });
       if (f.frac <= 0) { f.vivo = false; f.frac = 0; }
     }
+    // Quem o chefão manda depois de um nocaute (2026-09-30, observação do usuário na
+    // run: depois da Sunflora da Flannery vieram o Torkoal evoluído e o Ceruledge; e
+    // jogadores no Discord oficial: a IA é a do Emerald e quase não troca por conta
+    // própria). Regra do usuário: primeiro quem tem golpe super efetivo no meu
+    // Pokémon em campo; se ninguém tem, quem mais resiste a ele. O 1º a entrar
+    // continua o primeiro do time do dado.
+    function proximoDoChefao(de) {
+      if (!atual || !atual.vivo) return;
+      var meu = comoEstaDuelo(atual), escolhido = -1, melhor = null;
+      for (var k = de; k < deles.length; k++) {
+        if (!deles[k].vivo) continue;
+        var dele = comoEstaDuelo(deles[k]);
+        var vantagem = (danoNoDuelo(dele, meu, nivel).melhor.efTipo || 0) >= 2 ? 1 : 0;
+        var levaDeMim = danoNoDuelo(meu, dele, nivel).melhor.efTipo;
+        var nota = [vantagem, -(levaDeMim === undefined ? 0 : levaDeMim)];
+        if (!melhor || nota[0] > melhor[0] || (nota[0] === melhor[0] && nota[1] > melhor[1])) { melhor = nota; escolhido = k; }
+      }
+      if (escolhido > de) { var t = deles[de]; deles[de] = deles[escolhido]; deles[escolhido] = t; }
+    }
     // Quem vence ganha o bônus do nocaute; quem cai deixa o efeito do desmaio.
     function nocaute(vence, cai) {
       var ef = vence.u.ef;
@@ -2993,7 +3063,7 @@
     if (deles.length) entraDele(deles[0]);
     while (i < deles.length && time.some(function (c) { return c.vivo; }) && voltas++ < 60) {
       var f = deles[i];
-      if (!f.vivo) { i++; if (i < deles.length) entraDele(deles[i]); continue; }
+      if (!f.vivo) { i++; if (i < deles.length) { proximoDoChefao(i); entraDele(deles[i]); } continue; }
       time.forEach(function (c) { c.vivosNoTime = time.filter(function (x) { return x.vivo; }).length - 1; }); // Minion Control
       if (!atual || !atual.vivo) {
         var caiuAgora = !!atual;
@@ -3008,8 +3078,11 @@
       poeHazardComGolpe(f, atual, ladoMeu);
       if (!atual.vivo) continue;
       var r = luta(atual, f);
-      // Prisão (Shadow Tag, Arena Trap, Magnet Pull...): não dá pra trocar.
-      var preso = prendeDuelo(f.u, atual.u);
+      // Prisão (Shadow Tag, Arena Trap, Magnet Pull...): não dá pra trocar. Fear
+      // também prende por 2 turnos (FAQ oficial, 2026-09-30) - a troca aqui é
+      // decidida no começo do confronto, então vale o medo que já vem na entrada.
+      var preso = prendeDuelo(f.u, atual.u) ||
+        ((f.u.ef.statusNaEntrada || {}).medo >= 0.5 && podeSofrerStatusDuelo(atual.u, "medo"));
       if (r.venceu === false && !preso) {
         // Troca: outro vivo que vence mesmo levando um golpe na entrada.
         var troca = time.filter(function (c) { return c.vivo && c !== atual; }).map(function (c) {

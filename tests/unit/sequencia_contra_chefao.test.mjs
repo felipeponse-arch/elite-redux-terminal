@@ -56,3 +56,26 @@ test("hazard: Stealth Rock fere quem entra, pela tabela de Rock; Heavy-Duty Boot
   R.entrarNoLadoDuelo(botas, lado);
   assert.equal(botas.frac, 1);
 });
+
+// Quem o chefão manda depois de um nocaute (2026-09-30, regra do usuário pela run:
+// depois da Sunflora veio quem tinha vantagem): primeiro quem tem golpe super
+// efetivo no meu Pokémon em campo; sem isso, quem mais resiste a ele.
+test("depois de um nocaute, o chefão manda quem tem vantagem sobre o meu Pokémon, não a ordem do time", () => {
+  const eu = unidade(efDe([]), golpe("F", { forca: 900, forcaBase: 900, tipo: "Water" }), { tipos: ["Water"], stats: [5000, 100, 100, 100, 100, 200] });
+  const abre = unidade(efDe([]), golpe("F"), { sp: { n: "Abre", sname: "A" }, nome: "Abre", tipos: ["Normal"] });
+  const neutro = unidade(efDe([]), golpe("F"), { sp: { n: "Neutro", sname: "N" }, nome: "Neutro", tipos: ["Normal"] });
+  const planta = unidade(efDe([]), golpe("E", { tipo: "Grass" }), { sp: { n: "Planta", sname: "P" }, nome: "Planta", tipos: ["Normal"] });
+  const s = R.simularLutaContraChefao([eu], [abre, neutro, planta], 50);
+  const derrubados = s.log.filter((l) => l.contra && !l.troca).map((l) => l.contra);
+  assert.equal(derrubados.join(","), ["Abre", "Planta", "Neutro"].join(","), JSON.stringify(s.log));
+});
+
+test("sem ninguém com vantagem, entra quem mais resiste ao meu Pokémon", () => {
+  const eu = unidade(efDe([]), golpe("F", { forca: 900, forcaBase: 900, tipo: "Water" }), { tipos: ["Normal"], stats: [5000, 100, 100, 100, 100, 200] });
+  const abre = unidade(efDe([]), golpe("F"), { sp: { n: "Abre", sname: "A" }, nome: "Abre", tipos: ["Normal"] });
+  const neutro = unidade(efDe([]), golpe("F"), { sp: { n: "Neutro", sname: "N" }, nome: "Neutro", tipos: ["Normal"] });
+  const resiste = unidade(efDe([]), golpe("F"), { sp: { n: "Resiste", sname: "R" }, nome: "Resiste", tipos: ["Grass"] });
+  const s = R.simularLutaContraChefao([eu], [abre, neutro, resiste], 50);
+  const derrubados = s.log.filter((l) => l.contra && !l.troca).map((l) => l.contra);
+  assert.equal(derrubados.join(","), ["Abre", "Resiste", "Neutro"].join(","), JSON.stringify(s.log));
+});

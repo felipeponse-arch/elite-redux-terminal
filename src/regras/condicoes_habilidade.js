@@ -89,15 +89,32 @@
   function descricaoDeHabilidade(nome) {
     if (descricaoDeHabilidadeCache[nome] !== undefined) return descricaoDeHabilidadeCache[nome];
     var a = ABILITIES.filter(function (x) { return x && x[0] === nome; })[0];
-    var txt = a ? (a[1] || "") : "";
-    // "Snow Warning + Cryomancy": junta o texto das partes (um nível só).
-    txt.split("+").forEach(function (parte) {
-      var p = parte.trim().replace(/\.$/, "");
-      var sub = p !== nome ? ABILITIES.filter(function (x) { return x && x[0] === p; })[0] : null;
-      if (sub) txt += " " + (sub[1] || "");
-    });
+    var txt = expandirTextoDeHabilidade(a ? (a[1] || "") : "", nome, 0);
     descricaoDeHabilidadeCache[nome] = txt;
     return txt;
+  }
+  // Pelo número (2026-09-30): há habilidades com o MESMO nome e textos diferentes
+  // ("As One: Unnerve + Chilling Neigh" e "As One: Unnerve + Grim Neigh") - pelo
+  // nome, as duas recebiam o texto da primeira.
+  var descricaoPorIdCache = {};
+  function descricaoDeHabilidadePorId(id) {
+    if (descricaoPorIdCache[id] !== undefined) return descricaoPorIdCache[id];
+    var a = ABILITIES[id];
+    return (descricaoPorIdCache[id] = a ? expandirTextoDeHabilidade(a[1] || "", a[0], 0) : "");
+  }
+  // "Snow Warning + Cryomancy": junta o texto das partes. Revisão de 2026-09-30:
+  // o nome da parte vai só até "." ou ";" ("Intimidate + Scare; 10% chance..."
+  // perdia o Scare) e a expansão desce até 3 níveis ("Atlantic Ruler: Aquatic
+  // Dweller + Swift Swim", e Aquatic Dweller é "Aquatic + ...").
+  function expandirTextoDeHabilidade(txt, nome, nivel) {
+    var extra = "";
+    if (nivel >= 3 || txt.indexOf("+") === -1) return txt;
+    txt.split("+").forEach(function (parte) {
+      var p = parte.split(/[.;]/)[0].trim();
+      var sub = p && p !== nome ? ABILITIES.filter(function (x) { return x && x[0] === p; })[0] : null;
+      if (sub) extra += " " + expandirTextoDeHabilidade(sub[1] || "", p, nivel + 1);
+    });
+    return txt + extra;
   }
   function habilidadeArma(nome, cond) {
     return !!ARMA_POR_TEXTO[cond] && ARMA_POR_TEXTO[cond].test(descricaoDeHabilidade(nome));
