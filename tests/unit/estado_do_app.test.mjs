@@ -38,6 +38,32 @@ test("save: buildSave -> applySave devolve o mesmo conteúdo", () => {
   assert.equal(R.syncContentDiffers(salvo, JSON.parse(JSON.stringify(R.buildSave()))), false, "nada mudou no ida e volta");
 });
 
+// Soma de verificação (2026-10-01): a ideia do bit de paridade aplicada ao save.
+test("save: soma de verificação confere no ida e volta e acusa qualquer mudança no conteúdo", () => {
+  const s = R.state;
+  s.team = [sp("SPECIES_GARCHOMP").x];
+  s.notes = { SPECIES_GARCHOMP: "anotação" };
+  s.customBuilds = { SPECIES_GARCHOMP: [build({ moves: ["Earthquake", "Dragon Claw"] })] };
+  const salvo = JSON.parse(JSON.stringify(R.buildSave()));
+  assert.match(salvo.soma, /^[0-9a-f]{8}$/);
+  assert.equal(R.conferirSomaDoSave(salvo), "ok");
+  // O banco da sincronização pode devolver as chaves em outra ordem: continua ok.
+  const invertido = JSON.parse(JSON.stringify(Object.fromEntries(Object.entries(salvo).reverse())));
+  assert.equal(R.conferirSomaDoSave(invertido), "ok", "ordem das chaves não importa");
+  // Uma letra trocada numa anotação, um golpe trocado numa build, um campo a mais.
+  const mexido = (f) => { const c = JSON.parse(JSON.stringify(salvo)); f(c); return R.conferirSomaDoSave(c); };
+  assert.equal(mexido((c) => { c.notes.SPECIES_GARCHOMP = "anotaçao"; }), "errada");
+  assert.equal(mexido((c) => { c.customBuilds.SPECIES_GARCHOMP[0].moves[1] = "Outrage"; }), "errada");
+  assert.equal(mexido((c) => { c.team.push("SPECIES_SWAMPERT"); }), "errada");
+  assert.equal(mexido((c) => { c.savedAt = "2000-01-01T00:00:00.000Z"; }), "errada");
+  // Save de antes desta conferência (sem soma) continua aceito como sempre foi.
+  const antigo = JSON.parse(JSON.stringify(salvo)); delete antigo.soma;
+  assert.equal(R.conferirSomaDoSave(antigo), "sem");
+  assert.equal(R.conferirSomaDoSave(null), "errada");
+  // A soma muda a cada gravação (savedAt), mas não conta como "conteúdo mudou" no sync.
+  assert.equal(R.syncContentDiffers(salvo, Object.assign({}, salvo, { soma: "00000000" })), false);
+});
+
 test("save: applySave é defensivo com save malformado ou de outra versão", () => {
   R.applySave({
     team: ["SPECIES_GARCHOMP", "SPECIES_QUE_NAO_EXISTE"], box: [],

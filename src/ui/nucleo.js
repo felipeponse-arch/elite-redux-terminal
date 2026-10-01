@@ -313,11 +313,26 @@
     var raw = lsGet(STORE_KEY);
     if (raw) {
       try {
-        applySave(JSON.parse(raw));
+        var lido = JSON.parse(raw);
+        // Soma de verificação (save.js): passou no parse mas não é o que foi
+        // gravado. Carrega mesmo assim - applySave já descarta o que não faz
+        // sentido, e recomeçar do exemplo perderia mais - mas guarda a cópia
+        // crua e avisa, igual ao caso do JSON quebrado logo abaixo.
+        var somaErrada = conferirSomaDoSave(lido) === "errada";
+        if (somaErrada) {
+          lsSet(STORE_KEY + "_corrupted_backup", raw);
+          showStorageBanner(
+            "O save deste navegador não bate com a soma de verificação (o conteúdo mudou depois de gravado). " +
+            "Carreguei o que deu para aproveitar - confira time, caixa e builds. A cópia original ficou em \"" +
+            STORE_KEY + "_corrupted_backup\" no armazenamento local deste navegador."
+          );
+        }
+        applySave(lido);
         // Cobre o caso de um save de ANTES desta feature existir: se o cap
         // salvo já libera evoluções que nunca foram aplicadas, aplica agora
         // mesmo, antes da primeira renderização.
-        if (autoEvolveRoster(true) || reconciliouAoAplicar) persist();
+        // A soma errada também regrava: o aviso sai uma vez só (a cópia crua já foi guardada).
+        if (autoEvolveRoster(true) || reconciliouAoAplicar || somaErrada) persist();
         return;
       } catch (e) {
         // BUG P0 achado em auditoria, 2026-09-18: antes disto, um save

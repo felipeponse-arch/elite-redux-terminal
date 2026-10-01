@@ -177,6 +177,27 @@ export const MUTACOES = [
     para: "if (custom && !curadasDe(sp.sname).length) {",
   },
   {
+    id: "save-soma-nunca-acusa",
+    descricao: "soma de verificação aceita qualquer save, mesmo com o conteúdo mexido",
+    arquivo: "save.js",
+    de: "return save.soma === somaDoSave(save) ? \"ok\" : \"errada\";",
+    para: "return \"ok\";",
+  },
+  {
+    id: "save-soma-depende-da-ordem",
+    descricao: "soma depende da ordem das chaves (save legítimo do sync acusado como errado)",
+    arquivo: "save.js",
+    de: "return \"{\" + Object.keys(v).sort().filter(",
+    para: "return \"{\" + Object.keys(v).filter(",
+  },
+  {
+    id: "save-soma-conta-no-sync",
+    descricao: "a soma (que muda a cada gravação) conta como conteúdo diferente no sync",
+    arquivo: "save.js",
+    de: "\"autoLog\", \"soma\"];",
+    para: "\"autoLog\"];",
+  },
+  {
     id: "sync-ignora-campo-de-um-lado",
     descricao: "sync só compara campos que existem no save local (buff marcado no outro aparelho some)",
     arquivo: "save.js",

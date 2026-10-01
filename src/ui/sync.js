@@ -53,6 +53,17 @@
       persist();
     }
   }
+  // Save de outro aparelho com a soma de verificação errada (save.js): não é
+  // aplicado. O save local, que confere, sobe por cima e conserta a cópia do
+  // banco - como a memória com redundância, que recupera a palavra pela cópia
+  // boa. Sem save local, só avisa.
+  function remotoComSomaErrada(remote, local) {
+    if (conferirSomaDoSave(remote) !== "errada") return false;
+    if (local) syncRef.set(local).catch(function () {});
+    showStorageBanner("O save que veio de outro aparelho não bate com a soma de verificação e foi ignorado. " +
+      "O save deste aparelho continua valendo" + (local ? " e foi enviado no lugar dele." : "."));
+    return true;
+  }
   function pushToSync(save) {
     if (!syncRef) return;
     // persist() only ever runs from a genuine content-changing action (every
@@ -142,7 +153,7 @@
         var remote = snap.data();
         var localRaw = lsGet(STORE_KEY);
         var local = localRaw ? JSON.parse(localRaw) : null;
-        if (syncContentDiffers(local, remote)) {
+        if (syncContentDiffers(local, remote) && !remotoComSomaErrada(remote, local)) {
           if (!local || (remote.savedAt && (!local.savedAt || remote.savedAt > local.savedAt))) {
             // Remote has real differences and is the newer (or only) copy.
             // Bug real, achado em auditoria (2026-09-11): isto só gravava o
@@ -185,6 +196,7 @@
         // existente pra "sem local válido" logo abaixo - aplica o remoto.
       }
       if (!syncContentDiffers(local3, remote)) return;
+      if (remotoComSomaErrada(remote, local3)) return;
       // Achado real, 2026-09-13 (usuário reportou times divergentes entre
       // celular e navegador): ao contrário da reconciliação de carga inicial
       // acima (que só aceita o remoto quando ele é MAIS NOVO por savedAt),

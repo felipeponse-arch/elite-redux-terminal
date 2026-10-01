@@ -266,7 +266,53 @@
     return out;
   }
 
+  // ---------------- soma de verificação (2026-10-01) ----------------
+  // Mesma ideia do bit de paridade da memória: cada save leva uma soma do
+  // próprio conteúdo, e quem lê confere antes de confiar. Um JSON truncado já
+  // falha no JSON.parse (loadSave guarda a cópia e avisa); a soma pega o que
+  // passa no parse mas não é o que foi gravado - texto mexido à mão, gravação
+  // pela metade de outro aparelho, extensão de navegador. Como o bit de
+  // paridade, só DETECTA: não tenta consertar.
+  // O texto é canônico (chaves em ordem alfabética, mesmas regras do
+  // JSON.stringify para undefined/função) porque o banco da sincronização pode
+  // devolver as chaves em outra ordem - a soma não pode depender disso.
+  function textoCanonicoDoSave(v) {
+    if (v === null || typeof v !== "object") {
+      var t = JSON.stringify(v);
+      return t === undefined ? "null" : t;
+    }
+    if (Array.isArray(v)) {
+      return "[" + v.map(function (x) {
+        return x === undefined || typeof x === "function" ? "null" : textoCanonicoDoSave(x);
+      }).join(",") + "]";
+    }
+    return "{" + Object.keys(v).sort().filter(function (k) {
+      return k !== "soma" && v[k] !== undefined && typeof v[k] !== "function";
+    }).map(function (k) { return JSON.stringify(k) + ":" + textoCanonicoDoSave(v[k]); }).join(",") + "}";
+  }
+  // FNV-1a de 32 bits sobre o texto canônico, em 8 dígitos hexadecimais.
+  function somaDoSave(save) {
+    var texto = textoCanonicoDoSave(save), h = 0x811c9dc5;
+    for (var i = 0; i < texto.length; i++) {
+      h ^= texto.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return ("0000000" + h.toString(16)).slice(-8);
+  }
+  // "ok" | "sem" (save de antes desta conferência existir - aceito como sempre
+  // foi) | "errada" (o conteúdo não é o que foi gravado).
+  function conferirSomaDoSave(save) {
+    if (!save || typeof save !== "object") return "errada";
+    if (typeof save.soma !== "string") return "sem";
+    return save.soma === somaDoSave(save) ? "ok" : "errada";
+  }
+
   function buildSave() {
+    var save = montarSave();
+    save.soma = somaDoSave(save);
+    return save;
+  }
+  function montarSave() {
     return {
       v: SCHEMA_VERSION,
       dataVersion: DATA.meta ? DATA.meta.version : null,
@@ -299,7 +345,8 @@
   // que ficou sem gymSkillsCleared e autoEvolved, e o buff de ginásio marcado
   // em outro aparelho era ignorado; a união também pega campo que só o outro
   // aparelho, numa versão mais nova do app, já grava).
-  var SYNC_IGNORADAS = ["v", "dataVersion", "savedAt", "autoLog"];
+  // A soma muda junto com savedAt a cada gravação, então também não conta.
+  var SYNC_IGNORADAS = ["v", "dataVersion", "savedAt", "autoLog", "soma"];
   function syncContentDiffers(a, b) {
     if (!a || !b) return true;
     var chaves = {};
