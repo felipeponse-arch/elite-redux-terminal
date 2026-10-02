@@ -1509,11 +1509,16 @@
   // Efetividade do golpe: tabela de tipos + habilidades do DEFENSOR
   // (abilityTypeModFor, resistTipo) + habilidades do ATACANTE (contraTipo,
   // vsTipo). Mold Breaker e parecidas atravessam as habilidades do defensor.
+  var INVERSA_PERMANENTE_DUELO = 99;
+  function emAreaDuelo(g) { return !!g.area && g.area !== "aleatorio"; }
   function efetividadeNoDuelo(atq, tipo, def) {
     var troca = atq.ef.contraTipo[tipo];
     // Gravidade: Ground acerta quem voa (sem o tipo Flying nem Levitate na conta).
     var gravidade = CAMPO_DUELO && CAMPO_DUELO.gravidade && tipo === "Ground";
-    var inversa = CAMPO_DUELO && CAMPO_DUELO.inversaAtiva;
+    // Fora de um duelo (CAMPO_DUELO nulo: plano, escolha dos 4 golpes) a batalha invertida do chefão
+    // (regra de campo, 99 turnos) vale mesmo assim - achado do vídeo de 02/10: o plano da Tate & Liza 1
+    // chamava Axe Kick (Dark) de super efetivo em Psychic usando a tabela normal.
+    var inversa = CAMPO_DUELO ? CAMPO_DUELO.inversaAtiva : (atq.ef.inversa >= INVERSA_PERMANENTE_DUELO || def.ef.inversa >= INVERSA_PERMANENTE_DUELO);
     // Trick-or-Treat na entrada (Monster Mash): o outro ganha o tipo Ghost.
     var tiposDef = atq.ef.adicionaFantasma && def.tipos.indexOf("Ghost") === -1 ? def.tipos.concat("Ghost") : def.tipos;
     var raw = tiposDef.reduce(function (m, t) {
@@ -1554,6 +1559,10 @@
     return A;
   }
   function danoNoDuelo(atq, def, nivel) {
+    // Wide Guard permanente do ginásio (Tate & Liza): golpe em área não chega no time dele; sobram os de alvo único.
+    if (def.ef.bloqueiaArea && (atq.golpesProntos || []).some(emAreaDuelo)) {
+      atq = Object.assign({}, atq, { golpesProntos: atq.golpesProntos.filter(function (g) { return !emAreaDuelo(g); }) });
+    }
     var melhor = { dano: 0, prio: 0, golpe: null }, melhorPrio = { dano: 0 }, segundo = { dano: 0 };
     var semBonus = def.ef.bloqueiaBonus && !atq.ef.quebraHabilidade;
     var amuleto = atq.it && atq.it.imuneQuedas; // Clear Amulet
@@ -2355,14 +2364,15 @@
   // comparado com o plano. Antes nada conferia se o time levado ainda vencia.
   function conferirTimeComBuilds(sps, party, nivel, opcoes, original) {
     var cands = sps.map(function (sp) { return { sp: sp, owned: sp.x, build: getActiveBuild(sp.sname) }; });
-    var s = montarTimeContraChefao(cands, party, nivel, opcoes).simulacao, o = original || null;
+    var refeito = montarTimeContraChefao(cands, party, nivel, Object.assign({}, opcoes, { ordem: sps.map(function (sp) { return sp.x; }) }));
+    var s = refeito.simulacao, o = original || null;
     var pior = !!o && ((o.venceu && !s.venceu) || s.derrubados < o.derrubados);
     var texto = o && o.venceu && !s.venceu
       ? "ATENÇÃO: com as builds salvas, a luta simulada NÃO vence mais (derruba " + s.derrubados + " de " + s.total + "). Revise as builds ou monte de novo."
       : pior ? "Atenção: com as builds salvas a luta simulada derruba " + s.derrubados + " de " + s.total + " (o plano derrubava " + o.derrubados + ")."
-        : s.venceu ? "Conferido: com as builds salvas o time continua vencendo a luta simulada."
+        : s.venceu ? "Conferido: o plano e a luta acima foram refeitos com os golpes das builds salvas e o time continua vencendo a luta simulada."
           : "Com as builds salvas a luta simulada derruba " + s.derrubados + " de " + s.total + ".";
-    return { simulacao: s, texto: texto, pior: pior };
+    return { simulacao: s, texto: texto, pior: pior, plano: refeito.plano };
   }
   // Unidade de duelo a partir de uma build salva (habilidade, natureza, EVs, item, 4 golpes).
   function unidadeDaBuild(sp, b, nivel, clima) {
@@ -3230,7 +3240,7 @@
   //  - Reflect/Light Screen/Lucky Chant: 5 turnos do lado dele, no começo da luta.
   // Fica de fora do motor (só vai como aviso pra IA): Foresight, Leech Seed e
   // Magnet Rise depois de N turnos em campo, Embargo, herdar atributos ao
-  // entrar, precisão e Wide Guard - dependem de turno exato que o motor não segue.
+  // entrar, precisão - dependem de turno exato que o motor não segue.
   var BUFFS_DO_GINASIO_DUELO = {
     roxanne_laststand: { ultimoX: 2 },
     roxanne_hazard_bleed: { lado: { rocha: true }, statusNoFim: ["sangrar", 2] },
@@ -3262,6 +3272,7 @@
     tateliza_reflect: { abreTela: { F: 5 } },
     tateliza_luckychant: { abreSemCritico: true },
     tateliza_sleep: { statusNoFim: ["sono", 1] },
+    tateliza_wideguard: { bloqueiaArea: true },
     tateliza_noprotect: { semProtectMeu: true }
   };
   var INDICE_DO_ATRIBUTO_DUELO = { atk: 1, def: 2, spa: 3, spd: 4, spe: 5 };
@@ -3279,6 +3290,7 @@
       buffs.forEach(function (b) {
         if (b.porTurno) Object.keys(b.porTurno).forEach(function (k) { efCopia().porTurno[k] = (ef.porTurno[k] || 0) + b.porTurno[k]; });
         if (b.semCuraMeu) efCopia().bloqueiaCura = true;
+        if (b.bloqueiaArea) efCopia().bloqueiaArea = true;
         if (abre && b.abreX) Object.keys(b.abreX).forEach(function (k) { mult[INDICE_DO_ATRIBUTO_DUELO[k]] *= b.abreX[k]; });
         if (abre && b.abreBloqueia) efCopia().bloqueiaUmGolpe = true;
         if (abre && b.abreTela) { efCopia(); if (b.abreTela.F) ef.telaF = Math.max(ef.telaF || 0, b.abreTela.F); if (b.abreTela.E) ef.telaE = Math.max(ef.telaE || 0, b.abreTela.E); }
@@ -3298,7 +3310,7 @@
     return foes.map(function (f) {
       var ef = Object.assign({}, f.ef);
       if (regra.sala) ef.sala = 99;
-      if (regra.inversa) ef.inversa = 99;
+      if (regra.inversa) ef.inversa = INVERSA_PERMANENTE_DUELO;
       if (regra.gravidade) ef.gravidade = true;
       return Object.assign({}, f, { ef: ef });
     });
@@ -3516,7 +3528,7 @@
   // Chefões pode devolver a vez pra tela (antes a conta travava 1-3 s no desktop).
   // Quem quer tudo de uma vez (rank, testes) usa montarTimeContraChefao.
   // `buffs`: ids dos buffs do ginásio ainda ativos (chefoes.js, gymSkillsSummaryFor).
-  function* montarTimeNoClimaEmPassos(candidatos, party, nivel, clima, armador, dupla, buffs, campo) {
+  function* montarTimeNoClimaEmPassos(candidatos, party, nivel, clima, armador, dupla, buffs, campo, ordem) {
     var inicio = buffs && buffs.length ? inicioDaLutaComBuffs(buffs) : null;
     var foes = foesComRegraDeCampo(foesComBuffsDoGinasio(party.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean), buffs, dupla ? 2 : 1), campo);
     // Os mesmos Pokémon sem clima: o clima dura 8 turnos (CLIMA_OFICIAL) e o do jogador só
@@ -3570,6 +3582,9 @@
       usados.push(melhor.owned);
       melhor.porFoe.forEach(function (v, i) { cobertura[i] = Math.max(cobertura[i], v); });
     }
+    // `ordem` (conferência com as builds, 02/10): a luta simulada segue a ordem REAL da party - o sono
+    // do ginásio cai no último dela, não no último que o guloso escolheu.
+    if (ordem) escolhidos.sort(function (a, b) { return ordem.indexOf(a.owned) - ordem.indexOf(b.owned); });
     // Luta inteira: o time escolhido pelos duelos é conferido na sequência e
     // melhorado trocando um membro por um dos 8 melhores de fora, se a luta rende mais.
     var sim = simular(escolhidos.map(function (e) { return e.unidade; }), foes, nivel);
@@ -3615,13 +3630,13 @@
   function* montarTimeContraChefaoEmPassos(candidatos, party, nivel, opcoes) {
     var dupla = !!(opcoes && opcoes.dupla), buffs = (opcoes && opcoes.buffs) || [], campo = (opcoes && opcoes.campo) || null;
     var climaChefao = climaDoTimeDoChefao(party);
-    var melhor = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, climaChefao, null, dupla, buffs, campo);
+    var melhor = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, climaChefao, null, dupla, buffs, campo, opcoes && opcoes.ordem);
     var base = melhor;
     melhor.estrategia = null;
     var armadores = armadoresDeClima(candidatos);
     for (var ai = 0; ai < armadores.length; ai++) {
       var arm = armadores[ai];
-      var r = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, arm.clima, arm, dupla, buffs, campo);
+      var r = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, arm.clima, arm, dupla, buffs, campo, opcoes && opcoes.ordem);
       if (r.armadorEntrou && r.valor >= melhor.valor + (melhor === base ? GANHO_MINIMO_ESTRATEGIA : 0.001)) {
         // Quem ganha com o clima: nota no clima do time bem acima da nota sem ele.
         var notaBase = {};

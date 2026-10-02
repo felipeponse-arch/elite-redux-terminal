@@ -377,6 +377,13 @@
   };
   function regraDeCampoDoChefao(nome) { return REGRA_DE_CAMPO_DO_CHEFAO[nome] || null; }
 
+  // Pro card do plano (relato de 02/10: o jogador marcou os 6 buffs achando que marcado = ativo, o
+  // simulador rodou sem nenhum e ninguém avisou): quantos buffs o chefão tem e quais estão ATIVOS na conta.
+  function buffsParaMostrarDoChefao(leaderName) {
+    var r = gymSkillsSummaryFor(gymLeaderBaseName(leaderName));
+    if (!r || r.gateOnly) return null;
+    return { total: r.total, ativos: r.buffs.filter(function (b) { return !b.cleared; }).map(function (b) { return b.label; }) };
+  }
   // Ids dos buffs do ginásio que o jogador ainda NÃO tirou (vão pro simulador do
   // chefão e pro prompt da IA). Vazio pra quem não é líder com buffs.
   function buffsAtivosDoChefao(leaderName) {

@@ -321,7 +321,7 @@
       });
       generatedTeamResult = {
         archetypeLabel: "contra " + boss.name, chefao: boss.name, plano: plano, clima: r.clima, estrategia: r.estrategia, luta: resumoDaLuta(r.simulacao),
-        progresso: "Gerando as builds...", anterior: anterior, forTeamKey: teamKeyFor(members)
+        progresso: "Gerando as builds...", anterior: anterior, buffs: buffsParaMostrarDoChefao(boss.name), forTeamKey: teamKeyFor(members)
       };
       var aba = document.querySelector('.tab-btn[data-tab="team"]');
       if (aba) aba.click();
@@ -355,6 +355,12 @@
           { dupla: !!boss.db, buffs: buffsAtivosDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name) }, r.simulacao);
       } catch (eConf) { conferencia = null; }
       if (generatedTeamResult && generatedTeamResult.chefao === boss.name) {
+        // O card passa a mostrar o plano e a luta refeitos com as builds que ficaram salvas (relato de
+        // 02/10: o plano dizia Dragon Claw e a build do Hydreigon tinha Dragon Pulse).
+        if (conferencia && conferencia.plano) {
+          generatedTeamResult.plano = planoDaLuta({ plano: conferencia.plano });
+          generatedTeamResult.luta = resumoDaLuta(conferencia.simulacao);
+        }
         var faltou = computeTeamGenerationValidation(state.team.map(getSpeciesByX).filter(Boolean)).withoutBuild;
         generatedTeamResult.progresso = (faltou.length
           ? "Faltou build pra: " + faltou.join(", ") + (ultimoMotivo ? " (" + ultimoMotivo.replace(/\.$/, "") + ")" : "") +
@@ -405,13 +411,13 @@
     }
     var itemsHtml = summary.buffs.map(function (b) {
       return '<li><label><input type="checkbox" data-gymskill="' + escapeHtml(b.id) + '"' + (b.cleared ? " checked" : "") + '>' +
-        '<span><b>' + escapeHtml(b.label) + '</b><span class="gs-detail"> — ' + escapeHtml(b.detail) + '</span></span></label></li>';
+        '<span><b>' + escapeHtml(b.label) + '</b> <span class="gs-estado ' + (b.cleared ? "gs-tirado" : "gs-ativo") + '">' + (b.cleared ? "já tirado - NÃO vale na luta" : "ATIVO na luta") + '</span><span class="gs-detail"> — ' + escapeHtml(b.detail) + '</span></span></label></li>';
     }).join("");
     return '<div class="card" data-gym-leader="' + escapeHtml(leaderName) + '"><h3>Buffs do ginásio</h3>' +
-      '<p class="hint" style="margin:0 0 10px;">Cada treinador de apoio deste ginásio tira um desses buffs de ' + escapeHtml(leaderName) + ' quando você o vence, antes de desafiá-la(o). Marque os que você já tirou — não precisa dizer qual treinador, só o efeito.</p>' +
+      '<p class="hint" style="margin:0 0 10px;">Cada treinador de apoio deste ginásio tira um desses buffs de ' + escapeHtml(leaderName) + ' quando você o vence, antes de desafiá-la(o). <b>Caixa marcada = buff já tirado (não vale mais na luta). Caixa vazia = buff ATIVO.</b> Marque só os que você já tirou — não precisa dizer qual treinador, só o efeito.</p>' +
       (summary.note ? '<p class="hint" style="margin:0 0 10px;">' + escapeHtml(summary.note) + '</p>' : "") +
       '<ul class="gym-skill-list">' + itemsHtml + '</ul>' +
-      '<div class="gym-skill-summary mono" style="margin-top:10px;font-size:var(--fs-texto);">Restam ' + summary.remaining + ' de ' + summary.total + ' buff' + (summary.total === 1 ? "" : "s") + ' ativo' + (summary.remaining === 1 ? "" : "s") + ' antes da luta.</div>' +
+      '<div class="gym-skill-summary mono" style="margin-top:10px;font-size:var(--fs-texto);">Restam ' + summary.remaining + ' de ' + summary.total + ' buff' + (summary.total === 1 ? "" : "s") + ' ativo' + (summary.remaining === 1 ? "" : "s") + ' antes da luta' + (summary.remaining ? ": " + summary.buffs.filter(function (b) { return !b.cleared; }).map(function (b) { return escapeHtml(b.label); }).join(", ") : " (o simulador roda a luta sem nenhum buff)") + '.</div>' +
     '</div>';
   }
 

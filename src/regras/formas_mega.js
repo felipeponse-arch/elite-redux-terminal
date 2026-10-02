@@ -87,16 +87,38 @@
   var MEGA_UNLOCK_MILESTONE = 4;
   function megaEvolutionUnlocked() { return state.settings.milestone >= MEGA_UNLOCK_MILESTONE; }
 
-  // Pedras que só aparecem mais tarde (2026-09-27, pedido do usuário: "tem
-  // algumas mega evoluções que só são liberadas quando a gente ganha da Tate e
-  // da Liza"). Não está no dado do NextDex nem nas páginas oficiais; vem do
-  // Discord oficial (comunidade, versão 2.65): a Haxorusite é a luta contra o
-  // Totem Haxorus no Meteor Falls, liberada depois do 7º ginásio (Nash Gold,
-  // 27/04/2026); Dragoninite Y e Gyaradosite Y foram incluídas por decisão do
-  // usuário (citadas junto por quem tinha acabado de vencer a Tate & Liza, sem
-  // confirmação). Valor = etapa (índice de levelcaps.json) em que a pedra libera.
-  var MEGA_PEDRAS_TARDIAS = { "Haxorusite": 7, "Dragoninite Y": 7, "Gyaradosite Y": 7 };
-  var ROTULO_ETAPA_MEGA = { 4: "4ª insígnia (Flannery)", 7: "7ª insígnia (Tate & Liza)" };
+  // Pedras que só aparecem mais tarde. Auditoria de 02/10/2026 no código oficial do jogo (er-repo, commit
+  // 217dd0f, o mesmo das fontes do rank): entra aqui a pedra cuja fonte é um NPC/treinador com trava de
+  // insígnia (FLAG_BADGE0n_GET em data/maps/<mapa>/scripts.pory; ex.: Route123 dá a Granbullite só com a
+  // 7ª). Pedra que também vem de item solto ou de NPC sem trava fica na 4ª, e a "só no menu do Meteor
+  // Falls" também (a varredura não olhou as lojas em src/). Granbullite foi o relato do usuário (vídeo de
+  // 02/10); Haxorusite e Dragoninite Y seguem em 7 por decisões anteriores (sem trava achada no código).
+  // Valor = etapa (índice de levelcaps.json) em que a pedra libera.
+  var MEGA_PEDRAS_TARDIAS = {
+    "Breloomite": 5,
+    "Empoleonite": 5,
+    "Feraligite X": 5,
+    "Feraligite Y": 5,
+    "Krookodilenite": 5,
+    "Meganiumite": 5,
+    "Sandslashite": 5,
+    "Slakingite": 5,
+    "Torterranite": 5,
+    "Typhlosionite": 5,
+    "Hitmonchanite": 6,
+    "Hitmontopite": 6,
+    "Nidokingite": 6,
+    "Nidoqueenite": 6,
+    "Toucannonite": 6,
+    "Crobatite": 7,
+    "Dewgongite": 7,
+    "Dragoninite Y": 7,
+    "Granbullite": 7,
+    "Gyaradosite Y": 7,
+    "Haxorusite": 7,
+    "Slowkingite": 7
+  };
+  var ROTULO_ETAPA_MEGA = { 4: "4ª insígnia (Flannery)", 5: "5ª insígnia (Norman)", 6: "6ª insígnia (Winona)", 7: "7ª insígnia (Tate & Liza)" };
   // Etapa em que esta forma Mega fica disponível: a da pedra, se for tardia.
   function etapaDaMega(megaSp) {
     return stonesOf(megaSp).reduce(function (et, pedra) {

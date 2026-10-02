@@ -83,6 +83,10 @@
 .gym-skill-list label { display: flex; gap: 9px; align-items: flex-start; cursor: pointer; }
 .gym-skill-list input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; width: 15px; height: 15px; }
 .gym-skill-list .gs-detail { color: var(--text-dim); font-weight: 400; }
+.gym-skill-list .gs-estado { font-weight: 700; }
+.gym-skill-list .gs-ativo { color: var(--sem-weak); }
+.gym-skill-list .gs-tirado { color: var(--text-dim); }
+.plano-buffs-aviso { color: var(--sem-weak); }
 .auto-log time { display: block; font-size: var(--fs-legenda); color: var(--text-dim); font-variant-numeric: tabular-nums; }
 .sync-banner button {
   border: none; border-radius: var(--radius-sm); padding: 4px 10px; font-size: var(--fs-pequeno); font-weight: 700;

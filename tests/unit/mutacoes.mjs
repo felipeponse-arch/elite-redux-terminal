@@ -7,6 +7,34 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "buffs-do-card-sem-lista",
+    descricao: "o card do plano não diz quais buffs do ginásio entraram na conta",
+    arquivo: "chefoes.js",
+    de: "ativos: r.buffs.filter(function (b) { return !b.cleared; }).map(function (b) { return b.label; }) };",
+    para: "ativos: [] };",
+  },
+  {
+    id: "wideguard-do-ginasio-ignorado",
+    descricao: "o Wide Guard permanente da Tate & Liza não bloqueia golpe em área",
+    arquivo: "duelo.js",
+    de: "if (def.ef.bloqueiaArea && (atq.golpesProntos || []).some(emAreaDuelo)) {",
+    para: "if (false) {",
+  },
+  {
+    id: "inversa-fora-do-duelo-ignorada",
+    descricao: "o plano do chefão (fora do duelo) usa a tabela de tipos normal mesmo na batalha invertida",
+    arquivo: "duelo.js",
+    de: "var inversa = CAMPO_DUELO ? CAMPO_DUELO.inversaAtiva : (atq.ef.inversa >= INVERSA_PERMANENTE_DUELO || def.ef.inversa >= INVERSA_PERMANENTE_DUELO);",
+    para: "var inversa = CAMPO_DUELO && CAMPO_DUELO.inversaAtiva;",
+  },
+  {
+    id: "granbullite-libera-na-4a",
+    descricao: "Granbullite libera na 4ª insígnia (antes da Tate & Liza)",
+    arquivo: "formas_mega.js",
+    de: "    \"Granbullite\": 7,\n",
+    para: "",
+  },
+  {
     id: "mega-tardia-libera-na-4a",
     descricao: "Haxorusite/Dragoninite Y/Gyaradosite Y liberam na 4ª insígnia",
     arquivo: "formas_mega.js",
@@ -376,7 +404,7 @@ export const MUTACOES = [
     id: "loteA-campo-ignorado",
     descricao: "a regra de campo (Trick Room/invertida) não chega ao chefão",
     arquivo: "duelo.js",
-    de: "if (regra.inversa) ef.inversa = 99;",
+    de: "if (regra.inversa) ef.inversa = INVERSA_PERMANENTE_DUELO;",
     para: "",
   },
   {

@@ -371,6 +371,11 @@
           (res.estrategia.aproveitam.length ? '; aproveitam: ' + escapeHtml(res.estrategia.aproveitam.join(", ")) : "") +
           '. Abra com ele pra ligar o clima.</p>'
         : "") +
+      (res.buffs
+        ? '<p class="mybuild-hint' + (res.buffs.total && !res.buffs.ativos.length ? " plano-buffs-aviso" : "") + '"><b>Buffs do ginásio na conta:</b> ' +
+          (res.buffs.ativos.length ? escapeHtml(res.buffs.ativos.join(", ")) + "."
+            : "nenhum (todos marcados como já tirados). Se a luta ainda tem os buffs, desmarque-os no card Buffs do ginásio e monte o time de novo.") + '</p>'
+        : "") +
       '<ol class="plano-chefao">' + itens + '</ol>' +
       (res.luta
         ? '<p class="mybuild-hint"><b>Luta simulada inteira' + (res.luta.dupla ? " em dupla" : "") + '</b> (o HP passa de uma luta pra outra): ' +
