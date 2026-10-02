@@ -124,7 +124,12 @@
   // jogo original e não aparece nas páginas oficiais deste hack - fica de fora.
   // Números oficiais num lugar só (2026-09-30): o motor do duelo (duelo.js) usa
   // estes mesmos - antes ele dava +50% no sol/chuva enquanto este texto dizia +20%.
-  var CLIMA_OFICIAL = { reforcoSolChuva: 1.2, defesaIceNoGranizo: 1.5, danoGhostPsychicNaNevoa: 0.8 };
+  // Clima (decisão do usuário em 2026-10-02, depois da auditoria): segue o NextDex 2.65beta
+  // (Drought/Drizzle/Sand Stream/Snow Warning "Lasts 8 turns") e o código oficial do jogo
+  // (battle_util.c: clima de habilidade ou golpe dura 8 turnos e reforça 1,5x; o 1,2x é só
+  // do clima permanente de mapa). O Full Features (+20%, infinito) ficou desatualizado.
+  // A duração (duracaoTurnos) entra na luta inteira junto com "o armador precisa entrar".
+  var CLIMA_OFICIAL = { reforcoSolChuva: 1.5, duracaoTurnos: 8, defesaIceNoGranizo: 1.5, danoGhostPsychicNaNevoa: 0.8 };
   var pctClima = function (mult) { return Math.round(Math.abs(mult - 1) * 100) + "%"; };
   var CLIMA_QUE_COMBINA = {
     Fire: { clima: "Sun", curto: "+" + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " em golpes Fire", porque: "golpes Fire causam " + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " a mais no sol" },

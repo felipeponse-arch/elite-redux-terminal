@@ -300,7 +300,7 @@
       await new Promise(function (ok) { setTimeout(ok, 0); }); // deixa o texto aparecer antes da conta
       var nivel = getCurrentCap() || 100;
       // Chefão em dupla (db no dado): a luta é simulada 2 contra 2.
-      var r = await simularSemTravarATela(cands, party, nivel, { dupla: !!boss.db, buffs: buffsAtivosDoChefao(boss.name) }, function (feitos, total) {
+      var r = await simularSemTravarATela(cands, party, nivel, { dupla: !!boss.db, buffs: buffsAtivosDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name) }, function (feitos, total) {
         statusChefao("Simulando os duelos contra " + boss.name + "... " + Math.min(feitos, total) + " de " + total);
       });
       if (!r.escolhidos.length) { statusChefao("Não consegui montar um time com os Pokémon que você tem."); return; }

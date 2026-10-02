@@ -62,7 +62,20 @@ foreach ($m in $data.moves) {
     # movepool real de cada espécie - hoje essas habilidades pontuam ZERO no
     # rubric de habilidade (Score-AbilityText) porque nada nunca cruzou os
     # dois lados. Array de ids (índices em flagsT), igual `types`/`ab`/`inn`.
-    [void]$movesOut.Add(@($m["name"], $t0, $m["split"], $m["pwr"], $m["acc"], $m["pp"], $m["desc"], $m["prio"], @($m["flags"])))
+    #
+    # tipo2 (índice 9, 2026-10-02, auditoria da força-tarefa): golpes com DOIS
+    # tipos no dado bruto (Muddy Water Ground/Water, Flying Press
+    # Fighting/Flying, Aura Wheel, Scorched Earth, Saber Slashes) - antes só o
+    # types[0] era guardado e o golpe virava de um tipo só. -1 = sem 2º tipo.
+    # usaHpType (índice 10): Hidden Power, Secret Power e Techno Blast usam o
+    # hpType de quem usa (o treinador tem o campo; o jogador não).
+    $t1 = if ($types.Count -gt 1) { $types[1] } else { -1 }
+    $usaHp = if ($m["usesHpType"]) { 1 } else { 0 }
+    # efeito (índice 11): nome do efeito oficial (effT) - o motor tirava o número
+    # de acertos de regex na tradução PT ("não pode ser usado duas vezes seguidas"
+    # virava 2 acertos no Gigaton Hammer); agora usa o campo do jogo.
+    $efeito = if ($data.effT[$m["eff"]]) { $data.effT[$m["eff"]] } else { "" }
+    [void]$movesOut.Add(@($m["name"], $t0, $m["split"], $m["pwr"], $m["acc"], $m["pp"], $m["desc"], $m["prio"], @($m["flags"]), $t1, $usaHp, $efeito))
 }
 
 # --- items lookup: flat, sorted list of real item names (no ids needed -
@@ -159,6 +172,10 @@ for ($idx = 0; $idx -lt $data.species.Count; $idx++) {
         senc = $senc.ToArray()
         wenc = if ($wildMapsBySpecies.ContainsKey($idx)) { $wildMapsBySpecies[$idx].ToArray() } else { @() }
         frm = $frm
+        # cabecas (2026-10-02): stats.flags F_TWO_HEADED/F_THREE_HEADED do dado
+        # bruto - o motor chutava 1,5 golpe extra pra Multi Headed sem saber
+        # quantas cabeças a espécie tem. 1 = sem a marcação.
+        cab = if (@($st["flags"]) -contains "F_THREE_HEADED") { 3 } elseif (@($st["flags"]) -contains "F_TWO_HEADED") { 2 } else { 1 }
     }
     [void]$speciesOut.Add($entry)
 }

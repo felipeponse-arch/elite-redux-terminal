@@ -23,12 +23,22 @@
     return d === "easy" ? "easy" : d === "elite" ? "elite" : "more";
   }
 
-  // Dificuldade Elite (Full Features oficial, item 19: "Abilities must be
-  // unlocked by defeating first 2 Gyms"): até a 2ª insígnia o jogador luta
-  // sem habilidade nenhuma - escolhida e innates. Só o lado do jogador; Easy e
-  // Ace não têm trava (2026-10-01, pendência antiga de 16/09).
-  function habilidadesTravadasNoElite() {
-    return state.settings.difficulty === "elite" && (state.settings.milestone || 0) < 2;
+  // Dificuldade Elite: as innates do JOGADOR liberam pelo nível do Pokémon
+  // (código oficial do jogo, include/constants/pokemon_config.h:
+  // INNATE_1_LEVEL_ELITE 1, INNATE_2 17, INNATE_3 24; pokemon.c:4968 só vale
+  // pro jogador). A habilidade escolhida vale sempre. O Full Features resume
+  // como "depois dos 2 primeiros ginásios" - é o mesmo efeito nos caps "More".
+  // Correção de 2026-10-02: a v158 travava TUDO até a 2ª insígnia (errado; o
+  // vídeo Mono Fairy mostra habilidades antes do 1º ginásio).
+  var NIVEL_DA_INNATE_ELITE = [1, 17, 24];
+  function innatesAtivasNoNivel(sp, nivel) {
+    var inn = (sp && sp.inn) || [];
+    if (state.settings.difficulty !== "elite") return inn.slice();
+    return inn.filter(function (id, i) { return (nivel || 0) >= (NIVEL_DA_INNATE_ELITE[i] || 1); });
+  }
+  function innatesTravadasNoNivel(sp, nivel) {
+    var ativas = innatesAtivasNoNivel(sp, nivel);
+    return ((sp && sp.inn) || []).filter(function (id) { return ativas.indexOf(id) === -1; });
   }
 
   function getCurrentCap() {

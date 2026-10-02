@@ -289,7 +289,11 @@
       "Habilidades escolhiveis - " + (plural ? "cada set escolhe" : "escolha") + " exatamente UMA destas, escrita EXATAMENTE assim: " + abiNames.join(", ") + ". Efeito de cada uma NESTE jogo:\n" +
       "<dados_do_jogo>\n" + abiIds.map(linhaHabilidadeIA).join("\n") + "\n</dados_do_jogo>\n" +
       "Innates SEMPRE ativas (nao escolhiveis, mas contam na sinergia - a build deve aproveitar o maximo delas):\n" +
-      "<dados_do_jogo>\n" + uniqueIds(sp.inn).map(linhaHabilidadeIA).join("\n") + "\n</dados_do_jogo>\n";
+      "<dados_do_jogo>\n" + uniqueIds(sp.inn).map(function (id) {
+        // Elite: a innate que o nível do cap ainda não liberou (level_cap.js) vai marcada.
+        var travada = innatesTravadasNoNivel(sp, getCurrentCap() || 100).indexOf(id) !== -1;
+        return linhaHabilidadeIA(id) + (travada ? " [TRAVADA no Elite ate o Pokemon chegar ao nivel " + NIVEL_DA_INNATE_ELITE[(sp.inn || []).indexOf(id)] + " - nao conte com ela agora]" : "");
+      }).join("\n") + "\n</dados_do_jogo>\n";
   }
 
   // Papel conduz a build (2026-09-27, pedido do usuário: "se um Pokémon é
@@ -494,6 +498,8 @@
       linhas.push("  " + f.name + " (" + speciesTypeNames(f.sp).join("/") + ") " + (f.ability || "habilidade desconhecida") +
         " @ " + (f.item || "sem item") + ": " + (f.moves || []).join(", "));
     });
+    var campo = regraDeCampoDoChefao(boss.name);
+    if (campo) linhas.push("  REGRA DE CAMPO desta luta: " + campo.texto + " - monte e escolha golpes/velocidade pensando nisso.");
     // Buffs do ginásio que o jogador ainda não tirou (2026-10-01): mudam a escolha
     // (status nos últimos do time, telas, Protect proibido, hazards...).
     var resumoBuffs = gymSkillsSummaryFor(gymLeaderBaseName(boss.name));
@@ -550,12 +556,15 @@
     return linhas;
   }
   // `sp` opcional: com ele, entra a linha "o app sugere ESTA espécie" da próxima luta.
-  // Dificuldade Elite antes da 2ª insígnia (Full Features oficial): sem habilidade nenhuma.
-  var AVISO_HABILIDADES_TRAVADAS_IA = "HABILIDADES TRAVADAS: o jogador está na dificuldade Elite e ainda não venceu os 2 primeiros ginásios - " +
-    "no jogo, até lá NENHUMA habilidade funciona (nem a escolhida nem as innates). Não conte com habilidade nenhuma agora; " +
-    "escolha pelo que funciona sem elas (tipos, atributos, golpes, item). O campo ability da build continua sendo a que vai valer depois da 2ª insígnia.";
+  // Dificuldade Elite (código oficial): innates do jogador liberam pelo nível do Pokémon.
+  function avisoInnatesEliteIA() {
+    if (state.settings.difficulty !== "elite") return "";
+    var cap = getCurrentCap();
+    return "INNATES NO ELITE: no jogador, a habilidade escolhida vale sempre; a 1a innate vale desde o nivel 1, a 2a so a partir do nivel 17 " +
+      "e a 3a so a partir do nivel 24 do Pokemon" + (cap ? " (cap atual " + cap + ")" : "") + ". Nao conte com innate que o nivel ainda nao liberou.";
+  }
   function linhasContextoComumIA(sp, chefao) {
-    var linhas = habilidadesTravadasNoElite() ? [AVISO_HABILIDADES_TRAVADAS_IA] : [];
+    var linhas = avisoInnatesEliteIA() ? [avisoInnatesEliteIA()] : [];
     var faltam = getRemainingBossEntries();
     if (faltam.length) {
       var contagem = {};
@@ -808,7 +817,7 @@
       "algo fora dela:\n" + rosterDesc + "\n\n" +
       "Foco pedido: " + focusDesc + ".\n" +
       (megaEvolutionUnlocked() ? "" : "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da 4a insignia (Flannery). NAO sugira nenhuma forma mega nem conte com mega no time; use so as formas base da lista.\n") +
-      (habilidadesTravadasNoElite() ? AVISO_HABILIDADES_TRAVADAS_IA + "\n" : "") +
+      (avisoInnatesEliteIA() ? avisoInnatesEliteIA() + "\n" : "") +
       (monotype ? "A lista acima JÁ está filtrada só pro tipo " + monotype + " (Monotype) - todos servem, escolha pela sinergia entre eles.\n" +
         "Na " + orientacaoMono(monotype) + " Entre candidatos parecidos, prefira quem cobre mais dessas fraquezas.\n" +
         viramDoTipoPrompt(monotype) : "") +

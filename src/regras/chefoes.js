@@ -363,6 +363,20 @@
     return { gateOnly: false, note: leaderData.note || null, buffs: buffs, remaining: remaining, total: buffs.length };
   }
 
+  // Regra de campo de lutas específicas, do código oficial do jogo (scripts dos mapas):
+  // a 1ª Tate&Liza tem Trick Room permanente + batalha invertida; as revanches dela, só
+  // Trick Room (o atalho de revanche pula o setflag da inversa); as duplas do Steven,
+  // Gravity. O campeão monotype (BATTLE_FIELD_EFFECT_MONOCHAMP) tem efeito próprio ainda
+  // não pesquisado - fica de fora de propósito.
+  var REGRA_DE_CAMPO_DO_CHEFAO = {
+    "Tate And Liza 1": { sala: true, inversa: true, texto: "Trick Room permanente e batalha INVERTIDA (tabela de tipos ao contrario) a luta inteira" },
+    "Tate And Liza 2": { sala: true, texto: "Trick Room permanente a luta inteira" },
+    "Tate And Liza 3": { sala: true, texto: "Trick Room permanente a luta inteira" },
+    "Steven Doubles": { gravidade: true, texto: "Gravity a luta inteira (Ground acerta voadores, sem Levitate)" },
+    "Steven Doubles Legends": { gravidade: true, texto: "Gravity a luta inteira (Ground acerta voadores, sem Levitate)" }
+  };
+  function regraDeCampoDoChefao(nome) { return REGRA_DE_CAMPO_DO_CHEFAO[nome] || null; }
+
   // Ids dos buffs do ginásio que o jogador ainda NÃO tirou (vão pro simulador do
   // chefão e pro prompt da IA). Vazio pra quem não é líder com buffs.
   function buffsAtivosDoChefao(leaderName) {

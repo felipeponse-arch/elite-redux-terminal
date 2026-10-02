@@ -13,12 +13,15 @@ const golpe = (cat, extra) => Object.assign({ nome: "T", tipo: "Normal", cat, co
 const unidade = (ef, g, extra) => Object.assign({ sp: { n: "Teste", sname: "T", inn: [] }, tipos: ["Water"], ids: [], ef, item: "", it: R.itemDoDuelo("", null), stats: [320, 100, 100, 100, 100, 100], golpesProntos: [g], statusIds: [] }, extra || {});
 const u100 = (ids, tipos) => ({ ef: R.efeitoDasHabilidadesNoDuelo(ids, "CO_U" + ids.join(), null), tipos: tipos || ["Water"], stats: [100, 100, 100, 100, 100, 100] });
 
-test("sol/chuva reforçam 20% (oficial), não 50%; o texto da mono run usa o mesmo número", () => {
+// 2026-10-02 (decisão do usuário): NextDex 2.65beta ("Lasts 8 turns") + código oficial (1,5x
+// para clima de habilidade/golpe). O Full Features (+20%, infinito) ficou desatualizado.
+test("sol/chuva reforçam 50% por 8 turnos (NextDex + código); o texto da mono run usa o mesmo número", () => {
   const surf = R.MOVE_ID_BY_NAME["Surf"];
   const forca = (clima) => R.prepararGolpesDuelo([surf], u100([]), clima)[0].forca;
   assert.ok(perto(forca("chuva") / forca(null), R.CLIMA_OFICIAL.reforcoSolChuva));
-  assert.equal(R.CLIMA_OFICIAL.reforcoSolChuva, 1.2);
-  assert.match(R.climaQueCombina("Water").curto, /\+20%/);
+  assert.equal(R.CLIMA_OFICIAL.reforcoSolChuva, 1.5);
+  assert.equal(R.CLIMA_OFICIAL.duracaoTurnos, 8);
+  assert.match(R.climaQueCombina("Water").curto, /\+50%/);
   assert.match(R.climaQueCombina("Ice").curto, /\+50%/);
 });
 

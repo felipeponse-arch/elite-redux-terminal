@@ -43,13 +43,18 @@
   function textoHabDuelo(id) { return descricaoDeHabilidadePorId(id); } // pelo número: nomes repetidos (As One)
 
   // ---------- golpes ----------
+  // Acertos pelo EFEITO oficial do golpe (MOVES[id][11], effT do dado bruto) - 2026-10-02,
+  // auditoria: a regex na tradução PT dava 2 acertos ao Gigaton/Tsunami Hammer ("não pode
+  // ser usado duas vezes seguidas") e errava Wrap/Double Slap. Multi Hit (2 a 5) conta 3 na
+  // média. Exceções provadas pelo texto em inglês do NextDex 2.65beta, onde o efeito do dado
+  // é outro (Poison Hit, Drench Hit...) mas o golpe acerta mais de uma vez:
+  var ACERTOS_POR_EFEITO_DUELO = { "Multi Hit": 3, "Double Hit": 2, "Triple Kick": 3, "Ten Hits": 6 };
+  var ACERTOS_PELO_TEXTO_DUELO = { "Twineedle": 2, "Cross Poison": 2, "Double Iron Bash": 2, "Rapid River": 2,
+    "Chiller": 3, "Surging Strikes": 3, "Sparkling Barrage": 3 };
   function acertosDoGolpeDuelo(id) {
-    var d = MOVE_PT[id] || "";
-    if (/2 a 5 vezes|de 2 a 5/i.test(d) && !/turnos/i.test(d)) return 3;
-    if (/10 vezes/i.test(d)) return 6;
-    if (/tr[eê]s vezes|3 vezes/i.test(d)) return 3;
-    if (/duas vezes|2 vezes/i.test(d)) return 2;
-    return 1;
+    var m = MOVES[id];
+    if (!m) return 1;
+    return ACERTOS_PELO_TEXTO_DUELO[m[0]] || ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;
   }
   function golpeUtilNoDuelo(id) {
     var m = MOVES[id];
@@ -1144,7 +1149,7 @@
       espiao: false, pintaAlvo: null, golpeAlterado: {}, golpeTaunt: null, curaComLuta: false, sonoCura: 0,
       curaTimeNaEntrada: false, mimetismo: false, ventoAtaque: false, ventoCarga: false,
       forma: null, cuspe: false, critMetade: false,
-      imposter: false, traca: false, gasNeutro: false, enfurecido: false, poluicaoMental: false, alquimia: false, mumia: false, malodor: false, espirito: false, hemotoxina: false, quebraAura: false,
+      imposter: false, traca: false, gasNeutro: false, enfurecido: false, poluicaoMental: false, alquimia: false, mumia: false, malodor: false, espirito: false, hemotoxina: false, quebraAura: false, multiCabeca: false,
       egoista: false, compartilha: false, retribuicao: false, homeRun: false, trocaEstagios: false, pantano: false, alcatrao: false,
       atravessaProtecao: false, protegeNaEntrada: false, semRecarga: false, tudoDanca: false, dancaSom: false, curaAliadoEstagios: false,
       receptor: false, ladrao: false, recuperaItem: false };
@@ -1253,7 +1258,14 @@
       if ((x = t.match(/hit twice\. (?:1st hit at 100% power, )?2nd hit (?:at|does) (\d+)%/i)) || (x = t.match(/Second hit does (\d+)% damage/i))) {
         ef.golpeExtra = Math.max(ef.golpeExtra, 1 + parseInt(x[1], 10) / 100);
       }
-      if (/Hits as many times, as it has heads/i.test(t)) ef.golpeExtra = Math.max(ef.golpeExtra, 1.5);
+      // Multi-Headed (código oficial, battle_util.c GetParentalBondMultiplier): duas cabeças
+      // = 2 golpes, o 2º a 25%; três = 100% + 20% + 15%. As cabeças vêm do dado (sp.cab,
+      // stats.flags F_TWO/THREE_HEADED); antes era um chute de 1,5 pra todos (2026-10-02).
+      if (/Hits as many times, as it has heads/i.test(t)) {
+        ef.multiCabeca = true;
+        var cabecas = (getSpeciesBySname(sname) || {}).cab || 1;
+        ef.golpeExtra = Math.max(ef.golpeExtra, cabecas === 3 ? 1.35 : cabecas === 2 ? 1.25 : 1);
+      }
       if ((x = t.match(/After using a (\w+) move, follow up with a (\d+)\s?BP/i))) ef.seguimento = { tipo: x[1], poder: parseInt(x[2], 10) };
       if ((x = t.match(/Triggers (\d+) BP \w+ after using a (\w+)-type move/i)) && tipoDoTextoDuelo(x[2])) ef.seguimento = { tipo: x[2], poder: parseInt(x[1], 10) };
       if (/Multi-hit moves always hit the maximum/i.test(t)) ef.skillLink = true;
@@ -1379,7 +1391,10 @@
     });
     var lista = ids.map(function (id) {
       var m = MOVES[id];
-      var tipo = TYPES[m[1]], hab = 1;
+      // Hidden Power/Secret Power/Techno Blast (m[10]) usam o tipo do hpType de quem usa (só
+      // chefão tem, bosses.json hpt); m[9] = 2º tipo do golpe (Muddy Water Ground/Water...).
+      var tipo = m[10] && u.hpt ? u.hpt : TYPES[m[1]], hab = 1;
+      var tipo2 = m[9] !== undefined && m[9] >= 0 ? TYPES[m[9]] : null;
       var conv = u.ef.converte[tipo];
       if (conv) { tipo = conv.para; hab *= conv.mult; }
       var som = temSomDuelo(m) || !!u.ef.somPorTipo[tipo]; // Reverberate: Normal vira som
@@ -1398,7 +1413,7 @@
       // ou que mira a Defesa Especial (Power Fists, Power Edge).
       if (cats.some(function (c) { return u.ef.categoriaEspecial[c]; })) cat = "E";
       var defEspecial = cats.some(function (c) { return u.ef.categoriaNaSpDef[c]; });
-      var stabNatural = u.tipos.indexOf(tipo) !== -1;
+      var stabNatural = u.tipos.indexOf(tipo) !== -1 || (!!tipo2 && u.tipos.indexOf(tipo2) !== -1);
       var stabHab = !stabNatural && (u.ef.stabTodos || u.ef.stabExtra.indexOf(tipo) !== -1);
       var base = stabNatural ? 1.5 : 1;
       if (stabNatural) hab *= u.ef.stabMult / 1.5;
@@ -1418,7 +1433,7 @@
       var poder = alt && alt.poder ? alt.poder : m[3] + (alt && alt.mais ? alt.mais : 0);
       if (u.ef.tecnico && poder <= u.ef.tecnico.limite) hab *= u.ef.tecnico.mult;
       if ((m[7] || 0) > 0) hab *= u.ef.prioMult;
-      if (reforcado && tipo === reforcado) base *= CLIMA_OFICIAL.reforcoSolChuva; // oficial: +20% (Weather Rework), não o 1,5x da série
+      if (reforcado && tipo === reforcado) base *= CLIMA_OFICIAL.reforcoSolChuva; // NextDex 2.65beta + código oficial: 1,5x (mono_run.js)
       // Série: Water no sol e Fire na chuva saem pela metade (Catastrophe: reforçam; Nika: Water normal no sol).
       var enfraquecido = { sol: "Water", chuva: "Fire" }[clima];
       if (enfraquecido && tipo === enfraquecido && !(clima === "sol" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? CLIMA_OFICIAL.reforcoSolChuva : 0.5; // Catastrophe: o mesmo reforço do clima
@@ -1441,7 +1456,7 @@
       if (contato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
-      var g = { nome: m[0], tipo: tipo, cat: cat, defEspecial: defEspecial, contato: temContatoDuelo(m), som: som, prio: m[7] || 0,
+      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, contato: temContatoDuelo(m), som: som, prio: m[7] || 0,
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
           cats.some(function (c) { return u.ef.prioCheioCategoria[c]; }),
         precisao: Math.max(m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, u.ef.precisaoGolpe[m[0]] || 0), forcaBase: base, forca: base * hab };
@@ -1509,7 +1524,11 @@
       var r = abilityTypeModFor(tipo, def.tipos, def.ids);
       if (r.raw !== 0 && r.mult === 0) return 0; // imune por habilidade
       if (r.raw > 0) mult *= r.mult / r.raw;
-      if (def.ef.resistTipo[tipo] !== undefined) mult *= def.ef.resistTipo[tipo];
+      // Fossilized/Raw Wood e parecidas: a resistência já veio da tabela TYPE_MOD_ABILITIES
+      // (tipos.js) - a regex do texto ("Halves dmg taken by X") não pode contar de novo
+      // (auditoria de 2026-10-02: dava 0,25 em vez de 0,5 para 34 espécies).
+      var naTabela = (def.ids || []).some(function (id) { var md = TYPE_MOD_ABILITIES[id]; return md && md.resist && md.resist[tipo] !== undefined; });
+      if (def.ef.resistTipo[tipo] !== undefined && !naTabela) mult *= def.ef.resistTipo[tipo];
       if (def.ef.resistSeTipo && def.ef.resistSeTipo.tipo === tipo && def.tipos.indexOf(def.ef.resistSeTipo.se) !== -1) mult *= 0.5; // Old Mariner
       if (atq.ef.alcatrao && tipo === "Fire") mult *= 2; // Tar Shot na entrada (Tar Toss)
     }
@@ -1556,6 +1575,8 @@
       // Upper Hand (NextDex: "Fails if the target doesn't use a priority move").
       if (g.nome === "Upper Hand" && !(def.golpesProntos || []).some(function (x) { return x.prio > 0 && x.cat !== "S"; })) return;
       var efTipo = efetividadeNoDuelo(atq, g.tipo, def);
+      // Golpe de dois tipos (Flying Press, Muddy Water...): a efetividade é o produto dos dois.
+      if (g.tipo2) efTipo *= efetividadeNoDuelo(atq, g.tipo2, def);
       // "Super effective vs X" do NextDex (Freeze-Dry em Water, Acid em Steel...): o tipo X conta 2x.
       var seContra = GOLPE_SUPER_EFETIVO_CONTRA[g.nome];
       if (seContra && def.tipos.indexOf(seContra) !== -1) {
@@ -2218,11 +2239,13 @@
     var megaSname = MEGA_FORMS[m.item];
     var sp = (megaSname && getSpeciesBySname(megaSname)) || getSpeciesByX(m.x);
     if (!sp) return null;
-    var abiId = ABILITY_ID_BY_NAME[m.abi];
+    // abiId do dado (2026-10-02): "As One"/"Embody Aspect" têm vários ids com o mesmo nome.
+    var abiId = m.abiId !== undefined && m.abiId >= 0 ? m.abiId : ABILITY_ID_BY_NAME[m.abi];
     var ids = uniqueIds((sp.inn || []).concat(abiId !== undefined && !megaSname ? [abiId] : []));
     var ev = m.evsRaw || [0, 0, 0, 0, 0, 0], iv = m.ivsRaw || [31, 31, 31, 31, 31, 31];
     var foe = { sp: sp, nome: m.n || sp.n, ids: ids, item: m.item || "", it: itemDoDuelo(m.item || "", sp),
       stats: [0, 1, 2, 3, 4, 5].map(function (i) { return calcFinalStat(sp.b[i], iv[i], ev[i], nivel, i, m.nat, m.item, sp.n); }) };
+    foe.hpt = m.hpt || null; // tipo do Hidden Power deste Pokémon (antes de preparar os golpes)
     foe.ef = efeitoDasHabilidadesNoDuelo(ids, sp.sname, clima);
     foe.tipos = tiposNaBatalha(sp, foe.ef);
     aplicarFormaDuelo(foe, function (alt) { return [0, 1, 2, 3, 4, 5].map(function (i) { return calcFinalStat(alt.b[i], iv[i], ev[i], nivel, i, m.nat, m.item, alt.n); }); }, clima);
@@ -2241,23 +2264,23 @@
     (party || []).forEach(function (m) {
       var sp = getSpeciesByX(m.x);
       if (!sp || clima) return;
-      var nomes = uniqueIds((sp.inn || []).concat(ABILITY_ID_BY_NAME[m.abi] !== undefined ? [ABILITY_ID_BY_NAME[m.abi]] : [])).map(nomeHabDuelo);
+      var nomes = uniqueIds((sp.inn || []).concat(m.abiId !== undefined && m.abiId >= 0 ? [m.abiId] : ABILITY_ID_BY_NAME[m.abi] !== undefined ? [ABILITY_ID_BY_NAME[m.abi]] : [])).map(nomeHabDuelo);
       ["sol", "chuva"].forEach(function (c) { if (!clima && nomes.some(function (n) { return habilidadeArma(n, c); })) clima = c; });
     });
     return clima;
   }
   // item: o da build, quando há; sem ele, o que combina com o set e a habilidade (itemDoSetDuelo).
   function unidadeDeDuelo(sp, set, abId, nivel, golpeIds, clima, item) {
-    // Elite antes da 2ª insígnia: o jogador luta sem habilidade nenhuma (level_cap.js).
-    var travadas = habilidadesTravadasNoElite();
-    var ids = travadas ? [] : uniqueIds((sp.inn || []).concat(abId === null || abId === undefined ? [] : [abId]));
+    // Elite: só as innates que o nível já liberou (level_cap.js, innatesAtivasNoNivel).
+    var innAtivas = innatesAtivasNoNivel(sp, nivel);
+    var ids = uniqueIds(innAtivas.concat(abId === null || abId === undefined ? [] : [abId]));
     var ef = efeitoDasHabilidadesNoDuelo(ids, sp.sname, clima);
     if (ef.semRecarga) golpeIds = uniqueIds(golpeIds.concat(golpesDeRecargaAte(sp, nivel))); // Rampage: Hyper Beam e parecidos
     var nomeItem = item === undefined || item === null ? itemDoSetDuelo(set, sp, ef) : item;
     var u = { sp: sp, set: set.nome, ab: abId === null || abId === undefined ? "" : nomeHabDuelo(abId), abId: abId, ids: ids, item: nomeItem, it: itemDoDuelo(nomeItem, sp),
       stats: [0, 1, 2, 3, 4, 5].map(function (i) { return calcFinalStat(sp.b[i], 31, set.evs[i], nivel, i, set.nature, nomeItem, sp.n); }) };
     u.ef = ef;
-    if (travadas) u.habilidadesTravadas = true;
+    u.innAtivas = innAtivas;
     u.statusIds = planosUteisDuelo(golpesDeStatusAte(sp, nivel), u, golpeIds);
     u.clima = clima || null;
     u.golpeIds = golpeIds;
@@ -2531,11 +2554,11 @@
   // A mesma unidade com outras habilidades (sem a escolhida, sem nenhuma, ou com
   // uma a mais): refeita uma vez e guardada nela.
   function comHabilidadesDuelo(u, modo, extraId) {
-    if (!u.golpeIds || u.habilidadesTravadas) return u; // Elite travado: não há habilidade pra variar
+    if (!u.golpeIds) return u;
     u.porHabilidade = u.porHabilidade || {};
     var chave = modo + "|" + (extraId === undefined ? "" : extraId);
     if (u.porHabilidade[chave]) return u.porHabilidade[chave];
-    var inn = uniqueIds(u.sp.inn || []);
+    var inn = uniqueIds(u.innAtivas || u.sp.inn || []); // Elite: só as que o nível liberou
     var ids = modo === "nenhuma" ? [] : modo === "semEscolhida" ? inn : uniqueIds(u.ids.concat(extraId === undefined || extraId === null ? [] : [extraId]));
     var ef = efeitoDasHabilidadesNoDuelo(ids, u.sp.sname, u.clima || null);
     if (modo === "auraQuebrada") {
@@ -3079,6 +3102,18 @@
     });
     return escolhido;
   }
+  // Recuo, custo de HP e Life Orb do golpe que NOCAUTEIA (auditoria de 2026-10-02): no duelo
+  // 1x1 não mudam o resultado (balanco desconta só os golpes antes do último), mas na luta
+  // inteira o HP passa pra próxima - o Azumarill com Life Orb "varria" com 19% de HP.
+  function custoDoGolpeFinalDuelo(u, alvo, fracAlvo, nivel) {
+    if (u.ef.semResiduo) return 0;
+    var d = danoNoDuelo(u, alvo, nivel).melhor, g = d.golpe;
+    if (!g) return 0;
+    var entra = Math.min(d.dano, Math.max(0, fracAlvo) * alvo.stats[0]);
+    var it = u.it || itemDoDuelo("", null);
+    var custo = (g.recuo || 0) * entra + (g.custoHP || 0) * u.stats[0] + it.custoAtaque * u.stats[0] * itemAtivoDuelo(u, alvo, g.contato);
+    return custo / u.stats[0];
+  }
   function participanteDuelo(u) { return { u: u, frac: 1, vivo: true, status: {}, bonus: { estagios: {}, crit: 0, mult: 1, semGolpe: [] } }; }
 
   // ---------- buffs do ginásio (Gym Skills) ainda ativos (2026-10-01) ----------
@@ -3149,6 +3184,20 @@
       var mudouStat = mult.some(function (m) { return m !== 1; });
       if (!ef && !mudouStat) return f;
       return Object.assign({}, f, { ef: ef || f.ef, stats: mudouStat ? f.stats.map(function (s, k) { return Math.floor(s * mult[k]); }) : f.stats });
+    });
+  }
+  // Regra de CAMPO da luta (código oficial: MossdeepCity_Gym/scripts.pory:991-995 e
+  // EverGrandeCity_ChampionsRoom:314-318, 2026-10-02): Trick Room permanente, batalha
+  // invertida e Gravity. O chefão "arma" o campo a luta toda (99 turnos), e o
+  // campoDoDuelo já sabe o que fazer com sala/inversa/gravidade.
+  function foesComRegraDeCampo(foes, regra) {
+    if (!regra) return foes;
+    return foes.map(function (f) {
+      var ef = Object.assign({}, f.ef);
+      if (regra.sala) ef.sala = 99;
+      if (regra.inversa) ef.inversa = 99;
+      if (regra.gravidade) ef.gravidade = true;
+      return Object.assign({}, f, { ef: ef });
     });
   }
   // Meu Pokémon com os buffs que pesam em mim: sem Protect/Detect.
@@ -3323,7 +3372,11 @@
       atual.bonus.primeiroGolpe = 0; // Stakeout/Avenger: só o 1º golpe depois de entrar
       atual.itemGasto = true; f.itemGasto = true; // consumível usado nesta luta
       if (perece && r.turnos > perece + 1) { atual.vivo = false; atual.frac = 0; f.vivo = false; f.frac = 0; }
-      else if (r.venceu === true) { atual.frac = r.fracEu; f.vivo = false; f.frac = 0; nocaute(atual, f); }
+      else if (r.venceu === true) {
+        var custoFinal = custoDoGolpeFinalDuelo(comoEstaDuelo(atual), comoEstaDuelo(f), f.frac, nivel);
+        atual.frac = r.fracEu - custoFinal; f.vivo = false; f.frac = 0; nocaute(atual, f);
+        if (atual.frac <= 0) { atual.frac = 0; atual.vivo = false; } // o recuo do nocaute derruba os dois
+      }
       else if (r.venceu === false) { f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; nocaute(f, atual); }
       // Empate de velocidade: conta como derrota (o lado seguro), o dele fica com o HP que sobrou.
       else { f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; }
@@ -3341,13 +3394,13 @@
   // Chefões pode devolver a vez pra tela (antes a conta travava 1-3 s no desktop).
   // Quem quer tudo de uma vez (rank, testes) usa montarTimeContraChefao.
   // `buffs`: ids dos buffs do ginásio ainda ativos (chefoes.js, gymSkillsSummaryFor).
-  function* montarTimeNoClimaEmPassos(candidatos, party, nivel, clima, armador, dupla, buffs) {
+  function* montarTimeNoClimaEmPassos(candidatos, party, nivel, clima, armador, dupla, buffs, campo) {
     var inicio = buffs && buffs.length ? inicioDaLutaComBuffs(buffs) : null;
     var simular = function (meus, fs, nv) {
       var comBuffs = buffs && buffs.length ? meus.map(function (u) { return meuComBuffsDoGinasio(u, buffs); }) : meus;
       return (dupla ? simularDuplaContraChefao : simularLutaContraChefao)(comBuffs, fs, nv, inicio);
     };
-    var foes = foesComBuffsDoGinasio(party.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean), buffs, dupla ? 2 : 1);
+    var foes = foesComRegraDeCampo(foesComBuffsDoGinasio(party.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean), buffs, dupla ? 2 : 1), campo);
     var avaliados = [];
     for (var ci = 0; ci < candidatos.length; ci++) {
       var c = candidatos[ci];
@@ -3415,15 +3468,15 @@
   // Quantos candidatos o simulador avalia (pro progresso "12 de 44" do botão).
   function totalDePassosContraChefao(candidatos) { return candidatos.length * (1 + armadoresDeClima(candidatos).length); }
   function* montarTimeContraChefaoEmPassos(candidatos, party, nivel, opcoes) {
-    var dupla = !!(opcoes && opcoes.dupla), buffs = (opcoes && opcoes.buffs) || [];
+    var dupla = !!(opcoes && opcoes.dupla), buffs = (opcoes && opcoes.buffs) || [], campo = (opcoes && opcoes.campo) || null;
     var climaChefao = climaDoTimeDoChefao(party);
-    var melhor = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, climaChefao, null, dupla, buffs);
+    var melhor = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, climaChefao, null, dupla, buffs, campo);
     var base = melhor;
     melhor.estrategia = null;
     var armadores = armadoresDeClima(candidatos);
     for (var ai = 0; ai < armadores.length; ai++) {
       var arm = armadores[ai];
-      var r = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, arm.clima, arm, dupla, buffs);
+      var r = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, arm.clima, arm, dupla, buffs, campo);
       if (r.valor >= melhor.valor + (melhor === base ? GANHO_MINIMO_ESTRATEGIA : 0.001)) {
         // Quem ganha com o clima: nota no clima do time bem acima da nota sem ele.
         var notaBase = {};

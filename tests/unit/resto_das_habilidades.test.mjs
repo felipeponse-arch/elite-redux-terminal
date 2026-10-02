@@ -27,8 +27,8 @@ test("clima: Water no sol sai pela metade (série); Catastrophe vira reforço; N
   const u = (ab) => ({ ef: efDe(ab, "sol"), tipos: ["Normal"], stats: [100, 100, 100, 100, 100, 100] });
   const semClima = R.prepararGolpesDuelo([agua], { ef: efDe([]), tipos: ["Normal"], stats: [100, 100, 100, 100, 100, 100] }, null)[0].forca;
   assert.ok(perto(R.prepararGolpesDuelo([agua], u([]), "sol")[0].forca / semClima, 0.5));
-  // Catastrophe: o mesmo reforço oficial do clima (+20%, Weather Rework), não 1,5x.
-  assert.ok(perto(R.prepararGolpesDuelo([agua], u(["Catastrophe"]), "sol")[0].forca / semClima, 1.2));
+  // Catastrophe: o mesmo reforço do clima (CLIMA_OFICIAL, 1,5x desde 2026-10-02).
+  assert.ok(perto(R.prepararGolpesDuelo([agua], u(["Catastrophe"]), "sol")[0].forca / semClima, R.CLIMA_OFICIAL.reforcoSolChuva));
 });
 
 test("Delta Stream tira a fraqueza do Flying; Weather Control barra golpe de clima", () => {

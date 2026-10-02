@@ -1,4 +1,4 @@
-# Generates data/bosses.json (boss trainers + their difficulty variants) from
+﻿# Generates data/bosses.json (boss trainers + their difficulty variants) from
 # data/gameData_265beta.json. Run via build.ps1, or standalone for debugging.
 
 . (Join-Path $PSScriptRoot "common.ps1")
@@ -36,6 +36,13 @@ function ResolveAbility($sp, $abiIdx) {
     return ""
 }
 
+function ResolveAbilityId($sp, $abiIdx) {
+    if (-not $sp -or -not $sp["stats"] -or -not $sp["stats"]["abis"]) { return -1 }
+    $abisArr = @($sp["stats"]["abis"])
+    if ($abiIdx -ge 0 -and $abiIdx -lt $abisArr.Count) { return [int]$abisArr[$abiIdx] }
+    return -1
+}
+
 function ResolveParty($rawParty) {
     $party = New-Object System.Collections.ArrayList
     foreach ($mon in @($rawParty)) {
@@ -63,6 +70,13 @@ function ResolveParty($rawParty) {
             evsRaw = @($mon["evs"])
             ivsRaw = @($mon["ivs"])
             mv = $moveNames
+            # abiId (2026-10-02): o id da habilidade, não só o nome - "As One"
+            # e "Embody Aspect" têm vários ids com o mesmo nome (cada um com um
+            # efeito), e o nome resolvia sempre pro primeiro.
+            abiId = ResolveAbilityId $sp $mon["abi"]
+            # hpt: tipo do Hidden Power/Secret Power/Techno Blast deste
+            # Pokémon (hpType do dado bruto); vazio quando não usa esses golpes.
+            hpt = if (@(@($mon["moves"]) | Where-Object { $_ -ne 0 -and $data.moves[$_] -and $data.moves[$_]["usesHpType"] }).Count -gt 0) { $data.typeT[$mon["hpType"]] } else { "" }
         })
     }
     return $party.ToArray()

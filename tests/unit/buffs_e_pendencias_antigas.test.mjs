@@ -84,22 +84,23 @@ test("buffsAtivosDoChefao: só os que o jogador não marcou, pelo nome base do l
   R.state.gymSkillsCleared = {};
 });
 
-// ---------------- Elite: habilidades travadas até a 2ª insígnia ----------------
-test("Elite antes da 2ª insígnia: meu Pokémon luta sem habilidade; Ace e Elite depois da 2ª, com", () => {
-  const E = carregarRegras({ milestone: 1, difficulty: "elite", levelCapMode: "elite" });
+// ---------------- Elite: innates liberadas pelo nível (código oficial) ----------------
+// pokemon_config.h: INNATE_1_LEVEL_ELITE 1, INNATE_2 17, INNATE_3 24; só o jogador. Corrige a v158,
+// que travava tudo até a 2ª insígnia (o vídeo Mono Fairy mostra habilidades antes do 1º ginásio).
+test("Elite: escolhida e 1ª innate sempre; 2ª innate no nível 17, 3ª no 24; Ace sem trava", () => {
+  const E = carregarRegras({ milestone: 0, difficulty: "elite", levelCapMode: "elite" });
   const sp = E.getSpeciesBySname("SPECIES_GARCHOMP");
+  assert.equal(sp.inn.length, 3, "fixture: Garchomp tem 3 innates");
+  const ab = sp.ab[0];
   const set = { nome: "x", evs: [0, 252, 0, 0, 4, 252], nature: "Jolly" };
   const golpes = E.golpesDeDueloAte(sp, 50);
-  const travado = E.unidadeDeDuelo(sp, set, null, 50, golpes, null);
-  assert.equal(E.habilidadesTravadasNoElite(), true);
-  assert.equal(travado.ids.length, 0);
-  assert.equal(E.comHabilidadesDuelo(travado, "semEscolhida"), travado);
-  assert.match(E.linhasContextoComumIA(null, null).join("\n"), /HABILIDADES TRAVADAS/);
-  E.state.settings.milestone = 2;
-  assert.equal(E.habilidadesTravadasNoElite(), false);
-  assert.ok(E.unidadeDeDuelo(sp, set, null, 50, golpes, null).ids.length > 0);
-  assert.equal(R.habilidadesTravadasNoElite(), false, "Ace nunca trava");
-  assert.doesNotMatch(R.linhasContextoComumIA(null, null).join("\n"), /HABILIDADES TRAVADAS/);
+  const ids = (nivel) => E.unidadeDeDuelo(sp, set, ab, nivel, golpes, null).ids.join(",");
+  assert.equal(ids(10), [sp.inn[0], ab].join(","), "nível 10: 1ª innate + escolhida");
+  assert.equal(ids(17), [sp.inn[0], sp.inn[1], ab].join(","), "nível 17: libera a 2ª");
+  assert.equal(ids(24), [sp.inn[0], sp.inn[1], sp.inn[2], ab].join(","), "nível 24: todas");
+  assert.match(E.linhasContextoComumIA(null, null).join("\n"), /INNATES NO ELITE/);
+  assert.equal(R.unidadeDeDuelo(sp, set, ab, 10, golpes, null).ids.length, 4, "Ace: tudo desde o início");
+  assert.doesNotMatch(R.linhasContextoComumIA(null, null).join("\n"), /INNATES NO ELITE/);
 });
 
 // ---------------- iniciais por BP ----------------
