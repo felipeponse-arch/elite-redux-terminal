@@ -34,3 +34,32 @@
   // Sem chamada na carga: aqui o state do app ainda não existe (o template o declara depois
   // das regras). O JSON já vem com a nota de Fácil/Ace (padrão); applySave e a troca de
   // dificuldade em Progresso chamam aplicarRankDaDificuldade.
+
+  // Marca "Concorrência no tipo" do rank v2 (ponto 6, 2026-10-02): marca sem nota. Para
+  // cada tipo da espécie, quantas do MESMO tipo a dominam (Pareto): potencial e
+  // viabilidade maiores ou iguais, disponível na mesma etapa ou antes, e estritamente
+  // melhor em pelo menos um dos três (senão duas formas idênticas se "dominariam").
+  // Calculada por scripts/calcular_rank_v2.mjs no --gravar (porDificuldade.<dif>.dominadoPor);
+  // aqui só a função pura, pra o script e os testes usarem a mesma.
+  // lista: [{ s, tipos: [...], pot, via, etapa }] -> { s: { tipo: n } }
+  function dominantesNoTipo(lista) {
+    var porTipo = {}, out = {};
+    lista.forEach(function (e) {
+      out[e.s] = {};
+      e.tipos.forEach(function (t) { (porTipo[t] = porTipo[t] || []).push(e); });
+    });
+    Object.keys(porTipo).forEach(function (t) {
+      var grupo = porTipo[t];
+      grupo.forEach(function (a) {
+        out[a.s][t] = grupo.filter(function (b) {
+          return b !== a && b.pot >= a.pot && b.via >= a.via && b.etapa <= a.etapa &&
+            (b.pot > a.pot || b.via > a.via || b.etapa < a.etapa);
+        }).length;
+      });
+    });
+    return out;
+  }
+  // Dado da dificuldade da run (set, habilidade, dominadoPor) de uma entrada de SPECIES_RANK.
+  function rankDaDificuldadeDe(r) {
+    return (r && r.porDificuldade && r.porDificuldade[r.rankDaDificuldade || "party"]) || null;
+  }

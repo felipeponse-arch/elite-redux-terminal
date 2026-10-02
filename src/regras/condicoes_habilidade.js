@@ -195,6 +195,37 @@
       comoGarantir: comoGarantir(sp, conds, ativas)
     };
   }
+  // Marca "Precisa de setter" do rank v2 (ponto 6, 2026-10-02): marca sem nota. A
+  // espécie, com a habilidade do set do rank + innates, depende de clima/terreno que
+  // nenhuma habilidade dela arma. Mesma tabela e mesma leitura de texto acima (nada
+  // novo de mecânica); a innate condicional também é garantida por uma escolhível que
+  // arma (igual blocoCondicoesIA). Só condição de CAMPO: status e item (Booster Energy)
+  // a espécie resolve sozinha. Golpe (Solar Beam) não entra: o motor já tira do set do
+  // rank o golpe de carga que não dispara sem sol (prepararGolpesDuelo).
+  // Retorna [{ condicao, nome, habilidades: [...], golpes: [...] }] - golpes = os que
+  // armam a condição no movepool (ela arma sozinha, mas gastando turno e espaço).
+  var CONDICOES_DE_CAMPO = Object.keys(CONDICAO_DO_ARQUETIPO).map(function (k) { return CONDICAO_DO_ARQUETIPO[k]; });
+  function precisaDeSetter(sp, habilidadeEscolhida) {
+    var innates = nomesDeHabilidades(sp.inn), escolhiveis = nomesDeHabilidades(sp.ab);
+    var porCondicao = {}, ordem = [];
+    innates.concat(habilidadeEscolhida ? [habilidadeEscolhida] : []).forEach(function (nome) {
+      var conds = CONDICAO_DE_HABILIDADE[nome];
+      if (!conds || !conds.every(function (c) { return CONDICOES_DE_CAMPO.indexOf(c) !== -1; })) return;
+      var ehInnate = innates.indexOf(nome) !== -1;
+      var armadoras = innates.concat(ehInnate ? escolhiveis : [habilidadeEscolhida]);
+      if (conds.some(function (c) { return armadoras.some(function (n) { return habilidadeArma(n, c); }); })) return;
+      var chave = conds.join("|");
+      if (!porCondicao[chave]) { porCondicao[chave] = { condicao: chave, nome: conds.map(function (c) { return NOME_DA_CONDICAO[c] || c; }).join(" ou "), habilidades: [], golpes: [] }; ordem.push(chave); }
+      if (porCondicao[chave].habilidades.indexOf(nome) === -1) porCondicao[chave].habilidades.push(nome);
+    });
+    var movepool = ordem.length ? availableMovesFor(sp).names : [];
+    return ordem.map(function (k) {
+      var m = porCondicao[k];
+      k.split("|").forEach(function (c) { (GOLPES_QUE_ARMAM[c] || []).forEach(function (g) { if (movepool.indexOf(g) !== -1 && m.golpes.indexOf(g) === -1) m.golpes.push(g); }); });
+      return m;
+    });
+  }
+
   // Linhas pro prompt, ANTES da IA escolher: cada habilidade condicional da
   // espécie (escolhível ou innate), o que a garante hoje e como garantir.
   function blocoCondicoesIA(sp) {

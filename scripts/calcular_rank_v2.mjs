@@ -177,7 +177,7 @@ for (const d of DIFICULDADES) {
   const pot = notas(d.chave, "potencial"), via = notas(d.chave, "viabilidade");
   const geo = Object.fromEntries(validos.map((s) => [s, Math.sqrt(Math.max(0, pot.nota[s]) * Math.max(0, via.nota[s]))]));
   const pp = percentis(pot.nota), pv = percentis(via.nota), pg = percentis(geo);
-  relatorio[d.chave] = { pesoLuta: pot.pesoLuta, geo, pg };
+  relatorio[d.chave] = { pesoLuta: pot.pesoLuta, geo, pg, pot: pot.nota, via: via.nota };
   for (const s of validos) {
     final[s] = final[s] || { etapa: res[s].etapa };
     const r = res[s][d.chave];
@@ -218,7 +218,11 @@ if (process.argv.includes("--gravar")) {
     validos.forEach((s) => { const a = antigo[s]; if (a && a.stageTier) (porEstagio[a.stage] = porEstagio[a.stage] || []).push(s); });
     const estagio = {};
     Object.values(porEstagio).forEach((lista) => { const f = pctDentro(lista, geo); lista.forEach((s) => { estagio[s] = f(s); }); });
-    blocos[d.chave] = { mono, estagio };
+    // Concorrência no tipo (ponto 6): quantas do mesmo tipo a dominam, pelas notas brutas
+    // dos dois eixos (o percentil arredondado empataria demais) e pela etapa.
+    const dominado = R.dominantesNoTipo(validos.filter((s) => final[s][d.chave]).map((s) => ({ s,
+      tipos: R.speciesTypeNames(R.getSpeciesBySname(s)), pot: relatorio[d.chave].pot[s], via: relatorio[d.chave].via[s], etapa: final[s].etapa })));
+    blocos[d.chave] = { mono, estagio, dominado };
   }
   const novo = {};
   for (const s of Object.keys(antigo)) {
@@ -228,7 +232,7 @@ if (process.argv.includes("--gravar")) {
       const f = final[s][d.chave];
       if (!f) continue;
       e.porDificuldade[d.chave] = { tier: f.tier, score: f.score, potencial: f.potencial, viabilidade: f.viabilidade,
-        monoRanks: blocos[d.chave].mono[s] || {}, set: f.set, habilidade: f.habilidade, golpes: f.golpes };
+        monoRanks: blocos[d.chave].mono[s] || {}, dominadoPor: blocos[d.chave].dominado[s] || {}, set: f.set, habilidade: f.habilidade, golpes: f.golpes };
     }
     const base = e.porDificuldade.party || e.porDificuldade.insane;
     Object.assign(e, { tier: base.tier, score: base.score, potencial: base.potencial, viabilidade: base.viabilidade, monoRanks: base.monoRanks });

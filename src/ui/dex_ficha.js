@@ -291,6 +291,26 @@
   function badgeDeTierHtml(classe, tier, titulo) {
     return '<span class="' + classe + ' ' + (RANK_TIER_CLASS[tier] || "tier-C") + '" title="' + escapeHtml(titulo) + '">' + tier + '</span>';
   }
+  // Marcas sem nota do rank v2 (ponto 6, 02/10): não mexem no score, só avisam.
+  function marcasDoRankHtml(sp, r) {
+    var d = rankDaDificuldadeDe(r), out = "";
+    precisaDeSetter(sp, d && d.habilidade).forEach(function (m) {
+      var title = "Sem nota: " + m.habilidades.join(", ") + " só funciona com " + m.nome + ", e nenhuma habilidade desta espécie arma isso. " +
+        (m.golpes.length ? "Ela mesma só arma usando " + m.golpes.join(" ou ") + " (gasta turno e espaço de golpe)." : "Precisa de alguém no time que arme.");
+      out += '<span class="rank-info-item"><span class="rank-info-label">Precisa de setter</span>' +
+        '<span title="' + escapeHtml(title) + '">' + escapeHtml(m.nome + " (" + m.habilidades.join(", ") + ")") + '</span></span>';
+    });
+    var dom = d && d.dominadoPor;
+    if (dom && Object.keys(dom).length) {
+      var tipos = Object.keys(dom), com = tipos.filter(function (t) { return dom[t]; }), sem = tipos.filter(function (t) { return !dom[t]; });
+      var partes = (com.length ? ["dominado por " + com.map(function (t) { return dom[t] + " " + t; }).join(", ")] : [])
+        .concat(sem.length ? ["ninguém domina entre " + sem.join(" e ")] : []);
+      out += '<span class="rank-info-item"><span class="rank-info-label">Concorrência</span><span title="' +
+        escapeHtml("Sem nota: quantas espécies do mesmo tipo são iguais ou melhores em potencial E viabilidade e já estão disponíveis na mesma etapa ou antes.") +
+        '">' + escapeHtml(partes.join(" · ")) + '</span></span>';
+    }
+    return out;
+  }
   function rankInfoLineHtml(sp) {
     var r = SPECIES_RANK[sp.sname];
     if (!r && FORA_DO_RANK[sp.sname]) {
@@ -317,6 +337,8 @@
       items += '<span class="rank-info-item"><span class="rank-info-label">Rank entre ' + escapeHtml(t) + '</span>' +
         badgeDeTierHtml("rank-badge-mono", mr.tier, "Rank " + mr.tier + " comparado só com quem tem o tipo " + t + " (score " + mr.score + "/100).") + '</span>';
     });
+    items += marcasDoRankHtml(sp, r);
+    // "Papéis cumpridos" (ponto 6) já é o "Papel" abaixo (species_role.json): não repete.
     items += roleTagsHtml(sp.sname);
     // The letters alone don't say which end is good without a hover -
     // user feedback, 2026-09-09 ("falta indicar qual seria o rank mais
