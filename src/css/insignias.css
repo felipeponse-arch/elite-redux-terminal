@@ -44,6 +44,8 @@
 .rank-badge.tier-B  { background: var(--badge-accent2); }
 .rank-badge.tier-C  { background: var(--surface-3); color: var(--text); }
 .rank-badge.tier-D  { background: var(--sem-weak); }
+/* Fora do rank (rank v2: pós-jogo, DexNav ou sem fonte) - traço neutro, não é nota. */
+.rank-badge.rank-fora { background: transparent; color: var(--text); border: 1px dashed var(--border); }
 
 /* Stage-relative badge - outlined instead of filled so it visually reads
    as "secondary/contextual" next to the plain rank badge, not a second

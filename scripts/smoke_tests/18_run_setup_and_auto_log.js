@@ -200,7 +200,14 @@ async function section18() {
     if (rowComTipo) { rowComTipo.click(); await wait(30); }
     // Só na ficha: desde 2026-09-26 o card de mono run (aba Time) também usa o
     // selo de rank Monotype.
-    var badgeMono = document.querySelector("#species-detail .rank-badge-mono");
+    // Rank v2 (02/10): rank por tipo SEMPRE na ficha, um selo por tipo ("Rank entre X").
+    var badgeDoTipo = function (tipo) {
+      var item = [...document.querySelectorAll("#species-detail .rank-info-item")].find(function (i) {
+        var l = i.querySelector(".rank-info-label"); return l && l.textContent === "Rank entre " + tipo;
+      });
+      return item ? item.querySelector(".rank-badge-mono") : null;
+    };
+    var badgeMono = badgeDoTipo(tipoMonotype);
     var tierEsperado = T.SPECIES_RANK[especieComTipo.sname].monoRanks[tipoMonotype].tier;
     check("badge de rank Monotype aparece na ficha de uma espécie do tipo ativo, com o tier certo",
       !!badgeMono && badgeMono.textContent.trim() === tierEsperado,
@@ -212,8 +219,8 @@ async function section18() {
     await wait(120);
     var rowSemTipo = document.querySelector("#species-list .species-row");
     if (rowSemTipo) { rowSemTipo.click(); await wait(30); }
-    check("badge de rank Monotype NÃO aparece na ficha de uma espécie sem o tipo ativo",
-      !document.querySelector("#species-detail .rank-badge-mono"));
+    check("ficha de espécie sem o tipo ativo não mostra rank entre esse tipo, mas mostra os dos tipos dela",
+      !badgeDoTipo(tipoMonotype) && !!document.querySelector("#species-detail .rank-badge-mono"));
     document.getElementById("back-to-list").click();
     await wait(30);
     setSearch("");
@@ -237,8 +244,8 @@ async function section18() {
     await wait(120);
     var rowDepoisDeLimpar = document.querySelector("#species-list .species-row");
     if (rowDepoisDeLimpar) { rowDepoisDeLimpar.click(); await wait(30); }
-    check("badge de rank Monotype some depois de limpar o arquétipo (mesma espécie que mostrava antes)",
-      !document.querySelector("#species-detail .rank-badge-mono"));
+    check("rank por tipo continua na ficha depois de limpar o arquétipo (sempre na ficha desde o rank v2)",
+      !!badgeDoTipo(tipoMonotype));
     document.getElementById("back-to-list").click();
     await wait(30);
     setSearch("");

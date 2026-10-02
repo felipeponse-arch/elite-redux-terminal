@@ -144,8 +144,10 @@
       // 2026-09-24: só mudava ao reabrir o chefão). Mesma escolha de variante de
       // selectBoss(), sem mexer na navegação (no celular o jogador pode estar na
       // lista, com o chefão ainda marcado).
-      acao(["resumo", "chefao"], function () {
+      // O rank muda com a dificuldade (rank v2: time party em Fácil/Ace, insane em Elite).
+      acao(["resumo", "chefao", "lista", "ficha", "time"], function () {
         state.settings.difficulty = diffSel.value;
+        aplicarRankDaDificuldade(state.settings.difficulty);
         var bossAberto = bossState.selected !== null ? BOSSES[bossState.selected] : null;
         if (bossAberto) bossState.diff = varianteDoChefao(bossAberto);
       });

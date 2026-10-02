@@ -165,9 +165,21 @@
   // "velocidade" saíram do rank (a primeira virou redundante com a
   // simulação de defesa real; a segunda vai virar contextual ao arquétipo
   // do time numa fase futura do roadmap, ainda não implementada).
+  var ROTULO_DO_RANK_DA_DIFICULDADE = { party: "Fácil/Ace", insane: "Elite" };
   function rankBadgeHtml(sname) {
     var r = SPECIES_RANK[sname];
+    if (!r && FORA_DO_RANK[sname]) {
+      return '<span class="rank-badge rank-fora" title="' + escapeHtml("Fora do rank: " + (MOTIVO_FORA_DO_RANK_PT[FORA_DO_RANK[sname]] || FORA_DO_RANK[sname]) + ".") + '">—</span>';
+    }
     if (!r) return "";
+    // Rank v2 (2026-10-02, scripts/calcular_rank_v2.mjs): nota da dificuldade da run.
+    if (r.porDificuldade) {
+      var titulo = "Rank " + r.tier + " de SS (melhor) a D (pior) em " + (ROTULO_DO_RANK_DA_DIFICULDADE[r.rankDaDificuldade] || "Fácil/Ace") +
+        " — score " + r.score + "/100. Duelo simulado contra os Pokémon dos chefões da run, só nas lutas a partir de quando dá pra pegá-lo" +
+        " (etapa " + r.etapa + "), no level cap de cada luta, com um set fixo de 4 golpes; chefão mais difícil pesa mais. " +
+        "Potencial " + r.potencial.tier + " (com golpe de status/setup) e viabilidade " + r.viabilidade.tier + " (só os 4 golpes de dano).";
+      return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(titulo) + '">' + r.tier + '</span>';
+    }
     // Rank por duelo simulado desde 2026-09-28 (scripts/calcular_rank_duelo.mjs):
     // o método antigo media só a tipagem defensiva e deixava Garchomp em C.
     var title = r.duelo
@@ -206,27 +218,8 @@
     return '<span class="rank-badge-stage ' + (RANK_TIER_CLASS[r.stageTier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.stageTier + '</span>';
   }
 
-  // Rank relativo por TIPO, só quando o jogador está numa run Monotype
-  // (achado real da pesquisa Smogon, 2026-09-21: o próprio formato Monotype
-  // do Smogon ranqueia cada espécie separadamente POR TIPO - "Toedscruel
-  // seria ranqueado separadamente pra cada tipo" porque times de Grass
-  // valorizam ele mais que times de Ground - mesma lógica do rank por
-  // estágio acima, comparar só quem compete pelo mesmo espaço, mas no eixo
-  // de tipo em vez de estágio evolutivo). Só renderiza quando (a) o jogador
-  // escolheu um Monotype em Progresso E (b) esta espécie realmente tem esse
-  // tipo (senão nem seria elegível pro time Monotype dele) - degrade seguro
-  // em qualquer outro caso, igual ao resto do rank.
-  function rankMonoBadgeHtml(sname) {
-    var monotype = state.archetype.monotype;
-    if (!monotype) return "";
-    var r = SPECIES_RANK[sname];
-    if (!r || !r.monoRanks || !r.monoRanks[monotype]) return "";
-    var mr = r.monoRanks[monotype];
-    var title = "Rank " + mr.tier + " entre outros Pokémon do tipo " + monotype + " (score " + mr.score + "/100) — " +
-      "mesma fórmula do rank normal, mas comparado só com quem tem o tipo " + monotype + ", já que é isso que decide quem " +
-      "pode entrar no seu time nesta run Monotype.";
-    return '<span class="rank-badge-mono ' + (RANK_TIER_CLASS[mr.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + mr.tier + '</span>';
-  }
+  // Rank por tipo: desde o rank v2 (02/10) sai SEMPRE na ficha, um selo por tipo da espécie
+  // (rankInfoLineHtml abaixo) - não só na run Monotype.
 
   function roleTagsHtml(sname) {
     var role = SPECIES_ROLE[sname];
@@ -295,8 +288,15 @@
     return "Encontro selvagem em: " + locText + ".";
   }
 
+  function badgeDeTierHtml(classe, tier, titulo) {
+    return '<span class="' + classe + ' ' + (RANK_TIER_CLASS[tier] || "tier-C") + '" title="' + escapeHtml(titulo) + '">' + tier + '</span>';
+  }
   function rankInfoLineHtml(sp) {
     var r = SPECIES_RANK[sp.sname];
+    if (!r && FORA_DO_RANK[sp.sname]) {
+      return '<div class="rank-info-line"><span class="rank-info-item"><span class="rank-info-label">Fora do rank</span>' + rankBadgeHtml(sp.sname) +
+        '</span><span class="rank-info-scale">' + escapeHtml(MOTIVO_FORA_DO_RANK_PT[FORA_DO_RANK[sp.sname]] || "") + '</span></div>';
+    }
     if (!r) return "";
     var items = '<span class="rank-info-item"><span class="rank-info-label">Rank geral</span>' + rankBadgeHtml(sp.sname) + '</span>';
     if (r.stageTier !== null && r.stageTier !== undefined) {
@@ -305,10 +305,18 @@
     }
     var duplaBadge = rankDuplaBadgeHtml(sp.sname);
     if (duplaBadge) items += '<span class="rank-info-item"><span class="rank-info-label">Rank em dupla</span>' + duplaBadge + '</span>';
-    var monoBadge = rankMonoBadgeHtml(sp.sname);
-    if (monoBadge) {
-      items += '<span class="rank-info-item"><span class="rank-info-label">Rank Monotype ' + escapeHtml(state.archetype.monotype) + '</span>' + monoBadge + '</span>';
+    // Rank v2: os dois eixos lado a lado e o rank por tipo SEMPRE (decisão do usuário, 02/10).
+    if (r.potencial && r.viabilidade) {
+      items += '<span class="rank-info-item"><span class="rank-info-label">Potencial</span>' +
+        badgeDeTierHtml("rank-badge-stage", r.potencial.tier, "Com golpe de status/setup no 4º espaço (score " + r.potencial.score + "/100).") + '</span>';
+      items += '<span class="rank-info-item"><span class="rank-info-label">Viabilidade</span>' +
+        badgeDeTierHtml("rank-badge-stage", r.viabilidade.tier, "Só os 4 golpes de dano, sem setup (score " + r.viabilidade.score + "/100).") + '</span>';
     }
+    Object.keys(r.monoRanks || {}).forEach(function (t) {
+      var mr = r.monoRanks[t];
+      items += '<span class="rank-info-item"><span class="rank-info-label">Rank entre ' + escapeHtml(t) + '</span>' +
+        badgeDeTierHtml("rank-badge-mono", mr.tier, "Rank " + mr.tier + " comparado só com quem tem o tipo " + t + " (score " + mr.score + "/100).") + '</span>';
+    });
     items += roleTagsHtml(sp.sname);
     // The letters alone don't say which end is good without a hover -
     // user feedback, 2026-09-09 ("falta indicar qual seria o rank mais

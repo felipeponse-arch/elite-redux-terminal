@@ -1,0 +1,20 @@
+{
+  "nota": "Regras de disponibilidade do rank v2 (scripts/gerar_rank_disponibilidade.mjs). Etapa = índice de levelcaps.json; insígnia n = etapa n. Cada regra cita a fonte no código oficial (er-repo).",
+  "equipamento": {
+    "oldRod": { "etapa": 0, "fonte": "data/maps/LittlerootTown/scripts.pory: giveitem ITEM_OLD_ROD junto com os Running Shoes" },
+    "goodRod": { "etapa": 3, "fonte": "data/maps/Route118/scripts.pory: pescador dá ITEM_GOOD_ROD; planilha marca '(Good Rod)' na etapa 3" },
+    "superRod": { "etapa": 6, "fonte": "data/maps/MossdeepCity_House3/scripts.pory: giveitem ITEM_SUPER_ROD" },
+    "surf": { "etapa": 5, "fonte": "src/field_control_avatar.c: Surf exige FLAG_BADGE05_GET" },
+    "rockSmash": { "etapa": 3, "fonte": "src/party_menu.c: golpe de campo n exige FLAG_BADGE01_GET + n (Rock Smash = 3ª)" }
+  },
+  "varaDaVaga": { "fonte": "src/wild_encounter.c: vagas 0-1 Old Rod, 2-4 Good Rod, 5-9 Super Rod", "oldRod": [0, 1], "goodRod": [2, 3, 4], "superRod": [5, 6, 7, 8, 9] },
+  "mapasPelaHistoria": {
+    "nota": "Mapas que a planilha não cita: etapa pela ordem da história (as mesmas etapas das lutas do rank). Prefixo da chave do mapa (sem MAP_, sem _, maiúsculas).",
+    "VERDANTURF": 2, "LAVARIDGETOWN": 3, "MIRAGETOWER": 4,
+    "ROUTE122": 6, "MTPYRE": 6, "MAGMAHIDEOUT": 6, "MOSSDEEPCITY": 6,
+    "ROUTE126": 6, "ROUTE127": 6, "ROUTE128": 6, "ROUTE129": 6, "ROUTE130": 6, "ROUTE131": 6, "PACIFIDLOGTOWN": 6,
+    "AQUAHIDEOUT": 7, "UNDERWATER": 7, "SEAFLOORCAVERN": 7, "SOOTOPOLISCITY": 7,
+    "ROUTE132": 7, "ROUTE133": 7, "ROUTE134": 7, "EVERGRANDECITY": 8,
+    "ARTISANCAVE": "pos-jogo"
+  }
+}

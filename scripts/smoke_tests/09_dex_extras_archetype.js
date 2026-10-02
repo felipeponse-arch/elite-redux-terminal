@@ -217,23 +217,23 @@ async function section09() {
   // qualquer publish, com espécies de controle conhecidas"). Desde 2026-09-28
   // o rank é o duelo simulado (scripts/calcular_rank_duelo.mjs) e a âncora
   // antiga (Probopass SS, calibrada pra fórmula de tipagem defensiva) saiu.
-  // Primal Kyogre é a âncora nova: SS porque a Primordial Sea que ele mesmo
-  // arma ativa o Raging Storm (1,5x no ataque) - se o duelo parar de contar
-  // "clima que o próprio Pokémon arma", ele cai e este teste pega.
-  setSearch("Kyogre Primal");
+  // Rank v2 (02/10): Primal Kyogre saiu do rank (só no pós-jogo pelo código do jogo).
+  // Âncora nova: Sandslash Mega, SS em Fácil/Ace e em Elite, obtível na etapa 4
+  // (arma a própria tempestade de areia com Sand Stream).
+  setSearch("Sandslash Mega");
   await wait(120);
-  const kyogreRow = [...document.querySelectorAll("#species-list .species-row")].find((r) => /Primal/.test(r.textContent));
-  if (kyogreRow) {
-    kyogreRow.click();
+  const ancoraRow = [...document.querySelectorAll("#species-list .species-row")].find((r) => /Sandslash Mega/.test(r.textContent));
+  if (ancoraRow) {
+    ancoraRow.click();
     await wait(30);
-    const rankBadge = document.querySelector(".rank-badge");
-    check("Primal Kyogre é SS (âncora: clima que ele mesmo arma ativa o Raging Storm no duelo)",
+    const rankBadge = document.querySelector("#species-detail .rank-badge");
+    check("Sandslash Mega é SS (âncora de calibração do rank v2)",
       !!rankBadge && rankBadge.textContent === "SS", rankBadge && rankBadge.textContent);
     check("tooltip do rank badge explica o duelo simulado contra os chefões (não a fórmula antiga)",
       !!rankBadge && rankBadge.title.indexOf("Duelo simulado") !== -1 && rankBadge.title.indexOf("Sinal principal") === -1,
       rankBadge && rankBadge.title);
   } else {
-    check("Primal Kyogre encontrado pro teste de calibração do rank", false);
+    check("Sandslash Mega encontrado pro teste de calibração do rank", false);
   }
   setSearch("");
   await wait(120);

@@ -1307,4 +1307,25 @@ export const MUTACOES = [
     de: "return g.efeito === \"Knock Off\"; })) f *= 0.5;",
     para: "return g.efeito === \"Knock Off\"; })) f *= 1;",
   },
+  {
+    id: "rankv2-elite-usa-party",
+    descricao: "Elite continua mostrando a nota do time party",
+    arquivo: "rank_da_run.js",
+    de: "return dif === \"elite\" ? \"insane\" : \"party\";",
+    para: "return \"party\";",
+  },
+  {
+    id: "rankv2-save-nao-troca",
+    descricao: "carregar save em outra dificuldade não troca o rank",
+    arquivo: "save.js",
+    de: "      aplicarRankDaDificuldade(state.settings.difficulty);",
+    para: "",
+  },
+  {
+    id: "rankv2-fora-fica",
+    descricao: "espécie fora do rank (pós-jogo) continua em SPECIES_RANK",
+    arquivo: "rank_da_run.js",
+    de: "      delete SPECIES_RANK[s];",
+    para: "",
+  },
 ];
