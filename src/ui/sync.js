@@ -50,7 +50,7 @@
     capRegistrado = getCurrentCap();
     if (reconciliouAoAplicar) {
       reconciliouAoAplicar = false;
-      persist();
+      persist({ manterData: true });
     }
   }
   // Save de outro aparelho com a soma de verificação errada (save.js): não é

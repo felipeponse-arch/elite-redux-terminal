@@ -20,13 +20,12 @@
   function autoEvolveRoster(announce) {
     var cap = getCurrentCap();
     if (cap === null || cap === undefined) return false;
-    var messages = [];
-    var step = function (x) { return evolveChainByX(devolveChainByX(x, cap, messages), cap, messages); };
-    var newTeam = state.team.map(step);
-    var newBox = state.box.map(step);
+    podarAutoEvolved(state.team, state.box);
+    var r = evoluirElencoSemDuplicar(state.team, state.box, function (x, msgs) { return evolveChainByX(devolveChainByX(x, cap, msgs), cap, msgs); });
+    var messages = r.messages;
     if (!messages.length) return false;
-    state.team = newTeam;
-    state.box = newBox;
+    state.team = r.team;
+    state.box = r.box;
     logAutoAction(messages.join("; ") + " (level cap " + cap + ")");
     renderAutoLog();
     if (announce) flashToast(messages.join("; ") + " (level cap " + cap + ")");

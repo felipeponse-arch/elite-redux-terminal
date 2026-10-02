@@ -19,3 +19,16 @@ test("hash ignora CRLF (checkout no Windows) mas pega mudança real", () => {
   assert.equal(hashDoConteudo(Buffer.from('{"a":1}\r\n')), hashDoConteudo(Buffer.from('{"a":1}\n')));
   assert.notEqual(hashDoConteudo(Buffer.from('{"a":1}\n')), hashDoConteudo(Buffer.from('{"a":2}\n')));
 });
+
+// Lote D da força-tarefa (2026-10-02): 404/4xx é endereço que sumiu (mudança), não falta
+// de rede - antes o alarme ficava cego em silêncio se o repositório mudasse de caminho.
+test("baixar: 4xx marca enderecoSumiu e não fica tentando de novo; 5xx é falha comum", async () => {
+  const { baixar } = await import("../../scripts/alarme_upstream.mjs");
+  const original = globalThis.fetch;
+  let chamadas = 0;
+  try {
+    globalThis.fetch = async () => { chamadas++; return { ok: false, status: 404 }; };
+    await assert.rejects(baixar("https://exemplo/x.json"), (e) => e.enderecoSumiu === true);
+    assert.equal(chamadas, 1, "404 não repete");
+  } finally { globalThis.fetch = original; }
+});

@@ -152,8 +152,8 @@
   }
 
 
-  function persist() {
-    var save = buildSave();
+  function persist(opts) {
+    var save = buildSave(opts);
     // lsSet() already swallows a quota/disabled-storage exception and
     // returns false - persist() used to just ignore that, so a full
     // localStorage (customBuilds/notes/build history all grow unbounded
@@ -332,7 +332,7 @@
         // salvo já libera evoluções que nunca foram aplicadas, aplica agora
         // mesmo, antes da primeira renderização.
         // A soma errada também regrava: o aviso sai uma vez só (a cópia crua já foi guardada).
-        if (autoEvolveRoster(true) || reconciliouAoAplicar || somaErrada) persist();
+        if (autoEvolveRoster(true) || reconciliouAoAplicar || somaErrada) persist({ manterData: true }); // ajuste automático, não ação do jogador
         return;
       } catch (e) {
         // BUG P0 achado em auditoria, 2026-09-18: antes disto, um save

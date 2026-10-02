@@ -359,6 +359,7 @@
       state.archetype = { pace: null, weather: null, monotype: null, tatica: null, reasoning: "" };
       state.autoEvolved = {};
       state.gymSkillsCleared = {};
+      state.orphans = { team: [], box: [] }; // Pokémon de versão mais nova dos dados também são da run antiga
       state.settings.milestone = 0;
       state.settings.runConfirmedAt = null;
       capRegistrado = getCurrentCap();

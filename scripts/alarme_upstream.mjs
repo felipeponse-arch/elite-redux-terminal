@@ -49,19 +49,25 @@ export function hashDoConteudo(buf) {
   return createHash("sha256").update(semCR).digest("hex");
 }
 
-async function baixar(url, comoBytes = false) {
+export async function baixar(url, comoBytes = false) {
   let ultimoErro;
   for (let tentativa = 1; tentativa <= 3; tentativa++) {
     try {
       const resp = await fetch(url, { headers: { "user-agent": "elite-redux-terminal-alarme" } });
+      // 4xx = o endereço sumiu ou mudou (repositório renomeado, versão nova com outro nome):
+      // isso é MUDANÇA, não falta de rede - antes um 404 deixava o alarme cego em silêncio.
+      if (resp.status >= 400 && resp.status < 500) { const e = new Error(`HTTP ${resp.status}`); e.enderecoSumiu = true; throw e; }
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       return comoBytes ? Buffer.from(await resp.arrayBuffer()) : await resp.text();
     } catch (err) {
       ultimoErro = err;
+      if (err.enderecoSumiu) break;
       if (tentativa < 3) await new Promise((r) => setTimeout(r, 5000 * tentativa));
     }
   }
-  throw new Error(`${url}: ${ultimoErro.message}`);
+  const e = new Error(`${url}: ${ultimoErro.message}`);
+  e.enderecoSumiu = !!ultimoErro.enderecoSumiu;
+  throw e;
 }
 
 async function main() {
@@ -75,7 +81,8 @@ async function main() {
       const estado = encontrado === null ? "mudou" : encontrado === esperado ? "ok" : "mudou";
       linhas.push({ item, esperado, encontrado: encontrado ?? "formato da página mudou", estado });
     } catch (err) {
-      linhas.push({ item, esperado, encontrado: `sem resposta (${err.message})`, estado: "sem-rede" });
+      if (err.enderecoSumiu) linhas.push({ item, esperado, encontrado: `endereço sumiu (${err.message})`, estado: "mudou" });
+      else linhas.push({ item, esperado, encontrado: `sem resposta (${err.message})`, estado: "sem-rede" });
     }
   };
 

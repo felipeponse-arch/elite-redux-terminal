@@ -37,7 +37,8 @@
   var STRATEGY_SETS_MAX = 60;
 
   var SCHEMA_VERSION = 2;
-  var reconciliouAoAplicar = false; // antes de applySave (no-use-before-define, 2026-09-30)
+  var reconciliouAoAplicar = false;
+  var dataDoSaveCarregado = null; // data do save que applySave carregou (buildSave com manterData) // antes de applySave (no-use-before-define, 2026-09-30)
 
   function applySave(save) {
     if (!save || typeof save !== "object") return;
@@ -46,8 +47,14 @@
     // keep re-partitioning correctly on every future load: known-again ->
     // back into the active list, still-unknown -> still an orphan.
     var teamOrphans = [], boxOrphans = [];
-    state.team = snamesToXs(save.team, teamOrphans).slice(0, 6);
-    state.box = snamesToXs(save.box, boxOrphans);
+    // Mais de 6 no time (save editado/de outra versão): o excedente vai pra caixa em vez
+    // de sumir sem aviso (lote D da força-tarefa, 2026-10-02).
+    var timeTodo = snamesToXs(save.team, teamOrphans);
+    state.team = timeTodo.slice(0, 6);
+    state.box = snamesToXs(save.box, boxOrphans).concat(timeTodo.slice(6).filter(function (x) { return state.team.indexOf(x) === -1; }));
+    // Data do save carregado: gravações AUTOMÁTICAS (ajuste na abertura) a mantêm, pra não
+    // passarem por "mais novas" e apagarem no sync o que foi feito no outro aparelho.
+    dataDoSaveCarregado = typeof save.savedAt === "string" ? save.savedAt : null;
     state.orphans = { team: teamOrphans, box: boxOrphans };
     if (Array.isArray(save.savedTeams)) {
       state.savedTeams = save.savedTeams.filter(function (t) {
@@ -61,12 +68,13 @@
       });
     }
     if (save.settings && typeof save.settings === "object") {
-      if (save.settings.difficulty) state.settings.difficulty = save.settings.difficulty;
+      if (["easy", "ace", "elite"].indexOf(save.settings.difficulty) !== -1) state.settings.difficulty = save.settings.difficulty;
       if (LEVEL_CAP_MODES.indexOf(save.settings.levelCapMode) !== -1) state.settings.levelCapMode = save.settings.levelCapMode;
       else state.settings.levelCapMode = levelCapModeFromDifficulty(save.settings.difficulty);
       if (save.settings.megaMode === "permanente" || save.settings.megaMode === "temporaria") state.settings.megaMode = save.settings.megaMode;
-      if (typeof save.settings.milestone === "number") state.settings.milestone = save.settings.milestone;
-      if (typeof save.settings.runConfirmedAt === "string") state.settings.runConfirmedAt = save.settings.runConfirmedAt;
+      if (typeof save.settings.milestone === "number" && save.settings.milestone >= 0) state.settings.milestone = Math.floor(save.settings.milestone);
+      // null também vale: é o "Novo jogo" feito no outro aparelho (antes ficava a data velha).
+      state.settings.runConfirmedAt = typeof save.settings.runConfirmedAt === "string" ? save.settings.runConfirmedAt : null;
       // Fase 1 quality-of-life, 2026-09-09: remember sort order + type
       // filter between sessions - both used to silently reset on reload.
       // typeFilter is validated against USABLE_TYPES so a hand-edited or
@@ -307,16 +315,17 @@
     return save.soma === somaDoSave(save) ? "ok" : "errada";
   }
 
-  function buildSave() {
-    var save = montarSave();
+  // opts.manterData: gravação automática (não é ação do jogador) - mantém a data do save.
+  function buildSave(opts) {
+    var save = montarSave(opts);
     save.soma = somaDoSave(save);
     return save;
   }
-  function montarSave() {
+  function montarSave(opts) {
     return {
       v: SCHEMA_VERSION,
       dataVersion: DATA.meta ? DATA.meta.version : null,
-      savedAt: new Date().toISOString(),
+      savedAt: opts && opts.manterData && dataDoSaveCarregado ? dataDoSaveCarregado : new Date().toISOString(),
       team: xsToSnames(state.team).concat(state.orphans.team),
       box: xsToSnames(state.box).concat(state.orphans.box),
       savedTeams: state.savedTeams,
@@ -351,5 +360,11 @@
     if (!a || !b) return true;
     var chaves = {};
     Object.keys(a).concat(Object.keys(b)).forEach(function (k) { if (SYNC_IGNORADAS.indexOf(k) === -1) chaves[k] = true; });
-    return Object.keys(chaves).some(function (k) { return JSON.stringify(a[k]) !== JSON.stringify(b[k]); });
+    // Ordenação e filtro de tipo da Dex são preferência de tela: mudar só eles não é
+    // "o time mudou" (antes cada clique de filtro gravava na rede e avisava o outro aparelho).
+    function semPreferenciaDeTela(k, v) {
+      if (k !== "settings" || !v || typeof v !== "object") return v;
+      var c = Object.assign({}, v); delete c.sort; delete c.typeFilter; return c;
+    }
+    return Object.keys(chaves).some(function (k) { return JSON.stringify(semPreferenciaDeTela(k, a[k])) !== JSON.stringify(semPreferenciaDeTela(k, b[k])); });
   }
