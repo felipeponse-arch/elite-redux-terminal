@@ -838,6 +838,10 @@
     if (b.ef.egoista) chaves.forEach(function (k) { eb[k] += Math.max(0, copiaA[k]); });
     if (a.ef.compartilha || b.ef.compartilha) chaves.forEach(function (k) { ea[k] = copiaA[k] + copiaB[k]; eb[k] = copiaA[k] + copiaB[k]; });
   }
+  // Golpes com "Super effective vs/on X" no NextDex 2.65beta (2026-10-01). Sonic Boom fica
+  // de fora: o texto curto diz Rock e o longo diz Steel.
+  var GOLPE_SUPER_EFETIVO_CONTRA = { "Acid": "Steel", "Sludge": "Water", "Poison Gas": "Flying", "Sheer Cold": "Water",
+    "Razor Wind": "Rock", "Magnet Bomb": "Steel", "Gigaton Hammer": "Steel", "Crackle Slam": "Steel", "Freeze-Dry": "Water" };
   // Mudança de estágio do efeito extra do golpe (dado do NextDex): no alvo ou no usuário.
   var ESTAGIO_DO_EFEITO_DUELO = {
     "Attack Down Hit": { alvo: { atk: -1 } }, "Defense Down Hit": { alvo: { def: -1 } }, "Special Attack Down Hit": { alvo: { spa: -1 } },
@@ -1456,7 +1460,8 @@
       // custo em HP (Blood Price, Infernal Rage) e dreno (golpe + habilidade).
       g.recuo = extra && extra.rc && !u.ef.semRecuo ? extra.rc / 100 : 0;
       g.custoHP = u.ef.custoPorAtaque + (u.ef.custoTipo[tipo] || 0);
-      g.dreno = (extra && extra.dr ? extra.dr / 100 * u.ef.drenoMult : 0) + u.ef.drenoPct + (contato ? u.ef.drenoContato : 0) + (u.ef.drenoTipo[tipo] || 0) +
+      // Matcha Gotcha (NextDex 2.65beta: "heals 50% dmg dealt") - o dado não traz o dreno.
+      g.dreno = (extra && extra.dr ? extra.dr / 100 * u.ef.drenoMult : extra && extra.ef === "Matcha Gotcha" ? 0.5 * u.ef.drenoMult : 0) + u.ef.drenoPct + (contato ? u.ef.drenoContato : 0) + (u.ef.drenoTipo[tipo] || 0) +
         cats.reduce(function (mx, c) { return Math.max(mx, u.ef.drenoCategoria[c] || 0); }, 0); // Vitality Strike
       g.recuo *= u.ef.recuoFrac; // Daredevil: metade do recuo
       if (u.ef.sementeNoDreno && extra && extra.dr) g.status.push({ st: "semente", p: 1, doGolpe: false, ignoraGenero: false }); // Absorbant
@@ -1548,7 +1553,15 @@
       if (abreDef && flags.some(function (fl) { return def.ef.imuneFlag[fl]; })) return;
       if (abreDef && def.ef.imuneTipoNaEntrada === g.tipo) return; // Magnet Rise na entrada (5 turnos: a luta toda)
       if (abreDef && def.ef.bloqueiaGolpeClima && flags.indexOf("Weather Based") !== -1) return; // Weather Control
+      // Upper Hand (NextDex: "Fails if the target doesn't use a priority move").
+      if (g.nome === "Upper Hand" && !(def.golpesProntos || []).some(function (x) { return x.prio > 0 && x.cat !== "S"; })) return;
       var efTipo = efetividadeNoDuelo(atq, g.tipo, def);
+      // "Super effective vs X" do NextDex (Freeze-Dry em Water, Acid em Steel...): o tipo X conta 2x.
+      var seContra = GOLPE_SUPER_EFETIVO_CONTRA[g.nome];
+      if (seContra && def.tipos.indexOf(seContra) !== -1) {
+        var semEsse = def.tipos.filter(function (tp) { return tp !== seContra; });
+        efTipo = 2 * (semEsse.length ? efetividadeNoDuelo(atq, g.tipo, Object.assign({}, def, { tipos: semEsse })) : 1);
+      }
       var osso = flags.indexOf("Bone Based") !== -1 && atq.ef.flagMult["Bone Based"]; // Bone Zone
       if (efTipo === 0 && osso) efTipo = 1;
       if (efTipo === 0) return;
@@ -1653,6 +1666,8 @@
   function golpeCondicionalDuelo(u, g, presNoAlvo, danoQueLeva, turnos) {
     if (!g) return 1;
     if (g.efeito === "Hex") return 1 + STATUS_DO_HEX.reduce(function (mx, s) { return Math.max(mx, presNoAlvo[s] || 0); }, 0);
+    // Infernal Parade, Bitter Malice, Barb Barrage (NextDex 2.65beta): "50% boost if target is statused".
+    if (g.efeito === "Infernal Parade") return 1 + 0.5 * STATUS_DO_HEX.reduce(function (mx, s) { return Math.max(mx, presNoAlvo[s] || 0); }, 0);
     if (g.efeito === "Eruption") {
       var n = Math.max(1, turnos || 1), soma = 0;
       for (var t = 0; t < n; t++) soma += Math.max(1 / 150, 1 - t * (danoQueLeva || 0) / u.stats[0]);
@@ -1840,6 +1855,9 @@
     var extraMeu = extraPorTurno(eu, meu.melhor.dano, meu.melhor.golpe, dele.melhor.golpe), extraDele = extraPorTurno(foe, dele.melhor.dano, dele.melhor.golpe, meu.melhor.golpe);
     var condMeu = golpeCondicionalDuelo(eu, meu.melhor.golpe, nele.pres, dele.melhor.dano, turnos);
     var condDele = golpeCondicionalDuelo(foe, dele.melhor.golpe, nMim.pres, meu.melhor.dano, turnos);
+    // Glaive Rush (NextDex: "The foe's next move deals double damage"): usado todo turno, quem usa leva sempre o dobro.
+    function glaive(melhor) { return melhor.golpe && melhor.golpe.nome === "Glaive Rush" ? 2 : 1; }
+    condDele *= glaive(meu.melhor); condMeu *= glaive(dele.melhor);
     function meuDano(d) { return d > 0 ? d * critMeu * spMeu.ataque * spDele.defesa * ordemMeu * estagioMeu * ritmoMeu * condMeu * nele.recebeMais * nMim.corte + extraMeu + nele.residuo : nele.residuo; }
     function deleDano(d) { return d > 0 ? d * critDele * spDele.ataque * spMeu.defesa * ordemDele * estagioDele * ritmoDele * condDele * nMim.recebeMais * nele.corte + extraDele + nMim.residuo : nMim.residuo; }
     // Balanço de HP de cada lado por turno: o que ele mesmo perde (recuo, custo,

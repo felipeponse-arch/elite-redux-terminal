@@ -76,11 +76,11 @@ test("habilidade composta ('A + B') aplica o efeito de TODAS as partes", () => {
 const EFEITOS_DE_GOLPE_SEM_REGRA_EXPLICITA = ["Accuracy Down Hit", "Argument Hit", "Argument Hit If Stat Up", "Bug Bite", "Bulldoze", "Burn Up",
   "Clear Smog", "Creeping Thorns Hit", "Curse Hit", "Defog", "Drench Hit", "Electro Shot", "Fairy Terrain Hit", "Feint",
   "Flame Burst", "Flinch Recoil 33", "Fling", "Freeze Dry", "Grassy Terrain Hit", "Grav Apple", "Heat Crash", "Hit",
-  "Hit Prevent Escape", "Hit Switch Target", "Hurricane", "Hyperspace Fury", "Incinerate", "Infernal Parade", "Leech Seed Hit",
-  "Matcha Gotcha", "Mind Blown", "Misc Hit", "Mortal Spin", "Multi Hit", "Natural Gift", "Nightmare", "Pay Day", "Rain Hit",
+  "Hit Prevent Escape", "Hit Switch Target", "Hurricane", "Hyperspace Fury", "Incinerate", "Leech Seed Hit",
+  "Mind Blown", "Misc Hit", "Mortal Spin", "Multi Hit", "Natural Gift", "Nightmare", "Pay Day", "Rain Hit",
   "Recoil 33", "Recoil If Miss", "Remove Terrain No Fail", "Rip And Tear", "Round", "Sandstorm Hit", "Sleep Hit",
   "Smack Down", "Snap Jaw", "Snore", "Sparkling Aria", "Spectral Thief", "Spike Hit", "Stealth Rock Hit", "Sticky Web Hit", "Tailwind Hit",
-  "Thief", "Thunder", "Trepidation", "Two Turn Retaliation", "Upper Hand", "Wake Up Slap"];
+  "Thief", "Thunder", "Trepidation", "Two Turn Retaliation", "Wake Up Slap"];
 
 test("efeitos de golpe sem regra explícita: só os já conhecidos", () => {
   const src = readdirSync("src/regras").map((f) => readFileSync("src/regras/" + f, "utf8")).join("\n");

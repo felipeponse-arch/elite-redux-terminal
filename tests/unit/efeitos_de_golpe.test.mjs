@@ -73,3 +73,34 @@ test("Rampage (Outrage): em luta longa, quem usa fica confuso e se fere; Own Tem
   const ownTempo = R.resultadoDoDuelo(atq(["Own Tempo"]), tanque(), 50, { detalhe: true });
   assert.ok(ownTempo.fracEu > com.fracEu, ownTempo.fracEu + " x " + com.fracEu);
 });
+
+// 2026-10-01, 2º lote (textos do NextDex 2.65beta, a versão dos dados do app).
+const prep = (nome, atq) => { const u = atq || unidade(efDe([]), golpe("E")); u.golpesProntos = R.prepararGolpesDuelo([R.MOVE_ID_BY_NAME[nome]], u, null); return u; };
+const alvoDe = (tipos) => unidade(efDe([]), golpe("F"), { tipos, stats: [5000, 100, 100, 100, 100, 100] });
+test("'Super effective vs X': Freeze-Dry em Water, Acid em Steel (que seria imune a Poison)", () => {
+  const fd = prep("Freeze-Dry", unidade(efDe([]), golpe("E"), { tipos: ["Ice"] }));
+  assert.equal(R.danoNoDuelo(fd, alvoDe(["Water"]), 50).melhor.efTipo, 2);
+  assert.equal(R.danoNoDuelo(fd, alvoDe(["Water", "Ground"]), 50).melhor.efTipo, 4);
+  assert.equal(R.danoNoDuelo(fd, alvoDe(["Fire"]), 50).melhor.efTipo, 0.5, "fora do tipo citado, tabela normal");
+  const acid = prep("Acid", unidade(efDe([]), golpe("E"), { tipos: ["Poison"] }));
+  assert.equal(R.danoNoDuelo(acid, alvoDe(["Steel"]), 50).melhor.efTipo, 2);
+});
+test("Upper Hand só vale contra quem tem golpe de prioridade", () => {
+  const uh = prep("Upper Hand", unidade(efDe([]), golpe("F"), { tipos: ["Fighting"] }));
+  assert.equal(R.danoNoDuelo(uh, alvoDe(["Normal"]), 50).melhor.dano, 0);
+  const comPrio = alvoDe(["Normal"]); comPrio.golpesProntos = [golpe("F", { prio: 1 })];
+  assert.ok(R.danoNoDuelo(uh, comPrio, 50).melhor.dano > 0);
+});
+test("Infernal Parade: +50% na parte da luta com o alvo sob status; Matcha Gotcha drena metade", () => {
+  const u = unidade(efDe([]), golpe("E"));
+  assert.ok(perto(R.golpeCondicionalDuelo(u, { efeito: "Infernal Parade" }, { queimar: 0.6 }, 0, 3), 1.3));
+  assert.equal(R.golpeCondicionalDuelo(u, { efeito: "Infernal Parade" }, {}, 0, 3), 1);
+  assert.equal(prep("Matcha Gotcha").golpesProntos[0].dreno, 0.5);
+});
+test("Glaive Rush: quem usa leva o dobro - vence menos que o mesmo golpe sem a regra", () => {
+  const atq = () => prep("Glaive Rush", unidade(efDe([]), golpe("F"), { tipos: ["Dragon"], stats: [600, 100, 150, 100, 150, 100] }));
+  const semRegra = (u) => Object.assign({}, u, { golpesProntos: u.golpesProntos.map((g) => Object.assign({}, g, { nome: "Outro" })) });
+  const rival = () => unidade(efDe([]), golpe("F", { forca: 40, poder: 40, forcaBase: 40 }), { tipos: ["Normal"], stats: [700, 80, 100, 80, 100, 80] });
+  const com = R.resultadoDoDuelo(atq(), rival(), 50, { detalhe: true }), sem = R.resultadoDoDuelo(semRegra(atq()), rival(), 50, { detalhe: true });
+  assert.ok(com.fracEu < sem.fracEu, com.fracEu + " x " + sem.fracEu);
+});
