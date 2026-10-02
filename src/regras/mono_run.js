@@ -31,6 +31,41 @@
     return linha;
   }
 
+  // Lojas de iniciais (página oficial "How to Get Every Gen 1 to 9 Starter",
+  // eliteredux.net, lida em 2026-10-01): depois de vencer a Flannery, cada
+  // inicial de Grama/Água/Fogo das gerações 1 a 9 sai por 15 BP numa loja por
+  // tipo. Os 45 iniciais extras por tipo NÃO estão nessas lojas.
+  var LOJAS_DE_INICIAIS = [
+    { onde: "na floricultura da Rota 104 (depois do Petalburg Woods)",
+      bases: ["BULBASAUR", "CHIKORITA", "TREECKO", "TURTWIG", "SNIVY", "CHESPIN", "ROWLET", "GROOKEY", "SPRIGATITO"] },
+    { onde: "no mercado de Slateport",
+      bases: ["SQUIRTLE", "TOTODILE", "MUDKIP", "PIPLUP", "OSHAWOTT", "FROAKIE", "POPPLIO", "SOBBLE", "QUAXLY"] },
+    { onde: "na primeira casa à direita do ginásio de Lavaridge",
+      bases: ["CHARMANDER", "CYNDAQUIL", "TORCHIC", "CHIMCHAR", "TEPIG", "FENNEKIN", "LITTEN", "SCORBUNNY", "FUECOCO"] }
+  ];
+  var compraDeInicialCache = null;
+  // Frase do "Como conseguir" pra um inicial (ou evolução dele); "" pros demais.
+  function compraDeInicialTexto(sp) {
+    if (!compraDeInicialCache) {
+      compraDeInicialCache = Object.create(null);
+      LOJAS_DE_INICIAIS.forEach(function (loja) {
+        loja.bases.forEach(function (b) {
+          var base = getSpeciesBySname("SPECIES_" + b);
+          if (!base) return;
+          linhaEvolutivaDe(base).forEach(function (membro) {
+            if (!compraDeInicialCache[membro.sname]) compraDeInicialCache[membro.sname] = { base: base, onde: loja.onde };
+          });
+        });
+      });
+    }
+    var c = sp && compraDeInicialCache[sp.sname];
+    if (!c) return "";
+    var quando = "depois de vencer a Flannery, por 15 BP " + c.onde;
+    return c.base.sname === sp.sname
+      ? "Loja de iniciais: " + quando + "."
+      : "Evolução de inicial: compre o " + c.base.n + " " + quando + " e evolua.";
+  }
+
   // ---- Monotype valendo em tudo (2026-09-26, pedido do usuário: "tem algo
   // que pode ajudar nas mono runs?"). Antes só o gerador de time respeitava o
   // Monotype; a melhor troca da caixa (com botão Aplicar) sugeria Pokémon de

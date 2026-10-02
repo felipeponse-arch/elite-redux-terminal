@@ -15,13 +15,10 @@ const R = carregarRegras();
 
 // Habilidades em uso que o motor NÃO lê, e por quê (memória: project_habilidades_sem_regra).
 const HABILIDADES_SEM_REGRA = {
-  "Angel's Wrath": "o texto não traz o efeito novo",
-  "Temporal Rupture": "o texto não traz o efeito novo",
-  "Hollow Ice Zone": "Ice Statue sem regra em fonte oficial",
-  "Power of Alchemy": "transmuta itens, sem regra de quais",
+  "Angel's Wrath": "efeito extra por golpe (Tackle, String Shot...; código oficial) - não modelado, 1 espécie",
+  "Temporal Rupture": "Roar of Time põe Slow Start por 5 turnos (código oficial) - status por golpe não modelado, só Dialga",
+  "Hollow Ice Zone": "golpe Ice vira o alvo tipo Ice e o usuário sai (código oficial) - troca de tipo do alvo não modelada",
   "Flammable Coat": "troca de forma sem forma alternativa no dado",
-  "Mental Pollution": "estado 'enraged' sem regra",
-  "Madness Enhancement": "estado 'enraged' sem regra (o changelog 2.65.3b só diz que é Enrage)",
   "Spiteful": "mexe em PP sem dizer quanto; o simulador não gasta PP",
   "Symbiosis": "passa item ao aliado; o 2x2 não controla item gasto",
   "Honey Gather": "acha item fora de batalha",
@@ -78,12 +75,12 @@ test("habilidade composta ('A + B') aplica o efeito de TODAS as partes", () => {
 // lacunas conhecidas, a revisar (planner de 30/09). Efeito NOVO faz o teste falhar.
 const EFEITOS_DE_GOLPE_SEM_REGRA_EXPLICITA = ["Accuracy Down Hit", "Argument Hit", "Argument Hit If Stat Up", "Bug Bite", "Bulldoze", "Burn Up",
   "Clear Smog", "Creeping Thorns Hit", "Curse Hit", "Defog", "Drench Hit", "Electro Shot", "Fairy Terrain Hit", "Feint",
-  "Flame Burst", "Flinch Recoil 33", "Fling", "Freeze Dry", "Grassy Terrain Hit", "Grav Apple", "Hammer Arm", "Heat Crash", "Hit",
+  "Flame Burst", "Flinch Recoil 33", "Fling", "Freeze Dry", "Grassy Terrain Hit", "Grav Apple", "Heat Crash", "Hit",
   "Hit Prevent Escape", "Hit Switch Target", "Hurricane", "Hyperspace Fury", "Incinerate", "Infernal Parade", "Leech Seed Hit",
-  "Matcha Gotcha", "Mind Blown", "Misc Hit", "Mortal Spin", "Multi Hit", "Natural Gift", "Nightmare", "Pay Day", "Rain Hit", "Rampage",
+  "Matcha Gotcha", "Mind Blown", "Misc Hit", "Mortal Spin", "Multi Hit", "Natural Gift", "Nightmare", "Pay Day", "Rain Hit",
   "Recoil 33", "Recoil If Miss", "Remove Terrain No Fail", "Rip And Tear", "Round", "Sandstorm Hit", "Sleep Hit",
   "Smack Down", "Snap Jaw", "Snore", "Sparkling Aria", "Spectral Thief", "Spike Hit", "Stealth Rock Hit", "Sticky Web Hit", "Tailwind Hit",
-  "Thief", "Thunder", "Trepidation", "Two Turn Retaliation", "Upper Hand", "V Create", "Wake Up Slap"];
+  "Thief", "Thunder", "Trepidation", "Two Turn Retaliation", "Upper Hand", "Wake Up Slap"];
 
 test("efeitos de golpe sem regra explícita: só os já conhecidos", () => {
   const src = readdirSync("src/regras").map((f) => readFileSync("src/regras/" + f, "utf8")).join("\n");

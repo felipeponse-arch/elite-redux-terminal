@@ -845,7 +845,9 @@
     "Attack Up Hit": { proprio: { atk: 1 } }, "Defense Up Hit": { proprio: { def: 1 } }, "Defense Up2 Hit": { proprio: { def: 2 } },
     "Sp Attack Up Hit": { proprio: { spa: 1 } }, "Special Attack Up Hit": { proprio: { spa: 1 } }, "Speed Up Hit": { proprio: { spe: 1 } },
     "All Stats Up Hit": { proprio: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 } },
-    "Overheat": { proprio: { spa: -2 } }, "Close Combat": { proprio: { def: -1, spd: -1 } }
+    "Overheat": { proprio: { spa: -2 } }, "Close Combat": { proprio: { def: -1, spd: -1 } },
+    // NextDex: Hammer Arm "Drops the user's Speed"; V-create "lowers the user's Defense, Sp. Def and Speed" (2026-10-01).
+    "Hammer Arm": { proprio: { spe: -1 } }, "V Create": { proprio: { def: -1, spd: -1, spe: -1 } }
   };
   function estagiosDoGolpeDuelo(id, u) {
     var e = typeof MOVE_CATEGORIAS !== "undefined" ? MOVE_CATEGORIAS[id] : null;
@@ -1138,7 +1140,7 @@
       espiao: false, pintaAlvo: null, golpeAlterado: {}, golpeTaunt: null, curaComLuta: false, sonoCura: 0,
       curaTimeNaEntrada: false, mimetismo: false, ventoAtaque: false, ventoCarga: false,
       forma: null, cuspe: false, critMetade: false,
-      imposter: false, traca: false, gasNeutro: false, mumia: false, malodor: false, espirito: false, hemotoxina: false, quebraAura: false,
+      imposter: false, traca: false, gasNeutro: false, enfurecido: false, poluicaoMental: false, alquimia: false, mumia: false, malodor: false, espirito: false, hemotoxina: false, quebraAura: false,
       egoista: false, compartilha: false, retribuicao: false, homeRun: false, trocaEstagios: false, pantano: false, alcatrao: false,
       atravessaProtecao: false, protegeNaEntrada: false, semRecarga: false, tudoDanca: false, dancaSom: false, curaAliadoEstagios: false,
       receptor: false, ladrao: false, recuperaItem: false };
@@ -1327,6 +1329,7 @@
       var mult = x ? (/%$/.test(x[0]) ? 1 + parseInt(x[1], 10) / 100 : parseFloat(x[1])) : 1.3;
       (h.golpes || []).forEach(function (g) { ef.bonusGolpes[g] = Math.max(ef.bonusGolpes[g] || 1, Math.min(mult, 2)); });
     });
+    if (ef.poluicaoMental && ef.enfurecido) ef.gasNeutro = true; // as duas partes podem vir em qualquer ordem
     ef.climasProprios = Object.keys(climaProprio); // climas que as próprias habilidades armam
     cacheEfeitoDuelo[chave] = ef;
     return ef;
@@ -1680,6 +1683,10 @@
       var orbe = alvo.ef.klutz ? null : ORBE_DE_STATUS_DUELO[alvo.item];
       var todos = Object.keys(chances);
       if (orbe && podeSofrerStatusDuelo(alvo, orbe) && todos.indexOf(orbe) === -1) todos.push(orbe);
+      // Rampage (Outrage, Thrash, Petal Dance...; NextDex: "two to three turns, then becomes
+      // confused", 2026-10-01): a confusão entra depois de ~2,5 golpes e vale o resto da luta.
+      var rampage = golpeDoAlvo && golpeDoAlvo.efeito === "Rampage" && turnos > 2.5 && podeSofrerStatusDuelo(alvo, "confundir") ? (turnos - 2.5) / turnos : 0;
+      if (rampage && todos.indexOf("confundir") === -1) todos.push("confundir");
       var fica = 1 - (alvo.ef.curaStatus || 0);
       if (alvo.ef.curaComLuta && golpeDoAlvo && golpeDoAlvo.tipo === "Fighting") fica = 0; // Vital Spirit
       // Lum Berry: cura o 1º status - na média, metade da presença (Unnerve do outro barra).
@@ -1688,7 +1695,7 @@
       todos.forEach(function (s) {
         var regra = STATUS_DUELO[s], p = chances[s] || 0;
         if (s === "recuar") { r.corte *= 1 - (alvoAntes === null ? p / 2 : alvoAntes ? 0 : p); return; } // só recua quem bate depois
-        var doOrbe = s === orbe && turnos > 0 ? (turnos - 1) / turnos : 0;
+        var doOrbe = s === orbe && turnos > 0 ? (turnos - 1) / turnos : s === "confundir" ? rampage : 0;
         var corte = regra.corte || (golpeDoAlvo && golpeDoAlvo.cat === "F" ? regra.corteF : regra.corteE) || 0;
         if (corte) r.corte *= 1 - corte * fica * Math.max(doOrbe, presencaDoStatus(p, turnos, alvoAntes ? 0 : 1));
         var pres = fica * Math.max(doOrbe, presencaDoStatus(p, turnos, 1));
@@ -1779,8 +1786,12 @@
     if (eu.ef.venenoReduz) estagioDele *= 1 - envenenado(nele.pres) / 3;
     if (foe.ef.venenoReduz) estagioMeu *= 1 - envenenado(nMim.pres) / 3;
     var semTelas = eu.ef.limpaTelas || foe.ef.limpaTelas;
-    function tela(u, atq) { return u.ef.telaNaEntrada && turnos > 0 && !semTelas && !atq.ef.infiltra ? 1 - 0.5 * Math.min(u.ef.telaNaEntrada, turnos) / turnos : 1; }
-    estagioMeu *= tela(foe, eu); estagioDele *= tela(eu, foe);
+    // Reflect/Light Screen do buff de ginásio (telaF/telaE): só a categoria da tela.
+    function tela(u, atq, g) {
+      var t = Math.max(u.ef.telaNaEntrada || 0, g && g.cat === "F" ? u.ef.telaF || 0 : 0, g && g.cat === "E" ? u.ef.telaE || 0 : 0);
+      return t && turnos > 0 && !semTelas && !atq.ef.infiltra ? 1 - 0.5 * Math.min(t, turnos) / turnos : 1;
+    }
+    estagioMeu *= tela(foe, eu, meu.melhor.golpe); estagioDele *= tela(eu, foe, dele.melhor.golpe);
     // Baga de resistência (Occa...): o 1º golpe do tipo (super efetivo) sai pela metade - um quarto com Ripen.
     function bagaResiste(def, atq, melhor) {
       var b = def.it && def.it.bagaResiste, g = melhor.golpe;
@@ -2007,6 +2018,8 @@
     // Imposter, Trace (entrada); Neutralizing Gas e Aura Break (o outro, a luta toda).
     var eu0 = eu;
     eu = naEntradaHabilidadesDuelo(eu, foe); foe = naEntradaHabilidadesDuelo(foe, eu0);
+    if (eu.ef.alquimia) foe = bagaViraLodoDuelo(foe);
+    if (foe.ef.alquimia) eu = bagaViraLodoDuelo(eu);
     if (eu.ef.gasNeutro) foe = comHabilidadesDuelo(foe, "nenhuma");
     else if (foe.ef.gasNeutro) eu = comHabilidadesDuelo(eu, "nenhuma");
     if (eu.ef.quebraAura) foe = comHabilidadesDuelo(foe, "auraQuebrada");
@@ -2217,13 +2230,16 @@
   }
   // item: o da build, quando há; sem ele, o que combina com o set e a habilidade (itemDoSetDuelo).
   function unidadeDeDuelo(sp, set, abId, nivel, golpeIds, clima, item) {
-    var ids = uniqueIds((sp.inn || []).concat(abId === null || abId === undefined ? [] : [abId]));
+    // Elite antes da 2ª insígnia: o jogador luta sem habilidade nenhuma (level_cap.js).
+    var travadas = habilidadesTravadasNoElite();
+    var ids = travadas ? [] : uniqueIds((sp.inn || []).concat(abId === null || abId === undefined ? [] : [abId]));
     var ef = efeitoDasHabilidadesNoDuelo(ids, sp.sname, clima);
     if (ef.semRecarga) golpeIds = uniqueIds(golpeIds.concat(golpesDeRecargaAte(sp, nivel))); // Rampage: Hyper Beam e parecidos
     var nomeItem = item === undefined || item === null ? itemDoSetDuelo(set, sp, ef) : item;
     var u = { sp: sp, set: set.nome, ab: abId === null || abId === undefined ? "" : nomeHabDuelo(abId), abId: abId, ids: ids, item: nomeItem, it: itemDoDuelo(nomeItem, sp),
       stats: [0, 1, 2, 3, 4, 5].map(function (i) { return calcFinalStat(sp.b[i], 31, set.evs[i], nivel, i, set.nature, nomeItem, sp.n); }) };
     u.ef = ef;
+    if (travadas) u.habilidadesTravadas = true;
     u.statusIds = planosUteisDuelo(golpesDeStatusAte(sp, nivel), u, golpeIds);
     u.clima = clima || null;
     u.golpeIds = golpeIds;
@@ -2418,6 +2434,15 @@
     // Sorte na ordem.
     if ((x = f.match(/(\d+)% chance to move first/i))) ef.saque = parseInt(x[1], 10) / 100; // Quick Draw
     if (/Astonishes enemy priority users in fog/i.test(f) && climaOk("fog")) ef.barraPrioridade = true; // Surprise!
+    // "Enraged" (código oficial do jogo, src/abilities.cc, lido em 2026-10-01): Madness
+    // Enhancement enfurece na névoa; Berserk DNA, na entrada. O NextDex (versão dos nossos
+    // dados) diz "halves damage when enraged" - o branch upcoming do código usa 0,8.
+    if (/Enrages in fog, halves damage when enraged/i.test(f) && climaOk("fog")) { ef.reducao.todos *= 0.5; ef.enfurecido = true; }
+    if (/enrages on entry/i.test(f)) ef.enfurecido = true;
+    // Mental Pollution: enfurecido, põe Gastro Acid em todos os outros - como Neutralizing Gas.
+    if (/Suppresses others' abilities when it becomes enraged/i.test(f)) ef.poluicaoMental = true;
+    // Power of Alchemy: na entrada, a baga do outro vira Black Sludge (código oficial).
+    if (/Transmutes berries on entry/i.test(f)) ef.alquimia = true;
     // Recuo vira velocidade (Steadfast), dano a mais contra Mega (Eternal Flower), Power Outage.
     if (/Raises Speed by one stage if this Pok\S+ flinches/i.test(f)) ef.firmeza = true;
     if ((x = f.match(/Reduces the stats of other Megas by (\d+)%/i))) ef.contraMega = 1 - parseInt(x[1], 10) / 100;
@@ -2488,7 +2513,7 @@
   // A mesma unidade com outras habilidades (sem a escolhida, sem nenhuma, ou com
   // uma a mais): refeita uma vez e guardada nela.
   function comHabilidadesDuelo(u, modo, extraId) {
-    if (!u.golpeIds) return u;
+    if (!u.golpeIds || u.habilidadesTravadas) return u; // Elite travado: não há habilidade pra variar
     u.porHabilidade = u.porHabilidade || {};
     var chave = modo + "|" + (extraId === undefined ? "" : extraId);
     if (u.porHabilidade[chave]) return u.porHabilidade[chave];
@@ -2510,6 +2535,9 @@
     if (a.ef.imposter) a = Object.assign({}, b, { sp: a.sp, stats: [a.stats[0]].concat(b.stats.slice(1)), item: a.item, it: a.it, porHabilidade: null });
     if (a.ef.traca && b.abId !== undefined && b.abId !== null) a = comHabilidadesDuelo(a, "comExtra", b.abId);
     return a;
+  }
+  function bagaViraLodoDuelo(u) {
+    return /Berry$/.test(u.item || "") ? Object.assign({}, u, { item: "Black Sludge", it: itemDoDuelo("Black Sludge", u.sp) }) : u;
   }
   // ---------- formas (2026-09-29) ----------
   // A forma é uma espécie própria no dado (Wishiwashi School, Zygarde Complete,
@@ -2780,9 +2808,10 @@
   // (fração do HP que tira; golpe de área soma os dois e desconta o aliado), na
   // ordem da velocidade. Quem cai é trocado: o chefão manda o próximo; eu, o
   // melhor dos que sobram contra os dois de frente.
-  function simularDuplaContraChefao(meus, foes, nivel) {
+  function simularDuplaContraChefao(meus, foes, nivel, inicio) {
     var time = meus.map(participanteDupla), deles = foes.map(participanteDupla);
-    var ladoMeu = novoLadoDuelo(), ladoDele = novoLadoDuelo();
+    var ladoMeu = inicio ? Object.assign(novoLadoDuelo(), inicio.lado) : novoLadoDuelo(), ladoDele = novoLadoDuelo();
+    if (inicio) aplicarStatusNoFimDuelo(time, inicio.statusNoFim);
     var log = [], voltas = 0;
     function vivos(l) { return l.filter(function (c) { return c.vivo; }); }
     var frenteDeles = deles.slice(0, 2), frenteMinha = [];
@@ -3033,9 +3062,118 @@
     return escolhido;
   }
   function participanteDuelo(u) { return { u: u, frac: 1, vivo: true, status: {}, bonus: { estagios: {}, crit: 0, mult: 1, semGolpe: [] } }; }
-  function simularLutaContraChefao(meus, foes, nivel) {
+
+  // ---------- buffs do ginásio (Gym Skills) ainda ativos (2026-10-01) ----------
+  // Pedido do usuário: o time recomendado tem que contar os buffs que ele ainda
+  // não tirou. Números do código do jogo (src/battle_events.c e o
+  // registerbattleevent de cada data/maps/<Ginasio>/scripts.pory):
+  //  - "Posture": atributo +20% por nível, 4 níveis = x1,8, no(s) que abre(m) a luta;
+  //  - "Steady": +1 estágio por turno no ativo dele (como Speed Boost);
+  //  - "Last Stand 5,5": quando 5 dele já caíram, o último ganha +100% em tudo;
+  //  - status "nos últimos N": do fim do meu time pro começo, pulando o 1º;
+  //  - Reflect/Light Screen/Lucky Chant: 5 turnos do lado dele, no começo da luta.
+  // Fica de fora do motor (só vai como aviso pra IA): Foresight, Leech Seed e
+  // Magnet Rise depois de N turnos em campo, Embargo, herdar atributos ao
+  // entrar, precisão e Wide Guard - dependem de turno exato que o motor não segue.
+  var BUFFS_DO_GINASIO_DUELO = {
+    roxanne_laststand: { ultimoX: 2 },
+    roxanne_hazard_bleed: { lado: { rocha: true }, statusNoFim: ["sangrar", 2] },
+    roxanne_defense: { abreX: { def: 1.8 }, porTurno: { def: 1 } },
+    brawly_paralysis: { statusNoFim: ["paralisar", 2] },
+    brawly_spikes: { lado: { espinho: 2 } },
+    brawly_matblock: { abreBloqueia: true },
+    brawly_attack: { abreX: { atk: 1.8 } },
+    wattson_burn: { statusNoFim: ["queimar", 3] },
+    wattson_stickyweb: { lado: { teia: true } },
+    wattson_speed: { porTurno: { spe: 1 } },
+    wattson_magnetrise_spdef: { abreX: { spd: 1.8 } },
+    flannery_spatk_steady: { porTurno: { spa: 1 } },
+    flannery_toxic: { statusNoFim: ["envenenarForte", 2] },
+    flannery_healblock: { semCuraMeu: true },
+    flannery_burn: { statusNoFim: ["queimar", 2] },
+    flannery_defense: { abreX: { def: 1.8 } },
+    flannery_spatk_posture: { abreX: { spa: 1.8 } },
+    norman_speed: { abreX: { spe: 1.8 } },
+    norman_accuracy_laststand: { ultimoX: 2 },
+    norman_spikes: { lado: { espinho: 2 } },
+    norman_defense: { abreX: { def: 1.8 } },
+    norman_attack: { abreX: { atk: 1.8 } },
+    norman_substitute: { ultimoBloqueia: true },
+    winona_spdef: { abreX: { spd: 1.8 } },
+    winona_frostbite: { statusNoFim: ["congelar", 4] },
+    winona_defense: { abreX: { def: 1.8 } },
+    tateliza_lightscreen: { abreTela: { E: 5 } },
+    tateliza_reflect: { abreTela: { F: 5 } },
+    tateliza_luckychant: { abreSemCritico: true },
+    tateliza_sleep: { statusNoFim: ["sono", 1] },
+    tateliza_noprotect: { semProtectMeu: true }
+  };
+  var INDICE_DO_ATRIBUTO_DUELO = { atk: 1, def: 2, spa: 3, spd: 4, spe: 5 };
+  function buffsConhecidosDuelo(ids) {
+    return (ids || []).map(function (id) { return BUFFS_DO_GINASIO_DUELO[id]; }).filter(Boolean);
+  }
+  // O time do chefão com os buffs: cópias, nunca o objeto que outra conta usa.
+  // `quantosAbrem`: 1 na luta simples, 2 na dupla (o jogo aplica nos dois da frente).
+  function foesComBuffsDoGinasio(foes, ids, quantosAbrem) {
+    var buffs = buffsConhecidosDuelo(ids);
+    if (!buffs.length) return foes;
+    return foes.map(function (f, i) {
+      var abre = i < quantosAbrem, mult = [1, 1, 1, 1, 1, 1], ef = null;
+      function efCopia() { if (!ef) ef = Object.assign({}, f.ef, { porTurno: Object.assign({}, f.ef.porTurno) }); return ef; }
+      buffs.forEach(function (b) {
+        if (b.porTurno) Object.keys(b.porTurno).forEach(function (k) { efCopia().porTurno[k] = (ef.porTurno[k] || 0) + b.porTurno[k]; });
+        if (b.semCuraMeu) efCopia().bloqueiaCura = true;
+        if (abre && b.abreX) Object.keys(b.abreX).forEach(function (k) { mult[INDICE_DO_ATRIBUTO_DUELO[k]] *= b.abreX[k]; });
+        if (abre && b.abreBloqueia) efCopia().bloqueiaUmGolpe = true;
+        if (abre && b.abreTela) { efCopia(); if (b.abreTela.F) ef.telaF = Math.max(ef.telaF || 0, b.abreTela.F); if (b.abreTela.E) ef.telaE = Math.max(ef.telaE || 0, b.abreTela.E); }
+        if (abre && b.abreSemCritico) efCopia().imuneCritico = true;
+      });
+      var mudouStat = mult.some(function (m) { return m !== 1; });
+      if (!ef && !mudouStat) return f;
+      return Object.assign({}, f, { ef: ef || f.ef, stats: mudouStat ? f.stats.map(function (s, k) { return Math.floor(s * mult[k]); }) : f.stats });
+    });
+  }
+  // Meu Pokémon com os buffs que pesam em mim: sem Protect/Detect.
+  function meuComBuffsDoGinasio(u, ids) {
+    if (!buffsConhecidosDuelo(ids).some(function (b) { return b.semProtectMeu; })) return u;
+    var semProtege = (u.statusIds || []).filter(function (id) { var p = planoDoGolpeStatus(id); return !p || p.tipo !== "protege"; });
+    return semProtege.length === (u.statusIds || []).length ? u : Object.assign({}, u, { statusIds: semProtege });
+  }
+  // Como a luta começa do meu lado (hazards já postos, status nos últimos N) e o
+  // que o último dele ganha ao entrar (Last Stand/Substitute: "5 dele já caíram" -
+  // aplicado na luta, em quem de fato entra por último).
+  function inicioDaLutaComBuffs(ids) {
+    var lado = novoLadoDuelo(), statusNoFim = [], ultimo = { x: 1, bloqueia: false };
+    buffsConhecidosDuelo(ids).forEach(function (b) {
+      if (b.ultimoX) ultimo.x *= b.ultimoX;
+      if (b.ultimoBloqueia) ultimo.bloqueia = true;
+      if (b.lado) { if (b.lado.rocha) lado.rocha = true; if (b.lado.teia) lado.teia = true; if (b.lado.espinho) lado.espinho = Math.min(3, lado.espinho + b.lado.espinho); }
+      if (b.statusNoFim) statusNoFim.push(b.statusNoFim);
+    });
+    return { lado: lado, statusNoFim: statusNoFim, ultimo: ultimo.x !== 1 || ultimo.bloqueia ? ultimo : null };
+  }
+  function ultimoTurbinadoDuelo(u, ultimo) {
+    var ef = ultimo.bloqueia ? Object.assign({}, u.ef, { bloqueiaUmGolpe: true }) : u.ef;
+    return Object.assign({}, u, { ef: ef, stats: u.stats.map(function (s, k) { return k === 0 ? s : Math.floor(s * ultimo.x); }) });
+  }
+  // Aplica o status "nos últimos N" como o jogo: do fim pro começo, sem o 1º, só em quem está sem status.
+  function aplicarStatusNoFimDuelo(time, statusNoFim) {
+    statusNoFim.forEach(function (sn) {
+      var falta = sn[1];
+      for (var k = time.length - 1; k > 0 && falta > 0; k--) {
+        if (Object.keys(time[k].status).length) continue;
+        // O jogo grava o status direto na party (AffectNStatusOnTeamFromLastToFirst),
+        // sem olhar imunidade de tipo; quem lê (jaTem) ainda descarta o que o tipo anula.
+        falta--;
+        time[k].status[sn[0]] = 1;
+      }
+    });
+  }
+  // `inicio` (opcional, buffs do ginásio): hazards já no meu lado e status nos últimos N.
+  function simularLutaContraChefao(meus, foes, nivel, inicio) {
     var time = meus.map(participanteDuelo), deles = foes.map(participanteDuelo);
-    var ladoMeu = novoLadoDuelo(), ladoDele = novoLadoDuelo();
+    var ladoMeu = inicio ? Object.assign(novoLadoDuelo(), inicio.lado) : novoLadoDuelo(), ladoDele = novoLadoDuelo();
+    if (inicio) aplicarStatusNoFimDuelo(time, inicio.statusNoFim);
     var log = [], atual = null, i = 0, voltas = 0;
     function luta(c, f) { return resultadoDoDuelo(comoEstaDuelo(c), comoEstaDuelo(f), nivel, { fracEu: c.frac, fracFoe: f.frac, detalhe: true }); }
     function entraMeu(c) {
@@ -3112,7 +3250,15 @@
     if (deles.length) entraDele(deles[0]);
     while (i < deles.length && time.some(function (c) { return c.vivo; }) && voltas++ < 60) {
       var f = deles[i];
-      if (!f.vivo) { i++; if (i < deles.length) { proximoDoChefao(i); entraDele(deles[i]); } continue; }
+      if (!f.vivo) {
+        i++;
+        if (i < deles.length) {
+          proximoDoChefao(i);
+          if (inicio && inicio.ultimo && deles.length === 6 && i === 5) deles[i].u = ultimoTurbinadoDuelo(deles[i].u, inicio.ultimo);
+          entraDele(deles[i]);
+        }
+        continue;
+      }
       time.forEach(function (c) { c.vivosNoTime = time.filter(function (x) { return x.vivo; }).length - 1; }); // Minion Control
       if (!atual || !atual.vivo) {
         var caiuAgora = !!atual;
@@ -3176,9 +3322,14 @@
   // Em passos (gerador, 2026-09-30): cada `yield` é um ponto em que o botão da aba
   // Chefões pode devolver a vez pra tela (antes a conta travava 1-3 s no desktop).
   // Quem quer tudo de uma vez (rank, testes) usa montarTimeContraChefao.
-  function* montarTimeNoClimaEmPassos(candidatos, party, nivel, clima, armador, dupla) {
-    var simular = dupla ? simularDuplaContraChefao : simularLutaContraChefao;
-    var foes = party.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean);
+  // `buffs`: ids dos buffs do ginásio ainda ativos (chefoes.js, gymSkillsSummaryFor).
+  function* montarTimeNoClimaEmPassos(candidatos, party, nivel, clima, armador, dupla, buffs) {
+    var inicio = buffs && buffs.length ? inicioDaLutaComBuffs(buffs) : null;
+    var simular = function (meus, fs, nv) {
+      var comBuffs = buffs && buffs.length ? meus.map(function (u) { return meuComBuffsDoGinasio(u, buffs); }) : meus;
+      return (dupla ? simularDuplaContraChefao : simularLutaContraChefao)(comBuffs, fs, nv, inicio);
+    };
+    var foes = foesComBuffsDoGinasio(party.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean), buffs, dupla ? 2 : 1);
     var avaliados = [];
     for (var ci = 0; ci < candidatos.length; ci++) {
       var c = candidatos[ci];
@@ -3246,15 +3397,15 @@
   // Quantos candidatos o simulador avalia (pro progresso "12 de 44" do botão).
   function totalDePassosContraChefao(candidatos) { return candidatos.length * (1 + armadoresDeClima(candidatos).length); }
   function* montarTimeContraChefaoEmPassos(candidatos, party, nivel, opcoes) {
-    var dupla = !!(opcoes && opcoes.dupla);
+    var dupla = !!(opcoes && opcoes.dupla), buffs = (opcoes && opcoes.buffs) || [];
     var climaChefao = climaDoTimeDoChefao(party);
-    var melhor = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, climaChefao, null, dupla);
+    var melhor = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, climaChefao, null, dupla, buffs);
     var base = melhor;
     melhor.estrategia = null;
     var armadores = armadoresDeClima(candidatos);
     for (var ai = 0; ai < armadores.length; ai++) {
       var arm = armadores[ai];
-      var r = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, arm.clima, arm, dupla);
+      var r = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, arm.clima, arm, dupla, buffs);
       if (r.valor >= melhor.valor + (melhor === base ? GANHO_MINIMO_ESTRATEGIA : 0.001)) {
         // Quem ganha com o clima: nota no clima do time bem acima da nota sem ele.
         var notaBase = {};

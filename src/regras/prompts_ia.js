@@ -494,6 +494,14 @@
       linhas.push("  " + f.name + " (" + speciesTypeNames(f.sp).join("/") + ") " + (f.ability || "habilidade desconhecida") +
         " @ " + (f.item || "sem item") + ": " + (f.moves || []).join(", "));
     });
+    // Buffs do ginásio que o jogador ainda não tirou (2026-10-01): mudam a escolha
+    // (status nos últimos do time, telas, Protect proibido, hazards...).
+    var resumoBuffs = gymSkillsSummaryFor(gymLeaderBaseName(boss.name));
+    var ativos = resumoBuffs && !resumoBuffs.gateOnly ? resumoBuffs.buffs.filter(function (b) { return !b.cleared; }) : [];
+    if (ativos.length) {
+      linhas.push("  Buffs do ginasio AINDA ATIVOS nessa luta (o jogador nao venceu os treinadores que tiram estes) - leve em conta:");
+      ativos.forEach(function (b) { linhas.push("    - " + b.label + ": " + b.detail); });
+    }
     if (cx) {
       var buracos = cx.c.buracos.map(function (f) { return f.name; });
       var ameacas = cx.c.ameacas.map(function (f) { return f.name; });
@@ -542,8 +550,12 @@
     return linhas;
   }
   // `sp` opcional: com ele, entra a linha "o app sugere ESTA espécie" da próxima luta.
+  // Dificuldade Elite antes da 2ª insígnia (Full Features oficial): sem habilidade nenhuma.
+  var AVISO_HABILIDADES_TRAVADAS_IA = "HABILIDADES TRAVADAS: o jogador está na dificuldade Elite e ainda não venceu os 2 primeiros ginásios - " +
+    "no jogo, até lá NENHUMA habilidade funciona (nem a escolhida nem as innates). Não conte com habilidade nenhuma agora; " +
+    "escolha pelo que funciona sem elas (tipos, atributos, golpes, item). O campo ability da build continua sendo a que vai valer depois da 2ª insígnia.";
   function linhasContextoComumIA(sp, chefao) {
-    var linhas = [];
+    var linhas = habilidadesTravadasNoElite() ? [AVISO_HABILIDADES_TRAVADAS_IA] : [];
     var faltam = getRemainingBossEntries();
     if (faltam.length) {
       var contagem = {};
@@ -796,6 +808,7 @@
       "algo fora dela:\n" + rosterDesc + "\n\n" +
       "Foco pedido: " + focusDesc + ".\n" +
       (megaEvolutionUnlocked() ? "" : "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da 4a insignia (Flannery). NAO sugira nenhuma forma mega nem conte com mega no time; use so as formas base da lista.\n") +
+      (habilidadesTravadasNoElite() ? AVISO_HABILIDADES_TRAVADAS_IA + "\n" : "") +
       (monotype ? "A lista acima JÁ está filtrada só pro tipo " + monotype + " (Monotype) - todos servem, escolha pela sinergia entre eles.\n" +
         "Na " + orientacaoMono(monotype) + " Entre candidatos parecidos, prefira quem cobre mais dessas fraquezas.\n" +
         viramDoTipoPrompt(monotype) : "") +

@@ -23,6 +23,14 @@
     return d === "easy" ? "easy" : d === "elite" ? "elite" : "more";
   }
 
+  // Dificuldade Elite (Full Features oficial, item 19: "Abilities must be
+  // unlocked by defeating first 2 Gyms"): até a 2ª insígnia o jogador luta
+  // sem habilidade nenhuma - escolhida e innates. Só o lado do jogador; Easy e
+  // Ace não têm trava (2026-10-01, pendência antiga de 16/09).
+  function habilidadesTravadasNoElite() {
+    return state.settings.difficulty === "elite" && (state.settings.milestone || 0) < 2;
+  }
+
   function getCurrentCap() {
     if (!LEVELCAPS || !LEVELCAPS.rows[state.settings.milestone]) return null;
     return LEVELCAPS.rows[state.settings.milestone][levelCapMode()];

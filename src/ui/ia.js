@@ -267,19 +267,19 @@
       },
       {
         name: "getPriorityMoveOptions",
-        description: "Retorna os golpes de prioridade (prio > 0) que esta especie realmente aprende (nivel ou tutor - mesmo conjunto permitido nos 4 golpes da build), com nome/poder/prioridade reais. Lista vazia = esta especie nao tem golpe de prioridade viavel.",
+        description: "Retorna os golpes de prioridade (prio > 0) que esta especie realmente aprende (por nivel ou liberado desde o inicio - mesmo conjunto permitido nos 4 golpes da build), com nome/poder/prioridade reais. Lista vazia = esta especie nao tem golpe de prioridade viavel.",
         inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
         execute: function (input) { return aiTool_getPriorityMoveOptions(input); }
       },
       {
         name: "getAbilityMovepoolSynergy",
-        description: "Retorna, pro sname informado, quais habilidades (escolhivel ou innate) desta especie realmente aumentam o poder de uma categoria de golpe ou tipo E a especie de fato aprende (nivel ou tutor) pelo menos um golpe real dessa categoria - com os nomes dos golpes reais que se beneficiam. Lista vazia = nenhuma sinergia confirmada pro movepool real desta especie.",
+        description: "Retorna, pro sname informado, quais habilidades (escolhivel ou innate) desta especie realmente aumentam o poder de uma categoria de golpe ou tipo E a especie de fato aprende (por nivel ou liberado desde o inicio) pelo menos um golpe real dessa categoria - com os nomes dos golpes reais que se beneficiam. Lista vazia = nenhuma sinergia confirmada pro movepool real desta especie.",
         inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
         execute: function (input) { return aiTool_getAbilityMovepoolSynergy(input); }
       },
       {
         name: "getConditionMoveSynergy",
-        description: "Retorna, pro sname informado, combos autossuficientes reais entre uma habilidade condicional (ativa com clima especifico ou com HP baixo) e um golpe que esta MESMA especie aprende (nivel ou tutor) e que satisfaz essa condicao sozinha - sem depender de outro membro do time preparar o clima, nem de dano externo pra baixar o HP. Lista vazia = nenhum combo confirmado pra esta especie.",
+        description: "Retorna, pro sname informado, combos autossuficientes reais entre uma habilidade condicional (ativa com clima especifico ou com HP baixo) e um golpe que esta MESMA especie aprende (por nivel ou liberado desde o inicio) e que satisfaz essa condicao sozinha - sem depender de outro membro do time preparar o clima, nem de dano externo pra baixar o HP. Lista vazia = nenhum combo confirmado pra esta especie.",
         inputSchema: { type: "object", properties: { sname: { type: "string" } }, required: ["sname"] },
         execute: function (input) { return aiTool_getConditionMoveSynergy(input); }
       },

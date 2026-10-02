@@ -363,6 +363,14 @@
     return { gateOnly: false, note: leaderData.note || null, buffs: buffs, remaining: remaining, total: buffs.length };
   }
 
+  // Ids dos buffs do ginásio que o jogador ainda NÃO tirou (vão pro simulador do
+  // chefão e pro prompt da IA). Vazio pra quem não é líder com buffs.
+  function buffsAtivosDoChefao(leaderName) {
+    var r = gymSkillsSummaryFor(gymLeaderBaseName(leaderName));
+    if (!r || r.gateOnly) return [];
+    return r.buffs.filter(function (b) { return !b.cleared; }).map(function (b) { return b.id; });
+  }
+
   // ---------------- Speed tiers ----------------
   // Timid/Jolly dão o MESMO +10% em Velocidade (só muda qual outro stat cai
   // 10%, irrelevante pra este cálculo) - Jolly é só o rótulo escolhido pra

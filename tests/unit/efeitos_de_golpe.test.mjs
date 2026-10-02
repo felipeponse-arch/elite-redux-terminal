@@ -51,3 +51,25 @@ test("Knock Off: o item do alvo vale metade da luta; pedra de Mega e Sticky Hold
   assert.equal(R.itemAtivoDuelo(com("Leftovers", ["Sticky Hold"]), atq), 1);
   assert.equal(R.itemAtivoDuelo(com("Leftovers"), unidade(efDe([]), golpe("F"))), 1, "sem Knock Off, o item vale inteiro");
 });
+
+// 2026-10-01 (lote dos golpes da auditoria): Hammer Arm e V-create baixam o próprio
+// atributo; Rampage (Outrage...) deixa quem usa confuso depois de 2-3 turnos.
+test("Hammer Arm baixa a própria Velocidade; V-create, Defesa, Def. Especial e Velocidade", () => {
+  const ha = R.prepararGolpesDuelo([R.MOVE_ID_BY_NAME["Hammer Arm"]], u100(), null)[0];
+  assert.equal(ha.estagios.proprio.spe, -1);
+  const vc = R.prepararGolpesDuelo([R.MOVE_ID_BY_NAME["V-create"]], u100(), null)[0];
+  assert.equal([vc.estagios.proprio.def, vc.estagios.proprio.spd, vc.estagios.proprio.spe].join(","), "-1,-1,-1");
+});
+
+test("Rampage (Outrage): em luta longa, quem usa fica confuso e se fere; Own Tempo não", () => {
+  const out = R.MOVE_ID_BY_NAME["Outrage"];
+  const atq = (ab) => { const u = unidade(efDe(ab || []), golpe("F"), { tipos: ["Dragon"], stats: [300, 100, 100, 100, 100, 100] }); u.golpesProntos = R.prepararGolpesDuelo([out], u, null); return u; };
+  const semEfeito = (u) => Object.assign({}, u, { golpesProntos: u.golpesProntos.map((g) => Object.assign({}, g, { efeito: null })) });
+  const tanque = () => unidade(efDe([]), golpe("F", { forca: 40, poder: 40, forcaBase: 40 }), { tipos: ["Normal"], stats: [900, 60, 140, 60, 140, 50] });
+  const com = R.resultadoDoDuelo(atq(), tanque(), 50, { detalhe: true });
+  const sem = R.resultadoDoDuelo(semEfeito(atq()), tanque(), 50, { detalhe: true });
+  assert.ok(com.turnos > 3, "luta longa: " + com.turnos);
+  assert.ok(com.fracEu < sem.fracEu, com.fracEu + " x " + sem.fracEu);
+  const ownTempo = R.resultadoDoDuelo(atq(["Own Tempo"]), tanque(), 50, { detalhe: true });
+  assert.ok(ownTempo.fracEu > com.fracEu, ownTempo.fracEu + " x " + com.fracEu);
+});

@@ -492,6 +492,7 @@
       rankInfoLineHtml(sp) +
       (sp.d ? '<p class="flavor">' + escapeHtml(sp.d) + '</p>' : "") +
       (function () { var t = howToObtainText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })() +
+      (function () { var t = compraDeInicialTexto(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })() +
       (function () { var t = whereToFindText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })();
   }
 
@@ -516,12 +517,13 @@
     '</div>';
   }
 
-  // Ficha: golpes por nível e de tutor/TM (bloco fechado por padrão).
+  // Ficha: golpes por nível e os liberados desde o início (o FAQ oficial: não
+  // existem mais TM/HM/tutor; o campo `tu` do dado guarda esses). Bloco fechado.
   function fichaGolpesHtml(sp) {
     var lm = sp.lm.slice().sort(function (a, b) { return a[0] - b[0]; });
     var lmHtml = renderMovesTable(lm, "Golpes por Nível", "Sem golpes por nível registrados.");
     var tuPairs = sp.tu.map(function (id) { return [null, id]; });
-    var tuHtml = tuPairs.length ? renderMovesTable(tuPairs, "Golpes de Tutor / TM", "Sem golpes de tutor registrados.") : "";
+    var tuHtml = tuPairs.length ? renderMovesTable(tuPairs, "Golpes liberados desde o início", "Sem golpes liberados desde o início registrados.") : "";
     return '<details class="detail-group"><summary>Golpes (' + (lm.length + tuPairs.length) + ')</summary>' +
       lmHtml + tuHtml +
     '</details>';
