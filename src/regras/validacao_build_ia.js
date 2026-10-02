@@ -168,7 +168,19 @@
   // uma explicação específica pra mostrar ao usuário quando rejeita. Sem ele
   // o comportamento é o de antes (retorna null e quem chamou mostra a
   // mensagem genérica).
-  function validateAiBuild(sp, raw, motivo) {
+  // Contexto da validação estratégica a partir das opções da build (opts.chefao vem do
+  // botão do chefão): buffs do ginásio ainda ativos e a habilidade que o armador do clima
+  // precisa levar - só quando ela é das escolhíveis (armar por innate já vale sempre).
+  function contextoDeValidacao(sp, opts) {
+    var c = opts && opts.chefao;
+    if (!c || !c.boss) return {};
+    var ctx = { buffs: buffsAtivosDoChefao(c.boss.name) };
+    var est = c.estrategia;
+    var escolhiveis = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+    if (est && est.armador === sp.n && escolhiveis.indexOf(est.habilidade) !== -1) ctx.habilidadeExigida = est.habilidade;
+    return ctx;
+  }
+  function validateAiBuild(sp, raw, motivo, ctx) {
     if (!raw || typeof raw !== "object") return null;
     var validAbilities = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
     // Motivo específico em cada rejeição (2026-09-16): a nova tentativa
@@ -334,6 +346,36 @@
     // renderizar (myBuildEditorHtml), igual qualquer outro texto exibido pro
     // usuário. A ausência dela não é motivo de rejeição - uma build
     // válida sem justificativa ainda assim é salva.
+    // Validação ESTRATÉGICA (lote C da força-tarefa, 2026-10-02) - a de cima só
+    // conferia legalidade. `ctx` (opcional) traz o contexto da luta alvo.
+    ctx = ctx || {};
+    // (a) Armador do clima escolhido pelo simulador: tem que levar a habilidade que
+    // arma - senão a estratégia de time que o simulador provou deixa de existir.
+    if (ctx.habilidadeExigida && raw.ability !== ctx.habilidadeExigida) {
+      return rejeita("Este Pokémon é o armador do clima do time: a habilidade precisa ser " + ctx.habilidadeExigida + ".");
+    }
+    // (b) Heal Block permanente ativo na luta alvo (buff do ginásio): cura não funciona.
+    if ((ctx.buffs || []).indexOf("flannery_healblock") !== -1) {
+      var curaInutil = raw.moves.filter(function (n) { return moveRoleOf(n) === "cura"; });
+      if (curaInutil.length) return rejeita("A luta alvo tem Heal Block permanente (buff do ginásio ainda ativo): " + curaInutil.join(", ") + " não cura nada. Troque por outro golpe.");
+      if (["Leftovers", "Sitrus Berry", "Shell Bell", "Big Root"].indexOf(item) !== -1) {
+        return rejeita("A luta alvo tem Heal Block permanente: " + item + " não cura nada. Troque o item.");
+      }
+    }
+    // (c) Atacante sem nenhum golpe com STAB (o próprio tipo, ou o que a habilidade
+    // dá - Protean e parecidas): o set perde o maior multiplicador que tem.
+    if (papel !== "Tanque") {
+      var ofensivos = raw.moves.filter(function (n) { return moveRoleOf(n) === "dano"; });
+      var efSet = efeitoDasHabilidadesNoDuelo(uniqueIds((sp.inn || []).concat([ABILITY_ID_BY_NAME[raw.ability]])), sp.sname, null);
+      var tiposComStab = speciesTypeNames(sp).concat(efSet.stabExtra || [], efSet.tipoExtra || []);
+      var temStab = efSet.stabTodos || ofensivos.some(function (n) {
+        var m = MOVES[MOVE_ID_BY_NAME[n]];
+        return tiposComStab.indexOf(TYPES[m[1]]) !== -1 || (m[9] >= 0 && tiposComStab.indexOf(TYPES[m[9]]) !== -1) || !!(efSet.converte && efSet.converte[TYPES[m[1]]]);
+      });
+      if (ofensivos.length >= 2 && !temStab) {
+        return rejeita("Nenhum dos golpes de dano tem STAB (" + speciesTypeNames(sp).join("/") + "). Um atacante precisa de pelo menos um golpe do próprio tipo.");
+      }
+    }
     var rationale = typeof raw.rationale === "string" ? raw.rationale.trim().slice(0, 360) : "";
     // O papel aparece pro jogador na própria justificativa (o save guarda uma
     // lista fixa de campos da build - campo novo se perderia no sync).

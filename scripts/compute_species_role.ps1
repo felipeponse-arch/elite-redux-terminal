@@ -85,6 +85,17 @@ foreach ($s in $dex.species) {
     $b = @($s["b"])
     if ($b.Count -lt 6) { continue }
     $hp = $b[0]; $atk = $b[1]; $def = $b[2]; $spa = $b[3]; $spd = $b[4]; $spe = $b[5]
+    # Innates que dobram o atributo (auditoria de 2026-10-02: Azumarill/Mawile com Huge
+    # Power de innate saiam como "Especial"). Neste hack Huge Power dobra o Ataque e Pure
+    # Power/Cryptic Power dobram o Ataque Especial; vale também a habilidade composta
+    # que contém uma dessas partes ("X + Huge Power"). Innate = sempre ativa.
+    foreach ($innId in @($s["inn"])) {
+        $ab = $dex.abilities[$innId]
+        if (-not $ab) { continue }
+        $txt = "$($ab[0]) | $($ab[1])"
+        if ($txt -match "Huge Power|Doubles own Attack") { $atk = $atk * 2 }
+        if ($txt -match "Pure Power|Cryptic Power|Doubles own Sp\. ?Atk") { $spa = $spa * 2 }
+    }
     $offense = [math]::Max($atk, $spa)
     $physBulk = $hp * $def / 100.0
     $specBulk = $hp * $spd / 100.0

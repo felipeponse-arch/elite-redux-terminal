@@ -846,7 +846,10 @@
   // Golpes com "Super effective vs/on X" no NextDex 2.65beta (2026-10-01). Sonic Boom fica
   // de fora: o texto curto diz Rock e o longo diz Steel.
   var GOLPE_SUPER_EFETIVO_CONTRA = { "Acid": "Steel", "Sludge": "Water", "Poison Gas": "Flying", "Sheer Cold": "Water",
-    "Razor Wind": "Rock", "Magnet Bomb": "Steel", "Gigaton Hammer": "Steel", "Crackle Slam": "Steel", "Freeze-Dry": "Water" };
+    "Razor Wind": "Rock", "Magnet Bomb": "Steel", "Gigaton Hammer": "Steel", "Crackle Slam": "Steel", "Freeze-Dry": "Water",
+    // Texto longo (lDesc) dos golpes cujo texto curto é "Not done yet" (2026-10-02):
+    "Clay Dart": "Flying", "Fumigation Bomb": "Bug", "Aura Force": "Ghost", "Hacksaw": "Steel", "Godspeed": "Steel" };
+    // Tsunami Hammer fica de fora como o Sonic Boom: o texto longo diz Poison, o curto diz Water.
   // Mudança de estágio do efeito extra do golpe (dado do NextDex): no alvo ou no usuário.
   var ESTAGIO_DO_EFEITO_DUELO = {
     "Attack Down Hit": { alvo: { atk: -1 } }, "Defense Down Hit": { alvo: { def: -1 } }, "Special Attack Down Hit": { alvo: { spa: -1 } },
@@ -1443,8 +1446,9 @@
         if (vale && poder > 0) hab *= (poder + sg.poder) / poder;
       });
       var acertos = acertosDoGolpeDuelo(id);
-      if (u.ef.skillLink && acertos === 3 && /2 a 5/i.test(MOVE_PT[id] || "")) acertos = 5;
-      else if (u.it && u.it.dadoCarregado && acertos === 3 && /2 a 5/i.test(MOVE_PT[id] || "")) acertos = 4.5; // Loaded Dice: 4 ou 5
+      var doisACinco = MOVES[id] && MOVES[id][11] === "Multi Hit"; // efeito oficial (2 a 5 acertos)
+      if (u.ef.skillLink && acertos === 3 && doisACinco) acertos = 5;
+      else if (u.it && u.it.dadoCarregado && acertos === 3 && doisACinco) acertos = 4.5; // Loaded Dice: 4 ou 5
       if (alt && alt.acertos) acertos = alt.acertos;
       base *= poder * acertos;
       // Sheer Force: golpe com efeito extra perde o efeito e ganha força.

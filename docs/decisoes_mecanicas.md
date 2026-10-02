@@ -1,0 +1,44 @@
+# Decisões de mecânica (registro único)
+
+Regra travada pelo usuário em 2026-10-02: **nenhuma interpretação nova** de golpe, habilidade,
+item ou regra de batalha sem (1) consultar este registro, (2) pesquisar a fundo nas fontes abaixo,
+(3) varrer as mecânicas parecidas e decidir todas juntas, (4) registrar aqui com a fonte e um teste
+que falha sem a decisão. Fontes em conflito: registrar o conflito e não modelar (ou perguntar).
+
+## Fontes, em ordem
+1. Documentação oficial (eliteredux.net, índice Full Documentation).
+2. NextDex 2.65beta = `data/gameData_265beta.json` (versão dos dados do app). Ler **desc e lDesc**:
+   o desc curto às vezes é placeholder ("Not done yet") e o efeito está no lDesc.
+3. Campos estruturados do dado (effT do golpe, types, flags, stats.flags, hpType) **antes** de
+   qualquer texto livre.
+4. Código oficial do jogo (github Elite-Redux/eliteredux-source; o clone usado é do branch
+   *upcoming* - marcar quando puder ser mais novo que a 2.65beta).
+5. Transcrições de vídeos (`teste/ferramentas/transcricoes`, yt-dlp): só evidência de comportamento.
+
+Nunca usar como fonte de mecânica: a tradução PT (`move_translations_pt.json` /
+`ability_translations_pt.json`) nem qualquer gameData de outra versão.
+
+## Decisões
+
+| Mecânica | Decisão | Fonte | Data |
+|---|---|---|---|
+| Clima sol/chuva | +50%, 8 turnos (duração entra na luta inteira) | NextDex 2.65beta "Lasts 8 turns" + código (battle_util.c); Full Features (+20%, infinito) desatualizado; decisão do usuário | 2026-10-02 |
+| Granizo / Eerie Fog | Ice +50% Def física; Ghost/Psychic recebem 0,8x | Full Features (Weather Rework) | 2026-09-30 |
+| Elite: innates do jogador | escolhida sempre; 1ª innate nv 1, 2ª nv 17, 3ª nv 24 (nível do Pokémon) | código pokemon_config.h + pokemon.c:4968; vídeo Mono Fairy | 2026-10-02 |
+| Acertos de golpe | pelo effT: Multi Hit 3 (2-5), Double Hit 2, Triple Kick 3, Ten Hits 6; exceções do lDesc: Twineedle, Cross Poison, Double Iron Bash, Rapid River 2; Chiller, Surging Strikes, Sparkling Barrage 3 | effT + lDesc 2.65beta | 2026-10-02 |
+| "Can't be used twice in a row" | NÃO é acerto duplo (Gigaton/Tsunami Hammer, Blood Moon...) | lDesc | 2026-10-02 |
+| Golpes de 2 tipos | efetividade = produto; STAB por qualquer dos dois | dado bruto types[] | 2026-10-02 |
+| Hidden Power / Secret Power / Techno Blast | tipo = hpType do treinador | dado bruto usesHpType + hpType | 2026-10-02 |
+| Multi-Headed | 2 cabeças 1,25x; 3 cabeças 1,35x (100%+20%+15%) | código GetParentalBondMultiplier + stats.flags | 2026-10-02 |
+| Super efetivo contra X | Acid/Magnet Bomb/Gigaton Hammer/Crackle Slam/Hacksaw/Godspeed em Steel; Sludge/Sheer Cold/Freeze-Dry em Water; Poison Gas/Clay Dart em Flying; Razor Wind em Rock; Fumigation Bomb em Bug; Aura Force em Ghost | desc/lDesc 2.65beta | 2026-10-02 |
+| Sonic Boom, Tsunami Hammer | NÃO modelado: desc e lDesc citam tipos diferentes | conflito de fonte | 2026-10-02 |
+| Infernal Parade / Bitter Malice / Barb Barrage | +50% com o alvo sob status (não 2x) | lDesc 2.65beta | 2026-10-01 |
+| Absorb | na 2.65beta NÃO drena (tira mudanças de atributo) | desc 2.65beta (o gameData de outra versão diz que drena) | 2026-10-01 |
+| Golpes "Not done yet" (30) | funcionam; efeito = lDesc | lDesc + transcrições (Diamond Blade, Black Magic em 2025-2026) | 2026-10-02 |
+| Madness Enhancement | enfurece na névoa, dano recebido 0,5x | NextDex 2.65beta (código upcoming usa 0,8) | 2026-10-01 |
+| Mental Pollution | enfurecido = suprime as habilidades dos outros (como Neutralizing Gas) | código abilities.cc | 2026-10-01 |
+| Power of Alchemy | baga do outro vira Black Sludge na entrada | código abilities.cc | 2026-10-01 |
+| Pure Power / Cryptic Power | dobram o **Sp. Atk** neste hack (Huge Power dobra o Atk) | desc 2.65beta | 2026-10-02 |
+| Buffs do ginásio | Posture x1,8; Steady +1/turno; Last Stand x2 no último (com 6); status nos últimos N; telas 5 turnos | código battle_events.c + scripts.pory | 2026-10-01 |
+| Regra de campo | Tate&Liza 1: Trick Room + invertida; revanches: Trick Room; Steven Doubles: Gravity; Monochamp: NÃO modelado (efeito próprio não pesquisado) | scripts.pory oficiais | 2026-10-02 |
+| Cute Charm | 50% (o ~90% visto em vídeo era bug de versão) | desc 2.65beta | 2026-10-02 |

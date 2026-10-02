@@ -573,7 +573,7 @@
         faltam = [];
         members.forEach(function (sp) {
           var bruto = resp.valor[sp.sname] || resp.valor[sp.n];
-          var v = bruto ? validateAiBuild(sp, bruto, {}) : null;
+          var v = bruto ? validateAiBuild(sp, bruto, {}, contextoDeValidacao(sp, optsDe(sp))) : null;
           var r = v ? gravarBuildValidadaDaIa(sp, v, bruto, optsDe(sp), cap, aviso) : false;
           // Só sai do lote quem ganhou build: quem vai ser pedido de novo continua
           // fora da conta de itens em uso (a build velha dele ainda vai sair).
@@ -630,7 +630,7 @@
         ferramentas: false, // contexto já vai no prompt (blocoContextoIA): uma chamada só
         validar: function (bruto) {
           var m = {};
-          var v = validateAiBuild(sp, bruto, m);
+          var v = validateAiBuild(sp, bruto, m, contextoDeValidacao(sp, opts));
           // Motivo técnico vai pro modelo na nova tentativa; o jogador vê a
           // versão dele (os dois textos de antes da fase 4).
           return v ? { valor: v } : {
