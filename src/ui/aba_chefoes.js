@@ -204,7 +204,8 @@
     owned.forEach(function (x) {
       var sp = getSpeciesByX(x);
       if (!sp) return;
-      battleUnitsOf(sp).forEach(function (u) { if (serveProMono(u.main)) out.push({ sp: u.main, owned: x }); });
+      // A build salva vale pra forma base (a do elenco); forma de luta (mega) segue genérica.
+      battleUnitsOf(sp).forEach(function (u) { if (serveProMono(u.main)) out.push({ sp: u.main, owned: x, build: u.main.x === x ? getActiveBuild(sp.sname) : null }); });
     });
     // Ordem fixa (revisão de 2026-09-30): em empate o simulador fica com o primeiro da
     // lista, e "time + caixa" muda depois de cada montagem - clicar de novo no mesmo
@@ -337,15 +338,22 @@
       comecarLoteDeBuilds(members.map(function (m) { return m.x; })); // encerrado no finally
       // As builds numa consulta só (lote, 2026-09-30); quem falhar é pedido sozinho.
       var chefaoDaBuild = { boss: boss, party: party, clima: r.clima, estrategia: r.estrategia, chave: chaveDoTime };
+      var provado = resumoProvadoPeloSimulador(r); // set/habilidade/golpes que o simulador provou (lote B)
       var feitas = await gerarBuildsDoTimeComIA(members, "chefao-build-status",
-        function (sp) { return { silencioso: true, chefao: Object.assign({ responde: responde[sp.sname] || [] }, chefaoDaBuild) }; },
-        { chefao: chefaoDaBuild, responde: responde },
+        function (sp) { return { silencioso: true, chefao: Object.assign({ responde: responde[sp.sname] || [], provado: provado[sp.sname] || null }, chefaoDaBuild) }; },
+        { chefao: chefaoDaBuild, responde: responde, provado: provado },
         function (texto) {
           if (!generatedTeamResult || generatedTeamResult.chefao !== boss.name) return; // outra montagem começou por cima
           generatedTeamResult.progresso = texto;
           TELAS.time();
         });
       var ultimoMotivo = feitas.ultimoMotivo || "";
+      // Confere o plano com as builds que de fato ficaram salvas (lote B).
+      var conferencia = null;
+      try {
+        conferencia = conferirTimeComBuilds(state.team.map(getSpeciesByX).filter(Boolean), party, nivel,
+          { dupla: !!boss.db, buffs: buffsAtivosDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name) }, r.simulacao);
+      } catch (eConf) { conferencia = null; }
       if (generatedTeamResult && generatedTeamResult.chefao === boss.name) {
         var faltou = computeTeamGenerationValidation(state.team.map(getSpeciesByX).filter(Boolean)).withoutBuild;
         generatedTeamResult.progresso = (faltou.length
@@ -353,7 +361,8 @@
             " - use \"Gerar build com IA\" no card de cada um."
           : "") +
           (jaFeitas.length ? (faltou.length ? " " : "") + "Mantidas as builds que já eram contra " + boss.name + " neste level cap: " +
-            jaFeitas.map(function (sp) { return sp.n; }).join(", ") + "." : "");
+            jaFeitas.map(function (sp) { return sp.n; }).join(", ") + "." : "") +
+          (conferencia ? " " + conferencia.texto : "");
         TELAS.time();
       }
       flashToast("Time contra " + boss.name + " montado" + (anterior.salvo ? " - o anterior ficou em Times salvos." : "."));

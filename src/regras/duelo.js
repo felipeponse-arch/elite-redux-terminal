@@ -2309,7 +2309,106 @@
         if (!melhor || nota > melhor.nota) melhor = { nota: nota, set: set.nome, ab: u.ab, porFoe: porFoe, unidade: u };
       });
     });
-    return melhor;
+    return comQuatroGolpes(melhor, sp, foes, nivel, clima);
+  }
+  // 4 golpes por Pokémon, como no jogo (lote B da força-tarefa, 2026-10-02): antes cada
+  // duelo usava o melhor golpe do MOVEPOOL INTEIRO - o Clefable "usava" 6 golpes diferentes
+  // contra a Flannery e a cobertura do time ficava superestimada. Escolha gulosa por
+  // cobertura de dano contra o time do chefão (fração do HP de cada um, o melhor golpe vale);
+  // o 4º espaço disputa com o melhor golpe de status pela nota dos duelos.
+  function quatroGolpesDeDano(u, foes, nivel) {
+    var fracoes = u.golpesProntos.map(function (g) {
+      var so = Object.assign({}, u, { golpesProntos: [g] });
+      return foes.map(function (f) { return Math.min(1, danoNoDuelo(so, f, nivel).melhor.dano / Math.max(1, f.stats[0])); });
+    });
+    var escolhidos = [], cobertura = foes.map(function () { return 0; });
+    while (escolhidos.length < 4) {
+      var melhorI = -1, melhorGanho = -1;
+      fracoes.forEach(function (fr, i) {
+        if (escolhidos.indexOf(i) !== -1) return;
+        var ganho = fr.reduce(function (s, v, k) { return s + Math.max(0, v - cobertura[k]); }, 0) + fr.reduce(function (s, v) { return s + v; }, 0) * 0.001;
+        if (ganho > melhorGanho) { melhorGanho = ganho; melhorI = i; }
+      });
+      if (melhorI < 0) break;
+      escolhidos.push(melhorI);
+      fracoes[melhorI].forEach(function (v, k) { cobertura[k] = Math.max(cobertura[k], v); });
+    }
+    return escolhidos.map(function (i) { return MOVE_ID_BY_NAME[u.golpesProntos[i].nome]; }).filter(function (id) { return id !== undefined; });
+  }
+  // O que o simulador PROVOU pra cada membro (lote B, 2026-10-02): set, habilidade, os 4
+  // golpes e o golpe-chave contra cada Pokémon do chefão que ele responde. Vai pra IA, que
+  // antes refazia os sets sem saber disso (o plano da tela deixava de ser verdade).
+  function resumoProvadoPeloSimulador(r) {
+    var out = {};
+    (r.escolhidos || []).forEach(function (e) {
+      var u = e.unidade;
+      out[e.sp.sname] = { set: e.set, habilidade: e.ab || "", golpes: (u.golpesDoSet || []).map(function (id) { return MOVES[id][0]; }), chave: {} };
+    });
+    (r.plano || []).forEach(function (p) {
+      var a = p.respostas && p.respostas[0];
+      if (a && a.golpe && out[a.sp.sname]) out[a.sp.sname].chave[p.foe.nome] = a.golpe;
+    });
+    return out;
+  }
+  // Validação do plano (lote B, 2026-10-02 - a camada que mais faltava na auditoria): depois
+  // que as builds são geradas, o time é simulado de novo com as builds REAIS e o resultado é
+  // comparado com o plano. Antes nada conferia se o time levado ainda vencia.
+  function conferirTimeComBuilds(sps, party, nivel, opcoes, original) {
+    var cands = sps.map(function (sp) { return { sp: sp, owned: sp.x, build: getActiveBuild(sp.sname) }; });
+    var s = montarTimeContraChefao(cands, party, nivel, opcoes).simulacao, o = original || null;
+    var pior = !!o && ((o.venceu && !s.venceu) || s.derrubados < o.derrubados);
+    var texto = o && o.venceu && !s.venceu
+      ? "ATENÇÃO: com as builds salvas, a luta simulada NÃO vence mais (derruba " + s.derrubados + " de " + s.total + "). Revise as builds ou monte de novo."
+      : pior ? "Atenção: com as builds salvas a luta simulada derruba " + s.derrubados + " de " + s.total + " (o plano derrubava " + o.derrubados + ")."
+        : s.venceu ? "Conferido: com as builds salvas o time continua vencendo a luta simulada."
+          : "Com as builds salvas a luta simulada derruba " + s.derrubados + " de " + s.total + ".";
+    return { simulacao: s, texto: texto, pior: pior };
+  }
+  // Unidade de duelo a partir de uma build salva (habilidade, natureza, EVs, item, 4 golpes).
+  function unidadeDaBuild(sp, b, nivel, clima) {
+    var ids = (b.moves || []).map(function (n) { return MOVE_ID_BY_NAME[n]; }).filter(function (id) { return id !== undefined; });
+    var dano = ids.filter(golpeUtilNoDuelo), status = ids.filter(function (id) { return !!planoDoGolpeStatus(id); });
+    var set = { nome: "build", evs: Array.isArray(b.evs) && b.evs.length === 6 ? b.evs : [0, 0, 0, 0, 0, 0], nature: b.nature || "Hardy" };
+    var abId = ABILITY_ID_BY_NAME[b.ability];
+    if (abId === undefined) abId = null;
+    var u = unidadeDeDuelo(sp, set, abId, nivel, dano, clima, b.item || "");
+    u.statusIds = (u.statusIds || []).filter(function (id) { return status.indexOf(id) !== -1; });
+    u.golpesDoSet = dano.concat(status);
+    u.receita = { sp: sp, set: set, abId: abId, nivel: nivel, golpes: dano, status: status, item: b.item || "" };
+    return u;
+  }
+  // A mesma unidade do jogador sem clima (refeita pela receita de comQuatroGolpes).
+  function unidadeSemClima(u) {
+    var r = u.receita;
+    if (!r || !u.clima) return u;
+    if (u.semClimaMemo) return u.semClimaMemo;
+    var x = unidadeDeDuelo(r.sp, r.set, r.abId, r.nivel, r.golpes, null, r.item);
+    x.statusIds = (x.statusIds || []).filter(function (id) { return r.status.indexOf(id) !== -1; });
+    x.receita = r; x.golpesDoSet = u.golpesDoSet;
+    u.semClimaMemo = x;
+    return x;
+  }
+  function comQuatroGolpes(melhor, sp, foes, nivel, clima) {
+    if (!melhor || !melhor.unidade) return melhor;
+    var u0 = melhor.unidade, set = SETS_DE_DUELO.filter(function (s) { return s.nome === melhor.set; })[0];
+    if (!set || !u0.golpeIds) return melhor;
+    var dano = quatroGolpesDeDano(u0, foes, nivel);
+    var opcoes = [{ golpes: dano, status: [] }];
+    // O 4º espaço: cada golpe de status útil (setup, hazard, tela...) no lugar do 4º de dano.
+    (u0.statusIds || []).forEach(function (st) {
+      opcoes.push(dano.length >= 4 ? { golpes: dano.slice(0, 3), status: [st] } : { golpes: dano, status: [st] });
+    });
+    var vencedor = null;
+    opcoes.forEach(function (op) {
+      var u = unidadeDeDuelo(sp, set, u0.abId, nivel, op.golpes, clima, u0.item);
+      u.statusIds = (u.statusIds || []).filter(function (id) { return op.status.indexOf(id) !== -1; });
+      u.golpesDoSet = op.golpes.concat(op.status);
+      u.receita = { sp: sp, set: set, abId: u0.abId, nivel: nivel, golpes: op.golpes, status: op.status, item: u0.item };
+      var porFoe = foes.map(function (f) { return resultadoDoDuelo(u, f, nivel); });
+      var nota = porFoe.reduce(function (a, v) { return a + v; }, 0);
+      if (!vencedor || nota > vencedor.nota + 1e-9) vencedor = { nota: nota, set: melhor.set, ab: u.ab, porFoe: porFoe, unidade: u };
+    });
+    return vencedor;
   }
 
   // ---------- botão "Montar time contra este chefão" ----------
@@ -3246,8 +3345,22 @@
     var ladoMeu = inicio ? Object.assign(novoLadoDuelo(), inicio.lado) : novoLadoDuelo(), ladoDele = novoLadoDuelo();
     if (inicio) aplicarStatusNoFimDuelo(time, inicio.statusNoFim);
     var log = [], atual = null, i = 0, voltas = 0;
+    // Clima com duração (lote B, 2026-10-02; NextDex 2.65beta "Lasts 8 turns"): `inicio.clima`
+    // traz as unidades sem clima. O do chefão vale desde o início; o do jogador só depois que
+    // o armador ENTRA - antes a estratégia valia a luta toda mesmo sem o armador em campo.
+    var cl = inicio && inicio.clima;
+    var climaLigado = !!cl && cl.armadorIdx === null, climaRestante = cl ? cl.duracao : 0;
+    time.forEach(function (c, k) { c.uClima = c.u; c.uSem = cl ? cl.meusSem[k] : c.u; });
+    deles.forEach(function (c, k) { c.uClima = c.u; c.uSem = cl ? cl.foesSem[k] : c.u; });
+    function aplicarClima() {
+      if (!cl) return;
+      var on = climaLigado && climaRestante > 0;
+      time.concat(deles).forEach(function (c) { c.u = on ? c.uClima : c.uSem; });
+    }
+    aplicarClima();
     function luta(c, f) { return resultadoDoDuelo(comoEstaDuelo(c), comoEstaDuelo(f), nivel, { fracEu: c.frac, fracFoe: f.frac, detalhe: true }); }
     function entraMeu(c) {
+      if (cl && cl.armadorIdx !== null && c === time[cl.armadorIdx]) { climaLigado = true; climaRestante = cl.duracao; aplicarClima(); }
       if (c.u.ef.curaTimeNaEntrada) time.forEach(function (x) { x.status = {}; }); // Soothing Aroma
       if (c.u.ef.brasas) ladoDele.brasas = true; // Hot Coals: queima o próximo que entrar do lado dele
       if (c.u.ef.limpaHazards) ladoMeu = novoLadoDuelo();
@@ -3325,7 +3438,11 @@
         i++;
         if (i < deles.length) {
           proximoDoChefao(i);
-          if (inicio && inicio.ultimo && deles.length === 6 && i === 5) deles[i].u = ultimoTurbinadoDuelo(deles[i].u, inicio.ultimo);
+          if (inicio && inicio.ultimo && deles.length === 6 && i === 5) {
+            deles[i].uClima = ultimoTurbinadoDuelo(deles[i].uClima, inicio.ultimo);
+            deles[i].uSem = ultimoTurbinadoDuelo(deles[i].uSem, inicio.ultimo);
+            deles[i].u = ultimoTurbinadoDuelo(deles[i].u, inicio.ultimo);
+          }
           entraDele(deles[i]);
         }
         continue;
@@ -3372,7 +3489,8 @@
       var perece = Math.max(atual.u.ef.perecer, f.u.ef.perecer);
       hazardsAoApanhar(atual, f, ladoDele);
       hazardsAoApanhar(f, atual, ladoMeu);
-      log.push({ meu: atual.u.sp.n, contra: f.u.nome || f.u.sp.n, venceu: r.venceu, fracEu: r.fracEu, fracFoe: r.fracFoe, turnos: r.turnos });
+      log.push({ meu: atual.u.sp.n, contra: f.u.nome || f.u.sp.n, venceu: r.venceu, fracEu: r.fracEu, fracFoe: r.fracFoe, turnos: r.turnos, clima: !!cl && climaLigado && climaRestante > 0 });
+      if (cl && climaLigado) { climaRestante -= r.turnos || 1; aplicarClima(); }
       atual.bonus.primeiroGolpe = 0; // Stakeout/Avenger: só o 1º golpe depois de entrar
       atual.itemGasto = true; f.itemGasto = true; // consumível usado nesta luta
       if (perece && r.turnos > perece + 1) { atual.vivo = false; atual.frac = 0; f.vivo = false; f.frac = 0; }
@@ -3400,17 +3518,36 @@
   // `buffs`: ids dos buffs do ginásio ainda ativos (chefoes.js, gymSkillsSummaryFor).
   function* montarTimeNoClimaEmPassos(candidatos, party, nivel, clima, armador, dupla, buffs, campo) {
     var inicio = buffs && buffs.length ? inicioDaLutaComBuffs(buffs) : null;
-    var simular = function (meus, fs, nv) {
-      var comBuffs = buffs && buffs.length ? meus.map(function (u) { return meuComBuffsDoGinasio(u, buffs); }) : meus;
-      return (dupla ? simularDuplaContraChefao : simularLutaContraChefao)(comBuffs, fs, nv, inicio);
-    };
     var foes = foesComRegraDeCampo(foesComBuffsDoGinasio(party.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean), buffs, dupla ? 2 : 1), campo);
+    // Os mesmos Pokémon sem clima: o clima dura 8 turnos (CLIMA_OFICIAL) e o do jogador só
+    // começa quando o armador entra. A luta em dupla segue com o clima a luta toda.
+    var foesSem = clima && !dupla ? foesComRegraDeCampo(foesComBuffsDoGinasio(party.map(function (m) { return foeDeDuelo(m, nivel, null); }).filter(Boolean), buffs, 1), campo) : null;
+    var comBuffsMeu = function (u) { return buffs && buffs.length ? meuComBuffsDoGinasio(u, buffs) : u; };
+    var simular = function (meus, fs, nv) {
+      var ini = inicio;
+      if (foesSem && fs.length === foesSem.length) {
+        var armadorIdx = null;
+        if (armador) meus.forEach(function (u, k) { if (armadorIdx === null && u.sp === armador.cand.sp) armadorIdx = k; });
+        ini = Object.assign({ lado: novoLadoDuelo(), statusNoFim: [], ultimo: null }, inicio || {}, {
+          clima: { duracao: CLIMA_OFICIAL.duracaoTurnos, armadorIdx: armador ? (armadorIdx === null ? -1 : armadorIdx) : null,
+            meusSem: meus.map(function (u) { return comBuffsMeu(unidadeSemClima(u)); }), foesSem: foesSem } });
+      }
+      return (dupla ? simularDuplaContraChefao : simularLutaContraChefao)(meus.map(comBuffsMeu), fs, nv, ini);
+    };
     var avaliados = [];
     for (var ci = 0; ci < candidatos.length; ci++) {
       var c = candidatos[ci];
       // Quem arma com habilidade escolhível entra com ela; se arma por innate, qualquer escolhível serve.
       var forcada = armador && c === armador.cand ? armador.abForcada : undefined;
-      var rc = melhorUnidadeContra(c.sp, foes, nivel, clima, golpesDeDueloAte(c.sp, nivel), forcada);
+      // Build salva do jogador (lote B, 2026-10-02): o simulador avalia o Pokémon como ele
+      // VAI lutar. O armador do clima só usa a build se ela levar a habilidade que arma.
+      var usaBuild = c.build && (c.build.moves || []).length && (forcada === undefined || ABILITY_ID_BY_NAME[c.build.ability] === forcada);
+      var rc;
+      if (usaBuild) {
+        var ub = unidadeDaBuild(c.sp, c.build, nivel, clima);
+        var pf = foes.map(function (f) { return resultadoDoDuelo(ub, f, nivel); });
+        rc = { nota: pf.reduce(function (a, v) { return a + v; }, 0), set: "build", ab: ub.ab, porFoe: pf, unidade: ub };
+      } else rc = melhorUnidadeContra(c.sp, foes, nivel, clima, golpesDeDueloAte(c.sp, nivel), forcada);
       avaliados.push({ sp: c.sp, owned: c.owned, nota: rc.nota, set: rc.set, ab: rc.ab, porFoe: rc.porFoe, unidade: rc.unidade, cand: c });
       yield 1;
     }
@@ -3461,7 +3598,11 @@
     });
     // Valor do time: os pontos da luta inteira (a cobertura só desempata).
     var valor = sim.pontos + cobertura.reduce(function (s, v) { return s + v; }, 0) * 0.01;
-    return { escolhidos: escolhidos, plano: plano, clima: clima, foes: foes, valor: valor, avaliados: avaliados, simulacao: sim };
+    // Estratégia de clima só existe se o armador entra de verdade na luta simulada
+    // (lote B, 2026-10-02: antes valia o granizo de um Ninetales que nunca entrava).
+    var nomeArmador = armador ? armador.cand.sp.n : null;
+    var armadorEntrou = !armador || (sim.log || []).some(function (l) { return l.meu === nomeArmador || l.entra === nomeArmador; });
+    return { escolhidos: escolhidos, plano: plano, clima: clima, foes: foes, valor: valor, avaliados: avaliados, simulacao: sim, armadorEntrou: armadorEntrou };
   }
   // opcoes.dupla: a batalha é em dupla (chefão `db` no dado) - a luta é simulada 2 contra 2.
   function montarTimeContraChefao(candidatos, party, nivel, opcoes) {
@@ -3481,7 +3622,7 @@
     for (var ai = 0; ai < armadores.length; ai++) {
       var arm = armadores[ai];
       var r = yield* montarTimeNoClimaEmPassos(candidatos, party, nivel, arm.clima, arm, dupla, buffs, campo);
-      if (r.valor >= melhor.valor + (melhor === base ? GANHO_MINIMO_ESTRATEGIA : 0.001)) {
+      if (r.armadorEntrou && r.valor >= melhor.valor + (melhor === base ? GANHO_MINIMO_ESTRATEGIA : 0.001)) {
         // Quem ganha com o clima: nota no clima do time bem acima da nota sem ele.
         var notaBase = {};
         base.avaliados.forEach(function (a) { notaBase[a.owned] = a.nota; });

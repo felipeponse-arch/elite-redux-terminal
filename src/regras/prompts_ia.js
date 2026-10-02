@@ -192,6 +192,7 @@
       return "OBJETIVO DESTA BUILD: vencer " + dadoExterno(c.boss.name) + " (time dele no CONTEXTO). O time foi escolhido pelo simulador de duelo do app" +
         (c.responde && c.responde.length ? " e este Pokemon e a resposta do time para: " + c.responde.map(dadoExterno).join(", ") +
           " - golpes, item e EVs precisam vencer ESSES duelos" : "") +
+        (c.provado ? ". " + linhaProvadoIA(c.provado) : "") +
         (c.estrategia
           ? ". ESTRATEGIA DO TIME: " + dadoExterno(c.estrategia.armador) + " arma " + (NOME_DA_CONDICAO[c.estrategia.clima] || c.estrategia.clima) +
             " ao entrar (" + dadoExterno(c.estrategia.habilidade) + ")" +
@@ -580,6 +581,14 @@
     return linhas.concat(linhasProximaLutaIA(sp, chefao));
   }
 
+  // Set que o simulador provou contra o chefão (lote B): a IA mantém a habilidade e os
+  // golpes-chave, salvo motivo forte escrito na rationale - o app re-simula as builds reais.
+  function linhaProvadoIA(p) {
+    var chaves = Object.keys(p.chave || {}).map(function (f) { return dadoExterno(p.chave[f]) + " contra " + dadoExterno(f); });
+    return "O SIMULADOR PROVOU ESTE POKEMON com habilidade " + dadoExterno(p.habilidade) + ", set " + p.set +
+      " e os golpes " + p.golpes.map(dadoExterno).join(", ") + (chaves.length ? " (golpe-chave: " + chaves.join("; ") + ")" : "") +
+      ". Mantenha a habilidade e os golpes-chave, salvo motivo forte escrito na rationale; o app simula de novo o time com as builds reais.";
+  }
   // Formato JSON de uma build (o mesmo no prompt individual e no lote).
   var FORMATO_BUILD_IA = '{"papel":"Tanque|Pivô|Wallbreaker|Sweeper","ability":"...","nature":"...","item":"...","moves":["...","...","...","..."],"evs":[hp,atk,def,spa,spd,spe],"plano":{"golpe de agora":"golpe futuro"},"rationale":"..."}';
   // Prompt da build de UM membro (botão "Gerar com IA", revisão pós-evolução,
@@ -666,6 +675,7 @@
         blocoItensDaEspecieIA(sp) +
         envelopeContextoIA(linhasContextoDaEspecieIA(sp)) +
         (c && resp.length ? "Este Pokemon e a resposta do time para: " + resp.map(dadoExterno).join(", ") + ".\n" : "") +
+        (opts.provado && opts.provado[sp.sname] ? linhaProvadoIA(opts.provado[sp.sname]) + "\n" : "") +
         planoPromptBlock(sp, cap);
     }).join("");
     return cabecalhoIA() +
