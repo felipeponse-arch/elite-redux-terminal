@@ -87,7 +87,7 @@ const CORRECAO = {
 };
 
 export default [
-  { ignores: ["artifact_final.html", "node_modules/**", "tests/visual_*/**", "data/**", ".git/**", "test-results*/**", "playwright-report*/**"] },
+  { ignores: ["artifact_final.html", "node_modules/**", "tests/visual_*/**", "data/**", ".git/**", "test-results*/**", "playwright-report*/**", ".claude/**"] },
   {
     files: ["src/regras/**/*.js"],
     languageOptions: {
