@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "futuro-1x1-ignorado",
+    descricao: "o Future Sight do Forewarn não tira HP na luta 1x1",
+    arquivo: "duelo.js",
+    de: "        atual.frac -= danoDoFuturoDuelo(f, atual, nivel);",
+    para: "",
+  },
+  {
+    id: "futuro-dupla-ignorado",
+    descricao: "o Future Sight do Forewarn não tira HP na luta em dupla",
+    arquivo: "duelo.js",
+    de: "      alvo.frac -= danoDoFuturoDuelo(f, alvo, nivel);",
+    para: "",
+  },
+  {
     id: "buffs-do-card-sem-lista",
     descricao: "o card do plano não diz quais buffs do ginásio entraram na conta",
     arquivo: "chefoes.js",

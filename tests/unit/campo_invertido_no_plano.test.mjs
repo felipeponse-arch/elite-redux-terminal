@@ -104,3 +104,27 @@ test("pedras com trava de insígnia no código oficial (auditoria de 02/10): eta
   assert.equal(etapa("SPECIES_BRELOOM_MEGA"), 5, "FLAG_BADGE05_GET");
   assert.equal(etapa("SPECIES_ALTARIA_MEGA"), 4, "sem trava no código: continua na 4ª");
 });
+
+test("Forewarn (Delphox da Tate & Liza): o Future Sight de 80 de poder na entrada tira HP de quem abre", () => {
+  const tl = R.BOSSES.find((b) => b.name === "Tate And Liza 1");
+  const delphox = R.foeDeDuelo(tl.party.find((p) => p.n === "Delphox"), 85, null);
+  assert.equal(delphox.ef.futuro, 80, "o texto 'Casts an 80 BP Future Sight on entry' vira efeito");
+  const alvo = R.foeDeDuelo(tl.party.find((p) => p.n === "Medicham"), 85, null);
+  const frac = R.danoDoFuturoDuelo(R.participanteDuelo(delphox), R.participanteDuelo(alvo), 85);
+  assert.ok(frac > 0.02 && frac < 0.8, "fração de HP razoável: " + frac);
+  const semFuturo = Object.assign({}, delphox, { ef: Object.assign({}, delphox.ef, { futuro: 0 }) });
+  assert.equal(R.danoDoFuturoDuelo(R.participanteDuelo(semFuturo), R.participanteDuelo(alvo), 85), 0);
+});
+
+test("Forewarn na luta simulada (1x1 e dupla): o time chega com menos HP do que sem o Future Sight", () => {
+  const tl = R.BOSSES.find((b) => b.name === "Tate And Liza 1");
+  const mk = (n, futuro) => { const u = R.foeDeDuelo(tl.party.find((p) => p.n === n), 85, null); return futuro === undefined ? u : Object.assign({}, u, { ef: Object.assign({}, u.ef, { futuro }) }); };
+  const hp = (sim) => sim.hpRestante;
+  const meus = () => [mk("Slowking"), mk("Lunatone")];
+  const com1 = R.simularLutaContraChefao(meus(), [mk("Delphox")], 85, null);
+  const sem1 = R.simularLutaContraChefao(meus(), [mk("Delphox", 0)], 85, null);
+  assert.ok(hp(com1) < hp(sem1) || com1.derrubados < sem1.derrubados, "1x1: " + hp(com1) + " vs " + hp(sem1));
+  const com2 = R.simularDuplaContraChefao(meus(), [mk("Delphox"), mk("Oranguru")], 85, null);
+  const sem2 = R.simularDuplaContraChefao(meus(), [mk("Delphox", 0), mk("Oranguru")], 85, null);
+  assert.ok(hp(com2) < hp(sem2) || com2.derrubados < sem2.derrubados, "dupla: " + hp(com2) + " vs " + hp(sem2));
+});

@@ -1142,7 +1142,7 @@
       aliadoEspecial: 0, aliadoMaior: 0, reiDosRatos: null, aliadoImuneSom: false, aliadoImuneStatus: {}, protegeGrass: false,
       porAliadoCaido: 0, vinganca: 0, lacaios: false, comandante: false, copiaAliado: false, copiaGolpe: null,
       refleteStatus: false, imuneGolpeStatus: false, pranksterStatus: false, imuneTaunt: false, acordaCedo: false, bonusVsSono: 0,
-      pesadelo: 0, statusIgnoraImune: false, statusSom: false, precisaoGolpe: {}, triage: false, entradaSono: false,
+      pesadelo: 0, statusIgnoraImune: false, statusSom: false, precisaoGolpe: {}, triage: false, entradaSono: false, futuro: 0,
       entradaDisable: false, entradaTorment: false, adicionaFantasma: false, quash: false, po: false,
       prende: null, ignoraDefesa: 0, prisaoForte: false, quedaPorTurno: {}, prisaoParalisa: false, recuoSePrimeiro: 0,
       primeiroGolpeRecebido: 1, expulsaAoApanhar: false, expulsaQuemEnrola: false, naoSaiForcado: false, fogeNaMetade: false,
@@ -2033,6 +2033,18 @@
     var acertosBloqueados = (def.ef.bloqueiaUmGolpe ? 1 : 0) + Math.max(0, def.ef.bloqueios - protecaoFura);
     return Math.floor(acertosBloqueados / porGolpe) + (def.ef.bloqueiaSuperEf && danoAtq.melhor.efTipo >= 2 ? 1 : 0) + balao;
   }
+  // Future Sight na entrada (Forewarn do Delphox da Tate & Liza, vídeo de 02/10: "Incoming attack ... power of
+  // 80", 3 turnos): na luta curta ele sempre cai, então vira um golpe especial Psychic de N de poder, de uma vez,
+  // em quem estiver em campo. Fração do HP máximo de quem apanha.
+  function danoDoFuturoDuelo(foe, alvo, nivel) {
+    var id = MOVE_ID_BY_NAME["Future Sight"];
+    var g = id === undefined ? null : prepararGolpesDuelo([id], foe.u, null)[0];
+    if (!g || !foe.u.ef.futuro) return 0;
+    var k = foe.u.ef.futuro / Math.max(1, g.poder || 120);
+    var gN = Object.assign({}, g, { forca: g.forca * k, forcaBase: g.forcaBase * k, poder: foe.u.ef.futuro, area: null });
+    var atq = Object.assign({}, comoEstaDuelo(foe), { golpesProntos: [gN] });
+    return danoNoDuelo(atq, comoEstaDuelo(alvo), nivel).melhor.dano / alvo.u.stats[0];
+  }
   // Um duelo, do ponto de vista de "eu" (0..1), no campo que os dois montam.
   // ini (opcional, pra sequência de lutas): { fracEu, fracFoe } = HP de partida
   // (fração do máximo) e detalhe: true pra receber { nota, venceu, fracEu,
@@ -2521,6 +2533,7 @@
     if (/Attacks with Sand Attack on switch-in|Sets Smokescreen for 3 turns on switch-in/i.test(f)) ef.evasao *= 4 / 3; // precisão do rival -1 (série: 3/4)
     if (/Uses Wish on switch-in/i.test(f)) ef.reviveHP = Math.max(ef.reviveHP, 0.5);
     if (/Uses Yawn on switch-in/i.test(f)) ef.entradaSono = true;
+    if ((x = f.match(/Casts an? ([0-9]+) BP Future Sight on entry/i))) ef.futuro = parseInt(x[1], 10); // Forewarn (T&L): cai 3 turnos depois
     if (/Uses Disable on switch-in/i.test(f)) ef.entradaDisable = true;
     if (/Casts Torment on entry/i.test(f)) ef.entradaTorment = true;
     if (/Uses Dragon Cheer on switch-in/i.test(f)) ef.critEstagio += 1;
@@ -2992,6 +3005,12 @@
       if (c.frac <= 0) { c.vivo = false; c.frac = 0; }
     }
     for (var k = 0; k < 2; k++) { var c0 = escolherMeu(); if (c0) { frenteMinha.push(c0); entraMeu(c0); } }
+    frenteDeles.forEach(function (f) {
+      var alvo = frenteMinha.filter(function (c) { return c.vivo; })[0];
+      if (!f.u.ef.futuro || !alvo) return;
+      alvo.frac -= danoDoFuturoDuelo(f, alvo, nivel);
+      if (alvo.frac <= 0) { alvo.frac = 0; alvo.vivo = false; }
+    });
     // Proteção que um dá ao outro na frente (Aroma Veil, Sweet Veil, Flower Veil).
     function protecaoDoLado(frente) {
       frente.forEach(function (c) {
@@ -3472,6 +3491,11 @@
       poeHazardComGolpe(atual, f, ladoDele);
       poeHazardComGolpe(f, atual, ladoMeu);
       if (!atual.vivo) continue;
+      if (f.u.ef.futuro && !f.futuroLancado) {
+        f.futuroLancado = true;
+        atual.frac -= danoDoFuturoDuelo(f, atual, nivel);
+        if (atual.frac <= 0) { atual.frac = 0; atual.vivo = false; continue; }
+      }
       var r = luta(atual, f);
       // Prisão (Shadow Tag, Arena Trap, Magnet Pull...): não dá pra trocar. O Fear
       // também prende 2 turnos (FAQ), mas a troca aqui é decidida no começo do
