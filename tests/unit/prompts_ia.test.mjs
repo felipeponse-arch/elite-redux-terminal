@@ -109,14 +109,14 @@ test("resposta do time: só snames reais do jogador, sem repetir, até 6", () =>
 });
 
 test("roster pra IA: Mega antes da 4ª insígnia conta como a base, sem duplicar; Monotype filtra", () => {
-  const alt = sp("SPECIES_ALTARIA"), mega = sp("SPECIES_ALTARIA_MEGA"), g = sp("SPECIES_GARCHOMP");
+  const alt = sp("SPECIES_ABSOL"), mega = sp("SPECIES_ABSOL_MEGA"), g = sp("SPECIES_GARCHOMP");
   R.state.team = [alt.x]; R.state.box = [mega.x, g.x];
   R.state.settings.milestone = 2;
   const r = R.rosterParaTimeIA(null);
-  assert.equal(r.roster.filter((s) => s.sname === "SPECIES_ALTARIA").length, 1, "Altaria e Altaria Mega viram uma criatura só");
-  assert.ok(!r.validSnames.includes("SPECIES_ALTARIA_MEGA"), "Mega ainda não vale");
+  assert.equal(r.roster.filter((s) => s.sname === "SPECIES_ABSOL").length, 1, "Absol e Absol Mega viram uma criatura só");
+  assert.ok(!r.validSnames.includes("SPECIES_ABSOL_MEGA"), "Mega ainda não vale");
   R.state.settings.milestone = 4;
-  assert.ok(R.rosterParaTimeIA(null).validSnames.includes("SPECIES_ALTARIA_MEGA"), "depois da 4ª insígnia, vale");
+  assert.ok(R.rosterParaTimeIA(null).validSnames.includes("SPECIES_ABSOL_MEGA"), "depois da 4ª insígnia, vale");
   const soDragao = R.rosterParaTimeIA("Dragon").roster.map((s) => s.sname);
   assert.ok(soDragao.every((sn) => R.speciesTypeNames(R.getSpeciesBySname(sn)).includes("Dragon")));
 });

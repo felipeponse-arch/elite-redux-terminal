@@ -90,8 +90,9 @@
   // Pedras que só aparecem mais tarde. Auditoria de 02/10/2026 no código oficial do jogo (er-repo, commit
   // 217dd0f, o mesmo das fontes do rank): entra aqui a pedra cuja fonte é um NPC/treinador com trava de
   // insígnia (FLAG_BADGE0n_GET em data/maps/<mapa>/scripts.pory; ex.: Route123 dá a Granbullite só com a
-  // 7ª). Pedra que também vem de item solto ou de NPC sem trava fica na 4ª, e a "só no menu do Meteor
-  // Falls" também (a varredura não olhou as lojas em src/). Granbullite foi o relato do usuário (vídeo de
+  // 7ª). Pedra que também vem de item solto ou de NPC sem trava fica na 4ª. As 11 que SÓ saem do menu do totem
+  // Haxorus (Meteor Falls) valem 7: o Ace Trainer que tampa a porta da sala só sai com FLAG_BADGE07_GET
+  // (MeteorFalls_1F_1R/scripts.pory:17,619) e nem src/ (lojas, field_specials.c) nem data/ citam essas pedras em outro lugar. Granbullite foi o relato do usuário (vídeo de
   // 02/10); Haxorusite e Dragoninite Y seguem em 7 por decisões anteriores (sem trava achada no código).
   // Valor = etapa (índice de levelcaps.json) em que a pedra libera.
   var MEGA_PEDRAS_TARDIAS = {
@@ -110,13 +111,24 @@
     "Nidokingite": 6,
     "Nidoqueenite": 6,
     "Toucannonite": 6,
+    "Altarianite": 7,
     "Crobatite": 7,
     "Dewgongite": 7,
     "Dragoninite Y": 7,
+    "Galladite": 7,
+    "Gardevoirite": 7,
     "Granbullite": 7,
     "Gyaradosite Y": 7,
     "Haxorusite": 7,
-    "Slowkingite": 7
+    "Luxraynite": 7,
+    "Magnezonite": 7,
+    "Quagsirenite": 7,
+    "Relicanthite": 7,
+    "Sceptilite": 7,
+    "Skarmorite": 7,
+    "Slowkingite": 7,
+    "Swalotite": 7,
+    "Swampertite": 7
   };
   var ROTULO_ETAPA_MEGA = { 4: "4ª insígnia (Flannery)", 5: "5ª insígnia (Norman)", 6: "6ª insígnia (Winona)", 7: "7ª insígnia (Tate & Liza)" };
   // Etapa em que esta forma Mega fica disponível: a da pedra, se for tardia.

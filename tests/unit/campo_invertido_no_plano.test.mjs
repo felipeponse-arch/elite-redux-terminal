@@ -102,7 +102,7 @@ test("pedras com trava de insígnia no código oficial (auditoria de 02/10): eta
   assert.equal(etapa("SPECIES_HITMONCHAN_MEGA"), 6);
   assert.equal(etapa("SPECIES_SLOWKING_MEGA"), 7, "ginásio de Mossdeep (Tate & Liza)");
   assert.equal(etapa("SPECIES_BRELOOM_MEGA"), 5, "FLAG_BADGE05_GET");
-  assert.equal(etapa("SPECIES_ALTARIA_MEGA"), 4, "sem trava no código: continua na 4ª");
+  assert.equal(etapa("SPECIES_ABSOL_MEGA"), 4, "sem trava no código: continua na 4ª");
 });
 
 test("Forewarn (Delphox da Tate & Liza): o Future Sight de 80 de poder na entrada tira HP de quem abre", () => {
@@ -127,4 +127,12 @@ test("Forewarn na luta simulada (1x1 e dupla): o time chega com menos HP do que 
   const com2 = R.simularDuplaContraChefao(meus(), [mk("Delphox"), mk("Oranguru")], 85, null);
   const sem2 = R.simularDuplaContraChefao(meus(), [mk("Delphox", 0), mk("Oranguru")], 85, null);
   assert.ok(hp(com2) < hp(sem2) || com2.derrubados < sem2.derrubados, "dupla: " + hp(com2) + " vs " + hp(sem2));
+});
+
+test("pedras que só saem do menu do totem Haxorus (porta liberada com a 7ª insígnia no código oficial)", () => {
+  const etapa = (s) => R.etapaDaMega(R.getSpeciesBySname(s));
+  assert.equal(etapa("SPECIES_GARDEVOIR_MEGA"), 7);
+  assert.equal(etapa("SPECIES_SCEPTILE_MEGA"), 7);
+  assert.equal(etapa("SPECIES_ALTARIA_MEGA"), 7);
+  assert.equal(etapa("SPECIES_ABSOL_MEGA"), 4, "Absolite também vem de item solto: segue na 4ª");
 });

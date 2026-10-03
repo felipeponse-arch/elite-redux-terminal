@@ -261,11 +261,11 @@ async function section20() {
   }
 
   // ---- Trava de Mega na sugestão de time (print do usuário, 2026-09-24:
-  // "Altaria Mega" na caixa, insígnia no 2º ginásio, e a sugestão contava a
+  // "Absol Mega" na caixa, insígnia no 2º ginásio, e a sugestão contava a
   // Mega). Antes da 4ª insígnia a Mega vira a base no roster e o prompt avisa
   // que Mega não existe ainda; depois, a Mega entra normal. ----
-  var megaFx = T.getSpeciesBySname("SPECIES_ALTARIA_MEGA");
-  if (achou("Altaria Mega no dado (fixture da trava de Mega)", megaFx)) {
+  var megaFx = T.getSpeciesBySname("SPECIES_ABSOL_MEGA");
+  if (achou("Absol Mega no dado (fixture da trava de Mega)", megaFx)) {
     var boxAntesMega = T.state.box.slice();
     var milestoneAntesMega = T.state.settings.milestone;
     var archetypeAntesMega = { pace: T.state.archetype.pace, weather: T.state.archetype.weather, monotype: T.state.archetype.monotype };
@@ -281,7 +281,7 @@ async function section20() {
     check("antes da 4ª insígnia o prompt do time avisa que Mega ainda não existe",
       promptTrancado.indexOf("MEGA EVOLUCAO: AINDA NAO DISPONIVEL") !== -1, promptTrancado.slice(0, 300));
     check("antes da 4ª insígnia a Mega da caixa vira a base no roster (nem aparece a forma Mega)",
-      promptTrancado.indexOf("SPECIES_ALTARIA ") !== -1 && promptTrancado.indexOf("SPECIES_ALTARIA_MEGA") === -1,
+      promptTrancado.indexOf("SPECIES_ABSOL ") !== -1 && promptTrancado.indexOf("SPECIES_ABSOL_MEGA") === -1,
       promptTrancado.slice(0, 500));
     T.state.settings.milestone = 4;
     estagios.length = 0;
@@ -290,7 +290,7 @@ async function section20() {
     await wait(60);
     var promptLiberado = estagios[0] || "";
     check("depois da 4ª insígnia a Mega entra no roster normalmente e não há o aviso de trava",
-      promptLiberado.indexOf("SPECIES_ALTARIA_MEGA") !== -1 && promptLiberado.indexOf("AINDA NAO DISPONIVEL") === -1,
+      promptLiberado.indexOf("SPECIES_ABSOL_MEGA") !== -1 && promptLiberado.indexOf("AINDA NAO DISPONIVEL") === -1,
       promptLiberado.slice(0, 500));
     T.state.box = boxAntesMega;
     T.state.settings.milestone = milestoneAntesMega;
