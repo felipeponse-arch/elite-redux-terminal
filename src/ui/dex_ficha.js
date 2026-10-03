@@ -337,15 +337,21 @@
       items += '<span class="rank-info-item"><span class="rank-info-label">Rank entre ' + escapeHtml(t) + '</span>' +
         badgeDeTierHtml("rank-badge-mono", mr.tier, "Rank " + mr.tier + " comparado só com quem tem o tipo " + t + " (score " + mr.score + "/100).") + '</span>';
     });
-    items += marcasDoRankHtml(sp, r);
-    // "Papéis cumpridos" (ponto 6) já é o "Papel" abaixo (species_role.json): não repete.
-    items += roleTagsHtml(sp.sname);
     // The letters alone don't say which end is good without a hover -
     // user feedback, 2026-09-09 ("falta indicar qual seria o rank mais
     // valioso"). Spelled out in plain text every time, not just on hover,
     // plus you can now sort the whole Dex list by rank (search controls).
-    items += '<span class="rank-info-scale">Escala: SS (melhor) &rarr; S &rarr; A &rarr; B &rarr; C &rarr; D (pior)</span>';
-    return '<div class="rank-info-line">' + items + '</div>';
+    items += '<span class="rank-info-scale">SS (melhor) &rarr; D (pior)</span>';
+    // Dois grupos (usuário, 02/10): as notas em letra numa linha e as marcas sem nota
+    // em outra, em texto pequeno - antes as marcas ficavam no meio das letras e com
+    // fonte maior que a da própria nota. "Papéis cumpridos" (ponto 6) é o "Papel"
+    // (species_role.json): não repete.
+    var marcas = marcasDoRankHtml(sp, r) + roleTagsHtml(sp.sname);
+    return '<div class="rank-info-line">' +
+      '<div class="rank-info-grupo"><span class="rank-info-titulo">Notas</span>' + items + '</div>' +
+      (marcas ? '<div class="rank-info-grupo rank-info-marcas"><span class="rank-info-titulo" title="' +
+        escapeHtml("Avisos que não mexem na nota.") + '">Marcas</span>' + marcas + '</div>' : "") +
+      '</div>';
   }
 
   function goToDexSpecies(x) {

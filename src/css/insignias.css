@@ -90,7 +90,12 @@
 .rank-badge-mono.tier-C  { color: var(--text); }
 .rank-badge-mono.tier-D  { color: var(--sem-weak); }
 
-.rank-info-line { display: flex; flex-wrap: wrap; gap: 16px; margin: -4px 0 14px; }
+/* Dois grupos (02/10): "Notas" (letras) e "Marcas" (avisos sem nota, em texto
+   pequeno, para não chamar mais atenção que a nota). */
+.rank-info-line { display: flex; flex-direction: column; gap: 8px; margin: -4px 0 14px; }
+.rank-info-grupo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+.rank-info-marcas { font-size: var(--fs-legenda); color: var(--text); padding-top: 8px; border-top: 1px solid var(--border); }
+.rank-info-titulo { font-size: var(--fs-micro); color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; min-width: 52px; }
 .rank-info-item { display: inline-flex; align-items: center; gap: 6px; }
 .rank-info-label { font-size: var(--fs-legenda); color: var(--text-dim); }
 .rank-info-scale { font-size: var(--fs-micro); color: var(--text-dim); }
