@@ -4,7 +4,8 @@
     "items": [
       "Tela do chefe e card do plano mostram a regra de campo da luta (Trick Room e batalha invertida da Tate & Liza, Gravity do Steven) e o efeito dos 18 campeões monotype - esses últimos ainda não entram na simulação, e o app avisa",
       "Mega pedras na insígnia certa: Dragoninite X, Hitmonleenite, Infernapite, Shedinjite, Slakingite, Latiasite, Latiosite e Purple Orb liberam só quando o jogo realmente dá a pedra",
-      "3 builds novas do Discord (Morpekyll, Spindaze, Boarlock)"
+      "3 builds novas do Discord (Morpekyll, Spindaze, Boarlock)",
+      "Revisão dos 8 ginásios contra o código do jogo: a revanche do líder não tem os buffs, o buff Sem Protect da Tate & Liza zera só o Protect (Detect e outros continuam), 8 textos de buff com os números reais, o card do plano lista os buffs que o simulador não calcula e o modo Hell mostra +5 níveis e as habilidades extras que o código confirma"
     ]
   },
   {

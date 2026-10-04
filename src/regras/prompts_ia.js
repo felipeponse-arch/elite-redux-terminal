@@ -503,7 +503,7 @@
     if (campo) linhas.push("  REGRA DE CAMPO desta luta: " + campo.texto + " - monte e escolha golpes/velocidade pensando nisso.");
     // Buffs do ginásio que o jogador ainda não tirou (2026-10-01): mudam a escolha
     // (status nos últimos do time, telas, Protect proibido, hazards...).
-    var resumoBuffs = gymSkillsSummaryFor(gymLeaderBaseName(boss.name));
+    var resumoBuffs = ehRevancheDeLider(boss.name) ? null : gymSkillsSummaryFor(gymLeaderBaseName(boss.name));
     var ativos = resumoBuffs && !resumoBuffs.gateOnly ? resumoBuffs.buffs.filter(function (b) { return !b.cleared; }) : [];
     if (ativos.length) {
       linhas.push("  Buffs do ginasio AINDA ATIVOS nessa luta (o jogador nao venceu os treinadores que tiram estes) - leve em conta:");

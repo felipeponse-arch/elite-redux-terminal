@@ -5,7 +5,7 @@
     "Roxanne": {
       "milestone": 1,
       "buffs": [
-        { "id": "roxanne_laststand", "label": "Resistência de virada", "detail": "Quando sobrarem poucos Pokémon pro time dela, os stats do Pokémon ativo sobem bastante de uma vez (o jogo mesmo avisa: \"não vou aceitar a derrota\")." },
+        { "id": "roxanne_laststand", "label": "Resistência de virada", "detail": "Quando 5 Pokémon dela já tiverem caído, o último dela entra com Ataque, Defesa, Atq. Esp., Def. Esp. e Velocidade +100% de uma vez (o jogo avisa: \"não vou aceitar a derrota\"). Só vale se o time dela tem 6." },
         { "id": "roxanne_hazard_bleed", "label": "Stealth Rock + sangramento", "detail": "Pedras pontiagudas cercam seu time (dano ao trocar de Pokémon), e os 2 últimos Pokémon do SEU time começam a luta sangrando." },
         { "id": "roxanne_defense", "label": "Defesa reforçada", "detail": "A Defesa do Pokémon ativo dela sobe de uma vez ao entrar em campo, e continua subindo um pouco a cada turno." }
       ]
@@ -13,10 +13,10 @@
     "Brawly": {
       "milestone": 2,
       "buffs": [
-        { "id": "brawly_foresight", "label": "Foresight no seu ativo", "detail": "Seu Pokémon ativo recebe Foresight: perde o bônus defensivo de esquiva e a imunidade Fantasma contra golpes Normal/Lutador." },
+        { "id": "brawly_foresight", "label": "Foresight no seu ativo", "detail": "Depois de 1 turno do seu Pokémon em campo, ele recebe Foresight: perde o bônus de esquiva e a imunidade Fantasma contra golpes Normal/Lutador." },
         { "id": "brawly_paralysis", "label": "Paralisia nos últimos 2", "detail": "Os 2 últimos Pokémon do seu time começam a luta paralisados." },
         { "id": "brawly_spikes", "label": "Spikes (2 camadas)", "detail": "2 camadas de Spikes cercam seu time, causando dano toda vez que você troca de Pokémon." },
-        { "id": "brawly_matblock", "label": "Mat Block ao trocar", "detail": "O Pokémon dele bloqueia o primeiro golpe direto toda vez que ele entra em campo." },
+        { "id": "brawly_matblock", "label": "Mat Block no 1º Pokémon", "detail": "Só o primeiro Pokémon dele entra com Mat Block: bloqueia os golpes que causam dano no primeiro turno da luta (os que entram depois não têm)." },
         { "id": "brawly_attack", "label": "Ataque reforçado", "detail": "O Ataque do Pokémon ativo dele sobe de uma vez, numa porcentagem, ao entrar em campo." }
       ]
     },
@@ -26,7 +26,7 @@
         { "id": "wattson_burn", "label": "Queimadura nos últimos 3", "detail": "Os 3 últimos Pokémon do seu time começam a luta queimados." },
         { "id": "wattson_stickyweb", "label": "Sticky Web", "detail": "Uma teia gruda no chão do seu lado do campo, baixando a Velocidade de quem entra." },
         { "id": "wattson_speed", "label": "Velocidade sobe aos poucos", "detail": "A Velocidade do Pokémon ativo dele aumenta um pouco a cada turno." },
-        { "id": "wattson_magnetrise_spdef", "label": "Magnet Rise + Def. Especial", "detail": "O Pokémon ativo dele fica imune a golpes de Terra (Magnet Rise) e ganha Defesa Especial de uma vez ao entrar." }
+        { "id": "wattson_magnetrise_spdef", "label": "Magnet Rise + Def. Especial", "detail": "A Defesa Especial do Pokémon dele sobe 80% ao entrar e, depois de 2 turnos em campo, ele fica imune a golpes de Terra (Magnet Rise)." }
       ]
     },
     "Flannery": {
@@ -46,12 +46,12 @@
       "milestone": 5,
       "buffs": [
         { "id": "norman_speed", "label": "Velocidade reforçada", "detail": "A Velocidade do Pokémon ativo dele sobe de uma vez, numa porcentagem, ao entrar em campo." },
-        { "id": "norman_accuracy_laststand", "label": "Precisão + resistência de virada", "detail": "A Precisão do Pokémon ativo dele aumenta um pouco a cada turno, e quando sobrarem poucos Pokémon os stats sobem bastante de uma vez." },
+        { "id": "norman_accuracy_laststand", "label": "Precisão + resistência de virada", "detail": "A Precisão do Pokémon ativo dele aumenta um pouco a cada turno e, quando 5 dele já tiverem caído, o último entra com todos os atributos +100%. Só vale se o time dele tem 6." },
         { "id": "norman_spikes", "label": "Spikes (2 camadas)", "detail": "2 camadas de Spikes cercam seu time, causando dano toda vez que você troca de Pokémon." },
         { "id": "norman_defense", "label": "Defesa reforçada", "detail": "A Defesa do Pokémon ativo dele sobe de uma vez, numa porcentagem, ao entrar em campo." },
-        { "id": "norman_leechseed", "label": "Leech Seed no seu ativo", "detail": "Seu Pokémon ativo é grudado com Leech Seed: perde HP por turno, que vai pro time dele." },
+        { "id": "norman_leechseed", "label": "Leech Seed no seu ativo", "detail": "Depois de 3 turnos do seu Pokémon em campo, ele é grudado com Leech Seed: perde HP por turno, que vai pro time dele." },
         { "id": "norman_attack", "label": "Ataque reforçado", "detail": "O Ataque do Pokémon ativo dele sobe de uma vez, numa porcentagem, ao entrar em campo." },
-        { "id": "norman_substitute", "label": "Substituto", "detail": "O Pokémon ativo dele entra em campo já usando Substituto." }
+        { "id": "norman_substitute", "label": "Substituto", "detail": "Quando 5 dele já tiverem caído, o último entra em campo já com um Substituto (25% do HP). Só vale se o time dele tem 6." }
       ]
     },
     "Winona": {
@@ -59,7 +59,7 @@
       "buffs": [
         { "id": "winona_spdef", "label": "Def. Especial reforçada", "detail": "A Defesa Especial do Pokémon ativo dela sobe de uma vez, numa porcentagem, ao entrar em campo." },
         { "id": "winona_frostbite", "label": "Frostbite nos últimos 4", "detail": "Os 4 últimos Pokémon do seu time começam a luta com frostbite: perdem HP por turno e ficam com Ataque Especial reduzido." },
-        { "id": "winona_embargo", "label": "Embargo", "detail": "Seus Pokémon ficam impedidos de usar o item que estão segurando por um tempo." },
+        { "id": "winona_embargo", "label": "Embargo", "detail": "Seus Pokémon ficam impedidos de usar o item que seguram por 4 turnos." },
         { "id": "winona_defense", "label": "Defesa reforçada", "detail": "A Defesa do Pokémon ativo dela sobe de uma vez, numa porcentagem, ao entrar em campo." }
       ]
     },
@@ -72,7 +72,7 @@
         { "id": "tateliza_luckychant", "label": "Lucky Chant", "detail": "O time deles fica livre de sofrer acertos críticos por um tempo." },
         { "id": "tateliza_wideguard", "label": "Wide Guard permanente", "detail": "O time deles fica protegido de golpes em área a luta inteira." },
         { "id": "tateliza_sleep", "label": "Sono no último Pokémon", "detail": "O último Pokémon do seu time começa a luta dormindo." },
-        { "id": "tateliza_noprotect", "label": "Sem Protect/Detect", "detail": "Você não pode usar Protect nem Detect nessa luta." }
+        { "id": "tateliza_noprotect", "label": "Sem Protect", "detail": "Os PP do Protect de todo o seu time vão a zero (só o Protect: Detect, King's Shield e outros golpes de proteção continuam valendo)." }
       ]
     },
     "Juan": {

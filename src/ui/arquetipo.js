@@ -425,6 +425,7 @@
         : "") +
       (res.buffs
         ? '<p class="mybuild-hint' + (res.buffs.total && !res.buffs.ativos.length ? " plano-buffs-aviso" : "") + '"><b>Buffs do ginásio na conta:</b> ' +
+          (res.buffs.foraDaConta && res.buffs.foraDaConta.length ? '<span class="plano-buffs-aviso"><b>Fora da conta do simulador:</b> ' + escapeHtml(res.buffs.foraDaConta.join(", ")) + '. </span> ' : "") +
           (buffsMudaram(res) ? '<span class="plano-buffs-aviso"><b>Você mudou os buffs depois de montar este time - clique em "Montar time contra este chefão" de novo.</b></span> ' : "") +
           (res.buffs.ativos.length ? escapeHtml(res.buffs.ativos.join(", ")) + "."
             : "nenhum (todos marcados como já tirados). Se a luta ainda tem os buffs, desmarque-os no card Buffs do ginásio e monte o time de novo.") + '</p>'

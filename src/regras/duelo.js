@@ -3356,10 +3356,12 @@
       return Object.assign({}, f, { ef: ef });
     });
   }
-  // Meu Pokémon com os buffs que pesam em mim: sem Protect/Detect.
+  // Meu Pokémon com os buffs que pesam em mim: sem o PP do Protect (revisão dos ginásios de 04/10: o código oficial,
+  // battle_events.c BATTLE_EVENT_NO_PROTECT, chama DepleteTeamPowerPointOfMove(MOVE_PROTECT) - só o MOVE_PROTECT; a mensagem
+  // do jogo diz "power points of protect drained". Detect, King's Shield, Spiky Shield etc. continuam valendo).
   function meuComBuffsDoGinasio(u, ids) {
     if (!buffsConhecidosDuelo(ids).some(function (b) { return b.semProtectMeu; })) return u;
-    var semProtege = (u.statusIds || []).filter(function (id) { var p = planoDoGolpeStatus(id); return !p || p.tipo !== "protege"; });
+    var semProtege = (u.statusIds || []).filter(function (id) { return !MOVES[id] || MOVES[id][0] !== "Protect"; });
     return semProtege.length === (u.statusIds || []).length ? u : Object.assign({}, u, { statusIds: semProtege });
   }
   // Como a luta começa do meu lado (hazards já postos, status nos últimos N) e o

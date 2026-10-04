@@ -53,6 +53,12 @@ test("Last Stand só existe com 6 dele; Sem Protect tira o Protect dos meus", ()
   const u = { statusIds: [protect], ef: {} };
   assert.equal(R.meuComBuffsDoGinasio(u, ["tateliza_noprotect"]).statusIds.length, 0);
   assert.equal(R.meuComBuffsDoGinasio(u, ["tateliza_sleep"]), u);
+  // Só o Protect: o jogo zera o PP de MOVE_PROTECT (battle_events.c), Detect/King's Shield/Spiky Shield seguem valendo.
+  const outros = ["Detect", "King's Shield", "Spiky Shield", "Baneful Bunker"].map((n) => R.MOVE_ID_BY_NAME[n]).filter((x) => x !== undefined);
+  assert.ok(outros.length >= 3, "fixture: golpes de proteção no dado");
+  const u2 = { statusIds: [protect].concat(outros), ef: {} };
+  const depois = R.meuComBuffsDoGinasio(u2, ["tateliza_noprotect"]);
+  assert.equal(JSON.stringify(depois.statusIds), JSON.stringify(outros), "só o Protect sai");
 });
 
 test("com todos os buffs da Flannery ativos, a mesma luta rende menos que sem nenhum", () => {

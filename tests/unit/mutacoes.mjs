@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "revanche-com-buffs-do-ginasio",
+    descricao: "a revanche do líder (Roxanne 2 a 5...) volta a ter os buffs do 1º encontro",
+    arquivo: "chefoes.js",
+    de: "    if (ehRevancheDeLider(leaderName)) return [];",
+    para: "",
+  },
+  {
+    id: "sem-protect-tira-toda-protecao",
+    descricao: "o buff Sem Protect da Tate & Liza tira Detect/King's Shield/Spiky Shield também (o jogo zera só o PP do Protect)",
+    arquivo: "duelo.js",
+    de: "return !MOVES[id] || MOVES[id][0] !== \"Protect\"; });",
+    para: "var p = planoDoGolpeStatus(id); return !p || p.tipo !== \"protege\"; });",
+  },
+  {
     id: "mega-dragoninite-x-na-4a",
     descricao: "a Dragoninite X (Sky Pillar, 6ª insígnia) volta a liberar na 4ª",
     arquivo: "formas_mega.js",
@@ -108,8 +122,8 @@ export const MUTACOES = [
     id: "buffs-do-card-sem-lista",
     descricao: "o card do plano não diz quais buffs do ginásio entraram na conta",
     arquivo: "chefoes.js",
-    de: "ativos: r.buffs.filter(function (b) { return !b.cleared; }).map(function (b) { return b.label; }) };",
-    para: "ativos: [] };",
+    de: "ativos: ativos.map(function (b) { return b.label; }), foraDaConta",
+    para: "ativos: [], foraDaConta",
   },
   {
     id: "wideguard-do-ginasio-ignorado",

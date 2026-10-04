@@ -401,16 +401,55 @@
   });
   function regraDeCampoDoChefao(nome) { return REGRA_DE_CAMPO_DO_CHEFAO[nome] || null; }
 
+  // Modo Hell (revisão dos ginásios de 04/10, código oficial er-repo 217dd0f): o jogo escolhe o time pela dificuldade - Easy e Ace usam
+  // `party`, Elite usa `partyInsane` e Hell usa `partyHell` (src/battle_main.c) -, e SÓ no Hell registra os eventos de treinador
+  // (RegisterTrainerBattleEvents, src/data/hell_trainer_skills.h) e soma HELL_MODE_EXTRA_LEVELS (5) a todo treinador depois da 3ª
+  // insígnia (FLAG_BADGE03_GET, include/constants/pokemon_config.h). A tabela de habilidades extras do código público só cobre
+  // até o Wattson; os líderes seguintes, a Elite 4 e o campeão não estão nela (seus `hellSkills` ficam nos dados de treinador,
+  // que o repositório público não traz) - por isso o app só mostra o que o código confirma.
+  var HELL_NIVEIS_EXTRAS = 5, HELL_NIVEIS_EXTRAS_A_PARTIR_DA_INSIGNIA = 3;
+  var HELL_HABILIDADES_EXTRAS_DO_CHEFAO = {
+    "Roxanne 1": ["Pressure", "Shed Skin", "Self Sufficient"],
+    "Wattson 1": ["Surge Surfer"]
+  };
+  function habilidadesExtrasDoHell(nome) { return HELL_HABILIDADES_EXTRAS_DO_CHEFAO[nome] || []; }
+  function regrasDoHell(nome) { return { niveisExtras: HELL_NIVEIS_EXTRAS, aPartirDaInsignia: HELL_NIVEIS_EXTRAS_A_PARTIR_DA_INSIGNIA, habilidades: habilidadesExtrasDoHell(nome) }; }
+
   // Pro card do plano (relato de 02/10: o jogador marcou os 6 buffs achando que marcado = ativo, o
   // simulador rodou sem nenhum e ninguém avisou): quantos buffs o chefão tem e quais estão ATIVOS na conta.
+  // Revanche de líder (Roxanne 2 a 5, Flannery 2 a 5, Wallace 2 a 5...): com o jogo zerado o script do líder (FLAG_SYS_GAME_CLEAR)
+  // vai direto pro RematchScript e NUNCA passa pelo CheckTrainers, onde ficam todos os registerbattleevent (revisão dos ginásios
+  // de 04/10, os 8 scripts). Só o 1º encontro de cada líder tem os buffs do ginásio.
+  function ehRevancheDeLider(nome) {
+    var b = BOSSES.filter(function (x) { return x.name === nome; })[0];
+    if (!b || b.cat !== "Lider de Ginasio") return false;
+    var base = gymLeaderBaseName(nome);
+    var primeiro = BOSSES.filter(function (x) { return x.cat === "Lider de Ginasio" && gymLeaderBaseName(x.name) === base; })[0];
+    return primeiro !== b;
+  }
+  // Buffs do ginásio (ou parte deles) que o simulador de duelo NÃO calcula - dependem de turno exato em campo (Foresight, Leech Seed,
+  // Magnet Rise, Embargo) ou de estágio de precisão/herança de estágios. Vão pro aviso do plano, pra ele não parecer mais completo do
+  // que é (revisão dos ginásios de 04/10). Cada texto diz a parte que fica de fora.
+  var BUFFS_FORA_DA_CONTA = {
+    brawly_foresight: "Foresight no seu ativo",
+    wattson_magnetrise_spdef: "Magnet Rise (imune a Terra após 2 turnos)",
+    flannery_accuracy: "Precisão sobe aos poucos",
+    flannery_copystats: "Herda status ao entrar",
+    norman_accuracy_laststand: "Precisão sobe aos poucos",
+    norman_leechseed: "Leech Seed no seu ativo",
+    winona_embargo: "Embargo (4 turnos sem item)"
+  };
   function buffsParaMostrarDoChefao(leaderName) {
+    if (ehRevancheDeLider(leaderName)) return null;
     var r = gymSkillsSummaryFor(gymLeaderBaseName(leaderName));
     if (!r || r.gateOnly) return null;
-    return { total: r.total, ativos: r.buffs.filter(function (b) { return !b.cleared; }).map(function (b) { return b.label; }) };
+    var ativos = r.buffs.filter(function (b) { return !b.cleared; });
+    return { total: r.total, ativos: ativos.map(function (b) { return b.label; }), foraDaConta: ativos.filter(function (b) { return BUFFS_FORA_DA_CONTA[b.id]; }).map(function (b) { return BUFFS_FORA_DA_CONTA[b.id]; }) };
   }
   // Ids dos buffs do ginásio que o jogador ainda NÃO tirou (vão pro simulador do
   // chefão e pro prompt da IA). Vazio pra quem não é líder com buffs.
   function buffsAtivosDoChefao(leaderName) {
+    if (ehRevancheDeLider(leaderName)) return [];
     var r = gymSkillsSummaryFor(gymLeaderBaseName(leaderName));
     if (!r || r.gateOnly) return [];
     return r.buffs.filter(function (b) { return !b.cleared; }).map(function (b) { return b.id; });

@@ -26,6 +26,12 @@ async function section27() {
     abrirChefao("Monochamp Bug"); await wait(40);
     det = document.getElementById("boss-detail").textContent;
     check("o campeão monotype mostra o efeito e avisa que o simulador ainda não o conta", /Regra de campo desta luta/.test(det) && /infestação/.test(det) && /ainda não conta este efeito/.test(det), det.slice(0, 160));
+    // Revisão dos ginásios (04/10): revanche de líder não tem os buffs do ginásio (só o 1º encontro).
+    abrirChefao("Roxanne 2"); await wait(40);
+    det = document.getElementById("boss-detail").textContent;
+    check("a revanche (Roxanne 2) avisa que não tem buffs do ginásio e não lista nenhum", /Esta é uma revanche/.test(det) && !document.querySelector(".gym-skill-summary") && !document.querySelector("[data-gymskill]"), det.slice(0, 120));
+    abrirChefao("Roxanne 1"); await wait(40);
+    check("o 1º encontro (Roxanne 1) lista os buffs do ginásio", !!document.querySelector("[data-gymskill]"));
     abrirChefao("Flannery 1"); await wait(40);
     check("a Flannery 1 (sem regra de campo) não mostra o cartão", !/Regra de campo desta luta/.test(document.getElementById("boss-detail").textContent));
     busca.value = "Flannery 1";

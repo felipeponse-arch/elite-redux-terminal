@@ -170,6 +170,18 @@
     return '<div class="card"><h3>Regra de campo desta luta</h3><p class="mybuild-hint">' + escapeHtml(campo.texto) + '</p>' +
       (campo.naoSimulado ? '<p class="mybuild-hint plano-buffs-aviso"><b>O simulador ainda não conta este efeito:</b> o plano e o veredito não levam isto em conta.</p>' : "") + '</div>';
   }
+  // Regras do modo Hell no time do chefe (só quando a aba mostra o time Hell): nível extra e, onde o código oficial define,
+  // as habilidades extras do time inteiro. Fonte e limite da tabela: comentário em chefoes.js (HELL_NIVEIS_EXTRAS).
+  function hellDoChefaoHtml(nome, diffKey) {
+    if (diffKey !== "hell") return "";
+    var hell = regrasDoHell(nome), habs = hell.habilidades;
+    return '<div class="card"><h3>Regras do Hell</h3>' +
+      '<p class="mybuild-hint">Depois da ' + hell.aPartirDaInsignia + 'ª insígnia todos os treinadores do Hell ganham +' + hell.niveisExtras + ' níveis.</p>' +
+      (habs.length
+        ? '<p class="mybuild-hint"><b>Habilidades extras no time inteiro dele:</b> ' + escapeHtml(habs.join(", ")) + '.</p>'
+        : '<p class="mybuild-hint">As habilidades extras do Hell deste treinador não estão no código público do jogo (a tabela oficial só cobre até o Wattson).</p>') +
+      '</div>';
+  }
   function bossCatColor(cat) { return BOSS_CAT_COLOR[cat] || "var(--text-dim)"; }
 
   function renderBossList() {
@@ -422,6 +434,10 @@
     var leaderName = gymLeaderBaseName(boss.name);
     var summary = gymSkillsSummaryFor(leaderName);
     if (!summary) return "";
+    if (ehRevancheDeLider(boss.name)) {
+      return '<div class="card" data-gym-leader="' + escapeHtml(leaderName) + '"><h3>Buffs do ginásio</h3>' +
+        '<p class="hint gym-sem-margem">Esta é uma revanche (jogo já zerado): o jogo não registra os buffs do ginásio nela. Eles só valem no primeiro encontro com o líder.</p></div>';
+    }
     if (summary.gateOnly) {
       return '<div class="card" data-gym-leader="' + escapeHtml(leaderName) + '"><h3>Buffs do ginásio</h3>' +
         '<p class="hint gym-sem-margem">' + escapeHtml(summary.gateNote) + '</p></div>';
@@ -574,8 +590,9 @@
         '<h2>' + escapeHtml(boss.name) + '</h2>' +
         '<div class="detail-dexno mono">' + escapeHtml(nomeDaCategoriaDeChefao(boss.cat)) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +
-      (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:6px 0 0;max-width:65ch;">Nomes crus dos dados do jogo — não temos 100% de certeza que "Insane"/"Hell" batem exatamente com os modos "Ace"/"Elite" do menu do jogo atual. Confira sua dificuldade no Centro Pokémon se quiser ter certeza.</p></div>' : "") +
+      (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:6px 0 0;max-width:65ch;">Padrão é o time de Easy e Ace (os dois usam o mesmo), Insane é o time do Elite e Hell é o do modo Hell (confirmado no código do jogo).</p></div>' : "") +
       campoDoChefaoHtml(boss.name) +
+      hellDoChefaoHtml(boss.name, diffKey) +
       bossConfrontoHtml(boss, party) +
       montarHtml +
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
