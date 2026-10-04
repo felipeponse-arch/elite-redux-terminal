@@ -323,7 +323,9 @@
         '</span><span class="rank-info-scale">' + escapeHtml(MOTIVO_FORA_DO_RANK_PT[FORA_DO_RANK[sp.sname]] || "") + '</span></div>';
     }
     if (!r) return "";
-    var items = '<span class="rank-info-item"><span class="rank-info-label">Rank geral</span>' + rankBadgeHtml(sp.sname) + '</span>';
+    // Lote 2 do redesenho (04/10): o rank geral é o destaque (selo maior); as outras notas vão numa grade de 2 colunas (rótulo | selo).
+    var geral = '<span class="rank-info-geral"><span class="rank-info-label">Rank geral</span>' + rankBadgeHtml(sp.sname) + '</span>';
+    var items = "";
     if (r.stageTier !== null && r.stageTier !== undefined) {
       var label = STAGE_LABEL[r.stage] || (r.stage + "º estágio");
       items += '<span class="rank-info-item"><span class="rank-info-label">Rank no ' + label + '</span>' + rankStageBadgeHtml(sp.sname) + '</span>';
@@ -346,14 +348,15 @@
     // user feedback, 2026-09-09 ("falta indicar qual seria o rank mais
     // valioso"). Spelled out in plain text every time, not just on hover,
     // plus you can now sort the whole Dex list by rank (search controls).
-    items += '<span class="rank-info-scale">SS (melhor) &rarr; D (pior)</span>';
+    var legenda = '<span class="rank-info-scale">SS (melhor) &rarr; D (pior)</span>';
     // Dois grupos (usuário, 02/10): as notas em letra numa linha e as marcas sem nota
     // em outra, em texto pequeno - antes as marcas ficavam no meio das letras e com
     // fonte maior que a da própria nota. "Papéis cumpridos" (ponto 6) é o "Papel"
     // (species_role.json): não repete.
     var marcas = marcasDoRankHtml(sp, r) + roleTagsHtml(sp.sname);
     return '<div class="rank-info-line">' +
-      '<div class="rank-info-grupo"><span class="rank-info-titulo">Notas</span>' + items + '</div>' +
+      '<div class="rank-info-notas"><div class="rank-info-topo"><span class="rank-info-titulo">Notas</span>' + geral + legenda + '</div>' +
+        (items ? '<div class="rank-info-grade">' + items + '</div>' : "") + '</div>' +
       (marcas ? '<div class="rank-info-grupo rank-info-marcas"><span class="rank-info-titulo" title="' +
         escapeHtml("Avisos que não mexem na nota.") + '">Marcas</span>' + marcas + '</div>' : "") +
       '</div>';

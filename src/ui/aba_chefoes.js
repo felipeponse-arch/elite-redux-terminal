@@ -263,6 +263,11 @@
         if (l.troca) return "troque " + l.sai + " por " + l.entra + " contra " + l.contra;
         var hp = Math.round((l.fracEu || 0) * 100);
         return l.meu + " contra " + l.contra + ": " + (l.venceu === true ? "vence, fica com " + hp + "% de HP" : "cai");
+      }),
+      // HP que sobra em cada passo (0 a 100), na mesma ordem de "passos"; null onde não há duelo (troca, derrubada em dupla).
+      hps: sim.log.map(function (l) {
+        if (l.derruba || l.troca) return null;
+        return l.venceu === true ? Math.round((l.fracEu || 0) * 100) : 0;
       }) };
   }
   // Simulador sem travar a tela (Fase 3, 2026-09-30): a conta leva 1-4 s no
@@ -408,17 +413,27 @@
     if (!summary) return "";
     if (summary.gateOnly) {
       return '<div class="card" data-gym-leader="' + escapeHtml(leaderName) + '"><h3>Buffs do ginásio</h3>' +
-        '<p class="hint" style="margin:0;">' + escapeHtml(summary.gateNote) + '</p></div>';
+        '<p class="hint gym-sem-margem">' + escapeHtml(summary.gateNote) + '</p></div>';
     }
+    // Cada buff é uma linha com uma chave de dois estados (Ativo | Já tirado). A caixa de seleção
+    // continua sendo o controle real (marcada = "já tirado", o mesmo evento e atributo de antes);
+    // a chave só a desenha. O estado vai em texto e ícone, não só na cor.
     var itemsHtml = summary.buffs.map(function (b) {
-      return '<li><label><input type="checkbox" data-gymskill="' + escapeHtml(b.id) + '"' + (b.cleared ? " checked" : "") + '>' +
-        '<span><b>' + escapeHtml(b.label) + '</b> <span class="gs-estado ' + (b.cleared ? "gs-tirado" : "gs-ativo") + '">' + (b.cleared ? "já tirado - NÃO vale na luta" : "ATIVO na luta") + '</span><span class="gs-detail"> — ' + escapeHtml(b.detail) + '</span></span></label></li>';
+      return '<li><label class="gs-linha ' + (b.cleared ? "gs-linha-tirado" : "gs-linha-ativo") + '">' +
+        '<input type="checkbox" data-gymskill="' + escapeHtml(b.id) + '"' + (b.cleared ? " checked" : "") + ' aria-label="' + escapeHtml(b.label) + ': já tirado">' +
+        '<span class="gs-corpo"><b>' + escapeHtml(b.label) + '</b><span class="gs-detail">' + escapeHtml(b.detail) + '</span></span>' +
+        '<span class="gs-chave" aria-hidden="true">' +
+          '<span class="gs-opcao gs-opcao-ativo"><span class="gs-icone">●</span> Ativo</span>' +
+          '<span class="gs-opcao gs-opcao-tirado"><span class="gs-icone">✓</span> Já tirado</span>' +
+        '</span></label></li>';
     }).join("");
-    return '<div class="card" data-gym-leader="' + escapeHtml(leaderName) + '"><h3>Buffs do ginásio</h3>' +
-      '<p class="hint" style="margin:0 0 10px;">Cada treinador de apoio deste ginásio tira um desses buffs de ' + escapeHtml(leaderName) + ' quando você o vence, antes de desafiá-la(o). <b>Caixa marcada = buff já tirado (não vale mais na luta). Caixa vazia = buff ATIVO.</b> Marque só os que você já tirou — não precisa dizer qual treinador, só o efeito.</p>' +
-      (summary.note ? '<p class="hint" style="margin:0 0 10px;">' + escapeHtml(summary.note) + '</p>' : "") +
+    var restantes = summary.remaining;
+    return '<div class="card gym-card" data-gym-leader="' + escapeHtml(leaderName) + '">' +
+      '<h3>Buffs do ginásio<span class="gym-skill-summary plano-chip' + (restantes ? " gym-chip-ativos" : "") + '">' + restantes + ' de ' + summary.total + ' ativo' + (restantes === 1 ? "" : "s") + '</span></h3>' +
+      '<p class="hint gym-instrucao">Marque os buffs que você já tirou. Os desmarcados valem na luta.</p>' +
+      '<p class="gym-contexto">Cada treinador de apoio vencido tira um buff de ' + escapeHtml(leaderName) + '.' + (restantes ? "" : " Sem nenhum ativo, o simulador roda a luta sem buffs.") + '</p>' +
+      (summary.note ? '<p class="gym-contexto">' + escapeHtml(summary.note) + '</p>' : "") +
       '<ul class="gym-skill-list">' + itemsHtml + '</ul>' +
-      '<div class="gym-skill-summary mono" style="margin-top:10px;font-size:var(--fs-texto);">Restam ' + summary.remaining + ' de ' + summary.total + ' buff' + (summary.total === 1 ? "" : "s") + ' ativo' + (summary.remaining === 1 ? "" : "s") + ' antes da luta' + (summary.remaining ? ": " + summary.buffs.filter(function (b) { return !b.cleared; }).map(function (b) { return escapeHtml(b.label); }).join(", ") : " (o simulador roda a luta sem nenhum buff)") + '.</div>' +
     '</div>';
   }
 

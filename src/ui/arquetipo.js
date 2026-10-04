@@ -349,7 +349,31 @@
   // Modo chefão (botão "Montar time contra este chefão", 2026-09-29): no lugar
   // do guia da IA, o plano da luta do simulador de duelo - na ordem em que o
   // chefão manda os Pokémon, quem do time responde a cada um e com que golpe.
-  function planoContraChefaoHtml(res) {
+  // A "Luta simulada inteira" fica recolhida; o jogador que abriu não quer que feche a cada redesenho do card.
+  var lutaSimuladaAberta = false;
+  document.addEventListener("toggle", function (e) {
+    if (e.target && e.target.classList && e.target.classList.contains("plano-luta-det")) lutaSimuladaAberta = e.target.open;
+  }, true);
+  // Veredito da luta simulada: o foco do card (ícone + frase + contagem em chip). Sem a luta inteira,
+  // o foco é a cobertura do plano (quantos Pokémon dele têm resposta clara).
+  function vereditoDaLutaHtml(res, nMembros, cobertos) {
+    var l = res.luta, ok, titulo, chip;
+    if (l) {
+      ok = !!l.venceu;
+      titulo = ok ? "Vence:" : "Derruba:";
+      chip = ok ? l.vivos + " de " + nMembros + " de pé" : l.derrubados + " de " + l.total;
+    } else {
+      ok = cobertos === res.plano.length;
+      titulo = "Respostas claras:";
+      chip = cobertos + " de " + res.plano.length;
+    }
+    return '<div class="plano-veredito ' + (ok ? "plano-veredito-ok" : "plano-veredito-atencao") + '">' +
+      '<span class="plano-veredito-icone" aria-hidden="true">' + (ok ? "✓" : "!") + '</span>' +
+      '<div class="plano-veredito-corpo"><div class="plano-veredito-titulo">' + titulo + ' <span class="plano-chip plano-chip-forte">' + chip + '</span></div>' +
+        (l ? '<div class="plano-veredito-sub">Luta simulada inteira' + (l.dupla ? " em dupla" : "") + ". " +
+          cobertos + ' de ' + res.plano.length + ' Pokémon dele têm resposta clara no seu time.</div>' : "") + '</div></div>';
+  }
+  function planoContraChefaoHtml(res, nMembros) {
     var cobertos = res.plano.filter(function (p) { return p.coberto; }).length;
     var itens = res.plano.map(function (p) {
       var resp = p.respostas.length
@@ -361,9 +385,17 @@
       return '<li><div class="plano-foe"><b>' + escapeHtml(p.foe) + '</b> <span class="plano-tipos">' + p.tipos.map(function (t) { return typePill(t, true); }).join("") + '</span></div>' +
         '<div class="plano-resp">' + resp + '</div></li>';
     }).join("");
+    // Uma linha por passo da luta; onde houve duelo, uma barrinha de HP (o texto já diz a porcentagem).
+    var passosLuta = res.luta ? res.luta.passos.map(function (t, i) {
+      var hp = res.luta.hps ? res.luta.hps[i] : null;
+      var barra = typeof hp === "number"
+        ? '<span class="plano-hp plano-hp-' + (hp >= 50 ? "alto" : hp >= 25 ? "medio" : "baixo") + '" aria-hidden="true"><span class="plano-hp-cheio" style="--hp:' + hp + '"></span></span>'
+        : "";
+      return "<li><span class=\"plano-luta-txt\">" + escapeHtml(t) + "</span>" + barra + "</li>";
+    }).join("") : "";
     return '<div class="ts-usage-guide">' +
-      '<p class="mybuild-hint">Escolhido pelo simulador de duelo do app (o mesmo do rank): ' + cobertos + ' de ' + res.plano.length +
-        ' Pokémon dele têm resposta clara no seu time. A ordem abaixo é a em que ele manda os Pokémon.' +
+      vereditoDaLutaHtml(res, nMembros, cobertos) +
+      '<p class="mybuild-hint">Escolhido pelo simulador de duelo do app (o mesmo do rank). A ordem abaixo é a em que ele manda os Pokémon.' +
         (res.estrategia
           ? "" : (res.clima ? " Ele arma " + (res.clima === "sol" ? "sol: golpes Fire ficam mais fortes." : "chuva: golpes Water ficam mais fortes.") : "")) + '</p>' +
       (res.estrategia
@@ -379,9 +411,9 @@
         : "") +
       '<ol class="plano-chefao">' + itens + '</ol>' +
       (res.luta
-        ? '<p class="mybuild-hint"><b>Luta simulada inteira' + (res.luta.dupla ? " em dupla" : "") + '</b> (o HP passa de uma luta pra outra): ' +
-          (res.luta.venceu ? "vence, com " + res.luta.vivos + " de pé" : "derruba " + res.luta.derrubados + " de " + res.luta.total) + ".</p>" +
-          '<ol class="plano-luta">' + res.luta.passos.map(function (t) { return "<li>" + escapeHtml(t) + "</li>"; }).join("") + "</ol>"
+        ? '<details class="plano-luta-det"' + (lutaSimuladaAberta ? " open" : "") + '><summary>Luta simulada inteira' + (res.luta.dupla ? " em dupla" : "") +
+          ' <span class="plano-luta-dica">(o HP passa de uma luta pra outra)</span></summary>' +
+          '<ol class="plano-luta">' + passosLuta + "</ol></details>"
         : "") +
     '</div>';
   }
@@ -395,7 +427,7 @@
           (res.anterior.salvo ? "" : '<span class="mybuild-hint"> (os 3 espaços de Times salvos estão ocupados - o time anterior só fica guardado enquanto esta página estiver aberta)</span>')
         : "";
       return '<div class="card ts-generated-team"><h3>Time gerado ' + escapeHtml(res.archetypeLabel) + '</h3>' +
-        planoContraChefaoHtml(res) +
+        planoContraChefaoHtml(res, members.length) +
         // O aviso "Faltou build pra..." vem separado do resto do texto pra ter a cor de aviso
         // (o texto continua começando por ele: a suíte procura por "Faltou build").
         '<p id="chefao-build-status" class="notes-status" role="status" aria-live="polite">' +

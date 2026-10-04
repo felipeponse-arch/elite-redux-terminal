@@ -98,7 +98,18 @@
 .rank-info-titulo { font-size: var(--fs-micro); color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; min-width: 52px; }
 .rank-info-item { display: inline-flex; align-items: center; gap: 6px; }
 .rank-info-label { font-size: var(--fs-legenda); color: var(--text-dim); }
-.rank-info-scale { font-size: var(--fs-micro); color: var(--text-dim); }
+.rank-info-scale { font-size: var(--fs-micro); color: var(--text-dim); margin-left: auto; white-space: nowrap; }
+/* Lote 2 (04/10): o rank geral é o destaque, as outras notas ficam numa grade de 2 colunas
+   (rótulo à esquerda, selo à direita) e a legenda SS a D vira uma linha discreta à direita. */
+.rank-info-notas { display: flex; flex-direction: column; gap: 8px; }
+.rank-info-topo { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.rank-info-geral { display: inline-flex; align-items: center; gap: 8px; }
+.rank-info-geral .rank-info-label { font-size: var(--fs-texto); font-weight: 600; color: var(--text); }
+.rank-info-geral .rank-badge { min-width: 34px; height: 26px; padding: 0 8px; font-size: var(--fs-destaque); border-radius: var(--radius-md); }
+.rank-info-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 24px; }
+.rank-info-grade .rank-info-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; padding-bottom: 4px; border-bottom: 1px dotted var(--border); }
+.rank-info-grade .rank-info-label { min-width: 0; }
+
 .cov-flag { cursor: help; font-weight: 700; margin-left: 1px; opacity: .85; }
 
 .risk-list { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
