@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "mega-dragoninite-x-na-4a",
+    descricao: "a Dragoninite X (Sky Pillar, 6ª insígnia) volta a liberar na 4ª",
+    arquivo: "formas_mega.js",
+    de: "    \"Dragoninite X\": 6,\n",
+    para: "",
+  },
+  {
     id: "monochamp-sem-aviso-de-nao-simulado",
     descricao: "o campeão monotype deixa de avisar que o simulador não conta o efeito",
     arquivo: "chefoes.js",

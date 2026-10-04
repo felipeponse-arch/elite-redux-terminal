@@ -2586,6 +2586,22 @@
       "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Ataque misto (RyuXen, 19/09): Substitute + Teeter Dance + Leftovers são o motor, com Toxic Spill e Cosmic Daze; Psycho Boost pega os tipos Poison imunes ao Toxic Spill. Precisa de apoio contra Psychic. Mais agressivo: Viral Strike no lugar de Substitute, natureza Hasty e mais Ataque. EVs pensados pro nível 80.",
       "fonte": "discord-build-workshop-2.65",
       "versao": "2.65beta"
+    },
+    {
+      "estilo": "defensivo",
+      "ability": "Let's Dance",
+      "nature": "Jolly",
+      "evs": "4 HP / 252 Atk / 252 Spe",
+      "item": "Black Sludge",
+      "moves": [
+        "Close Combat",
+        "Protect",
+        "Poison Jab",
+        "Fake Out"
+      ],
+      "note": "Do RyuXen no Build Workshop (03/10), EVs de nível 45. O 3º golpe era Poison Jab / Coverage: ficou o Poison Jab. Item Black Sludge (Focus Sash como alternativa). Fake Out + Protect combinam com o Toxic Spill; Close Combat é o STAB principal. Estilo \"defensivo\" por ser o set de suporte (Fake Out, Protect, Black Sludge).",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
     }
   ],
   "SPECIES_RIBOMBEE_REDUX_MEGA": {
@@ -2983,6 +2999,38 @@
       "Stealth Rock"
     ],
     "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. EVs no post (RyuXen, 21/09): \"252 HP / 108 Def / 148 Def\" - Def repetido; lido como 148 SpD (natureza Calm, set de defesa especial). EVs pensados pro nível 80.",
+    "fonte": "discord-build-workshop-2.65",
+    "versao": "2.65beta"
+  },
+  "SPECIES_MORPEKYLL": {
+    "estilo": "ofensivo",
+    "ability": "Unburden",
+    "nature": "Adamant",
+    "evs": "196 HP / 228 Atk / 84 SpD",
+    "item": "Figy Berry",
+    "moves": [
+      "Aura Wheel",
+      "Knock Off",
+      "Sucker Punch",
+      "Stuff Cheeks"
+    ],
+    "note": "Do RyuXen no Build Workshop (27/09), EVs de nível 50. Ele deixou o 2º golpe como Taunt / Knock Off / Coverage: ficou o Knock Off. Item Figy Berry (a Liechi foi citada como alternativa). Contra o Norman ele iria de 252 HP e 28 Def e levaria Protect por causa do Fake Out.",
+    "fonte": "discord-build-workshop-2.65",
+    "versao": "2.65beta"
+  },
+  "SPECIES_BOARLOCK": {
+    "estilo": "ofensivo",
+    "ability": "Gluttony",
+    "nature": "Modest",
+    "evs": "252 HP / 252 SpA",
+    "item": "Salac Berry",
+    "moves": [
+      "Calm Mind",
+      "Transmute",
+      "Focus Blast",
+      "Dazzling Gleam"
+    ],
+    "note": "Do deeeep player no Build Workshop (04/10). Os dois últimos slots eram 'Focus Blast / Dazzling Gleam / Belch' nos dois: ficaram as duas primeiras opções (a Belch combina com a Salac Berry consumida).",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   }

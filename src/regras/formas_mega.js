@@ -94,6 +94,11 @@
   // Haxorus (Meteor Falls) valem 7: o Ace Trainer que tampa a porta da sala só sai com FLAG_BADGE07_GET
   // (MeteorFalls_1F_1R/scripts.pory:17,619) e nem src/ (lojas, field_specials.c) nem data/ citam essas pedras em outro lugar. Granbullite foi o relato do usuário (vídeo de
   // 02/10); Haxorusite e Dragoninite Y seguem em 7 por decisões anteriores (sem trava achada no código).
+  // Varredura de 04/10 (todas as fontes de pedra nos scripts, travas por insígnia): Dragoninite X (Sky Pillar, FLAG_BADGE06_GET),
+  // Hitmonleenite (Granite Cave B2F, BADGE06, mesma NPC das outras duas Hitmon), Infernapite (Game Corner, BADGE05, mesma NPC da
+  // Empoleonite e da Torterranite), Shedinjite (Abandoned Ship, BADGE07), Slakingite (Norman na volta, BADGE06, não 5), Purple Orb
+  // (Petalburg Woods, só com FLAG_SYS_GAME_CLEAR = etapa 9, Champion) e Latiasite/Latiosite (Southern Island exige o Eon Ticket da
+  // revanche do rival, também pós-jogo; antes disso só o menu do totem do Haxorus, na 7ª).
   // Valor = etapa (índice de levelcaps.json) em que a pedra libera.
   var MEGA_PEDRAS_TARDIAS = {
     "Breloomite": 5,
@@ -101,12 +106,15 @@
     "Feraligite X": 5,
     "Feraligite Y": 5,
     "Krookodilenite": 5,
+    "Infernapite": 5,
     "Meganiumite": 5,
     "Sandslashite": 5,
-    "Slakingite": 5,
+    "Slakingite": 6,
     "Torterranite": 5,
     "Typhlosionite": 5,
+    "Dragoninite X": 6,
     "Hitmonchanite": 6,
+    "Hitmonleenite": 6,
     "Hitmontopite": 6,
     "Nidokingite": 6,
     "Nidoqueenite": 6,
@@ -120,11 +128,15 @@
     "Granbullite": 7,
     "Gyaradosite Y": 7,
     "Haxorusite": 7,
+    "Latiasite": 7,
+    "Latiosite": 7,
     "Luxraynite": 7,
     "Magnezonite": 7,
+    "Purple Orb": 9,
     "Quagsirenite": 7,
     "Relicanthite": 7,
     "Sceptilite": 7,
+    "Shedinjite": 7,
     "Skarmorite": 7,
     "Slowkingite": 7,
     "Swalotite": 7,

@@ -88,7 +88,7 @@ test("Megas de pedra tardia só contam a partir da 7ª insígnia (Tate & Liza)",
   });
   // Espécie com uma Mega liberada e outra tardia: só a tardia fica de fora.
   const drag = especie("SPECIES_DRAGONITE");
-  comMilestone(5, () => {
+  comMilestone(6, () => {
     const nomes = R.battleFamilyOf(drag).map((s) => s.sname);
     assert.ok(!nomes.includes("SPECIES_DRAGONITE_MEGA_Y"));
     if (R.formFamilyOf(drag).length > 2) {
@@ -96,4 +96,11 @@ test("Megas de pedra tardia só contam a partir da 7ª insígnia (Tate & Liza)",
       assert.match(R.megaPromptBlock(drag), /Ainda travada\(s\).*Dragonite Mega Y/);
     }
   });
+});
+// Varredura de 04/10 nos scripts do jogo (er-repo 217dd0f): pedras cuja fonte tem trava de insígnia que a tabela não tinha.
+test("pedras com trava achada na varredura de 04/10 liberam na etapa certa", () => {
+  const esperado = { SPECIES_DRAGONITE_MEGA: 6, SPECIES_HITMONLEE_MEGA: 6, SPECIES_INFERNAPE_MEGA: 5, SPECIES_SHEDINJA_MEGA: 7, SPECIES_SLAKING_MEGA: 6, SPECIES_LATIAS_MEGA: 7, SPECIES_LATIOS_MEGA: 7, SPECIES_CASCOON_PRIMAL: 9 };
+  for (const [sname, et] of Object.entries(esperado)) assert.equal(R.etapaDaMega(especie(sname)), et, sname);
+  assert.equal(R.etapaDaMega(especie("SPECIES_DRAGONITE_MEGA_Y")), 7, "a Y segue em 7");
+  assert.equal(R.etapaDaMega(especie("SPECIES_HITMONCHAN_MEGA") || especie("SPECIES_HITMONCHAN")), 6);
 });
