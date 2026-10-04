@@ -84,3 +84,16 @@ test("conferência com as builds reais: build fraca acusa que o plano piorou", (
     assert.match(c.texto, /ATENÇÃO|Atenção/);
   } finally { R.state.customBuilds = antes; }
 });
+
+test("estratégia de clima: com o pool de fogo/sol contra a Winona 1 o Torkoal não vira estratégia se não entra (caso que a mutação percebe)", () => {
+  const pool = ["Ninetales", "Torkoal", "Charizard", "Arcanine", "Venusaur", "Lilligant", "Heliolisk", "Cherrim", "Blissey", "Snorlax"];
+  const cands = pool.map((n) => R.SPECIES.find((s) => s && s.n === n)).filter(Boolean).map((sp) => ({ sp, owned: sp.x }));
+  assert.ok(cands.length >= 8, "fixture: espécies no dado");
+  const winona = R.BOSSES.find((b) => b.name === "Winona 1");
+  const res = R.montarTimeContraChefao(cands, winona.party, 50, {});
+  if (res.estrategia) {
+    const n = res.estrategia.armador;
+    assert.ok(res.simulacao.log.some((l) => l.meu === n || l.entra === n), "armador " + n + " declarado mas não entrou na luta");
+  }
+  assert.equal(res.escolhidos.length, 6);
+});

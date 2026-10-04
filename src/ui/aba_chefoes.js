@@ -362,13 +362,14 @@
           generatedTeamResult.luta = resumoDaLuta(conferencia.simulacao);
         }
         var faltou = computeTeamGenerationValidation(state.team.map(getSpeciesByX).filter(Boolean)).withoutBuild;
-        generatedTeamResult.progresso = (faltou.length
+        // O aviso fica à parte (cor de aviso no card); o status mostra o aviso e depois o resto.
+        generatedTeamResult.aviso = faltou.length
           ? "Faltou build pra: " + faltou.join(", ") + (ultimoMotivo ? " (" + ultimoMotivo.replace(/\.$/, "") + ")" : "") +
             " - use \"Gerar build com IA\" no card de cada um."
-          : "") +
-          (jaFeitas.length ? (faltou.length ? " " : "") + "Mantidas as builds que já eram contra " + boss.name + " neste level cap: " +
+          : "";
+        generatedTeamResult.progresso = (jaFeitas.length ? "Mantidas as builds que já eram contra " + boss.name + " neste level cap: " +
             jaFeitas.map(function (sp) { return sp.n; }).join(", ") + "." : "") +
-          (conferencia ? " " + conferencia.texto : "");
+          (conferencia ? (jaFeitas.length ? " " : "") + conferencia.texto : "");
         TELAS.time();
       }
       flashToast("Time contra " + boss.name + " montado" + (anterior.salvo ? " - o anterior ficou em Times salvos." : "."));

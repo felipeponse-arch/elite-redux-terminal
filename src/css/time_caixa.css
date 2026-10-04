@@ -156,7 +156,12 @@
 .cf-fix li { margin-bottom: 6px; }
 .cf-fix ul ul { margin: 4px 0 6px; }
 .cf-plan { margin-top: 12px; }
-.cf-plan summary { cursor: pointer; font-weight: 600; font-size: var(--fs-texto); }
+/* Alvo de toque (lote 1, 2026-10-03): o <summary> ganha altura mínima; o marcador do
+   navegador (que some com display:flex) vira o mesmo ▸ do .bh-details. */
+.cf-plan summary { cursor: pointer; font-weight: 600; font-size: var(--fs-texto); display: flex; align-items: center; min-height: var(--alvo-min); list-style: none; }
+.cf-plan summary::-webkit-details-marker { display: none; }
+.cf-plan summary::before { content: "▸ "; white-space: pre; }
+.cf-plan[open] summary::before { content: "▾ "; }
 .cf-plan ol { margin: 8px 0 0; padding-left: 20px; font-size: var(--fs-texto); }
 .cf-plan li { margin-bottom: 5px; }
 .cf-plan-meta { color: var(--text-dim); cursor: help; }

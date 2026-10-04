@@ -15,6 +15,7 @@
 .pcbox-detail .remove-btn {
   background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);
   padding: 6px 10px; font-size: var(--fs-base); line-height: 1; cursor: pointer; color: var(--sem-weak);
+  min-width: var(--alvo-min); min-height: var(--alvo-min);
 }
 
 .row-add-btn {
@@ -78,15 +79,50 @@
 .ts-usage-guide { display: flex; flex-direction: column; gap: 8px; font-size: var(--fs-texto); margin-bottom: 10px; }
 .ts-guide-item b { color: var(--text-dim); font-weight: 700; }
 .ts-validation { font-size: var(--fs-texto); color: var(--text-dim); padding-top: 8px; border-top: 1px solid var(--border); }
-.ts-validation-warn { color: var(--sem-weak); }
+.ts-validation-warn { color: var(--aviso); }
 .gym-skill-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: var(--fs-texto); }
-.gym-skill-list label { display: flex; gap: 9px; align-items: flex-start; cursor: pointer; }
-.gym-skill-list input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; width: 15px; height: 15px; }
+.gym-skill-list label { display: flex; gap: 9px; align-items: flex-start; cursor: pointer; min-height: var(--alvo-min); }
+.gym-skill-list input[type="checkbox"] { margin: 0; flex-shrink: 0; width: 24px; height: 24px; }
 .gym-skill-list .gs-detail { color: var(--text-dim); font-weight: 400; }
 .gym-skill-list .gs-estado { font-weight: 700; }
 .gym-skill-list .gs-ativo { color: var(--sem-weak); }
 .gym-skill-list .gs-tirado { color: var(--text-dim); }
-.plano-buffs-aviso { color: var(--sem-weak); }
+.plano-buffs-aviso { color: var(--aviso); }
+
+/* Card "Time gerado contra <chefão>" (lote 1 do redesenho, 2026-10-03): antes
+   não tinha regra nenhuma e saía com o estilo padrão do navegador (lista
+   numerada colada na margem, espaços de 16 px entre blocos). Aqui: sem
+   marcador do navegador (a ordem vira um número em chip), inimigo + tipos de um
+   lado e quem responde ao lado (no celular, embaixo), resumo da luta compacto. */
+.plano-chefao, .plano-luta { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; counter-reset: plano; }
+.plano-chefao { gap: 10px; }
+.plano-luta { gap: 4px; }
+.plano-chefao li, .plano-luta li { counter-increment: plano; display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: 8px; row-gap: 4px; align-items: start; }
+.plano-chefao li::before {
+  content: counter(plano); grid-row: 1; grid-column: 1;
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+  width: 22px; height: 22px; border-radius: var(--radius-pill);
+  background: var(--surface-3); color: var(--text); font-size: var(--fs-legenda); font-weight: 700;
+}
+.plano-luta li::before { content: counter(plano) "."; color: var(--text-dim); font-variant-numeric: tabular-nums; text-align: right; }
+.plano-foe { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 22px; }
+.plano-resp { grid-column: 2; min-width: 0; }
+.plano-tipos { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.plano-resp .goto-species { font-weight: 700; color: var(--badge-accent2); text-decoration: underline; text-decoration-style: dotted; }
+.plano-sem-resposta { color: var(--aviso); font-weight: 600; }
+.plano-estrategia { margin: 0; padding: 8px 12px; background: var(--surface-2); border-left: 3px solid var(--accent-2); border-radius: var(--radius-sm); }
+.plano-faltou-build { display: block; color: var(--aviso); font-weight: 600; }
+.plano-rodape { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.plano-chip {
+  display: inline-flex; align-items: center; padding: 4px 10px;
+  border-radius: var(--radius-pill); background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-dim); font-size: var(--fs-pequeno); font-weight: 600; font-variant-numeric: tabular-nums;
+}
+@media (min-width: 700px) {
+  /* Telas largas: o inimigo fica numa coluna e a resposta ao lado, na mesma linha. */
+  .plano-chefao li { grid-template-columns: 22px minmax(11rem, 17rem) minmax(0, 1fr); column-gap: 12px; align-items: center; }
+  .plano-chefao .plano-resp { grid-column: 3; }
+}
 .auto-log time { display: block; font-size: var(--fs-legenda); color: var(--text-dim); font-variant-numeric: tabular-nums; }
 .sync-banner button {
   border: none; border-radius: var(--radius-sm); padding: 4px 10px; font-size: var(--fs-pequeno); font-weight: 700;
@@ -132,8 +168,25 @@
   font-size: var(--fs-legenda);
   font-weight: 700;
   cursor: pointer;
-  padding: 2px 4px;
+  /* Alvo de toque (lote 1, 2026-10-03): era 17 px de altura; agora >= 24 px
+     (44 px em tela de toque), só com padding/min-height. */
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-min);
+  padding: 2px 8px;
 }
+/* "Gerar build com IA": ação principal do estado vazio, não link solto (lote 1,
+   2026-10-03) - botão secundário com borda e fundo. */
+.ts-ai-generate-btn, #mybuild-ai-generate {
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px 14px;
+  font-size: var(--fs-pequeno);
+}
+.ts-ai-generate-btn:hover, #mybuild-ai-generate:hover { background: var(--surface-3); }
+.ts-ai-generate-btn:disabled, #mybuild-ai-generate:disabled { color: var(--text-dim); cursor: default; }
 .ts-build-note { font-size: var(--fs-legenda); color: var(--text-dim); margin-top: 6px; font-style: italic; }
 .ts-nota-fonte .ts-build-note { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .ts-item-desc { font-size: var(--fs-legenda); color: var(--text-dim); margin-top: 4px; }

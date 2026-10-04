@@ -83,7 +83,12 @@
   font-size: var(--fs-pequeno);
   font-weight: 700;
   cursor: pointer;
-  padding: 2px 0;
+  /* Alvo de toque (lote 1, 2026-10-03). */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--alvo-min);
+  padding: 2px 8px;
 }
 
 /* Mapa de calor de cobertura (redesign 2026-09-18) - mesmas classes/

@@ -19,11 +19,11 @@
     if (state.typeFilter.has(t)) {
       checkboxEl.checked = true;
       label.classList.add("checked");
-      label.style.background = meta.hex; label.style.color = meta.dark ? "#1c1b17" : "#fff9f2"; label.style.borderColor = meta.hex;
+      label.style.background = meta.hex; label.style.color = tintaDoTipo(meta.hex); label.style.borderColor = meta.hex;
     }
     checkboxEl.addEventListener("change", function (e) {
       var marcado = e.target.checked;
-      if (marcado) { label.classList.add("checked"); label.style.background = meta.hex; label.style.color = meta.dark ? "#1c1b17" : "#fff9f2"; label.style.borderColor = meta.hex; }
+      if (marcado) { label.classList.add("checked"); label.style.background = meta.hex; label.style.color = tintaDoTipo(meta.hex); label.style.borderColor = meta.hex; }
       else { label.classList.remove("checked"); label.style.background = ""; label.style.color = ""; label.style.borderColor = ""; }
       acao(["lista"], function () { if (marcado) state.typeFilter.add(t); else state.typeFilter.delete(t); });
     });

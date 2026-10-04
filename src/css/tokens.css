@@ -21,6 +21,10 @@
   --sem-weak: #c23b3b;
   --sem-resist: #1f8f5f;
   --sem-immune: #6b3fa0;
+  /* Aviso ("atenção, falta algo"): âmbar, distinto do vermelho --sem-weak, que
+     no app é fraqueza de tipo. Claro medido >= 4,5:1 sobre --surface, --surface-2 e
+     --surface-3 (2026-10-03). */
+  --aviso: #855500;
   /* Ângulo de foco/badges recalibrado pra nova paleta (2026-09-18),
      mesma metodologia da auditoria de 2026-09-13 que criou este padrão
      -safe: o ciano-escuro abaixo mede 5.1:1 como TEXTO sobre --surface
@@ -35,7 +39,7 @@
      resto do arquivo) com um pouco mais de margem, pra sobreviver a
      qualquer ajuste fino futuro do tom sem precisar re-auditar. */
   --badge-accent: #c11f63;
-  --badge-accent2: #0b7c6c;
+  --badge-accent2: #096b5c;
   --badge-resist: #1c8156;
   /* Cor por categoria de treinador (Chefões) - versões escurecidas pra
      valer como TEXTO no claro (mesmo método -safe usado acima: medido
@@ -58,6 +62,9 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 18px;
+  /* Área mínima de toque (WCAG 2.5.8: 24 px; 44 px em tela de toque, no
+     @media do responsivo.css). */
+  --alvo-min: 24px;
   --radius-pill: 999px;
   /* Escala de tamanho de texto (2026-09-24, pedido do usuário: "padronizar
      o tamanho da fonte"). Antes: 19 tamanhos soltos, muitos a meio pixel um
@@ -98,6 +105,7 @@
     --sem-weak: #e5686a;
     --sem-resist: #4fce93;
     --sem-immune: #b28ce0;
+    --aviso: #f0b84a;
     --focus: #33f0c8;
     --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
     /* Dark mode's plain --accent/--accent-2 already clear AA as text
@@ -130,6 +138,7 @@
   --sem-weak: #e5686a;
   --sem-resist: #4fce93;
   --sem-immune: #b28ce0;
+  --aviso: #f0b84a;
   --focus: #33f0c8;
   --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
   --badge-accent: #ff4f9a;
@@ -168,6 +177,7 @@
   --sem-weak: #ff6666;
   --sem-resist: #66ff66;
   --sem-immune: #d9a3ff;
+  --aviso: #ffb000;
   --focus: #ffffff;
   --shadow: 0 0 0 1px #ffffff;
   --badge-accent: #ffcc00;

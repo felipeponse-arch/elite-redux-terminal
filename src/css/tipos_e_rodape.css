@@ -36,7 +36,13 @@
   background: var(--surface);
 }
 .footer p { margin: 0; }
-.footer a { color: var(--badge-accent2); text-decoration: none; }
+/* Alvo de toque sem engordar o rodapé (lote 1, 2026-10-03): o padding cria a área
+   clicável e a margem negativa devolve o espaço, então a linha continua do mesmo
+   tamanho. */
+.footer a {
+  color: var(--badge-accent2); text-decoration: none;
+  display: inline-block; padding: calc((var(--alvo-min) - 1.2em) / 2) 4px; margin: calc((var(--alvo-min) - 1.2em) / -2) -4px;
+}
 .footer a:hover { text-decoration: underline; }
 /* Celular e janela baixa (2026-09-26, pedido do usuário: "no celular em janela
    flutuante fica muito ruim de usar"): numa janela de 360x520 o rodapé quebrava
@@ -45,7 +51,11 @@
    crédito continua no title do link do NextDex - e o texto corta com "…" em
    vez de quebrar. */
 @media (max-width: 620px), (max-height: 600px) {
-  .footer { padding: 4px 14px; }
+  .footer { padding: 0 14px; }
   .footer .rodape { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Aqui o link ocupa a altura toda da linha (~28 px) em vez de 44: o rodapé de uma linha
+     só é decisão do usuário (teste "rodapé ocupa uma linha só", < 32 px) e uma área
+     de 44 px no fim da tela nem caberia na janela (lote 1, 2026-10-03). */
+  .footer a { margin-block: 0; padding-block: 5px; }
   .rodape-extra { display: none; }
 }

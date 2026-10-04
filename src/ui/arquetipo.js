@@ -45,8 +45,8 @@
       var isActive = current === opt;
       var style = "";
       if (typeColored) {
-        var meta = TYPE_META[opt] || { hex: "#777", dark: false };
-        style = ' style="--chip-color:' + meta.hex + ';--chip-ink:' + (meta.dark ? "#1c1b17" : "#fff9f2") + '"';
+        var meta = TYPE_META[opt] || { hex: "#777777" };
+        style = ' style="--chip-color:' + meta.hex + ';--chip-ink:' + tintaDoTipo(meta.hex) + '"';
       }
       return '<button type="button" class="arch-chip' + (typeColored ? " arch-chip-type" : "") + (isActive ? " active" : "") +
         '"' + style + ' data-axis="' + axis + '" data-value="' + escapeHtml(opt) + '">' + escapeHtml(opt) + '</button>';
@@ -358,7 +358,8 @@
               (a.golpe ? " (" + escapeHtml(a.golpe) + (a.efTipo >= 2 ? ", super efetivo" : "") + ")" : "");
           }).join(" ou ")
         : '<span class="plano-sem-resposta">ninguém do seu time vence este duelo com folga - evite deixá-lo montar</span>';
-      return '<li><b>' + escapeHtml(p.foe) + '</b> <span class="plano-tipos">' + p.tipos.map(function (t) { return typePill(t, true); }).join("") + '</span>: ' + resp + '</li>';
+      return '<li><div class="plano-foe"><b>' + escapeHtml(p.foe) + '</b> <span class="plano-tipos">' + p.tipos.map(function (t) { return typePill(t, true); }).join("") + '</span></div>' +
+        '<div class="plano-resp">' + resp + '</div></li>';
     }).join("");
     return '<div class="ts-usage-guide">' +
       '<p class="mybuild-hint">Escolhido pelo simulador de duelo do app (o mesmo do rank): ' + cobertos + ' de ' + res.plano.length +
@@ -395,10 +396,13 @@
         : "";
       return '<div class="card ts-generated-team"><h3>Time gerado ' + escapeHtml(res.archetypeLabel) + '</h3>' +
         planoContraChefaoHtml(res) +
-        '<p id="chefao-build-status" class="notes-status" role="status" aria-live="polite">' + escapeHtml(res.progresso || "") + '</p>' +
-        '<div class="ts-validation' + (vc.allBuilt ? "" : " ts-validation-warn") + '">' +
-          (vc.total - vc.withoutBuild.length) + "/" + vc.total + ' membros com build.' +
-        '</div>' + restaurar + '</div>';
+        // O aviso "Faltou build pra..." vem separado do resto do texto pra ter a cor de aviso
+        // (o texto continua começando por ele: a suíte procura por "Faltou build").
+        '<p id="chefao-build-status" class="notes-status" role="status" aria-live="polite">' +
+          (res.aviso ? '<span class="plano-faltou-build">' + escapeHtml(res.aviso) + '</span>' + (res.progresso ? " " : "") : "") +
+          escapeHtml(res.progresso || "") + '</p>' +
+        '<div class="plano-rodape"><span class="plano-chip">' +
+          (vc.total - vc.withoutBuild.length) + "/" + vc.total + ' membros com build</span>' + restaurar + '</div></div>';
     }
     var g = generatedTeamResult.guide;
     var v = generatedTeamResult.validation;

@@ -661,24 +661,24 @@
 
 
   var TYPE_META = {
-    Normal:  { hex: "#8e8873", dark: false },
-    Fighting:{ hex: "#c1432e", dark: false },
-    Fire:    { hex: "#e8632c", dark: false },
-    Water:   { hex: "#3d7dc9", dark: false },
-    Electric:{ hex: "#d6a819", dark: true  },
-    Grass:   { hex: "#5a9e42", dark: false },
-    Ice:     { hex: "#5cc3ce", dark: true  },
-    Poison:  { hex: "#8e4ea6", dark: false },
-    Ground:  { hex: "#b5904a", dark: true  },
-    Flying:  { hex: "#7f9fd6", dark: true  },
-    Psychic: { hex: "#d9527e", dark: false },
-    Bug:     { hex: "#8fa832", dark: true  },
-    Rock:    { hex: "#a68a4a", dark: true  },
-    Ghost:   { hex: "#5c5a94", dark: false },
-    Dragon:  { hex: "#5b4fc4", dark: false },
-    Dark:    { hex: "#4a4640", dark: false },
-    Steel:   { hex: "#7c8a94", dark: true  },
-    Fairy:   { hex: "#d982ad", dark: true  }
+    Normal:  { hex: "#8e8873" },
+    Fighting:{ hex: "#c1432e" },
+    Fire:    { hex: "#e8632c" },
+    Water:   { hex: "#3d7dc9" },
+    Electric:{ hex: "#d6a819" },
+    Grass:   { hex: "#5a9e42" },
+    Ice:     { hex: "#5cc3ce" },
+    Poison:  { hex: "#8e4ea6" },
+    Ground:  { hex: "#b5904a" },
+    Flying:  { hex: "#7f9fd6" },
+    Psychic: { hex: "#d9527e" },
+    Bug:     { hex: "#8fa832" },
+    Rock:    { hex: "#a68a4a" },
+    Ghost:   { hex: "#5c5a94" },
+    Dragon:  { hex: "#5b4fc4" },
+    Dark:    { hex: "#4a4640" },
+    Steel:   { hex: "#7c8a94" },
+    Fairy:   { hex: "#d982ad" }
   };
 
   /*@regras tipos.js*/
@@ -695,14 +695,36 @@
 /*@regras duelo.js*/
 /*@regras prompts_ia.js*/
 
+  // Tinta do texto sobre a cor do tipo, escolhida pelo contraste (WCAG AA, 4,5:1) em vez
+  // de uma lista "claro/escuro" à mão (lote 1, 2026-10-03: Fire, Grass, Normal, Psychic e
+  // Water ficavam entre 3,1 e 4,0). Escolhe a de maior contraste entre a tinta escura e a clara do
+  // app; se nenhuma das duas chega a 4,5, cai pro preto ou branco puro. Só muda a tinta, nunca a cor de fundo.
+  function tintaDoTipo(hex) {
+    function lum(h) {
+      return [1, 3, 5].map(function (i) {
+        var v = parseInt(h.slice(i, i + 2), 16) / 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      }).reduce(function (s, v, i) { return s + v * [0.2126, 0.7152, 0.0722][i]; }, 0);
+    }
+    var fundo = lum(hex);
+    function contraste(tinta) {
+      var l = lum(tinta);
+      return (Math.max(fundo, l) + 0.05) / (Math.min(fundo, l) + 0.05);
+    }
+    var escura = "#1c1b17", clara = "#fff9f2";
+    var melhor = contraste(escura) >= contraste(clara) ? escura : clara;
+    if (contraste(melhor) >= 4.5) return melhor;
+    return contraste("#000000") >= contraste("#ffffff") ? "#000000" : "#ffffff";
+  }
+
   function typePill(name, small) {
-    var meta = TYPE_META[name] || { hex: "#777", dark: false };
-    var color = meta.dark ? "#1c1b17" : "#fff9f2";
+    var meta = TYPE_META[name] || { hex: "#777777" };
+    var color = tintaDoTipo(meta.hex);
     return '<span class="type-pill" style="background:' + meta.hex + ';color:' + color + (small ? ';padding:2px 8px;font-size:var(--fs-micro)' : '') + '">' + escapeHtml(name) + '</span>';
   }
 
   function typePip(name) {
-    var meta = TYPE_META[name] || { hex: "#777" };
+    var meta = TYPE_META[name] || { hex: "#777777" };
     // aria-hidden: purely a decorative color swatch (the row's own sname
     // text is the row's accessible name) - a "title" attribute alone isn't
     // reliably announced, and without aria-hidden some screen readers try

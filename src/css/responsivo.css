@@ -1,3 +1,7 @@
+/* Tela de toque (celular/tablet): alvos de 44 px em vez de 24 (lote 1, 2026-10-03). */
+@media (pointer: coarse), (max-width: 620px) {
+  :root { --alvo-min: 44px; }
+}
 @media (max-width: 860px) {
   /* #view-dex.active { flex-direction: column } subiu pra regra
      incondicional acima (achado real, 2026-09-18) - o resto daqui
@@ -34,7 +38,10 @@
     font-size: var(--fs-texto);
     cursor: pointer;
     margin-bottom: 10px;
-    padding: 0;
+    /* Alvo de toque (lote 1, 2026-10-03); a margem negativa mantém o texto alinhado. */
+    min-height: var(--alvo-min);
+    padding: 0 8px;
+    margin-left: -8px;
   }
   .topbar { padding: 10px 12px; gap: 10px; }
   .species-detail { padding: 16px 16px 50px; }

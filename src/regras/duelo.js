@@ -37,8 +37,8 @@
     { nome: "tanque", evs: [252, 0, 128, 0, 128, 0], nature: "Hardy" },
     // Jolly/Timid (diagnóstico de 03/10: a comunidade usa o set rápido e o menu só tinha Adamant/Modest/Hardy;
     // Garchomp .649 -> .732 com Jolly + Life Orb, 97 de 131 foes ultrapassados contra 79).
-    { nome: "fisicoRapido", evs: [4, 252, 0, 0, 0, 252], nature: "Jolly" },
-    { nome: "especialRapido", evs: [4, 0, 0, 252, 0, 252], nature: "Timid" }
+    { nome: "fisicoRapido", evs: [4, 252, 0, 0, 0, 252], nature: "Jolly", rapidoDe: "fisico" },
+    { nome: "especialRapido", evs: [4, 0, 0, 252, 0, 252], nature: "Timid", rapidoDe: "especial" }
   ];
   var CLIMA_DO_TEXTO_DUELO = { rain: "chuva", sun: "sol", sand: "areia", sandstorm: "areia", hail: "granizo", fog: "nevoa" };
   var TIPO_REFORCADO_PELO_CLIMA = { sol: "Fire", chuva: "Water" };
@@ -2339,14 +2339,19 @@
     var escolhas = abForcada !== undefined ? [abForcada] : uniqueIds(sp.ab || []);
     if (!escolhas.length) escolhas = [null];
     var melhor = null;
-    SETS_DE_DUELO.forEach(function (set) {
+    function avalia(set) {
       escolhas.forEach(function (ab) {
         var u = unidadeDeDuelo(sp, set, ab, nivel, golpeIds, clima);
         var porFoe = foes.map(function (f) { return resultadoDoDuelo(u, f, nivel); });
         var nota = porFoe.reduce(function (a, v) { return a + v; }, 0);
         if (!melhor || nota > melhor.nota) melhor = { nota: nota, set: set.nome, ab: u.ab, porFoe: porFoe, unidade: u };
       });
-    });
+    }
+    // Botão do chefão (03/10, medido: Tate & Liza 1 com 60 candidatos levava 35 s com os 5 sets): os 3 sets de sempre e, só
+    // pro melhor deles, o par rápido (Jolly/Timid). O rank (scripts/calcular_rank_v2.mjs) avalia o menu inteiro.
+    SETS_DE_DUELO.filter(function (s) { return !s.rapidoDe; }).forEach(avalia);
+    var par = SETS_DE_DUELO.filter(function (s) { return melhor && s.rapidoDe === melhor.set; })[0];
+    if (par) avalia(par);
     return comQuatroGolpes(melhor, sp, foes, nivel, clima);
   }
   // 4 golpes por Pokémon, como no jogo (lote B da força-tarefa, 2026-10-02): antes cada

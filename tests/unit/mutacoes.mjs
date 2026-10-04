@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "botao-avalia-menu-inteiro",
+    descricao: "o botão do chefão volta a avaliar os 5 sets (custo +67%)",
+    arquivo: "duelo.js",
+    de: "SETS_DE_DUELO.filter(function (s) { return !s.rapidoDe; }).forEach(avalia);",
+    para: "SETS_DE_DUELO.forEach(avalia);",
+  },
+  {
     id: "areia-rock-sem-spd",
     descricao: "o tipo Rock não ganha +50% de Sp. Def na tempestade de areia",
     arquivo: "duelo.js",
@@ -17,8 +24,8 @@ export const MUTACOES = [
     id: "sets-sem-jolly-timid",
     descricao: "o menu de sets do simulador perde Jolly e Timid",
     arquivo: "duelo.js",
-    de: "{ nome: \"fisicoRapido\", evs: [4, 252, 0, 0, 0, 252], nature: \"Jolly\" },",
-    para: "{ nome: \"fisicoRapido\", evs: [4, 252, 0, 0, 0, 252], nature: \"Adamant\" },",
+    de: "{ nome: \"fisicoRapido\", evs: [4, 252, 0, 0, 0, 252], nature: \"Jolly\", rapidoDe: \"fisico\" },",
+    para: "{ nome: \"fisicoRapido\", evs: [4, 252, 0, 0, 0, 252], nature: \"Adamant\", rapidoDe: \"fisico\" },",
   },
   {
     id: "golpe-chave-nao-imposto",

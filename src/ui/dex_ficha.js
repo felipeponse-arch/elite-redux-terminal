@@ -116,7 +116,7 @@
       var mv = MOVES[moveId];
       if (!mv) return "";
       var typeName = TYPES[mv[1]];
-      var meta = TYPE_META[typeName] || { hex: "#777", dark: false };
+      var meta = TYPE_META[typeName] || { hex: "#777777" };
       var id = "mv_" + title.replace(/\s/g, "") + "_" + idx;
       var aboveCap = cap !== null && cap !== undefined && lv > cap;
       // Whole-row type tint, not just the pill - field research, 2026-09-09
@@ -132,7 +132,7 @@
       var main = '<tr class="move-row' + (aboveCap ? " above-cap" : "") + '" data-target="' + id + '" style="background:color-mix(in srgb, ' + meta.hex + ' 9%, transparent);">' +
         '<td class="mono">' + (lv !== undefined && lv !== null && title.indexOf("Nível") !== -1 ? lv + (aboveCap ? ' <span class="cap-tag" title="Acima do level cap atual (' + cap + ')">acima</span>' : "") : "&mdash;") + '</td>' +
         '<td>' + escapeHtml(mv[0]) + '</td>' +
-        '<td><span class="move-type-tag" style="background:' + meta.hex + ';color:' + (meta.dark ? "#1c1b17" : "#fff9f2") + '">' + typeName + '</span></td>' +
+        '<td><span class="move-type-tag" style="background:' + meta.hex + ';color:' + tintaDoTipo(meta.hex) + '">' + typeName + '</span></td>' +
         '<td class="mono">' + (mv[3] || "&mdash;") + '</td>' +
         '<td class="mono">' + (mv[4] ? mv[4] + "%" : "&mdash;") + '</td>' +
         '<td class="mono">' + (mv[5] || "&mdash;") + '</td></tr>';
