@@ -73,5 +73,90 @@
     "method": "Presente (NPC)",
     "note": "Dado pelo Prof. Cozmo em Fallarbor Town.",
     "source": "Changelog oficial (eliteredux.net/full-changelog/) - versao antiga, nao reconfirmada numa build recente; usuario relatou que bate com o proprio save em 2026-09-13"
+  },
+  "SPECIES_CHESNAUGHT_BATTLE_BOND": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Depois de vencer o 4º ginásio, fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Comet Shard.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_BADGE04_GET)"
+  },
+  "SPECIES_DELPHOX_BATTLE_BOND": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Depois de vencer o 4º ginásio, fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Comet Shard.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_BADGE04_GET)"
+  },
+  "SPECIES_PIKACHU_PARTNER": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Depois de vencer o 4º ginásio, fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Pikanite.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_BADGE04_GET)"
+  },
+  "SPECIES_EEVEE_PARTNER": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Depois de vencer o 4º ginásio, fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Eevite.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_BADGE04_GET)"
+  },
+  "SPECIES_MEOWTH_PARTNER": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Depois de vencer o 4º ginásio, fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Meowthite.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_BADGE04_GET)"
+  },
+  "SPECIES_KELDEO": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Black Belt.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
+  },
+  "SPECIES_ZYGARDE_10": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Choice Band.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
+  },
+  "SPECIES_FLOETTE_ETERNAL_FLOWER": {
+    "method": "Presente (Mystery Gift)",
+    "note": "Depois de vencer o 6º ginásio, fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Fairy Gem. A Mega (pedra Floettite): a página \"Evolution Data\" do próprio jogo diz \"Talk to the legendary sage in Littleroot Town\" (print do usuário, 03/10). Não achamos esse NPC nos scripts públicos do jogo (o único Legendary Sage nos scripts fica em Oldale Town e só conversa), então a pedra pode depender de uma versão mais nova do jogo ou de uma condição; se achar quem entrega, avise.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_BADGE06_GET)"
+  },
+  "SPECIES_ENAMORUS": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Focus Sash.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
+  },
+  "SPECIES_ETERNATUS": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Life Orb.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
+  },
+  "SPECIES_CHI_YU": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Choice Specs.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
+  },
+  "SPECIES_WO_CHIEN": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Tactical Vest.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
+  },
+  "SPECIES_CHIEN_PAO": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Choice Band.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
+  },
+  "SPECIES_TING_LU": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Assault Vest.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
+  },
+  "SPECIES_ZACIAN": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Rusted Sword.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
+  },
+  "SPECIES_ZAMAZENTA": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Rusted Shield.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
+  },
+  "SPECIES_ZYGARDE_10_POWER_CONSTRUCT": {
+    "method": "Presente (Mystery Gift)",
+    "note": "No pós-jogo (depois de ser Campeão), fale com o senhor de qualquer Centro Pokémon e escolha \"Mystery Gift\". Vem segurando Choice Band.",
+    "source": "Código oficial do Elite Redux: GetMysteryGiftSpecies em src/field_specials.c (FLAG_SYS_GAME_CLEAR)"
   }
 }
