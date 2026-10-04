@@ -420,6 +420,9 @@
           (res.estrategia.aproveitam.length ? '; aproveitam: ' + escapeHtml(res.estrategia.aproveitam.join(", ")) : "") +
           '. Abra com ele pra ligar o clima.</p>'
         : "") +
+      (res.campo
+        ? '<p class="mybuild-hint"><b>Regra de campo:</b> ' + escapeHtml(res.campo.texto) + (res.campo.naoSimulado ? ' <span class="plano-buffs-aviso"><b>(o simulador ainda não conta este efeito)</b></span>' : "") + '</p>'
+        : "") +
       (res.buffs
         ? '<p class="mybuild-hint' + (res.buffs.total && !res.buffs.ativos.length ? " plano-buffs-aviso" : "") + '"><b>Buffs do ginásio na conta:</b> ' +
           (buffsMudaram(res) ? '<span class="plano-buffs-aviso"><b>Você mudou os buffs depois de montar este time - clique em "Montar time contra este chefão" de novo.</b></span> ' : "") +

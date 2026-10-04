@@ -18,6 +18,16 @@ async function section27() {
     document.querySelector('.tab-btn[data-tab="bosses"]').click();
     await wait(50);
     var busca = document.getElementById("boss-search-input");
+    // Regra de campo visível na tela do chefe (04/10): antes só a simulação e a IA a viam.
+    function abrirChefao(nome) { busca.value = nome; busca.dispatchEvent(new Event("input", { bubbles: true })); var r = document.querySelector("#boss-list .species-row"); if (r) r.click(); }
+    abrirChefao("Tate And Liza 1"); await wait(40);
+    var det = document.getElementById("boss-detail").textContent;
+    check("a Tate & Liza 1 mostra a regra de campo (Trick Room e invertida)", /Regra de campo desta luta/.test(det) && /INVERTIDA/.test(det) && !/ainda não conta este efeito/.test(det), det.slice(0, 160));
+    abrirChefao("Monochamp Bug"); await wait(40);
+    det = document.getElementById("boss-detail").textContent;
+    check("o campeão monotype mostra o efeito e avisa que o simulador ainda não o conta", /Regra de campo desta luta/.test(det) && /infestação/.test(det) && /ainda não conta este efeito/.test(det), det.slice(0, 160));
+    abrirChefao("Flannery 1"); await wait(40);
+    check("a Flannery 1 (sem regra de campo) não mostra o cartão", !/Regra de campo desta luta/.test(document.getElementById("boss-detail").textContent));
     busca.value = "Flannery 1";
     busca.dispatchEvent(new Event("input", { bubbles: true }));
     await wait(30);

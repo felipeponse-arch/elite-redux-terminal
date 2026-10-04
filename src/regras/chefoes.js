@@ -366,8 +366,9 @@
   // Regra de campo de lutas específicas, do código oficial do jogo (scripts dos mapas):
   // a 1ª Tate&Liza tem Trick Room permanente + batalha invertida; as revanches dela, só
   // Trick Room (o atalho de revanche pula o setflag da inversa); as duplas do Steven,
-  // Gravity. O campeão monotype (BATTLE_FIELD_EFFECT_MONOCHAMP) tem efeito próprio ainda
-  // não pesquisado - fica de fora de propósito.
+  // Gravity. O campeão monotype (BATTLE_FIELD_EFFECT_MONOCHAMP, src/battle_main.c HandleMonoChampSpecialEffects +
+  // textos de anúncio em src/battle_message.c) tem um efeito por tipo; o simulador ainda NÃO conta nenhum deles
+  // (naoSimulado), mas a tela e o pedido à IA mostram o texto.
   var REGRA_DE_CAMPO_DO_CHEFAO = {
     "Tate And Liza 1": { sala: true, inversa: true, texto: "Trick Room permanente e batalha INVERTIDA (tabela de tipos ao contrario) a luta inteira" },
     "Tate And Liza 2": { sala: true, texto: "Trick Room permanente a luta inteira" },
@@ -375,6 +376,29 @@
     "Steven Doubles": { gravidade: true, texto: "Gravity a luta inteira (Ground acerta voadores, sem Levitate)" },
     "Steven Doubles Legends": { gravidade: true, texto: "Gravity a luta inteira (Ground acerta voadores, sem Levitate)" }
   };
+  var EFEITO_DO_CAMPEAO_MONOTYPE = {
+    Normal: "Trick Room e Wonder Room se alternam a cada turno até o fim da luta.",
+    Fighting: "Golpes super efetivos causam dano neutro. Golpes Fighting são reforçados, golpes de status ficam desativados e não dá para trocar.",
+    Flying: "Uma corrente de ar protege os Flying e aumenta a Speed do time do campeão. Trick Room não tem efeito.",
+    Poison: "O campo fica cheio de resíduo tóxico: o time do campeão recebe menos dano.",
+    Ground: "Os voadores não conseguem ficar no ar. O time do campeão recebe menos dano de golpes super efetivos.",
+    Rock: "O time do campeão é imune a golpes Rock, causa dano super efetivo em tipo Rock, e o seu time fica sob Salt Cure.",
+    Bug: "Há uma infestação permanente no seu lado do campo.",
+    Ghost: "Todo o seu time fica amaldiçoado.",
+    Steel: "O time do campeão quebra o molde (ignora habilidades defensivas) e os dois lados recebem menos dano.",
+    Fire: "A luz do sol fica extremamente forte (sol primal).",
+    Water: "Chuva extremamente forte (chuva primal) e o seu time fica atolado no pântano (Swamp).",
+    Grass: "Grassy Terrain permanente: o time do campeão recebe menos dano.",
+    Electric: "Electric Terrain permanente: o time do campeão recebe menos dano.",
+    Psychic: "Psychic Terrain permanente: o time do campeão recebe menos dano.",
+    Ice: "Granizo permanente; o time do campeão ganha Speed e ataca com ela.",
+    Dragon: "O time do campeão intimida todo o seu time e passa por cima das suas imunidades.",
+    Dark: "Todo o seu time começa dormindo.",
+    Fairy: "Misty Terrain permanente: os golpes Fairy do time do campeão acertam Poison e Steel com super efetividade."
+  };
+  Object.keys(EFEITO_DO_CAMPEAO_MONOTYPE).forEach(function (tipo) {
+    REGRA_DE_CAMPO_DO_CHEFAO["Monochamp " + tipo] = { texto: EFEITO_DO_CAMPEAO_MONOTYPE[tipo], naoSimulado: true };
+  });
   function regraDeCampoDoChefao(nome) { return REGRA_DE_CAMPO_DO_CHEFAO[nome] || null; }
 
   // Pro card do plano (relato de 02/10: o jogador marcou os 6 buffs achando que marcado = ativo, o

@@ -162,6 +162,14 @@
   // Nome da categoria na tela (a chave do dado, sem acento, continua sendo a de filtro e de lógica).
   var NOME_DA_CATEGORIA_DE_CHEFAO = { "Lider de Ginasio": "Líder de Ginásio", "Campeao": "Campeão", "Superchefao": "Superchefão", "Superchefao (Monotype)": "Superchefão (Monotype)" };
   function nomeDaCategoriaDeChefao(c) { return NOME_DA_CATEGORIA_DE_CHEFAO[c] || c; }
+  // Regra de campo da luta (Trick Room/invertida da Tate & Liza, Gravity do Steven, efeito do campeão monotype):
+  // antes só entrava na simulação e no pedido à IA - o jogador nunca via. Os do monotype ainda não são simulados.
+  function campoDoChefaoHtml(nome) {
+    var campo = regraDeCampoDoChefao(nome);
+    if (!campo) return "";
+    return '<div class="card"><h3>Regra de campo desta luta</h3><p class="mybuild-hint">' + escapeHtml(campo.texto) + '</p>' +
+      (campo.naoSimulado ? '<p class="mybuild-hint plano-buffs-aviso"><b>O simulador ainda não conta este efeito:</b> o plano e o veredito não levam isto em conta.</p>' : "") + '</div>';
+  }
   function bossCatColor(cat) { return BOSS_CAT_COLOR[cat] || "var(--text-dim)"; }
 
   function renderBossList() {
@@ -329,7 +337,7 @@
       });
       generatedTeamResult = {
         archetypeLabel: "contra " + boss.name, chefao: boss.name, plano: plano, clima: r.clima, estrategia: r.estrategia, luta: resumoDaLuta(r.simulacao),
-        progresso: "Gerando as builds...", anterior: anterior, buffs: buffsParaMostrarDoChefao(boss.name), forTeamKey: teamKeyFor(members)
+        progresso: "Gerando as builds...", anterior: anterior, buffs: buffsParaMostrarDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name), forTeamKey: teamKeyFor(members)
       };
       var aba = document.querySelector('.tab-btn[data-tab="team"]');
       if (aba) aba.click();
@@ -567,6 +575,7 @@
         '<div class="detail-dexno mono">' + escapeHtml(nomeDaCategoriaDeChefao(boss.cat)) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +
       (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:6px 0 0;max-width:65ch;">Nomes crus dos dados do jogo — não temos 100% de certeza que "Insane"/"Hell" batem exatamente com os modos "Ace"/"Elite" do menu do jogo atual. Confira sua dificuldade no Centro Pokémon se quiser ter certeza.</p></div>' : "") +
+      campoDoChefaoHtml(boss.name) +
       bossConfrontoHtml(boss, party) +
       montarHtml +
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +

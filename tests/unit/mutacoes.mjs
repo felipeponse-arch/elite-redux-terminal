@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "monochamp-sem-aviso-de-nao-simulado",
+    descricao: "o campeão monotype deixa de avisar que o simulador não conta o efeito",
+    arquivo: "chefoes.js",
+    de: "{ texto: EFEITO_DO_CAMPEAO_MONOTYPE[tipo], naoSimulado: true }",
+    para: "{ texto: EFEITO_DO_CAMPEAO_MONOTYPE[tipo] }",
+  },
+  {
     id: "botao-avalia-menu-inteiro",
     descricao: "o botão do chefão volta a avaliar os 5 sets (custo +67%)",
     arquivo: "duelo.js",
