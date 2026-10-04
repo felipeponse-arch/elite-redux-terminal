@@ -36,6 +36,11 @@
     if (state.settings.difficulty !== "elite") return inn.slice();
     return inn.filter(function (id, i) { return (nivel || 0) >= (NIVEL_DA_INNATE_ELITE[i] || 1); });
   }
+  // Nível em que a habilidade `nome` (da espécie `sp`) passa a valer no Elite: 1 se é escolhida ou a 1ª innate.
+  function nivelDaHabilidadeNoElite(sp, nome) {
+    var i = nomesDeHabilidades(sp.inn).indexOf(nome);
+    return i === -1 ? 1 : (NIVEL_DA_INNATE_ELITE[i] || 1);
+  }
   function innatesTravadasNoNivel(sp, nivel) {
     var ativas = innatesAtivasNoNivel(sp, nivel);
     return ((sp && sp.inn) || []).filter(function (id) { return ativas.indexOf(id) === -1; });

@@ -178,6 +178,14 @@
     var est = c.estrategia;
     var escolhiveis = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
     if (est && est.armador === sp.n && escolhiveis.indexOf(est.habilidade) !== -1) ctx.habilidadeExigida = est.habilidade;
+    // Golpes-chave que o simulador provou contra os Pokémon do chefão (resumoProvadoPeloSimulador): a build entra com eles.
+    var chave = c.provado && c.provado.chave;
+    if (chave) {
+      // Os 4 golpes que o simulador provou vêm primeiro (quem responde 5+ alvos com golpes diferentes não perde a chave principal).
+      var provados = c.provado.golpes || [];
+      ctx.golpesChave = Object.keys(chave).map(function (f) { return chave[f]; }).filter(function (g, i, a) { return g && a.indexOf(g) === i; })
+        .sort(function (a, b) { var ia = provados.indexOf(a), ib = provados.indexOf(b); return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib); });
+    }
     return ctx;
   }
   function validateAiBuild(sp, raw, motivo, ctx) {
@@ -231,6 +239,32 @@
     // sinergia conhecida não é penalizada - a regra é inaplicável, não
     // violada.
     var synergyHitsAi = sinergiasDaEspecie(sp);
+    // Golpe-chave provado (03/10, relato da Tate & Liza: o plano dizia Dragon Claw e a build da IA tinha Dragon Pulse): o app
+    // não deixa a IA derrubar o golpe que o simulador provou. Falta algum? Troca o ÚLTIMO golpe que não é chave E cuja saída
+    // não tira a sinergia de habilidade (regra do especialista, logo abaixo) e registra na rationale. A IA não é chamada de
+    // novo (sem custo). Não muta o `raw` do chamador.
+    function sinergiaOk(moves) {
+      if (!synergyHitsAi || !synergyHitsAi.length) return true;
+      return synergyHitsAi.filter(function (h) { return h.kind === "inn" || h.name === raw.ability; })
+        .some(function (h) { return (h.golpes || []).some(function (g) { return moves.indexOf(g) !== -1; }); });
+    }
+    var chaveTrocada = [];
+    if (ctx && ctx.golpesChave && ctx.golpesChave.length) {
+      var chaves = ctx.golpesChave.filter(function (g) { return validMoves.indexOf(g) !== -1; }).slice(0, 4);
+      var faltando = chaves.filter(function (g) { return raw.moves.indexOf(g) === -1; });
+      if (faltando.length) {
+        var movesNovos = raw.moves.slice();
+        faltando.forEach(function (g) {
+          for (var j = 3; j >= 0; j--) {
+            if (chaves.indexOf(movesNovos[j]) !== -1) continue;
+            var teste = movesNovos.slice(); teste[j] = g;
+            if (!sinergiaOk(teste) && sinergiaOk(movesNovos)) continue; // essa saída quebraria a sinergia: tenta a anterior
+            chaveTrocada.push(movesNovos[j] + " -> " + g); movesNovos = teste; break;
+          }
+        });
+        if (chaveTrocada.length) raw = Object.assign({}, raw, { moves: movesNovos });
+      }
+    }
     if (synergyHitsAi && synergyHitsAi.length) {
       var ativas = synergyHitsAi.filter(function (h) {
         return h.kind === "inn" || h.name === raw.ability;
@@ -377,6 +411,7 @@
       }
     }
     var rationale = typeof raw.rationale === "string" ? raw.rationale.trim().slice(0, 360) : "";
+    if (chaveTrocada.length) rationale = ("Golpe-chave do simulador mantido (" + chaveTrocada.join("; ") + "). " + rationale).trim().slice(0, 360);
     // O papel aparece pro jogador na própria justificativa (o save guarda uma
     // lista fixa de campos da build - campo novo se perderia no sync).
     if (papel && rationale.indexOf(papel) === -1) rationale = "Papel: " + papel + ". " + rationale;

@@ -129,7 +129,7 @@
   // (battle_util.c: clima de habilidade ou golpe dura 8 turnos e reforça 1,5x; o 1,2x é só
   // do clima permanente de mapa). O Full Features (+20%, infinito) ficou desatualizado.
   // A duração (duracaoTurnos) entra na luta inteira junto com "o armador precisa entrar".
-  var CLIMA_OFICIAL = { reforcoSolChuva: 1.5, duracaoTurnos: 8, defesaIceNoGranizo: 1.5, danoGhostPsychicNaNevoa: 0.8 };
+  var CLIMA_OFICIAL = { reforcoSolChuva: 1.5, duracaoTurnos: 8, defesaIceNoGranizo: 1.5, spdRockNaAreia: 1.5, danoGhostPsychicNaNevoa: 0.8 };
   var pctClima = function (mult) { return Math.round(Math.abs(mult - 1) * 100) + "%"; };
   var CLIMA_QUE_COMBINA = {
     Fire: { clima: "Sun", curto: "+" + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " em golpes Fire", porque: "golpes Fire causam " + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " a mais no sol" },

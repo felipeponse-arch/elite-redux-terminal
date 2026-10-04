@@ -212,7 +212,9 @@
       var conds = CONDICAO_DE_HABILIDADE[nome];
       if (!conds || !conds.every(function (c) { return CONDICOES_DE_CAMPO.indexOf(c) !== -1; })) return;
       var ehInnate = innates.indexOf(nome) !== -1;
-      var armadoras = innates.concat(ehInnate ? escolhiveis : [habilidadeEscolhida]);
+      // Auditoria de 02/10: a escolhível só garante o campo se for a do SET do rank (as escolhíveis se excluem);
+      // sem set conhecido, qualquer escolhível desta espécie ainda conta (não marca à toa).
+      var armadoras = innates.concat(habilidadeEscolhida ? [habilidadeEscolhida] : (ehInnate ? escolhiveis : []));
       if (conds.some(function (c) { return armadoras.some(function (n) { return habilidadeArma(n, c); }); })) return;
       var chave = conds.join("|");
       if (!porCondicao[chave]) { porCondicao[chave] = { condicao: chave, nome: conds.map(function (c) { return NOME_DA_CONDICAO[c] || c; }).join(" ou "), habilidades: [], golpes: [] }; ordem.push(chave); }

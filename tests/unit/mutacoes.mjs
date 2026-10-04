@@ -7,6 +7,69 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "areia-rock-sem-spd",
+    descricao: "o tipo Rock não ganha +50% de Sp. Def na tempestade de areia",
+    arquivo: "duelo.js",
+    de: "else D *= spdNoClima; // Rock na areia: +50% de Sp. Def",
+    para: "",
+  },
+  {
+    id: "sets-sem-jolly-timid",
+    descricao: "o menu de sets do simulador perde Jolly e Timid",
+    arquivo: "duelo.js",
+    de: "{ nome: \"fisicoRapido\", evs: [4, 252, 0, 0, 0, 252], nature: \"Jolly\" },",
+    para: "{ nome: \"fisicoRapido\", evs: [4, 252, 0, 0, 0, 252], nature: \"Adamant\" },",
+  },
+  {
+    id: "golpe-chave-nao-imposto",
+    descricao: "a validação da build deixa a IA derrubar o golpe-chave provado pelo simulador",
+    arquivo: "validacao_build_ia.js",
+    de: "if (chaveTrocada.length) raw = Object.assign({}, raw, { moves: movesNovos });",
+    para: "",
+  },
+  {
+    id: "golpe-chave-ignora-sinergia",
+    descricao: "a troca do golpe-chave quebra a sinergia de habilidade da build",
+    arquivo: "validacao_build_ia.js",
+    de: "if (!sinergiaOk(teste) && sinergiaOk(movesNovos)) continue;",
+    para: "",
+  },
+  {
+    id: "thunder-chuva-nao-acerta-sempre",
+    descricao: "Thunder/Hurricane não acertam sempre na chuva",
+    arquivo: "duelo.js",
+    de: "if (clima === \"chuva\") g.precisao = 1; else if (clima === \"sol\" && !semErrarAqui) g.precisao = 0.5; }",
+    para: "}",
+  },
+  {
+    id: "axe-kick-sem-custo-do-erro",
+    descricao: "Axe Kick não cobra o dano de quando erra",
+    arquivo: "duelo.js",
+    de: "if (extra && extra.ef === \"Recoil If Miss\") g.custoHP += (1 - g.precisao) * 0.5;",
+    para: "",
+  },
+  {
+    id: "thousand-arrows-nao-acerta-voador",
+    descricao: "Thousand Arrows não acerta Flying",
+    arquivo: "duelo.js",
+    de: "g.nome === \"Thousand Arrows\" && def.tipos.indexOf(\"Flying\") !== -1) {",
+    para: "false) {",
+  },
+  {
+    id: "pareto-conta-a-propria-familia",
+    descricao: "a Mega/Primal da própria espécie conta como concorrente no tipo",
+    arquivo: "rank_da_run.js",
+    de: "!(a.familia && b.familia === a.familia) && ",
+    para: "",
+  },
+  {
+    id: "elite-innate-nivel-sempre-1",
+    descricao: "a marca de setter no Elite ignora o nível em que a innate libera",
+    arquivo: "level_cap.js",
+    de: "return i === -1 ? 1 : (NIVEL_DA_INNATE_ELITE[i] || 1);",
+    para: "return 1;",
+  },
+  {
     id: "futuro-1x1-ignorado",
     descricao: "o Future Sight do Forewarn não tira HP na luta 1x1",
     arquivo: "duelo.js",
@@ -1379,10 +1442,10 @@ export const MUTACOES = [
   },
   {
     id: "setter-innate-sem-escolhivel",
-    descricao: "innate condicional ignora a escolhível que arma o clima",
+    descricao: "o setter conta qualquer escolhível que arma o clima, não só a do set do rank",
     arquivo: "condicoes_habilidade.js",
-    de: "var armadoras = innates.concat(ehInnate ? escolhiveis : [habilidadeEscolhida]);",
-    para: "var armadoras = innates.concat([habilidadeEscolhida]);",
+    de: "var armadoras = innates.concat(habilidadeEscolhida ? [habilidadeEscolhida] : (ehInnate ? escolhiveis : []));",
+    para: "var armadoras = innates.concat(ehInnate ? escolhiveis : [habilidadeEscolhida]);",
   },
   {
     id: "setter-marca-status",

@@ -185,7 +185,7 @@
     var title = r.duelo
       ? "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100. Duelo simulado 1x1 contra cada Pokémon " +
         "real dos chefões do jogo (golpes, habilidade, item e EVs do jogo): venceu " + r.duelo.vitorias + "% dos duelos com o " +
-        "melhor set genérico (" + r.duelo.set + (r.duelo.habilidade ? ", " + r.duelo.habilidade : "") + (r.duelo.item ? ", " + r.duelo.item : "") + "). Conta dano dos dois " +
+        "melhor set genérico (" + (ROTULO_DO_SET_DE_DUELO[r.duelo.set] || r.duelo.set) + (r.duelo.habilidade ? ", " + r.duelo.habilidade : "") + (r.duelo.item ? ", " + r.duelo.item : "") + "). Conta dano dos dois " +
         "lados, velocidade, prioridade, item, status, crítico, campo e as habilidades (inclusive clima que ele mesmo arma). Não conta o resto do time."
       : "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100.";
     return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.tier + '</span>';
@@ -288,6 +288,8 @@
     return "Encontro selvagem em: " + locText + ".";
   }
 
+  // Nome do set do simulador pro jogador (fisicoRapido etc. são nomes internos).
+  var ROTULO_DO_SET_DE_DUELO = { fisico: "físico, Adamant", especial: "especial, Modest", tanque: "tanque, Hardy", fisicoRapido: "físico rápido, Jolly", especialRapido: "especial rápido, Timid" };
   function badgeDeTierHtml(classe, tier, titulo) {
     return '<span class="' + classe + ' ' + (RANK_TIER_CLASS[tier] || "tier-C") + '" title="' + escapeHtml(titulo) + '">' + tier + '</span>';
   }
@@ -295,10 +297,13 @@
   function marcasDoRankHtml(sp, r) {
     var d = rankDaDificuldadeDe(r), out = "";
     precisaDeSetter(sp, d && d.habilidade).forEach(function (m) {
-      var title = "Sem nota: " + m.habilidades.join(", ") + " só funciona com " + m.nome + ", e nenhuma habilidade desta espécie arma isso. " +
+      // Elite: a innate só libera no nível dela (1/17/24) - a marca diz a partir de quando o setter faz falta.
+      var nivelElite = state.settings.difficulty === "elite" ? Math.max.apply(null, m.habilidades.map(function (h) { return nivelDaHabilidadeNoElite(sp, h); })) : 1;
+      var aviso = nivelElite > 1 ? " (Elite: só vale a partir do nível " + nivelElite + ")" : "";
+      var title = "Sem nota: " + m.habilidades.join(", ") + " só funciona com " + m.nome + ", e a habilidade do set do rank (nem as innates) não arma isso" + aviso + ". " +
         (m.golpes.length ? "Ela mesma só arma usando " + m.golpes.join(" ou ") + " (gasta turno e espaço de golpe)." : "Precisa de alguém no time que arme.");
       out += '<span class="rank-info-item"><span class="rank-info-label">Precisa de setter</span>' +
-        '<span title="' + escapeHtml(title) + '">' + escapeHtml(m.nome + " (" + m.habilidades.join(", ") + ")") + '</span></span>';
+        '<span title="' + escapeHtml(title) + '">' + escapeHtml(m.nome + " (" + m.habilidades.join(", ") + ")" + aviso) + '</span></span>';
     });
     var dom = d && d.dominadoPor;
     if (dom && Object.keys(dom).length) {

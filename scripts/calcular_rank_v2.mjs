@@ -221,7 +221,7 @@ if (process.argv.includes("--gravar")) {
     // Concorrência no tipo (ponto 6): quantas do mesmo tipo a dominam, pelas notas brutas
     // dos dois eixos (o percentil arredondado empataria demais) e pela etapa.
     const dominado = R.dominantesNoTipo(validos.filter((s) => final[s][d.chave]).map((s) => ({ s,
-      tipos: R.speciesTypeNames(R.getSpeciesBySname(s)), pot: relatorio[d.chave].pot[s], via: relatorio[d.chave].via[s], etapa: final[s].etapa })));
+      familia: R.formFamilyOf(R.getSpeciesBySname(s))[0].sname, tipos: R.speciesTypeNames(R.getSpeciesBySname(s)), pot: relatorio[d.chave].pot[s], via: relatorio[d.chave].via[s], etapa: final[s].etapa })));
     blocos[d.chave] = { mono, estagio, dominado };
   }
   const novo = {};

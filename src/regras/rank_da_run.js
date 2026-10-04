@@ -41,7 +41,9 @@
   // melhor em pelo menos um dos três (senão duas formas idênticas se "dominariam").
   // Calculada por scripts/calcular_rank_v2.mjs no --gravar (porDificuldade.<dif>.dominadoPor);
   // aqui só a função pura, pra o script e os testes usarem a mesma.
-  // lista: [{ s, tipos: [...], pot, via, etapa }] -> { s: { tipo: n } }
+  // lista: [{ s, tipos: [...], pot, via, etapa, familia }] -> { s: { tipo: n } }
+  // `familia` (auditoria de 02/10): a própria Mega/Primal/forma da MESMA espécie não conta como
+  // concorrente (ex.: Kingdra "dominado por 1 Dragon" que era só a Mega dela).
   function dominantesNoTipo(lista) {
     var porTipo = {}, out = {};
     lista.forEach(function (e) {
@@ -52,7 +54,7 @@
       var grupo = porTipo[t];
       grupo.forEach(function (a) {
         out[a.s][t] = grupo.filter(function (b) {
-          return b !== a && b.pot >= a.pot && b.via >= a.via && b.etapa <= a.etapa &&
+          return b !== a && !(a.familia && b.familia === a.familia) && b.pot >= a.pot && b.via >= a.via && b.etapa <= a.etapa &&
             (b.pot > a.pot || b.via > a.via || b.etapa < a.etapa);
         }).length;
       });

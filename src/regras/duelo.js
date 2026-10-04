@@ -34,7 +34,11 @@
   var SETS_DE_DUELO = [
     { nome: "fisico", evs: [4, 252, 0, 0, 0, 252], nature: "Adamant" },
     { nome: "especial", evs: [4, 0, 0, 252, 0, 252], nature: "Modest" },
-    { nome: "tanque", evs: [252, 0, 128, 0, 128, 0], nature: "Hardy" }
+    { nome: "tanque", evs: [252, 0, 128, 0, 128, 0], nature: "Hardy" },
+    // Jolly/Timid (diagnóstico de 03/10: a comunidade usa o set rápido e o menu só tinha Adamant/Modest/Hardy;
+    // Garchomp .649 -> .732 com Jolly + Life Orb, 97 de 131 foes ultrapassados contra 79).
+    { nome: "fisicoRapido", evs: [4, 252, 0, 0, 0, 252], nature: "Jolly" },
+    { nome: "especialRapido", evs: [4, 0, 0, 252, 0, 252], nature: "Timid" }
   ];
   var CLIMA_DO_TEXTO_DUELO = { rain: "chuva", sun: "sol", sand: "areia", sandstorm: "areia", hail: "granizo", fog: "nevoa" };
   var TIPO_REFORCADO_PELO_CLIMA = { sol: "Fire", chuva: "Water" };
@@ -1486,7 +1490,12 @@
       if (u.ef.sementeNoDreno && extra && extra.dr) g.status.push({ st: "semente", p: 1, doGolpe: false, ignoraGenero: false }); // Absorbant
       if (u.ef.prioTipoSempre.indexOf(tipo) !== -1) g.prio = Math.max(g.prio, 1); // Galeforce Wings
       if (u.ef.triage && g.dreno > 0 && extra && extra.dr) g.prio = Math.max(g.prio, 3); // Triage: golpe que cura (dreno) com +3
-      if (cats.some(function (c) { return u.ef.semErrarCategoria[c]; })) g.precisao = 1; // Deadeye, Roundhouse
+      var semErrarAqui = cats.some(function (c) { return u.ef.semErrarCategoria[c]; });
+      if (semErrarAqui) g.precisao = 1; // Deadeye, Roundhouse
+      // Thunder/Hurricane (código oficial, battle_script_commands.c: EFFECT_THUNDER/EFFECT_HURRICANE): chuva = sempre acerta, sol = 50%.
+      if (extra && (extra.ef === "Thunder" || extra.ef === "Hurricane")) { if (clima === "chuva") g.precisao = 1; else if (clima === "sol" && !semErrarAqui) g.precisao = 0.5; }
+      // Axe Kick (NextDex: "Hurts on miss"): errar custa metade do HP máximo (regra da série), em média (1 - precisão) / 2 por uso.
+      if (extra && extra.ef === "Recoil If Miss") g.custoHP += (1 - g.precisao) * 0.5;
       g.flags = flags;
       g.menorDefesa = cats.some(function (c) { return u.ef.menorDefesaCategoria[c]; });
       g.stab = stabNatural || stabHab;
@@ -1578,6 +1587,8 @@
     // granizo; Ghost/Psychic recebem menos dano na Eerie Fog.
     var climaCampo = climaNoCampoDuelo(atq, def);
     var defNoClima = climaCampo === "granizo" && def.tipos.indexOf("Ice") !== -1 ? CLIMA_OFICIAL.defesaIceNoGranizo : 1;
+    // Tempestade de areia (código oficial, battle_util.c: STAT_SPDEF "Sandstorm"): tipo Rock ganha +50% de Sp. Def.
+    var spdNoClima = climaCampo === "areia" && def.tipos.indexOf("Rock") !== -1 ? CLIMA_OFICIAL.spdRockNaAreia : 1;
     var danoNoClima = climaCampo === "nevoa" && (def.tipos.indexOf("Ghost") !== -1 || def.tipos.indexOf("Psychic") !== -1) ? CLIMA_OFICIAL.danoGhostPsychicNaNevoa : 1;
     atq.golpesProntos.forEach(function (g) {
       var flags = g.flags || [];
@@ -1595,6 +1606,11 @@
       if (seContra && def.tipos.indexOf(seContra) !== -1) {
         var semEsse = def.tipos.filter(function (tp) { return tp !== seContra; });
         efTipo = 2 * (semEsse.length ? efetividadeNoDuelo(atq, g.tipo, Object.assign({}, def, { tipos: semEsse })) : 1);
+      }
+      // Thousand Arrows (NextDex: "also hits foes that are in the air"): o tipo Flying do alvo não anula o Ground.
+      if (efTipo === 0 && g.nome === "Thousand Arrows" && def.tipos.indexOf("Flying") !== -1) {
+        var semVoo = def.tipos.filter(function (tp) { return tp !== "Flying"; });
+        efTipo = semVoo.length ? efetividadeNoDuelo(atq, g.tipo, Object.assign({}, def, { tipos: semVoo })) : 1;
       }
       var osso = flags.indexOf("Bone Based") !== -1 && atq.ef.flagMult["Bone Based"]; // Bone Zone
       if (efTipo === 0 && osso) efTipo = 1;
@@ -1629,6 +1645,7 @@
       D *= noTerrenoDuelo(def, fisico && !g.defEspecial ? "def" : "spd"); // Grass Pelt, Flower Necklace
       D *= comItem(fisico && !g.defEspecial ? itD.defMult : itD.spdMult, ativoD); // Eviolite
       if (fisico && !g.defEspecial) D *= defNoClima; // Ice no granizo: +50% de Defesa
+      else D *= spdNoClima; // Rock na areia: +50% de Sp. Def
       // Eternal Flower: as outras Megas perdem 20% dos atributos.
       if (atq.ef.contraMega < 1 && /Mega/.test(def.sp && def.sp.n || "")) D *= atq.ef.contraMega;
       if (def.ef.contraMega < 1 && /Mega/.test(atq.sp && atq.sp.n || "")) A *= def.ef.contraMega;
