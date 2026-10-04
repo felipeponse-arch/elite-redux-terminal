@@ -41,7 +41,7 @@
     cats.forEach(function (c) {
       var opt = document.createElement("option");
       opt.value = c;
-      opt.textContent = c;
+      opt.textContent = nomeDaCategoriaDeChefao(c);
       catSelect.appendChild(opt);
     });
     catSelect.addEventListener("change", function () {
@@ -159,6 +159,9 @@
     "Superchefao": "var(--cat-super)",
     "Superchefao (Monotype)": "var(--cat-super)"
   };
+  // Nome da categoria na tela (a chave do dado, sem acento, continua sendo a de filtro e de lógica).
+  var NOME_DA_CATEGORIA_DE_CHEFAO = { "Lider de Ginasio": "Líder de Ginásio", "Campeao": "Campeão", "Superchefao": "Superchefão", "Superchefao (Monotype)": "Superchefão (Monotype)" };
+  function nomeDaCategoriaDeChefao(c) { return NOME_DA_CATEGORIA_DE_CHEFAO[c] || c; }
   function bossCatColor(cat) { return BOSS_CAT_COLOR[cat] || "var(--text-dim)"; }
 
   function renderBossList() {
@@ -178,7 +181,7 @@
       var catColor = bossCatColor(row.b.cat);
       return '<li class="species-row' + sel + '" data-i="' + row.i + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
         '<span class="sname">' + escapeHtml(row.b.name) + (row.b.db ? " (dupla)" : "") + '</span>' +
-        '<span class="boss-cat-tag" style="color:' + catColor + ';background:color-mix(in srgb, ' + catColor + ' 16%, var(--surface-2));">' + escapeHtml(row.b.cat) + '</span></li>';
+        '<span class="boss-cat-tag" style="color:' + catColor + ';background:color-mix(in srgb, ' + catColor + ' 16%, var(--surface-2));">' + escapeHtml(nomeDaCategoriaDeChefao(row.b.cat)) + '</span></li>';
     }).join("");
     // Clique numa linha: ouvinte único em #boss-list (initBosses).
   }
@@ -561,7 +564,7 @@
       '<button class="back-btn" id="boss-back-to-list">&larr; Voltar para a lista</button>' +
       '<div class="detail-head"><div class="detail-titles">' +
         '<h2>' + escapeHtml(boss.name) + '</h2>' +
-        '<div class="detail-dexno mono">' + escapeHtml(boss.cat) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
+        '<div class="detail-dexno mono">' + escapeHtml(nomeDaCategoriaDeChefao(boss.cat)) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +
       (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:6px 0 0;max-width:65ch;">Nomes crus dos dados do jogo — não temos 100% de certeza que "Insane"/"Hell" batem exatamente com os modos "Ace"/"Elite" do menu do jogo atual. Confira sua dificuldade no Centro Pokémon se quiser ter certeza.</p></div>' : "") +
       bossConfrontoHtml(boss, party) +

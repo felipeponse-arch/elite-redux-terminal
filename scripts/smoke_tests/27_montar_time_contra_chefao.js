@@ -52,6 +52,15 @@ async function section27() {
     var itens = document.querySelectorAll(".plano-chefao li");
     check("o plano lista os 6 Pokémon dela, em ordem", itens.length === 6 && /Sunflora/.test(itens[0].textContent), [].map.call(itens, function (li) { return li.textContent.slice(0, 40); }));
     check("o plano avisa que ela arma sol", !!card && /Ele arma sol/.test(card.textContent));
+    // Debug de 04/10: mudar os buffs depois de montar deixava a linha "na conta" velha e sem aviso.
+    check("sem mexer nos buffs, o cartão não acusa mudança", !/Você mudou os buffs/.test(card.textContent));
+    var clearedAntes = JSON.stringify(T.state.gymSkillsCleared);
+    T.state.gymSkillsCleared = Object.assign({}, T.state.gymSkillsCleared, { Flannery: T.GYM_SKILLS.leaders.Flannery.buffs.map(function (b) { return b.id; }) });
+    T.TELAS.time();
+    var cardNovo = document.querySelector(".ts-generated-team");
+    check("marcar buffs depois de montar avisa que o plano ficou velho", !!cardNovo && /Você mudou os buffs/.test(cardNovo.textContent), cardNovo && cardNovo.textContent.slice(cardNovo.textContent.indexOf("Buffs do gin") - 10, cardNovo.textContent.indexOf("Buffs do gin") + 260));
+    T.state.gymSkillsCleared = JSON.parse(clearedAntes);
+    T.TELAS.time();
     // Luta inteira (2026-09-29): o cartão mostra o placar e a ordem das lutas.
     var passos = document.querySelectorAll(".plano-luta li");
     check("o cartão mostra a luta simulada inteira, passo a passo", !!card && /Luta simulada inteira/.test(card.textContent) && passos.length >= 1,

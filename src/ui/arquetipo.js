@@ -384,6 +384,11 @@
         (l ? '<div class="plano-veredito-sub">Luta simulada inteira' + (l.dupla ? " em dupla" : "") + ". " +
           cobertos + ' de ' + res.plano.length + ' Pokémon dele têm resposta clara no seu time.</div>' : "") + '</div></div>';
   }
+  // Buffs do ginásio mudaram desde que o time foi montado (debug de 04/10: a linha "na conta" ficava velha).
+  function buffsMudaram(res) {
+    var agora = typeof buffsParaMostrarDoChefao === "function" && res.chefao ? buffsParaMostrarDoChefao(res.chefao) : null;
+    return !!agora && !!res.buffs && JSON.stringify(agora.ativos) !== JSON.stringify(res.buffs.ativos);
+  }
   function planoContraChefaoHtml(res, nMembros) {
     var cobertos = res.plano.filter(function (p) { return p.coberto; }).length;
     var itens = res.plano.map(function (p) {
@@ -417,6 +422,7 @@
         : "") +
       (res.buffs
         ? '<p class="mybuild-hint' + (res.buffs.total && !res.buffs.ativos.length ? " plano-buffs-aviso" : "") + '"><b>Buffs do ginásio na conta:</b> ' +
+          (buffsMudaram(res) ? '<span class="plano-buffs-aviso"><b>Você mudou os buffs depois de montar este time - clique em "Montar time contra este chefão" de novo.</b></span> ' : "") +
           (res.buffs.ativos.length ? escapeHtml(res.buffs.ativos.join(", ")) + "."
             : "nenhum (todos marcados como já tirados). Se a luta ainda tem os buffs, desmarque-os no card Buffs do ginásio e monte o time de novo.") + '</p>'
         : "") +

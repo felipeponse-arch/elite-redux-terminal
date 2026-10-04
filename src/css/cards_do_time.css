@@ -111,7 +111,7 @@
 .gs-opcao {
   display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; box-sizing: border-box;
   min-height: calc(var(--alvo-min) - 8px); padding: 0 12px; border-radius: var(--radius-pill);
-  font-size: var(--fs-pequeno); font-weight: 700; color: var(--text-dim);
+  font-size: var(--fs-pequeno); font-weight: 700; color: var(--badge-text-dim);
 }
 .gs-linha-ativo .gs-opcao-ativo { background: var(--sem-weak); color: var(--accent-ink); }
 .gs-linha-tirado .gs-opcao-tirado { background: var(--surface); color: var(--text); box-shadow: 0 0 0 1px var(--border); }
