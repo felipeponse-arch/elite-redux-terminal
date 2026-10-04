@@ -32,4 +32,4 @@ input, select, textarea { font-family: inherit; }
    Antes o mesmo style="" repetido em cada rótulo e cada dica. */
 .card-ajustes { max-width: 460px; }
 .rotulo-ajuste { display: flex; flex-direction: column; gap: 5px; font-size: var(--fs-texto); font-weight: 600; }
-.rotulo-ajuste-dica { font-weight: 400; font-size: var(--fs-legenda); color: var(--text-dim); }
+.rotulo-ajuste-dica { font-weight: 400; font-size: var(--fs-legenda); color: var(--text-dim); max-width: 70ch; }

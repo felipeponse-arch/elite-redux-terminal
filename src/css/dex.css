@@ -128,8 +128,18 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 16px 18px;
-  margin-bottom: 16px;
+  box-shadow: var(--elev-1);
+  padding: var(--space-4) calc(var(--space-4) + 2px);
+  margin-bottom: var(--space-4);
+}
+/* Card que aparece como resposta a uma ação (Time gerado): UM movimento de entrada, curto,
+   só opacidade e deslocamento. O JS põe a classe só na primeira vez que o resultado aparece
+   (as atualizações de progresso redesenham o card e não podem repetir o movimento). */
+@media (prefers-reduced-motion: no-preference) {
+  .card.card-entrada { animation: card-entrada var(--dur-entrada) var(--ease-out) backwards; }
+}
+@keyframes card-entrada {
+  from { opacity: 0; transform: translateY(var(--space-2)); }
 }
 /* Título de card sem o eyebrow ALL-CAPS genérico (achado de auditoria
    visual, 2026-09-18 - "tracked-out ALL-CAPS eyebrow label above every

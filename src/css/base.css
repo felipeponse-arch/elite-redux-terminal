@@ -28,7 +28,13 @@ h1, h2, h3, .display {
   font-variant-numeric: tabular-nums;
 }
 a { color: var(--badge-accent2); }
-button { font-family: inherit; }
+button { font-family: inherit; transition: var(--transicao); }
+/* Resposta ao toque (lote 3, 2026-10-04): o botão afunda um pouco enquanto está
+   pressionado. Só quando a pessoa aceita movimento - com prefers-reduced-motion
+   a regra nem existe (o bloco global de responsivo.css também zera as transições). */
+@media (prefers-reduced-motion: no-preference) {
+  button:not(:disabled):active { transform: scale(.97); }
+}
 ::selection { background: var(--accent); color: var(--accent-ink); }
 
 #brand-watermark {
@@ -89,5 +95,5 @@ button { font-family: inherit; }
      comeca visivel por padrao. --banner-offset e' mantida por
      syncBannerOffset() com a altura real do banner ativo no momento. */
   padding-top: var(--banner-offset);
-  transition: padding-top .12s ease;
+  transition: padding-top var(--dur-toque) var(--ease-out);
 }

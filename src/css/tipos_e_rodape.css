@@ -10,7 +10,7 @@
 #view-progress > .types-shell > .hint,
 #view-progress > .types-shell > #progress-trail-card { grid-column: 1 / -1; margin: 0; }
 #view-progress > .types-shell > .card { margin: 0; max-width: none; }
-#view-progress > .types-shell > .hint { max-width: 75ch; }
+#view-progress > .types-shell > .hint { max-width: 70ch; }
 .hint { color: var(--text-dim); font-size: var(--fs-texto); max-width: 70ch; margin-bottom: 16px; }
 .changelog-entry { margin-bottom: 14px; }
 .changelog-entry:last-child { margin-bottom: 0; }

@@ -16,12 +16,17 @@
    escolhida pelo usuário). Antes a largura da marca era a do subtítulo, que o
    script preenche depois da primeira pintura e que muda durante o uso (status
    da sincronização: 28 a 70 caracteres) - as abas pulavam de linha e a tela
-   inteira descia (CLS ~0,5 no computador). Agora a marca parte de largura 0
-   (flex-basis) com um mínimo fixo que cabe o título; o subtítulo fica numa
-   linha só, cortado com "…" (o texto inteiro aparece no title). Quebrar as
-   abas pra linha de baixo passa a depender só da largura da tela. */
+   inteira descia (CLS ~0,5 no computador). A marca parte de largura 0
+   (flex-basis) com um mínimo fixo que cabe o título; quebrar as abas pra linha
+   de baixo depende só da largura da tela.
+   Lote 3 (2026-10-04): a linha da versão QUEBRA em vez de cortar com "…", e o
+   status da sincronização virou um chip à parte. O que impede o pulo é que o
+   número de linhas só depende da LARGURA: o chip fica sempre na linha de baixo
+   (ou ao lado, quando a marca é larga o bastante pra caber os dois - decidido
+   por container query, não pelo tamanho do texto), com altura reservada mesmo
+   vazio, e o texto dele nunca quebra (corta com "…"; o inteiro vai no title). */
 .brand { display: flex; align-items: center; gap: 12px; flex: 1 1 0; min-width: 250px; }
-.brand-text { min-width: 0; }
+.brand-text { flex: 1 1 0; min-width: 0; container-type: inline-size; }
 .brand-mark {
   display: grid;
   place-items: center;
@@ -34,16 +39,27 @@
   flex: none;
   box-shadow: var(--shadow);
 }
-.brand-text h1 { font-size: var(--fs-titulo); font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; }
-/* Três partes por prioridade: a versão do jogo nunca corta; espécies/data/"Dex
-   offline" cortam primeiro (encolhem 1000x mais); o status da sincronização por
-   último - é ele que avisa "só neste aparelho". Antes a versão ficava no trecho
-   que corta e a ~900 px sobrava só "Dex …" (2026-09-24). */
-.brand-sub { margin: 2px 0 0; font-size: var(--fs-texto); color: var(--text-dim); display: flex; white-space: nowrap; }
-.brand-sub-versao { flex: none; }
-.brand-sub-info, .brand-sub-sync { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.brand-sub-info { flex: 0 1000 auto; }
-.brand-sub-sync { flex: 0 1 auto; }
+.brand-text h1 { font-size: var(--fs-titulo); font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; line-height: 1.25; }
+/* Duas partes: a linha de versão/dados (quebra se faltar largura; a versão do jogo
+   nunca é cortada) e o chip de sincronização, que é o que avisa "só neste aparelho". */
+.brand-sub { margin: 2px 0 0; font-size: var(--fs-texto); line-height: 1.4; color: var(--text-dim); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); }
+.brand-sub-meta { flex: 1 1 100%; min-width: 0; }
+.brand-sub-versao { white-space: nowrap; }
+.brand-sub-sync {
+  flex: 0 1 auto; min-width: 0; max-width: 100%; box-sizing: border-box; min-height: 22px;
+  padding: 1px var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-pill);
+  background: var(--surface-2); font-size: var(--fs-pequeno); line-height: 18px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Sem texto ainda: o chip some, mas continua ocupando o lugar (sem pulo quando o texto chega). */
+.brand-sub-sync:has(#sync-status-indicator:empty) { visibility: hidden; }
+.brand-sub-sync.is-aviso { color: var(--aviso); border-color: var(--aviso); }
+/* Marca larga (computador): versão e chip na mesma linha. O chip nunca passa de 40% da largura (a linha de versão, ~400 px, cabe nos 60% de 680 px). */
+@container (min-width: 680px) {
+  .brand-sub { flex-wrap: nowrap; }
+  .brand-sub-meta { flex: 1 1 0; }
+  .brand-sub-sync { max-width: 40%; }
+}
 /* Texto comum (redesenho 2026-09-24): fonte de código colorida no subtítulo era ruído. */
 .brand-sub .mono { font-family: inherit; color: inherit; }
 
@@ -65,7 +81,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: background .15s, color .15s;
+  transition: var(--transicao);
 }
 .tab-btn:hover { color: var(--text); }
 .tab-btn.active { background: var(--surface); color: var(--badge-accent); box-shadow: var(--shadow); }
@@ -77,6 +93,9 @@
    justamente o cenário clássico de toque perdido/precisa-tocar-de-novo
    em barra de abas roláveis. Ver .tab-label-short abaixo. */
 .tab-label-short { display: none; }
+/* Contador ainda sem número (Chefões, antes de a aba carregar): some, mas guarda o lugar -
+   a barra de abas não muda de largura quando o número chega. */
+.count-badge:empty { visibility: hidden; }
 .count-badge {
   background: var(--accent);
   color: var(--accent-ink);
@@ -129,3 +148,7 @@ main { flex: 1; min-height: 0; min-width: 0; display: flex; }
    vertical sempre foi a intenção real do layout, nunca o "row" por
    acidente - então a correção é permanente, não só mobile. */
 #view-dex.active { flex-direction: column; }
+/* Contagem e data entram depois da primeira pintura: o espaço delas já existe vazio (4 e 9,5
+   larguras do zero da fonte do subtítulo), então a linha não passa de uma a duas linhas quando chegam. */
+#species-count { display: inline-block; min-width: 4ch; }
+#data-stamp { display: inline-block; min-width: 9.5ch; }

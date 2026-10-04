@@ -23,6 +23,10 @@
   .dex-shell.show-detail .type-filter-panel { display: none; }
   .dex-shell.show-detail .search-row { padding: 10px 14px; }
   .dex-shell:not(.show-detail) .species-detail { display: none; }
+  /* Chefões: com o chefe aberto, a busca sai da frente (lote 3, 2026-10-04) - a ficha dele
+     já tem o botão "Voltar para a lista" e o campo ocupava ~60 px de uma tela que mal cabe o
+     plano. Digitar de novo (busca) ainda funciona: voltando à lista ela reaparece. */
+  #boss-shell.show-detail .dex-sidebar { display: none; }
   /* Vertical space is scarce here and the Pokemon being looked at matters
      more than the team summary - hide the dashboard while a detail is
      open. */

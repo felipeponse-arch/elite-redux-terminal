@@ -104,8 +104,8 @@
   // que um deles nem estava sincronizando de verdade - violava RNF03
   // ("degradação graciosa... nunca falhar silenciosamente"), que já valia
   // pra geração por IA mas nunca foi aplicado a este outro capability).
-  // O subtítulo do cabeçalho fica numa linha só, cortado com "…" quando não
-  // cabe (opção A, 2026-09-24) - o texto inteiro vai no title, pra ler ao
+  // A linha de versão quebra quando não cabe e o chip de sincronização corta com "…"
+  // (opção A, 2026-09-24; chip no lote 3) - o texto inteiro vai no title, pra ler ao
   // passar o mouse. Chamada sempre que o texto dele muda.
   function atualizarTituloDoSubtitulo() {
     var sub = document.querySelector(".brand-sub");
@@ -116,7 +116,8 @@
     if (!el) return;
     el.textContent = text;
     atualizarTituloDoSubtitulo();
-    el.style.color = warn ? "var(--sem-weak)" : "";
+    // Chip à parte (lote 3, 2026-10-04): o aviso muda a cor e a borda do chip, não só a letra.
+    if (el.parentNode) el.parentNode.classList.toggle("is-aviso", !!warn);
   }
   setSyncStatusIndicator("sincronização: verificando...");
   // Reconexão automática (achado real do usuário, 2026-09-13: viu "conexão

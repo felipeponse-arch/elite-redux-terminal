@@ -89,7 +89,7 @@
    extra, não uma ação obrigatória". Própria linha, depois do divisor de
    Análise de uso quando os dois existem juntos. */
 .pcbox-fit-note { display: block; color: var(--badge-accent2); font-size: var(--fs-pequeno); font-weight: 600; }
-.pcbox-empty-note { color: var(--text-dim); font-size: var(--fs-texto); }
+.pcbox-empty-note { color: var(--text-dim); font-size: var(--fs-texto); max-width: 70ch; }
 
 .saved-teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 .saved-team-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px; background: var(--surface-2); }
@@ -149,7 +149,7 @@
 .cf-best { font-size: var(--fs-pequeno); white-space: nowrap; color: var(--text-dim); text-align: left; padding-left: 6px; }
 .cf-best b { color: var(--text); }
 .cf-legend { margin: 8px 0 0; font-size: var(--fs-pequeno); color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 4px 14px; }
-.cf-note { margin: 6px 0 0; font-size: var(--fs-pequeno); color: var(--text-dim); max-width: 75ch; }
+.cf-note { margin: 6px 0 0; font-size: var(--fs-pequeno); color: var(--text-dim); max-width: 70ch; }
 .cf-fix { margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border); }
 .cf-fix h4 { margin: 0 0 6px; font-size: var(--fs-texto); }
 .cf-fix ul { margin: 0; padding-left: 18px; font-size: var(--fs-texto); }

@@ -33,6 +33,17 @@
   // Mesmo padrão efêmero de teamRecommendation - não persiste, e some
   // sozinho quando o time muda (forTeamKey).
   var generatedTeamResult = null;
+  // O resultado cujo card já fez o movimento de entrada (lote 3, 2026-10-04). O card é
+  // redesenhado várias vezes seguidas na montagem (progresso das builds), às vezes antes de a
+  // aba abrir ou antes de o navegador pintar: por isso a vez só é gasta quando o movimento
+  // COMEÇA de verdade (animationstart). Daí em diante as atualizações não repetem.
+  var cardGeradoAnimado = null;
+  function classeDeEntradaDoCardGerado() {
+    return cardGeradoAnimado === generatedTeamResult ? "" : " card-entrada";
+  }
+  document.addEventListener("animationstart", function (e) {
+    if (e.animationName === "card-entrada") cardGeradoAnimado = generatedTeamResult;
+  });
 
   // Chips no lugar de <select> (redesign 2026-09-18: "battle prep" tocável
   // em vez de formulário) - Estilo, Clima e campo e Tática têm poucas
@@ -426,7 +437,7 @@
         ? '<button type="button" id="chefao-restaurar" class="text-action-btn">Voltar ao time anterior</button>' +
           (res.anterior.salvo ? "" : '<span class="mybuild-hint"> (os 3 espaços de Times salvos estão ocupados - o time anterior só fica guardado enquanto esta página estiver aberta)</span>')
         : "";
-      return '<div class="card ts-generated-team"><h3>Time gerado ' + escapeHtml(res.archetypeLabel) + '</h3>' +
+      return '<div class="card ts-generated-team' + classeDeEntradaDoCardGerado() + '"><h3>Time gerado ' + escapeHtml(res.archetypeLabel) + '</h3>' +
         planoContraChefaoHtml(res, members.length) +
         // O aviso "Faltou build pra..." vem separado do resto do texto pra ter a cor de aviso
         // (o texto continua começando por ele: a suíte procura por "Faltou build").
@@ -460,7 +471,7 @@
         : (v.total - v.withoutBuild.length) + "/" + v.total + " membros com build confirmada - faltou gerar pra: " + escapeHtml(v.withoutBuild.join(", ")) + ".") +
       ' Riscos compartilhados: ' + riskText + '.' +
     '</div>';
-    return '<div class="card ts-generated-team"><h3>Time gerado: ' + escapeHtml(generatedTeamResult.archetypeLabel) + '</h3>' + guideHtml + validationHtml + '</div>';
+    return '<div class="card ts-generated-team' + classeDeEntradaDoCardGerado() + '"><h3>Time gerado: ' + escapeHtml(generatedTeamResult.archetypeLabel) + '</h3>' + guideHtml + validationHtml + '</div>';
   }
 
   function renderTeamStrategy(members) {

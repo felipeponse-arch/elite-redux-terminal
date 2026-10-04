@@ -41,7 +41,7 @@ dialog#swap-modal::backdrop {
    eram anunciadas pra quem usa leitor de tela, ao contrário do toast/
    sync-banner/storage-banner, que já tinham isso desde muito antes. */
 .notes-status { font-size: var(--fs-pequeno); color: var(--badge-accent2); }
-.mybuild-hint { color: var(--text-dim); font-size: var(--fs-pequeno); margin: 0 0 12px; }
+.mybuild-hint { color: var(--text-dim); font-size: var(--fs-pequeno); margin: 0 0 12px; max-width: 70ch; }
 .mybuild-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
 .mybuild-field {
   display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px;

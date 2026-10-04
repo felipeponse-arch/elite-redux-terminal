@@ -33,6 +33,12 @@
      fundo/ícone, nunca como cor de texto puro. */
   --focus: #0b7c6c;
   --shadow: 0 10px 28px -14px rgb(28 23 48 / 0.28);
+  /* Elevação (lote 3, 2026-10-04): dois degraus, os mesmos nomes nos 4 blocos de
+     tema. No claro é sombra suave; no escuro a sombra some no fundo, então o degrau
+     vira um fio de luz no topo (superfície um tom acima); no alto contraste, só
+     contorno. --elev-1 = card em repouso; --elev-2 = o que flutua (aviso, menu). */
+  --elev-1: 0 1px 2px rgb(28 23 48 / 0.06), 0 1px 1px rgb(28 23 48 / 0.04);
+  --elev-2: 0 6px 16px -8px rgb(28 23 48 / 0.22), 0 1px 3px rgb(28 23 48 / 0.08);
   --badge-text-dim: #58507a;
   /* --accent (#d6266f) já mede 4.8:1 como texto sobre --surface branco -
      ainda assim mantém uma variante -badge dedicada (mesmo padrão do
@@ -66,6 +72,22 @@
      @media do responsivo.css). */
   --alvo-min: 24px;
   --radius-pill: 999px;
+  /* Espaçamento (lote 3, 2026-10-04): seis degraus, iguais nos 3 temas. Hierarquia
+     de raio: card de resultado = lg; o que mora dentro dele (veredito, bloco de
+     texto, linha de buff) = md; chip e botão de pílula = pill. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  /* Movimento: um só tempo curto e uma só curva (ease-out forte, o movimento
+     começa rápido e assenta). Tudo isso desliga em prefers-reduced-motion. */
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --dur-toque: 120ms;
+  --dur-padrao: 160ms;
+  --dur-entrada: 200ms;
+  --transicao: background-color var(--dur-padrao) var(--ease-out), border-color var(--dur-padrao) var(--ease-out), color var(--dur-padrao) var(--ease-out), transform var(--dur-toque) var(--ease-out);
   /* Escala de tamanho de texto (2026-09-24, pedido do usuário: "padronizar
      o tamanho da fonte"). Antes: 19 tamanhos soltos, muitos a meio pixel um
      do outro (10/10,5, 12/12,5, 13/13,5). Agora 9 degraus inteiros, um por
@@ -108,6 +130,8 @@
     --aviso: #f0b84a;
     --focus: #33f0c8;
     --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
+    --elev-1: inset 0 1px 0 rgb(255 255 255 / 0.04);
+    --elev-2: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 8px 20px -10px rgb(0 0 0 / 0.6);
     /* Dark mode's plain --accent/--accent-2 already clear AA as text
        (magenta/ciano vivos sobre roxo quase preto) - sem precisar
        escurecer nada aqui, mesmo raciocínio do padrão original. */
@@ -141,6 +165,8 @@
   --aviso: #f0b84a;
   --focus: #33f0c8;
   --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
+  --elev-1: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  --elev-2: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 8px 20px -10px rgb(0 0 0 / 0.6);
   --badge-accent: #ff4f9a;
   --badge-accent2: #33f0c8;
   --badge-resist: #4fce93;
@@ -180,6 +206,8 @@
   --aviso: #ffb000;
   --focus: #ffffff;
   --shadow: 0 0 0 1px #ffffff;
+  --elev-1: none;
+  --elev-2: 0 0 0 1px #ffffff;
   --badge-accent: #ffcc00;
   --badge-accent2: #00e5ff;
   --badge-resist: #66ff66;
