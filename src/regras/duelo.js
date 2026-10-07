@@ -143,8 +143,8 @@
   // oposto); Confusion = 33% do dano causado volta como recuo. Burn, paralisia e
   // veneno a fonte oficial não redefine: valem as da série (Burn 1/16 e metade do
   // Atk; paralisia 25% de perder o turno; veneno 1/8; o tóxico, que cresce, ~1/8
-  // na média de uma luta curta). Sono (Sleep Clause) e Drench (sem regra oficial)
-  // ficam de fora.
+  // na média de uma luta curta). Sono (Sleep Clause) fica de fora;
+  // Drench muda a ordem dos turnos, não o dano (chanceDeEncharcarDuelo, ticket 17).
   var STATUS_DUELO = {
     queimar: { residuo: 1 / 16, corteF: 0.5, imunes: ["Fire"] },
     congelar: { residuo: 1 / 16, corteE: 0.5, imunes: ["Ice"] },
@@ -1161,7 +1161,7 @@
       imposter: false, traca: false, gasNeutro: false, enfurecido: false, poluicaoMental: false, alquimia: false, mumia: false, malodor: false, espirito: false, hemotoxina: false, quebraAura: false, multiCabeca: false,
       egoista: false, compartilha: false, retribuicao: false, homeRun: false, trocaEstagios: false, pantano: false, alcatrao: false,
       atravessaProtecao: false, protegeNaEntrada: false, semRecarga: false, tudoDanca: false, dancaSom: false, curaAliadoEstagios: false,
-      receptor: false, ladrao: false, recuperaItem: false };
+      receptor: false, ladrao: false, recuperaItem: false, semEncharcar: false, encharcaAgua: 0 };
     var nomes = ids.map(nomeHabDuelo);
     var climaProprio = {};
     ["chuva", "sol", "areia", "granizo", "nevoa"].forEach(function (c) {
@@ -1174,6 +1174,10 @@
     function maxEm(obj, k, v) { obj[k] = Math.max(obj[k] || 1, v); }
     ids.forEach(function (id) {
       var t = textoHabDuelo(id), x, m;
+      // Drench (ticket 17): Amphibious não fica encharcado; Hydrate encharca 10% num golpe Water de usuário
+      // Water - só no código (abilities.cc Impl<ABILITY_HYDRATE>), o texto da habilidade não diz.
+      if (/Can't become drenched/i.test(t)) ef.semEncharcar = true;
+      if (nomeHabDuelo(id) === "Hydrate") ef.encharcaAgua = 0.1;
       // Frases: corta em ". " seguido de maiúscula, mas não em abreviação do
       // próprio texto do jogo ("Sp. Atk", "Phys. moves", "vs. Steel").
       var frases = t.split(/(?<!\b(?:Sp|Phys|vs|Elec|Fight)\.)(?<=[.!])\s+(?=[A-Z])|\n/).filter(Boolean);
@@ -1474,6 +1478,7 @@
         precisao: Math.max(m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, u.ef.precisaoGolpe[m[0]] || 0), forcaBase: base, forca: base * hab };
       g.area = extra && extra.al ? extra.al : null; // dupla: ambos/todos/aleatorio
       g.efeito = extra && extra.ef ? extra.ef : ""; // efeito do golpe no dado (Fake Out, Hex, Eruption, Knock Off...)
+      g.chanceEfeito = extra && extra.ch ? extra.ch / 100 : 0; // chance do efeito extra (Drench Hit 30% = 0,3)
       // -2 de Sp. Atk no próprio usuário a cada uso (grupo do Overheat no dado); Simple
       // dobra e Contrary inverte (estagioMult), como em qualquer mudança de estágio.
       if (extra && extra.ef === "Overheat") g.quedaPropriaSpa = 2 * (u.ef.estagioMult || 1);
@@ -2052,6 +2057,27 @@
     }
     return v;
   }
+  // ---------- drench (ticket 17) ----------
+  // Código oficial (er-repo 217dd0f): MOVE_EFFECT_DRENCH faz o alvo agir por último na faixa de
+  // prioridade dele (battle_main.c GetBattlerSpeedValue: goesLast, como o Lagging Tail - vale até no
+  // Trick Room) por 2 ou 3 turnos (drenched = 2 + Random() % 2; o turno em que pega não conta).
+  // Não pega em quem já está encharcado, no tipo Water nem com Amphibious (battle_util.c
+  // CanBeDrenched). Causas: golpes "Drench Hit" (Hydro Pump 30%, Surf 20%, Water Gun e Rapid
+  // River 10%) e Hydrate. Shield Dust/Covert Cloak barram, Sheer Force tira, Serene Grace dobra.
+  function chanceDeEncharcarDuelo(atq, def, g) {
+    if (!g || def.tipos.indexOf("Water") !== -1 || def.ef.semEncharcar) return 0;
+    if (def.ef.imuneEfeitoDeGolpe || (def.it && def.it.imuneEfeito)) return 0;
+    var p = g.efeito === "Drench Hit" && !atq.ef.semEfeitoExtra ? Math.min(1, (g.chanceEfeito || 0) * atq.ef.chanceMult) : 0;
+    if (atq.ef.encharcaAgua && g.tipo === "Water" && atq.tipos.indexOf("Water") !== -1) p = 1 - (1 - p) * (1 - atq.ef.encharcaAgua);
+    return p * (g.precisao || 1);
+  }
+  // Chance de estar encharcado no turno n, com chance p por golpe a partir do turno 1. Estado =
+  // quantos turnos ainda faltam encharcado (0 a 3); encharcado não pega de novo.
+  function chanceEncharcadoNoTurnoDuelo(p, n) {
+    var est = [1, 0, 0, 0];
+    for (var t = 1; t < n; t++) est = [est[0] * (1 - p) + est[1], est[2], est[3] + est[0] * p / 2, est[0] * p / 2];
+    return 1 - est[0];
+  }
   function comTipoMudado(atq, def, danoAtq, danoDef, nivel) {
     var novo = def.ef.mudaTipoNoContato ? null : atq.ef.mudaTipoNoContato; // quem tem a habilidade muda o OUTRO
     var gA = danoAtq.melhor.golpe;
@@ -2193,6 +2219,10 @@
     var v1 = velocidadeNoDuelo(eu, turnos, foe, meu.melhor.golpe, dele.melhor.golpe), v2 = velocidadeNoDuelo(foe, turnos, eu, dele.melhor.golpe, meu.melhor.golpe);
     // Trick Room (Twist. Dimension): enquanto dura, o mais lento age primeiro.
     if (CAMPO_DUELO.sala && turnos <= CAMPO_DUELO.sala) { v1 = -v1; v2 = -v2; }
+    // Drench (ticket 17): encharcado no turno que decide (chance de 50% ou mais) age por último.
+    var encFoe = turnos >= 2 && chanceEncharcadoNoTurnoDuelo(chanceDeEncharcarDuelo(eu, foe, meu.melhor.golpe), turnos) >= 0.5;
+    var encEu = turnos >= 2 && chanceEncharcadoNoTurnoDuelo(chanceDeEncharcarDuelo(foe, eu, dele.melhor.golpe), turnos) >= 0.5;
+    if (encFoe && !encEu) v2 = -Infinity; else if (encEu && !encFoe) v1 = -Infinity;
     // Know Your Place: depois do 1º contato, o rival age por último.
     if (turnos >= 2 && eu.ef.forcaUltimo && meu.melhor.golpe && meu.melhor.golpe.contato) v1 = Infinity;
     if (turnos >= 2 && foe.ef.forcaUltimo && dele.melhor.golpe && dele.melhor.golpe.contato) v2 = Infinity;

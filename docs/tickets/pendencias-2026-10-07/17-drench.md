@@ -1,6 +1,6 @@
 # 17 — Status "drench" (Hydro Pump, Surf...)
 
-Status: a-avaliar
+Status: feito
 Bloqueado por: 06
 Agentes: meta-pokemon, playtester-de-build
 

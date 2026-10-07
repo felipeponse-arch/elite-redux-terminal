@@ -1678,4 +1678,32 @@ export const MUTACOES = [
     de: "return r >= PODER_ELECTRO_BALL.length ? PODER_ELECTRO_BALL.length - 1 : PODER_ELECTRO_BALL[r];",
     para: "return r >= PODER_ELECTRO_BALL.length ? 150 : PODER_ELECTRO_BALL[r];",
   },
+  {
+    id: "drench-ignorado",
+    descricao: "encharcado deixa de agir por último",
+    arquivo: "duelo.js",
+    de: "if (encFoe && !encEu) v2 = -Infinity; else if (encEu && !encFoe) v1 = -Infinity;",
+    para: "if (false) v2 = 0;",
+  },
+  {
+    id: "drench-pega-em-water",
+    descricao: "tipo Water passa a ficar encharcado",
+    arquivo: "duelo.js",
+    de: 'if (!g || def.tipos.indexOf("Water") !== -1 || def.ef.semEncharcar) return 0;',
+    para: "if (!g || def.ef.semEncharcar) return 0;",
+  },
+  {
+    id: "drench-amphibious-ignorado",
+    descricao: "Amphibious deixa de proteger do drench",
+    arquivo: "duelo.js",
+    de: "if (/Can't become drenched/i.test(t)) ef.semEncharcar = true;",
+    para: "if (false) ef.semEncharcar = true;",
+  },
+  {
+    id: "drench-duracao-fixa",
+    descricao: "drench dura sempre 2 turnos (o código sorteia 2 ou 3)",
+    arquivo: "duelo.js",
+    de: "est[3] + est[0] * p / 2, est[0] * p / 2]",
+    para: "est[3] + est[0] * p, 0]",
+  },
 ];
