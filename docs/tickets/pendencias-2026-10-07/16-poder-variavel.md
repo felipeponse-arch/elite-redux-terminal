@@ -1,6 +1,6 @@
 # 16 — Golpes de poder variável
 
-Status: pronto-para-agente
+Status: resolvido
 Bloqueado por: 06
 Agentes: playtester-de-build, meta-pokemon
 
@@ -14,3 +14,7 @@ código oficial (battle_util.c CalcMoveBasePower e efeitos); o que não tiver da
 
 ## Como verificar
 Teste por fórmula + sabotagem; um chefão com Heavy Slam passa a causar dano.
+
+## Comentários
+
+07/10: Low Kick, Grass Knot, Heavy Slam, Heat Crash, Splash, Gyro Ball, Electro Ball (com o bug do jogo), Seismic Toss e Night Shade pelo código. Super Fang, Final Gambit, Counter e Mirror Coat ficaram fora (escolha do usuário). Rank recalcula no 19.

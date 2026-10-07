@@ -25,6 +25,7 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
     ABILITY_PT: lerJson("ability_translations_pt.json"),
     ITEM_DESC: lerJson("item_descriptions.json"),
     ONDE_ACHAR_ITENS: lerJson("onde_achar_itens.json"),
+    PODER_VARIAVEL: lerJson("poder_variavel.json"),
     ITEM_PT: lerJson("item_translations_pt.json"),
     MOVE_ROLES: lerJson("move_roles.json"),
     BOSSES: lerJson("bosses.json"),

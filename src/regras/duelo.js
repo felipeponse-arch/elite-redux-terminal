@@ -1483,6 +1483,8 @@
       g.cats = cats;
       g.acertos = acertos;
       g.poder = poder;
+      // Poder que vem de outra coisa (ticket 16): peso, velocidade ou nível - calculado no dano (poderVariavelDuelo).
+      g.poderVariavel = (typeof PODER_VARIAVEL !== "undefined" && PODER_VARIAVEL.golpes[id]) || null;
       // Custo e retorno por golpe: recuo (fração do dano causado; Rock Head anula),
       // custo em HP (Blood Price, Infernal Rage) e dreno (golpe + habilidade).
       g.recuo = extra && extra.rc && !u.ef.semRecuo ? extra.rc / 100 : 0;
@@ -1670,9 +1672,13 @@
       if (!precisaoAtq && abreDef && def.ef.evasao !== 1) precisao /= def.ef.evasao; // Sand Veil, Olé!...
       if (!precisaoAtq) precisao = Math.min(1, precisao * comItem(itA.precisaoMult, ativoA) / comItem(itD.evasao, ativoD)); // Wide Lens, Bright Powder
       var forca = semBonus ? g.forcaBase : g.forca;
+      if (g.poderVariavel) forca *= poderVariavelDuelo(g.poderVariavel, atq, def) / Math.max(1, g.poder);
       if ((atq.ef.critSuperEf || atq.ef.seQuebra) && efTipo >= 2) precisao = 1; // Fatal/Deadly Precision: "never miss"
       var crit = fatorCriticoDuelo(atq, def, g, efTipo);
       var dano = ((((2 * nivel) / 5 + 2) * forca * A / D) / 50 + 2) * efTipo * red * ROLAGEM_MEDIA_DUELO * precisao * crit.fator * noCampo * comItem(itA.danoMult, ativoA);
+      // Seismic Toss e Night Shade (battle_script_commands.c Cmd_calculatesetdamage): dano = nível de quem usa;
+      // só a imunidade de tipo conta (já descartada acima), nada de atributo, STAB, crítico ou item.
+      if (g.poderVariavel === "Sky Drop" || g.poderVariavel === "Level Damage") dano = nivel * precisao;
       // Golpe que baixa o próprio Sp. Atk em 2 a cada uso (Overheat, Draco Meteor, Leaf
       // Storm...; revisão de 2026-09-30 - antes contava força cheia todo turno):
       // média do dano ao longo dos golpes que precisa pra derrubar.
@@ -1722,6 +1728,22 @@
   }
   // O lado da IA (chefão, treinador) luta com a escolha da IA no lugar do golpe de mais dano.
   function comoIADuelo(r) { return r && r.ia && r.ia !== r.melhor ? Object.assign({}, r, { melhor: r.ia }) : r; }
+  // Poder dos golpes de poder 1 no dado (ticket 16; código oficial src/script_conditions.cc CustomMoveDamage).
+  // Peso pela Pokédex nacional (formas e Megas usam o da base), em hectogramas; velocidade pelo atributo com o
+  // multiplicador da habilidade. Habilidade/item que mudam o peso (Heavy Metal, Float Stone...) ficam de fora.
+  var PESO_LOW_KICK = [[100, 20], [250, 40], [500, 60], [1000, 80], [2000, 100]];
+  var PODER_HEAT_CRASH = [40, 40, 60, 80, 100, 120];
+  var PODER_ELECTRO_BALL = [40, 60, 80, 120, 150];
+  function pesoDuelo(u) { return (typeof PODER_VARIAVEL !== "undefined" && u.sp && PODER_VARIAVEL.pesos[u.sp.i]) || 1; }
+  function velocidadeBaseDuelo(u) { return Math.max(1, u.stats[5] * (u.ef.speMult || 1)); }
+  function poderVariavelDuelo(efeito, atq, def) {
+    if (efeito === "Low Kick") { var w = pesoDuelo(def); for (var i = 0; i < PESO_LOW_KICK.length; i++) if (PESO_LOW_KICK[i][0] > w) return PESO_LOW_KICK[i][1]; return 120; }
+    if (efeito === "Heat Crash") return PODER_HEAT_CRASH[Math.min(PODER_HEAT_CRASH.length - 1, Math.floor(pesoDuelo(atq) / pesoDuelo(def)))];
+    if (efeito === "Gyro Ball") return Math.min(150, Math.floor(25 * velocidadeBaseDuelo(def) / velocidadeBaseDuelo(atq)) + 1);
+    // Electro Ball: com razão 5x ou mais o código devolve ARRAY_COUNT - 1 = 4 de poder (bug do jogo; vale o código).
+    if (efeito === "Electro Ball") { var r = Math.floor(velocidadeBaseDuelo(atq) / velocidadeBaseDuelo(def)); return r >= PODER_ELECTRO_BALL.length ? PODER_ELECTRO_BALL.length - 1 : PODER_ELECTRO_BALL[r]; }
+    return 1; // Sky Drop / Level Damage: dano fixo, tratado no danoNoDuelo
+  }
   function golpesNecessariosDuelo(hp, d) { return d > 0 ? Math.ceil(hp / d) : Infinity; }
   // Aguenta o primeiro golpe com HP cheio: Focus Sash (item: "If the holder has
   // full HP, it endures KO hits with 1 HP") ou Sturdy ("At full HP, cannot be

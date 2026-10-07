@@ -75,7 +75,7 @@ test("habilidade composta ('A + B') aplica o efeito de TODAS as partes", () => {
 // lacunas conhecidas, a revisar (planner de 30/09). Efeito NOVO faz o teste falhar.
 const EFEITOS_DE_GOLPE_SEM_REGRA_EXPLICITA = ["Accuracy Down Hit", "Argument Hit", "Argument Hit If Stat Up", "Bug Bite", "Bulldoze", "Burn Up",
   "Clear Smog", "Creeping Thorns Hit", "Curse Hit", "Defog", "Drench Hit", "Electro Shot", "Fairy Terrain Hit", "Feint",
-  "Flame Burst", "Flinch Recoil 33", "Fling", "Freeze Dry", "Grassy Terrain Hit", "Grav Apple", "Heat Crash", "Hit",
+  "Flame Burst", "Flinch Recoil 33", "Fling", "Freeze Dry", "Grassy Terrain Hit", "Grav Apple", "Hit",
   "Hit Prevent Escape", "Hit Switch Target", "Hyperspace Fury", "Incinerate", "Leech Seed Hit",
   "Mind Blown", "Misc Hit", "Mortal Spin", "Natural Gift", "Nightmare", "Pay Day", "Rain Hit",
   "Recoil 33", "Remove Terrain No Fail", "Rip And Tear", "Round", "Sandstorm Hit", "Sleep Hit",

@@ -48,6 +48,7 @@ const ARQUIVOS_DE_DADOS = {
   __HOW_TO_OBTAIN_JSON__: "how_to_obtain.json",
   __ITEM_DESC_JSON__: "item_descriptions.json",
   __ONDE_ACHAR_ITENS_JSON__: "onde_achar_itens.json",
+  __PODER_VARIAVEL_JSON__: "poder_variavel.json",
   __ITEM_PT_JSON__: "item_translations_pt.json",
   __GYM_SKILLS_JSON__: "gym_skills.json",
   __MONO_DISP_JSON__: "mono_disponibilidade.json",

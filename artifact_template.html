@@ -474,6 +474,7 @@
 <script id="howtoobtain" type="application/json">__HOW_TO_OBTAIN_JSON__</script>
 <script id="itemdesc" type="application/json">__ITEM_DESC_JSON__</script>
 <script id="ondeacharitens" type="application/json">__ONDE_ACHAR_ITENS_JSON__</script>
+<script id="podervariavel" type="application/json">__PODER_VARIAVEL_JSON__</script>
 <script id="itempt" type="application/json">__ITEM_PT_JSON__</script>
 <script id="speciesrank" type="application/json">__SPECIES_RANK_JSON__</script>
 <script id="speciesrole" type="application/json">__SPECIES_ROLE_JSON__</script>
@@ -598,6 +599,8 @@
   var ITEM_DESC = JSON.parse(document.getElementById("itemdesc").textContent || "{}");
   // Onde achar cada item e a partir de qual etapa (ticket 07; scripts/gerar_onde_achar_itens.mjs).
   var ONDE_ACHAR_ITENS = JSON.parse(document.getElementById("ondeacharitens").textContent || "{}");
+  // Golpes de poder variável e pesos da Pokédex (ticket 16; scripts/gerar_poder_variavel.mjs).
+  var PODER_VARIAVEL = JSON.parse(document.getElementById("podervariavel").textContent || "{}");
   // Tradução PT-BR (mesmo padrão de ABILITY_PT/MOVE_PT) - 818 dos 818 itens
   // traduzidos, sem exceção (regra do projeto: tudo em português, nomes
   // próprios de espécie/golpe/tipo/item continuam em inglês, igual nas

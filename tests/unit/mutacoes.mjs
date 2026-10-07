@@ -1657,4 +1657,25 @@ export const MUTACOES = [
     de: "var mult = abilityTypeMod(atk, sp).mult;",
     para: "var mult = typeMultiplier(atk, speciesTypeNames(sp));",
   },
+  {
+    id: "poder-variavel-ignorado",
+    descricao: "golpe de poder variável volta a valer o poder 1 do dado",
+    arquivo: "duelo.js",
+    de: "if (g.poderVariavel) forca *= poderVariavelDuelo(g.poderVariavel, atq, def) / Math.max(1, g.poder);",
+    para: "if (false) forca *= 1;",
+  },
+  {
+    id: "seismic-toss-sem-dano-fixo",
+    descricao: "Seismic Toss/Night Shade deixam de causar dano igual ao nível",
+    arquivo: "duelo.js",
+    de: "dano = nivel * precisao;",
+    para: "dano = dano * 1;",
+  },
+  {
+    id: "electro-ball-sem-bug-do-jogo",
+    descricao: "Electro Ball com razão 5x+ vira 150 (o código do jogo devolve 4)",
+    arquivo: "duelo.js",
+    de: "return r >= PODER_ELECTRO_BALL.length ? PODER_ELECTRO_BALL.length - 1 : PODER_ELECTRO_BALL[r];",
+    para: "return r >= PODER_ELECTRO_BALL.length ? 150 : PODER_ELECTRO_BALL[r];",
+  },
 ];
