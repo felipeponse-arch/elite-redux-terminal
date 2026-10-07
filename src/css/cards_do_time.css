@@ -284,5 +284,5 @@
    build antiga continua valendo até o clique. */
 .ts-evo-gerar { background: none; border: 1px solid var(--accent-2); color: var(--badge-accent2); border-radius: var(--radius-sm); padding: 1px 8px; font: inherit; font-size: var(--fs-legenda); font-weight: 600; cursor: pointer; }
 .ts-evo-gerar:hover { background: color-mix(in srgb, var(--accent-2) 14%, transparent); }
-.ts-evo-gerar:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.ts-evo-gerar:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .ts-evo-gerar:disabled { opacity: .6; cursor: default; }

@@ -400,7 +400,9 @@
     });
     if (det) {
       det.open = true;
-      det.scrollIntoView({ block: "start", behavior: "smooth" });
+      // Rolagem suave só para quem aceita movimento (ticket 10): o CSS de prefers-reduced-motion não alcança o JS.
+      var semMovimento = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      det.scrollIntoView({ block: "start", behavior: semMovimento ? "auto" : "smooth" });
     }
   }
   document.addEventListener("click", function (e) {

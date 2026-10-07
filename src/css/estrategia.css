@@ -160,7 +160,7 @@
 .mono-item { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 6px; font-size: var(--fs-texto); padding: 3px 0; border-bottom: 1px solid var(--border); }
 .mono-nome { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: var(--text); cursor: pointer; }
 .mono-nome:hover { text-decoration: underline; }
-.mono-nome:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.mono-nome:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .mono-local { color: var(--text-dim); font-size: var(--fs-pequeno); }
 .mono-marca { font-size: var(--fs-legenda); color: var(--text-dim); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 5px; }
 .mono-ja-tem { font-size: var(--fs-legenda); color: var(--sem-resist); font-weight: 600; }
@@ -168,7 +168,7 @@
 .mono-aviso-forte { color: var(--sem-weak); font-weight: 600; }
 .mono-usar-clima { background: none; border: 1px solid var(--accent-2); color: var(--badge-accent2); border-radius: var(--radius-sm); padding: 1px 8px; font: inherit; font-size: var(--fs-pequeno); font-weight: 600; cursor: pointer; }
 .mono-usar-clima:hover { background: color-mix(in srgb, var(--accent-2) 14%, transparent); }
-.mono-usar-clima:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.mono-usar-clima:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 /* Revisão de front/CX (2026-09-27): resumo em linhas de rótulo + valor, listas
    completas recolhidas em "Tudo o que dá pra pegar". */
 .mono-run h3 { margin: 0 0 8px; }

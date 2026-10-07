@@ -167,3 +167,35 @@ test("no celular, digitar na busca volta pra lista e a ficha some", async ({ pag
   await expect(page.locator("#species-list")).toBeVisible();
   await expect(page.locator("#species-detail")).toBeHidden();
 });
+
+// Ticket 10 (07/10/2026): Home/End na lista (padrão de listbox do ARIA APG). Na Dex a lista vem em lotes:
+// o End carrega o resto antes de ir à última linha; o Home volta à primeira.
+test("lista da Dex: End vai à última espécie (carregando os lotes) e Home volta à primeira", async ({ page }) => {
+  await abrirApp(page);
+  await abrirAba(page, "dex");
+  const linhas = page.locator("#species-list .species-row");
+  await linhas.first().focus();
+  await page.keyboard.press("End");
+  const total = await page.evaluate(() => document.querySelectorAll("#species-list .species-row").length);
+  expect(total, "o End carregou todos os lotes").toBeGreaterThan(1000);
+  await expect(linhas.last()).toBeFocused();
+  await page.keyboard.press("Home");
+  await expect(linhas.first()).toBeFocused();
+});
+
+for (const reduzida of [true, false]) {
+  test("rolagem até Estratégias: " + (reduzida ? "sem" : "com") + " animação quando o sistema pede " + (reduzida ? "menos movimento" : "movimento normal"), async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: reduzida ? "reduce" : "no-preference" });
+    await abrirApp(page);
+    const comportamento = await page.evaluate(() => {
+      const chamadas = [];
+      const original = Element.prototype.scrollIntoView;
+      Element.prototype.scrollIntoView = function (o) { chamadas.push(o && o.behavior); return original.call(this, o); };
+      const sp = window.__erTest.getSpeciesBySname("SPECIES_CHARIZARD");
+      window.__erTest.goToDexSpeciesStrategies(sp.x);
+      Element.prototype.scrollIntoView = original;
+      return chamadas[chamadas.length - 1];
+    });
+    expect(comportamento).toBe(reduzida ? "auto" : "smooth");
+  });
+}

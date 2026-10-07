@@ -82,7 +82,10 @@
       return;
     }
 
-    if ((e.key === "ArrowDown" || e.key === "ArrowUp") && !typing) {
+    // Home/End (ticket 10, padrão de listbox do ARIA APG): só com o foco dentro da lista - fora dela continuam
+    // rolando a página.
+    var naLista = document.activeElement && document.activeElement.closest && document.activeElement.closest('[role="listbox"]');
+    if (((e.key === "ArrowDown" || e.key === "ArrowUp") || ((e.key === "Home" || e.key === "End") && naLista)) && !typing) {
       var dexActiveNav = document.querySelector('.tab-btn[data-tab="dex"]').classList.contains("active");
       var bossesActiveNav = document.querySelector('.tab-btn[data-tab="bosses"]').classList.contains("active");
       if (dexActiveNav && !document.getElementById("dex-shell").classList.contains("show-detail")) {
@@ -130,7 +133,12 @@
     }
     if (curIdx !== -1) { rows[curIdx].classList.remove("kbd-active"); rows[curIdx].tabIndex = -1; }
     var nextIdx;
-    if (e.key === "ArrowDown") nextIdx = curIdx === -1 ? 0 : Math.min(curIdx + 1, rows.length - 1);
+    if (e.key === "End") {
+      // Lista da Dex em lotes: carrega o resto antes de ir à última linha.
+      if (rowSelector.indexOf("#species-list") === 0) { while (renderMaisLista()) { /* próximo lote */ } rows = document.querySelectorAll(rowSelector); }
+      nextIdx = rows.length - 1;
+    } else if (e.key === "Home") nextIdx = 0;
+    else if (e.key === "ArrowDown") nextIdx = curIdx === -1 ? 0 : Math.min(curIdx + 1, rows.length - 1);
     else nextIdx = curIdx === -1 ? 0 : Math.max(curIdx - 1, 0);
     rows[nextIdx].classList.add("kbd-active");
     rows[nextIdx].tabIndex = 0;
