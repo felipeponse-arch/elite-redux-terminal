@@ -184,3 +184,18 @@
 .mono-aviso-forte .mono-rotulo { color: var(--text-dim); } /* só o valor fica em alerta */
 /* Sem Monotype o contêiner fica vazio e não pode ocupar o espaçamento da coluna. */
 #team-mono:empty { display: none; }
+/* Lote 5 (06/10): bloco "Não serve agora" (avisos de build) e selo de origem/confiança.
+   Texto sempre em --text sobre fundo neutro (contraste AA nos 3 temas); a cor só aparece na
+   borda, e o nível também vai em palavra e símbolo, nunca só em cor. */
+.aviso-build {
+  margin-top: 6px; padding: 6px 10px; border-left: 3px solid var(--aviso); border-radius: var(--radius-sm);
+  background: var(--surface-2); color: var(--text); font-size: var(--fs-legenda); max-width: 70ch;
+}
+.aviso-build ul { margin: 4px 0 0; padding-left: 18px; }
+.selo-origem {
+  display: inline-block; font-size: var(--fs-micro); font-weight: 600; padding: 1px 7px; border-radius: var(--radius-pill);
+  background: var(--surface-3); color: var(--text); border: 1px solid var(--border); vertical-align: middle; cursor: help;
+}
+.selo-confirmado { border-color: var(--badge-resist); }
+.selo-consenso { border-color: var(--badge-accent2); }
+.selo-relato { border-style: dashed; border-color: var(--aviso); }

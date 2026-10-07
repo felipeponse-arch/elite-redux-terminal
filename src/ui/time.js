@@ -20,7 +20,7 @@
         var build = effectiveBuild(sp);
         var buildHtml = build ? (
           '<div class="ts-build">' +
-            '<div class="ts-build-head"><span class="ts-build-label">' + rotuloDaBuild(build) + '</span>' + revisaoStatusHtml(sp.sname) +
+            '<div class="ts-build-head"><span class="ts-build-label">' + rotuloDaBuild(build) + '</span>' + seloDaBuildHtml(build) + revisaoStatusHtml(sp.sname) +
               '<button class="ts-build-copy" data-x="' + sp.x + '" type="button" title="Copiar este set">copiar</button></div>' +
             '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
             planoDaBuildHtml(build) +

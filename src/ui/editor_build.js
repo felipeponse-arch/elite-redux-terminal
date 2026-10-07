@@ -153,20 +153,21 @@
   function buildNoteHtml(texto) {
     return texto ? '<div class="ts-build-note">' + texto + '</div>' : "";
   }
+  // Um bloco só de Avisos de build (lote 5, 06/10): reúne o que não serve neste ponto da run -
+  // golpe depois do cap, Mega/pedra antes da insígnia, clima sem setter, set de dupla em 1x1.
+  // As contas moram em avisosDaBuild (src/regras/avisos_build.js); aqui só vira HTML.
   function buildContextNotesHtml(sp, build) {
-    if (!sp || !build || !Array.isArray(build.moves)) return "";
-    var cap = getCurrentCap();
-    var notas = [];
-    // Conta única em golpesTravadosNoCap (src/regras/level_cap.js). Golpe que
-    // a forma não aprende (nivel null) não entra aqui - reconciliarBuild cuida.
-    var acima = golpesTravadosNoCap(sp, build.moves).filter(function (g) { return g.nivel !== null; });
-    if (acima.length) notas.push("Acima do seu level cap atual (" + cap + "): " + acima.map(function (g) {
-      return escapeHtml(g.nome) + " (nível " + g.nivel + ")";
-    }).join(", ") + ".");
-    var dupla = build.moves.filter(function (m) { return moveRoleOf(m) === "dupla"; });
-    if (build.formato === "dupla") notas.push("A fonte descreve este set como pensado pra batalha dupla.");
-    if (dupla.length) notas.push("Só funciona em batalha dupla: " + dupla.map(escapeHtml).join(", ") + ".");
-    return notas.map(buildNoteHtml).join("");
+    var avisos = avisosDaBuild(sp, build);
+    if (!avisos.length) return "";
+    return '<div class="aviso-build" role="note"><b>⚠ Não serve agora</b><ul>' +
+      avisos.map(function (a) { return '<li data-aviso="' + a.tipo + '">' + escapeHtml(a.texto) + '</li>'; }).join("") + '</ul></div>';
+  }
+  // Selo de origem/confiança ao lado do rótulo da build (seloDaBuild em avisos_build.js).
+  function seloDaBuildHtml(build) {
+    var s = seloDaBuild(build);
+    if (!s) return "";
+    return ' <span class="selo-origem selo-' + s.nivel + '" title="' + escapeHtml(s.nome + ": " + s.explica) + '">' +
+      s.simbolo + ' ' + s.nome + ' · ' + escapeHtml(s.rotulo) + '</span>';
   }
   function megaModeBuildNoteHtml(sp, build) {
     var rule = megaStoneRuleFor(sp);
@@ -432,7 +433,7 @@
       // effectiveBuild() já faz pra "Meu build" (evsToShowdownText).
       var forDisplay = { ability: set.ability, nature: set.nature, item: set.item, moves: set.moves, evs: evsToShowdownText(set.evs) };
       return '<div class="strategy-set">' +
-        '<div class="strategy-set-head"><span class="strategy-set-name">' + escapeHtml(set.name) + '</span>' +
+        '<div class="strategy-set-head"><span class="strategy-set-name">' + escapeHtml(set.name) + '</span>' + seloDaBuildHtml({ origem: "ia" }) +
           '<button class="text-action-btn strategy-set-copy" data-idx="' + idx + '" type="button">copiar</button></div>' +
         '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, forDisplay)) + '</pre>' +
         itemDescHtml(set.item) +

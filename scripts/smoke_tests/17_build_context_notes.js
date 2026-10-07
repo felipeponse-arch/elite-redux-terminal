@@ -70,12 +70,12 @@ async function section17() {
     if (achou("build curada com golpe acima do cap " + capBaixo, acima)) {
       var nota = T.buildContextNotesHtml(acima.sp, acima.b);
       check("build curada mostra o golpe acima do level cap e o nível em que aprende",
-        nota.indexOf("Acima do seu level cap") !== -1 && nota.indexOf(acima.golpe) !== -1 && nota.indexOf("nível") !== -1,
+        nota.indexOf("Golpe só depois do seu level cap") !== -1 && nota.indexOf(acima.golpe) !== -1 && nota.indexOf("nível") !== -1,
         acima.sp.n + ": " + nota.replace(/<[^>]+>/g, ""));
       // Sem level cap (Campeão/Alto Comando) não existe "acima do cap".
       T.state.settings.milestone = 9;
       var semCap = T.buildContextNotesHtml(acima.sp, acima.b);
-      check("sem level cap (Campeão), a observação de golpe acima do cap some", semCap.indexOf("Acima do seu level cap") === -1, semCap.replace(/<[^>]+>/g, ""));
+      check("sem level cap (Campeão), a observação de golpe acima do cap some", semCap.indexOf("Golpe só depois do seu level cap") === -1, semCap.replace(/<[^>]+>/g, ""));
     }
   } finally {
     T.state.settings.levelCapMode = settingsOriginais.levelCapMode;
