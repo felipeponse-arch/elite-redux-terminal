@@ -157,7 +157,8 @@
     "Alto Comando": "var(--cat-elite)",
     "Campeao": "var(--badge-accent)",
     "Superchefao": "var(--cat-super)",
-    "Superchefao (Monotype)": "var(--cat-super)"
+    "Superchefao (Monotype)": "var(--cat-super)",
+    "Treinador opcional": "var(--badge-text-dim)"
   };
   // Nome da categoria na tela (a chave do dado, sem acento, continua sendo a de filtro e de lógica).
   var NOME_DA_CATEGORIA_DE_CHEFAO = { "Lider de Ginasio": "Líder de Ginásio", "Campeao": "Campeão", "Superchefao": "Superchefão", "Superchefao (Monotype)": "Superchefão (Monotype)" };
@@ -169,6 +170,11 @@
     if (!campo) return "";
     return '<div class="card"><h3>Regra de campo desta luta</h3><p class="mybuild-hint">' + escapeHtml(campo.texto) + '</p>' +
       (campo.naoSimulado ? '<p class="mybuild-hint plano-buffs-aviso"><b>O simulador ainda não conta este efeito:</b> o plano e o veredito não levam isto em conta.</p>' : "") + '</div>';
+  }
+  // Treinador opcional (ticket 04): pedra Mega, revanche do Calvin ou luta escondida na Liga - fora do rank.
+  function opcionalHtml(boss) {
+    if (boss.cat !== "Treinador opcional") return "";
+    return '<p class="mybuild-hint">Luta opcional (dá pedra Mega, é revanche ou fica escondida na Liga). Não entra no rank, que só usa as lutas da run.</p>';
   }
   // Jeito de lutar da IA deste treinador (flags da config oficial; ticket 03). Só aparece em quem tem flag extra.
   function iaDoChefaoHtml(nome) {
@@ -599,7 +605,7 @@
         '<div class="detail-dexno mono">' + escapeHtml(nomeDaCategoriaDeChefao(boss.cat)) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +
       (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:6px 0 0;max-width:65ch;">Padrão é o time de Easy e Ace (os dois usam o mesmo), Insane é o time do Elite e Hell é o do modo Hell (confirmado no código do jogo).</p></div>' : "") +
-      campoDoChefaoHtml(boss.name) + iaDoChefaoHtml(boss.name) +
+      opcionalHtml(boss) + campoDoChefaoHtml(boss.name) + iaDoChefaoHtml(boss.name) +
       hellDoChefaoHtml(boss.name, diffKey) +
       bossConfrontoHtml(boss, party) +
       montarHtml +

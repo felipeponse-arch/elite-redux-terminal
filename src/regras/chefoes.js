@@ -406,12 +406,15 @@
   // cada uma soma na pontuação do golpe (battle_ai_main.c). Todo treinador já tem a IA base (tenta nocautear,
   // evita golpe inútil, troca "esperta"); isto é o extra. Só aviso na tela: o simulador não conta.
   var IA_ARRISCADA = "Arriscada: dá preferência a golpe de crítico alto e, em metade das vezes, a golpes de risco (sono, Explosion, nocaute direto, confusão, Counter, Destiny Bond, Belly Drum, Focus Punch).";
+  var IA_STATUS = "Prefere golpes de status: todo golpe de status ganha um ponto a mais na escolha.";
   var COMPORTAMENTO_DA_IA_DO_CHEFAO = {
     "Roxanne 1": [
       "Prefere golpes de status: todo golpe de status ganha um ponto a mais na escolha.",
       "Joga na defesa (stall): golpes que sobem Defesa ou Defesa Especial ganham um ponto a mais."
     ],
-    "Winona 2": [IA_ARRISCADA], "Winona 3": [IA_ARRISCADA], "Winona 4": [IA_ARRISCADA], "Winona 5": [IA_ARRISCADA]
+    "Winona 2": [IA_ARRISCADA], "Winona 3": [IA_ARRISCADA], "Winona 4": [IA_ARRISCADA], "Winona 5": [IA_ARRISCADA],
+    // Revanches do Calvin (treinadores opcionais desde o ticket 04).
+    "Calvin 1": [IA_STATUS], "Calvin 2": [IA_STATUS], "Calvin 3": [IA_STATUS], "Calvin 4": [IA_STATUS]
   };
   function comportamentoDaIADoChefao(nome) { return COMPORTAMENTO_DA_IA_DO_CHEFAO[nome] || []; }
 

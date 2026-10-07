@@ -82,13 +82,27 @@ function ResolveParty($rawParty) {
     return $party.ToArray()
 }
 
+# Treinadores especiais (ticket 04, decisão do usuário em 07/10/2026): lutas opcionais que não são de
+# classe de chefão - dão pedra Mega, ficam escondidas na Liga ou são revanches do Calvin. Entram pelo
+# NOME (a classe deles é comum: Expert, Youngster, Lady...) e ficam FORA do rank (o rank só usa as
+# lutas da run, calcular_rank_v2.mjs). "Steven Mossdeep" NÃO entra: é o parceiro do jogador na dupla
+# de Mossdeep, não um adversário.
+$treinadoresOpcionais = @(
+    "Dragonitenite Sage 1", "Dragonitenite Sage 2", "Dragonitenite Sage 3",
+    "Steven Granite Cave", "Steven Route118",
+    "Calvin 1", "Calvin 2", "Calvin 3", "Calvin 4", "Calvin E4",
+    "Mega Fidough", "Blunder",
+    "Shedinjite Abandoned Ship", "Crobatite Dewford Manor", "Granbullite Route123", "Sinnoh Megas Mauville Game Corner"
+)
+
 $bosses = New-Object System.Collections.ArrayList
 foreach ($t in $data.trainers) {
     $cid = [string]$t["tclass"]
-    if (-not $bossCategories.ContainsKey($cid)) { continue }
+    $opcional = $treinadoresOpcionais -contains $t["name"]
+    if (-not $opcional -and -not $bossCategories.ContainsKey($cid)) { continue }
     [void]$bosses.Add([ordered]@{
         name = $t["name"]
-        cat = $bossCategories[$cid]
+        cat = if ($opcional) { "Treinador opcional" } else { $bossCategories[$cid] }
         db = [bool]$t["db"]
         party = ResolveParty $t["party"]
         insane = ResolveParty $t["insane"]

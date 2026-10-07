@@ -1,6 +1,6 @@
 # 04 — Treinadores especiais como chefões opcionais
 
-Status: pronto-para-agente
+Status: resolvido
 Bloqueado por: 02
 Agentes: arquiteta-de-dados, engenheira-frontend
 
@@ -12,3 +12,7 @@ Dewford Manor, Granbullite na Route 123, Megas de Sinnoh no Game Corner). Extra�
 
 ## Como verificar
 Aparecem na lista de chefões com etiqueta de opcional; rank não muda; teste de que o extrator acha todos.
+
+## Comentários
+
+07/10: 16 treinadores (Steven Mossdeep fora: é parceiro). Extrator + conferidor --aplicar (8 Eviolites nos novos). Cor neutra própria, aviso "luta opcional, fora do rank" e flags do Calvin. 3 imagens de referência regravadas.

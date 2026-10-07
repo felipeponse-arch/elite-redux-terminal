@@ -60,3 +60,11 @@ test("bosses.json tem os 11 Eviolites da config oficial (achado do ticket 02)", 
     ["Roxanne 1", "insane", 4], ["Roxanne 1", "insane", 5], ["Norman 3", "party", 2], ["Monochamp Ice", "party", 1]];
   for (const [nome, chave, pos] of casos) assert.equal(mon(nome, chave, pos).item, "Eviolite", nome + " " + chave + " " + pos);
 });
+
+test("treinadores opcionais (ticket 04): os 16 entram com a categoria própria; o parceiro Steven Mossdeep não", () => {
+  const opcionais = BOSSES.filter((b) => b.cat === "Treinador opcional").map((b) => b.name);
+  assert.equal(opcionais.length, 16, opcionais.join(", "));
+  for (const n of ["Dragonitenite Sage 1", "Steven Route118", "Calvin E4", "Mega Fidough", "Blunder", "Granbullite Route123"]) assert.ok(opcionais.includes(n), n);
+  assert.ok(!BOSSES.some((b) => b.name === "Steven Mossdeep"), "Steven Mossdeep é parceiro na dupla, não adversário");
+  assert.equal(mon("Calvin 1", "party", 1).item, "Eviolite", "o item perdido pela NextDex também volta nos opcionais");
+});
