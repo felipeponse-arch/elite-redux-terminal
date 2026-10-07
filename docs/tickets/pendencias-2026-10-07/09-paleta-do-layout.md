@@ -1,12 +1,12 @@
-# 09 — Paleta do layout
+# 09 — Paleta do layout: decisão
 
-Status: para-o-usuario (escolher A Esmeralda, B Shiny ou manter a atual; capturas em teste/estudo_paleta)
+Status: resolvido
 Bloqueado por: nenhum
 Agentes: engenheira-frontend, ux-acessibilidade
 
-## O que entrega
-Estudo de 04/10 pronto (3 protótipos). A paleta atual falha contraste AA em 12 pares no tema claro; as novas corrigem.
-Depois da escolha: plano em lotes L1 (só `tokens.css`) a L6, cada lote um ticket.
+## Decisão do usuário (07/10/2026)
+**B Shiny** (preto, ouro e rubi) é a paleta do app, sem alternador (a Esmeralda e a atual saem). Estudo de 04/10 guardado em
+`teste/estudo_paleta/` (fora do git): `mockup_B_shiny.html`, `paletas.mjs` (valores `sh_claro` e `sh_escuro`, já com
+contraste AA; a atual falha 12 pares no claro), capturas e as ilustrações em `web/`. Execução nos tickets 11 a 15.
 
-## Como verificar
-`checar_css` verde, contraste AA nos 3 temas, capturas antes/depois.
+Direitos: as ilustrações são arte oficial; só servem porque o app é privado (artifact visível só ao dono).
