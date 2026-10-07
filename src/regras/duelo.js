@@ -65,10 +65,12 @@
     if (!m || !(m[3] > 0) || DATA.splits[m[2]] === "STATUS") return false;
     return !/desmaia|descansa no turno/i.test(MOVE_PT[id] || "");
   }
+  // Efeito oficial que troca o atributo de ataque (battle_util.c CalcAttackStat): Foul Play usa o Atk do ALVO; Body Press, a Def do usuário.
+  var FONTE_DO_ATAQUE_DUELO = { "Foul Play": "alvoAtk", "Body Press": "def" };
   function categoriaNoDuelo(m, atk, spa) {
     var s = DATA.splits[m[2]];
-    if (s === "PHYSICAL" || s === "HITS_DEF") return "F";
-    if (s === "SPECIAL" || s === "HITS_SPDEF") return "E";
+    if (s === "PHYSICAL") return "F";
+    if (s === "SPECIAL" || s === "HITS_SPDEF" || s === "HITS_DEF") return "E";
     return atk >= spa ? "F" : "E";
   }
   function temContatoDuelo(m) { return (m[8] || []).some(function (i) { return DATA.flags[i] === "Makes Contact"; }); }
@@ -1464,7 +1466,7 @@
       if (contato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
-      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, contato: temContatoDuelo(m), som: som, prio: m[7] || 0,
+      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF", fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: temContatoDuelo(m), som: som, prio: m[7] || 0,
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
           cats.some(function (c) { return u.ef.prioCheioCategoria[c]; }),
         precisao: Math.max(m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, u.ef.precisaoGolpe[m[0]] || 0), forcaBase: base, forca: base * hab };
@@ -1553,9 +1555,10 @@
     def.tipos.forEach(function (t) { if (atq.ef.vsTipo[t]) mult *= atq.ef.vsTipo[t]; });
     return mult;
   }
-  function ataqueNoDuelo(atq, g) {
+  function ataqueNoDuelo(atq, g, def) {
     var fisico = g.cat === "F";
-    var A = fisico ? atq.stats[1] : atq.stats[3];
+    var A = g.fonteAtk === "alvoAtk" ? def.stats[1] : g.fonteAtk === "def" ? atq.stats[2] : fisico ? atq.stats[1] : atq.stats[3];
+    if (g.fonteAtk) return A; // Foul Play / Body Press: o atributo vem de outra fonte (battle_util.c CalcAttackStat), sem Equinox nem maior-atributo
     if (atq.ef.equinox) A = Math.max(atq.stats[1], atq.stats[3]); // Equinox: o menor sobe até o maior
     // Protosynthesis e parecidas: o maior atributo x1,3 (no clima).
     if (atq.ef.maiorMult && Math.max.apply(null, atq.stats.slice(1)) === (fisico ? atq.stats[1] : atq.stats[3])) A *= atq.ef.maiorMult;
@@ -1627,8 +1630,8 @@
       if (terreno === "psiquico" && prioAqui > 0 && aterradoDuelo(def)) prioAqui = 0; // Psychic Terrain barra prioridade
       if (def.ef.barraPrioridade && prioAqui > 0) prioAqui = 0; // Surprise! na névoa
       if (abreDef && def.ef.sempreResiste && efTipo > 0.5) efTipo = 0.5; // Color Change, Soothsayer
-      var fisico = g.cat === "F";
-      var A = ataqueNoDuelo(atq, g) * (fisico ? intim : assus);
+      var fisico = g.cat === "F", defF = g.defNaDef || (fisico && !g.defEspecial);
+      var A = ataqueNoDuelo(atq, g, def) * (fisico ? intim : assus);
       if (!fisico) A *= noTerrenoDuelo(atq, "spa");
       // Item de poder (tipo, Muscle Band, Punching Glove) entra no poder; o Life Orb, no dano final.
       A *= comItem((fisico ? itA.fisicoMult : itA.especialMult) * (itA.tipoMult[g.tipo] || 1) *
@@ -1638,13 +1641,13 @@
       if (abreDef && def.ef.semStabOutros && g.stab) A /= 1.5;
       var dv = def.ef.defesaPelaVelocidade;
       var dFis = def.stats[2] * def.ef.defMult, dEsp = def.stats[4] * def.ef.spdMult;
-      if (def.ef.maiorMult && Math.max.apply(null, def.stats.slice(1)) === def.stats[fisico && !g.defEspecial ? 2 : 4]) { if (fisico && !g.defEspecial) dFis *= def.ef.maiorMult; else dEsp *= def.ef.maiorMult; }
+      if (def.ef.maiorMult && Math.max.apply(null, def.stats.slice(1)) === def.stats[defF ? 2 : 4]) { if (defF) dFis *= def.ef.maiorMult; else dEsp *= def.ef.maiorMult; }
       var D = dv && dv.contato === g.contato && abreDef ? def.stats[5] * def.ef.speMult
-        : g.menorDefesa ? Math.min(dFis, dEsp) : (fisico && !g.defEspecial ? dFis : dEsp);
+        : g.menorDefesa ? Math.min(dFis, dEsp) : (defF ? dFis : dEsp);
       if (def.ef.defesaExtraVel && abreDef) D += def.stats[5] * def.ef.defesaExtraVel; // Sleek Scales
-      D *= noTerrenoDuelo(def, fisico && !g.defEspecial ? "def" : "spd"); // Grass Pelt, Flower Necklace
-      D *= comItem(fisico && !g.defEspecial ? itD.defMult : itD.spdMult, ativoD); // Eviolite
-      if (fisico && !g.defEspecial) D *= defNoClima; // Ice no granizo: +50% de Defesa
+      D *= noTerrenoDuelo(def, defF ? "def" : "spd"); // Grass Pelt, Flower Necklace
+      D *= comItem(defF ? itD.defMult : itD.spdMult, ativoD); // Eviolite
+      if (defF) D *= defNoClima; // Ice no granizo: +50% de Defesa
       else D *= spdNoClima; // Rock na areia: +50% de Sp. Def
       // Eternal Flower: as outras Megas perdem 20% dos atributos.
       if (atq.ef.contraMega < 1 && /Mega/.test(def.sp && def.sp.n || "")) D *= atq.ef.contraMega;
@@ -1833,10 +1836,11 @@
     regrasDasSubidas(foe, estDele, nele.pres);
     function porEstagio(atq, def, estAtq, estDef, g) {
       if (!g) return 1;
-      var fisico = g.cat === "F", f = 1;
-      if (!def.ef.ignoraEstagios) f *= multDoEstagio(estAtq[fisico ? "atk" : "spa"]);
-      if (!atq.ef.ignoraEstagios) f /= multDoEstagio(estDef[fisico && !g.defEspecial ? "def" : "spd"] * (1 - (atq.ef.ignoraDefesa || 0)));
-      var rDef = atq.ef.ruina[fisico && !g.defEspecial ? "def" : "spd"], rAtq = def.ef.ruina[fisico ? "atk" : "spa"];
+      var fisico = g.cat === "F", f = 1, defF = g.defNaDef || (fisico && !g.defEspecial);
+      if (g.fonteAtk === "alvoAtk") { if (!atq.ef.ignoraEstagios) f *= multDoEstagio(estDef.atk); } // Foul Play: o estágio de Atk é o do alvo
+      else if (!def.ef.ignoraEstagios) f *= multDoEstagio(estAtq[g.fonteAtk === "def" ? "def" : fisico ? "atk" : "spa"]);
+      if (!atq.ef.ignoraEstagios) f /= multDoEstagio(estDef[defF ? "def" : "spd"] * (1 - (atq.ef.ignoraDefesa || 0)));
+      var rDef = atq.ef.ruina[defF ? "def" : "spd"], rAtq = g.fonteAtk === "alvoAtk" ? 0 : def.ef.ruina[g.fonteAtk === "def" ? "def" : fisico ? "atk" : "spa"];
       if (rDef) f /= rDef;
       if (rAtq) f *= rAtq;
       if (atq.ef.bonusContraReduzido > 1) {

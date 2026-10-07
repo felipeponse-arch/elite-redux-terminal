@@ -1027,7 +1027,7 @@ export const MUTACOES = [
     id: "duelo-ignora-estagios",
     descricao: "estágios de atributo (Intrepid Sword, Stamina, Whiplash...) não entram no dano",
     arquivo: "duelo.js",
-    de: "if (!def.ef.ignoraEstagios) f *= multDoEstagio(estAtq[fisico ? \"atk\" : \"spa\"]);",
+    de: "else if (!def.ef.ignoraEstagios) f *= multDoEstagio(estAtq[g.fonteAtk === \"def\" ? \"def\" : fisico ? \"atk\" : \"spa\"]);",
     para: "",
   },
   {
@@ -1301,8 +1301,8 @@ export const MUTACOES = [
     id: "granizo-sem-defesa-ice",
     descricao: "Ice no granizo perde os +50% de Defesa",
     arquivo: "duelo.js",
-    de: "if (fisico && !g.defEspecial) D *= defNoClima;",
-    para: "if (fisico && !g.defEspecial) D *= 1;",
+    de: "if (defF) D *= defNoClima;",
+    para: "if (defF) D *= 1;",
   },
   {
     id: "nevoa-sem-reducao",
@@ -1516,5 +1516,26 @@ export const MUTACOES = [
     arquivo: "rank_da_run.js",
     de: "r.porDificuldade[r.rankDaDificuldade || \"party\"]",
     para: "r.porDificuldade.party",
+  },
+  {
+    id: "hits-def-vira-fisico",
+    descricao: "Psyshock/Secret Sword atacam com o Atk em vez do Sp. Atk",
+    arquivo: "duelo.js",
+    de: 'if (s === "PHYSICAL") return "F";',
+    para: 'if (s === "PHYSICAL" || s === "HITS_DEF") return "F";',
+  },
+  {
+    id: "foul-play-atk-proprio",
+    descricao: "Foul Play usa o Atk de quem ataca em vez do Atk do alvo",
+    arquivo: "duelo.js",
+    de: 'g.fonteAtk === "alvoAtk" ? def.stats[1] :',
+    para: 'false ? def.stats[1] :',
+  },
+  {
+    id: "body-press-atk-proprio",
+    descricao: "Body Press usa o Atk em vez da Def de quem ataca",
+    arquivo: "duelo.js",
+    de: ': g.fonteAtk === "def" ? atq.stats[2] :',
+    para: ': false ? atq.stats[2] :',
   },
 ];
