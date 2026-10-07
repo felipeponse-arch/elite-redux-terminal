@@ -1,62 +1,56 @@
 :root {
-  /* "Trilha Viva" - identidade escolhida em 2026-09-18 depois de 3
-     propostas comparadas lado a lado com o usuário (ver histórico da
-     sessão): mantém a atmosfera de jornada/trilha/descoberta da proposta
-     B, mas com uma paleta deliberadamente mais ousada (o usuário pediu
-     "mais disruptivo, mais moderno") - roxo-noite com magenta/ciano
-     bioluminescentes no lugar do bege+verde-trilha original. Light mode
-     segue a MESMA família de matiz (não é um tema à parte inventado). */
+  /* "Shiny" (paleta B) - escolhida pelo usuário em 2026-10-07 entre 3 protótipos
+     (estudo de 04/10, teste/estudo_paleta): preto, ouro e rubi do Rayquaza shiny,
+     no lugar da "Trilha Viva" (roxo-noite com magenta/ciano, de 2026-09-18), que
+     falhava contraste AA em 12 pares no tema claro. Valores de paletas.mjs
+     (sh_claro / sh_escuro), todos conferidos AA lá; o claro é a mesma família
+     de matiz em papel creme, não um tema à parte. */
   --banner-offset: 0px;
-  --bg: #f6f4fb;
+  --bg: #f6f4ec;
   --surface: #ffffff;
-  --surface-2: #ece8f7;
-  --surface-3: #e1daf0;
-  --border: #d9d0ec;
-  --text: #1c1730;
-  --text-dim: #6b5f8a;
-  --accent: #d6266f;
-  --accent-strong: #b81a5c;
-  --accent-ink: #fff7fb;
-  --accent-2: #0e9c86;
-  --sem-weak: #c23b3b;
-  --sem-resist: #1f8f5f;
+  --surface-2: #ebe8da;
+  --surface-3: #dcd8c4;
+  --border: #a9a38a;
+  --text: #17160f;
+  --text-dim: #585541;
+  --accent: #ac2438;
+  --accent-strong: #8c1a2c;
+  --accent-ink: #ffffff;
+  --accent-2: #a67c00;
+  --sem-weak: #a62235;
+  --sem-resist: #236a40;
   --sem-immune: #6b3fa0;
   /* Aviso ("atenção, falta algo"): âmbar, distinto do vermelho --sem-weak, que
      no app é fraqueza de tipo. Claro medido >= 4,5:1 sobre --surface, --surface-2 e
      --surface-3 (2026-10-03). */
-  --aviso: #855500;
-  /* Ângulo de foco/badges recalibrado pra nova paleta (2026-09-18),
-     mesma metodologia da auditoria de 2026-09-13 que criou este padrão
-     -safe: o ciano-escuro abaixo mede 5.1:1 como TEXTO sobre --surface
-     (WCAG AA 4.5:1 pra texto, 3:1 pra indicador não-textual como o
-     anel de foco) - o --accent-2 "vivo" (#0e9c86) fica só pra borda/
-     fundo/ícone, nunca como cor de texto puro. */
-  --focus: #0b7c6c;
-  --shadow: 0 10px 28px -14px rgb(28 23 48 / 0.28);
+  --aviso: #8a4a00;
+  /* Foco no claro: quase preto (anel de foco é indicador não-textual, 3:1; aqui passa
+     de 15:1). O --accent-2 (ouro #a67c00) NÃO serve como texto no claro (~3,4:1): fica
+     só pra borda/fundo/ícone; texto em ouro usa --badge-accent2 (#6e5000). */
+  --focus: #17160f;
+  --shadow: 0 10px 28px -14px rgb(23 22 15 / 0.28);
   /* Elevação (lote 3, 2026-10-04): dois degraus, os mesmos nomes nos 4 blocos de
      tema. No claro é sombra suave; no escuro a sombra some no fundo, então o degrau
      vira um fio de luz no topo (superfície um tom acima); no alto contraste, só
      contorno. --elev-1 = card em repouso; --elev-2 = o que flutua (aviso, menu). */
-  --elev-1: 0 1px 2px rgb(28 23 48 / 0.06), 0 1px 1px rgb(28 23 48 / 0.04);
-  --elev-2: 0 6px 16px -8px rgb(28 23 48 / 0.22), 0 1px 3px rgb(28 23 48 / 0.08);
-  --badge-text-dim: #58507a;
-  /* --accent (#d6266f) já mede 4.8:1 como texto sobre --surface branco -
-     ainda assim mantém uma variante -badge dedicada (mesmo padrão do
-     resto do arquivo) com um pouco mais de margem, pra sobreviver a
-     qualquer ajuste fino futuro do tom sem precisar re-auditar. */
-  --badge-accent: #c11f63;
-  --badge-accent2: #096b5c;
-  --badge-resist: #1c8156;
+  --elev-1: 0 1px 2px rgb(23 22 15 / 0.06), 0 1px 1px rgb(23 22 15 / 0.04);
+  --elev-2: 0 6px 16px -8px rgb(23 22 15 / 0.22), 0 1px 3px rgb(23 22 15 / 0.08);
+  --badge-text-dim: #4f4c39;
+  /* Variantes -badge = cor feita pra TEXTO (AA 4,5:1 sobre --surface, -2 e -3, medido
+     em paletas.mjs). O rubi --accent já passa como texto sobre --surface; a variante
+     dá margem pros fundos mais escuros. */
+  --badge-accent: #a0212f;
+  --badge-accent2: #6e5000;
+  --badge-resist: #1f6339;
   /* Cor por categoria de treinador (Chefões) - versões escurecidas pra
      valer como TEXTO no claro (mesmo método -safe usado acima: medido
      contra --surface-2, AA 4.5:1). "Lider de Ginasio"/"Campeao" reusam
-     --accent-2/--accent direto (já são -safe) - só as demais precisam
-     de token próprio. */
-  --cat-aqua: #2a68a6;
-  --cat-magma: #9c4720;
+     --badge-accent2/--badge-accent (ouro e rubi feitos pra texto). */
+  --cat-aqua: #245c94;
+  --cat-magma: #8f3f1b;
   --cat-frontier: #6f3fa8;
-  --cat-elite: #86680f;
-  --cat-super: #5f5f76;
+  --cat-elite: #6c5207;
+  --cat-super: #555b66;
   color-scheme: light;
 
   /* ---- Estrutura: igual em todos os temas (os blocos de tema abaixo não
@@ -113,32 +107,31 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0d0b1a;
-    --surface: #17132c;
-    --surface-2: #201a3f;
-    --surface-3: #291f52;
-    --border: #34285f;
-    --text: #f4effc;
-    --text-dim: #ab9ed4;
-    --accent: #ff4f9a;
-    --accent-strong: #ff7ab5;
-    --accent-ink: #1a0a14;
-    --accent-2: #33f0c8;
-    --sem-weak: #e5686a;
-    --sem-resist: #4fce93;
-    --sem-immune: #b28ce0;
-    --aviso: #f0b84a;
-    --focus: #33f0c8;
+    --bg: #0b0c09;
+    --surface: #151612;
+    --surface-2: #1e201a;
+    --surface-3: #292c23;
+    --border: #585c4a;
+    --text: #f6f4e8;
+    --text-dim: #b3b09b;
+    --accent: #ff5d70;
+    --accent-strong: #ff8e9b;
+    --accent-ink: #1a0509;
+    --accent-2: #f3c941;
+    --sem-weak: #ff7a86;
+    --sem-resist: #5fd694;
+    --sem-immune: #b9a2f2;
+    --aviso: #ffab4d;
+    --focus: #f3c941;
     --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
     --elev-1: inset 0 1px 0 rgb(255 255 255 / 0.04);
     --elev-2: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 8px 20px -10px rgb(0 0 0 / 0.6);
-    /* Dark mode's plain --accent/--accent-2 already clear AA as text
-       (magenta/ciano vivos sobre roxo quase preto) - sem precisar
-       escurecer nada aqui, mesmo raciocínio do padrão original. */
-    --badge-accent: #ff4f9a;
-    --badge-accent2: #33f0c8;
-    --badge-resist: #4fce93;
-    --badge-text-dim: #ab9ed4;
+    /* No escuro o rubi e o ouro vivos já passam AA como texto sobre o
+       preto, então as variantes -badge repetem os mesmos valores. */
+    --badge-accent: #ff5d70;
+    --badge-accent2: #f3c941;
+    --badge-resist: #5fd694;
+    --badge-text-dim: #b3b09b;
     --cat-aqua: #6fb0ff;
     --cat-magma: #ff8a5c;
     --cat-frontier: #c9a3f2;
@@ -148,29 +141,29 @@
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0d0b1a;
-  --surface: #17132c;
-  --surface-2: #201a3f;
-  --surface-3: #291f52;
-  --border: #34285f;
-  --text: #f4effc;
-  --text-dim: #ab9ed4;
-  --accent: #ff4f9a;
-  --accent-strong: #ff7ab5;
-  --accent-ink: #1a0a14;
-  --accent-2: #33f0c8;
-  --sem-weak: #e5686a;
-  --sem-resist: #4fce93;
-  --sem-immune: #b28ce0;
-  --aviso: #f0b84a;
-  --focus: #33f0c8;
+  --bg: #0b0c09;
+  --surface: #151612;
+  --surface-2: #1e201a;
+  --surface-3: #292c23;
+  --border: #585c4a;
+  --text: #f6f4e8;
+  --text-dim: #b3b09b;
+  --accent: #ff5d70;
+  --accent-strong: #ff8e9b;
+  --accent-ink: #1a0509;
+  --accent-2: #f3c941;
+  --sem-weak: #ff7a86;
+  --sem-resist: #5fd694;
+  --sem-immune: #b9a2f2;
+  --aviso: #ffab4d;
+  --focus: #f3c941;
   --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
   --elev-1: inset 0 1px 0 rgb(255 255 255 / 0.04);
   --elev-2: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 8px 20px -10px rgb(0 0 0 / 0.6);
-  --badge-accent: #ff4f9a;
-  --badge-accent2: #33f0c8;
-  --badge-resist: #4fce93;
-  --badge-text-dim: #ab9ed4;
+  --badge-accent: #ff5d70;
+  --badge-accent2: #f3c941;
+  --badge-resist: #5fd694;
+  --badge-text-dim: #b3b09b;
   --cat-aqua: #6fb0ff;
   --cat-magma: #ff8a5c;
   --cat-frontier: #c9a3f2;

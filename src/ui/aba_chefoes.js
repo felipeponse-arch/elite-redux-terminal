@@ -153,9 +153,9 @@
     "Equipe Magma": "var(--cat-magma)",
     "Equipe Magma (Admin)": "var(--cat-magma)",
     "Frontier Brain": "var(--cat-frontier)",
-    "Lider de Ginasio": "var(--accent-2)",
+    "Lider de Ginasio": "var(--badge-accent2)",
     "Alto Comando": "var(--cat-elite)",
-    "Campeao": "var(--accent)",
+    "Campeao": "var(--badge-accent)",
     "Superchefao": "var(--cat-super)",
     "Superchefao (Monotype)": "var(--cat-super)"
   };
