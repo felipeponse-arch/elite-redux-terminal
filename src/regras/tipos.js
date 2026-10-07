@@ -88,6 +88,7 @@
     195: { resist: { Water: 0.5 } },                        // Water Compaction
     199: { resist: { Fire: 0.5 } },                         // Water Bubble
     218: { resist: { Fire: 2 } },                           // Fluffy (FRAQUEZA a Fire, não resistência)
+    678: { resist: { Fire: 2 } },                           // Fluffiest (código = Fluffy: fogo x2, não x4)
     306: { resist: { Dark: 0.75, Fairy: 0.75 } },           // Nocturnal
     311: { resist: { Water: 2 } },                          // Liquified (fraqueza a Water)
     337: { resist: { Grass: 0.5 } },                        // Raw Wood

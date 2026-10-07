@@ -1539,6 +1539,20 @@ export const MUTACOES = [
     para: ': false ? atq.stats[2] :',
   },
   {
+    id: "fluffiest-contato-pelo-texto",
+    descricao: "Fluffiest segue o texto (contato x0,25) em vez do código do jogo (x0,5)",
+    arquivo: "duelo.js",
+    de: "if (/Quarters contact damage taken/i.test(t)) ef.reducao.contato *= 0.5;",
+    para: "if (/Quarters contact damage taken/i.test(t)) ef.reducao.contato *= 0.25;",
+  },
+  {
+    id: "fluffiest-sem-fraqueza-a-fogo",
+    descricao: "Fluffiest perde a fraqueza 2x a Fire do código do jogo",
+    arquivo: "tipos.js",
+    de: "678: { resist: { Fire: 2 } },",
+    para: "678: { resist: { Fire: 1 } },",
+  },
+  {
     id: "aviso-build-cap-sumiu",
     descricao: "a build com golpe acima do level cap deixa de ser avisada",
     arquivo: "avisos_build.js",

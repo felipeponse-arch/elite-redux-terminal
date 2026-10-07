@@ -1216,7 +1216,9 @@
         if ((y = f.match(/Takes ([\d.]+)x damage from (\w+?)s\b/i)) && tipoDoTextoDuelo(y[2])) ef.resistTipo[y[2]] = parseFloat(y[1]);
         if ((y = f.match(/Deals ([\d.]+)x damage to (\w+?)s\b/i)) && tipoDoTextoDuelo(y[2])) ef.vsTipo[y[2]] = parseFloat(y[1]);
       });
-      if (/Quarters contact damage taken/i.test(t)) ef.reducao.contato *= 0.25;
+      // Fluffiest (678): o texto diz "Quarters contact damage", mas o código do jogo (abilities.cc
+      // Impl<ABILITY_FLUFFIEST>, igual à Fluffy) faz contato x0,5 e fogo x2. Vale o código (decisão 07/10).
+      if (/Quarters contact damage taken/i.test(t)) ef.reducao.contato *= 0.5;
       // --- bônus por tipo/categoria (o 1º número é o fixo; "ou 1.5x com HP baixo" fica de fora) ---
       var reTipo = /Boosts (?:the power of )?([A-Za-z.]+?)(?:-type)?(?: and [\w-]+)? moves by ([\d.]+)x|Ups own (\w+) moves by ([\d.]+)x|(\w+)-type moves deal ([\d.]+)x damage/gi, mt;
       while ((mt = reTipo.exec(t))) {
