@@ -1,6 +1,6 @@
 # 19 — Poder que cresce ou golpe que carrega
 
-Status: pronto-para-agente
+Status: feito
 Bloqueado por: 06
 Agentes: playtester-de-build, meta-pokemon
 

@@ -66,6 +66,11 @@
     return !/desmaia|descansa no turno/i.test(MOVE_PT[id] || "");
   }
   // Efeito oficial que troca o atributo de ataque (battle_util.c CalcAttackStat): Foul Play usa o Atk do ALVO; Body Press, a Def do usuário.
+  // Poder que cresce (ticket 19; battle_util.c CalcMoveBasePower, EFFECT_MISC_HIT): o efeito vem do
+  // argumento do golpe no er-config, que o dado não traz - por isso pelo nome. Last Respects: +10 por
+  // aliado caído (gFaintedMonCount do lado); Rage Fist: +20 por vez que levou dano, até 6 (timesDamaged,
+  // por posição no time: vale a luta inteira); Psyblade: x1,5 no Electric Terrain, se quem usa está no chão.
+  var PODER_QUE_CRESCE_DUELO = { "Last Respects": "Last Respects", "Rage Fist": "Rage Fist", "Psyblade": "Psyblade" };
   var FONTE_DO_ATAQUE_DUELO = { "Foul Play": "alvoAtk", "Body Press": "def" };
   function categoriaNoDuelo(m, atk, spa) {
     var s = DATA.splits[m[2]];
@@ -1398,6 +1403,9 @@
       // Grupo do Fake Out não carrega - só vale no 1º turno (regra própria em danoNoDuelo).
       // O "Só funciona no primeiro turno" da tradução do First Impression caía no filtro de carga.
       if (cat && cat.ef === "Fake Out") return true;
+      // Electro Shot (ticket 19; battle_scripts_1.s BattleScript_EffectElectroShot): carrega um turno subindo
+      // +1 de Sp. Atk; na chuva dispara na hora. Accelerate e Power Herb também (twoturnmoveacceleratecheck).
+      if (cat && cat.ef === "Electro Shot") return clima === "chuva" || u.ef.cargaInstantanea || !!(u.it && u.it.cargaUmaVez);
       // Golpe de dois turnos: pela descrição ou pelo efeito "Semi Invulnerable" do dado
       // (o Rock Climb é "A charging attack" no NextDex, mas a tradução não diz - escapava).
       if (!/no primeiro turno|turno seguinte/i.test(MOVE_PT[id] || "") && !(cat && cat.ef === "Semi Invulnerable")) return true;
@@ -1409,6 +1417,7 @@
       // Hidden Power/Secret Power/Techno Blast (m[10]) usam o tipo do hpType de quem usa (só
       // chefão tem, bosses.json hpt); m[9] = 2º tipo do golpe (Muddy Water Ground/Water...).
       var tipo = m[10] && u.hpt ? u.hpt : TYPES[m[1]], hab = 1;
+      if (m[11] === "Electro Shot") hab *= multDoEstagio(u.ef.estagioMult || 1); // o +1 de Sp. Atk entra antes do dano
       var tipo2 = m[9] !== undefined && m[9] >= 0 ? TYPES[m[9]] : null;
       var conv = u.ef.converte[tipo];
       if (conv) { tipo = conv.para; hab *= conv.mult; }
@@ -1490,7 +1499,7 @@
       g.acertos = acertos;
       g.poder = poder;
       // Poder que vem de outra coisa (ticket 16): peso, velocidade ou nível - calculado no dano (poderVariavelDuelo).
-      g.poderVariavel = (typeof PODER_VARIAVEL !== "undefined" && PODER_VARIAVEL.golpes[id]) || null;
+      g.poderVariavel = (typeof PODER_VARIAVEL !== "undefined" && PODER_VARIAVEL.golpes[id]) || PODER_QUE_CRESCE_DUELO[m[0]] || null;
       // Custo e retorno por golpe: recuo (fração do dano causado; Rock Head anula),
       // custo em HP (Blood Price, Infernal Rage) e dreno (golpe + habilidade).
       g.recuo = extra && extra.rc && !u.ef.semRecuo ? extra.rc / 100 : 0;
@@ -1742,7 +1751,11 @@
   var PODER_ELECTRO_BALL = [40, 60, 80, 120, 150];
   function pesoDuelo(u) { return (typeof PODER_VARIAVEL !== "undefined" && u.sp && PODER_VARIAVEL.pesos[u.sp.i]) || 1; }
   function velocidadeBaseDuelo(u) { return Math.max(1, u.stats[5] * (u.ef.speMult || 1)); }
+  function poderDoDadoDuelo(nome) { return MOVES[MOVE_ID_BY_NAME[nome]][3]; }
   function poderVariavelDuelo(efeito, atq, def) {
+    if (efeito === "Last Respects") return poderDoDadoDuelo("Last Respects") + 10 * (atq.ef.aliadosCaidos || 0);
+    if (efeito === "Rage Fist") return poderDoDadoDuelo("Rage Fist") + 20 * Math.min(6, atq.ef.jaApanhou || 0);
+    if (efeito === "Psyblade") return CAMPO_DUELO && CAMPO_DUELO.terreno === "eletrico" && aterradoDuelo(atq) ? poderDoDadoDuelo("Psyblade") * 1.5 : poderDoDadoDuelo("Psyblade");
     if (efeito === "Low Kick") { var w = pesoDuelo(def); for (var i = 0; i < PESO_LOW_KICK.length; i++) if (PESO_LOW_KICK[i][0] > w) return PESO_LOW_KICK[i][1]; return 120; }
     if (efeito === "Heat Crash") return PODER_HEAT_CRASH[Math.min(PODER_HEAT_CRASH.length - 1, Math.floor(pesoDuelo(atq) / pesoDuelo(def)))];
     if (efeito === "Gyro Ball") return Math.min(150, Math.floor(25 * velocidadeBaseDuelo(def) / velocidadeBaseDuelo(atq)) + 1);
@@ -1783,6 +1796,12 @@
     if (g.efeito === "Hex") return 1 + STATUS_DO_HEX.reduce(function (mx, s) { return Math.max(mx, presNoAlvo[s] || 0); }, 0);
     // Infernal Parade, Bitter Malice, Barb Barrage (NextDex 2.65beta): "50% boost if target is statused".
     if (g.efeito === "Infernal Parade") return 1 + 0.5 * STATUS_DO_HEX.reduce(function (mx, s) { return Math.max(mx, presNoAlvo[s] || 0); }, 0);
+    // Rage Fist: +20 a cada golpe levado no duelo (até 6 no total) - na média dos golpes, o k-ésimo já levou k-1.
+    if (g.poderVariavel === "Rage Fist") {
+      var nR = Math.max(1, turnos || 1), ja = Math.min(6, u.ef.jaApanhou || 0), somaR = 0, base = poderDoDadoDuelo("Rage Fist"), p0 = base + 20 * ja;
+      for (var k = 0; k < nR; k++) somaR += base + 20 * Math.min(6, ja + k);
+      return somaR / nR / p0;
+    }
     if (g.efeito === "Eruption") {
       var n = Math.max(1, turnos || 1), soma = 0;
       for (var t = 0; t < n; t++) soma += Math.max(1 / 150, 1 - t * (danoQueLeva || 0) / u.stats[0]);
@@ -3338,8 +3357,8 @@
     var b = c.bonus, u = c.u;
     // Item gasto numa luta anterior (Sitrus, gema, Focus Sash...) não volta - Harvest guarda a baga.
     if (c.itemGasto && u.it && u.it.consumivel && !(u.ef.colheita && u.it.baga)) u = Object.assign({}, u, { item: "", it: itemDoDuelo("", null) });
-    if (u !== c.u && !Object.keys(b.estagios).length && !b.crit && b.mult === 1 && !b.semGolpe.length && !Object.keys(c.status).length) return u;
-    var temBonus = Object.keys(b.estagios).length || b.crit || b.mult !== 1 || b.semGolpe.length || b.imuneStatus || b.primeiroGolpe || c.vivosNoTime !== undefined;
+    if (u !== c.u && !Object.keys(b.estagios).length && !b.crit && b.mult === 1 && !b.semGolpe.length && !Object.keys(c.status).length && !c.caidosNoTime && !c.apanhou) return u;
+    var temBonus = Object.keys(b.estagios).length || b.crit || b.mult !== 1 || b.semGolpe.length || b.imuneStatus || b.primeiroGolpe || c.vivosNoTime !== undefined || c.caidosNoTime || c.apanhou;
     if (!temBonus && !Object.keys(c.status).length) return u;
     var ef = Object.assign({}, u.ef, { estagioEntrada: Object.assign({}, u.ef.estagioEntrada), critEstagio: u.ef.critEstagio + b.crit,
       atkMult: u.ef.atkMult * b.mult, spaMult: u.ef.spaMult * b.mult, spdMult: u.ef.spdMult * b.mult });
@@ -3347,6 +3366,8 @@
     if (b.imuneStatus) { ef.imuneStatus = Object.assign({}, u.ef.imuneStatus, b.imuneStatus); if (b.imuneStatus.quedas) ef.imuneQuedas = { atk: true, def: true, spa: true, spd: true, spe: true }; }
     if (b.primeiroGolpe) ef.primeiroTurnoMult = Math.max(ef.primeiroTurnoMult, b.primeiroGolpe); // Avenger
     if (c.vivosNoTime !== undefined) ef.lacaiosVivos = c.vivosNoTime;
+    if (c.caidosNoTime) ef.aliadosCaidos = c.caidosNoTime; // Last Respects
+    if (c.apanhou) ef.jaApanhou = c.apanhou; // Rage Fist
     Object.keys(b.estagios).forEach(function (k) { ef.estagioEntrada[k] = (ef.estagioEntrada[k] || 0) + b.estagios[k]; });
     var golpes = u.golpesProntos.filter(function (g) { return b.semGolpe.indexOf(g.nome) === -1; });
     return Object.assign({}, u, { ef: ef, statusInicial: c.status, golpesProntos: golpes.length ? golpes : u.golpesProntos });
@@ -3659,6 +3680,7 @@
         continue;
       }
       time.forEach(function (c) { c.vivosNoTime = time.filter(function (x) { return x.vivo; }).length - 1; }); // Minion Control
+      [time, deles].forEach(function (lado) { var caidos = lado.filter(function (x) { return !x.vivo; }).length; lado.forEach(function (c) { c.caidosNoTime = caidos; }); }); // Last Respects
       if (!atual || !atual.vivo) {
         var caiuAgora = !!atual;
         var vivos = time.filter(function (c) { return c.vivo; });
@@ -3714,10 +3736,11 @@
       if (perece && r.turnos > perece + 1) { atual.vivo = false; atual.frac = 0; f.vivo = false; f.frac = 0; }
       else if (r.venceu === true) {
         var custoFinal = custoDoGolpeFinalDuelo(comoEstaDuelo(atual), comoEstaDuelo(f), f.frac, nivel);
+        atual.apanhou = (atual.apanhou || 0) + Math.max(0, (r.turnos || 1) - 1); // Rage Fist: golpes levados ficam com ele
         atual.frac = r.fracEu - custoFinal; f.vivo = false; f.frac = 0; somaEstagios(atual.bonus.estagios, r.setupEu); nocaute(atual, f);
         if (atual.frac <= 0) { atual.frac = 0; atual.vivo = false; } // o recuo do nocaute derruba os dois
       }
-      else if (r.venceu === false) { f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; somaEstagios(f.bonus.estagios, r.setupEle); nocaute(f, atual); }
+      else if (r.venceu === false) { f.apanhou = (f.apanhou || 0) + Math.max(0, (r.turnos || 1) - 1); f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; somaEstagios(f.bonus.estagios, r.setupEle); nocaute(f, atual); }
       // Empate de velocidade: conta como derrota (o lado seguro), o dele fica com o HP que sobrou.
       else { f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; }
     }
