@@ -82,6 +82,16 @@
         return;
       }
       if (e.target && e.target.id === "boss-montar-time") { montarTimeContraEsteChefao(); return; }
+      var exportBtn = e.target && e.target.closest && e.target.closest(".boss-export-btn");
+      if (exportBtn) {
+        var chefe = BOSSES[bossState.selected];
+        var mon = chefe && chefe[bossState.diff || "party"] && chefe[bossState.diff || "party"][parseInt(exportBtn.dataset.idx, 10)];
+        var espe = mon && getSpeciesByX(mon.x);
+        if (!espe) return;
+        copyText(showdownSet(espe, { ability: mon.abi || "", item: mon.item || "", nature: mon.nat || "", evs: mon.evs || "", moves: (mon.mv || []).slice(0, 4) }), null, "");
+        flashToast("Set do " + mon.n + " copiado no formato Showdown");
+        return;
+      }
       var buildBtn = e.target && e.target.closest && e.target.closest(".use-boss-build-btn");
       if (buildBtn) {
         var boss = BOSSES[bossState.selected];
@@ -546,9 +556,10 @@
       abiHtml = '<div class="bm-row"><b>Habilidade:</b> ' + escapeHtml(m.abi || "?") + '</div>';
     }
     return '<div class="boss-mon-card">' +
-      '<div class="bm-head goto-species" tabindex="0" role="button" data-x="' + displayX + '" title="Ver na Dex">' + spriteImgHtml(displayX, displayName, 36) +
+      '<div class="bm-head goto-species" tabindex="0" role="button" data-x="' + displayX + '" title="Ver na Dex">' + spriteImgHtml(displayX, displayName, 48) +
       '<div><div class="bm-name">' + escapeHtml(displayName) + '</div>' +
       '<div class="bm-types">' + typesHtml + '</div></div></div>' +
+      '<div class="bm-set">' +
       transformNote +
       abiHtml +
       '<div class="bm-row"><b>Item:</b> ' + escapeHtml(m.item || "nenhum") + '</div>' +
@@ -564,9 +575,13 @@
       // player's own copy of that Pokemon holding the same item would
       // transform the same way. Only offered when the base species and
       // its raw EV/IV arrays actually resolve (same guard as statsHtml).
+      '<div class="bm-acoes">' +
       (sp && m.evsRaw && m.ivsRaw
-        ? '<button class="text-action-btn use-boss-build-btn" data-idx="' + idx + '" type="button" style="margin-top:8px;">+ Usar como meu build (' + escapeHtml(m.n) + ')</button>'
+        ? '<button class="text-action-btn use-boss-build-btn" data-idx="' + idx + '" type="button">+ Usar como meu build (' + escapeHtml(m.n) + ')</button>'
         : "") +
+      // Exportar (ticket 14): o set deste Pokémon no formato Showdown, pra colar onde quiser.
+      (sp ? '<button class="text-action-btn boss-export-btn" data-idx="' + idx + '" type="button">Exportar</button>' : "") +
+      '</div></div>' +
     '</div>';
   }
 
@@ -600,7 +615,8 @@
 
     document.getElementById("boss-detail").innerHTML =
       '<button class="back-btn" id="boss-back-to-list">&larr; Voltar para a lista</button>' +
-      '<div class="detail-head"><div class="detail-titles">' +
+      // Cabeçalho com a arte da equipe (ticket 14): só Aqua e Magma têm arte; os outros seguem sem fundo.
+      '<div class="detail-head' + (/Aqua/.test(boss.cat) ? ' chefao-heroi chefao-aqua' : /Magma/.test(boss.cat) ? ' chefao-heroi chefao-magma' : '') + '"><div class="detail-titles">' +
         '<h2>' + escapeHtml(boss.name) + '</h2>' +
         '<div class="detail-dexno mono">' + escapeHtml(nomeDaCategoriaDeChefao(boss.cat)) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +

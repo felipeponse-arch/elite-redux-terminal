@@ -125,8 +125,8 @@
   padding: 2px 8px;
   white-space: nowrap;
 }
-.boss-mon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-.boss-mon-card { background: var(--surface-2); border-radius: var(--radius-md); padding: 10px 12px; }
+.boss-mon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+.boss-mon-card { background: var(--surface-2); border-radius: var(--radius-md); padding: 10px 12px; display: grid; grid-template-columns: 104px 1fr; column-gap: 12px; align-items: start; }
 /* Matriz "Confronto com o seu time" (2026-09-24, motor src/regras/confronto.js).
    A cor só reforça: o significado de cada célula vai SEMPRE no símbolo e no
    texto acessível, e o texto usa var(--text) sobre um tint leve, então o
@@ -166,7 +166,7 @@
 .cf-plan li { margin-bottom: 5px; }
 .cf-plan-meta { color: var(--text-dim); cursor: help; }
 .cf-plan-warn { color: var(--text); }
-.boss-mon-card .bm-head { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
+.boss-mon-card .bm-head { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; }
 .boss-mon-card .bm-name { font-weight: 700; font-size: var(--fs-destaque); margin-bottom: 4px; }
 .boss-mon-card .bm-types { display: flex; gap: 5px; }
 .boss-mon-card .bm-row { font-size: var(--fs-pequeno); color: var(--text-dim); line-height: 1.5; }
@@ -199,3 +199,25 @@
   border-style: dashed;
   text-align: center;
 }
+/* Tela do chefão (ticket 14, paleta Shiny). Card no estilo Hohou: o Pokémon à esquerda e o set à direita;
+   em card estreito (celular) volta a empilhar. */
+.boss-mon-card .bm-set { min-width: 0; }
+.bm-acoes { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+@media (max-width: 420px) {
+  .boss-mon-grid { grid-template-columns: 1fr; }
+  .boss-mon-card { grid-template-columns: 1fr; }
+  .boss-mon-card .bm-head { flex-direction: row; align-items: center; margin-bottom: 7px; }
+}
+/* Cabeçalho com a arte da equipe (Aqua/Magma; app privado - arte oficial). */
+.chefao-heroi {
+  position: relative; border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden;
+  padding: var(--space-6) var(--space-5) var(--space-5); min-height: 140px; display: flex; align-items: flex-end;
+  background-size: cover; background-repeat: no-repeat;
+}
+.chefao-heroi::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 75%, transparent) 50%, transparent 100%);
+}
+.chefao-heroi > * { position: relative; }
+.chefao-aqua { background-image: url("__ARTE_AQUA_DATAURI__"); background-position: 60% 30%; }
+.chefao-magma { background-image: url("__ARTE_MAGMA_DATAURI__"); background-position: 50% 25%; }

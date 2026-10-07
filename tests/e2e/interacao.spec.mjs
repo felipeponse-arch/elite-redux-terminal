@@ -216,3 +216,18 @@ test("ficha: próximo segue a lista filtrada; TOTAL e faixas de efetividade apar
   await expect(page.locator("#species-detail h2")).toHaveText("Charizard Mega X");
   await expect(page.locator(".ficha-nav-btn")).toHaveCount(2);
 });
+
+// Ticket 14 (07/10/2026): cada Pokémon do chefão tem "Exportar" (set no formato Showdown) e o cabeçalho da
+// Equipe Aqua/Magma ganha a arte da equipe.
+test("chefão: Exportar copia o set no formato Showdown; Aqua tem cabeçalho com arte", async ({ page }) => {
+  await abrirApp(page);
+  await abrirAba(page, "bosses");
+  await page.locator("#boss-list .species-row", { hasText: "Archie Slateport" }).first().click();
+  await expect(page.locator("#boss-detail .detail-head.chefao-aqua")).toHaveCount(1);
+  await page.evaluate(() => { window.__copiado = null; navigator.clipboard.writeText = (t) => { window.__copiado = t; return Promise.resolve(); }; });
+  await page.locator(".boss-export-btn").first().click();
+  await expect.poll(() => page.evaluate(() => window.__copiado)).toContain("Crobat @ Black Sludge");
+  const texto = await page.evaluate(() => window.__copiado);
+  expect(texto).toMatch(/Ability: Tinted Lens/);
+  expect(texto).toMatch(/- Dual Wingbeat/);
+});
