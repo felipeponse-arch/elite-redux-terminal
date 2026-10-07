@@ -46,7 +46,9 @@
     var clean = stripNote(item);
     var desc = clean && (ITEM_PT[clean] || ITEM_DESC[clean]);
     if (!desc) return "";
-    return '<div class="ts-item-desc"><b>' + escapeHtml(clean) + ':</b> ' + escapeHtml(desc) + '</div>';
+    var onde = ondeAcharItemTexto(clean); // ticket 07: onde achar na run
+    return '<div class="ts-item-desc"><b>' + escapeHtml(clean) + ':</b> ' + escapeHtml(desc) +
+      (onde ? '<br><span class="ts-item-onde">Onde achar: ' + escapeHtml(onde) + '</span>' : '') + '</div>';
   }
 
   // Shared by buildHistoryHtml and bossReferenceHtml below - same entry

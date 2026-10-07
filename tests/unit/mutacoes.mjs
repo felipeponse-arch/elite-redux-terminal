@@ -1636,4 +1636,18 @@ export const MUTACOES = [
     de: "if (e[k]) r.estagiosGanhos[k] = e[k] * mult;",
     para: "if (e[k]) r.estagiosGanhos[k] = 0;",
   },
+  {
+    id: "item-tardio-so-mega",
+    descricao: "o aviso de item que só sai depois volta a valer só para pedra Mega",
+    arquivo: "avisos_build.js",
+    de: "if (achar && state.settings.milestone < achar.etapa) {",
+    para: "if (false) {",
+  },
+  {
+    id: "item-tardio-conta-sem-etapa",
+    descricao: "lugar sem etapa (fora da run) conta como o primeiro lugar do item",
+    arquivo: "avisos_build.js",
+    de: "return lista.filter(function (x) { return x.etapa !== null; })[0] || null;",
+    para: "return lista[0] ? { etapa: 99, local: lista[0].local, como: lista[0].como } : null;",
+  },
 ];

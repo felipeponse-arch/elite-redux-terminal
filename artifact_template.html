@@ -473,6 +473,7 @@
 <script id="bossbuilds" type="application/json">__BOSS_BUILDS_JSON__</script>
 <script id="howtoobtain" type="application/json">__HOW_TO_OBTAIN_JSON__</script>
 <script id="itemdesc" type="application/json">__ITEM_DESC_JSON__</script>
+<script id="ondeacharitens" type="application/json">__ONDE_ACHAR_ITENS_JSON__</script>
 <script id="itempt" type="application/json">__ITEM_PT_JSON__</script>
 <script id="speciesrank" type="application/json">__SPECIES_RANK_JSON__</script>
 <script id="speciesrole" type="application/json">__SPECIES_ROLE_JSON__</script>
@@ -595,6 +596,8 @@
   // commit). Cobre 821 dos 929 itens (TMs/HMs não têm descrição própria,
   // só ensinam o golpe).
   var ITEM_DESC = JSON.parse(document.getElementById("itemdesc").textContent || "{}");
+  // Onde achar cada item e a partir de qual etapa (ticket 07; scripts/gerar_onde_achar_itens.mjs).
+  var ONDE_ACHAR_ITENS = JSON.parse(document.getElementById("ondeacharitens").textContent || "{}");
   // Tradução PT-BR (mesmo padrão de ABILITY_PT/MOVE_PT) - 818 dos 818 itens
   // traduzidos, sem exceção (regra do projeto: tudo em português, nomes
   // próprios de espécie/golpe/tipo/item continuam em inglês, igual nas

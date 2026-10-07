@@ -1,6 +1,6 @@
 # 07 — Partes do código do jogo nunca lidas
 
-Status: pronto-para-agente
+Status: resolvido
 Bloqueado por: nenhum
 Agentes: arquiteta-de-dados
 
@@ -11,3 +11,7 @@ spreads dos treinadores conferidos contra o `bosses.json`.
 
 ## Como verificar
 Teste de que todo item com local no código aparece no "Como conseguir"; diferenças registradas.
+
+## Comentários
+
+07/10: item no chão, escondidos, presentes, Pokémon de presente com item, lojas (inclusive por insígnia) e troca por BP lidos; data/onde_achar_itens.json (450 itens) com etapa pelo resolvedor único (extraído para scripts/etapa_do_mapa.mjs). Na build: "Onde achar" e aviso de item tardio geral. trainer_spreads.h: irrelevante para os chefões (EVs explícitos). trainers.inc: só textos.

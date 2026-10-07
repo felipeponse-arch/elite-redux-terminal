@@ -30,6 +30,7 @@ declare var GYM_SKILLS: any;
 declare var ABILITY_PT: Record<string, string>;
 /** Descrição de item do próprio jogo (data/item_descriptions.json), por nome. */
 declare var ITEM_DESC: Record<string, string>;
+declare var ONDE_ACHAR_ITENS: Record<string, { etapa: number | null; local: string; como: string }[]>;
 /** Mono run: por tipo, desde qual etapa dá pra pegar cada espécie (data/mono_disponibilidade.json). */
 declare var MONO_DISP: any;
 /** Categoria de golpe (soco, mordida, corte...) e chance de efeito extra, por id (data/move_categorias.json). */

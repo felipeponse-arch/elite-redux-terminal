@@ -21,6 +21,13 @@
       if (state.settings.milestone < etapa) {
         out.push({ tipo: "item-tardio", texto: build.item + " só sai a partir da " + (ROTULO_ETAPA_MEGA[etapa] || "etapa " + etapa) + "." });
       }
+    } else if (build.item) {
+      // Qualquer outro item (ticket 07): a etapa mais cedo em que o código do jogo o entrega. Sem local
+      // conhecido na run (só Battle Frontier, Pickup, troca...) não avisa: o dado não basta para afirmar.
+      var achar = primeiroLugarDoItem(build.item);
+      if (achar && state.settings.milestone < achar.etapa) {
+        out.push({ tipo: "item-tardio", texto: build.item + " só aparece a partir da " + rotuloDaEtapaDoItem(achar.etapa) + " (" + achar.local + ", " + achar.como + ")." });
+      }
     }
     // 3. Habilidade que depende de clima/terreno que nem a criatura, nem a build, nem o time arma.
     var ativas = nomesDeHabilidades(sp.inn).concat(build.ability ? [build.ability] : []);
@@ -61,4 +68,18 @@
     else if (build.fonte) s = SELOS_POR_FONTE[build.fonte] || { nivel: "relato", rotulo: "fonte " + build.fonte };
     if (!s) return null;
     return { nivel: s.nivel, rotulo: s.rotulo, simbolo: SELO_SIMBOLO[s.nivel], nome: SELO_NOME[s.nivel], explica: SELO_EXPLICA[s.nivel] };
+  }
+
+  // Onde achar um item na run (ticket 07; data/onde_achar_itens.json, gerado do código oficial do jogo).
+  // primeiroLugarDoItem: o lugar de etapa mais cedo (ignora os sem etapa); null = sem lugar com etapa.
+  function primeiroLugarDoItem(nome) {
+    var lista = (typeof ONDE_ACHAR_ITENS !== "undefined" && ONDE_ACHAR_ITENS[nome]) || [];
+    return lista.filter(function (x) { return x.etapa !== null; })[0] || null;
+  }
+  function rotuloDaEtapaDoItem(e) { return e === 0 ? "saída (antes da 1ª insígnia)" : e + "ª insígnia"; }
+  // Texto curto para a descrição do item na build: até 2 lugares, do mais cedo ao mais tarde.
+  function ondeAcharItemTexto(nome) {
+    var lista = ((typeof ONDE_ACHAR_ITENS !== "undefined" && ONDE_ACHAR_ITENS[nome]) || []).slice(0, 2);
+    if (!lista.length) return "";
+    return lista.map(function (x) { return x.local + " (" + x.como + (x.etapa === null ? ", fora da run" : ", a partir da " + rotuloDaEtapaDoItem(x.etapa)) + ")"; }).join("; ");
   }

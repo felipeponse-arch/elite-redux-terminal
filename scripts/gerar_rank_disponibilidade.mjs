@@ -17,6 +17,7 @@ import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 
+import { criarEtapaDoMapa } from "./etapa_do_mapa.mjs";
 const repo = process.argv[2];
 if (!repo || !existsSync(repo)) { console.error("uso: node scripts/gerar_rank_disponibilidade.mjs <er-repo>"); process.exit(2); }
 const R = carregarRegras();
@@ -24,7 +25,6 @@ const mono = JSON.parse(readFileSync("data/mono_disponibilidade.json", "utf8"));
 const caps = JSON.parse(readFileSync("data/levelcaps.json", "utf8")).rows;
 const POS_JOGO = caps.length - 1; // última etapa: depois da Liga, nenhuma luta da run cobre
 
-const chave = (t) => t.replace(/\(.*?\)/g, "").replace(/^MAP_/, "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
 const etapa = {};
 const origem = {};
 // todas as evidências diretas de cada espécie (auditoria; conflito = fontes que discordam)
@@ -42,33 +42,17 @@ const marcar = (sname, e, de) => {
 };
 
 // 1. planilha + tabela local -> etapa (sem as entradas DexNav, que são sempre a última etapa)
-const etapaDoLocal = {};
 for (const lista of Object.values(mono.porTipo)) {
-  for (const e of lista) {
-    marcar(e.s, e.e, "planilha: " + e.l);
-    if (/dexnav/i.test(e.l)) continue;
-    const k = chave(e.l);
-    if (etapaDoLocal[k] === undefined || e.e < etapaDoLocal[k]) etapaDoLocal[k] = e.e;
-  }
+  for (const e of lista) marcar(e.s, e.e, "planilha: " + e.l);
 }
 
 // Regras com fonte citada (equipamento, vara por vaga, mapas pela história): data/disponibilidade_regras.json
 const REGRAS = JSON.parse(readFileSync("data/disponibilidade_regras.json", "utf8"));
-const etapaDaRegra = (v) => (v === "pos-jogo" ? POS_JOGO : v);
-const HISTORIA = Object.fromEntries(Object.entries(REGRAS.mapasPelaHistoria).filter(([k]) => k !== "nota").map(([k, v]) => [k, etapaDaRegra(v)]));
 const EQUIP = Object.fromEntries(Object.entries(REGRAS.equipamento).map(([k, v]) => [k, v.etapa]));
 const varaDaVaga = (vaga) => ["oldRod", "goodRod", "superRod"].find((v) => REGRAS.varaDaVaga[v].includes(vaga)) || "superRod";
 
-// Resolvedor único de mapa -> etapa: nome exato na planilha, depois o prefixo conhecido mais
-// longo (ROUTE111SUNHOLLOWRUINS -> ROUTE111), depois a ordem da história. undefined = sem etapa.
-function etapaDoMapa(nome) {
-  const k = chave(nome || "");
-  if (etapaDoLocal[k] !== undefined) return etapaDoLocal[k];
-  const pref = Object.keys(etapaDoLocal).filter((p) => p.length >= 6 && k.startsWith(p)).sort((a, b) => b.length - a.length)[0];
-  if (pref) return etapaDoLocal[pref];
-  const h = Object.keys(HISTORIA).find((p) => k.startsWith(p));
-  return h ? HISTORIA[h] : undefined;
-}
+// Resolvedor único de mapa -> etapa (planilha, prefixo, história): scripts/etapa_do_mapa.mjs.
+const etapaDoMapa = criarEtapaDoMapa(mono, REGRAS, POS_JOGO);
 // equipamento que o tipo de encontro exige (Surf na água, Rock Smash na pedra, vara na pesca)
 function exigencia(campo, vaga) {
   if (campo === "water_mons") return { e: EQUIP.surf, como: " (Surf)" };
