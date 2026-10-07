@@ -40,6 +40,13 @@ pasta de saída por sessão: resolve o atropelo da suíte, mas não o das ediç�
 segunda verificação simultânea termina em menos de 1 s com "Outra sessão já está
 verificando".
 
+**Atualização 2026-10-07.** Esta ADR só entrou no master em 07/10 (ticket 01). Nesse meio
+tempo, em 06/10, cinco sessões na mesma pasta repetiram o problema: commits por índice
+separado e hook falhando à toa. A partir de 07/10 a unidade de trabalho é o **ticket**
+(`docs/tickets/`): um worktree por ticket (`.claude/worktrees/ticket-NN`, branch `ticket/NN`),
+merge `--ff-only` no master e limpeza com a junção apagada ANTES do `git worktree remove`.
+O passo a passo está em `docs/agents/issue-tracker.md`.
+
 ---
 
 ## ADR-002 - Dado derivado: no script quando compara espécies, no app quando depende da run

@@ -8,5 +8,6 @@ Contexto único (um vocabulário para o app inteiro).
 - `docs/decisoes_mecanicas.md`: faz o papel das ADRs. Toda decisão de mecânica do jogo (golpe, habilidade,
   clima, rank) com fonte e data. Ler as linhas da área que vai mexer; nunca reinterpretar uma decisão registrada.
 
-Não existe `docs/adr/`. Se uma decisão de arquitetura (não de mecânica) for difícil de reverter, surpreendente e
-fruto de uma escolha real, criar `docs/adr/` nessa hora, não antes.
+- `docs/decisoes_arquitetura.md`: as ADRs de arquitetura (worktree por sessão/ticket, dado derivado, rank lido por
+  uma função, fronteira regras/tela). Decisão nova de arquitetura difícil de reverter, surpreendente e fruto de uma
+  escolha real entra lá como ADR-00N.
