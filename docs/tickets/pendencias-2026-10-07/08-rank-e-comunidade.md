@@ -1,7 +1,7 @@
 # 08 — Rank × comunidade, builds dos vídeos e pedras sem fonte
 
 Status: pronto-para-agente
-Bloqueado por: 03, 05, 06
+Bloqueado por: 03, 05, 16, 17, 18, 19
 Agentes: meta-pokemon
 
 ## O que entrega

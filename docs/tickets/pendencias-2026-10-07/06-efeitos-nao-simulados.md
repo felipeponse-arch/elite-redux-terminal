@@ -1,6 +1,6 @@
 # 06 — Golpes e habilidades que o motor ainda não simula
 
-Status: a-avaliar (grande: dividir em tickets menores depois da triagem)
+Status: resolvido
 Bloqueado por: nenhum
 Agentes: playtester-de-build, meta-pokemon
 
@@ -12,3 +12,7 @@ passa a contar o campo `recuperaItem` do Retriever.
 
 ## Como verificar
 Cada efeito modelado com teste + sabotagem; lista travada pelo teste do auditor atualizada.
+
+## Comentários
+
+07/10: triagem feita. O auditor lista 54 efeitos por nome, mas a maioria já é coberta por dado (recuo extra.rc, dreno, chance de status pela descrição) ou quase não é usada. Viraram tickets (escolha do usuário): 16 poder variável, 17 drench, 18 setup/troca forçada, 19 poder que cresce. Ficam NÃO modelados (motivo no auditor): hazard/Tailwind ao acertar (Stone Axe, Needle Arm, Bleakwind Storm), Defog, golpes de 0-3 usos, e as 9 habilidades de HABILIDADES_SEM_REGRA.
