@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 import { cpus } from "node:os";
 import { Worker, isMainThread, parentPort, workerData } from "node:worker_threads";
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
+import { melhoresPelaSoma, notaDosEixos, escolherPelaNotaFinal } from "./rank_escolha.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const R = carregarRegras({ milestone: 9 });
@@ -79,37 +80,41 @@ function avaliar(sp) {
     const nivelRef = cobertas[Math.floor(cobertas.length / 2)].nivel;
     const todosFoes = cobertas.flatMap((l) => l.foes);
     const golpes = R.golpesDeDueloAte(sp, nivelRef);
-    let melhor = null;
+    const candidatos = [];
     for (const set of R.SETS_DE_DUELO) {
       for (const ab of R.uniqueIds(sp.ab || []).length ? R.uniqueIds(sp.ab) : [null]) {
         const u = R.unidadeDeDuelo(sp, set, ab, nivelRef, golpes, null);
         let s = 0;
         for (const f of todosFoes) s += R.resultadoDoDuelo(u, f, nivelRef);
-        if (!melhor || s > melhor.s) melhor = { s, set, ab, u };
+        candidatos.push({ s, set, ab, u });
       }
     }
-    // Potencial: o 4º espaço pode virar golpe de status (mesma escolha do montador de time).
-    // Viabilidade: só os 4 golpes de dano, sem planos de status/setup.
-    const dano = R.quatroGolpesDeDano(melhor.u, todosFoes, nivelRef);
-    const comStatus = R.comQuatroGolpes({ set: melhor.set.nome, unidade: melhor.u }, sp, todosFoes, nivelRef, null);
-    const receita = (comStatus && comStatus.unidade.receita) || { golpes: dano, status: [] };
-    const montar = (l, golpes, status) => {
-      const u = R.unidadeDeDuelo(sp, melhor.set, melhor.ab, l.nivel, golpes, null);
-      u.statusIds = (u.statusIds || []).filter((id) => status.indexOf(id) !== -1);
-      return u;
-    };
-    const eixos = {};
-    for (const [eixo, golpes, status, opc] of [
-      ["potencial", receita.golpes, receita.status, { detalhe: true }],
-      ["viabilidade", dano, [], { detalhe: true, semPlanos: true }]
-    ]) {
-      eixos[eixo] = cobertas.map((l) => {
-        const u = montar(l, golpes, status);
-        return { luta: l.nome, brs: l.foes.map((f) => br(R.resultadoDoDuelo(u, f, l.nivel, opc))) };
-      });
-    }
-    const quatro = receita.golpes, statusEscolhido = receita.status;
-    out[d.chave] = { set: melhor.set.nome, ab: melhor.u.ab, golpes: quatro.concat(statusEscolhido).map((id) => R.MOVES[id][0]), eixos };
+    // Os melhores pela soma rápida são avaliados por inteiro (rank_escolha.mjs).
+    const avaliados = melhoresPelaSoma(candidatos).map((melhor) => {
+      // Potencial: o 4º espaço pode virar golpe de status (mesma escolha do montador de time).
+      // Viabilidade: só os 4 golpes de dano, sem planos de status/setup.
+      const dano = R.quatroGolpesDeDano(melhor.u, todosFoes, nivelRef);
+      const comStatus = R.comQuatroGolpes({ set: melhor.set.nome, unidade: melhor.u }, sp, todosFoes, nivelRef, null);
+      const receita = (comStatus && comStatus.unidade.receita) || { golpes: dano, status: [] };
+      const montar = (l, golpes, status) => {
+        const u = R.unidadeDeDuelo(sp, melhor.set, melhor.ab, l.nivel, golpes, null);
+        u.statusIds = (u.statusIds || []).filter((id) => status.indexOf(id) !== -1);
+        return u;
+      };
+      const eixos = {};
+      for (const [eixo, golpes, status, opc] of [
+        ["potencial", receita.golpes, receita.status, { detalhe: true }],
+        ["viabilidade", dano, [], { detalhe: true, semPlanos: true }]
+      ]) {
+        eixos[eixo] = cobertas.map((l) => {
+          const u = montar(l, golpes, status);
+          return { luta: l.nome, brs: l.foes.map((f) => br(R.resultadoDoDuelo(u, f, l.nivel, opc))) };
+        });
+      }
+      const quatro = receita.golpes, statusEscolhido = receita.status;
+      return { nota: notaDosEixos(eixos), r: { set: melhor.set.nome, ab: melhor.u.ab, golpes: quatro.concat(statusEscolhido).map((id) => R.MOVES[id][0]), eixos } };
+    });
+    out[d.chave] = escolherPelaNotaFinal(avaliados).r;
   }
   return out;
 }

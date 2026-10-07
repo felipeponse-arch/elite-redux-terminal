@@ -1,6 +1,6 @@
 # 08 — Rank × comunidade, builds dos vídeos e pedras sem fonte
 
-Status: pronto-para-agente
+Status: em-andamento
 Bloqueado por: 03, 05, 16, 17, 18, 19
 Agentes: meta-pokemon
 
@@ -12,3 +12,6 @@ Mega Redux Garchomp com Swords Dance + Last Respects, Wooly Worm com Assault Ves
 
 ## Como verificar
 Comparação antes/depois anexada ao ticket; builds novas passam no `validar_dados.mjs`.
+
+## 07/10
+Rank recalculado com os tickets 02-19 e com a escolha de set corrigida (3 candidatos avaliados por inteiro). Falta: comparar com a comunidade (físicos fortes), nota de cobertura/suporte, Zarude, Floettite/Dragoninite Y e as builds dos vídeos.

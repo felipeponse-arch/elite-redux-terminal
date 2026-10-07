@@ -1804,4 +1804,25 @@ export const MUTACOES = [
     de: "if (m[11] === \"Electro Shot\") hab *= multDoEstagio(u.ef.estagioMult || 1);",
     para: "if (false) hab *= 1;",
   },
+  {
+    id: "rank-so-o-primeiro-da-soma",
+    descricao: "rank volta a ficar só com o 1º set da soma rápida",
+    arquivo: "rank_escolha.mjs",
+    de: "export const CANDIDATOS_DO_RANK = 3;",
+    para: "export const CANDIDATOS_DO_RANK = 1;",
+  },
+  {
+    id: "rank-ignora-nota-final",
+    descricao: "entre os candidatos, o rank fica com o 1º em vez do de maior nota final",
+    arquivo: "rank_escolha.mjs",
+    de: "(!m || a.nota > m.nota ? a : m)",
+    para: "(!m ? a : m)",
+  },
+  {
+    id: "rank-escolha-so-potencial",
+    descricao: "a escolha do set olha só o eixo de potencial",
+    arquivo: "rank_escolha.mjs",
+    de: "return Math.sqrt(Math.max(0, mediaDoEixo(eixos.potencial)) * Math.max(0, mediaDoEixo(eixos.viabilidade)));",
+    para: "return mediaDoEixo(eixos.potencial);",
+  },
 ];
