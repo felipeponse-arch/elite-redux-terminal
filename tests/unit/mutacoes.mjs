@@ -1587,4 +1587,32 @@ export const MUTACOES = [
     de: "s = { nivel: \"relato\", rotulo: \"gerada por IA\" }",
     para: "s = { nivel: \"confirmado\", rotulo: \"gerada por IA\" }",
   },
+  {
+    id: "ia-chefao-usa-maior-dano",
+    descricao: "o lado do chefão volta a usar o golpe de mais dano em vez da escolha da IA",
+    arquivo: "duelo.js",
+    de: "function comoIADuelo(r) { return r && r.ia && r.ia !== r.melhor ? Object.assign({}, r, { melhor: r.ia }) : r; }",
+    para: "function comoIADuelo(r) { return r; }",
+  },
+  {
+    id: "ia-chefao-sem-bonus-super-efetivo",
+    descricao: "a IA do chefão não soma pontos por golpe super efetivo",
+    arquivo: "duelo.js",
+    de: "if (c.efTipo >= 4) p += 4; else if (c.efTipo >= 2) p += 2;",
+    para: "if (c.efTipo >= 4) p += 0;",
+  },
+  {
+    id: "ia-chefao-sem-golpe-fraco",
+    descricao: "a IA do chefão não desconta o golpe muito mais fraco que o melhor",
+    arquivo: "duelo.js",
+    de: "else if ((melhorLim - lim(c)) * 100 / hp > 30) p -= 1;",
+    para: "else if ((melhorLim - lim(c)) * 100 / hp > 30) p -= 0;",
+  },
+  {
+    id: "ia-chefao-ignora-nocaute",
+    descricao: "a IA do chefão não dá prioridade ao golpe que nocauteia",
+    arquivo: "duelo.js",
+    de: "return antes || c.prio > 0 ? 4 : 2;",
+    para: "return 0;",
+  },
 ];

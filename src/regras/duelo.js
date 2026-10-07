@@ -1577,7 +1577,7 @@
     if (def.ef.bloqueiaArea && (atq.golpesProntos || []).some(emAreaDuelo)) {
       atq = Object.assign({}, atq, { golpesProntos: atq.golpesProntos.filter(function (g) { return !emAreaDuelo(g); }) });
     }
-    var melhor = { dano: 0, prio: 0, golpe: null }, melhorPrio = { dano: 0 }, segundo = { dano: 0 };
+    var melhor = { dano: 0, prio: 0, golpe: null }, melhorPrio = { dano: 0 }, segundo = { dano: 0 }, candidatos = [];
     var semBonus = def.ef.bloqueiaBonus && !atq.ef.quebraHabilidade;
     var amuleto = atq.it && atq.it.imuneQuedas; // Clear Amulet
     var intim = def.ef.intimida && !atq.ef.imuneIntimida && !amuleto ? 2 / (2 + def.ef.intimida) : 1;
@@ -1686,11 +1686,42 @@
       if (g.efeito === "Fake Out" && dano > 0) dano /= Math.min(6, golpesNecessariosDuelo(def.stats[0], dano));
       // Segundo melhor golpe (outro golpe): o que sobra com Disable/Torment.
       if (dano > melhor.dano) { if (melhor.golpe) segundo = { dano: melhor.dano }; } else if (dano > segundo.dano) segundo = { dano: dano };
-      if (dano > melhor.dano) melhor = { dano: dano, prio: prioAqui, golpe: g, efTipo: efTipo, crit: crit, razaoMenorDef: razaoMenorDef };
+      var este = { dano: dano, prio: prioAqui, golpe: g, efTipo: efTipo, crit: crit, razaoMenorDef: razaoMenorDef };
+      if (dano > 0) candidatos.push(este);
+      if (dano > melhor.dano) melhor = este;
       if (prioAqui > 0 && dano > melhorPrio.dano) melhorPrio = { dano: dano };
     });
-    return { melhor: melhor, melhorPrio: melhorPrio, segundo: segundo };
+    return { melhor: melhor, melhorPrio: melhorPrio, segundo: segundo, ia: escolhaDaIADuelo(candidatos, atq, def) || melhor };
   }
+  // Escolha de golpe da IA dos treinadores (ticket 03, 07/10; código oficial battle_ai_main.c AI_TryToFaint e
+  // battle_ai_util.c GetMoveDamageResult). Pontos por golpe de dano: nocauteia = +4 se age antes (ou tem
+  // prioridade), senão +2; não nocauteia = super efetivo +2 (x4: +4), crítico alto +2, o de mais dano +1 e "fraco"
+  // (mais de 30 pontos percentuais do HP abaixo do melhor) -1. O dano é limitado ao HP do alvo (+5%), então todo
+  // golpe que nocauteia empata no "mais dano". Empate de pontos: o jogo sorteia; aqui fica o de mais dano.
+  // Simplificações: velocidade só pelo atributo do 1º turno; o "perigo" (AI_TryToFaint_CheckIfDanger) e os golpes
+  // de status (AI_CheckViability) ficam de fora. Só o lado da IA usa esta escolha (comoIADuelo).
+  function escolhaDaIADuelo(cands, atq, def) {
+    if (!cands.length) return null;
+    var hp = def.stats[0], teto = hp * 1.05;
+    var lim = function (c) { return Math.min(c.dano, teto); };
+    var melhorLim = cands.reduce(function (mx, c) { return Math.max(mx, lim(c)); }, 0);
+    var antes = atq.stats[5] * atq.ef.speMult > def.stats[5] * def.ef.speMult;
+    var pontos = function (c) {
+      if (c.dano >= hp && c.golpe.efeito !== "Explosion") return antes || c.prio > 0 ? 4 : 2;
+      var p = 0;
+      if ((c.golpe.flags || []).indexOf("High Crit Rate") !== -1) p += 2;
+      if (lim(c) === melhorLim) p += 1;
+      else if ((melhorLim - lim(c)) * 100 / hp > 30) p -= 1;
+      if (c.efTipo >= 4) p += 4; else if (c.efTipo >= 2) p += 2;
+      return p;
+    };
+    return cands.reduce(function (esc, c) {
+      var pc = pontos(c), pe = pontos(esc);
+      return pc > pe || (pc === pe && c.dano > esc.dano) ? c : esc;
+    });
+  }
+  // O lado da IA (chefão, treinador) luta com a escolha da IA no lugar do golpe de mais dano.
+  function comoIADuelo(r) { return r && r.ia && r.ia !== r.melhor ? Object.assign({}, r, { melhor: r.ia }) : r; }
   function golpesNecessariosDuelo(hp, d) { return d > 0 ? Math.ceil(hp / d) : Infinity; }
   // Aguenta o primeiro golpe com HP cheio: Focus Sash (item: "If the holder has
   // full HP, it endures KO hits with 1 HP") ou Sturdy ("At full HP, cannot be
@@ -2118,24 +2149,24 @@
     if (eu.ef.fogeNaMetade) fracEu = Math.max(0.01, fracEu - 0.5);
     if (foe.ef.fogeNaMetade) fracFoe = Math.max(0.01, fracFoe - 0.5);
     var meu = danoNoDuelo(eu, foe, nivel);
-    var dele = danoNoDuelo(foe, eu, nivel);
+    var dele = comoIADuelo(danoNoDuelo(foe, eu, nivel));
     // Shallow Grave e parecidas: volta uma vez com parte do HP.
     var hpEu = eu.stats[0] * (fracEu + (eu.ef.reviveHP || 0) + noTerrenoDuelo(eu, "revive") + curaDeBagaDuelo(eu, foe)),
       hpFoe = foe.stats[0] * (fracFoe + (foe.ef.reviveHP || 0) + noTerrenoDuelo(foe, "revive") + curaDeBagaDuelo(foe, eu));
     // Damp/Magical Dust: depois do 1º contato o outro vira do tipo - o resto da luta usa a tabela nova.
     meu = comTipoMudado(eu, foe, meu, dele, nivel);
-    dele = comTipoMudado(foe, eu, dele, meu, nivel);
+    dele = comoIADuelo(comTipoMudado(foe, eu, dele, meu, nivel));
     var trocaHab = comHabilidadeTrocada(eu, foe, meu, dele, nivel);
-    meu = trocaHab.meu; dele = trocaHab.dele;
+    meu = trocaHab.meu; dele = comoIADuelo(trocaHab.dele);
     var turnos = Math.min(TURNOS_MAX_STATUS, golpesNecessariosDuelo(hpFoe, meu.melhor.dano), golpesNecessariosDuelo(hpEu, dele.melhor.dano));
     // Inverse Room: os turnos da sala usam a tabela invertida.
     if (CAMPO_DUELO.inversa && turnos > 0) {
       CAMPO_DUELO.inversaAtiva = true;
-      var meuInv = danoNoDuelo(eu, foe, nivel), deleInv = danoNoDuelo(foe, eu, nivel);
+      var meuInv = danoNoDuelo(eu, foe, nivel), deleInv = comoIADuelo(danoNoDuelo(foe, eu, nivel));
       CAMPO_DUELO.inversaAtiva = false;
       var fr = Math.min(CAMPO_DUELO.inversa, turnos) / turnos;
-      meu = { melhor: Object.assign({}, meuInv.melhor.dano > meu.melhor.dano ? meuInv.melhor : meu.melhor, { dano: meuInv.melhor.dano * fr + meu.melhor.dano * (1 - fr) }), melhorPrio: meu.melhorPrio, segundo: meu.segundo };
-      dele = { melhor: Object.assign({}, deleInv.melhor.dano > dele.melhor.dano ? deleInv.melhor : dele.melhor, { dano: deleInv.melhor.dano * fr + dele.melhor.dano * (1 - fr) }), melhorPrio: dele.melhorPrio, segundo: dele.segundo };
+      meu = { melhor: Object.assign({}, meuInv.melhor.dano > meu.melhor.dano ? meuInv.melhor : meu.melhor, { dano: meuInv.melhor.dano * fr + meu.melhor.dano * (1 - fr) }), melhorPrio: meu.melhorPrio, segundo: meu.segundo, ia: null };
+      dele = { melhor: Object.assign({}, deleInv.melhor.dano > dele.melhor.dano ? deleInv.melhor : dele.melhor, { dano: deleInv.melhor.dano * fr + dele.melhor.dano * (1 - fr) }), melhorPrio: dele.melhorPrio, segundo: dele.segundo, ia: null };
     }
     var v1 = velocidadeNoDuelo(eu, turnos, foe, meu.melhor.golpe, dele.melhor.golpe), v2 = velocidadeNoDuelo(foe, turnos, eu, dele.melhor.golpe, meu.melhor.golpe);
     // Trick Room (Twist. Dimension): enquanto dura, o mais lento age primeiro.

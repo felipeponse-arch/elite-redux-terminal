@@ -170,6 +170,14 @@
     return '<div class="card"><h3>Regra de campo desta luta</h3><p class="mybuild-hint">' + escapeHtml(campo.texto) + '</p>' +
       (campo.naoSimulado ? '<p class="mybuild-hint plano-buffs-aviso"><b>O simulador ainda não conta este efeito:</b> o plano e o veredito não levam isto em conta.</p>' : "") + '</div>';
   }
+  // Jeito de lutar da IA deste treinador (flags da config oficial; ticket 03). Só aparece em quem tem flag extra.
+  function iaDoChefaoHtml(nome) {
+    var itens = comportamentoDaIADoChefao(nome);
+    if (!itens.length) return "";
+    return '<div class="card"><h3>Como a IA deste treinador luta</h3><ul class="mybuild-hint">' +
+      itens.map(function (t) { return '<li>' + escapeHtml(t) + '</li>'; }).join("") + '</ul>' +
+      '<p class="mybuild-hint plano-buffs-aviso"><b>O simulador ainda não conta isto:</b> ele usa a escolha de golpe padrão da IA.</p></div>';
+  }
   // Regras do modo Hell no time do chefe (só quando a aba mostra o time Hell): nível extra e, onde o código oficial define,
   // as habilidades extras do time inteiro. Fonte e limite da tabela: comentário em chefoes.js (HELL_NIVEIS_EXTRAS).
   function hellDoChefaoHtml(nome, diffKey) {
@@ -591,7 +599,7 @@
         '<div class="detail-dexno mono">' + escapeHtml(nomeDaCategoriaDeChefao(boss.cat)) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +
       (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:6px 0 0;max-width:65ch;">Padrão é o time de Easy e Ace (os dois usam o mesmo), Insane é o time do Elite e Hell é o do modo Hell (confirmado no código do jogo).</p></div>' : "") +
-      campoDoChefaoHtml(boss.name) +
+      campoDoChefaoHtml(boss.name) + iaDoChefaoHtml(boss.name) +
       hellDoChefaoHtml(boss.name, diffKey) +
       bossConfrontoHtml(boss, party) +
       montarHtml +

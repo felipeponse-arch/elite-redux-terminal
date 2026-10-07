@@ -401,6 +401,20 @@
   });
   function regraDeCampoDoChefao(nome) { return REGRA_DE_CAMPO_DO_CHEFAO[nome] || null; }
 
+  // Jeito de lutar da IA por treinador (ticket 03, 07/10): flags da config oficial (er-config TrainerList 7be1617:
+  // prefer_status, prefer_stall, risky; o gerador tools/codegen TrainerPartyGenerator.kt vira AI_FLAG_*) e o que
+  // cada uma soma na pontuação do golpe (battle_ai_main.c). Todo treinador já tem a IA base (tenta nocautear,
+  // evita golpe inútil, troca "esperta"); isto é o extra. Só aviso na tela: o simulador não conta.
+  var IA_ARRISCADA = "Arriscada: dá preferência a golpe de crítico alto e, em metade das vezes, a golpes de risco (sono, Explosion, nocaute direto, confusão, Counter, Destiny Bond, Belly Drum, Focus Punch).";
+  var COMPORTAMENTO_DA_IA_DO_CHEFAO = {
+    "Roxanne 1": [
+      "Prefere golpes de status: todo golpe de status ganha um ponto a mais na escolha.",
+      "Joga na defesa (stall): golpes que sobem Defesa ou Defesa Especial ganham um ponto a mais."
+    ],
+    "Winona 2": [IA_ARRISCADA], "Winona 3": [IA_ARRISCADA], "Winona 4": [IA_ARRISCADA], "Winona 5": [IA_ARRISCADA]
+  };
+  function comportamentoDaIADoChefao(nome) { return COMPORTAMENTO_DA_IA_DO_CHEFAO[nome] || []; }
+
   // Modo Hell (revisão dos ginásios de 04/10, código oficial er-repo 217dd0f): o jogo escolhe o time pela dificuldade - Easy e Ace usam
   // `party`, Elite usa `partyInsane` e Hell usa `partyHell` (src/battle_main.c) -, e SÓ no Hell registra os eventos de treinador
   // (RegisterTrainerBattleEvents, src/data/hell_trainer_skills.h) e soma HELL_MODE_EXTRA_LEVELS (5) a todo treinador depois da 3ª

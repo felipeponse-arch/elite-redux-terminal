@@ -1,6 +1,6 @@
 # 03 — IA do chefão: troca, itens e escolha de golpe pelo código oficial
 
-Status: a-avaliar (grande: começar por /to-spec)
+Status: resolvido
 Bloqueado por: 02
 Agentes: meta-pokemon, playtester-de-build
 
@@ -13,3 +13,7 @@ simulador e corrigir o que divergir.
 ## Como verificar
 Cada regra nova com teste que falha sem ela e sabotagem; plano contra um chefão conhecido (Tate & Liza, Wattson) muda
 só onde o código manda.
+
+## Comentários
+
+07/10: escopo escolhido pelo usuário = escolha de golpe pela pontuação da IA + avisos das flags. Itens: não existem (gerador não grava). Troca voluntária: não modelada. Detalhe em docs/decisoes_mecanicas.md.
