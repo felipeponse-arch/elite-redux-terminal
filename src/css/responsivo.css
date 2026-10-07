@@ -83,7 +83,10 @@
     -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
   }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab-btn { white-space: nowrap; padding: 7px 9px; font-size: var(--fs-texto); scroll-snap-align: start; }
+  .tab-btn { white-space: nowrap; padding: 7px 7px; font-size: var(--fs-texto); scroll-snap-align: start; }
+  /* Ticket 15: as 4 abas cabem sem rolar até 360 px - o contador da aba Chefões (número fixo de
+     chefões) sai no celular; Time e Box mantêm o deles, que muda com o jogo. */
+  .tab-btn[data-tab="bosses"] .count-badge { display: none; }
   /* Rótulo curto só em vez do completo - ver comentário junto de
      .tab-label-short acima. Reduz a largura total das 4 abas o
      suficiente pra caber (ou quase caber) sem rolar na maioria dos
@@ -95,6 +98,10 @@
   .species-row .dexno { display: none; }
   .team-slots { grid-template-columns: 1fr; }
   .saved-teams-grid { grid-template-columns: 1fr; }
+}
+/* De 360 px pra cima as 4 abas cabem (ticket 15): sem o esmaecimento das bordas, que avisava "tem mais pra rolar". */
+@media (min-width: 360px) and (max-width: 620px) {
+  .tabs { mask-image: none; -webkit-mask-image: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

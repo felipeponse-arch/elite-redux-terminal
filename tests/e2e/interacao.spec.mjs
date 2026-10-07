@@ -231,3 +231,16 @@ test("chefão: Exportar copia o set no formato Showdown; Aqua tem cabeçalho com
   expect(texto).toMatch(/Ability: Tinted Lens/);
   expect(texto).toMatch(/- Dual Wingbeat/);
 });
+
+// Ticket 15 (07/10/2026): no celular as 4 abas cabem sem rolar a partir de 360 px (antes a aba Dex sumia
+// para a esquerda com Chefões ativa) e a página não rola para o lado.
+for (const largura of [360, 375]) {
+  test("celular " + largura + " px: as abas cabem sem rolar", async ({ page }) => {
+    await page.setViewportSize({ width: largura, height: 740 });
+    await abrirApp(page);
+    await page.locator('.tab-btn[data-tab="bosses"]').click();
+    const m = await page.evaluate(() => { const t = document.querySelector(".tabs"); return { cabe: t.scrollWidth <= t.clientWidth, pagina: document.documentElement.scrollWidth }; });
+    expect(m.cabe, "barra de abas sem rolagem").toBe(true);
+    expect(m.pagina).toBeLessThanOrEqual(largura);
+  });
+}
