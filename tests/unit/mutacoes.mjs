@@ -1650,4 +1650,11 @@ export const MUTACOES = [
     de: "return lista.filter(function (x) { return x.etapa !== null; })[0] || null;",
     para: "return lista[0] ? { etapa: 99, local: lista[0].local, como: lista[0].como } : null;",
   },
+  {
+    id: "perfil-ignora-innates",
+    descricao: "faixas da ficha ignoram as innates (só a tipagem)",
+    arquivo: "tipos.js",
+    de: "var mult = abilityTypeMod(atk, sp).mult;",
+    para: "var mult = typeMultiplier(atk, speciesTypeNames(sp));",
+  },
 ];

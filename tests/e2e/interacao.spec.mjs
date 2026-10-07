@@ -199,3 +199,20 @@ for (const reduzida of [true, false]) {
     expect(comportamento).toBe(reduzida ? "auto" : "smooth");
   });
 }
+
+// Ticket 13 (07/10/2026): anterior/próximo da ficha segue a lista da tela (busca aplicada) e a ficha mostra
+// o TOTAL dos stats e as faixas Fraco/Resiste/Imune.
+test("ficha: próximo segue a lista filtrada; TOTAL e faixas de efetividade aparecem", async ({ page }) => {
+  await abrirApp(page);
+  await abrirAba(page, "dex");
+  await page.locator("#search-input").fill("Charizard");
+  await expect(page.locator("#species-list .species-row")).toHaveCount(4);
+  await page.locator("#species-list .species-row").first().click();
+  await expect(page.locator("#species-detail h2")).toHaveText("Charizard");
+  await expect(page.locator(".ficha-nav-btn")).toHaveCount(1); // primeiro da lista: só "próxima"
+  await expect(page.locator(".stats-total")).toHaveText("TOTAL 535");
+  await expect(page.locator(".efe-imune + .efe-lista")).toContainText("Ground");
+  await page.locator(".ficha-nav-btn").click();
+  await expect(page.locator("#species-detail h2")).toHaveText("Charizard Mega X");
+  await expect(page.locator(".ficha-nav-btn")).toHaveCount(2);
+});

@@ -244,6 +244,9 @@
     var list = getFiltered();
     var ul = document.getElementById("species-list");
     listaAtual = list;
+    // Ficha aberta: o anterior/próximo segue a lista nova (ticket 13).
+    var nav = document.querySelector("#species-detail .ficha-nav");
+    if (nav && state.selected !== null && state.selected !== undefined && getSpeciesByX(state.selected)) nav.outerHTML = fichaNavHtml(getSpeciesByX(state.selected));
     if (list.length === 0) {
       listaRenderizadas = 0;
       ul.innerHTML = '<li class="no-results">Nenhum Pokémon encontrado.</li>';

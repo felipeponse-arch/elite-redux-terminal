@@ -114,6 +114,11 @@ for (const [placeholder, nome] of Object.entries(ARQUIVOS_DE_DADOS)) {
 }
 if (!final.includes("__SPRITE_ATLAS_DATAURI__")) falhar("placeholder __SPRITE_ATLAS_DATAURI__ não está no template.");
 final = trocarTudo(final, "__SPRITE_ATLAS_DATAURI__", "data:image/png;base64," + readFileSync(atlas).toString("base64"));
+// Artes da paleta Shiny (tickets 13-15): data/arte/*.webp viram data URI no CSS (__ARTE_<NOME>_DATAURI__).
+for (const [marca, arq] of [["__ARTE_RAYQUAZA_DATAURI__", "arte/rayquaza_shiny.webp"]]) {
+  if (!existsSync(join(DADOS, arq))) falhar("falta a arte data/" + arq);
+  final = trocarTudo(final, marca, "data:image/webp;base64," + readFileSync(join(DADOS, arq)).toString("base64"));
+}
 for (const placeholder of [...Object.keys(ARQUIVOS_DE_DADOS), "__SPRITE_ATLAS_DATAURI__"]) {
   if (final.includes(placeholder)) falhar(`placeholder ${placeholder} continua no arquivo depois da colagem.`);
 }

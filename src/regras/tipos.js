@@ -165,6 +165,21 @@
   function abilityTypeMod(atk, sp) {
     return abilityTypeModFor(atk, speciesTypeNames(sp), alwaysActiveAbilities(sp));
   }
+  // Perfil defensivo da espécie para a ficha (ticket 13): cada tipo atacante com o multiplicador final, já com
+  // as innates (sempre ativas; a habilidade escolhível depende da build e fica de fora). Fraco = > 1,
+  // resiste = entre 0 e 1, imune = 0. Ordem: o mais perigoso primeiro / a resistência maior primeiro.
+  function perfilDefensivoDaEspecie(sp) {
+    var r = { fraco: [], resiste: [], imune: [] };
+    USABLE_TYPES.forEach(function (atk) {
+      var mult = abilityTypeMod(atk, sp).mult;
+      if (mult === 0) r.imune.push({ tipo: atk, mult: 0 });
+      else if (mult > 1) r.fraco.push({ tipo: atk, mult: mult });
+      else if (mult < 1) r.resiste.push({ tipo: atk, mult: mult });
+    });
+    r.fraco.sort(function (a, b) { return b.mult - a.mult; });
+    r.resiste.sort(function (a, b) { return a.mult - b.mult; });
+    return r;
+  }
   // Mesmo cálculo, mas com os ids de habilidade ATIVOS informados por quem
   // chama - o motor de confronto (confronto.js) conhece a habilidade real de
   // um Pokémon de chefão (bosses.json), então não precisa adivinhar como

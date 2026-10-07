@@ -430,6 +430,29 @@
     return statsHtml;
   }
 
+  // Ficha (ticket 13): Fraco/Resiste/Imune, já com as innates (perfilDefensivoDaEspecie em src/regras/tipos.js).
+  function fichaEfetividadeHtml(sp) {
+    var p = perfilDefensivoDaEspecie(sp);
+    var fmt = function (m) { return m === 0.25 ? "¼x" : m === 0.5 ? "½x" : (Math.round(m * 100) / 100) + "x"; };
+    var faixa = function (lista, classe, rotulo) {
+      if (!lista.length) return "";
+      return '<div class="efe-faixa"><b class="efe-rotulo ' + classe + '">' + rotulo + '</b><ul class="efe-lista" aria-label="' + rotulo + '">' +
+        lista.map(function (x) { return '<li class="efe-tipo">' + escapeHtml(x.tipo) + ' <span class="mono">' + fmt(x.mult) + '</span></li>'; }).join("") + '</ul></div>';
+    };
+    return '<div class="card"><h3>Efetividade de tipos</h3>' + faixa(p.fraco, "efe-fraco", "Fraco a") + faixa(p.resiste, "efe-resiste", "Resiste a") + faixa(p.imune, "efe-imune", "Imune a") +
+      '<p class="efe-nota">Conta o tipo e as innates; a habilidade escolhida pode mudar isso.</p></div>';
+  }
+  // Ficha (ticket 13): anterior/próximo na ordem da lista que está na tela (com busca e filtros aplicados).
+  function fichaNavHtml(sp) {
+    var i = listaAtual.indexOf(sp);
+    if (i === -1) return '<nav class="ficha-nav" aria-label="Espécie anterior e próxima"></nav>';
+    var btn = function (alvo, rotulo, seta) {
+      return alvo ? '<button class="ficha-nav-btn" type="button" data-x="' + alvo.x + '" aria-label="' + rotulo + ': ' + escapeHtml(alvo.n) + '">' + seta + '</button>' : "";
+    };
+    return '<nav class="ficha-nav" aria-label="Espécie anterior e próxima">' + btn(listaAtual[i - 1], "Anterior", "&larr; " + escapeHtml((listaAtual[i - 1] || {}).n || "")) +
+      btn(listaAtual[i + 1], "Próxima", escapeHtml((listaAtual[i + 1] || {}).n || "") + " &rarr;") + '</nav>';
+  }
+
   // Ficha: linha evolutiva (cada etapa leva à ficha dela).
   function fichaEvolucaoHtml(sp) {
   var evoHtml = "";
@@ -495,7 +518,7 @@
     var teamFull = state.team.length >= 6;
     var inBox = state.box.indexOf(x) !== -1;
     var names = speciesTypeNames(sp);
-    return '<button class="back-btn" id="back-to-list">&larr; Voltar para a lista</button>' +
+    return '<div class="ficha-topo"><button class="back-btn" id="back-to-list">&larr; Voltar para a lista</button>' + fichaNavHtml(sp) + '</div>' +
       // 96 = o dobro exato da célula de 48 do atlas (redesenho 2026-09-24: o
       // Pokémon é o protagonista da ficha, e com image-rendering: pixelated o
       // dobro exato fica nítido). O identificador interno (SPECIES_...) saiu da
@@ -552,8 +575,8 @@
     var frmHtml = fichaFormasHtml(sp);
     var howToObtainHtml = fichaComoObterHtml(sp);
     return '<div class="detail-group"><h3 class="detail-group-heading">Conhecer a espécie</h3>' +
-      '<div class="card"><h3>Stats base</h3>' + statsHtml +
-        '<div class="stat-total">Total (BST) <b class="mono">' + bst(sp) + '</b></div></div>' +
+      '<div class="card"><h3 class="stats-titulo">Stats base <span class="stats-total mono" aria-label="Total dos stats base: ' + bst(sp) + '">TOTAL ' + bst(sp) + '</span></h3>' + statsHtml + '</div>' +
+      fichaEfetividadeHtml(sp) +
       '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
         '<p style="color:var(--text-dim);font-size:var(--fs-pequeno);margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p>' +
         conditionMoveSynergyNoteHtml(sp) + '</div>' +
@@ -663,7 +686,9 @@
       var sp = x !== null && x !== undefined ? getSpeciesByX(x) : null;
       var alvo = e.target.closest("button, .move-row");
       if (!alvo || !painel.contains(alvo) || !sp) return;
-      if (alvo.id === "back-to-list") {
+      if (alvo.classList.contains("ficha-nav-btn")) {
+        selectSpecies(parseInt(alvo.getAttribute("data-x"), 10));
+      } else if (alvo.id === "back-to-list") {
         document.getElementById("dex-shell").classList.remove("show-detail");
       } else if (alvo.id === "add-team-btn") {
         if (alvo.disabled || state.team.indexOf(x) !== -1) return;

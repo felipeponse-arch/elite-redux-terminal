@@ -253,3 +253,34 @@
   color: var(--text);
   border-bottom: 1px solid var(--border);
 }
+/* Ficha (ticket 13, paleta Shiny): anterior/próximo, TOTAL dos stats e faixas de efetividade. */
+.ficha-topo { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; }
+.ficha-nav { display: flex; gap: var(--space-2); margin-left: auto; }
+.ficha-nav-btn {
+  background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-pill);
+  padding: 4px 12px; font-size: var(--fs-pequeno); font-weight: 600; cursor: pointer; min-height: var(--alvo-min);
+}
+.ficha-nav-btn:hover { border-color: var(--accent); }
+.stats-titulo { display: flex; align-items: center; gap: var(--space-2); }
+.stats-total {
+  margin-left: auto; font-size: var(--fs-pequeno); font-weight: 700; background: var(--surface-3); color: var(--badge-text-dim);
+  padding: 2px 10px; border-radius: var(--radius-pill);
+}
+.efe-faixa { display: flex; gap: var(--space-2); align-items: baseline; flex-wrap: wrap; margin-top: var(--space-2); }
+.efe-rotulo { width: 74px; flex: none; font-size: var(--fs-pequeno); }
+.efe-fraco { color: var(--sem-weak); }
+.efe-resiste { color: var(--sem-resist); }
+.efe-imune { color: var(--sem-immune); }
+.efe-lista { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.efe-tipo {
+  font-size: var(--fs-pequeno); font-weight: 700; padding: 2px 9px; border-radius: var(--radius-pill);
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.efe-nota { margin: var(--space-3) 0 0; font-size: var(--fs-legenda); color: var(--text-dim); }
+/* Dex vazia com a arte do Rayquaza shiny (marca da paleta; app privado - arte oficial). */
+#species-detail > .empty-state {
+  background: linear-gradient(90deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 70%, transparent) 55%, transparent 100%),
+    url("__ARTE_RAYQUAZA_DATAURI__") right 30% / cover no-repeat;
+  border-radius: var(--radius-lg); border: 1px solid var(--border); min-height: 220px; display: flex; align-items: center;
+  text-align: left; padding: var(--space-6); max-width: 760px; margin: var(--space-5) auto;
+}
