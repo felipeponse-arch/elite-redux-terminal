@@ -94,7 +94,7 @@
 .back-btn { display: none; }
 
 .detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
-.detail-titles h2 { font-size: var(--fs-display); font-weight: 700; }
+.detail-titles h2 { font-family: var(--fonte-display); font-size: var(--fs-display); font-weight: 400; }
 .detail-dexno { color: var(--text-dim); font-size: var(--fs-texto); }
 .detail-acoes { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
 .detail-types { display: flex; gap: 6px; margin: 10px 0 14px; }

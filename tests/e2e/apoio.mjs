@@ -90,7 +90,10 @@ async function esperarFontes(page) {
     '400 15px "Figtree"', '500 15px "Figtree"', '600 15px "Figtree"', '700 15px "Figtree"',
     '700 20px "Bricolage Grotesque"', '800 20px "Bricolage Grotesque"',
     '400 13px "IBM Plex Mono"', '600 13px "IBM Plex Mono"',
-  ].map((f) => document.fonts.load(f).catch(() => null))).then(() => document.fonts.ready));
+  ].map((f) => document.fonts.load(f).catch(() => null)).concat(
+    // Potta One (títulos, ticket 12): a fonte vem em pedaços por alfabeto - sem texto de exemplo o
+    // navegador baixa o pedaço errado e o print sai com a fonte de reserva.
+    document.fonts.load('400 20px "Potta One"', "Elite Redux Terminal Charizard").catch(() => null))).then(() => document.fonts.ready));
 }
 
 // Liga o db falso a partir da PRÓXIMA navegação (addInitScript vale pras
