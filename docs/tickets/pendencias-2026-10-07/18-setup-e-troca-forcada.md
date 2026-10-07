@@ -1,6 +1,6 @@
 # 18 — Golpes que tiram ou roubam setup
 
-Status: pronto-para-agente
+Status: feito
 Bloqueado por: 06
 Agentes: playtester-de-build
 

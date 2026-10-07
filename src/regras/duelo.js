@@ -1478,6 +1478,7 @@
         precisao: Math.max(m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, u.ef.precisaoGolpe[m[0]] || 0), forcaBase: base, forca: base * hab };
       g.area = extra && extra.al ? extra.al : null; // dupla: ambos/todos/aleatorio
       g.efeito = extra && extra.ef ? extra.ef : ""; // efeito do golpe no dado (Fake Out, Hex, Eruption, Knock Off...)
+      g.efeitoDado = m[11] || ""; // efeito do dado bruto (o move_categorias não traz todos: Dragon Tail)
       g.chanceEfeito = extra && extra.ch ? extra.ch / 100 : 0; // chance do efeito extra (Drench Hit 30% = 0,3)
       // -2 de Sp. Atk no próprio usuário a cada uso (grupo do Overheat no dado); Simple
       // dobra e Contrary inverte (estagioMult), como em qualquer mudança de estágio.
@@ -2057,6 +2058,24 @@
     }
     return v;
   }
+  // ---------- golpes que tiram setup (ticket 18) ----------
+  // Código oficial (er-repo 217dd0f, battle_scripts_1.s): Hit Switch Target (Dragon Tail, Circle Throw,
+  // Roar of Time, Whirlwind, Poison Tail, Wild Swing) acerta e força a troca - quem sai perde os estágios
+  // (Suction Cups e parecidas seguram); Clear Smog (Clear Smog, Absorb, Force Palm) zera os estágios do
+  // alvo e Freezy Frost os de todos (normalisebuffs); Spectral Thief rouba os positivos antes do dano.
+  // Todos precisam acertar: tipo imune barra.
+  var TIRA_SETUP_DUELO = { "Hit Switch Target": "troca", "Clear Smog": "zera", "Freezy Frost": "zera", "Spectral Thief": "rouba" };
+  function golpeQueTiraSetupDuelo(x, y) {
+    var achado = null;
+    (x.golpesProntos || []).forEach(function (g) {
+      var modo = TIRA_SETUP_DUELO[g.efeitoDado];
+      if (!modo || achado) return;
+      if (modo === "troca" && y.ef.naoSaiForcado) return;
+      if (efetividadeNoDuelo(x, g.tipo, y) === 0) return;
+      achado = { golpe: g, modo: modo };
+    });
+    return achado;
+  }
   // ---------- drench (ticket 17) ----------
   // Código oficial (er-repo 217dd0f): MOVE_EFFECT_DRENCH faz o alvo agir por último na faixa de
   // prioridade dele (battle_main.c GetBattlerSpeedValue: goesLast, como o Lagging Tail - vale até no
@@ -2287,6 +2306,9 @@
       var efE = pe, efF = pf;
       if (pe && pe.zeraSetup && pf && pf.tipo === "setup") efF = Object.assign({}, pf, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
       if (pf && pf.zeraSetup && pe && pe.tipo === "setup") efE = Object.assign({}, pe, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
+      // Golpe de dano que tira o setup (ticket 18): quem tem usa contra quem fez setup - o setup se perde.
+      if (efF && efF.tipo === "setup" && golpeQueTiraSetupDuelo(eu, foe)) efF = Object.assign({}, efF, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
+      if (efE && efE.tipo === "setup" && golpeQueTiraSetupDuelo(foe, eu)) efE = Object.assign({}, efE, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
       planosQueValeram = { eu: efE, ele: efF };
       var dM = st.meu, dD = st.dele, hpE = hpEu, hpF = hpFoe, atE = 0, atF = 0, velE = 1, velF = 1, inverte = false;
       // Golpe de status que a habilidade usa ao entrar (sem gastar turno).
@@ -3524,6 +3546,22 @@
     }
     aplicarClima();
     function luta(c, f) { return resultadoDoDuelo(comoEstaDuelo(c), comoEstaDuelo(f), nivel, { fracEu: c.frac, fracFoe: f.frac, detalhe: true }); }
+    // Setup levado de um duelo anterior (ticket 05) contra quem tem golpe que tira setup (ticket 18):
+    // Clear Smog/Freezy Frost e a troca forçada zeram tudo (a troca só com outro vivo no time de quem
+    // sai); Spectral Thief tira só os positivos e passa para quem rouba.
+    function tiraSetupLevado(x, y, timeDeY) {
+      var pos = Object.keys(y.bonus.estagios).filter(function (k) { return y.bonus.estagios[k] > 0; });
+      if (!pos.length) return;
+      var t = golpeQueTiraSetupDuelo(x.u, y.u);
+      if (!t) return;
+      if (t.modo === "troca" && !timeDeY.some(function (c) { return c !== y && c.vivo; })) return;
+      if (t.modo === "rouba") {
+        pos.forEach(function (k) { x.bonus.estagios[k] = Math.min(6, (x.bonus.estagios[k] || 0) + y.bonus.estagios[k]); delete y.bonus.estagios[k]; });
+        return;
+      }
+      y.bonus.estagios = {};
+      if (t.golpe.efeitoDado === "Freezy Frost") x.bonus.estagios = {};
+    }
     // Estágios zeram para quem entra em campo (battle_main.c SwitchInClearSetData) e para quem
     // desmaia; quem fica em campo depois de vencer um duelo continua com o setup (ticket 05).
     function somaEstagios(alvo, ganhos) {
@@ -3638,6 +3676,8 @@
         atual.frac -= danoDoFuturoDuelo(f, atual, nivel);
         if (atual.frac <= 0) { atual.frac = 0; atual.vivo = false; continue; }
       }
+      tiraSetupLevado(f, atual, time);
+      tiraSetupLevado(atual, f, deles);
       var r = luta(atual, f);
       // Prisão (Shadow Tag, Arena Trap, Magnet Pull...): não dá pra trocar. O Fear
       // também prende 2 turnos (FAQ), mas a troca aqui é decidida no começo do
