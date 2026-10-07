@@ -30,6 +30,8 @@ Várias sessões usando a mesma pasta quebraram os commits em 06/10. Por isso ca
 2. `git worktree add .claude/worktrees/ticket-NN -b ticket/NN master`.
 3. No PowerShell, ligar as dependências sem copiar:
    `New-Item -ItemType Junction -Path .claude\worktrees\ticket-NN\node_modules -Target <pasta do app>\node_modules`.
+   E copiar o cache da sabotagem (fora do git): `tests/.sabotagem_cache.json` da pasta do app para o worktree.
+   Sem ele cada uma das ~225 sabotagens roda a suíte inteira e o hook passa de 10 min (07/10; com ele, ~2,5 min).
 4. Trabalhar e commitar DENTRO do worktree (o hook de pré-commit é o mesmo e roda lá).
 5. Voltar ao master, `git merge --ff-only ticket/NN` (se o master andou: `git rebase master` no worktree antes).
 6. Limpar: apagar a JUNÇÃO primeiro (`[System.IO.Directory]::Delete(<junção>, $false)`, que não toca no
