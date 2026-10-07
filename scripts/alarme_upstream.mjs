@@ -22,6 +22,7 @@ import { readFileSync, appendFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { validarDadoCru } from "./validar_dado_cru.mjs";
 
 export const VERSAO_DEX = "2.65beta";
 export const VERSAO_JOGO = "2.65.3b";
@@ -89,8 +90,17 @@ async function main() {
   await conferir("Versão padrão do NextDex", VERSAO_DEX,
     async () => ultimaVersaoDoDex(await baixar(`${BASE_DEX}/static/js/data_version.js`)));
   const hashLocal = hashDoConteudo(snapshot);
-  await conferir(`Dados da ${VERSAO_DEX} (sha256)`, hashLocal.slice(0, 16),
-    async () => hashDoConteudo(await baixar(`${BASE_DEX}/static/js/data/gameDataV${VERSAO_DEX}.json`, true)).slice(0, 16));
+  let dadoBaixado = null; // reaproveitado pela validação de formato logo abaixo
+  await conferir(`Dados da ${VERSAO_DEX} (sha256)`, hashLocal.slice(0, 16), async () => {
+    dadoBaixado = await baixar(`${BASE_DEX}/static/js/data/gameDataV${VERSAO_DEX}.json`, true);
+    return hashDoConteudo(dadoBaixado).slice(0, 16);
+  });
+  // Dado novo com o mesmo hash já foi validado no commit; só vale olhar o que mudou.
+  if (dadoBaixado && hashDoConteudo(dadoBaixado).slice(0, 16) !== hashLocal.slice(0, 16)) {
+    let problemas;
+    try { problemas = validarDadoCru(JSON.parse(dadoBaixado.toString("utf8"))); } catch (err) { problemas = [`JSON ilegível: ${err.message}`]; }
+    linhas.push({ item: "Formato do dado novo (validar_dado_cru)", esperado: "sem problemas", encontrado: problemas.length ? problemas.slice(0, 3).join("; ") : "sem problemas", estado: problemas.length ? "mudou" : "ok" });
+  }
   await conferir("Latest Version do site oficial", VERSAO_JOGO,
     async () => versaoDaPaginaDeDownload(await baixar(PAGINA_DOWNLOAD)));
 
