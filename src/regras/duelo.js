@@ -3237,24 +3237,34 @@
     if (p === "aco") return (preso.tipos || []).indexOf("Steel") !== -1;
     return true;
   }
-  // Qual Pokémon do chefão entra depois de um nocaute (regra do usuário, 2026-09-30,
-  // pela run - Flannery): primeiro quem tem golpe super efetivo em algum dos meus em
-  // campo (qualquer golpe de dano dele, não só o mais forte - revisão do mesmo dia);
-  // sem isso, quem mais resiste aos meus (o melhor golpe de cada um meu contra ele).
-  // Serve à luta simples e à dupla. `restantes` e `meus`: participantes vivos.
+  // Qual Pokémon do chefão entra depois de um nocaute. Regra do CÓDIGO OFICIAL (revisão de 04/10, src/battle_ai_switch_items.c,
+  // GetMostSuitableMonToSwitchInto; antes era a regra que o usuário observou na run da Flannery em 30/09, que errava o desempate):
+  //  1. Baton Pass (raro, ignorado aqui);
+  //  2. GetBestMonDefensive está DESLIGADO no código (retorna sem escolher), então não há escolha por resistência;
+  //  3. GetBestMonOffensive: pontua cada candidato pelos SEUS tipos contra os tipos do meu Pokémon (produto da efetividade de cada tipo
+  //     dele); pega o de maior nota (empate = o primeiro da fila) e só o aceita se algum dos 4 golpes dele for super efetivo (>= 2x,
+  //     golpe de status também conta - o jogo não checa categoria); se não tem, descarta e tenta o próximo melhor tipado;
+  //  4. GetBestMonDmg: se ninguém passou, entra o que causa MAIS dano com um golpe de dano (empate = o primeiro).
+  // Na dupla o jogo olha um único oponente (o da frente do slot); aqui é o primeiro dos meus em campo. `restantes` e `meus`: vivos.
   function escolherProximoDoChefao(restantes, meus, nivel) {
-    var escolhido = restantes[0] || null, melhor = null;
-    restantes.forEach(function (c) {
+    if (!restantes.length) return null;
+    if (!meus.length) return restantes[0];
+    var meu = comoEstaDuelo(meus[0]);
+    var cands = restantes.map(function (c, i) {
       var dele = comoEstaDuelo(c);
-      var vantagem = meus.some(function (m) {
-        var meu = comoEstaDuelo(m);
-        return (dele.golpesProntos || []).some(function (g) { return g.cat !== "S" && efetividadeNoDuelo(dele, g.tipo, meu) >= 2; });
-      }) ? 1 : 0;
-      var levaDosMeus = meus.reduce(function (s, m) { var ef = danoNoDuelo(comoEstaDuelo(m), dele, nivel).melhor.efTipo; return s + (ef === undefined ? 0 : ef); }, 0);
-      var nota = [vantagem, -levaDosMeus];
-      if (!melhor || nota[0] > melhor[0] || (nota[0] === melhor[0] && nota[1] > melhor[1])) { melhor = nota; escolhido = c; }
+      var proprios = (dele.tipos || []).filter(function (t, k, a) { return a.indexOf(t) === k; });
+      return { c: c, i: i, dele: dele, nota: proprios.reduce(function (p, t) { return p * efetividadeNoDuelo(dele, t, meu); }, 1) };
     });
-    return escolhido;
+    function temGolpeSuperEfetivo(dele) {
+      var tipos = (dele.golpesProntos || []).map(function (g) { return g.tipo; })
+        .concat((dele.statusIds || []).map(function (id) { return MOVES[id] ? TYPES[MOVES[id][1]] : null; }));
+      return tipos.some(function (t) { return t && efetividadeNoDuelo(dele, t, meu) >= 2; });
+    }
+    var ordem = cands.slice().sort(function (a, b) { return b.nota - a.nota || a.i - b.i; });
+    for (var k = 0; k < ordem.length; k++) if (temGolpeSuperEfetivo(ordem[k].dele)) return ordem[k].c;
+    var melhor = null, melhorDano = 0;
+    cands.forEach(function (x) { var d = danoNoDuelo(x.dele, meu, nivel).melhor.dano; if (d > melhorDano) { melhorDano = d; melhor = x.c; } });
+    return melhor || restantes[0];
   }
   // Recuo, custo de HP e Life Orb do golpe que NOCAUTEIA (auditoria de 2026-10-02): no duelo
   // 1x1 não mudam o resultado (balanco desconta só os golpes antes do último), mas na luta

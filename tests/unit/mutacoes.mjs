@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "proximo-do-chefao-sem-tipagem",
+    descricao: "o próximo do chefão volta a ignorar a nota de tipagem ofensiva (ordem da fila)",
+    arquivo: "duelo.js",
+    de: "var ordem = cands.slice().sort(function (a, b) { return b.nota - a.nota || a.i - b.i; });",
+    para: "var ordem = cands.slice();",
+  },
+  {
     id: "revanche-com-buffs-do-ginasio",
     descricao: "a revanche do líder (Roxanne 2 a 5...) volta a ter os buffs do 1º encontro",
     arquivo: "chefoes.js",
@@ -1399,10 +1406,10 @@ export const MUTACOES = [
   },
   {
     id: "rev-vantagem-so-golpe-mais-forte",
-    descricao: "vantagem volta a contar só o golpe mais forte do Pokémon do chefão",
+    descricao: "a vantagem do próximo do chefão volta a contar só o primeiro golpe dele",
     arquivo: "duelo.js",
-    de: "return (dele.golpesProntos || []).some(function (g) { return g.cat !== \"S\" && efetividadeNoDuelo(dele, g.tipo, meu) >= 2; });",
-    para: "return (danoNoDuelo(dele, meu, nivel).melhor.efTipo || 0) >= 2;",
+    de: "return tipos.some(function (t) { return t && efetividadeNoDuelo(dele, t, meu) >= 2; });",
+    para: "return tipos.slice(0, 1).some(function (t) { return t && efetividadeNoDuelo(dele, t, meu) >= 2; });",
   },
   {
     id: "rev-embody-aspect-nao-lido",

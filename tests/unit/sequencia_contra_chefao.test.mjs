@@ -70,14 +70,14 @@ test("depois de um nocaute, o chefão manda quem tem vantagem sobre o meu Pokém
   assert.equal(derrubados.join(","), ["Abre", "Planta", "Neutro"].join(","), JSON.stringify(s.log));
 });
 
-test("sem ninguém com vantagem, entra quem mais resiste ao meu Pokémon", () => {
+test("sem ninguém com golpe super efetivo, entra quem causa mais dano (regra oficial; não é quem mais resiste)", () => {
   const eu = unidade(efDe([]), golpe("F", { forca: 900, forcaBase: 900, tipo: "Water" }), { tipos: ["Normal"], stats: [5000, 100, 100, 100, 100, 200] });
   const abre = unidade(efDe([]), golpe("F"), { sp: { n: "Abre", sname: "A" }, nome: "Abre", tipos: ["Normal"] });
   const neutro = unidade(efDe([]), golpe("F"), { sp: { n: "Neutro", sname: "N" }, nome: "Neutro", tipos: ["Normal"] });
   const resiste = unidade(efDe([]), golpe("F"), { sp: { n: "Resiste", sname: "R" }, nome: "Resiste", tipos: ["Grass"] });
   const s = R.simularLutaContraChefao([eu], [abre, neutro, resiste], 50);
   const derrubados = s.log.filter((l) => l.contra && !l.troca).map((l) => l.contra);
-  assert.equal(derrubados.join(","), ["Abre", "Resiste", "Neutro"].join(","), JSON.stringify(s.log));
+  assert.equal(derrubados.join(","), ["Abre", "Neutro", "Resiste"].join(","), JSON.stringify(s.log));
 });
 
 // Revisão de 2026-09-30: "vantagem" é QUALQUER golpe de dano super efetivo, não só o
@@ -100,4 +100,24 @@ test("luta em dupla: o chefão repõe quem tem vantagem, não a ordem do time", 
   const s = R.simularDuplaContraChefao([eu1, eu2], [f("A", golpe("F"), ["Normal"]), f("B", golpe("F"), ["Normal"]), f("Neutro", golpe("F"), ["Normal"]), f("Planta", golpe("E", { tipo: "Grass" }), ["Normal"])], 50);
   const ordem = s.log.filter((l) => l.derruba).map((l) => l.derruba);
   assert.ok(ordem.indexOf("Planta") !== -1 && ordem.indexOf("Planta") < ordem.indexOf("Neutro"), JSON.stringify(ordem));
+});
+
+// Regra oficial (battle_ai_switch_items.c): ordena pela tipagem ofensiva, aceita o primeiro com golpe super efetivo e,
+// sem ninguém, escolhe o de maior dano.
+test("oficial: entre os com golpe super efetivo, vence a melhor tipagem ofensiva, não quem resiste mais", () => {
+  const eu = { u: unidade(efDe([]), golpe("F", { tipo: "Water" }), { tipos: ["Water"] }), frac: 1, vivo: true, status: {}, bonus: { estagios: {}, crit: 0, mult: 1, semGolpe: [] } };
+  const part = (nome, golpes, tipos) => ({ u: unidade(efDe([]), golpes[0], { sp: { n: nome, sname: nome }, nome, tipos, golpesProntos: golpes }), frac: 1, vivo: true, status: {}, bonus: { estagios: {}, crit: 0, mult: 1, semGolpe: [] } });
+  const se = golpe("E", { tipo: "Grass" });
+  const neutroDeTipo = part("NeutroDeTipo", [se], ["Normal"]);
+  const grassDeTipo = part("GrassDeTipo", [se], ["Grass"]);
+  assert.equal(R.escolherProximoDoChefao([neutroDeTipo, grassDeTipo], [eu], 50), grassDeTipo, "Grass (2x contra Water) tem nota maior que Normal (1x), mesmo vindo depois na fila");
+});
+
+test("oficial: o melhor tipado sem golpe super efetivo é descartado e entra o próximo", () => {
+  const eu = { u: unidade(efDe([]), golpe("F", { tipo: "Water" }), { tipos: ["Water"] }), frac: 1, vivo: true, status: {}, bonus: { estagios: {}, crit: 0, mult: 1, semGolpe: [] } };
+  const part = (nome, golpes, tipos) => ({ u: unidade(efDe([]), golpes[0], { sp: { n: nome, sname: nome }, nome, tipos, golpesProntos: golpes }), frac: 1, vivo: true, status: {}, bonus: { estagios: {}, crit: 0, mult: 1, semGolpe: [] } });
+  const se = golpe("E", { tipo: "Grass" }), neutro = golpe("F");
+  const bomTipoSemGolpe = part("BomTipoSemGolpe", [neutro], ["Grass"]);
+  const tipoNeutroComGolpe = part("TipoNeutroComGolpe", [se], ["Normal"]);
+  assert.equal(R.escolherProximoDoChefao([bomTipoSemGolpe, tipoNeutroComGolpe], [eu], 50), tipoNeutroComGolpe);
 });

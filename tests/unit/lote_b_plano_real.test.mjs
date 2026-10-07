@@ -97,3 +97,19 @@ test("estratégia de clima: com o pool de fogo/sol contra a Winona 1 o Torkoal n
   }
   assert.equal(res.escolhidos.length, 6);
 });
+
+// Caso fixo que a sabotagem 'loteB-estrategia-sem-armador' pega (achado de 06/10, depois da regra oficial do próximo do chefão):
+// marco 7, elenco de chuva contra o Brawly 2 - o Politoed viraria "armador" sem nunca entrar na luta simulada.
+test("estratégia de clima: Brawly 2 com elenco de chuva só declara armador que entra na luta (marco 7)", async () => {
+  const { carregarRegras: carregar } = await import("./carregar_regras.mjs");
+  const R7 = carregar({ milestone: 7, difficulty: "ace" });
+  const nomes = ["Ninetales", "Politoed", "Pelipper", "Tyranitar", "Hippowdon", "Abomasnow", "Clefable", "Azumarill", "Granbull", "Wigglytuff"];
+  const cands = nomes.map((n) => R7.SPECIES.find((s) => s && s.n === n)).filter(Boolean).map((sp) => ({ sp, owned: sp.x }));
+  const brawly2 = R7.BOSSES.find((b) => b.name === "Brawly 2");
+  const res = R7.montarTimeContraChefao(cands, brawly2.party, 50, {});
+  assert.equal(res.escolhidos.length, 6);
+  if (res.estrategia) {
+    const n = res.estrategia.armador;
+    assert.ok(res.simulacao.log.some((l) => l.meu === n || l.entra === n), "armador " + n + " declarado mas não entrou");
+  }
+});

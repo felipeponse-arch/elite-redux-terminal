@@ -183,21 +183,39 @@
     "fonte": "curadoria-do-projeto",
     "versao": "2.65beta"
   },
-  "SPECIES_CLAYDOL": {
-    "ability": "Ancient Idol",
-    "nature": "Careful",
-    "evs": "252 HP / 252 Def / 4 SpD",
-    "item": "Leftovers",
-    "moves": [
-      "Ancient Power",
-      "Psychic",
-      "Earth Power",
-      "Recover"
-    ],
-    "note": "Ancient Idol troca a base de ataque para Def/SpD (105/120 — bem maior que Atk/SpA 70/90). Por isso Careful: perder SpA não custa nada, e investir em SpD ataca e defende ao mesmo tempo. Mystic Power (innate) dá STAB 1.5x em todos os golpes, mesmo os que não batem com o tipo do Claydol.",
-    "fonte": "curadoria-do-projeto",
-    "versao": "2.65beta"
-  },
+  "SPECIES_CLAYDOL": [
+    {
+      "ability": "Ancient Idol",
+      "nature": "Careful",
+      "evs": "252 HP / 252 Def / 4 SpD",
+      "item": "Leftovers",
+      "moves": [
+        "Ancient Power",
+        "Psychic",
+        "Earth Power",
+        "Recover"
+      ],
+      "note": "Ancient Idol troca a base de ataque para Def/SpD (105/120 — bem maior que Atk/SpA 70/90). Por isso Careful: perder SpA não custa nada, e investir em SpD ataca e defende ao mesmo tempo. Mystic Power (innate) dá STAB 1.5x em todos os golpes, mesmo os que não batem com o tipo do Claydol.",
+      "fonte": "curadoria-do-projeto",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "equilibrado",
+      "ability": "Twist. Dimension",
+      "nature": "Sassy",
+      "evs": "6 HP / 252 Def / 252 SpD",
+      "item": "Shell Bell",
+      "moves": [
+        "Cosmic Power",
+        "Earth Power",
+        "Stored Power",
+        "Dazzling Gleam"
+      ],
+      "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Reverse Nuke\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Extrasensory / Ice Beam / Shadow Ball / Grass Knot.",
+      "fonte": "dex-strategy-do-jogo",
+      "versao": "2.65beta"
+    }
+  ],
   "SPECIES_ZYGARDE_10": {
     "ability": "Overwhelm",
     "nature": "Jolly",
@@ -1144,21 +1162,39 @@
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
-  "SPECIES_WHIMSICOTT": {
-    "ability": "Prankster",
-    "nature": "Calm",
-    "evs": "252 HP / 4 Def / 252 SpD",
-    "item": "Light Clay",
-    "moves": [
-      "Take Flight",
-      "Strength Sap",
-      "Light Screen",
-      "Reflect"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Light Clay / Leftovers.",
-    "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
-  },
+  "SPECIES_WHIMSICOTT": [
+    {
+      "ability": "Prankster",
+      "nature": "Calm",
+      "evs": "252 HP / 4 Def / 252 SpD",
+      "item": "Light Clay",
+      "moves": [
+        "Take Flight",
+        "Strength Sap",
+        "Light Screen",
+        "Reflect"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Light Clay / Leftovers.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "defensivo",
+      "ability": "Prankster",
+      "nature": "Bold",
+      "evs": "252 HP / 252 Def / 4 SpD",
+      "item": "Leftovers",
+      "moves": [
+        "Strength Sap",
+        "Protect",
+        "Leech Seed",
+        "Worry Seed"
+      ],
+      "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Stallcott\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Toxic / Giga Drain / Draining Kiss.",
+      "fonte": "dex-strategy-do-jogo",
+      "versao": "2.65beta"
+    }
+  ],
   "SPECIES_PINSIR_MEGA": {
     "ability": "Hyper Aggressive",
     "nature": "Adamant",
@@ -2134,21 +2170,39 @@
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
-  "SPECIES_DEWGONG": {
-    "ability": "Arctic Fur",
-    "nature": "Relaxed",
-    "evs": "252 HP / 252 Def / 4 Def",
-    "item": "Light Clay",
-    "moves": [
-      "Freeze-Dry",
-      "Slack Off",
-      "Knock Off",
-      "Flip Turn"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
-    "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
-  },
+  "SPECIES_DEWGONG": [
+    {
+      "ability": "Arctic Fur",
+      "nature": "Relaxed",
+      "evs": "252 HP / 252 Def / 4 Def",
+      "item": "Light Clay",
+      "moves": [
+        "Freeze-Dry",
+        "Slack Off",
+        "Knock Off",
+        "Flip Turn"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "equilibrado",
+      "ability": "Fur Coat",
+      "nature": "Relaxed",
+      "evs": "248 HP / 252 Def / 8 SpA",
+      "item": "Light Clay",
+      "moves": [
+        "Flip Turn",
+        "Freeze-Dry",
+        "Slack Off",
+        "Encore"
+      ],
+      "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"The Gong :skull:\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Toxic / Heal Bell / Scald.",
+      "fonte": "dex-strategy-do-jogo",
+      "versao": "2.65beta"
+    }
+  ],
   "SPECIES_PINCURCHIN": {
     "ability": "Sap Sipper",
     "nature": "Bold",
@@ -2284,21 +2338,39 @@
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
-  "SPECIES_SIGILYPH": {
-    "ability": "Low Visibility",
-    "nature": "Modest",
-    "evs": "252 HP / 128 Def / 128 SpD",
-    "item": "Leftovers",
-    "moves": [
-      "Stored Power",
-      "Cosmic Power",
-      "Protect",
-      "Roost"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Leftovers / Sitrus Berry.",
-    "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
-  },
+  "SPECIES_SIGILYPH": [
+    {
+      "ability": "Low Visibility",
+      "nature": "Modest",
+      "evs": "252 HP / 128 Def / 128 SpD",
+      "item": "Leftovers",
+      "moves": [
+        "Stored Power",
+        "Cosmic Power",
+        "Protect",
+        "Roost"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Leftovers / Sitrus Berry.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "equilibrado",
+      "ability": "Dreamcatcher",
+      "nature": "Timid",
+      "evs": "6 HP / 252 SpA / 252 Spe",
+      "item": "Shell Bell",
+      "moves": [
+        "Hypnosis",
+        "Shadow Ball",
+        "Dream Eater",
+        "Ice Beam"
+      ],
+      "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Your dreams are mine now\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: item Focus Sash; golpe Dazzling Gleam.",
+      "fonte": "dex-strategy-do-jogo",
+      "versao": "2.65beta"
+    }
+  ],
   "SPECIES_LUCARIO": {
     "ability": "Justified",
     "nature": "Timid",
@@ -2434,21 +2506,39 @@
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
-  "SPECIES_FERALIGATR": {
-    "ability": "Intimidate",
-    "nature": "Modest",
-    "evs": "252 HP or Spe / 252 SpA / 6 SpD",
-    "item": "",
-    "moves": [
-      "Hydro Cannon",
-      "Hyper Beam",
-      "Blizzard",
-      "Flip Turn"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Feraligite / Shell Bell / Choice Specs.",
-    "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
-  },
+  "SPECIES_FERALIGATR": [
+    {
+      "ability": "Intimidate",
+      "nature": "Modest",
+      "evs": "252 HP or Spe / 252 SpA / 6 SpD",
+      "item": "",
+      "moves": [
+        "Hydro Cannon",
+        "Hyper Beam",
+        "Blizzard",
+        "Flip Turn"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Feraligite / Shell Bell / Choice Specs.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "equilibrado",
+      "ability": "Predator",
+      "nature": "Adamant",
+      "evs": "252 HP / 252 Atk / 4 Spe",
+      "item": "Assault Vest",
+      "moves": [
+        "Deathroll",
+        "Psychic Fangs",
+        "Ice Fang",
+        "Crunch"
+      ],
+      "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Bulky Quad Bite\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+      "fonte": "dex-strategy-do-jogo",
+      "versao": "2.65beta"
+    }
+  ],
   "SPECIES_KINGLER_MEGA": {
     "ability": "Swift Swim",
     "nature": "Jolly",
@@ -2509,21 +2599,39 @@
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
-  "SPECIES_BLASTOISE": {
-    "ability": "Regenerator",
-    "nature": "Modest",
-    "evs": "252 SpA / 6 SpD / 252 Spe",
-    "item": "White Herb",
-    "moves": [
-      "Hydro Pump",
-      "Shell Smash",
-      "Ice Beam",
-      "Aura Sphere"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
-    "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
-  },
+  "SPECIES_BLASTOISE": [
+    {
+      "ability": "Regenerator",
+      "nature": "Modest",
+      "evs": "252 SpA / 6 SpD / 252 Spe",
+      "item": "White Herb",
+      "moves": [
+        "Hydro Pump",
+        "Shell Smash",
+        "Ice Beam",
+        "Aura Sphere"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "equilibrado",
+      "ability": "Regenerator",
+      "nature": "Modest",
+      "evs": "252 HP / 252 SpA / 4 SpD",
+      "item": "Assault Vest",
+      "moves": [
+        "Rapid Spin",
+        "Flip Turn",
+        "Water Pulse",
+        "Ice Beam"
+      ],
+      "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Regenvest\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+      "fonte": "dex-strategy-do-jogo",
+      "versao": "2.65beta"
+    }
+  ],
   "SPECIES_EXEGGUTOR_REDUX": {
     "ability": "Triage",
     "nature": "Modest",
@@ -3032,6 +3140,570 @@
     ],
     "note": "Do deeeep player no Build Workshop (04/10). Os dois últimos slots eram 'Focus Blast / Dazzling Gleam / Belch' nos dois: ficaram as duas primeiras opções (a Belch combina com a Salac Berry consumida).",
     "fonte": "discord-build-workshop-2.65",
+    "versao": "2.65beta"
+  },
+  "SPECIES_VENUSAUR": [
+    {
+      "estilo": "defensivo",
+      "ability": "Chloroplast",
+      "nature": "Bold",
+      "evs": "252 HP / 252 Def / 4 SpD",
+      "item": "Leftovers",
+      "moves": [
+        "Solar Beam",
+        "Sludge Bomb",
+        "Leech Seed",
+        "Sleep Powder"
+      ],
+      "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Physical Tank\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+      "fonte": "dex-strategy-do-jogo",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "equilibrado",
+      "ability": "Chloroplast",
+      "nature": "Modest",
+      "evs": "252 HP / 252 SpA / 4 Spe",
+      "item": "Wide Lens",
+      "moves": [
+        "Solar Beam",
+        "Sludge Bomb",
+        "Earth Power",
+        "Sleep Powder"
+      ],
+      "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Wide Lens, Chloroplast\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+      "fonte": "dex-strategy-do-jogo",
+      "versao": "2.65beta"
+    }
+  ],
+  "SPECIES_CHARIZARD_MEGA_X": {
+    "estilo": "ofensivo",
+    "ability": "Tough Claws",
+    "nature": "Jolly",
+    "evs": "252 Atk / 4 Def / 252 Spe",
+    "item": "Charizardite X",
+    "moves": [
+      "Dragon Dance",
+      "Flare Blitz",
+      "Dragon Rush",
+      "Dual Wingbeat"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Physical Setup Sweeper\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Dragon Claw.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_ESCAVALIER": {
+    "estilo": "equilibrado",
+    "ability": "No Guard",
+    "nature": "Jolly",
+    "evs": "252 Atk / 4 Def / 252 Spe",
+    "item": "Leftovers",
+    "moves": [
+      "Megahorn",
+      "Iron Head",
+      "Protect",
+      "Swords Dance"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Speed Boost Sweeper\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Close Combat / Drill Run.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_WARTORTLE": {
+    "estilo": "equilibrado",
+    "ability": "Stamina",
+    "nature": "Modest",
+    "evs": "252 HP / 20 Def / 216 SpA / 22 SpD",
+    "item": "Eviolite",
+    "moves": [
+      "Blizzard",
+      "Hydro Pump",
+      "Aura Sphere",
+      "Rapid Spin"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Turtle Power\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_GALLADE_MEGA": {
+    "estilo": "equilibrado",
+    "ability": "Intrepid Sword",
+    "nature": "Jolly",
+    "evs": "4 HP / 252 Atk / 252 Spe",
+    "item": "Galladite",
+    "moves": [
+      "Shadow Sneak",
+      "Excalibur",
+      "Psycho Cut",
+      "Sacred Sword"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Sir Galahad\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_DRAGAPULT": {
+    "estilo": "ofensivo",
+    "ability": "Parental Bond",
+    "nature": "Jolly",
+    "evs": "4 HP / 252 Atk / 252 Spe",
+    "item": "Colbur Berry",
+    "moves": [
+      "Poltergeist",
+      "Dragon Darts",
+      "U-turn",
+      "Will-O-Wisp"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Physical Parental Bond\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_FORRETRESS": {
+    "estilo": "defensivo",
+    "ability": "Stamina",
+    "nature": "Relaxed",
+    "evs": "252 HP / 252 Def / 4 SpD",
+    "item": "Leftovers",
+    "moves": [
+      "Body Press",
+      "Gyro Ball",
+      "Protect",
+      "Toxic"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Steel Sentry\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_ALAKAZAM_MEGA": {
+    "estilo": "equilibrado",
+    "ability": "Mystic Power",
+    "nature": "Timid",
+    "evs": "252 SpA / 4 SpD / 252 Spe",
+    "item": "Alakazite",
+    "moves": [
+      "Psyshock",
+      "Calm Mind",
+      "Shadow Ball",
+      "Focus Blast"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Almighty STAB\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_TORTERRA": {
+    "estilo": "ofensivo",
+    "ability": "Stamina",
+    "nature": "Adamant",
+    "evs": "130 HP / 252 Atk / 124 Spe",
+    "item": "Sitrus Berry",
+    "moves": [
+      "Shell Smash",
+      "Solar Blade",
+      "Earthquake",
+      "Stone Edge"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Shell Smash in the Sun\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe High Horsepower.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_TREVENANT": {
+    "estilo": "equilibrado",
+    "ability": "Grassy Surge",
+    "nature": "Careful",
+    "evs": "252 HP / 252 SpD",
+    "item": "Aguav Berry",
+    "moves": [
+      "Substitute",
+      "Leech Seed",
+      "Curse",
+      "Protect"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Please don't disturb the Tree\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_ARAQUANID": {
+    "estilo": "equilibrado",
+    "ability": "Water Veil",
+    "nature": "Adamant",
+    "evs": "252 HP / 4 Atk / 252 SpD",
+    "item": "Leftovers",
+    "moves": [
+      "Liquidation",
+      "Leech Life",
+      "Protect",
+      "Curse"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Special Attacker be-gone\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_GALVANTULA": {
+    "estilo": "ofensivo",
+    "ability": "Spider Lair",
+    "nature": "Timid",
+    "evs": "252 SpA / 4 SpD / 252 Spe",
+    "item": "Focus Sash",
+    "moves": [
+      "Thunderbolt",
+      "Volt Switch",
+      "Bug Buzz",
+      "Energy Ball"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Spider Lair Lead\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_CHANDELURE": {
+    "estilo": "equilibrado",
+    "ability": "Flash Fire",
+    "nature": "Timid",
+    "evs": "4 HP / 252 SpA / 252 Spe",
+    "item": "Choice Scarf",
+    "moves": [
+      "Fire Blast",
+      "Shadow Ball",
+      "Energy Ball",
+      "Trick"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Candle of doom\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Psychic / Heat Wave.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_STEELIX": {
+    "estilo": "equilibrado",
+    "ability": "Impenetrable",
+    "nature": "Adamant",
+    "evs": "252 HP / 252 Atk / 4 Def",
+    "item": "Leftovers",
+    "moves": [
+      "Double-Edge",
+      "Dragon Tail",
+      "Stealth Rock",
+      "Shore Up"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Great Wall of Johto\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Body Press.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_MAGEARNA": {
+    "estilo": "equilibrado",
+    "ability": "Pixilate",
+    "nature": "Calm",
+    "evs": "252 HP / 4 SpA / 252 SpD",
+    "item": "Leftovers",
+    "moves": [
+      "Heart Swap",
+      "Recover",
+      "Boomburst",
+      "Flash Cannon"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Deer Repellent\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_SILVALLY": {
+    "estilo": "equilibrado",
+    "ability": "Unaware",
+    "nature": "Adamant",
+    "evs": "248 HP / 252 Atk",
+    "item": "Silk Scarf",
+    "moves": [
+      "Extreme Speed",
+      "Shadow Claw",
+      "Recover",
+      "Swords Dance"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Demi-God Ekiller\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: item Life Orb / Leftovers; golpe Frustration / Parting Shot.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_BASTIODON": {
+    "estilo": "equilibrado",
+    "ability": "Stamina",
+    "nature": "Calm",
+    "evs": "248 HP / 8 Def / 248 SpD",
+    "item": "Leftovers",
+    "moves": [
+      "Stealth Rock",
+      "Shore Up",
+      "Body Press",
+      "Iron Defense"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Bastion\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: item Life Orb; golpe Toxic / Roar.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_MILOTIC": [
+    {
+      "estilo": "equilibrado",
+      "ability": "Marvel Scale",
+      "nature": "Bold",
+      "evs": "248 HP / 252 Def / 8 SpA",
+      "item": "Flame Orb",
+      "moves": [
+        "Recover",
+        "Haze",
+        "Scald",
+        "Moonblast"
+      ],
+      "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Mixed Wall\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+      "fonte": "dex-strategy-do-jogo",
+      "versao": "2.65beta"
+    },
+    {
+      "estilo": "ofensivo",
+      "ability": "Competitive",
+      "nature": "Modest",
+      "evs": "252 HP / 4 Def / 252 SpA",
+      "item": "Shell Bell",
+      "moves": [
+        "Scald",
+        "Moonblast",
+        "Flip Turn",
+        "Recover"
+      ],
+      "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Comp Sweeper\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+      "fonte": "dex-strategy-do-jogo",
+      "versao": "2.65beta"
+    }
+  ],
+  "SPECIES_XERNEAS": {
+    "estilo": "equilibrado",
+    "ability": "Pixilate",
+    "nature": "Modest",
+    "evs": "4 Def / 252 SpA / 252 Spe",
+    "item": "Power Herb",
+    "moves": [
+      "Geomancy",
+      "Boomburst",
+      "Earth Power",
+      "Ingrain"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"DEER\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Substitute.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_SHUCKLE": {
+    "estilo": "equilibrado",
+    "ability": "Contrary",
+    "nature": "Impish",
+    "evs": "252 HP / 252 Def / 4 SpD",
+    "item": "Leftovers",
+    "moves": [
+      "Strength",
+      "Infestation",
+      "Toxic",
+      "Pain Split"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Shuck\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Encore.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_FURRET": {
+    "estilo": "equilibrado",
+    "ability": "Adaptability",
+    "nature": "Adamant",
+    "evs": "252 Atk / 4 SpD / 252 Spe",
+    "item": "Shell Bell",
+    "moves": [
+      "Coil",
+      "Substitute",
+      "Body Slam",
+      "Focus Punch"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Subbell\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: item Salac Berry (Belly Drum); golpe Belly Drum / Return / Headbutt / Drain Punch / Fire Punch.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_TAUROS": {
+    "estilo": "equilibrado",
+    "ability": "Rampage",
+    "nature": "Jolly",
+    "evs": "6 HP / 252 Atk / 252 Spe",
+    "item": "Choice Band",
+    "moves": [
+      "Giga Impact",
+      "Zen Headbutt",
+      "Rock Slide",
+      "High Horsepower"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Deleted by Giga Impact\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Earthquake.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_WEAVILE": {
+    "estilo": "ofensivo",
+    "ability": "Hyper Aggressive",
+    "nature": "Jolly",
+    "evs": "252 Atk / 4 Def / 252 Spe",
+    "item": "Focus Sash",
+    "moves": [
+      "Swords Dance",
+      "Triple Axel",
+      "Knock Off",
+      "Ice Shard"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Physical Sweeper\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Wicked Blow.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_AZUMARILL": {
+    "estilo": "equilibrado",
+    "ability": "Sap Sipper",
+    "nature": "Adamant",
+    "evs": "252 HP / 252 Atk / 6 SpD",
+    "item": "Shell Bell",
+    "moves": [
+      "Aqua Jet",
+      "Play Rough",
+      "Belly Drum",
+      "Ice Punch"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Shell Bell Terror\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_NINJASK": {
+    "estilo": "equilibrado",
+    "ability": "Speed Force",
+    "nature": "Adamant",
+    "evs": "252 Atk / 6 Def / 252 Spe",
+    "item": "Focus Sash",
+    "moves": [
+      "Swords Dance",
+      "X-Scissor",
+      "Fly",
+      "Dig"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Fly-By\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: item Heavy-Duty Boots; golpe Protect.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_EXCADRILL": {
+    "estilo": "ofensivo",
+    "ability": "Tough Claws",
+    "nature": "Jolly",
+    "evs": "252 Atk / 4 SpD / 252 Spe",
+    "item": "Life Orb",
+    "moves": [
+      "Drill Run",
+      "Iron Head",
+      "Strength",
+      "Swords Dance"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Sand Rush Sweeper\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: item Leftovers; golpe High Horsepower / Rapid Spin.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_BUTTERFREE": {
+    "estilo": "equilibrado",
+    "ability": "Tinted Lens",
+    "nature": "Timid",
+    "evs": "252 SpA / 6 SpD / 252 Spe",
+    "item": "Wide Lens",
+    "moves": [
+      "Sleep Powder",
+      "Bug Buzz",
+      "Dream Eater",
+      "Hurricane"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Fast Sleeper\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_PARASECT": {
+    "estilo": "defensivo",
+    "ability": "Shadow Tag",
+    "nature": "Adamant",
+    "evs": "252 Atk / 6 Def / 252 SpD",
+    "item": "Leftovers",
+    "moves": [
+      "Fell Stinger",
+      "Leech Seed",
+      "Spore",
+      "Shadow Sneak"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Special Trapper\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_PIDGEOT": {
+    "estilo": "ofensivo",
+    "ability": "Majestic Bird",
+    "nature": "Timid",
+    "evs": "6 HP / 252 SpA / 252 Spe",
+    "item": "Wide Lens",
+    "moves": [
+      "Hurricane",
+      "Heat Wave",
+      "Hyper Voice",
+      "Focus Blast"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Majestic Lens\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Ominous Wind / Twister.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_RATICATE": {
+    "estilo": "ofensivo",
+    "ability": "Looter",
+    "nature": "Adamant",
+    "evs": "252 Atk / 252 Spe",
+    "item": "Flame Orb",
+    "moves": [
+      "Facade",
+      "Hyper Fang",
+      "Crunch",
+      "Thunder Fang"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"RAT POWER\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Protect / Sucker Punch.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_LUNATONE": {
+    "estilo": "ofensivo",
+    "ability": "Sage Power",
+    "nature": "Modest",
+    "evs": "6 HP / 252 SpA / 252 Spe",
+    "item": "Choice Scarf",
+    "moves": [
+      "Power Gem",
+      "Psychic",
+      "Dark Pulse",
+      "Moonblast"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"The Moon (Walmart Blood Moon)\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_SLOWBRO_MEGA": {
+    "estilo": "equilibrado",
+    "ability": "Unaware",
+    "nature": "Sassy",
+    "evs": "252 HP / 4 Def / 252 SpD",
+    "item": "Slowbronite",
+    "moves": [
+      "Body Press",
+      "Iron Defense",
+      "Amnesia",
+      "Slack Off"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Unbreakable Sweeper\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Stored Power / Surf.",
+    "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_SWALOT_MEGA": {
+    "estilo": "defensivo",
+    "ability": "Regenerator",
+    "nature": "Careful",
+    "evs": "252 HP / 4 Def / 252 SpD",
+    "item": "Swalotite",
+    "moves": [
+      "Sludge Bomb",
+      "Recover",
+      "Stockpile",
+      "Protect"
+    ],
+    "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Stockpile Wall\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Gunk Shot.",
+    "fonte": "dex-strategy-do-jogo",
     "versao": "2.65beta"
   }
 }
