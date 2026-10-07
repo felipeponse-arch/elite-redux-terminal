@@ -2218,6 +2218,7 @@
     if (!temPlanos) return comFim(comSaque(semPlanos, eu, foe));
     // Golpes de status (regras simples): cada lado escolhe o plano que mais rende
     // contra o outro atacando direto; depois os dois planos correm juntos.
+    var planosQueValeram = { eu: null, ele: null };
     function corridaCom(pe, pf) {
       // Taunt do mais rápido cancela o plano do outro; Haze zera o setup do outro.
       var euMaisRapido = v1 > v2;
@@ -2232,8 +2233,9 @@
       if (pf && pf.sustenta && eu.ef.expulsaQuemEnrola && !foe.ef.naoSaiForcado) pf = null;
       if (pe && pe.sustenta && foe.ef.expulsaQuemEnrola && !eu.ef.naoSaiForcado) pe = null;
       var efE = pe, efF = pf;
-      if (pe && pe.zeraSetup && pf && pf.tipo === "setup") efF = Object.assign({}, pf, { multX: 1, multY: 1, velX: 1 });
-      if (pf && pf.zeraSetup && pe && pe.tipo === "setup") efE = Object.assign({}, pe, { multX: 1, multY: 1, velX: 1 });
+      if (pe && pe.zeraSetup && pf && pf.tipo === "setup") efF = Object.assign({}, pf, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
+      if (pf && pf.zeraSetup && pe && pe.tipo === "setup") efE = Object.assign({}, pe, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
+      planosQueValeram = { eu: efE, ele: efF };
       var dM = st.meu, dD = st.dele, hpE = hpEu, hpF = hpFoe, atE = 0, atF = 0, velE = 1, velF = 1, inverte = false;
       // Golpe de status que a habilidade usa ao entrar (sem gastar turno).
       function naEntradaDe(x, y, golpeY, danoY) {
@@ -2301,9 +2303,15 @@
     var vale = (ini.detalhe || semMeuPlano.nota < 1) && !(euPrimeiro === false && elePrecisa <= 1);
     var planoEu = vale ? melhorPlanoDuelo(eu, foe, baseEu, nivel, function (ef) { var r = corridaCom(ef, planoEle); return { nota: r.nota, fracEu: r.restoEu / eu.stats[0] }; }) : null;
     if (planoEu) planoEle = planoDele(planoEu);
+    planosQueValeram = { eu: null, ele: null };
     var final = planoEu || planoEle ? corridaCom(planoEu, planoEle) : semPlanos;
     final = comSaque(final, eu, foe);
-    if (ini.detalhe) { var d = comFim(final); d.planoEu = planoEu ? planoEu.nome : null; d.planoEle = planoEle ? planoEle.nome : null; return d; }
+    if (ini.detalhe) {
+      var d = comFim(final); d.planoEu = planoEu ? planoEu.nome : null; d.planoEle = planoEle ? planoEle.nome : null;
+      var ganhos = function (pl) { return pl && pl.tipo === "setup" && pl.estagiosGanhos && Object.keys(pl.estagiosGanhos).length ? pl.estagiosGanhos : null; };
+      d.setupEu = ganhos(planosQueValeram.eu); d.setupEle = ganhos(planosQueValeram.ele);
+      return d;
+    }
     return comFim(final);
   }
 
@@ -2845,6 +2853,9 @@
       if (gY) r.multY = 1 / multDoEstagio((e[gY.cat === "F" ? "def" : "spd"] || 0) * mult);
       r.velX = multDoEstagio((e.spe || 0) * mult);
       r.custo = e.custo || 0;
+      // Estágios que ficam com quem fez o setup (ticket 05): levados ao próximo duelo se ele continuar em campo.
+      r.estagiosGanhos = {};
+      ["atk", "def", "spa", "spd", "spe"].forEach(function (k) { if (e[k]) r.estagiosGanhos[k] = e[k] * mult; });
       return r;
     }
     if (!statusPassaDuelo(x, y)) return null;
@@ -3461,7 +3472,14 @@
     }
     aplicarClima();
     function luta(c, f) { return resultadoDoDuelo(comoEstaDuelo(c), comoEstaDuelo(f), nivel, { fracEu: c.frac, fracFoe: f.frac, detalhe: true }); }
+    // Estágios zeram para quem entra em campo (battle_main.c SwitchInClearSetData) e para quem
+    // desmaia; quem fica em campo depois de vencer um duelo continua com o setup (ticket 05).
+    function somaEstagios(alvo, ganhos) {
+      if (!ganhos) return;
+      Object.keys(ganhos).forEach(function (k) { alvo[k] = Math.max(-6, Math.min(6, (alvo[k] || 0) + ganhos[k])); });
+    }
     function entraMeu(c) {
+      c.bonus.estagios = {};
       if (cl && cl.armadorIdx !== null && c === time[cl.armadorIdx]) { climaLigado = true; climaRestante = cl.duracao; aplicarClima(); }
       if (c.u.ef.curaTimeNaEntrada) time.forEach(function (x) { x.status = {}; }); // Soothing Aroma
       if (c.u.ef.brasas) ladoDele.brasas = true; // Hot Coals: queima o próximo que entrar do lado dele
@@ -3471,6 +3489,7 @@
       if (c.frac <= 0) { c.vivo = false; c.frac = 0; }
     }
     function entraDele(f) {
+      f.bonus.estagios = {};
       if (ladoDele.brasas && podeSofrerStatusDuelo(f.u, "queimar")) { f.status.queimar = 1; ladoDele.brasas = false; }
       // Stakeout: quem já está em campo bate 2x no que acabou de entrar (1º golpe).
       if (atual && atual.vivo && atual.u.ef.tocaia) atual.bonus.primeiroGolpe = atual.u.ef.tocaia;
@@ -3603,10 +3622,10 @@
       if (perece && r.turnos > perece + 1) { atual.vivo = false; atual.frac = 0; f.vivo = false; f.frac = 0; }
       else if (r.venceu === true) {
         var custoFinal = custoDoGolpeFinalDuelo(comoEstaDuelo(atual), comoEstaDuelo(f), f.frac, nivel);
-        atual.frac = r.fracEu - custoFinal; f.vivo = false; f.frac = 0; nocaute(atual, f);
+        atual.frac = r.fracEu - custoFinal; f.vivo = false; f.frac = 0; somaEstagios(atual.bonus.estagios, r.setupEu); nocaute(atual, f);
         if (atual.frac <= 0) { atual.frac = 0; atual.vivo = false; } // o recuo do nocaute derruba os dois
       }
-      else if (r.venceu === false) { f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; nocaute(f, atual); }
+      else if (r.venceu === false) { f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; somaEstagios(f.bonus.estagios, r.setupEle); nocaute(f, atual); }
       // Empate de velocidade: conta como derrota (o lado seguro), o dele fica com o HP que sobrou.
       else { f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; }
     }

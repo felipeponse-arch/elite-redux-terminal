@@ -1,6 +1,6 @@
 # 05 — Setup entre duelos na mesma luta
 
-Status: a-avaliar
+Status: resolvido
 Bloqueado por: nenhum
 Agentes: meta-pokemon, playtester-de-build
 
@@ -13,3 +13,7 @@ simulador passa a levar os boosts de um duelo 1x1 para o seguinte. Pesquisa prim
 ## Como verificar
 Teste: atacante com +2 vence o 2º Pokémon que antes perdia; sabotagem que zera os estágios é pega. Rank NÃO recalcula
 aqui (fica no 08).
+
+## Comentários
+
+07/10: confirmado no código (estágios zeram só ao entrar ou desmaiar). Implementado nos dois lados da luta contra o chefão; quem entra começa sem estágios. Exemplo do teste: sem levar o +2 do Swords Dance o 2º duelo é derrota, levando é vitória.

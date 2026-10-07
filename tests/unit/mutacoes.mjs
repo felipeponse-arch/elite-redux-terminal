@@ -1615,4 +1615,25 @@ export const MUTACOES = [
     de: "return antes || c.prio > 0 ? 4 : 2;",
     para: "return 0;",
   },
+  {
+    id: "setup-meu-nao-continua",
+    descricao: "meu Pokémon que vence o duelo perde o setup antes do próximo",
+    arquivo: "duelo.js",
+    de: "somaEstagios(atual.bonus.estagios, r.setupEu);",
+    para: "somaEstagios(atual.bonus.estagios, null);",
+  },
+  {
+    id: "setup-do-chefao-nao-continua",
+    descricao: "o Pokémon do chefão que vence o duelo perde o setup antes do meu próximo",
+    arquivo: "duelo.js",
+    de: "somaEstagios(f.bonus.estagios, r.setupEle);",
+    para: "somaEstagios(f.bonus.estagios, null);",
+  },
+  {
+    id: "setup-nao-registra-estagios",
+    descricao: "o plano de setup não registra os estágios que ganhou",
+    arquivo: "duelo.js",
+    de: "if (e[k]) r.estagiosGanhos[k] = e[k] * mult;",
+    para: "if (e[k]) r.estagiosGanhos[k] = 0;",
+  },
 ];
