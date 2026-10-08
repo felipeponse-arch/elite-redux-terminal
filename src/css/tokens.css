@@ -68,6 +68,17 @@
   /* Área mínima de toque (WCAG 2.5.8: 24 px; 44 px em tela de toque, no
      @media do responsivo.css). */
   --alvo-min: 24px;
+  /* Bordas seguras (ticket 15 da dívida, 2026-10-08): o viewport do template
+     usa viewport-fit=cover, então a página vai até a borda física e o entalhe,
+     a barra de gestos e os cantos arredondados do celular cobrem o que estiver
+     ali. Zero em tela sem entalhe. O cabeçalho usa --safe-top-cabecalho, que
+     vira 0 enquanto um aviso fixo (.sync-banner) ocupa o topo: o aviso já
+     carrega a borda segura e o cabeçalho abaixo dele não pode somá-la de novo. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-top-cabecalho: var(--safe-top);
   --radius-pill: 999px;
   /* Espaçamento (lote 3, 2026-10-04): seis degraus, iguais nos 3 temas. Hierarquia
      de raio: card de resultado = lg; o que mora dentro dele (veredito, bloco de

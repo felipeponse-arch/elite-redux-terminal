@@ -309,6 +309,42 @@
   }
   applyA11yPrefs(loadA11yPrefs());
 
+  // Cor da barra do navegador no celular (ticket 15 da dívida, 2026-10-08): o
+  // <meta name="theme-color"> acompanha o --bg do tema ativo (claro, escuro e alto
+  // contraste). Lê o valor JÁ resolvido pelo CSS em vez de repetir as cores aqui, então
+  // uma troca de paleta em tokens.css vale sozinha. Os três jeitos de o tema mudar têm
+  // gancho: tema do sistema (prefers-color-scheme), tema escolhido na plataforma
+  // (data-theme no <html>) e o alto contraste (data-high-contrast, ligado em Progresso).
+  function corDoTema() {
+    var cor = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+    if (!cor) return;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "theme-color");
+      document.head.appendChild(meta);
+    }
+    if (meta.getAttribute("content") !== cor) meta.setAttribute("content", cor);
+  }
+  corDoTema();
+  new MutationObserver(corDoTema).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-high-contrast"] });
+  if (window.matchMedia) {
+    var temaDoSistema = window.matchMedia("(prefers-color-scheme: dark)");
+    if (temaDoSistema.addEventListener) temaDoSistema.addEventListener("change", corDoTema);
+  }
+
+  // "Pular para o conteúdo": o href="#..." sozinho navega o iframe do artifact (ou
+  // recarrega o srcdoc) em vez de só rolar, então o clique é tratado aqui: foco direto
+  // no <main> (tabindex -1), e o próximo Tab já cai no primeiro controle da tela.
+  var linkPular = document.querySelector(".pular-conteudo");
+  if (linkPular) {
+    linkPular.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      var principal = document.getElementById("conteudo-principal");
+      if (principal) principal.focus();
+    });
+  }
+
   (function loadSave() {
     var raw = lsGet(STORE_KEY);
     if (raw) {

@@ -30,7 +30,10 @@
    curta - crédito ao NextDex/ForwardFeed e os mesmos 3 destinos. */
 .footer {
   border-top: 1px solid var(--border);
-  padding: 7px 24px;
+  /* Mesma ideia do .topbar: --pad-* mudam no @media, a barra de gestos soma embaixo. */
+  --pad-y: 7px;
+  --pad-x: 24px;
+  padding: var(--pad-y) max(var(--pad-x), var(--safe-right)) calc(var(--pad-y) + var(--safe-bottom)) max(var(--pad-x), var(--safe-left));
   font-size: var(--fs-pequeno);
   color: var(--text-dim);
   background: var(--surface);
@@ -51,7 +54,7 @@
    crédito continua no title do link do NextDex - e o texto corta com "…" em
    vez de quebrar. */
 @media (max-width: 620px), (max-height: 600px) {
-  .footer { padding: 0 14px; }
+  .footer { --pad-y: 0px; --pad-x: 14px; }
   .footer .rodape { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* Aqui o link ocupa a altura toda da linha (~28 px) em vez de 44: o rodapé de uma linha
      só é decisão do usuário (teste "rodapé ocupa uma linha só", < 32 px) e uma área

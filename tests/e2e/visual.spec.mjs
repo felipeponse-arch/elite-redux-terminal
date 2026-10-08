@@ -146,3 +146,43 @@ test.describe("celular", () => {
     await print(page, "celular-ficha.png");
   });
 });
+
+// ---- celular nos 3 temas + entalhe (ticket 15 da dívida, 2026-10-08) ----
+// As referências "celular-*" acima são do tema claro; aqui entram o escuro e o
+// alto contraste, mais um celular com entalhe e barra de gestos simulados
+// (Emulation.setSafeAreaInsetsOverride) e o "Pular para o conteúdo" com foco.
+for (const [rotulo, opcoes] of [["escuro", { tema: "dark" }], ["alto-contraste", { altoContraste: true }]]) {
+  test.describe(`celular ${rotulo}`, () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+    test.beforeEach(({ page }) => preparar(page, opcoes));
+
+    test("lista da Dex", async ({ page }) => {
+      await abrirAba(page, "dex");
+      await print(page, `celular-${rotulo}-dex-lista.png`);
+    });
+
+    test("ficha", async ({ page }) => {
+      await abrirFicha(page, "Charizard");
+      await print(page, `celular-${rotulo}-ficha.png`);
+    });
+  });
+}
+
+test.describe("celular com entalhe", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("lista da Dex (entalhe de 47 px em cima, barra de gestos de 34 px embaixo)", async ({ page }) => {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 47, bottom: 34, left: 0, right: 0 } });
+    await preparar(page);
+    await abrirAba(page, "dex");
+    await print(page, "celular-entalhe-dex-lista.png");
+  });
+
+  test("Pular para o conteúdo com foco (escuro)", async ({ page }) => {
+    await preparar(page, { tema: "dark" });
+    await page.keyboard.press("Tab");
+    await expect(page.locator(".pular-conteudo")).toBeFocused();
+    await print(page, "celular-escuro-pular-conteudo.png");
+  });
+});

@@ -5,7 +5,11 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 16px 24px;
+  /* Folga própria em --pad-*: os @media do responsivo.css só trocam esses dois
+     números, e as bordas seguras (entalhe, barra de gestos) somam aqui. */
+  --pad-y: 16px;
+  --pad-x: 24px;
+  padding: calc(var(--pad-y) + var(--safe-top-cabecalho)) max(var(--pad-x), var(--safe-right)) var(--pad-y) max(var(--pad-x), var(--safe-left));
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   position: sticky;
@@ -133,6 +137,30 @@
    type matrix) stretches its ancestors instead of scrolling inside .scroll-x,
    which pushed the whole page sideways on a phone. */
 main { flex: 1; min-height: 0; min-width: 0; display: flex; }
+/* Alvo do "Pular para o conteúdo": o foco vai pra cá por código (tabindex -1), então
+   o anel global de :focus-visible não deve contornar a tela inteira. */
+main:focus { outline: none; }
+/* Pular para o conteúdo (ticket 15 da dívida, 2026-10-08): primeiro item da ordem
+   de Tab, escondido acima da tela até receber foco. Fixo e acima dos avisos fixos
+   (z-index 200), respeitando o entalhe. Cores invertidas como o aviso passageiro
+   (--text sobre --bg): contraste alto nos 3 temas. */
+.pular-conteudo {
+  position: fixed;
+  top: calc(var(--space-2) + var(--safe-top));
+  left: max(var(--space-2), var(--safe-left));
+  z-index: 300;
+  padding: var(--space-2) var(--space-4);
+  min-height: var(--alvo-min);
+  background: var(--text);
+  color: var(--bg);
+  font-size: var(--fs-texto);
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  box-shadow: var(--elev-2);
+  text-decoration: none;
+  transform: translateY(calc(-100% - var(--space-4) - var(--safe-top)));
+}
+.pular-conteudo:focus { transform: none; }
 .view { display: none; flex: 1; min-height: 0; min-width: 0; }
 .view.active { display: flex; }
 /* #view-dex é a única view com 2 filhos diretos (#dashboard + .dex-shell) -

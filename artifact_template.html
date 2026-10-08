@@ -1,5 +1,9 @@
 <title>Elite Redux Terminal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Cor da barra do navegador no celular. Este valor é só o de partida (fundo do
+     tema claro, --bg de src/css/tokens.css): em seguida o script do app
+     (corDoTema, em src/ui/nucleo.js) troca pelo --bg do tema que estiver ativo. -->
+<meta name="theme-color" content="#f6f4ec">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Fontes sem travar a primeira pintura (fase 8, 2026-09-24). Medido: a
@@ -64,6 +68,7 @@
 </div>
 
 <div id="app">
+  <a class="pular-conteudo" href="#conteudo-principal">Pular para o conteúdo</a>
   <header class="topbar">
     <div class="brand">
       <div class="brand-mark"><img src="__ARTE_RQ_ICONE_DATAURI__" alt="" width="40" height="40"></div>
@@ -119,7 +124,7 @@
     })();
   </script>
 
-  <main>
+  <main id="conteudo-principal" tabindex="-1">
     <section id="view-dex" class="view active">
       <!--
         Design proposal B, 2026-09-09: the Dex used to open straight into a

@@ -41,7 +41,7 @@
   /* Acima do rodapé (~30 px), não por cima dele: o aviso passageiro não cobre o link
      do rodapé (lote 3, 2026-10-04). Não captura toque (pointer-events: none), então
      também não bloqueia o botão que estiver embaixo. */
-  bottom: calc(var(--space-6) + var(--space-5));
+  bottom: calc(var(--space-6) + var(--space-5) + var(--safe-bottom));
   transform: translateX(-50%) translateY(var(--space-3));
   /* Neutro (redesenho 2026-09-24): é confirmação, não ação - o magenta
      forte fica pro botão principal da tela. Cor invertida do texto. */
@@ -65,8 +65,13 @@
   position: fixed; left: 0; right: 0; top: 0; z-index: 200;
   display: flex; align-items: center; justify-content: center; gap: 12px;
   background: var(--accent-2); color: var(--accent-ink);
-  font-size: var(--fs-texto); font-weight: 600; padding: 8px 14px; box-shadow: var(--shadow);
+  font-size: var(--fs-texto); font-weight: 600; box-shadow: var(--shadow);
+  /* Fixo no topo, por cima do entalhe: a borda segura entra no padding (o
+     syncBannerOffset mede a altura já com ela). */
+  padding: calc(8px + var(--safe-top)) max(14px, var(--safe-right)) 8px max(14px, var(--safe-left));
 }
+/* Com um aviso no topo o cabeçalho fica abaixo dele: quem cobre o entalhe é o aviso. */
+:root:has(.sync-banner:not([hidden])) { --safe-top-cabecalho: 0px; }
 /* The EXACT same bug as .tabs-more-panel earlier today: an author-
    stylesheet `display` always beats the browser's native [hidden]
    handling, regardless of the hidden attribute/property being correctly
