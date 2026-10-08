@@ -110,7 +110,7 @@
     var riskCount = {};
     USABLE_TYPES.forEach(function (atk) {
       members.forEach(function (sp) {
-        if (abilityTypeMod(atk, sp).mult >= 2) riskCount[atk] = (riskCount[atk] || 0) + 1;
+        if (abilityTypeMod(atk, sp).real >= 2) riskCount[atk] = (riskCount[atk] || 0) + 1;
       });
     });
     return Object.keys(riskCount).map(function (t) { return { t: t, n: riskCount[t] }; })

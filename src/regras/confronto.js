@@ -70,7 +70,8 @@
     }
     if (!candidatos.length) return { classe: CONFRONTO_OFENSA.SEM_DANO, best: null, se: [], estimada: estimada };
     var avaliados = candidatos.map(function (c) {
-      return { move: c.move, type: c.type, power: c.power, mult: abilityTypeModFor(c.type, defTypes, ids).mult };
+      var info = abilityTypeModFor(c.type, defTypes, ids);
+      return { move: c.move, type: c.type, power: c.power, mult: info.real, reducao: info.reducoes.join("; ") };
     });
     avaliados.sort(function (a, b) { return b.mult - a.mult || b.power - a.power; });
     var best = avaliados[0];
@@ -92,12 +93,12 @@
     if (!golpes.length) return { classe: CONFRONTO_AMEACA.SEGURO, worst: null, threats: [] };
     var avaliados = golpes.map(function (n) {
       var type = confrontoMoveType(n);
-      var worst = null;
+      var worst = null, reducao = "";
       mine.forms.forEach(function (f) {
-        var m = abilityTypeModFor(type, f.types, f.abilityIds).mult;
-        if (worst === null || m > worst) worst = m;
+        var info = abilityTypeModFor(type, f.types, f.abilityIds);
+        if (worst === null || info.real > worst) { worst = info.real; reducao = info.reducoes.join("; "); }
       });
-      return { move: n, type: type, mult: worst, power: MOVE_BY_NAME[n][3] || 0 };
+      return { move: n, type: type, mult: worst, reducao: reducao, power: MOVE_BY_NAME[n][3] || 0 };
     });
     avaliados.sort(function (a, b) { return b.mult - a.mult || b.power - a.power; });
     var pior = avaliados[0];
@@ -208,7 +209,7 @@
         if (acc > 0 && acc < COBERTURA_PRECISAO_MINIMA) return;
         var type = confrontoMoveType(mv);
         var resolve = abertos.filter(function (foe) {
-          return abilityTypeModFor(type, speciesTypeNames(foe.sp), foeAbilityIds(foe.sp, foe.ability)).mult >= 2;
+          return abilityTypeModFor(type, speciesTypeNames(foe.sp), foeAbilityIds(foe.sp, foe.ability)).real >= 2;
         });
         if (resolve.length) candidatos.push({ idx: idx, move: mv, type: type, power: power, stab: mine.mainTypes.indexOf(type) !== -1, resolve: resolve });
       });

@@ -87,7 +87,7 @@
   // Quais dessas fraquezas a espécie cobre (resiste ou é imune), pelo tipo
   // secundário ou por habilidade sempre ativa.
   function cobreFraquezas(sp, fraquezas) {
-    return fraquezas.filter(function (atk) { return abilityTypeMod(atk, sp).mult < 1; });
+    return fraquezas.filter(function (atk) { return abilityTypeMod(atk, sp).real < 1; });
   }
 
   // Muda de tipo com a evolução? Pra quem NÃO tem o tipo: "#" se uma evolução

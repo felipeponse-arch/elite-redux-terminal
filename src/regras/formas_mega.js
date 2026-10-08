@@ -235,7 +235,7 @@
   function unitTypeMult(unit, atk) {
     var worst = null;
     unit.forms.forEach(function (f) {
-      var m = abilityTypeMod(atk, f).mult;
+      var m = abilityTypeMod(atk, f).real;
       if (worst === null || m > worst) worst = m;
     });
     return worst;

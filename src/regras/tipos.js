@@ -200,14 +200,15 @@
     if (immuneId !== undefined) {
       var mod = TYPE_MOD_ABILITIES[immuneId];
       var name = (ABILITIES[immuneId] && ABILITIES[immuneId][0]) || "?";
-      return { raw: raw, mult: 0, reasons: [name + (mod.healPct ? " (imune, cura " + mod.healPct + "%)" : " (imune)")] };
+      return { raw: raw, mult: 0, real: 0, reducoes: [], reasons: [name + (mod.healPct ? " (imune, cura " + mod.healPct + "%)" : " (imune)")] };
     }
 
     var mult = raw;
     // real: a efetividade sem o amortecedor de golpe super efetivo (Solid Rock, Filter...). O duelo usa ela,
-    // porque o corte já entra uma única vez pelo texto da habilidade (reducao.superEf); a tela segue usando mult.
+    // porque o corte já entra uma única vez pelo texto da habilidade (reducao.superEf); as telas também (mult fica só como o valor já amortecido).
     var real = raw;
     var reasons = [];
+    var reducoes = [];
     ids.forEach(function (id) {
       var m = TYPE_MOD_ABILITIES[id];
       if (!m) return;
@@ -222,10 +223,13 @@
         reasons.push(nm + (m.resist[atk] < 1 ? " (resistência extra)" : " (fraqueza extra)"));
       } else if (m.seDamper && raw > 1) {
         mult *= m.seDamper;
-        reasons.push(nm + " (amortece dano super efetivo)");
+        // Telas: mostram real (efetividade cheia) e citam o corte da habilidade, igual ao duelo.
+        var corte = nm + " reduz " + Math.round((1 - m.seDamper) * 100) + "%";
+        reducoes.push(corte);
+        reasons.push(corte + " (super efetivo)");
       }
     });
-    return { raw: raw, mult: mult, real: real, reasons: reasons };
+    return { raw: raw, mult: mult, real: real, reasons: reasons, reducoes: reducoes };
   }
 
   function typeMultiplier(atk, defTypes) {

@@ -8,16 +8,16 @@
     vantagem: ["▲", "vantagem"], seguro: ["◆", "seguro"], neutro: ["●", "neutro"],
     arriscado: ["◐", "arriscado"], desvantagem: ["▼", "desvantagem"]
   };
-  function confrontoMultTxt(mult) { return mult === 0 ? "imune" : "x" + mult; }
+  function confrontoMultTxt(mult, reducao) { return mult === 0 ? "imune" : "x" + mult + (mult >= 2 ? ", super efetivo" : "") + (reducao ? "; " + reducao : ""); }
   function confrontoNomesTxt(list) {
     return list.map(function (f) { return escapeHtml(f.name); }).join(", ");
   }
   function confrontoCelulaHtml(mineName, foe, d) {
     var s = CONFRONTO_SIMBOLO[d.veredito];
     var o = d.ofensa.best
-      ? (d.ofensa.best.move || ("tipo " + d.ofensa.best.type + ", sem build")) + " (" + confrontoMultTxt(d.ofensa.best.mult) + ")"
+      ? (d.ofensa.best.move || ("tipo " + d.ofensa.best.type + ", sem build")) + " (" + confrontoMultTxt(d.ofensa.best.mult, d.ofensa.best.reducao) + ")"
       : "sem golpe de dano";
-    var a = d.ameaca.worst ? d.ameaca.worst.move + " (" + confrontoMultTxt(d.ameaca.worst.mult) + ")" : "nenhum golpe de dano";
+    var a = d.ameaca.worst ? d.ameaca.worst.move + " (" + confrontoMultTxt(d.ameaca.worst.mult, d.ameaca.worst.reducao) + ")" : "nenhum golpe de dano";
     var txt = mineName + " contra " + foe.name + ": " + s[1] + ". Seu melhor golpe: " + o + ". Golpe mais perigoso dele: " + a + ".";
     return '<td class="cf-cell cf-v-' + d.veredito + '" title="' + escapeHtml(txt) + '"><span class="cf-sym" role="img" aria-label="' + escapeHtml(txt) + '">' + s[0] + '</span></td>';
   }

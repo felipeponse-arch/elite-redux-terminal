@@ -613,7 +613,7 @@
     var rows = USABLE_TYPES.map(function (atk) {
       var cells = members.map(function (sp) {
         var info = abilityTypeMod(atk, sp);
-        var m = info.mult;
+        var m = info.real;
         var cls = m === 0 ? "cov-immune" : m >= 2 ? "cov-weak" : m < 1 ? "cov-resist" : "cov-neutral";
         var label = m === 0 ? "0" : m === 0.25 ? "&frac14;" : m === 0.5 ? "&frac12;" : m === 1 ? "&mdash;" : (Math.round(m * 100) / 100) + "&times;";
         var flag = "";

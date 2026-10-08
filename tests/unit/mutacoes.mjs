@@ -866,8 +866,8 @@ export const MUTACOES = [
     id: "confronto-ignora-habilidade-do-chefao",
     descricao: "o ataque do jogador ignora a habilidade do Pokémon do chefão (Levitate/innates) e usa só a tabela crua",
     arquivo: "confronto.js",
-    de: "mult: abilityTypeModFor(c.type, defTypes, ids).mult };",
-    para: "mult: typeMultiplier(c.type, defTypes) };",
+    de: "mult: info.real, reducao:",
+    para: "mult: typeMultiplier(c.type, defTypes), reducao:",
   },
   {
     id: "confronto-conta-golpe-de-status",
@@ -936,7 +936,7 @@ export const MUTACOES = [
     id: "confronto-cobertura-ignora-habilidade",
     descricao: "cobertura sugerida ignora a habilidade do chefão (sugere golpe anulado por Levitate)",
     arquivo: "confronto.js",
-    de: "return abilityTypeModFor(type, speciesTypeNames(foe.sp), foeAbilityIds(foe.sp, foe.ability)).mult >= 2;",
+    de: "return abilityTypeModFor(type, speciesTypeNames(foe.sp), foeAbilityIds(foe.sp, foe.ability)).real >= 2;",
     para: "return typeMultiplier(type, speciesTypeNames(foe.sp)) >= 2;",
   },
   {
@@ -2109,7 +2109,7 @@ export const MUTACOES = [
     id: "solid-rock-real-cortada",
     descricao: "a efetividade real do tipos.js passa a incluir o corte de Solid Rock (o golpe 2x deixa de ser super efetivo)",
     arquivo: "tipos.js",
-    de: "return { raw: raw, mult: mult, real: real, reasons: reasons };",
-    para: "return { raw: raw, mult: mult, real: mult, reasons: reasons };",
+    de: "return { raw: raw, mult: mult, real: real, reasons: reasons, reducoes: reducoes };",
+    para: "return { raw: raw, mult: mult, real: mult, reasons: reasons, reducoes: reducoes };",
   },
 ];
