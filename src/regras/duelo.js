@@ -2356,7 +2356,7 @@
     if (!temPlanos) return comFim(comSaque(semPlanos, eu, foe));
     // Golpes de status (regras simples): cada lado escolhe o plano que mais rende
     // contra o outro atacando direto; depois os dois planos correm juntos.
-    var planosQueValeram = { eu: null, ele: null };
+    var planosQueValeram;
     function corridaCom(pe, pf) {
       // Taunt do mais rápido cancela o plano do outro; Haze zera o setup do outro.
       var euMaisRapido = v1 > v2;
@@ -2797,7 +2797,7 @@
     if (/Flees when stats are lowered/i.test(f)) ef.fogeAoCair = true; // Tactical Retreat
     if (/Boosts all stats but can't retreat when below 1\/2 max HP/i.test(f)) ef.ultimaCartada = true; // No Turning Back
     if (/Sets a trap that burns the next foe that switches in/i.test(f)) ef.brasas = true; // Hot Coals
-    if ((x = f.match(/Deals double damage to opponents being switched in/i))) ef.tocaia = 2; // Stakeout
+    if (/Deals double damage to opponents being switched in/i.test(f)) ef.tocaia = 2; // Stakeout
     // Clima anulado ou virado.
     if (/Clears weather and prevents its effects|Negates Weather, Rooms and Terrains/i.test(f)) ef.anulaClima = true; // Cloud Nine
     if (/Strong Winds until switched out/i.test(f)) ef.ventoForte = true; // Delta Stream
