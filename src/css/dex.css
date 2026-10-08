@@ -276,6 +276,7 @@
   font-size: var(--fs-pequeno); font-weight: 700; padding: 2px 9px; border-radius: var(--radius-pill);
   background: var(--surface-2); border: 1px solid var(--border);
 }
+.efe-reducao { font-weight: 400; color: var(--text-dim); }
 .efe-nota { margin: var(--space-3) 0 0; font-size: var(--fs-legenda); color: var(--text-dim); }
 /* Dex vazia com a arte do Rayquaza shiny (marca da paleta; app privado - arte oficial). */
 #species-detail > .empty-state {

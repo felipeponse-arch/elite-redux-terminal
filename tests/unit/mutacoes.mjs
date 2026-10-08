@@ -1654,8 +1654,8 @@ export const MUTACOES = [
     id: "perfil-ignora-innates",
     descricao: "faixas da ficha ignoram as innates (só a tipagem)",
     arquivo: "tipos.js",
-    de: "var mult = abilityTypeMod(atk, sp).mult;",
-    para: "var mult = typeMultiplier(atk, speciesTypeNames(sp));",
+    de: "var m = abilityTypeMod(atk, sp);",
+    para: "var m = { real: typeMultiplier(atk, speciesTypeNames(sp)), reducoes: [] };",
   },
   {
     id: "poder-variavel-ignorado",

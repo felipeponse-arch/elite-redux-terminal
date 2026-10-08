@@ -437,7 +437,7 @@
     var faixa = function (lista, classe, rotulo) {
       if (!lista.length) return "";
       return '<div class="efe-faixa"><b class="efe-rotulo ' + classe + '">' + rotulo + '</b><ul class="efe-lista" aria-label="' + rotulo + '">' +
-        lista.map(function (x) { return '<li class="efe-tipo">' + escapeHtml(x.tipo) + ' <span class="mono">' + fmt(x.mult) + '</span></li>'; }).join("") + '</ul></div>';
+        lista.map(function (x) { return '<li class="efe-tipo">' + escapeHtml(x.tipo) + ' <span class="mono">' + fmt(x.mult) + '</span>' + (x.reducoes && x.reducoes.length ? ' <small class="efe-reducao">' + escapeHtml(x.reducoes.join(', ')) + '</small>' : '') + '</li>'; }).join("") + '</ul></div>';
     };
     return '<div class="card"><h3>Efetividade de tipos</h3>' + faixa(p.fraco, "efe-fraco", "Fraco a") + faixa(p.resiste, "efe-resiste", "Resiste a") + faixa(p.imune, "efe-imune", "Imune a") +
       '<p class="efe-nota">Conta o tipo e as innates; a habilidade escolhida pode mudar isso.</p></div>';

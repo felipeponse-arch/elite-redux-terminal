@@ -21,3 +21,12 @@ test("innate que dá imunidade entra no perfil (como na tabela de tipos do motor
   const t = R.USABLE_TYPES.find((x) => R.typeMultiplier(x, R.speciesTypeNames(sp)) > 0 && R.abilityTypeMod(x, sp).mult === 0);
   assert.ok(R.perfilDefensivoDaEspecie(sp).imune.some((x) => x.tipo === t), sp.n + " imune a " + t);
 });
+
+test("Rhydon (Solid Rock sempre ativa): ficha mostra Grass 4x e Fighting 2x reais, citando a redução", () => {
+  const p = perfil("SPECIES_RHYDON");
+  const grama = p.fraco.find((x) => x.tipo === "Grass");
+  const luta = p.fraco.find((x) => x.tipo === "Fighting");
+  assert.equal(grama.mult, 4);
+  assert.equal(luta.mult, 2);
+  assert.ok(grama.reducoes[0].includes("Solid Rock reduz"), "cita a redução");
+});

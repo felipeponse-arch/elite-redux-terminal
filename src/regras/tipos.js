@@ -171,10 +171,11 @@
   function perfilDefensivoDaEspecie(sp) {
     var r = { fraco: [], resiste: [], imune: [] };
     USABLE_TYPES.forEach(function (atk) {
-      var mult = abilityTypeMod(atk, sp).mult;
-      if (mult === 0) r.imune.push({ tipo: atk, mult: 0 });
-      else if (mult > 1) r.fraco.push({ tipo: atk, mult: mult });
-      else if (mult < 1) r.resiste.push({ tipo: atk, mult: mult });
+      var m = abilityTypeMod(atk, sp);
+      var mult = m.real; // efetividade real (sem o amortecedor Solid Rock/Filter...), igual às outras telas; o corte vai em reducoes
+      if (mult === 0) r.imune.push({ tipo: atk, mult: 0, reducoes: [] });
+      else if (mult > 1) r.fraco.push({ tipo: atk, mult: mult, reducoes: m.reducoes });
+      else if (mult < 1) r.resiste.push({ tipo: atk, mult: mult, reducoes: m.reducoes });
     });
     r.fraco.sort(function (a, b) { return b.mult - a.mult; });
     r.resiste.sort(function (a, b) { return a.mult - b.mult; });
