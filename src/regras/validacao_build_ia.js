@@ -153,6 +153,29 @@
     return null;
   }
 
+  // Texto que o modelo escreveu, citado num motivo de rejeição. O motivo volta ao modelo na nova tentativa e
+  // aparece na tela: sem limite, uma resposta enorme ou com quebras de linha entraria inteira no prompt.
+  function citarDoModelo(v) {
+    return String(v).replace(/\s+/g, " ").slice(0, 40);
+  }
+  // 6 valores, cada um número (ou número escrito entre aspas). Fora disso não é uma lista de EVs.
+  function evsEmFormatoValido(evs) {
+    return Array.isArray(evs) && evs.length === 6 && evs.every(function (v) {
+      return (typeof v === "number" || typeof v === "string") && !isNaN(parseInt(String(v), 10));
+    });
+  }
+  // Os limites do jogo: 0 a 252 por atributo e 510 no total (a soma acima disso é reduzida na mesma proporção,
+  // em múltiplos de 4). Único lugar: a build da IA e os EVs copiados de uma build curada passam por aqui.
+  function limitarEvsAoJogo(evs) {
+    var out = evs.map(function (v) { return clampInt(v, 0, 252, 0); });
+    var soma = out.reduce(function (a, v) { return a + v; }, 0);
+    if (soma > 510) {
+      var escala = 510 / soma;
+      out = out.map(function (v) { return Math.floor((v * escala) / 4) * 4; });
+    }
+    return out;
+  }
+
   // Checks an AI-suggested build against this species' REAL data before
   // it's ever allowed to become a saved build - 2026-09-09, the Meta
   // Pokémon specialist's own non-negotiable rule: an LLM call can propose
@@ -196,10 +219,10 @@
     // corrigir às cegas; o nome exato do que falhou, não.
     function rejeita(txt) { if (motivo) motivo.txt = txt; return null; }
     if (typeof raw.ability !== "string" || validAbilities.indexOf(raw.ability) === -1) {
-      return rejeita("A habilidade \"" + raw.ability + "\" não é uma das escolhíveis do " + sp.n + " (" + validAbilities.join(", ") + ").");
+      return rejeita("A habilidade \"" + citarDoModelo(raw.ability) + "\" não é uma das escolhíveis do " + sp.n + " (" + validAbilities.join(", ") + ").");
     }
     if (typeof raw.nature !== "string" || ALL_NATURES.indexOf(raw.nature) === -1) {
-      return rejeita("A natureza \"" + raw.nature + "\" não existe.");
+      return rejeita("A natureza \"" + citarDoModelo(raw.nature) + "\" não existe.");
     }
     // Trava por level cap (achado real, 2026-09-12: o editor manual de "Meu
     // build" já filtrava golpes de nível acima do cap desde 2026-09-10, mas
@@ -211,7 +234,11 @@
     if (!Array.isArray(raw.moves) || raw.moves.length !== 4) return rejeita("A build precisa de exatamente 4 golpes.");
     for (var i = 0; i < 4; i++) {
       if (validMoves.indexOf(raw.moves[i]) === -1) {
-        return rejeita("O golpe \"" + raw.moves[i] + "\" não está no movepool do " + sp.n + " liberado até o level cap atual.");
+        return rejeita("O golpe \"" + citarDoModelo(raw.moves[i]) + "\" não está no movepool do " + sp.n + " liberado até o level cap atual.");
+      }
+      // Golpe repetido (ticket 17, 08/10): o jogo não deixa o mesmo golpe em dois slots, e a build ficava com 3 golpes úteis.
+      if (raw.moves.indexOf(raw.moves[i]) !== i) {
+        return rejeita("O golpe \"" + raw.moves[i] + "\" está repetido na build - os 4 golpes precisam ser diferentes.");
       }
     }
     // ASSIMETRIA DELIBERADA (decisão do usuário, 2026-09-16) - esta regra é
@@ -280,15 +307,17 @@
         return null;
       }
     }
-    var item = (typeof raw.item === "string" && ITEMS.indexOf(raw.item) !== -1) ? raw.item : "";
-    // Item exclusivo de outra espécie (Light Ball num Pokémon que não é
-    // Pikachu/Raichu...) não faz nada: cai pra "sem item", o mesmo tratamento
-    // suave de item desconhecido (ITENS_DE_ESPECIE em prompts_ia.js).
-    if (item && ITENS_DE_ESPECIE[item] && itensDeEspeciePara(sp).indexOf(item) === -1) item = "";
+    // Só vale item que o prompt oferece (ticket 17, 08/10): o prompt diz "nenhum fora destes grupos", mas a
+    // checagem só olhava se o item existe no jogo (926) - passavam pedra mega de outra espécie, item-chave,
+    // TM. Item exclusivo de outra espécie (Light Ball num Pokémon que não é Pikachu/Raichu...) também não faz
+    // nada. Item fora da lista cai pra "sem item", o mesmo tratamento suave de item desconhecido. A pedra da
+    // própria forma Mega vale (é ela que a regra da mega temporária impõe, logo abaixo).
+    var stoneRule = megaStoneRuleFor(sp);
+    var itensDaBuild = AI_ITEM_POOL.concat(itensDeEspeciePara(sp), isMegaForm(sp) ? stonesOf(sp) : []);
+    var item = (typeof raw.item === "string" && itensDaBuild.indexOf(raw.item) !== -1) ? raw.item : "";
     // Modo de mega temporária: build de forma mega PRECISA segurar a pedra
     // (ver megaStoneRuleFor). Com uma pedra só, corrige sozinho em vez de
     // rejeitar - mesmo espírito "soft" do resto do item.
-    var stoneRule = megaStoneRuleFor(sp);
     if (stoneRule && stoneRule.stones.indexOf(item) === -1) {
       if (stoneRule.stones.length === 1) {
         item = stoneRule.stones[0];
@@ -321,12 +350,13 @@
           " com o mesmo item. Escolha outro item que reforce o papel deste Pokémon. Tente gerar de novo.");
       }
     }
-    var evs = Array.isArray(raw.evs) && raw.evs.length === 6 ? raw.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0];
-    var evSum = evs.reduce(function (a, v) { return a + v; }, 0);
-    if (evSum > 510) {
-      var scale = 510 / evSum;
-      evs = evs.map(function (v) { return Math.floor((v * scale) / 4) * 4; });
+    // EV fora do formato (ticket 17, 08/10): ausente, tamanho errado ou texto virava [0,0,0,0,0,0] em silêncio e a
+    // build era salva sem EV nenhum. Agora rejeita (a nova tentativa leva o motivo). Número fora da faixa
+    // (negativo, acima de 252, soma acima de 510) continua só sendo ajustado.
+    if (!evsEmFormatoValido(raw.evs)) {
+      return rejeita("Os EVs precisam ser 6 números inteiros (HP, Atk, Def, SpA, SpD, Spe) - a resposta veio sem eles ou em outro formato.");
     }
+    var evs = limitarEvsAoJogo(raw.evs);
     // Coerência papel x golpe (pedido do usuário, 2026-09-16: "notei que está
     // sugerindo Roost em uma build super ofensiva"). Uma build com EVs 100%
     // ofensivos (ataque e velocidade maxados, nada em HP/Def/SpD) não aguenta
@@ -456,4 +486,38 @@
       }
     });
     return out;
+  }
+  // Ajustes na build validada antes de gravar (tirados de generateBuildWithAI na fase 5 da refatoração; movidos
+  // pra cá no ticket 17, 08/10, pra ter teste). Item repetido no time é permitido desde 2026-09-27 (pedido do
+  // usuário: "cada Pokémon pode ter um item e esse item pode ser repetido pelo time") - antes o item já em uso
+  // por outro membro era apagado.
+  function ajustarBuildDaIa(sp, validated, opts, cap) {
+    if (opts.modo === "ponte" && opts.alvo) {
+      // A build de agora é a curada com golpes-ponte: habilidade, natureza,
+      // item e EVs continuam os da curada (quando valem pra esta forma).
+      var alvoAb = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+      if (alvoAb.indexOf(opts.alvo.ability) !== -1) validated.ability = opts.alvo.ability;
+      if (opts.alvo.nature) validated.nature = opts.alvo.nature;
+      validated.item = opts.alvo.item || "";
+      // A curada vem de texto do Discord e pode somar mais que o jogo permite (Lepastry: 520).
+      validated.evs = limitarEvsAoJogo(evsTextoParaArray(opts.alvo.evs));
+      validated.rationale = "Build curada adaptada ao level cap " + cap + ": golpes-ponte até liberar os da curada.";
+    }
+  }
+
+  // Curada no lugar da IA no time novo (2026-09-30, decisão do usuário: "só quando não houver Clima/Tática").
+  // Devolve a entrada a gravar, ou null quando a curada não serve e a IA deve montar: golpe ainda travado no
+  // level cap, item que já está em 2 do time, ou habilidade que esta forma não escolhe (ticket 17, 08/10: a
+  // curada da Arbok Mega traz a Merciless, que é da base - nunca misturar dado entre formas).
+  function entradaDaCuradaParaTimeNovo(sp, cur) {
+    if (!cur || golpesTravadosNoCap(sp, cur.moves).some(function (g) { return g.nivel !== null; })) return null;
+    var item = stripNote(cur.item);
+    if (item && (itensEmUsoComQuem(sp.x)[item] || []).length >= MAX_MESMO_ITEM_NO_TIME) return null;
+    var escolhiveis = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+    if (escolhiveis.indexOf(cur.ability) === -1) return null;
+    var entrada = { ability: cur.ability, nature: cur.nature, item: cur.item, moves: cur.moves.slice(), planoConsultado: true,
+      ivs: [31, 31, 31, 31, 31, 31], evs: limitarEvsAoJogo(evsTextoParaArray(cur.evs)),
+      rationale: "Build curada de " + sp.n + " (" + (cur.fonte || "curadoria") + "), no estilo do time." };
+    if (cur.plano) entrada.plano = cur.plano;
+    return entrada;
   }

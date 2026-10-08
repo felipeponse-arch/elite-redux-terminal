@@ -426,23 +426,6 @@
     }
   }
 
-  // Acertos na build validada antes de gravar (tirados de generateBuildWithAI na
-  // fase 5 da refatoração). Item repetido no time é permitido desde 2026-09-27
-  // (pedido do usuário: "cada Pokémon pode ter um item e esse item pode ser
-  // repetido pelo time") - antes o item já em uso por outro membro era apagado.
-  function ajustarBuildDaIa(sp, validated, opts, cap) {
-    if (opts.modo === "ponte" && opts.alvo) {
-      // A build de agora é a curada com golpes-ponte: habilidade, natureza,
-      // item e EVs continuam os da curada (quando valem pra esta forma).
-      var alvoAb = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
-      if (alvoAb.indexOf(opts.alvo.ability) !== -1) validated.ability = opts.alvo.ability;
-      if (opts.alvo.nature) validated.nature = opts.alvo.nature;
-      validated.item = opts.alvo.item || "";
-      validated.evs = evsTextoParaArray(opts.alvo.evs);
-      validated.rationale = "Build curada adaptada ao level cap " + cap + ": golpes-ponte até liberar os da curada.";
-    }
-  }
-
   // Uma ação só: gravar a build, limpar a marca de revisão e registrar no
   // log - uma gravação e um redesenho no fim (card do time, ficha aberta
   // desta espécie, confronto). Devolve false se não salvou (lista cheia).
@@ -525,14 +508,10 @@
   // vaga sem tirar build feita à mão. Devolve true se aplicou (sem chamada de IA).
   function aplicarCuradaNoTimeNovo(sp, pace) {
     var cur = curadaParaEstilo(sp.sname, estiloDoRitmo(pace), true);
-    if (!cur || golpesTravadosNoCap(sp, cur.moves).some(function (g) { return g.nivel !== null; })) return false;
-    var item = stripNote(cur.item);
-    if (item && (itensEmUsoComQuem(sp.x)[item] || []).length >= MAX_MESMO_ITEM_NO_TIME) return false;
+    var entrada = entradaDaCuradaParaTimeNovo(sp, cur);
+    if (!entrada) return false;
     var lista = getBuildList(sp.sname);
     if (lista.length >= 3 && lista.every(function (b) { return b.source === "manual"; })) return false;
-    var entrada = { ability: cur.ability, nature: cur.nature, item: cur.item, moves: cur.moves.slice(), planoConsultado: true,
-      ivs: [31, 31, 31, 31, 31, 31], evs: evsTextoParaArray(cur.evs), rationale: "Build curada de " + sp.n + " (" + (cur.fonte || "curadoria") + "), no estilo do time." };
-    if (cur.plano) entrada.plano = cur.plano;
     return acao(telasDeBuild(sp.sname).concat(["log"]), function () {
       abrirVagaPreservando(sp.sname, getActiveBuild(sp.sname), true);
       var ok = addBuildVariant(sp.sname, entrada, "curada");
