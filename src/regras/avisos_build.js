@@ -29,12 +29,12 @@
         out.push({ tipo: "item-tardio", texto: build.item + " só aparece a partir da " + rotuloDaEtapaDoItem(achar.etapa) + " (" + achar.local + ", " + achar.como + ")." });
       }
     }
-    // 2b. Item que a build da IA rejeitaria (decisão do usuário, 08/10, golpe-ponte da curada): Choice
-    // com golpe de status, Vest com status, Black Sludge fora do Poison, Eviolite sem evolução e o
-    // limite de 2 itens iguais no time. Na build da IA isso é rejeição; aqui, que o item vem da curada, é aviso.
-    var itemAv = stripNote(build.item || "");
+    // 2b. Golpe-ponte (curada aplicada ao time; decisão do usuário, 08/10, "só o pedido"): o item vem da
+    // curada sem passar pela validação da IA, então avisa só Choice com golpe de status e o item repetido
+    // além do limite do time. Outras builds não recebem esses avisos.
+    var itemAv = build.ponte ? stripNote(build.item || "") : "";
     if (itemAv) {
-      var conflito = conflitoDeItem(itemAv, build.moves, sp);
+      var conflito = ITENS_CHOICE.indexOf(itemAv) !== -1 ? conflitoDeItem(itemAv, build.moves, sp) : null;
       if (conflito) out.push({ tipo: "item-conflito", texto: conflito.replace(/ Tente gerar de novo.$/, "") });
       var stoneAv = megaStoneRuleFor(sp);
       if (!stoneAv && state.team.indexOf(sp.x) !== -1) {

@@ -29,6 +29,7 @@
     var plano = (build.plano && Object.keys(build.plano).length) ? build.plano
       : (substituida && substituida.plano ? planoSaneado(substituida.plano, build.moves || []) : null);
     if (plano) e.plano = plano;
+    if (build.ponte) e.ponte = true; // golpe-ponte da curada (avisosDaBuild confere o item dela)
     // Plano já perguntado à IA (mesmo que a resposta tenha sido "nenhuma troca"):
     // editar natureza/EV/item sem mexer nos golpes não pede de novo.
     var mesmosGolpes = !!substituida && (substituida.moves || []).slice().sort().join("|") === (build.moves || []).slice().sort().join("|");

@@ -181,6 +181,7 @@
           if (b.feitaPara && typeof b.feitaPara.chefao === "string" && typeof b.feitaPara.cap === "number") {
             entrada.feitaPara = { chefao: b.feitaPara.chefao.slice(0, 60), cap: clampInt(b.feitaPara.cap, 0, 100, 0) };
           }
+          if (b.ponte === true) entrada.ponte = true;
           return entrada;
         }).filter(function (b) {
           if (!b) return false;

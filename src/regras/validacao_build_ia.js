@@ -503,6 +503,7 @@
       if (alvoAb.indexOf(opts.alvo.ability) !== -1) validated.ability = opts.alvo.ability;
       if (opts.alvo.nature) validated.nature = opts.alvo.nature;
       validated.item = opts.alvo.item || "";
+      validated.ponte = true; // marca a build como golpe-ponte: o item da curada recebe avisos próprios (avisosDaBuild)
       // A curada vem de texto do Discord e pode somar mais que o jogo permite (Lepastry: 520).
       validated.evs = limitarEvsAoJogo(evsTextoParaArray(opts.alvo.evs));
       validated.rationale = "Build curada adaptada ao level cap " + cap + ": golpes-ponte até liberar os da curada.";
