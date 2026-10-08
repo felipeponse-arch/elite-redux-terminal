@@ -2098,4 +2098,18 @@ export const MUTACOES = [
     de: "g.porPoder.somas.forEach(function (s) { fv *= (pv + s) / pv; });",
     para: "void 0;",
   },
+  {
+    id: "solid-rock-corte-duplo",
+    descricao: "o duelo volta a usar a efetividade já cortada por Solid Rock/Filter (o corte vale duas vezes em 4x)",
+    arquivo: "duelo.js",
+    de: "if (r.raw > 0) mult *= r.real / r.raw;",
+    para: "if (r.raw > 0) mult *= r.mult / r.raw;",
+  },
+  {
+    id: "solid-rock-real-cortada",
+    descricao: "a efetividade real do tipos.js passa a incluir o corte de Solid Rock (o golpe 2x deixa de ser super efetivo)",
+    arquivo: "tipos.js",
+    de: "return { raw: raw, mult: mult, real: real, reasons: reasons };",
+    para: "return { raw: raw, mult: mult, real: mult, reasons: reasons };",
+  },
 ];

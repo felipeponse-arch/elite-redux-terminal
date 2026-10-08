@@ -92,27 +92,53 @@ test("Solid Rock corta o golpe super efetivo em 35%", () => {
   dentroDoEfeito(razao(com("Solid Rock"), com("Predator"), sofrido), 0.65, "Hydro Pump (2x) em Rock");
 });
 
-// COMPORTAMENTO ATUAL, BUG EM ABERTO (decisão do usuário; o motor NÃO foi mexido). Solid Rock (-35% em golpe super efetivo)
-// é aplicado em dois lugares: tipos.js:219 (seDamper 0,65 dentro da efetividade, que deixa o 2x em 1,3 e o 4x em 2,6)
-// e duelo.js:1678 (reducao.superEf 0,65 quando efTipo >= 2). Efeitos: (1) em fraqueza 4x o corte vale duas vezes
-// (0,65 x 0,65 = 0,42); (2) no 2x o golpe deixa de contar como super efetivo, então Expert Belt e Weakness Policy do
-// chefão não disparam. Primal Armor (seDamper 0,5) tem a mesma estrutura. Se o motor for corrigido, estes asserts
-// quebram de propósito: troque pelos valores certos (4x -> 0,65 do dano; Expert Belt volta a valer x1,2).
-test("Solid Rock (comportamento atual, bug em aberto): o corte em fraqueza 4x vale duas vezes", () => {
-  const machamp = () => chefao("Machamp", { hab: "No Guard", golpes: ["Karate Chop"], evs: EV.nenhum, nat: "Hardy" }); // Fighting é 4x em Rock/Dark
-  const luta = (hab) => lutar(eu("Tyranitar", { hab, golpes: ["Crunch"], evs: EV.tanqueF }), machamp());
-  assert.equal(luta("Predator").venceu, false);
-  assert.equal(luta("Predator").turnos, 1, "sem Solid Rock o 4x derruba o Tyranitar de um golpe (o golpe tira o HP inteiro ou mais)");
-  // Com UM corte de 0,65 o golpe ainda tiraria >= 65% do HP e o Tyranitar cairia em 2 golpes no máximo.
-  assert.equal(luta("Solid Rock").venceu, true);
-  assert.equal(luta("Solid Rock").turnos, 3, "aguenta 3 golpes: só o corte duplo (0,65 x 0,65) explica");
+// Solid Rock/Filter/Prism Armor (-35%) e Primal Armor (-50%): UM corte só em golpe super efetivo, e o golpe continua
+// super efetivo (Expert Belt e Weakness Policy disparam). Fonte: er-repo 217dd0f, src/abilities.cc (Filter, Solid Rock,
+// Primal Armor): MUL(.65)/MUL(.5) quando typeEffectivenessModifier >= GetSuperEffectiveMult(), sem mexer na efetividade.
+// Corrigido em 08/10/2026 (antes o corte valia duas vezes em 4x e zerava o "super efetivo" em 2x).
+const maquinas = () => ({
+  machamp: chefao("Machamp", { hab: "No Guard", golpes: ["Karate Chop"], evs: EV.nenhum, nat: "Hardy" }), // Fighting é 4x em Rock/Dark
+  starmie: chefao("Starmie", { hab: "Natural Cure", golpes: ["Hydro Pump"], evs: EV.especial, nat: "Modest" }), // Water é 2x em Rock/Dark
+});
+test("efetividade do duelo com Solid Rock/Primal Armor continua real: 4x e 2x, o golpe segue super efetivo", () => {
+  const { machamp, starmie } = maquinas();
+  ["Predator", "Solid Rock", "Primal Armor"].forEach((hab) => {
+    const tyranitar = eu("Tyranitar", { hab, golpes: ["Crunch"] });
+    assert.equal(R.efetividadeNoDuelo(machamp, "Fighting", tyranitar), 4, hab + ": Fighting em Rock/Dark");
+    assert.equal(R.efetividadeNoDuelo(starmie, "Water", tyranitar), 2, hab + ": Water em Rock/Dark");
+  });
 });
 
-test("Solid Rock (comportamento atual, bug em aberto): o golpe 2x cortado deixa de contar como super efetivo e o Expert Belt do chefão não dispara", () => {
-  const starmie = (item) => chefao("Starmie", { hab: "Natural Cure", golpes: ["Hydro Pump"], evs: EV.especial, nat: "Modest", item });
-  const luta = (hab, item) => lutar(eu("Tyranitar", { hab, golpes: ["Crunch"], evs: EV.tanqueE }), starmie(item));
-  dentroDoEfeito(razao(luta("Predator", "Expert Belt"), luta("Predator", ""), sofrido), 1.2, "controle: sem Solid Rock o Expert Belt vale");
-  semEfeito(razao(luta("Solid Rock", "Expert Belt"), luta("Solid Rock", ""), sofrido), "com Solid Rock o Expert Belt não dispara (bug)");
+test("Solid Rock e Primal Armor: o corte em fraqueza 4x vale uma vez só", () => {
+  const luta = (hab) => lutar(eu("Tyranitar", { hab, golpes: ["Crunch"], evs: EV.tanqueF }), maquinas().machamp);
+  assert.equal(luta("Predator").venceu, false);
+  assert.equal(luta("Predator").turnos, 1, "sem a habilidade o 4x derruba o Tyranitar de um golpe");
+  // Um corte de 0,65 (ou 0,5) ainda deixa o golpe forte: o Tyranitar cai no segundo, não aguenta o 3 do corte duplo.
+  assert.equal(luta("Solid Rock").venceu, false, "4x x 0,65 = 2,6: ainda perde");
+  assert.equal(luta("Solid Rock").turnos, 2);
+  assert.equal(luta("Primal Armor").venceu, false, "4x x 0,5 = 2: ainda perde");
+  assert.equal(luta("Primal Armor").turnos, 2);
+});
+
+test("Solid Rock e Primal Armor em fraqueza 2x: dano x0,65 e x0,5 (um corte só)", () => {
+  const luta = (hab) => lutar(eu("Tyranitar", { hab, golpes: ["Crunch"], evs: EV.tanqueE }), maquinas().starmie);
+  dentroDoEfeito(razao(luta("Solid Rock"), luta("Predator"), sofrido), 0.65, "Solid Rock em 2x");
+  dentroDoEfeito(razao(luta("Primal Armor"), luta("Predator"), sofrido), 0.5, "Primal Armor em 2x");
+});
+
+test("Solid Rock e Primal Armor: o golpe cortado ainda é super efetivo, então o Expert Belt do chefão dispara", () => {
+  const luta = (hab, item) => lutar(eu("Tyranitar", { hab, golpes: ["Crunch"], evs: EV.tanqueE }), chefao("Starmie", { hab: "Natural Cure", golpes: ["Hydro Pump"], evs: EV.especial, nat: "Modest", item }));
+  ["Predator", "Solid Rock", "Primal Armor"].forEach((hab) =>
+    dentroDoEfeito(razao(luta(hab, "Expert Belt"), luta(hab, ""), sofrido), 1.2, "Expert Belt contra " + hab));
+});
+
+test("Solid Rock e Primal Armor: o Weakness Policy de quem apanha dispara no golpe cortado", () => {
+  const luta = (hab, item) => lutar(eu("Tyranitar", { hab, golpes: ["Crunch"], evs: EV.fisico, item }),
+    chefao("Vaporeon", { hab: "Hydration", golpes: ["Hydro Pump"], evs: [252, 0, 0, 252, 0, 0], nat: "Modest" }));
+  ["Predator", "Solid Rock", "Primal Armor"].forEach((hab) => {
+    assert.equal(luta(hab, "").turnos, 2, hab + ": controle sem o item");
+    assert.equal(luta(hab, "Weakness Policy").turnos, 1, hab + ": com o item o Ataque sobe e a luta acaba antes");
+  });
 });
 
 test("Rough Skin machuca quem ataca por contato, e só por contato", () => {

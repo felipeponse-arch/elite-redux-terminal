@@ -204,6 +204,9 @@
     }
 
     var mult = raw;
+    // real: a efetividade sem o amortecedor de golpe super efetivo (Solid Rock, Filter...). O duelo usa ela,
+    // porque o corte já entra uma única vez pelo texto da habilidade (reducao.superEf); a tela segue usando mult.
+    var real = raw;
     var reasons = [];
     ids.forEach(function (id) {
       var m = TYPE_MOD_ABILITIES[id];
@@ -211,6 +214,7 @@
       var nm = (ABILITIES[id] && ABILITIES[id][0]) || "?";
       if (m.resist && m.resist[atk] !== undefined) {
         mult *= m.resist[atk];
+        real *= m.resist[atk];
         // "resist" guarda o multiplicador cru, que pode ser > 1 (ex:
         // Fluffy causa FRAQUEZA a Fire, não resistência) - texto errado
         // aqui seria pior que não mostrar nada, então o rótulo segue o
@@ -221,7 +225,7 @@
         reasons.push(nm + " (amortece dano super efetivo)");
       }
     });
-    return { raw: raw, mult: mult, reasons: reasons };
+    return { raw: raw, mult: mult, real: real, reasons: reasons };
   }
 
   function typeMultiplier(atk, defTypes) {

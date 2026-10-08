@@ -1588,7 +1588,7 @@
     if (!atq.ef.quebraHabilidade && !(gravidade && abilityTypeModFor("Ground", [], def.ids || []).mult === 0)) {
       var r = abilityTypeModFor(tipo, def.tipos, def.ids);
       if (r.raw !== 0 && r.mult === 0) return 0; // imune por habilidade
-      if (r.raw > 0) mult *= r.mult / r.raw;
+      if (r.raw > 0) mult *= r.real / r.raw; // real: sem o corte de Solid Rock/Filter (entra uma vez em reducao.superEf; o golpe segue super efetivo)
       // Fossilized/Raw Wood e parecidas: a resistência já veio da tabela TYPE_MOD_ABILITIES
       // (tipos.js) - a regex do texto ("Halves dmg taken by X") não pode contar de novo
       // (auditoria de 2026-10-02: dava 0,25 em vez de 0,5 para 34 espécies).
