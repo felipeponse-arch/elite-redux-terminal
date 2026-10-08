@@ -29,6 +29,17 @@ h1, h2, h3, .display {
 }
 a { color: var(--badge-accent2); }
 button { font-family: inherit; transition: var(--transicao); }
+/* Toque (ticket 14 da dívida, 2026-10-08), definido de propósito em tudo que se aperta:
+   - touch-action: manipulation tira o atraso de ~300 ms do duplo toque para ampliar
+     (o celular esperava um segundo toque antes de responder); rolar e dar zoom com dois
+     dedos continuam funcionando.
+   - -webkit-tap-highlight-color: o clarão cinza padrão do navegador some e entra um
+     toque da cor de destaque do app, suave, que vale também para os elementos
+     role="button" (que não afundam como o botão). */
+button, summary, select, label, a, [role="button"], [role="option"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 22%, transparent);
+}
 /* Resposta ao toque (lote 3, 2026-10-04): o botão afunda um pouco enquanto está
    pressionado. Só quando a pessoa aceita movimento - com prefers-reduced-motion
    a regra nem existe (o bloco global de responsivo.css também zera as transições). */

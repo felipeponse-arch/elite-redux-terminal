@@ -179,6 +179,25 @@ async function section20() {
         document.querySelector(".detail-titles h2") && document.querySelector(".detail-titles h2").textContent === fx1.sp.n &&
         !!detAberto && detAberto.open,
         { especieAberta: (document.querySelector(".detail-titles h2") || {}).textContent, estrategiasAberta: detAberto && detAberto.open });
+      // Teclado (ticket 14 da dívida, 2026-10-08): o mesmo link, com o markup real, alcançável
+      // pelo Tab (tabindex + role) e aberto por Enter e por Espaço, não só por clique.
+      for (var tecla of ["Enter", " "]) {
+        document.querySelector('.tab-btn[data-tab="team"]').click();
+        await wait(50);
+        var linkTeclado = document.querySelector(".ts-generated-team .goto-species-strategies");
+        if (!achou("link \"Ver Estratégias\" continua no card depois de voltar à aba Time (tecla \"" + tecla + "\")", linkTeclado)) break;
+        check("o link é alcançável pelo teclado (tabindex 0 + role button)",
+          linkTeclado.tabIndex === 0 && linkTeclado.getAttribute("role") === "button", linkTeclado.outerHTML.slice(0, 120));
+        document.querySelectorAll(".detail-group").forEach(function (d) { d.open = false; }); // a tecla é quem tem que abrir
+        linkTeclado.dispatchEvent(new KeyboardEvent("keydown", { key: tecla, bubbles: true, cancelable: true }));
+        await wait(80);
+        var detTeclado = [...document.querySelectorAll(".detail-group")].find(function (d) {
+          return d.querySelector("summary") && d.querySelector("summary").textContent.indexOf("Estratégias") === 0;
+        });
+        check("tecla \"" + tecla + "\" no link abre a Dex do membro certo com Estratégias aberta",
+          (document.querySelector(".detail-titles h2") || {}).textContent === fx1.sp.n && !!detTeclado && detTeclado.open,
+          { especieAberta: (document.querySelector(".detail-titles h2") || {}).textContent });
+      }
     }
   }
 

@@ -131,7 +131,7 @@
       // drop under the 4.5:1 AA minimum.
       var main = '<tr class="move-row' + (aboveCap ? " above-cap" : "") + '" data-target="' + id + '" style="background:color-mix(in srgb, ' + meta.hex + ' 9%, transparent);">' +
         '<td class="mono">' + (lv !== undefined && lv !== null && title.indexOf("Nível") !== -1 ? lv + (aboveCap ? ' <span class="cap-tag" title="Acima do level cap atual (' + cap + ')">acima</span>' : "") : "&mdash;") + '</td>' +
-        '<td>' + escapeHtml(mv[0]) + '</td>' +
+        '<td><button type="button" class="move-toggle" aria-expanded="false" aria-controls="' + id + '">' + escapeHtml(mv[0]) + '</button></td>' +
         '<td><span class="move-type-tag" style="background:' + meta.hex + ';color:' + tintaDoTipo(meta.hex) + '">' + typeName + '</span></td>' +
         '<td class="mono">' + (mv[3] || "&mdash;") + '</td>' +
         '<td class="mono">' + (mv[4] ? mv[4] + "%" : "&mdash;") + '</td>' +
@@ -685,6 +685,9 @@
       var x = state.selected;
       var sp = x !== null && x !== undefined ? getSpeciesByX(x) : null;
       var alvo = e.target.closest("button, .move-row");
+      // Golpe da tabela: o botão do nome (teclado e leitor de tela) e a linha inteira (mouse/toque)
+      // abrem e fecham a descrição; aria-expanded acompanha.
+      if (alvo && alvo.classList.contains("move-toggle")) alvo = alvo.closest(".move-row");
       if (!alvo || !painel.contains(alvo) || !sp) return;
       if (alvo.classList.contains("ficha-nav-btn")) {
         selectSpecies(parseInt(alvo.getAttribute("data-x"), 10));
@@ -710,7 +713,11 @@
         if (status) status.textContent = "Salvo.";
       } else if (alvo.classList.contains("move-row")) {
         var detalhe = document.getElementById(alvo.dataset.target);
-        if (detalhe) detalhe.classList.toggle("hidden");
+        if (detalhe) {
+          var aberto = detalhe.classList.toggle("hidden") === false;
+          var botaoGolpe = alvo.querySelector(".move-toggle");
+          if (botaoGolpe) botaoGolpe.setAttribute("aria-expanded", aberto ? "true" : "false");
+        }
       }
     });
   })();

@@ -18,7 +18,7 @@ input, select, textarea { font-family: inherit; }
 }
 /* Busca principal de uma lista (Dex, Chefões, Velocidades). */
 .campo-busca { width: 100%; padding: 10px 12px; font-size: var(--fs-destaque); }
-.campo-busca:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+.campo-busca:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 /* Texto livre: busca na caixa, nome do time, anotação, comparação. */
 .campo-texto { padding: 9px 10px; font-size: var(--fs-texto); }
 /* Ajustes (Progresso, editor de build). */
@@ -33,3 +33,12 @@ input, select, textarea { font-family: inherit; }
 .card-ajustes { max-width: 460px; }
 .rotulo-ajuste { display: flex; flex-direction: column; gap: 5px; font-size: var(--fs-texto); font-weight: 600; }
 .rotulo-ajuste-dica { font-weight: 400; font-size: var(--fs-legenda); color: var(--text-dim); max-width: 70ch; }
+
+/* Opção de marcar/desmarcar (caixa + rótulo): o rótulo inteiro é o alvo de toque,
+   com a altura mínima dos outros controles (24 px no mouse, 44 px no toque). A
+   caixa fica um pouco maior que a padrão do navegador (16 px). */
+.opcao-caixa {
+  display: flex; align-items: center; gap: 9px; min-height: var(--alvo-min);
+  font-size: var(--fs-texto); font-weight: 600; cursor: pointer;
+}
+.opcao-caixa input[type="checkbox"] { width: 20px; height: 20px; margin: 0; flex-shrink: 0; cursor: pointer; }

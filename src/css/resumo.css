@@ -127,6 +127,8 @@
 .moves-table th { text-align: left; color: var(--text-dim); font-weight: 600; font-size: var(--fs-legenda); text-transform: uppercase; letter-spacing: .05em; padding: 5px 8px; border-bottom: 1px solid var(--border); }
 .moves-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
 .moves-table tr.move-row { cursor: pointer; }
+/* O nome do golpe é um botão de verdade (teclado/leitor de tela), com cara de texto. */
+.move-toggle { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
 .moves-table tr.move-row:hover { background: var(--surface-2); }
 .moves-table tr.move-row.above-cap { opacity: .5; }
 .cap-tag {

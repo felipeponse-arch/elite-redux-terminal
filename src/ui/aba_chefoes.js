@@ -627,7 +627,7 @@
       montarHtml +
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
         '<div class="boss-level-row"><label for="boss-level-input">Status final calculados pro nível</label>' +
-          '<input type="number" id="boss-level-input" class="campo campo-numero" min="1" max="100" value="' + bossState.level + '"></div>' +
+          '<input type="number" inputmode="numeric" id="boss-level-input" class="campo campo-numero" min="1" max="100" value="' + bossState.level + '"></div>' +
         '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:4px 0 12px;max-width:65ch;">Você digita o nível — não temos como saber o nível real de um treinador nos dados do jogo (por isso não existe uma calculadora de dano completa aqui, só isso). EVs/IVs são reais, extraídos do jogo. Considera o item quando é Choice Band/Specs/Scarf, Assault Vest, Tactical Vest, Thick Club ou Light Ball (marcado com *). Quando é Mega Stone ou orbe de reversão primal, os status já são calculados na forma transformada (types e stats reais dessa forma) — mas não sabemos qual das habilidades escolhíveis DA FORMA MEGA fica ativa (os dados não dizem), e não simulamos clima/campo/Trick Room já ativos antes da transformação (isso exigiria simular a ordem dos turnos, que este cálculo não faz). Efeito de habilidade em geral e itens ainda não identificados também não entram na conta.</p>' +
         '<div class="boss-mon-grid">' + monsHtml + '</div></div>' +
       renderGymSkillsCardHtml(boss);
