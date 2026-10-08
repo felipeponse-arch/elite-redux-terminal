@@ -13,7 +13,7 @@
   // battle between them.
   function compareCardHtml(sp) {
     return '<div class="card"><h3>Comparar com outro Pokémon</h3>' +
-      '<input type="text" id="compare-input" list="compare-species-list" placeholder="Nome de outro Pokémon..." autocomplete="off" ' +
+      '<input type="text" id="compare-input" list="compare-species-list" placeholder="Nome de outro Pokémon…" autocomplete="off" ' +
       'class="campo campo-texto" style="width:100%;max-width:320px;">' +
       '<div id="compare-result" style="margin-top:12px;"></div>' +
     '</div>';
@@ -78,7 +78,7 @@
   function notesCardHtml(sp) {
     var val = state.notes[sp.sname] || "";
     return '<div class="card"><h3>Minhas anotações</h3>' +
-      '<textarea id="species-notes-input" class="campo campo-texto notes-textarea" rows="3" placeholder="Sua própria anotação sobre este Pokémon - build que testou, estratégia, o que funcionou numa luta...">' + escapeHtml(val) + '</textarea>' +
+      '<textarea id="species-notes-input" class="campo campo-texto notes-textarea" rows="3" placeholder="Sua própria anotação sobre este Pokémon - build que testou, estratégia, o que funcionou numa luta…">' + escapeHtml(val) + '</textarea>' +
       '<div class="notes-actions"><button id="species-notes-save" class="text-action-btn" type="button">Salvar</button>' +
       '<span id="species-notes-status" class="notes-status" role="status" aria-live="polite"></span></div>' +
     '</div>';

@@ -349,12 +349,12 @@
     }
     montagemContraChefaoRodando = true;
     try {
-      statusChefao("Simulando os duelos contra " + boss.name + "...");
+      statusChefao("Simulando os duelos contra " + boss.name + "…");
       await new Promise(function (ok) { setTimeout(ok, 0); }); // deixa o texto aparecer antes da conta
       var nivel = getCurrentCap() || 100;
       // Chefão em dupla (db no dado): a luta é simulada 2 contra 2.
       var r = await simularSemTravarATela(cands, party, nivel, { dupla: !!boss.db, buffs: buffsAtivosDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name) }, function (feitos, total) {
-        statusChefao("Simulando os duelos contra " + boss.name + "... " + Math.min(feitos, total) + " de " + total);
+        statusChefao("Simulando os duelos contra " + boss.name + "… " + Math.min(feitos, total) + " de " + total);
       });
       if (!r.escolhidos.length) { statusChefao("Não consegui montar um time com os Pokémon que você tem."); return; }
       // guardarTimeAnterior reconhece o time que o próprio botão montou (slot.depois)
@@ -373,7 +373,7 @@
       });
       generatedTeamResult = {
         archetypeLabel: "contra " + boss.name, chefao: boss.name, plano: plano, clima: r.clima, estrategia: r.estrategia, luta: resumoDaLuta(r.simulacao),
-        progresso: "Gerando as builds...", anterior: anterior, buffs: buffsParaMostrarDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name), forTeamKey: teamKeyFor(members)
+        progresso: "Gerando as builds…", anterior: anterior, buffs: buffsParaMostrarDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name), forTeamKey: teamKeyFor(members)
       };
       var aba = document.querySelector('.tab-btn[data-tab="team"]');
       if (aba) aba.click();

@@ -40,7 +40,7 @@
     "Flourish": ["terreno de grama"], "Celestial Blessing": ["terreno nevoento"], "Biofilm": ["terreno toxico"]
   };
   var NOME_DA_CONDICAO = {
-    "status": "estar com um status (envenenado, queimado...)", "veneno": "estar envenenado",
+    "status": "estar com um status (envenenado, queimado…)", "veneno": "estar envenenado",
     "queimadura": "estar queimado", "sono": "estar dormindo", "chuva": "chuva", "sol": "sol",
     "areia": "tempestade de areia", "granizo": "granizo", "nevoa": "Eerie Fog (névoa)",
     "terreno eletrico": "Electric Terrain", "terreno de grama": "Grassy Terrain",

@@ -76,9 +76,9 @@
   // do script precisa atualizar este texto junto.
   var ROLE_DESCRIPTIONS_PT = {
     Pivo: "Tem um golpe de pivô real no movepool (U-turn, Volt Switch, Flip Turn, Teleport, Parting Shot ou Baton Pass) e bulk fora do quartil mais frágil do jogo (percentil 25 ou mais) - aguenta pelo menos um hit antes de trocar, mantendo controle de quem entra em campo.",
-    Tanque: "Bulk entre os 25% mais altos do jogo (percentil 75+) E tem um golpe de recuperação real (Recover, Roost, Wish, Slack Off...) - bulk sozinho, sem recuperação, se desgasta em poucos turnos.",
+    Tanque: "Bulk entre os 25% mais altos do jogo (percentil 75+) E tem um golpe de recuperação real (Recover, Roost, Wish, Slack Off…) - bulk sozinho, sem recuperação, se desgasta em poucos turnos.",
     Wallbreaker: "Ataque - físico ou especial, o maior dos dois - entre os 25% mais altos do jogo (percentil 75+), mas SEM bulk alto (percentil abaixo de 60) - fura muralhas sem depender de golpe de setup pra isso.",
-    Sweeper: "Velocidade entre as 25% mais altas do jogo (percentil 75+), ataque acima da mediana (percentil 60+) E tem um golpe de setup real (Swords Dance, Dragon Dance, Nasty Plot, Calm Mind...) - vira avalanche quando entra limpo no fim de jogo."
+    Sweeper: "Velocidade entre as 25% mais altas do jogo (percentil 75+), ataque acima da mediana (percentil 60+) E tem um golpe de setup real (Swords Dance, Dragon Dance, Nasty Plot, Calm Mind…) - vira avalanche quando entra limpo no fim de jogo."
   };
   var ROLE_SORT_PCT = { Pivo: "bulkPct", Tanque: "bulkPct", Wallbreaker: "offensePct", Sweeper: "spePct" };
   var ROLE_TIER_ORDER = { SS: 0, S: 1, A: 2, B: 3, C: 4, D: 5 };

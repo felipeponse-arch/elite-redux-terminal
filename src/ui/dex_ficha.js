@@ -205,7 +205,7 @@
     var r = SPECIES_RANK[sname];
     if (!r || !r.dupla) return "";
     var title = "Rank " + r.dupla.tier + " em batalha em dupla (score " + r.dupla.score + "/100): duelo contra os Pokémon dos chefões em dupla, " +
-      "com golpe de área acertando os dois (0,75x cada) e o que a habilidade faz pelo parceiro (Friend Guard, Power Spot, Intimidate nos dois...).";
+      "com golpe de área acertando os dois (0,75x cada) e o que a habilidade faz pelo parceiro (Friend Guard, Power Spot, Intimidate nos dois…).";
     return '<span class="rank-badge-stage ' + (RANK_TIER_CLASS[r.dupla.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.dupla.tier + '</span>';
   }
   var STAGE_LABEL = { 1: "1º estágio", 2: "2º estágio", 3: "3º estágio", 4: "4º estágio" };

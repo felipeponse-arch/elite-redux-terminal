@@ -343,7 +343,7 @@
   //  - FALHA PASSAGEIRA tenta de novo sozinha, com espera crescente, antes de
   //    mostrar erro. Os códigos seguem sample.d.ts (código desconhecido conta
   //    como upstream_error, passageiro).
-  //  - TEMPO VISÍVEL: "Consultando o Claude... 14 s" em vez de texto parado.
+  //  - TEMPO VISÍVEL: "Consultando o Claude… 14 s" em vez de texto parado.
   var PAUSAS_IA_MS = [4000, 10000];
   var ERROS_IA_PASSAGEIROS = ["upstream_error", "rate_limited", "empty_completion", "invalid_json"];
   var ERROS_IA_DEFINITIVOS = ["not_granted", "session_expired", "refused", "prompt_too_large", "sampling_disabled",
@@ -371,7 +371,7 @@
   function esperarMs(ms) { return new Promise(function (ok) { setTimeout(ok, ms); }); }
   function pedirIA(o) {
     var aviso = o.aviso || function () {};
-    if (pedidosIAPendentes > 0) aviso("Na fila - esperando outra consulta à IA terminar...");
+    if (pedidosIAPendentes > 0) aviso("Na fila - esperando outra consulta à IA terminar…");
     pedidosIAPendentes++;
     var vez = filaIA.then(function () { return pedirIAAgora(o); });
     // A fila anda mesmo se este pedido falhar.
@@ -384,14 +384,14 @@
     var pausas = o.pausasMs || PAUSAS_IA_MS;
     for (var i = 0; ; i++) {
       var inicio = Date.now();
-      var base = i === 0 ? rotulo : rotulo.replace(/\.\.\.$/, "") + " - tentativa " + (i + 1) + " de " + (pausas.length + 1) + "...";
+      var base = i === 0 ? rotulo : rotulo.replace(/(…|\.\.\.)$/, "") + " - tentativa " + (i + 1) + " de " + (pausas.length + 1) + "…";
       aviso(base);
       var relogio = setInterval(function () { aviso(base + " " + Math.round((Date.now() - inicio) / 1000) + " s"); }, 1000);
       try {
         return await comTempoLimite(sample.json(prompt, opts));
       } catch (e) {
         if (i >= pausas.length || !erroIAPassageiro(e)) throw e;
-        aviso("A IA está ocupada - tentando de novo em " + Math.round(pausas[i] / 1000) + " s...");
+        aviso("A IA está ocupada - tentando de novo em " + Math.round(pausas[i] / 1000) + " s…");
         await esperarMs(pausas[i]);
       } finally {
         clearInterval(relogio);
@@ -409,7 +409,7 @@
     try {
       for (var t = 1; t <= tentativas; t++) {
         var bruto = await chamarModelo(sample, prompt, o.ferramentas === false ? undefined : { tools: buildStandardAiTools() }, o,
-          t === 1 ? "Consultando o Claude..." : "A primeira sugestão não passou na validação - pedindo outra...");
+          t === 1 ? "Consultando o Claude…" : "A primeira sugestão não passou na validação - pedindo outra…");
         var r = o.validar ? o.validar(bruto) : { valor: bruto };
         if (r && !r.motivo) return { ok: true, valor: r.valor, bruto: bruto };
         // `motivo` vai pro modelo na nova tentativa; `motivoParaJogador` (se
@@ -557,7 +557,7 @@
     var progresso = aoProgresso || function () {};
     var faltam = members.slice();
     if (members.length > 1) {
-      progresso("Gerando as " + members.length + " builds numa consulta só...");
+      progresso("Gerando as " + members.length + " builds numa consulta só…");
       var resp = await pedirIA({
         prompt: montarPromptBuildsDoTime(members, optsLote),
         ferramentas: false,
@@ -593,7 +593,7 @@
     });
     for (var i = 0; i < faltam.length; i++) {
       var sp = faltam[i];
-      progresso("Build " + (members.length - faltam.length + i + 1) + "/" + members.length + ": " + sp.n + " (sozinha)...");
+      progresso("Build " + (members.length - faltam.length + i + 1) + "/" + members.length + ": " + sp.n + " (sozinha)…");
       resultado[sp.sname] = await generateBuildWithAI(sp, statusElId, optsDe(sp));
       concluirBuildDoLote(sp.x);
       // O motivo da falha fica no status só até o próximo redesenho - guarda pra
@@ -619,7 +619,7 @@
         var el = document.getElementById(statusElId || "mybuild-ai-status") || statusEl;
         if (el) el.textContent = texto;
       };
-      aviso("Consultando o Claude...");
+      aviso("Consultando o Claude…");
       var cap = getCurrentCap();
       // Uma nova tentativa automática, já dizendo à IA por que a primeira foi
       // rejeitada (item U3 da pauta técnica, 2026-09-16) - antes o trabalho de
@@ -647,7 +647,7 @@
         aviso(resp.rejeitada ? resp.mensagem + " (já tentei 2 vezes)" : resp.mensagem);
         return false;
       }
-      aviso(""); // o relógio "Consultando o Claude... N s" não fica na tela depois de salvar
+      aviso(""); // o relógio "Consultando o Claude… N s" não fica na tela depois de salvar
       return gravarBuildValidadaDaIa(sp, resp.valor, resp.bruto, opts, cap, aviso);
     } catch (e) {
       // Erro no app (não da IA - esses o pedirIA já trata) ao aplicar a resposta.

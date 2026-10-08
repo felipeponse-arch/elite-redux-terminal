@@ -119,7 +119,7 @@
     // Chip à parte (lote 3, 2026-10-04): o aviso muda a cor e a borda do chip, não só a letra.
     if (el.parentNode) el.parentNode.classList.toggle("is-aviso", !!warn);
   }
-  setSyncStatusIndicator("sincronização: verificando...");
+  setSyncStatusIndicator("sincronização: verificando…");
   // Reconexão automática (achado real do usuário, 2026-09-13: viu "conexão
   // de sincronização perdida" na tela e perguntou o que significava - o
   // indicador já avisava certo, mas depois de avisar não fazia mais nada, o
@@ -137,7 +137,7 @@
     }
     syncRetryCount++;
     var delay = Math.min(5000 * Math.pow(1.5, syncRetryCount - 1), 30000);
-    setSyncStatusIndicator("reconectando sincronização...", true);
+    setSyncStatusIndicator("reconectando sincronização…", true);
     if (syncRetryTimer) clearTimeout(syncRetryTimer);
     syncRetryTimer = setTimeout(connectSync, delay);
   }

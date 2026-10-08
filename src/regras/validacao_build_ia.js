@@ -57,7 +57,7 @@
   function regraItemConsumivelPrompt(sp) {
     if (megaStoneRuleFor(sp)) return ""; // a pedra ocupa o slot de item
     var textoDe = function (r) {
-      return r.precisa === "berry" ? "o item TEM que ser uma Berry" : "o item TEM que ser um que se gasta na luta (Berry, Gem, Focus Sash, White Herb, Weakness Policy...)";
+      return r.precisa === "berry" ? "o item TEM que ser uma Berry" : "o item TEM que ser um que se gasta na luta (Berry, Gem, Focus Sash, White Herb, Weakness Policy…)";
     };
     var daInnate = regraItemConsumivelPara(sp, null);
     if (daInnate) return "ITEM OBRIGATORIO: a innate " + daInnate.habilidade + " so funciona consumindo o item - " + textoDe(daInnate) + ".\n";
@@ -306,7 +306,7 @@
       if (!serve) {
         return rejeita("A habilidade " + regraConsumivel.habilidade + " do " + sp.n + " só funciona gastando o item, mas a build usou " +
           (item ? "\"" + item + "\"" : "nenhum item") + " - precisa de " +
-          (regraConsumivel.precisa === "berry" ? "uma Berry" : "um item que se gasta na luta (Berry, Gem, Focus Sash, White Herb...)") + ". Tente gerar de novo.");
+          (regraConsumivel.precisa === "berry" ? "uma Berry" : "um item que se gasta na luta (Berry, Gem, Focus Sash, White Herb…)") + ". Tente gerar de novo.");
       }
     }
     // No máximo 2 membros do time com o mesmo item (2026-09-29, decisão do

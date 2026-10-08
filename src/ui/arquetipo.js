@@ -153,7 +153,7 @@
         if (statusEl) statusEl.textContent = "Escolha um Estilo, Clima e campo, Tática ou Monotype primeiro, pra eu focar o time em algo.";
         return false;
       }
-      if (statusEl) statusEl.textContent = "Consultando o Claude...";
+      if (statusEl) statusEl.textContent = "Consultando o Claude…";
       var r = rosterParaTimeIA(monotype);
       if (!r.roster.length) {
         if (statusEl) statusEl.textContent = monotype
@@ -314,7 +314,7 @@
       setStatus("Escolha um Estilo, Clima e campo, Tática ou Monotype primeiro, pra eu focar o time em algo.");
       return;
     }
-    setStatus("Etapa 1/4 - montando a composição do time...");
+    setStatus("Etapa 1/4 - montando a composição do time…");
     var composed = await generateTeamForArchetype();
     if (!composed || !teamRecommendation) return; // generateTeamForArchetype já deixou o motivo no status
     if (!applyRecommendedTeam()) return; // idem, applyRecommendedTeam já deixou o motivo no status/toast
@@ -340,10 +340,10 @@
     } finally {
       encerrarLoteDeBuilds();
     }
-    setStatus("Etapa 3/4 - escrevendo o guia de como jogar este time...");
+    setStatus("Etapa 3/4 - escrevendo o guia de como jogar este time…");
     var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + weather : "", state.archetype.tatica ? "Tática: " + state.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
     var guide = await generateTeamUsageGuide(members, focusDesc);
-    setStatus("Etapa 4/4 - validando a equipe...");
+    setStatus("Etapa 4/4 - validando a equipe…");
     generatedTeamResult = { archetypeLabel: focusDesc, guide: guide, validation: computeTeamGenerationValidation(members), forTeamKey: teamKeyFor(members) };
     TELAS.time(); // estado de tela (resultado da geração); as builds já foram gravadas pelas ações
     setStatus(guide ? "Time completo gerado." : "Time e builds gerados - o guia de uso não veio desta vez, pode gerar de novo depois.");

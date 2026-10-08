@@ -183,7 +183,7 @@
     try {
       var statusEl = document.getElementById(statusElId || "strategy-sets-status");
       var aviso = function (texto) { if (statusEl) statusEl.textContent = texto; };
-      aviso("Consultando o Claude...");
+      aviso("Consultando o Claude…");
       var cap = getCurrentCap();
       // Mesmo espírito do retry único da build - só que aqui o critério pra
       // tentar de novo é "nenhum set aproveitável", não "algum set com defeito"

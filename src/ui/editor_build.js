@@ -279,7 +279,7 @@
       '<div class="mybuild-row">' +
         '<label class="mybuild-field">Habilidade<select id="mybuild-ability" class="campo campo-ajuste">' + abiOptionsHtml + '</select></label>' +
         '<label class="mybuild-field">Nature<select id="mybuild-nature" class="campo campo-ajuste">' + natureOptionsHtml + '</select></label>' +
-        '<label class="mybuild-field">Item<input type="text" id="mybuild-item" class="campo campo-ajuste" list="mybuild-item-list" placeholder="Buscar item..." autocomplete="off"></label>' +
+        '<label class="mybuild-field">Item<input type="text" id="mybuild-item" class="campo campo-ajuste" list="mybuild-item-list" placeholder="Buscar item…" autocomplete="off"></label>' +
       '</div>' + itemDatalist +
       '<div class="mybuild-row mybuild-moves">' +
         [0, 1, 2, 3].map(function (i) {
