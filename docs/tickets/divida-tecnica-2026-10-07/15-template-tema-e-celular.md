@@ -1,6 +1,6 @@
 # 15 — Template: cor do tema, pular para o conteúdo e bordas do celular
 
-Status: em-andamento
+Status: resolvido
 Bloqueado por: nenhum
 
 ## O que entrega

@@ -1,6 +1,6 @@
 # 14 — Teclado e toque
 
-Status: em-andamento
+Status: resolvido
 Bloqueado por: nenhum
 
 ## O que entrega

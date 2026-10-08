@@ -1,6 +1,6 @@
 # 12 — Apagar Build com desfazer
 
-Status: em-andamento
+Status: resolvido
 Bloqueado por: nenhum
 
 ## O que entrega

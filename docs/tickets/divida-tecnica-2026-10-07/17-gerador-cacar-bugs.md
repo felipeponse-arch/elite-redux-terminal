@@ -1,6 +1,6 @@
 # 17 — Gerador de builds: caçar bugs no caminho
 
-Status: em-andamento
+Status: resolvido
 Bloqueado por: nenhum
 
 ## O que entrega
