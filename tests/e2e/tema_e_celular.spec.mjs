@@ -61,10 +61,13 @@ test.describe("pular para o conteúdo", () => {
     await abrirApp(page);
     const link = page.locator(".pular-conteudo");
     await expect(link).toHaveText("Pular para o conteúdo");
+    // Escondido não deixa nem a sombra vazar pro topo da tela (mancha na foto do entalhe).
+    expect(await link.evaluate((el) => getComputedStyle(el).boxShadow), "sem foco: sem sombra").toBe("none");
     // Sem foco: fora da tela (acima do topo).
     expect((await link.boundingBox()).y + (await link.boundingBox()).height).toBeLessThanOrEqual(0);
     await page.keyboard.press("Tab");
     await expect(link).toBeFocused();
+    expect(await link.evaluate((el) => getComputedStyle(el).boxShadow), "com foco: sombra volta").not.toBe("none");
     const caixa = await link.boundingBox();
     expect(caixa.y, "visível: dentro da tela").toBeGreaterThanOrEqual(0);
     expect(caixa.height).toBeGreaterThanOrEqual(24);

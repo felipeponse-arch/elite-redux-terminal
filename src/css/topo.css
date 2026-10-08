@@ -156,11 +156,12 @@ main:focus { outline: none; }
   font-size: var(--fs-texto);
   font-weight: 700;
   border-radius: var(--radius-md);
-  box-shadow: var(--elev-2);
   text-decoration: none;
   transform: translateY(calc(-100% - var(--space-4) - var(--safe-top)));
 }
-.pular-conteudo:focus { transform: none; }
+/* A sombra só existe com foco: escondido, o deslocamento não basta pra ela sair da tela
+   (--elev-2 do tema claro chegava ~6 px dentro, e a foto do entalhe gravou a mancha). */
+.pular-conteudo:focus { transform: none; box-shadow: var(--elev-2); }
 .view { display: none; flex: 1; min-height: 0; min-width: 0; }
 .view.active { display: flex; }
 /* #view-dex é a única view com 2 filhos diretos (#dashboard + .dex-shell) -
