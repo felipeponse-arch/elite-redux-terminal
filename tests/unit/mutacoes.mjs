@@ -1836,7 +1836,7 @@ export const MUTACOES = [
     id: "gerador-item-fora-do-prompt",
     descricao: "a validação volta a aceitar qualquer um dos 926 itens (pedra de outra espécie, item-chave)",
     arquivo: "validacao_build_ia.js",
-    de: "var itensDaBuild = AI_ITEM_POOL.concat(itensDeEspeciePara(sp), isMegaForm(sp) ? stonesOf(sp) : []);",
+    de: "var itensDaBuild = AI_ITEM_POOL.concat(itensDeEspeciePara(sp), pedrasDaFamilia);",
     para: "var itensDaBuild = ITEMS;",
   },
   {
@@ -1859,5 +1859,19 @@ export const MUTACOES = [
     arquivo: "validacao_build_ia.js",
     de: "if (escolhiveis.indexOf(cur.ability) === -1) return null;",
     para: "",
+  },
+  {
+    id: "gerador-base-sem-a-pedra-da-familia",
+    descricao: "a forma base perde a pedra da própria Mega na validação do item",
+    arquivo: "validacao_build_ia.js",
+    de: "megaFormsOf(sp).reduce(function (acc, m) { return acc.concat(stonesOf(m)); }, [])",
+    para: "[]",
+  },
+  {
+    id: "gerador-consumiveis-fora-do-filtro",
+    descricao: "Seeds, Adrenaline Orb e Leppa viram sem item em silêncio (Unburden/Gluttony ficam inalcançáveis)",
+    arquivo: "validacao_build_ia.js",
+    de: "(itensDaBuild.indexOf(raw.item) !== -1 || itemSeGastaNaLuta(raw.item))",
+    para: "(itensDaBuild.indexOf(raw.item) !== -1)",
   },
 ];

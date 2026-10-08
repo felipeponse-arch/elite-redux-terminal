@@ -313,8 +313,12 @@
     // nada. Item fora da lista cai pra "sem item", o mesmo tratamento suave de item desconhecido. A pedra da
     // própria forma Mega vale (é ela que a regra da mega temporária impõe, logo abaixo).
     var stoneRule = megaStoneRuleFor(sp);
-    var itensDaBuild = AI_ITEM_POOL.concat(itensDeEspeciePara(sp), isMegaForm(sp) ? stonesOf(sp) : []);
-    var item = (typeof raw.item === "string" && itensDaBuild.indexOf(raw.item) !== -1) ? raw.item : "";
+    // Pedras da própria família: a da forma Mega e, na forma base, as das Megas dela (no modo temporário a base
+    // também pode segurar a pedra). Itens que se gastam na luta (Seeds, Adrenaline Orb, qualquer Berry, Gem...)
+    // também passam: o prompt os cita como válidos pra Unburden/Gluttony/Ripen/Harvest (itemSeGastaNaLuta).
+    var pedrasDaFamilia = isMegaForm(sp) ? stonesOf(sp) : megaFormsOf(sp).reduce(function (acc, m) { return acc.concat(stonesOf(m)); }, []);
+    var itensDaBuild = AI_ITEM_POOL.concat(itensDeEspeciePara(sp), pedrasDaFamilia);
+    var item = (typeof raw.item === "string" && ITEMS.indexOf(raw.item) !== -1 && (itensDaBuild.indexOf(raw.item) !== -1 || itemSeGastaNaLuta(raw.item))) ? raw.item : "";
     // Modo de mega temporária: build de forma mega PRECISA segurar a pedra
     // (ver megaStoneRuleFor). Com uma pedra só, corrige sozinho em vez de
     // rejeitar - mesmo espírito "soft" do resto do item.

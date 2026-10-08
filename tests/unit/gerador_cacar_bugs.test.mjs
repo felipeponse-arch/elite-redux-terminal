@@ -58,10 +58,16 @@ test("achado 2b: item exclusivo da espécie e a pedra da própria forma Mega con
   const pikachu = R.getSpeciesBySname("SPECIES_PIKACHU");
   assert.ok(pikachu);
   assert.deepEqual([...R.itensDeEspeciePara(pikachu)], ["Light Ball"]);
-  // Light Ball no Pikachu: não cai pra "" pelo filtro de itens oferecidos (o resto da validação pode rejeitar por outro motivo).
-  const m = {};
-  const v = R.validateAiBuild(pikachu, Object.assign(bruto({ item: "Light Ball" }), { ability: nomeAb(pikachu.ab[0]), moves: R.availableMovesFor(pikachu).names.filter(dano).slice(0, 4) }), m);
-  if (v) assert.equal(v.item, "Light Ball");
+  // Light Ball no Pikachu: o item é mantido (asserção incondicional; a fixture sai do dado real).
+  const mvP = R.availableMovesFor(pikachu).names.filter(dano);
+  const sinP = R.sinergiasDaEspecie(pikachu).filter((h) => h.kind === "inn" || h.name === nomeAb(pikachu.ab[0])).flatMap((h) => h.golpes || []).filter((g) => mvP.includes(g));
+  const golpesP = [...new Set(sinP.concat(mvP))].slice(0, 4);
+  const mP = {};
+  const vP = R.validateAiBuild(pikachu, { ability: nomeAb(pikachu.ab[0]), nature: "Timid", item: "Light Ball", moves: golpesP, evs: [0, 0, 0, 252, 4, 252], rationale: "x" }, mP);
+  assert.ok(vP, mP.txt);
+  assert.equal(vP.item, "Light Ball");
+  // E Light Ball numa espécie que não é Pikachu/Raichu cai pra sem item.
+  assert.equal(valida({ item: "Light Ball" }).v.item, "");
   // Pedra da própria Mega (modo temporário): continua sendo imposta/aceita.
   const mega = R.getSpeciesBySname("SPECIES_ABSOL_MEGA");
   assert.deepEqual([...R.stonesOf(mega)], ["Absolite"]);
@@ -183,4 +189,58 @@ test("caso mínimo: item que só sai depois da etapa atual vira aviso, com a eta
   assert.ok(item, "pré-condição (dado real): item oferecido à IA que só sai depois da 3ª insígnia");
   const av = R2.avisosDaBuild(R2.getSpeciesBySname("SPECIES_RATTATA"), { moves: ["Tackle"], item }).find((a) => a.tipo === "item-tardio");
   assert.ok(av && av.texto.includes(item));
+});
+
+// ---------- rodada 2 (supervisor) ----------
+
+test("rodada 2: a forma BASE segura a pedra da própria Mega (modo temporário), como no master", () => {
+  const base = R.getSpeciesBySname("SPECIES_ABSOL");
+  const mega = R.getSpeciesBySname("SPECIES_ABSOL_MEGA");
+  assert.equal(R.megaMode(), "temporaria");
+  assert.deepEqual([...R.stonesOf(mega)], ["Absolite"]);
+  const mv = R.availableMovesFor(base).names;
+  const t = R.speciesTypeNames(base);
+  const stab = mv.filter((n) => dano(n) && t.indexOf(tipoDe(n)) !== -1).slice(0, 2);
+  const cob = mv.filter((n) => dano(n) && t.indexOf(tipoDe(n)) === -1).slice(0, 2);
+  const r = valida({ ability: nomeAb(base.ab[0]), moves: stab.concat(cob), item: "Absolite" }, base);
+  assert.ok(r.v, r.txt);
+  assert.equal(r.v.item, "Absolite");
+  // A pedra de outra família continua não valendo.
+  assert.equal(valida({ ability: nomeAb(base.ab[0]), moves: stab.concat(cob), item: "Charizardite X" }, base).v.item, "");
+});
+
+test("rodada 2: itens que se gastam na luta (Seeds, Adrenaline Orb, Leppa) não somem em silêncio", () => {
+  for (const n of R.ITENS_GASTOS_NA_LUTA) {
+    if (R.ITEMS.indexOf(n) === -1) continue;
+    assert.equal(valida({ item: n }).v.item, n, n + " é citado pelo prompt como item que se gasta");
+  }
+  assert.equal(valida({ item: "Leppa Berry" }).v.item, "Leppa Berry", "toda Berry serve pra Gluttony/Ripen/Harvest (o prompt diz 'uma Berry')");
+});
+
+test("rodada 2: Gluttony e Unburden continuam alcançáveis com os itens que o prompt cita", () => {
+  const R2 = carregarRegras({ milestone: 9, difficulty: "ace", levelCapMode: "more" });
+  const ab2 = (x) => R2.uniqueIds(x.ab).map((id) => R2.ABILITIES[id][0]);
+  const inn2 = (x) => x.inn.map((id) => R2.ABILITIES[id][0]);
+  const monta = (s, habilidade) => {
+    const livres = R2.availableMovesFor(s).names.filter((g) => R2.moveRoleOf(g) !== "dupla" && R2.moveRoleOf(g) !== "cura");
+    const sin = R2.sinergiasDaEspecie(s).filter((h) => h.kind === "inn" || h.name === habilidade).flatMap((h) => h.golpes || []).find((g) => livres.includes(g));
+    const golpes = [...new Set([sin, ...livres.filter((g) => R2.moveRoleOf(g) === "dano")].filter(Boolean))].slice(0, 4);
+    return { ability: habilidade, nature: "Adamant", moves: golpes, evs: [252, 252, 0, 0, 4, 0] };
+  };
+  const glut = R2.SPECIES.find((s) => !R2.isMegaForm(s) && inn2(s).includes("Gluttony") && R2.availableMovesFor(s).names.length >= 8);
+  const bg = monta(glut, ab2(glut)[0]);
+  for (const item of ["Leppa Berry", "Salac Berry"]) {
+    const v = R2.validateAiBuild(glut, { ...bg, item }, {});
+    assert.ok(v, "Gluttony com " + item);
+    assert.equal(v.item, item);
+  }
+  const unb = R2.SPECIES.find((s) => !R2.isMegaForm(s) && ab2(s).includes("Unburden") && !inn2(s).some((n) => ["Gluttony", "Ripen", "Harvest", "Cud Chew", "Unburden"].includes(n)) && R2.availableMovesFor(s).names.length >= 8);
+  const bu = monta(unb, "Unburden");
+  let alcancou = 0;
+  for (const item of ["Electric Seed", "Adrenaline Orb", "Focus Sash", "Flying Gem"]) {
+    const m = {};
+    const v = R2.validateAiBuild(unb, { ...bu, item }, m);
+    if (v) { assert.equal(v.item, item, "Unburden com " + item); alcancou++; } else assert.doesNotMatch(m.txt, /só funciona gastando o item/, item);
+  }
+  assert.ok(alcancou >= 1, "pelo menos um item consumível chega à build com Unburden");
 });
