@@ -2,6 +2,16 @@
 
 Ferramenta de apoio a uma run de Pokémon Elite Redux 2.65: Dex do hack, montagem de time e builds, plano contra cada chefão e rank das espécies.
 
+## Versões
+
+**Versão do jogo**:
+O número da versão que o jogador instala, como anunciado pelos desenvolvedores (ex.: 2.65.4.1b).
+_Avoid_: versão (sozinha), patch
+
+**Dado do jogo**:
+A cópia dos dados do jogo (espécies, golpes, habilidades, treinadores) que o app usa, identificada pelo rótulo da fonte e pela data do corte (ex.: NextDex 2.65.4, 07/10). Pode não coincidir com nenhuma Versão do jogo.
+_Avoid_: versão (sozinha), dex
+
 ## Progressão da run
 
 **Dificuldade**:

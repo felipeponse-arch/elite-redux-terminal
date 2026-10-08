@@ -1,6 +1,6 @@
 # 04 — Contexto da run: Level cap com padrão único
 
-Status: falta-informacao
+Status: pronto-para-agente
 Bloqueado por: 01
 
 ## O que entrega
@@ -14,3 +14,5 @@ Toda tela e toda regra usam o mesmo valor quando o Level cap não está definido
 
 ## Comentários
 Origem: levantamento de dívida técnica e revisão de arquitetura de 07/10 (prioridades na conversa).
+
+- 08/10 (usuário): o Level cap continua como sempre foi: três tipos (Easy, More, Elite), cada um com o valor que está no código do jogo. Nada muda de valor.

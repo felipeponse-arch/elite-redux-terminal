@@ -71,6 +71,56 @@ Prompt: "Ticket 16: avalie os blocos de prompts_ia.js e me traga a lista com ver
 ## Decisões que só o usuário toma
 04 valor do Level cap (Onda 2). 03 aprovar lista (Onda 8). 08 forma do registro (Onda 9).
 
+## F. Distribuição pela equipe (07/10, 23:59) — ordem: barato e sem tocar no dado bruto → valor → decidir o resto
+Cada ticket: um agente (Sonnet 5.5) no seu worktree (issue-tracker.md), commit no worktree, supervisor (Gauntlet) antes de juntar no master. Sem publicar até o dados-2654 10. Git sempre com `--no-pager`.
+
+Fase 1 — barato, sem tocar no dado bruto
+| Ticket | Agente | Custo |
+|---|---|---|
+| dívida 13 reticências | engenheira-frontend | P |
+| dívida 15 template: tema, pular conteúdo, bordas | engenheira-frontend | P |
+| dívida 12 apagar Build com desfazer | engenheira-frontend (revisão ux-acessibilidade) | P |
+| dívida 14 teclado e toque | ux-acessibilidade | M |
+| dívida 11 ESLint 10 | qa-processo | P |
+| dívida 17 caçar bugs do gerador | qa-processo | M |
+| dívida 02 especificação em dia | gerente | M (só texto) |
+
+Fase 2 — valor (depois de fechar dívida 01 e pendências 08, que estão em andamento em outra sessão)
+| Ticket | Agente |
+|---|---|
+| dados-2654 01 trocar o dado | arquiteta-de-dados |
+| dados-2654 02, 03 habilidades mudadas/prováveis | meta-pokemon (testes: qa-processo) |
+| dados-2654 04, 05, 06 habilidades novas | meta-pokemon (testes: qa-processo) |
+| dados-2654 07 sono e paralisia | meta-pokemon (testes: qa-processo) |
+| dados-2654 08 builds afetadas | playtester-de-build |
+| dados-2654 09 builds das espécies novas | playtester-de-build + meta-pokemon |
+| dívida 05 o que a run libera, 06 ferramentas da IA | arquiteta-de-dados |
+| dívida 07 testes pela interface do duelo | qa-processo |
+| dívida 18, 19 gerador (chamada e prompt) | engenheira-frontend / meta-pokemon |
+| dados-2654 10 rank, histórico, publicação | coordenador |
+
+Fase 3 — decidir com o usuário: dívida 03 (lista de sobras), 04 (valor do Level cap), 08-10 (registro de efeitos, sabatina), 16 e 20 (a-avaliar).
+
+## E. Versão nova do jogo: Dado do jogo 2.65.4 (sabatina de 07/10, à noite) — VALE MAIS QUE AS SEÇÕES ACIMA NA ORDEM
+Tickets em `docs/tickets/dados-2654/` (01-10). Curadoria em `docs/pesquisa_versao_2654.md`, `docs/pesquisa_2654_config.md`, `docs/pesquisa_2654_changelog.md`.
+
+Ordem única (avaliada pelo coordenador a pedido do usuário):
+1. Fechar o que está em andamento, porque mexe nos mesmos arquivos que a troca do dado: dívida 01 (rank por rankDe, worktree ticket-01) e pendências 08 (rank e comunidade, worktree ticket-08).
+2. Versão nova inteira: dados-2654 01 → 02, 03, 04 → 05, 06 → 07 → 08, 09 → 10.
+3. Dívida técnica a partir da Onda 2 (04 Level cap espera a decisão do usuário e não trava nada da versão nova).
+
+Regras decididas na sabatina:
+- Nenhuma publicação enquanto a versão nova estiver em andamento; a dívida que fechar nesse meio-tempo sai junto na publicação do dados-2654 10. Isto suspende as publicações intermediárias da seção C até lá.
+- As 29 habilidades novas entram na forma atual do motor; o registro de efeitos (08-10 da dívida) migra tudo depois.
+- Rank recalculado uma vez, no dados-2654 10, depois de todas as mudanças de mecânica. O "único que recalcula o rank" do ticket 10 da dívida continua valendo para quando ele acontecer.
+
+Prompts (uma sessão por ticket; agentes no Sonnet 5.5):
+- dados-2654 01: "Implemente docs/tickets/dados-2654/01-trocar-o-dado-do-jogo.md no worktree (issue-tracker.md). Aproveite o que está no branch dados-2654. Liste ao usuário as builds com golpe/habilidade que sumiu antes de mexer. Não recalcule o rank."
+- 02 a 07: "Implemente o ticket dados-2654/NN com /tdd. Mecânica: pesquisa profunda no código oficial e registro em docs/decisoes_mecanicas.md. Não recalcule o rank."
+- 08: "Ticket dados-2654/08: monte a lista das builds afetadas e me mostre antes de mexer."
+- 09: "Ticket dados-2654/09: subagente gera as 17 builds com as regras da validação da IA; playtester faz a curadoria; supervisor revisa."
+- 10: "Ticket dados-2654/10: recalcule o rank, escreva o histórico e publique (skill publicar-versao)."
+
 ## D. Grupo gerador de builds (pedido de 07/10, depois da revisão)
 Tickets 17-20. Importante (núcleo do projeto). Encaixe: logo depois da Onda 4 (precisa de 05 e 06 prontos para 18 e 19).
 - 17 caçar bugs (M, risco baixo) - pode rodar já, sem bloqueio.
