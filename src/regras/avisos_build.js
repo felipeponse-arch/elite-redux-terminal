@@ -29,6 +29,21 @@
         out.push({ tipo: "item-tardio", texto: build.item + " só aparece a partir da " + rotuloDaEtapaDoItem(achar.etapa) + " (" + achar.local + ", " + achar.como + ")." });
       }
     }
+    // 2b. Item que a build da IA rejeitaria (decisão do usuário, 08/10, golpe-ponte da curada): Choice
+    // com golpe de status, Vest com status, Black Sludge fora do Poison, Eviolite sem evolução e o
+    // limite de 2 itens iguais no time. Na build da IA isso é rejeição; aqui, que o item vem da curada, é aviso.
+    var itemAv = stripNote(build.item || "");
+    if (itemAv) {
+      var conflito = conflitoDeItem(itemAv, build.moves, sp);
+      if (conflito) out.push({ tipo: "item-conflito", texto: conflito.replace(/ Tente gerar de novo.$/, "") });
+      var stoneAv = megaStoneRuleFor(sp);
+      if (!stoneAv && state.team.indexOf(sp.x) !== -1) {
+        var comItem = itensEmUsoComQuem(sp.x)[itemAv] || [];
+        if (comItem.length >= MAX_MESMO_ITEM_NO_TIME) {
+          out.push({ tipo: "item-repetido", texto: itemAv + " já está com " + comItem.join(" e ") + " - no time vale no máximo " + MAX_MESMO_ITEM_NO_TIME + " com o mesmo item." });
+        }
+      }
+    }
     // 3. Habilidade que depende de clima/terreno que nem a criatura, nem a build, nem o time arma.
     var ativas = nomesDeHabilidades(sp.inn).concat(build.ability ? [build.ability] : []);
     precisaDeSetter(sp, build.ability).forEach(function (m) {
@@ -52,6 +67,8 @@
     "curadoria-do-projeto": { nivel: "confirmado", rotulo: "curadoria do projeto" },
     "discord-build-workshop-2.65": { nivel: "consenso", rotulo: "Discord Build Workshop" },
     "discord-movesets": { nivel: "relato", rotulo: "Discord" },
+    // Decisão do usuário (08/10): build da IA promovida pelo playtester é consenso.
+    "ia-curada-playtester": { nivel: "consenso", rotulo: "IA curada pelo playtester" },
     // Ticket 08: vídeo do canal MegaFidough - só o que o vídeo diz; natureza/EVs do padrão do app.
     "video-megafidough": { nivel: "relato", rotulo: "vídeo MegaFidough" }
   };

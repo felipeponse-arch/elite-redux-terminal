@@ -426,7 +426,7 @@
     if ((ctx.buffs || []).indexOf("flannery_healblock") !== -1) {
       var curaInutil = raw.moves.filter(function (n) { return moveRoleOf(n) === "cura"; });
       if (curaInutil.length) return rejeita("A luta alvo tem Heal Block permanente (buff do ginásio ainda ativo): " + curaInutil.join(", ") + " não cura nada. Troque por outro golpe.");
-      if (["Leftovers", "Sitrus Berry", "Shell Bell", "Big Root"].indexOf(item) !== -1) {
+      if (["Leftovers", "Black Sludge", "Sitrus Berry", "Shell Bell", "Big Root"].indexOf(item) !== -1) {
         return rejeita("A luta alvo tem Heal Block permanente: " + item + " não cura nada. Troque o item.");
       }
     }

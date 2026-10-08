@@ -15,7 +15,7 @@ _Avoid_: versão (sozinha), dex
 ## Progressão da run
 
 **Dificuldade**:
-A escolha do jogador no jogo (Easy, Ace, Elite, Hell); ela define o time que cada chefão usa ao longo de toda a run.
+A escolha do jogador no jogo (Easy, Ace, Elite, Hell); ela define o time que cada chefão usa ao longo de toda a run. Hell é uma Dificuldade do jogo: o app só a consulta, não a simula.
 _Avoid_: modo, nível de dificuldade
 
 **Variante do chefão**:
@@ -31,7 +31,7 @@ O objeto ganho ao vencer um líder de ginásio; marca a passagem de uma Etapa pa
 _Avoid_: badge
 
 **Level cap**:
-O nível máximo dos Pokémon do jogador numa Etapa, definido pela Dificuldade.
+O nível máximo dos Pokémon do jogador numa Etapa. É uma escolha própria do jogador no jogo, separada da Dificuldade.
 _Avoid_: cap, teto, nível limite
 
 ## Build

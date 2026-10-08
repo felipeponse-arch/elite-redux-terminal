@@ -11,6 +11,15 @@
   //   toast(texto) aviso rápido de sucesso.
   // Colado no <script> principal por scripts/build.mjs (marcador @regras gravacao_build_ia.js).
 
+  // ---- antes de pedir ----
+  // Decisão do usuário (08/10): build de Mega cuja pedra ainda não foi liberada na Etapa NÃO é
+  // gerada (antes só avisava). Devolve o motivo (texto pro jogador) ou null se pode gerar.
+  // Não chama a IA: quem bloqueia nem gasta a consulta.
+  function motivoDeNaoGerarBuild(sp) {
+    if (!sp || !isMegaForm(sp) || megaFormLiberada(sp)) return null;
+    return "Não gerei a build de " + sp.n + ": esta Mega só a partir da " + rotuloEtapaDaMega(sp) + ". Até lá a criatura luta como a forma base.";
+  }
+
   // ---- resposta -> build validada ----
   // Pedido de UMA build (generateBuildWithAI). `valor` é a build validada; `motivo` vai pro
   // modelo na nova tentativa, `motivoParaJogador` é o que o jogador vê se desistir.

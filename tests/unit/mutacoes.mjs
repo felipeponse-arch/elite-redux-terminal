@@ -2112,4 +2112,47 @@ export const MUTACOES = [
     de: "return { raw: raw, mult: mult, real: real, reasons: reasons, reducoes: reducoes };",
     para: "return { raw: raw, mult: mult, real: mult, reasons: reasons, reducoes: reducoes };",
   },
+  // Ticket dados-2654/11 (08/10): decisões do usuário sobre itens, Mega travada e selo.
+  {
+    id: "d11-selo-playtester-relato",
+    descricao: "a build promovida pelo playtester volta a ser relato em vez de consenso",
+    arquivo: "avisos_build.js",
+    de: "\"ia-curada-playtester\": { nivel: \"consenso\", rotulo: \"IA curada pelo playtester\" },",
+    para: "\"ia-curada-playtester\": { nivel: \"relato\", rotulo: \"IA curada pelo playtester\" },",
+  },
+  {
+    id: "d11-mega-travada-gera",
+    descricao: "Mega com a pedra ainda travada na Etapa volta a gerar build (só avisava)",
+    arquivo: "gravacao_build_ia.js",
+    de: "if (!sp || !isMegaForm(sp) || megaFormLiberada(sp)) return null;",
+    para: "return null;",
+  },
+  {
+    id: "d11-itens-tardios-sumem-do-prompt",
+    descricao: "o prompt da IA deixa de dizer quais itens ainda não estão disponíveis",
+    arquivo: "prompts_ia.js",
+    de: ".filter(function (x) { return x.p && x.p.etapa > state.settings.milestone; })",
+    para: ".filter(function () { return false; })",
+  },
+  {
+    id: "d11-ponte-sem-aviso-de-choice",
+    descricao: "curada aplicada ao time deixa de avisar Choice com golpe de status (e os outros conflitos de item)",
+    arquivo: "avisos_build.js",
+    de: "if (conflito) out.push({ tipo: \"item-conflito\"",
+    para: "if (false) out.push({ tipo: \"item-conflito\"",
+  },
+  {
+    id: "d11-ponte-sem-limite-de-2-itens",
+    descricao: "curada aplicada ao time deixa de avisar o 3º item igual no time",
+    arquivo: "avisos_build.js",
+    de: "if (comItem.length >= MAX_MESMO_ITEM_NO_TIME) {",
+    para: "if (false) {",
+  },
+  {
+    id: "d11-black-sludge-cura-com-heal-block",
+    descricao: "Black Sludge volta a valer contra Heal Block permanente (o jogo bloqueia a cura)",
+    arquivo: "validacao_build_ia.js",
+    de: "[\"Leftovers\", \"Black Sludge\", \"Sitrus Berry\"",
+    para: "[\"Leftovers\", \"Sitrus Berry\"",
+  },
 ];

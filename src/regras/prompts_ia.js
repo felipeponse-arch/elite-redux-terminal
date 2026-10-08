@@ -377,6 +377,19 @@
   }
   // `meio`: o que entra entre a lista de utilidade e as travas (a parte da
   // espécie no prompt de 1 build; vazio no lote, onde ela vai em cada espécie).
+  // Itens da lista que só saem DEPOIS da Etapa atual (decisão do usuário, 08/10): a IA evita,
+  // mas pode usar com motivo claro. Vem de ONDE_ACHAR_ITENS (código oficial do jogo).
+  function itensAindaIndisponiveisParaIA() {
+    return AI_ITEM_POOL.map(function (n) { return { n: n, p: primeiroLugarDoItem(n) }; })
+      .filter(function (x) { return x.p && x.p.etapa > state.settings.milestone; })
+      .sort(function (a, b) { return a.p.etapa - b.p.etapa; });
+  }
+  function blocoItensAindaIndisponiveisIA() {
+    var lista = itensAindaIndisponiveisParaIA();
+    if (!lista.length) return "";
+    return "AINDA NAO DISPONIVEIS nesta Etapa (o jogador ainda nao consegue obter; evite, e so use com motivo claro na rationale): " +
+      lista.map(function (x) { return x.n + " (a partir da " + rotuloDaEtapaDoItem(x.p.etapa) + ")"; }).join(", ") + ".\n";
+  }
   function blocoItensComunsIA(plural, meio) {
     var tipo = Object.keys(ITENS_IA_TIPO).filter(function (n) { return ITEMS.indexOf(n) !== -1; })
       .map(function (n) { return n + "=" + ITENS_IA_TIPO[n]; });
@@ -398,6 +411,7 @@
       "Utilidade (efeito deste jogo - leia, nao assuma pelo nome; pedra de clima so se a especie arma aquele clima):\n<dados_do_jogo>\n" +
       ITENS_IA_UTILIDADE.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" +
       meio +
+      blocoItensAindaIndisponiveisIA() +
       // Item que reforça + travas (2026-09-27; travas pela descrição do jogo,
       // conferidas em conflitoDeItem, validacao_build_ia.js).
       "ITEM x BUILD: o item precisa reforcar o papel, a habilidade ou os golpes escolhidos - diga na rationale o que ele reforca. " +

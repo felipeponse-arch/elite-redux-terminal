@@ -40,7 +40,7 @@ que manda sobre qualquer texto daqui. Decisão de arquitetura: `docs/decisoes_ar
 | RF52 | Substituído | Nota por duelo simulado (2026-09-28) e, depois, Rank v2 (RF89 a RF92) | 2026-10-02 |
 | RF62 | Substituído | RF93 (Rank por tipo sempre na ficha, não só em Monotype) | 2026-10-02 |
 | RF65 | Revisado | RF101 (revanche sem buffs; chave Ativo/Já tirado) | 2026-10-04 |
-| RF85 | Revisado | O bônus de sol e chuva não é +20%: vale a linha "Clima sol/chuva" de `docs/decisoes_mecanicas.md` | 2026-10-02 |
+| RF85 | Revisado | O RF não tem número próprio: os bônus de clima e de tipo valem os de `docs/decisoes_mecanicas.md` | 2026-10-08 |
 | RF88, RN16 | Revisados | RF111 (cada pedra tardia na sua Insígnia, conferida nos scripts do jogo) | 2026-10-04 |
 | RN17 | Revisado | Vale só para o card "Confronto" (por tipo); o simulador de duelo (RF97) calcula dano | 2026-09-28 |
 | RNF06 | Revisado | RNF27 (animação reduzida e Home/End nas listas) | 2026-10-07 |
@@ -554,13 +554,7 @@ Builds curadas por espécie, uma por papel, só dos papéis que o jogador já pe
   candidato, que fraqueza ele cobre e se sai do tipo ao evoluir (Everstone), e quem o jogador tem
   que ainda vai virar do tipo. O card de mono run mostra essas fraquezas, quantos membros do
   próximo líder têm golpe super efetivo no tipo e até 3 capturas disponíveis que as cobrem.
-- RF85 — **[REVISADO 2026-10-02: o bônus de sol e chuva vale o da linha "Clima sol/chuva" de
-  `docs/decisoes_mecanicas.md`, não +20%; a linha "Tempestade de areia: Rock" registra um bônus ao tipo Rock na areia, que a
-  sugestão de clima da mono run ainda não cita]** **Clima que combina com o tipo**: numa run Monotype o card sugere o clima com bônus
-  confirmado em fonte oficial (Full Features "Weather Rework" e FAQ): Fire→Sun e Water→Rain (+20% de
-  dano), Ice→Hail (+50% de Defesa), Ghost/Psychic→Eerie Fog (20% menos dano recebido, aumentos de
-  status não caem). Um clique põe no "Clima e campo"; a IA recebe a mesma sugestão. Tipo sem bônus
-  confirmado (ex.: areia pra Rock, que é do jogo original) não recebe sugestão.
+- RF85 — **[REVISADO 2026-10-08: o RF não carrega número de bônus; os valores de clima e de tipo estão só em `docs/decisoes_mecanicas.md` (linhas "Clima sol/chuva", "Tempestade de areia: Rock" e demais)]** **Clima que combina com o tipo**: numa run Monotype o card sugere o clima com bônus confirmado em fonte oficial (Full Features "Weather Rework" e FAQ): Fire→Sun, Water→Rain, Ice→Hail, Ghost/Psychic→Eerie Fog (a areia para Rock ainda não é citada pela sugestão). Um clique põe no "Clima e campo"; a IA recebe a mesma sugestão. Tipo sem bônus confirmado não recebe sugestão.
 - RF86 — **Build por IA conduzida pelo papel** (2026-09-27, revisão do prompt pedida pelo usuário:
   viabilidade, sinergia habilidade x golpes, prioridade, Velocidade, encaixe no time): o prompt leva o
   efeito de cada habilidade escolhível e innate (antes só o nome), o papel natural da espécie, a

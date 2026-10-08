@@ -169,6 +169,15 @@
     var cap = getCurrentCap();
     var aviso = function (texto) { var el = document.getElementById(statusElId); if (el) el.textContent = texto; };
     var progresso = aoProgresso || function () {};
+    // Mega ainda travada na Etapa: não gera (decisão do usuário, 08/10); quem chamou vê o motivo.
+    members = members.filter(function (sp) {
+      var motivo = motivoDeNaoGerarBuild(sp);
+      if (!motivo) return true;
+      resultado[sp.sname] = false;
+      resultado.ultimoMotivo = motivo;
+      concluirBuildDoLote(sp.x);
+      return false;
+    });
     var faltam = members.slice();
     if (members.length > 1) {
       progresso("Gerando as " + members.length + " builds numa consulta só…");
@@ -230,6 +239,8 @@
         var el = document.getElementById(statusElId || "mybuild-ai-status") || statusEl;
         if (el) el.textContent = texto;
       };
+      var travada = motivoDeNaoGerarBuild(sp);
+      if (travada) { aviso(travada); return false; }
       aviso("Consultando o Claude…");
       var cap = getCurrentCap();
       // Uma nova tentativa automática, já dizendo à IA por que a primeira foi
