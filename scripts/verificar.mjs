@@ -14,10 +14,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const RAIZ = fileURLToPath(new URL("..", import.meta.url));
+// Regra do QA (08/10/2026): no branch de um ticket, só as sabotagens ligadas ao que
+// mudou; no master (merge e publicar) a suíte inteira.
+const BRANCH = (spawnSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: RAIZ, encoding: "utf8" }).stdout || "").trim();
+const SABOTAGEM = BRANCH === "master" ? "node tests/run_sabotage.mjs" : "node tests/run_sabotage.mjs --mudados";
 const ETAPAS = [
   ["travas: codificação, sintaxe, lint (JS e CSS) e tipos", "npm run check --silent", "Trava estática falhou"],
   ["testes unitários das regras", "npm run test:unit --silent", "Testes unitários falharam"],
-  ["sabotagem das regras (todo defeito do catálogo tem que ser pego)", "npm run test:sabotage --silent", "Alguma sabotagem sobreviveu (ou o catálogo está desatualizado)"],
+  ["sabotagem das regras (" + (BRANCH === "master" ? "catálogo inteiro" : "só o que mudou desde o master") + ")", SABOTAGEM, "Alguma sabotagem sobreviveu (ou o catálogo está desatualizado)"],
   ["build (npm run build)", "npm run build --silent", "Build falhou"],
   ["testes de navegador (Playwright, projeto funcional)", "npm run test:e2e --silent", "Teste de navegador falhou - detalhes: npm run test:relatorio"],
 ];

@@ -4,6 +4,7 @@
 //   npm run test:sabotage
 //   node tests/run_sabotage.mjs lote- clima-   (só as que começam com esses nomes)
 //   node tests/run_sabotage.mjs --completo     (ignora o cache: suíte inteira em cada uma)
+//   node tests/run_sabotage.mjs --mudados      (só as ligadas ao que mudou desde o master)
 //
 // Mais rápido (Fase 3 da reunião de 30/09 - o usuário achou a rodada inteira
 // demorada, ~9 min pra 118): basta UM teste falhar pra sabotagem ser pega, então
@@ -12,15 +13,16 @@
 // cai na suíte inteira - "pega" continua querendo dizer "um teste falhou de
 // verdade". E roda várias sabotagens ao mesmo tempo (processos separados: cada
 // uma sabota só a própria memória, nunca o arquivo).
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { cpus } from "node:os";
 import { MUTACOES as TODAS } from "./unit/mutacoes.mjs";
 
 const ARGS = process.argv.slice(2);
 const COMPLETO = ARGS.includes("--completo");
+const MUDADOS = ARGS.includes("--mudados");
 const FILTROS = ARGS.filter((a) => !a.startsWith("--"));
-const MUTACOES = FILTROS.length ? TODAS.filter((m) => FILTROS.some((f) => m.id.startsWith(f))) : TODAS;
+let MUTACOES = FILTROS.length ? TODAS.filter((m) => FILTROS.some((f) => m.id.startsWith(f))) : TODAS;
 
 // Todo arquivo *.test.mjs da pasta, igual ao npm run test:unit - antes era uma
 // lista fixa, e um arquivo de teste novo ficava fora da sabotagem sem aviso.
@@ -28,6 +30,26 @@ const ARQUIVOS_DE_TESTE = readdirSync("tests/unit").filter((f) => f.endsWith(".t
 const CACHE = "tests/.sabotagem_cache.json";
 let cache = {};
 try { if (!COMPLETO && existsSync(CACHE)) cache = JSON.parse(readFileSync(CACHE, "utf8")); } catch { cache = {}; }
+
+// --mudados (regra do QA, 08/10/2026 - dois agentes rodando a suíte inteira ao mesmo
+// tempo levaram 90+ min): no branch de um ticket roda só as sabotagens ligadas ao que
+// mudou desde o master - a regra sabotada, o arquivo de teste que costuma pegá-la, ou
+// sabotagem nova do catálogo. A suíte inteira continua rodando no master (merge e publicar).
+if (MUDADOS) {
+  const git = (args) => spawnSync("git", args, { encoding: "utf8" }).stdout || "";
+  // worktree novo nasce sem cache: empresta o do checkout principal (senão tudo conta como "nova")
+  if (!Object.keys(cache).length) {
+    try { cache = JSON.parse(readFileSync(git(["rev-parse", "--path-format=absolute", "--git-common-dir"]).trim() + "/../" + CACHE, "utf8")); } catch { /* sem cache: roda todas */ }
+  }
+  const base = git(["merge-base", "HEAD", "master"]).trim();
+  const mudados = new Set([
+    ...git(["diff", "--name-only", base || "master"]).split("\n"),
+    ...git(["ls-files", "--others", "--exclude-standard"]).split("\n"),
+  ].filter(Boolean).map((f) => f.replace(/\\/g, "/")));
+  const nomes = new Set([...mudados].map((f) => f.split("/").pop()));
+  MUTACOES = MUTACOES.filter((m) => nomes.has(m.arquivo) || mudados.has(cache[m.id]) || !cache[m.id]);
+  console.log(`--mudados: ${mudados.size} arquivo(s) mudado(s) desde o master -> ${MUTACOES.length} sabotagem(ns)`);
+}
 const AO_MESMO_TEMPO = Math.max(2, Math.floor(cpus().length / 2));
 
 function rodar(m, arquivos) {
