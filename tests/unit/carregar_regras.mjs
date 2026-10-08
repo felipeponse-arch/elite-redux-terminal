@@ -11,6 +11,16 @@ import vm from "node:vm";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const lerJson = (nome) => JSON.parse(readFileSync(join(root, "data", nome), "utf8"));
 
+// Mesma reindexação por sname que o artifact_template.html faz ao carregar (CONDITION_MOVE_SYNERGY):
+// as ferramentas da IA (src/regras/ferramentas_ia.js) leem esse índice.
+function indexarCondicaoGolpe(bruto) {
+  const porSname = {};
+  const add = (sname, entrada) => { (porSname[sname] = porSname[sname] || []).push(entrada); };
+  (bruto.comboClimaAutossuficiente || []).forEach((c) => add(c.sname, { habilidade: c.habilidade, kind: c.kind, tipo: "clima", clima: c.clima, golpes: [c.golpe] }));
+  (bruto.comboHpBaixoComRecuo || []).forEach((c) => add(c.sname, { habilidade: c.habilidade, kind: c.kind, tipo: "hp_baixo", golpes: c.golpesRecuo || [] }));
+  return porSname;
+}
+
 export function carregarRegras({ difficulty = "ace", levelCapMode = "more", milestone = 0, megaMode = "temporaria" } = {}) {
   const contexto = {
     console,
@@ -32,6 +42,7 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
     GYM_SKILLS: lerJson("gym_skills.json"),
     MONO_DISP: lerJson("mono_disponibilidade.json"),
     MOVE_CATEGORIAS: lerJson("move_categorias.json"),
+    CONDITION_MOVE_SYNERGY: indexarCondicaoGolpe(lerJson("condition_move_synergy.json")),
     // Mesmo formato do `state` inicial do template (var state = {...}): desde a
     // fase 3 da refatoração (2026-09-24) save, evolução, builds e chefões moram
     // em src/regras e leem o state inteiro.

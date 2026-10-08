@@ -13,7 +13,7 @@ declare var DATA: any;
 /** Builds curadas (data/builds.json): sname -> build ou lista de builds. */
 declare var BUILDS: Record<string, any>;
 declare var ABILITY_SYNERGY: Record<string, any[]>;
-/** Combo habilidade condicional x golpe da própria espécie, por sname (reindexado no template; ausente nos testes do Node). */
+/** Combo habilidade condicional x golpe da própria espécie, por sname (reindexado no template e em tests/unit/carregar_regras.mjs). */
 declare var CONDITION_MOVE_SYNERGY: Record<string, any[]>;
 declare var LEVELCAPS: any;
 declare var MEGA_FORMS: any;
@@ -30,6 +30,8 @@ declare var GYM_SKILLS: any;
 declare var ABILITY_PT: Record<string, string>;
 /** Descrição de item do próprio jogo (data/item_descriptions.json), por nome. */
 declare var ITEM_DESC: Record<string, string>;
+/** Descrição de item em português (data/item_translations_pt.json), por nome. */
+declare var ITEM_PT: Record<string, string>;
 declare var PODER_VARIAVEL: { golpes: Record<string, string>; pesos: Record<string, number> };
 declare var ONDE_ACHAR_ITENS: Record<string, { etapa: number | null; local: string; como: string }[]>;
 /** Mono run: por tipo, desde qual etapa dá pra pegar cada espécie (data/mono_disponibilidade.json). */

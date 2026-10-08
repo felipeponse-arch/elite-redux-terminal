@@ -393,7 +393,8 @@ para o jogador ter vantagem contra qualquer chefão conforme o time e o momento 
 - RNF12 — **Regras fora da página** (refatoração fase 3, 2026-09-24): lógica que não lê nem desenha a
   página mora em `src/regras` e é testada no Node - save (`save.js`), Builds salvas e evolução
   (`evolucao.js`), Build mostrada (`builds.js`), chefões e confronto (`chefoes.js`), prompts e
-  leitura das respostas da IA (`prompts_ia.js`). As regras dependem só de dados e constantes
+  leitura das respostas da IA (`prompts_ia.js`), ferramentas que a IA consulta (`ferramentas_ia.js`) e o que
+  gravar da resposta validada (`gravacao_build_ia.js`, `lista_de_builds.js`). As regras dependem só de dados e constantes
   (`types/app-globais.d.ts` lista o que vem do template); a checagem de tipos acusa qualquer
   dependência nova.
 - RNF13 — **Cliente único de IA** (refatoração fase 4, 2026-09-24): todo pedido ao modelo passa por

@@ -89,32 +89,16 @@
   // As 4 operações que mudam builds salvas são AÇÕES (ver acao()): gravam e
   // redesenham o que mostra build (card do time, ficha aberta, confronto do
   // chefão) sozinhas - quem chama não precisa lembrar de nada disso.
+  // A mudança em si (só no state) mora em src/regras/lista_de_builds.js; aqui ela vira ação.
   function setOrReplaceActiveBuild(sname, build, source) {
-    return acao(telasDeBuild(sname), function () {
-      var list = getBuildList(sname).slice();
-      var activeIdx = -1;
-      for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
-      var entry = entradaDeBuild(build, source, sname, activeIdx !== -1 ? list[activeIdx] : null);
-      if (activeIdx !== -1) { list[activeIdx] = entry; }
-      else if (list.length < 3) { list.forEach(function (b) { b.active = false; }); list.push(entry); }
-      else { list.forEach(function (b, i) { b.active = (i === 0); }); list[0] = entry; }
-      state.customBuilds[sname] = list;
-      return true;
-    });
+    return acao(telasDeBuild(sname), function () { return trocarBuildAtivaNaLista(sname, build, source); });
   }
   // New explicit action, 2026-09-09 (user's own rule): ALWAYS adds a
   // separate variant rather than overwriting - refuses past the 3-build
   // cap instead of silently dropping one, since these are deliberate
   // choices (manual or AI), not disposable snapshots like save history.
   function addBuildVariant(sname, build, source) {
-    return acao(telasDeBuild(sname), function () {
-      var list = getBuildList(sname).slice();
-      if (list.length >= 3) return false;
-      list.forEach(function (b) { b.active = false; });
-      list.push(entradaDeBuild(build, source, sname, null));
-      state.customBuilds[sname] = list;
-      return true;
-    });
+    return acao(telasDeBuild(sname), function () { return acrescentarVarianteNaLista(sname, build, source); });
   }
   function setActiveBuildIndex(sname, idx) {
     return acao(telasDeBuild(sname), function () {
@@ -131,24 +115,13 @@
   // build feita à mão pelo jogador - sem vaga, a build nova é recusada (mesma regra
   // de addBuildVariant: escolha deliberada não some em silêncio).
   function abrirVagaPreservando(sname, preservar, protegerManuais) {
-    var lista = getBuildList(sname);
-    if (lista.length < 3) return null;
-    var velha = lista.map(function (b, i) { return { b: b, i: i }; })
-      .filter(function (o) { return o.b !== preservar && !o.b.active && !(protegerManuais && o.b.source === "manual"); })
-      .sort(function (x, y) { return String(x.b.savedAt).localeCompare(String(y.b.savedAt)); })[0];
+    var velha = buildQueSaiParaAbrirVaga(sname, preservar, protegerManuais);
     if (!velha) return null;
     removeBuildIndex(sname, velha.i);
     return velha.b;
   }
   function removeBuildIndex(sname, idx) {
-    return acao(telasDeBuild(sname), function () {
-      var list = getBuildList(sname).slice();
-      if (idx < 0 || idx >= list.length) return false;
-      list.splice(idx, 1);
-      if (list.length && !list.some(function (b) { return b.active; })) list[0].active = true;
-      if (list.length) state.customBuilds[sname] = list; else delete state.customBuilds[sname];
-      return true;
-    });
+    return acao(telasDeBuild(sname), function () { return removerBuildDaLista(sname, idx); });
   }
   // Desfazer de "Apagar esta" (ticket 12 da dívida, 2026-10-08): devolve ao lugar
   // de onde saiu a MESMA build que foi apagada (o objeto inteiro, com origem,
