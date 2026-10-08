@@ -14,6 +14,8 @@ const snorlax = (o = {}) => chefao("Snorlax", { hab: "Thick Fat", golpes: ["Body
 const machamp = (golpes = ["Knock Off"], o = {}) => chefao("Machamp", { hab: "No Guard", golpes, evs: EV.fisico, nat: "Adamant", ...o });
 const alakazam = (golpes = ["Psychic"], o = {}) => chefao("Alakazam", { hab: "Magic Guard", golpes, evs: EV.especial, nat: "Modest", ...o });
 const garchomp = (golpes = ["Outrage"], o = {}) => chefao("Garchomp", { hab: "Rough Skin", golpes, evs: EV.fisico, nat: "Jolly", ...o });
+// Algoz sem cura passiva: derruba o atacante de 1 golpe depois do dele, então a razão entre duas lutas é o multiplicador puro.
+const rhyperior = (o = {}) => chefao("Rhyperior", { hab: "Solid Rock", golpes: ["Rock Slide"], evs: [252, 252, 4, 0, 0, 0], nat: "Adamant", ...o });
 const skarmory = (golpes = ["Iron Head"]) => chefao("Skarmory", { hab: "Mirror Armor", golpes, evs: [252, 0, 252, 0, 0, 0] });
 
 // ---------- tipo e imunidade ----------
@@ -28,13 +30,13 @@ test("imunidade de tipo: Earthquake não toca em quem voa nem em quem flutua, e 
   assert.ok(flechas.fracFoe < 1, "Thousand Arrows acerta o Flying; fracFoe=" + flechas.fracFoe);
 });
 
-test("Freeze-Dry é super efetivo em Water: causa bem mais que o Ice Beam no mesmo alvo", () => {
-  const vaporeon = () => chefao("Vaporeon", { hab: "Water Absorb", golpes: ["Surf"], evs: EV.tanqueE });
-  const fd = lutar(eu("Weavile", { golpes: ["Freeze-Dry"] }), vaporeon()), ib = lutar(eu("Weavile", { golpes: ["Ice Beam"] }), vaporeon());
-  assert.ok(razao(fd, ib, causado) >= 1.3, "Freeze-Dry/Ice Beam em Water: " + razao(fd, ib, causado));
-  // controle: em quem não é Water o Freeze-Dry não ganha o bônus
-  const fdN = lutar(eu("Weavile", { golpes: ["Freeze-Dry"] }), snorlax()), ibN = lutar(eu("Weavile", { golpes: ["Ice Beam"] }), snorlax());
-  assert.ok(razao(fdN, ibN, causado) < 1.3, "fora de Water não há bônus: " + razao(fdN, ibN, causado));
+test("Freeze-Dry é super efetivo em Water: ~2,7x o Ice Beam no Water, ~0,8x (só a diferença de poder) fora dele", () => {
+  // Medido: 70/90 de poder x (2 / 0,5) de efetividade = 3,1; o Ice Beam ainda tem a chance de congelar, então a luta mede ~2,7.
+  const blastoise = () => chefao("Blastoise", { hab: "Torrent", golpes: ["Hydro Pump"], evs: EV.especial, nat: "Modest" });
+  const luta = (golpe, alvo) => lutar(eu("Weavile", { golpes: [golpe], evs: EV.especial, nat: "Modest" }), alvo());
+  dentroDoEfeito(razao(luta("Freeze-Dry", blastoise), luta("Ice Beam", blastoise), causado), 2.7, "Freeze-Dry / Ice Beam em Water");
+  // controle: em quem não é Water o Freeze-Dry não ganha o bônus e fica só com o poder menor (70 contra 90)
+  dentroDoEfeito(razao(luta("Freeze-Dry", rhyperior), luta("Ice Beam", rhyperior), causado), 70 / 90, "Freeze-Dry / Ice Beam fora de Water");
 });
 
 test("Wonder Guard: só super efetivo passa; golpe neutro (Water em Bug/Ghost) não tira nada e a luta empata", () => {
@@ -62,13 +64,13 @@ test("Seismic Toss tira o nível do usuário: não depende de EV, natureza nem A
 
 // ---------- habilidades ----------
 test("Tough Claws dá +30% em golpe de contato e nada em golpe sem contato", () => {
-  const com = (hab, golpe) => lutar(eu("Charizard", { hab, golpes: [golpe] }), snorlax());
+  const com = (hab, golpe) => lutar(eu("Charizard", { hab, golpes: [golpe] }), rhyperior());
   dentroDoEfeito(razao(com("Tough Claws", "Dragon Claw"), com("Giant Wings", "Dragon Claw"), causado), 1.3, "Dragon Claw (contato)");
   semEfeito(razao(com("Tough Claws", "Rock Slide"), com("Giant Wings", "Rock Slide"), causado), "Rock Slide (sem contato)");
 });
 
 test("Skill Link faz Rock Blast acertar 5 vezes em vez de 3 (~x1,7)", () => {
-  const com = (hab) => lutar(eu("Heracross", { hab, golpes: ["Rock Blast"] }), snorlax());
+  const com = (hab) => lutar(eu("Heracross", { hab, golpes: ["Rock Blast"] }), rhyperior());
   dentroDoEfeito(razao(com("Skill Link"), com("Moxie"), causado), 5 / 3, "Rock Blast");
 });
 
@@ -87,7 +89,30 @@ test("o Intimidate do jogador corta o dano físico que ele recebe (~2/3); Clear 
 test("Solid Rock corta o golpe super efetivo em 35%", () => {
   const hidro = () => chefao("Starmie", { hab: "Natural Cure", golpes: ["Hydro Pump"], evs: EV.especial, nat: "Modest" });
   const com = (hab) => lutar(eu("Tyranitar", { hab, golpes: ["Crunch"], evs: EV.tanqueE }), hidro());
-  dentroDoEfeito(razao(com("Solid Rock"), com("Predator"), sofrido), 0.65, "Hydro Pump em Rock");
+  dentroDoEfeito(razao(com("Solid Rock"), com("Predator"), sofrido), 0.65, "Hydro Pump (2x) em Rock");
+});
+
+// COMPORTAMENTO ATUAL, BUG EM ABERTO (decisão do usuário; o motor NÃO foi mexido). Solid Rock (-35% em golpe super efetivo)
+// é aplicado em dois lugares: tipos.js:219 (seDamper 0,65 dentro da efetividade, que deixa o 2x em 1,3 e o 4x em 2,6)
+// e duelo.js:1678 (reducao.superEf 0,65 quando efTipo >= 2). Efeitos: (1) em fraqueza 4x o corte vale duas vezes
+// (0,65 x 0,65 = 0,42); (2) no 2x o golpe deixa de contar como super efetivo, então Expert Belt e Weakness Policy do
+// chefão não disparam. Primal Armor (seDamper 0,5) tem a mesma estrutura. Se o motor for corrigido, estes asserts
+// quebram de propósito: troque pelos valores certos (4x -> 0,65 do dano; Expert Belt volta a valer x1,2).
+test("Solid Rock (comportamento atual, bug em aberto): o corte em fraqueza 4x vale duas vezes", () => {
+  const machamp = () => chefao("Machamp", { hab: "No Guard", golpes: ["Karate Chop"], evs: EV.nenhum, nat: "Hardy" }); // Fighting é 4x em Rock/Dark
+  const luta = (hab) => lutar(eu("Tyranitar", { hab, golpes: ["Crunch"], evs: EV.tanqueF }), machamp());
+  assert.equal(luta("Predator").venceu, false);
+  assert.equal(luta("Predator").turnos, 1, "sem Solid Rock o 4x derruba o Tyranitar de um golpe (o golpe tira o HP inteiro ou mais)");
+  // Com UM corte de 0,65 o golpe ainda tiraria >= 65% do HP e o Tyranitar cairia em 2 golpes no máximo.
+  assert.equal(luta("Solid Rock").venceu, true);
+  assert.equal(luta("Solid Rock").turnos, 3, "aguenta 3 golpes: só o corte duplo (0,65 x 0,65) explica");
+});
+
+test("Solid Rock (comportamento atual, bug em aberto): o golpe 2x cortado deixa de contar como super efetivo e o Expert Belt do chefão não dispara", () => {
+  const starmie = (item) => chefao("Starmie", { hab: "Natural Cure", golpes: ["Hydro Pump"], evs: EV.especial, nat: "Modest", item });
+  const luta = (hab, item) => lutar(eu("Tyranitar", { hab, golpes: ["Crunch"], evs: EV.tanqueE }), starmie(item));
+  dentroDoEfeito(razao(luta("Predator", "Expert Belt"), luta("Predator", ""), sofrido), 1.2, "controle: sem Solid Rock o Expert Belt vale");
+  semEfeito(razao(luta("Solid Rock", "Expert Belt"), luta("Solid Rock", ""), sofrido), "com Solid Rock o Expert Belt não dispara (bug)");
 });
 
 test("Rough Skin machuca quem ataca por contato, e só por contato", () => {
@@ -98,7 +123,7 @@ test("Rough Skin machuca quem ataca por contato, e só por contato", () => {
 
 // ---------- itens ----------
 test("item de ataque do jogador: Choice Band x1,5, Life Orb x1,3, item do tipo x1,2 só no golpe do tipo", () => {
-  const com = (item, golpe = "Dragon Claw") => lutar(eu("Charizard", { hab: "Giant Wings", golpes: [golpe], item }), snorlax());
+  const com = (item, golpe = "Dragon Claw") => lutar(eu("Charizard", { hab: "Giant Wings", golpes: [golpe], item }), rhyperior());
   const base = com("");
   dentroDoEfeito(razao(com("Choice Band"), base, causado), 1.5, "Choice Band");
   dentroDoEfeito(razao(com("Life Orb"), base, causado), 1.3, "Life Orb");
@@ -114,7 +139,8 @@ test("Expert Belt só vale no golpe super efetivo", () => {
 });
 
 test("itens de defesa: Assault Vest corta o dano especial; Leftovers e Rocky Helmet ajudam; Occa Berry segura o 1º Fire", () => {
-  const especial = (item) => lutar(eu("Blissey", { hab: "Cute Charm", golpes: ["Body Slam"], evs: EV.tanqueE, item }), alakazam());
+  // Corviknight, não Blissey: a Self Sufficient da Blissey cura uma constante por turno e a razão dava 0,49 em vez de 0,67
+  const especial = (item) => lutar(eu("Corviknight", { hab: "Chrome Coat", golpes: ["Iron Head"], evs: EV.tanqueE, item }), alakazam());
   dentroDoEfeito(razao(especial("Assault Vest"), especial(""), sofrido), 1 / 1.5, "Assault Vest");
   const fisico = (item) => lutar(eu("Corviknight", { hab: "Chrome Coat", golpes: ["Iron Head"], evs: EV.tanqueF, item }), machamp());
   assert.ok(fisico("Leftovers").fracEu > fisico("").fracEu + 0.05, "Leftovers: sobra mais HP");
@@ -179,7 +205,7 @@ test("Emergency Exit: o chefão sai com metade do HP, então só a metade de cim
 
 // ---------- clima e campo ----------
 test("sol dá x1,5 em golpe Fire e a chuva corta pela metade", () => {
-  const luta = (clima) => lutar(eu("Charizard", { hab: "Giant Wings", golpes: ["Fire Blast"], evs: EV.especial, nat: "Modest", clima }), snorlax({ clima }));
+  const luta = (clima) => lutar(eu("Charizard", { hab: "Giant Wings", golpes: ["Fire Blast"], evs: EV.especial, nat: "Modest", clima }), rhyperior({ clima }));
   dentroDoEfeito(razao(luta("sol"), luta(null), causado), 1.5, "sol");
   dentroDoEfeito(razao(luta("chuva"), luta(null), causado), 0.5, "chuva");
 });
@@ -198,7 +224,8 @@ test("clima defensivo: areia dá +50% de Sp. Def ao Rock, granizo +50% de Def ao
 });
 
 test("terreno armado por habilidade: Electro Surge reforça golpe Electric (x1,3) e não mexe nos outros tipos", () => {
-  const jolteon = (hab, golpe) => lutar(eu("Jolteon", { hab, golpes: [golpe], evs: EV.especial, nat: "Modest" }), snorlax());
+  const dragonite = () => chefao("Dragonite", { hab: "Inner Focus", golpes: ["Body Slam"], evs: [252, 252, 4, 0, 0, 0], nat: "Adamant" });
+  const jolteon = (hab, golpe) => lutar(eu("Jolteon", { hab, golpes: [golpe], evs: [0, 0, 0, 0, 0, 252], nat: "Modest" }), dragonite());
   dentroDoEfeito(razao(jolteon("Electro Surge", "Thunderbolt"), jolteon("Volt Absorb", "Thunderbolt"), causado), 1.3, "Electric Terrain");
   semEfeito(razao(jolteon("Electro Surge", "Energy Ball"), jolteon("Volt Absorb", "Energy Ball"), causado), "Energy Ball no terreno elétrico");
 });

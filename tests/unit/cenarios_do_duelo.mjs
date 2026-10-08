@@ -51,13 +51,12 @@ export function razao(a, b, medida) {
 }
 export const entre = (valor, min, max, rotulo) => assert.ok(valor >= min && valor <= max, (rotulo || "valor") + " = " + valor.toFixed(3) + ", esperado entre " + min + " e " + max);
 
-// O efeito de um multiplicador `mult` (1,3 = +30%; 0,5 = metade) medido numa luta inteira nunca sai
-// exato: o motor tira a média da luta (acerto, HP que sobra, golpes fracionados). Por isso a razão
-// entre as duas lutas precisa cair numa faixa em volta do multiplicador - da metade do efeito ao
-// dobro dele (1,3 -> de 1,15 a 1,6; 0,5 -> de 0,25 a 0,75). Efeito sumido (razão 1) ou exagerado
-// fica fora da faixa.
-export function dentroDoEfeito(razaoMedida, mult, rotulo) {
-  const a = 1 + (mult - 1) * 0.5, b = 1 + (mult - 1) * 2;
-  entre(razaoMedida, Math.min(a, b), Math.max(a, b), (rotulo || "razão") + " (efeito esperado x" + mult + ")");
+// O efeito de um multiplicador `mult` (1,3 = +30%; 0,5 = metade) medido numa luta inteira: a razão entre
+// as duas lutas precisa cair a 10% do multiplicador (1,3 -> de 1,17 a 1,43; 0,65 -> de 0,585 a 0,715).
+// Sol 1,3 no lugar de 1,5, Life Orb 1,5 no lugar de 1,3 e Solid Rock 0,75 no lugar de 0,65 saem da faixa.
+// Os cenários usam chefão e jogador SEM cura nem dano passivo (Snorlax e Blissey têm Self Sufficient,
+// que soma uma constante por turno e entorta a razão: sol media 1,6 e chuva 0,4 com o Snorlax).
+export function dentroDoEfeito(razaoMedida, mult, rotulo, tolerancia = 0.1) {
+  entre(razaoMedida, mult * (1 - tolerancia), mult * (1 + tolerancia), (rotulo || "razão") + " (efeito esperado x" + mult.toFixed(3) + ", +-" + tolerancia * 100 + "%)");
 }
 export const semEfeito = (razaoMedida, rotulo) => entre(razaoMedida, 0.97, 1.03, (rotulo || "razão") + " (sem efeito esperado)");
