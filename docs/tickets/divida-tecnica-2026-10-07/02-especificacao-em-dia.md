@@ -1,6 +1,6 @@
 # 02 — Especificação de requisitos em dia
 
-Status: pronto-para-agente
+Status: em-andamento
 Bloqueado por: nenhum
 
 ## O que entrega
