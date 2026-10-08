@@ -125,8 +125,8 @@ test("estratégia de clima: Courtney (Meteor Falls) com elenco de chuva só decl
   const courtney = R3.BOSSES.find((b) => b.name === "Courtney Meteor Falls");
   const res = R3.montarTimeContraChefao(cands, courtney.party, 50, {});
   assert.equal(res.escolhidos.length, 6);
-  if (res.estrategia) {
-    const n = res.estrategia.armador;
-    assert.ok(res.simulacao.log.some((l) => l.meu === n || l.entra === n), "armador " + n + " declarado mas não entrou");
-  }
+  // Hoje o Ninetales (armador) não entra na luta simulada, então NÃO pode haver estratégia de clima: a asserção exige
+  // a ausência (sem 'if'). Com a sabotagem a estratégia aparece com o Ninetales fora da luta. Se uma mudança do motor
+  // fizer o armador entrar, este caso deixa de provar a regra: ache outro com 'node tests/run_sabotage.mjs loteB-estrategia'.
+  assert.ok(!res.estrategia, "estratégia declarada sem o armador em campo: " + (res.estrategia && res.estrategia.armador));
 });

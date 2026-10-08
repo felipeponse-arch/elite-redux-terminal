@@ -53,3 +53,20 @@ test("Technician em golpe de poder variável usa o poder real: Low Kick em Snorl
   assert.ok(Math.abs(dano(comHab(["Technician"]), 143) - dano(comHab([]), 143)) < 1e-6, "120 de poder: sem bônus");
   assert.ok(dano(comHab(["Technician"]), 25) / dano(comHab([]), 25) > 1.3, "20 de poder: ganha a Technician (x1,5 no poder)");
 });
+
+// Seguimento (+N de poder depois do golpe do tipo) em golpe de poder variável: soma-se ao poder REAL contra o alvo
+// (battle_util.c: CalcMoveBasePower já devolve o poder calculado), não ao 1 do dado.
+test("seguimento em golpe de poder variável usa o poder real: Low Kick + 40 de seguimento vale (pv+40)/pv", () => {
+  // cópia do efeito: o cache de efeitoDasHabilidadesNoDuelo é compartilhado entre chaves iguais
+  const comSeg = (seg) => {
+    const u = { ef: Object.assign({}, R.efeitoDasHabilidadesNoDuelo([], "x", null)), tipos: ["Normal"], stats: S, ids: [], sp: { i: 1, n: "x1" } };
+    if (seg) u.ef.seguimento = seg;
+    u.golpesProntos = R.prepararGolpesDuelo([R.MOVE_ID_BY_NAME["Low Kick"]], u, null);
+    return u;
+  };
+  const razao = (dex) => R.danoNoDuelo(comSeg({ tipo: "Fighting", poder: 40 }), unid(dex, S), 50).melhor.dano / R.danoNoDuelo(comSeg(null), unid(dex, S), 50).melhor.dano;
+  // o dano tem uma constante fixa (+2), então a razão fica um pouco abaixo da do poder
+  assert.ok(razao(25) > 2.5 && razao(25) < 3.01, "Pikachu (poder 20): " + razao(25)); // (20+40)/20 = 3
+  assert.ok(razao(6) > 1.4 && razao(6) < 1.51, "Charizard (poder 80): " + razao(6)); // 120/80 = 1,5
+  assert.ok(razao(143) > 1.28 && razao(143) < 1.34, "Snorlax (poder 120): " + razao(143)); // 160/120
+});

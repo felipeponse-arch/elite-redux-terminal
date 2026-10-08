@@ -2127,6 +2127,12 @@
     });
     return achado;
   }
+  // Custo de usar o golpe que tira o setup em vez do melhor golpe: a fração do turno do melhor golpe que o golpe de
+  // tirar deixa de causar (0 = tão forte quanto o melhor). Modelagem do projeto, não regra do jogo (revisão de 07/10;
+  // pergunta aberta ao usuário no ticket 08).
+  function custoDeTirarSetupDuelo(tira, melhor) {
+    return tira && melhor && melhor.golpe && melhor.golpe.forca > 0 ? Math.max(0, 1 - tira.golpe.forca / melhor.golpe.forca) : 0;
+  }
   // ---------- drench (ticket 17) ----------
   // Código oficial (er-repo 217dd0f): MOVE_EFFECT_DRENCH faz o alvo agir por último na faixa de
   // prioridade dele (battle_main.c GetBattlerSpeedValue: goesLast, como o Lagging Tail - vale até no
@@ -2371,11 +2377,10 @@
       // o golpe custa o turno do melhor golpe, descontado o dano do próprio golpe (revisão de 07/10).
       var tiraE = efF && efF.tipo === "setup" ? golpeQueTiraSetupDuelo(eu, foe, ini.semReservaFoe) : null;
       var tiraF = efE && efE.tipo === "setup" ? golpeQueTiraSetupDuelo(foe, eu, ini.semReservaEu) : null;
-      var custoTira = function (t, melhor) { return t && melhor && melhor.golpe && melhor.golpe.forca > 0 ? Math.max(0, 1 - t.golpe.forca / melhor.golpe.forca) : 0; };
       if (tiraE) efF = Object.assign({}, efF, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
       if (tiraF) efE = Object.assign({}, efE, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
       planosQueValeram = { eu: efE, ele: efF };
-      var dM = st.meu, dD = st.dele, hpE = hpEu, hpF = hpFoe, atE = custoTira(tiraE, meu.melhor), atF = custoTira(tiraF, dele.melhor), velE = 1, velF = 1, inverte = false;
+      var dM = st.meu, dD = st.dele, hpE = hpEu, hpF = hpFoe, atE = custoDeTirarSetupDuelo(tiraE, meu.melhor), atF = custoDeTirarSetupDuelo(tiraF, dele.melhor), velE = 1, velF = 1, inverte = false;
       // Golpe de status que a habilidade usa ao entrar (sem gastar turno).
       function naEntradaDe(x, y, golpeY, danoY) {
         var r = { perdeY: 0, multY: 1, danoY: 0 };

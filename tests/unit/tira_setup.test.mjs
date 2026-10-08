@@ -78,3 +78,17 @@ test("revisão 07/10: Dragon Tail contra o último do time (sem reserva) não ti
   assert.deepEqual({ ...d(["Body Slam", "Dragon Tail"], true).setupEle }, { atk: 2 }, "sem reserva: o setup fica");
   assert.equal(d(["Body Slam", "Clear Smog"], true).setupEle, null, "Clear Smog não depende de troca");
 });
+
+// Revisão de 07/10 (modelagem do projeto, pergunta aberta no ticket 08): usar o golpe que tira o setup custa a parte
+// do turno em que o melhor golpe faria mais dano. Na prática o plano de setup nunca é escolhido quando o rival tira
+// (o setup se perde e o turno também), então o custo só pesa na comparação dos planos; testamos a função em si.
+test("custo de tirar o setup: fração do turno do melhor golpe que o golpe de tirar deixa de causar", () => {
+  const rem = unid("Rem", [400, 110, 120, 50, 120, 80], ["Body Slam", "Clear Smog"]);
+  const [melhor, smog] = rem.golpesProntos;
+  assert.ok(melhor.forca > smog.forca && smog.forca > 0, "pré-condição: Body Slam mais forte que Clear Smog");
+  const custo = R.custoDeTirarSetupDuelo({ golpe: smog }, { golpe: melhor });
+  assert.ok(Math.abs(custo - (1 - smog.forca / melhor.forca)) < 1e-9, "custo " + custo);
+  assert.ok(custo > 0.5 && custo < 0.7, "Clear Smog (50) contra Body Slam (127,5): " + custo);
+  assert.equal(R.custoDeTirarSetupDuelo({ golpe: melhor }, { golpe: melhor }), 0, "tão forte quanto o melhor: grátis");
+  assert.equal(R.custoDeTirarSetupDuelo(null, { golpe: melhor }), 0, "sem golpe de tirar: sem custo");
+});

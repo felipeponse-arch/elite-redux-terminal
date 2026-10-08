@@ -2084,4 +2084,18 @@ export const MUTACOES = [
     de: "fr >= 0.5 ? deleInv.melhor : dele.melhor",
     para: "deleInv.melhor.dano > dele.melhor.dano ? deleInv.melhor : dele.melhor",
   },
+  {
+    id: "tira-setup-custo-zerado",
+    descricao: "usar o golpe que tira o setup deixa de custar a parte do turno do melhor golpe",
+    arquivo: "duelo.js",
+    de: "return tira && melhor && melhor.golpe && melhor.golpe.forca > 0 ? Math.max(0, 1 - tira.golpe.forca / melhor.golpe.forca) : 0;",
+    para: "return 0;",
+  },
+  {
+    id: "seguimento-poder-variavel-ignorado",
+    descricao: "golpe de poder variável perde o seguimento (+N de poder) que vem da habilidade",
+    arquivo: "duelo.js",
+    de: "g.porPoder.somas.forEach(function (s) { fv *= (pv + s) / pv; });",
+    para: "void 0;",
+  },
 ];
