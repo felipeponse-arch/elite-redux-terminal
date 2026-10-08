@@ -548,7 +548,7 @@
     "versao": "2.65beta"
   },
   "SPECIES_KLEAVOR_REDUX_MEGA": {
-    "ability": "Dual Wield",
+    "ability": "Cutthroat",
     "nature": "Adamant",
     "evs": "252 HP / 252 Atk / 6 SpD",
     "item": "",
@@ -558,7 +558,7 @@
       "Sharpen",
       "Glaive Rush"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Kleavorite-R / Shell Bell.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Kleavorite-R / Shell Bell. CORREÇÃO (08/10, decisão do usuário): o post do Discord pedia Dual Wield, mas na Kleavor Redux Mega Dual Wield é habilidade INNATE (sempre ativa), não escolhível; as escolhíveis são Cutthroat, Sheer Force e Battle Armor. Ficou a primeira escolhível (Cutthroat: o primeiro golpe cortante de cada entrada ganha +1 de prioridade, e Mighty Cleave é cortante); Dual Wield continua valendo como innate.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -820,7 +820,7 @@
   "SPECIES_GROTOM_KICK": {
     "ability": "Roundhouse",
     "nature": "Adamant",
-    "evs": "252 HP / 252 Atk / 6 Def or 252 Atk / 6 Def / 252 Spe",
+    "evs": "252 HP / 252 Atk / 6 Def",
     "item": "Shell Bell",
     "moves": [
       "Noxious Torque",
@@ -828,7 +828,7 @@
       "Rock Polish",
       "Poison Sting"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Black Sludge / Frost Orb.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Black Sludge / Frost Orb. CORREÇÃO (08/10, decisão do usuário): o post dava duas distribuições de EV (\"252 HP / 252 Atk / 6 Def or 252 Atk / 6 Def / 252 Spe\"); ficou a primeira (252 HP / 252 Atk / 6 Def). A segunda (252 Atk / 6 Def / 252 Spe) combina melhor com Rock Polish, se o jogador preferir.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -1102,21 +1102,38 @@
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
-  "SPECIES_WOOLY_WORM": {
-    "ability": "Drought",
-    "nature": "Quiet",
-    "evs": "252 HP / 252 SpA / 6 SpD",
-    "item": "Shell Bell",
-    "moves": [
-      "Seed Flare",
-      "Fire Blast",
-      "Flash Cannon",
-      "Sticky Web"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Vídeo \"How Viable Are Pokémon With EXTREME Weaknesses??\" (MegaFidough, 23/08/2026; um vídeo só, confiança baixa) acha a bulk dele ótima com Assault Vest ou Tactical Vest. Item não alterado: os dois coletes (Assault e Tactical) bloqueiam golpe de status e esta build usa o Sticky Web - trocar o item fica para decisão do usuário.",
-    "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
-  },
+  "SPECIES_WOOLY_WORM": [
+    {
+      "ability": "Drought",
+      "nature": "Quiet",
+      "evs": "252 HP / 252 SpA / 6 SpD",
+      "item": "Shell Bell",
+      "moves": [
+        "Seed Flare",
+        "Fire Blast",
+        "Flash Cannon",
+        "Sticky Web"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Vídeo \"How Viable Are Pokémon With EXTREME Weaknesses??\" (MegaFidough, 23/08/2026; um vídeo só, confiança baixa) acha a bulk dele ótima com Assault Vest ou Tactical Vest. Item não alterado: os dois coletes (Assault e Tactical) bloqueiam golpe de status e esta build usa o Sticky Web - trocar o item fica para decisão do usuário.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    },
+    {
+      "ability": "Drought",
+      "nature": "Quiet",
+      "evs": "252 HP / 252 SpA / 6 SpD",
+      "item": "Assault Vest",
+      "moves": [
+        "Seed Flare",
+        "Fire Blast",
+        "Flash Cannon",
+        "Bug Buzz"
+      ],
+      "note": "Do vídeo \"How Viable Are Pokémon With EXTREME Weaknesses??\" (MegaFidough, 23/08/2026; um vídeo só, confiança baixa): a bulk dele é ótima com Assault Vest ou Tactical Vest. Decisão do usuário (08/10): entra como 2ª Build, ao lado da curada do Discord. O Assault Vest impede golpe de status neste jogo, então o Sticky Web saiu e entrou Bug Buzz (STAB de Bug, que a espécie aprende); habilidade, natureza, EVs e os outros 3 golpes são os da curada do Discord.",
+      "fonte": "video-megafidough",
+      "versao": "2.65beta"
+    }
+  ],
   "SPECIES_SWANNA": {
     "ability": "Overcoat",
     "nature": "Jolly",
@@ -2323,21 +2340,38 @@
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
-  "SPECIES_GARCHOMP_MEGA_REDUX": {
-    "ability": "Haunting Frenzy",
-    "nature": "Jolly",
-    "evs": "252 Atk / 4 Def / 252 Spe",
-    "item": "Shell Bell",
-    "moves": [
-      "Wave Crash",
-      "Guillotine",
-      "Shadow Claw",
-      "Dragon Dance"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell (Ω) / King's Rock (Ω). Vídeo \"RANKING Every Garchomp Form!\" (MegaFidough, 30/08/2026; um vídeo só, confiança baixa) cita para esta forma Swords Dance (dobra o ataque depois do primeiro nocaute, que o Haunting Frenzy acelera) e Last Respects (mais forte a cada aliado caído); não diz que troca o Dragon Dance. Build não alterada: trocar golpe fica para decisão do usuário.",
-    "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
-  },
+  "SPECIES_GARCHOMP_MEGA_REDUX": [
+    {
+      "ability": "Haunting Frenzy",
+      "nature": "Jolly",
+      "evs": "252 Atk / 4 Def / 252 Spe",
+      "item": "Shell Bell",
+      "moves": [
+        "Wave Crash",
+        "Guillotine",
+        "Shadow Claw",
+        "Dragon Dance"
+      ],
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell (Ω) / King's Rock (Ω). Vídeo \"RANKING Every Garchomp Form!\" (MegaFidough, 30/08/2026; um vídeo só, confiança baixa) cita para esta forma Swords Dance (dobra o ataque depois do primeiro nocaute, que o Haunting Frenzy acelera) e Last Respects (mais forte a cada aliado caído); não diz que troca o Dragon Dance. Build não alterada: trocar golpe fica para decisão do usuário.",
+      "fonte": "discord-build-workshop-2.65",
+      "versao": "2.65beta"
+    },
+    {
+      "ability": "Haunting Frenzy",
+      "nature": "Jolly",
+      "evs": "252 Atk / 4 Def / 252 Spe",
+      "item": "Shell Bell",
+      "moves": [
+        "Wave Crash",
+        "Guillotine",
+        "Last Respects",
+        "Swords Dance"
+      ],
+      "note": "Do vídeo \"RANKING Every Garchomp Form!\" (MegaFidough, 30/08/2026; um vídeo só, confiança baixa): Swords Dance (dobra o ataque depois do primeiro nocaute, que o Haunting Frenzy acelera) e Last Respects (mais forte a cada aliado caído). Decisão do usuário (08/10): entra como 2ª Build, ao lado da curada do Discord. Montagem do app: Swords Dance no lugar do Dragon Dance e Last Respects no lugar do Shadow Claw; Wave Crash e Guillotine, natureza, EVs e item são os da curada do Discord (o vídeo não diz).",
+      "fonte": "video-megafidough",
+      "versao": "2.65beta"
+    }
+  ],
   "SPECIES_SIGILYPH": [
     {
       "ability": "Low Visibility",
@@ -2863,9 +2897,9 @@
     "versao": "2.65beta"
   },
   "SPECIES_AGGRON_REDUX_MEGA": {
-    "ability": "Sheer Force",
+    "ability": "Hunter's Horn",
     "nature": "Adamant",
-    "evs": "252 HP or Spe / 252 Atk / 6 SpD",
+    "evs": "252 HP / 252 Atk / 6 SpD",
     "item": "Life Orb",
     "moves": [
       "Jagged Horns",
@@ -2873,7 +2907,7 @@
       "Drill Peck",
       "Spikes"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Life Orb / Shell Bell / Aggronite-R.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Life Orb / Shell Bell / Aggronite-R. CORREÇÃO (08/10, decisão do usuário): o post pedia Sheer Force, que na Aggron Redux Mega é innate (sempre ativa); a única habilidade escolhível da forma é Hunter's Horn, que ficou. EVs: o post dava \"252 HP or Spe\"; ficou a primeira opção (252 HP / 252 Atk / 6 SpD), a soma válida (510).",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
