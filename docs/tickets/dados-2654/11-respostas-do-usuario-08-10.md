@@ -1,6 +1,6 @@
 # 11 — Respostas do usuário às perguntas acumuladas (08/10)
 
-Status: em-andamento
+Status: resolvido
 Bloqueado por: nenhum (não mexe no dado do jogo; pode ir antes do 01)
 
 ## O que entrega

@@ -1,6 +1,6 @@
 # 12 — Telas mostram a efetividade real contra Solid Rock / Primal Armor
 
-Status: feito
+Status: resolvido
 Bloqueado por: nenhum
 
 ## O que entrega
