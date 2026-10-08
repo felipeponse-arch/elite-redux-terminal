@@ -40,7 +40,7 @@
     var others = battleFamilyOf(sp).filter(function (f) { return f.x !== sp.x; });
     if (!others.length) return "";
     return ", outras formas desta MESMA criatura (cada uma com dado proprio, nunca misture): " + others.map(function (f) {
-      var r = SPECIES_RANK[f.sname];
+      var r = rankDe(f.sname);
       var stones = stonesOf(f);
       return f.n + " [sname " + f.sname + ", " + speciesTypeNames(f).join("/") + ", status base " + f.b.join("/") +
         (r ? ", rank " + r.tier : "") +

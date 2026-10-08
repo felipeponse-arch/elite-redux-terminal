@@ -187,7 +187,7 @@ async function section18() {
   // a espécie não tem esse tipo, e some de vez quando o Monotype é limpo. ----
   var especieComTipo = T.SPECIES.find(function (s) {
     return s && T.speciesTypeNames(s).indexOf(tipoMonotype) !== -1 &&
-      T.SPECIES_RANK[s.sname] && T.SPECIES_RANK[s.sname].monoRanks && T.SPECIES_RANK[s.sname].monoRanks[tipoMonotype];
+      T.rankDe(s.sname) && T.rankDe(s.sname).monoRanks && T.rankDe(s.sname).monoRanks[tipoMonotype];
   });
   var especieSemTipo = T.SPECIES.find(function (s) {
     return s && T.speciesTypeNames(s).indexOf(tipoMonotype) === -1;
@@ -208,7 +208,7 @@ async function section18() {
       return item ? item.querySelector(".rank-badge-mono") : null;
     };
     var badgeMono = badgeDoTipo(tipoMonotype);
-    var tierEsperado = T.SPECIES_RANK[especieComTipo.sname].monoRanks[tipoMonotype].tier;
+    var tierEsperado = T.rankDe(especieComTipo.sname).monoRanks[tipoMonotype].tier;
     check("badge de rank Monotype aparece na ficha de uma espécie do tipo ativo, com o tier certo",
       !!badgeMono && badgeMono.textContent.trim() === tierEsperado,
       { achado: badgeMono && badgeMono.textContent, esperado: tierEsperado, especie: especieComTipo.n });

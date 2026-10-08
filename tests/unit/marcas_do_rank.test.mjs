@@ -66,7 +66,7 @@ test("Pareto gravado: cada espécie no rank tem dominadoPor por tipo, na dificul
   const nomes = Object.keys(ace.SPECIES_RANK).filter((s) => ace.SPECIES_RANK[s].porDificuldade);
   let zero = 0, algum = 0;
   for (const s of nomes) {
-    const d = ace.rankDaDificuldadeDe(ace.SPECIES_RANK[s]);
+    const d = ace.rankDaDificuldadeDe(ace.rankDe(s));
     for (const t of ace.speciesTypeNames(ace.getSpeciesBySname(s))) {
       assert.equal(typeof d.dominadoPor[t], "number", s + " sem concorrência entre " + t);
       if (d.dominadoPor[t] === 0) zero++; else algum++;
@@ -78,7 +78,7 @@ test("Pareto gravado: cada espécie no rank tem dominadoPor por tipo, na dificul
   const s = nomes.find((x) => elite.SPECIES_RANK[x].porDificuldade.insane &&
     JSON.stringify(elite.SPECIES_RANK[x].porDificuldade.insane.dominadoPor) !== JSON.stringify(elite.SPECIES_RANK[x].porDificuldade.party.dominadoPor));
   assert.ok(s, "nenhuma espécie com concorrência diferente entre as dificuldades");
-  igual(elite.rankDaDificuldadeDe(elite.SPECIES_RANK[s]).dominadoPor, elite.SPECIES_RANK[s].porDificuldade.insane.dominadoPor);
+  igual(elite.rankDaDificuldadeDe(elite.rankDe(s)).dominadoPor, elite.SPECIES_RANK[s].porDificuldade.insane.dominadoPor);
 });
 
 test("Pareto: a própria Mega/Primal (mesma família) não conta como concorrente", () => {

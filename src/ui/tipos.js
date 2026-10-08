@@ -95,7 +95,7 @@
       SPECIES.forEach(function (sp) {
         var r = SPECIES_ROLE[sp.sname];
         if (r && r.roles && r.roles.indexOf(role) !== -1) {
-          var rank = SPECIES_RANK[sp.sname];
+          var rank = rankDe(sp.sname);
           members.push({
             sp: sp, tier: rank ? rank.tier : null, sortVal: r[ROLE_SORT_PCT[role]],
             combina: !!monotype && speciesTypeNames(sp).indexOf(monotype) !== -1

@@ -80,7 +80,7 @@ comparar é sinal de dado que devia estar no script.
 
 ## ADR-003 - Rank lido por uma função só, sem reescrever SPECIES_RANK
 
-**Data:** 2026-10-02 · **Estado:** aceita, A IMPLEMENTAR (sessão de implementação)
+**Data:** 2026-10-02 · **Estado:** aceita, IMPLEMENTADA (ticket 01, 07/10/2026)
 
 **Contexto.** `src/regras/rank_da_run.js` reescreve `tier`, `score`, `potencial`,
 `viabilidade` e `monoRanks` de cada entrada de `SPECIES_RANK` quando o save carrega e
@@ -91,10 +91,11 @@ com a nota errada, e os testes precisam chamar `applySave` para enxergar a nota 
 **Decisão.** O JSON carregado não muda depois da carga. Uma função de leitura,
 `rankDe(sname)`, devolve a visão da dificuldade da run (tier, score, eixos, rank por
 tipo, marcas) a partir de `porDificuldade`. `rankDaDificuldadeDe` (rank_da_run.js) é o
-começo dela. Os leitores (`chefoes.js`, `formas_mega.js`, `mono_run.js`,
+começo dela (rank_da_run.js). Os leitores (`chefoes.js`, `formas_mega.js`, `mono_run.js`,
 `prompts_ia.js`, `dex_ficha.js`, `dex_lista.js`, `ia.js`, `tipos.js` e o próprio
-`rank_da_run.js`) passam a usar `rankDe`; `aplicarRankDaDificuldade` só guarda qual
-dificuldade vale.
+`rank_da_run.js`) passam a usar `rankDe`, que lê `state.settings.difficulty` a cada
+chamada (`aplicarRankDaDificuldade` deixou de existir: trocar a Dificuldade ou carregar
+save não avisa ninguém).
 
 **Descartado.** Manter e só documentar: a dependência escondida continua e o próximo
 leitor repete o risco.

@@ -105,7 +105,7 @@ async function section14() {
     if (!s) return false;
     var fam = T.formFamilyOf(s);
     if (fam.length < 2 || fam[0].x !== s.x) return false;
-    var rb = T.SPECIES_RANK[s.sname];
+    var rb = T.rankDe(s.sname);
     var best = T.bestRankForm(s);
     if (rb && best && best.sp.x !== s.x && best.score > rb.score) { megaMelhor = { s: s, best: best }; return true; }
     return false;

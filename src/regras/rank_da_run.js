@@ -1,8 +1,8 @@
   // Rank v2 (2026-10-02, modelo aprovado pelo usuário - scripts/calcular_rank_v2.mjs):
   // cada espécie tem uma nota por dificuldade (time "party" dos chefões em Fácil/Ace,
   // time "insane" em Elite), cada uma com dois eixos (potencial e viabilidade) e o
-  // rank por tipo. Este módulo é a única costura: troca tier/score/monoRanks de
-  // SPECIES_RANK pela dificuldade da run, e quem já lê SPECIES_RANK não muda.
+  // rank por tipo. Este módulo é a única costura: rankDe mostra tier/score/monoRanks de
+  // SPECIES_RANK pela dificuldade da run, e quem lê o rank usa rankDe.
   //
   // Espécies fora do rank (só no pós-jogo, só no DexNav, sem fonte - data/rank_disponibilidade.json)
   // saem de SPECIES_RANK e ficam em FORA_DO_RANK com o motivo: o resto do app já trata
@@ -20,20 +20,23 @@
     "sem-fonte": "não achamos como pegar na run (forma só de batalha, de teste ou sem fonte)"
   };
   function chaveDoRankDaDificuldade(dif) { return dif === "elite" ? "insane" : "party"; }
-  function aplicarRankDaDificuldade(dif) {
-    var k = chaveDoRankDaDificuldade(dif);
-    Object.keys(SPECIES_RANK).forEach(function (s) {
-      var r = SPECIES_RANK[s], d = r.porDificuldade && r.porDificuldade[k];
-      if (!d) return;
-      r.tier = d.tier; r.score = d.score;
-      r.potencial = d.potencial; r.viabilidade = d.viabilidade;
-      r.monoRanks = d.monoRanks;
-      r.rankDaDificuldade = k;
-    });
+  // ADR-003: o JSON de SPECIES_RANK não muda depois da carga. rankDe(sname) devolve a visão da Dificuldade da run
+  // (state.settings.difficulty: tier, score, eixos, rank por tipo) por cima da entrada, lida a cada chamada: trocar a
+  // Dificuldade ou carregar um save não precisa avisar ninguém, e teste que monta o state já enxerga a Nota certa.
+  // É a ÚNICA leitura direta de SPECIES_RANK[...] do app (confere tests/unit/rank_so_por_rankde.test.mjs).
+  var VISAO_DO_RANK = { party: Object.create(null), insane: Object.create(null) };
+  function rankDe(sname) {
+    var dif = typeof state !== "undefined" && state && state.settings ? state.settings.difficulty : "ace";
+    var chave = chaveDoRankDaDificuldade(dif);
+    var v = VISAO_DO_RANK[chave][sname];
+    if (v) return v;
+    var r = SPECIES_RANK[sname], d = r && r.porDificuldade && r.porDificuldade[chave];
+    if (!r || !d) return r;
+    v = Object.assign({}, r, { tier: d.tier, score: d.score, potencial: d.potencial, viabilidade: d.viabilidade,
+      monoRanks: d.monoRanks, rankDaDificuldade: chave });
+    VISAO_DO_RANK[chave][sname] = v;
+    return v;
   }
-  // Sem chamada na carga: aqui o state do app ainda não existe (o template o declara depois
-  // das regras). O JSON já vem com a nota de Fácil/Ace (padrão); applySave e a troca de
-  // dificuldade em Progresso chamam aplicarRankDaDificuldade.
 
   // Marca "Concorrência no tipo" do rank v2 (ponto 6, 2026-10-02): marca sem nota. Para
   // cada tipo da espécie, quantas do MESMO tipo a dominam (Pareto): potencial e

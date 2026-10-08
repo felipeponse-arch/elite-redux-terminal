@@ -1463,10 +1463,10 @@ export const MUTACOES = [
   },
   {
     id: "rankv2-save-nao-troca",
-    descricao: "carregar save em outra dificuldade não troca o rank",
-    arquivo: "save.js",
-    de: "      aplicarRankDaDificuldade(state.settings.difficulty);",
-    para: "",
+    descricao: "rankDe ignora a Dificuldade do state: trocar ou carregar save em Elite não troca o rank",
+    arquivo: "rank_da_run.js",
+    de: "state.settings ? state.settings.difficulty : \"ace\";",
+    para: "state.settings ? \"ace\" : \"ace\";",
   },
   {
     id: "rankv2-fora-fica",
@@ -1873,5 +1873,19 @@ export const MUTACOES = [
     arquivo: "validacao_build_ia.js",
     de: "(itensDaBuild.indexOf(raw.item) !== -1 || itemSeGastaNaLuta(raw.item))",
     para: "(itensDaBuild.indexOf(raw.item) !== -1)",
+  },
+  {
+    id: "rankde-devolve-dado-cru",
+    descricao: "rankDe devolve a entrada sem a visão da Dificuldade",
+    arquivo: "rank_da_run.js",
+    de: "if (!r || !d) return r;",
+    para: "return r;",
+  },
+  {
+    id: "rank-reescrito-na-carga",
+    descricao: "rankDe volta a reescrever o score de SPECIES_RANK ao ler outra Dificuldade",
+    arquivo: "rank_da_run.js",
+    de: "VISAO_DO_RANK[chave][sname] = v;",
+    para: "VISAO_DO_RANK[chave][sname] = v; SPECIES_RANK[sname].score = d.score;",
   },
 ];

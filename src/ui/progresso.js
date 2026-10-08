@@ -147,7 +147,6 @@
       // O rank muda com a dificuldade (rank v2: time party em Fácil/Ace, insane em Elite).
       acao(["resumo", "chefao", "lista", "ficha", "time"], function () {
         state.settings.difficulty = diffSel.value;
-        aplicarRankDaDificuldade(state.settings.difficulty);
         var bossAberto = bossState.selected !== null ? BOSSES[bossState.selected] : null;
         if (bossAberto) bossState.diff = varianteDoChefao(bossAberto);
       });

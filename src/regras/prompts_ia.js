@@ -537,7 +537,7 @@
   // que faltam, time da próxima luta) - no lote, a parte comum vai uma vez só.
   function linhasContextoDaEspecieIA(sp) {
     var linhas = [];
-    var rank = SPECIES_RANK[sp.sname];
+    var rank = rankDe(sp.sname);
     if (rank) linhas.push("Rank desta especie neste hack: tier " + rank.tier + " (pontuacao " + rank.score + ").");
     var sin = sinergiasDaEspecie(sp);
     linhas.push(sin.length
@@ -810,7 +810,7 @@
     var rosterDesc = roster.map(function (sp) {
       var role = SPECIES_ROLE[sp.sname];
       var roleNames = (role && role.roles || []).map(function (r) { return ROLE_LABEL_PT[r] || r; });
-      var r = SPECIES_RANK[sp.sname];
+      var r = rankDe(sp.sname);
       var build = effectiveBuild(sp);
       var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; });
       var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });

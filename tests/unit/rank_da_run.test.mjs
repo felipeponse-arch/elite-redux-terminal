@@ -15,21 +15,21 @@ test("Ace usa a nota do time party; Elite usa a do insane", () => {
   const ace = carregarRegras({ difficulty: "ace" });
   const s = queMuda(ace);
   assert.ok(s, "nenhuma espécie com nota diferente entre as dificuldades");
-  assert.equal(ace.SPECIES_RANK[s].score, ace.SPECIES_RANK[s].porDificuldade.party.score);
+  assert.equal(ace.rankDe(s).score, ace.SPECIES_RANK[s].porDificuldade.party.score);
   const elite = carregarRegras({ difficulty: "elite" });
-  elite.applySave({ settings: { difficulty: "elite" }, team: [], box: [] });
-  assert.equal(elite.SPECIES_RANK[s].score, elite.SPECIES_RANK[s].porDificuldade.insane.score);
-  assert.equal(elite.SPECIES_RANK[s].tier, elite.SPECIES_RANK[s].porDificuldade.insane.tier);
-  assert.equal(elite.SPECIES_RANK[s].rankDaDificuldade, "insane");
+  // sem applySave: o state montado com a Dificuldade já basta (ADR-003)
+  assert.equal(elite.rankDe(s).score, elite.SPECIES_RANK[s].porDificuldade.insane.score);
+  assert.equal(elite.rankDe(s).tier, elite.SPECIES_RANK[s].porDificuldade.insane.tier);
+  assert.equal(elite.rankDe(s).rankDaDificuldade, "insane");
 });
 
 test("trocar a dificuldade (ou carregar save) troca a nota", () => {
   const R = carregarRegras({ difficulty: "ace" });
   const s = queMuda(R);
   R.applySave({ settings: { difficulty: "elite" }, team: [], box: [] });
-  assert.equal(R.SPECIES_RANK[s].score, R.SPECIES_RANK[s].porDificuldade.insane.score, "save em Elite não trocou o rank");
-  R.aplicarRankDaDificuldade("easy");
-  assert.equal(R.SPECIES_RANK[s].score, R.SPECIES_RANK[s].porDificuldade.party.score);
+  assert.equal(R.rankDe(s).score, R.SPECIES_RANK[s].porDificuldade.insane.score, "save em Elite não trocou o rank");
+  R.state.settings.difficulty = "easy";
+  assert.equal(R.rankDe(s).score, R.SPECIES_RANK[s].porDificuldade.party.score);
 });
 
 test("dois eixos e rank por tipo para cada tipo da espécie", () => {

@@ -205,7 +205,7 @@
     boxMembers.forEach(function (owned) {
       battleUnitsOf(owned).forEach(function (unit) {
         var s = bossSafetyScore(unit, atkTypes);
-        var r = SPECIES_RANK[unit.main.sname];
+        var r = rankDe(unit.main.sname);
         var rankScore = r ? r.score : 0;
         if (!boxBest || s < boxBest.score || (s === boxBest.score && rankScore > boxBest.rankScore)) {
           boxBest = { unit: unit, sp: unit.main, owned: owned, score: s, rankScore: rankScore };
@@ -319,7 +319,7 @@
   function bestRankForm(owned) {
     var best = null;
     battleUnitsOf(owned).forEach(function (unit) {
-      var r = SPECIES_RANK[unit.main.sname];
+      var r = rankDe(unit.main.sname);
       if (r && (!best || r.score > best.score)) best = { sp: unit.main, owned: owned, score: r.score, tier: r.tier };
     });
     return best;

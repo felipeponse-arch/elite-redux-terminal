@@ -167,7 +167,7 @@
   // do time numa fase futura do roadmap, ainda não implementada).
   var ROTULO_DO_RANK_DA_DIFICULDADE = { party: "Fácil/Ace", insane: "Elite" };
   function rankBadgeHtml(sname) {
-    var r = SPECIES_RANK[sname];
+    var r = rankDe(sname);
     if (!r && FORA_DO_RANK[sname]) {
       return '<span class="rank-badge rank-fora" title="' + escapeHtml("Fora do rank: " + (MOTIVO_FORA_DO_RANK_PT[FORA_DO_RANK[sname]] || FORA_DO_RANK[sname]) + ".") + '">—</span>';
     }
@@ -202,7 +202,7 @@
   // Nota em dupla (2026-09-29, decisão do usuário: duas notas): o mesmo duelo
   // contra os chefões em dupla, com golpe de área e suporte ao parceiro.
   function rankDuplaBadgeHtml(sname) {
-    var r = SPECIES_RANK[sname];
+    var r = rankDe(sname);
     if (!r || !r.dupla) return "";
     var title = "Rank " + r.dupla.tier + " em batalha em dupla (score " + r.dupla.score + "/100): duelo contra os Pokémon dos chefões em dupla, " +
       "com golpe de área acertando os dois (0,75x cada) e o que a habilidade faz pelo parceiro (Friend Guard, Power Spot, Intimidate nos dois…).";
@@ -210,7 +210,7 @@
   }
   var STAGE_LABEL = { 1: "1º estágio", 2: "2º estágio", 3: "3º estágio", 4: "4º estágio" };
   function rankStageBadgeHtml(sname) {
-    var r = SPECIES_RANK[sname];
+    var r = rankDe(sname);
     if (!r || r.stageTier === null || r.stageTier === undefined) return "";
     var label = STAGE_LABEL[r.stage] || (r.stage + "º estágio");
     var title = "Rank " + r.stageTier + " entre outros Pokémon de " + label + " (score " + r.stageScore + "/100) — " +
@@ -317,7 +317,7 @@
     return out;
   }
   function rankInfoLineHtml(sp) {
-    var r = SPECIES_RANK[sp.sname];
+    var r = rankDe(sp.sname);
     if (!r && FORA_DO_RANK[sp.sname]) {
       return '<div class="rank-info-line"><span class="rank-info-item"><span class="rank-info-label">Fora do rank</span>' + rankBadgeHtml(sp.sname) +
         '</span><span class="rank-info-scale">' + escapeHtml(MOTIVO_FORA_DO_RANK_PT[FORA_DO_RANK[sp.sname]] || "") + '</span></div>';

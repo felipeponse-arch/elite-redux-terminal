@@ -181,7 +181,7 @@
     var itens = lista.map(function (e) {
       var sp = getSpeciesBySname(e.s);
       if (!sp) return null;
-      var rank = SPECIES_RANK[e.s];
+      var rank = rankDe(e.s);
       var mono = rank && rank.monoRanks && rank.monoRanks[tipo];
       return {
         sp: sp, local: e.l, etapa: e.e,

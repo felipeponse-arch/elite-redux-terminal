@@ -187,7 +187,7 @@
       // tier. Species without a rank (shouldn't happen - all 1906 get one)
       // fall to the bottom instead of erroring.
       if (state.sort === "rank") {
-        var ra = SPECIES_RANK[a.sname], rb = SPECIES_RANK[b.sname];
+        var ra = rankDe(a.sname), rb = rankDe(b.sname);
         return (rb ? rb.score : -1) - (ra ? ra.score : -1);
       }
       if (state.sort === "bst") return bst(b) - bst(a);

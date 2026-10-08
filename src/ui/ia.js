@@ -25,7 +25,7 @@
   }
   function aiTool_getSpeciesRank(input) {
     var sname = input && input.sname;
-    var r = sname ? SPECIES_RANK[sname] : null;
+    var r = sname ? rankDe(sname) : null;
     // roles/split vem de SPECIES_ROLE (sinal separado, 2026-09-11) - juntado
     // aqui na resposta da ferramenta porque o prompt já pede que a IA decida
     // "o papel que este Pokemon deve cumprir": em vez de deixar isso a
