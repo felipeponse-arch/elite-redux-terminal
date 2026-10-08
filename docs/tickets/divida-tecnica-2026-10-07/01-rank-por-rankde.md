@@ -1,6 +1,6 @@
 # 01 — Rank lido por rankDe (ADR-003)
 
-Status: pronto-para-agente
+Status: resolvido
 Bloqueado por: nenhum
 
 ## O que entrega

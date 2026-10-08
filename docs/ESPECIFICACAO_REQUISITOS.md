@@ -594,7 +594,7 @@ por `scripts/calcular_rank_v2.mjs`.
 - RF89 — **Nota por Dificuldade**: o Terminal deve dar a cada espécie uma Nota (0 a 100) e um Tier (SS a D)
   calculados em duelos simulados contra a Variante do chefão da Dificuldade da run: a Variante Padrão vale
   para Easy e Ace; a Insane, para Elite (o app não oferece a Hell como Dificuldade da run, RF102). Trocar a Dificuldade em
-  Progresso troca a Nota na hora (`aplicarRankDaDificuldade`, `src/regras/rank_da_run.js`); a ficha diz de
+  Progresso troca a Nota na hora (`rankDe` lê a Dificuldade a cada chamada, `src/regras/rank_da_run.js`); a ficha diz de
   qual Dificuldade é a Nota. Antes do Rank v2 os três níveis de time eram somados numa Nota só.
 - RF90 — **Só as lutas da run, no Level cap de cada uma**: o duelo conta as 29 lutas da run (primeiro
   encontro de cada ginásio, chefões Aqua/Magma do caminho, Alto Comando e Campeão), no Level cap da Etapa de
@@ -741,8 +741,8 @@ nova entra no motor sem consultar e registrar lá.
   a versão nova sair oficialmente em eliteredux.net: linha "Versão do jogo" de `docs/decisoes_mecanicas.md`.
 - RNF24 — **Dado derivado e leitura do Rank** (ADR-002 e ADR-003): dado que compara espécies é calculado em
   script e gravado em `data/`; dado que depende da run é calculado no app. A ADR-003 (ler o Rank por uma
-  função só, `rankDe`) está aceita mas NÃO implementada no `master`: hoje `aplicarRankDaDificuldade` ainda
-  reescreve os campos de `SPECIES_RANK`.
+  função só, `rankDe`) está implementada (ticket 01 da dívida técnica): nenhum leitor acessa `SPECIES_RANK`
+  direto, e o save não reescreve mais os campos dele.
 - RNF25 — **Processo de implementação** [revisa RNF17]: cada ticket de `docs/tickets/` é feito num worktree
   próprio; o hook de pré-commit roda `scripts/verificar.mjs` (travas, unitários, sabotagem, build e testes
   de navegador) e pega uma trava da máquina que impede duas verificações ao mesmo tempo; `npm run check`
