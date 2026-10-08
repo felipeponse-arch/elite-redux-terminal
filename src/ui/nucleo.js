@@ -150,6 +150,21 @@
       return true;
     });
   }
+  // Desfazer de "Apagar esta" (ticket 12 da dívida, 2026-10-08): devolve ao lugar
+  // de onde saiu a MESMA build que foi apagada (o objeto inteiro, com origem,
+  // justificativa e data), ativa de novo. Se nesse meio-tempo a lista encheu (3),
+  // recusa em vez de derrubar outra build em silêncio - devolve false.
+  function reinserirBuild(sname, idx, entrada) {
+    return acao(telasDeBuild(sname), function () {
+      var list = getBuildList(sname).slice();
+      if (list.length >= 3 || list.indexOf(entrada) !== -1) return false;
+      list.forEach(function (b) { b.active = false; });
+      entrada.active = true;
+      list.splice(Math.min(Math.max(idx, 0), list.length), 0, entrada);
+      state.customBuilds[sname] = list;
+      return true;
+    });
+  }
 
 
   function persist(opts) {

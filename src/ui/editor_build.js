@@ -505,6 +505,34 @@
     };
   }
 
+  // "Apagar esta" (ticket 12 da dívida, 2026-10-08): apaga na hora, como sempre, mas
+  // avisa com um botão Desfazer por 8 s em vez de pedir confirmação (confirm() nativo é
+  // proibido no iframe) e em vez de perder a build sem volta. Desfazer devolve a MESMA
+  // build, ativa, no mesmo lugar da lista (ver reinserirBuild).
+  function apagarBuildComDesfazer(sp, idx) {
+    var apagada = getBuildList(sp.sname)[idx];
+    if (!apagada || !removeBuildIndex(sp.sname, idx)) return;
+    var sname = sp.sname, nome = sp.n;
+    function focarNoEditor(id) {
+      var el = document.getElementById(id);
+      if (el) el.focus({ preventScroll: true });
+      return !!el;
+    }
+    flashToast("Build apagada: " + nome + ".", {
+      rotulo: "Desfazer",
+      aoClicar: function () {
+        if (reinserirBuild(sname, idx, apagada)) {
+          flashToast("Build restaurada: " + nome + ".");
+          var aberta = state.selected !== null && state.selected !== undefined ? getSpeciesByX(state.selected) : null;
+          if (aberta && aberta.sname === sname) focarNoEditor("mybuild-clear");
+        } else {
+          flashToast("Não deu para desfazer: " + nome + " já tem 3 builds salvas.");
+        }
+      },
+      devolverFoco: function () { focarNoEditor("mybuild-save"); }
+    });
+  }
+
   // Ouvintes únicos do editor "Meu build" e dos sets de Estratégias, no painel da
   // ficha. A espécie é sempre a da ficha aberta (state.selected).
   (function () {
@@ -544,7 +572,7 @@
         var list = getBuildList(sp.sname);
         var activeIdx = 0;
         for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
-        removeBuildIndex(sp.sname, activeIdx);
+        apagarBuildComDesfazer(sp, activeIdx);
       } else if (alvo.id === "mybuild-copy") {
         var saved = getActiveBuild(sp.sname);
         if (!saved) return;

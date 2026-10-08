@@ -426,9 +426,70 @@
   });
 
   var toastTimer = null;
-  function flashToast(msg) {
+  // Aviso passageiro COM ação (ticket 12 da dívida, 2026-10-08): o segundo argumento
+  // opcional é { rotulo, aoClicar, devolverFoco } e põe um botão (ex.: "Desfazer") no
+  // aviso. Com ação o aviso fica 8 s (não 2,2 s), PARA enquanto o mouse está em cima ou
+  // o foco está nele, o foco vai direto pro botão (só assim o teclado chega nele sem
+  // percorrer a página toda), Esc dispensa, e ao sumir o foco volta pra `devolverFoco()`.
+  // Um aviso novo qualquer substitui o anterior - e a ação some junto (ver abaixo).
+  var toastAcao = null;
+  var TOAST_MS = 2200, TOAST_COM_ACAO_MS = 8000;
+  function esconderToast() {
     var el = document.getElementById("toast");
-    el.textContent = msg;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = null;
+    var acao = toastAcao;
+    toastAcao = null;
+    if (el.contains(document.activeElement)) {
+      if (acao && acao.devolverFoco) acao.devolverFoco();
+      if (el.contains(document.activeElement)) document.activeElement.blur();
+    }
+    el.classList.remove("show", "tem-acao");
+    // Desabilitado, o botão sai da ordem do Tab enquanto o aviso está invisível.
+    el.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
+  }
+  function agendarToast(ms) {
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(esconderToast, ms);
+  }
+  (function () {
+    var el = document.getElementById("toast");
+    function pausar() { if (toastAcao && toastTimer) { clearTimeout(toastTimer); toastTimer = null; } }
+    function retomar() { if (toastAcao && !toastTimer && !el.matches(":hover") && !el.contains(document.activeElement)) agendarToast(TOAST_COM_ACAO_MS); }
+    el.addEventListener("mouseenter", pausar);
+    el.addEventListener("focusin", pausar);
+    el.addEventListener("mouseleave", retomar);
+    el.addEventListener("focusout", function () { setTimeout(retomar, 0); });
+    el.addEventListener("keydown", function (e) { if (e.key === "Escape" && toastAcao) esconderToast(); });
+    el.addEventListener("click", function (e) {
+      var botao = e.target.closest("button");
+      var acao = toastAcao;
+      if (!botao || !acao) return;
+      toastAcao = null; // o foco não volta pro lugar antigo: quem desfaz decide pra onde ele vai
+      esconderToast();
+      acao.aoClicar();
+    });
+  })();
+  function flashToast(msg, acao) {
+    var el = document.getElementById("toast");
+    // O aviso novo troca o conteúdo: se o foco estava no botão do antigo, ele não pode
+    // cair no vazio.
+    if (toastAcao && toastAcao.devolverFoco && el.contains(document.activeElement)) toastAcao.devolverFoco();
+    toastAcao = acao || null;
+    if (!acao) {
+      el.textContent = msg;
+    } else {
+      el.textContent = "";
+      var texto = document.createElement("span");
+      texto.textContent = msg;
+      var botao = document.createElement("button");
+      botao.type = "button";
+      botao.className = "toast-acao";
+      botao.textContent = acao.rotulo;
+      el.appendChild(texto);
+      el.appendChild(botao);
+    }
+    el.classList.toggle("tem-acao", !!acao);
     if (toastTimer) clearTimeout(toastTimer);
     // If a toast is already showing (fast successive actions - e.g. adding
     // several Pokemon in a row), just swapping the text with .show already
@@ -439,5 +500,6 @@
     el.classList.remove("show");
     void el.offsetWidth;
     el.classList.add("show");
-    toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2200);
+    agendarToast(acao ? TOAST_COM_ACAO_MS : TOAST_MS);
+    if (acao) el.querySelector("button").focus({ preventScroll: true });
   }

@@ -60,6 +60,24 @@
   text-align: center;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* Aviso com botão (Desfazer, ticket 12 da dívida): só aqui ele captura toque, e só
+   enquanto visível - invisível ele não pode bloquear o que está embaixo. */
+#toast.show.tem-acao { pointer-events: auto; }
+.toast-acao {
+  margin-left: var(--space-3);
+  min-height: var(--alvo-min);
+  padding: 2px 14px;
+  font: inherit;
+  font-weight: 800;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentcolor;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.toast-acao:hover { background: color-mix(in srgb, var(--bg) 18%, transparent); }
+/* O aviso tem fundo invertido (--text): o anel de foco padrão sumiria nele. */
+.toast-acao:focus-visible { outline: 2px solid var(--bg); outline-offset: 2px; }
 
 .sync-banner {
   position: fixed; left: 0; right: 0; top: 0; z-index: 200;
