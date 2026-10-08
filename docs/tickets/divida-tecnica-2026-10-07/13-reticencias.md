@@ -1,6 +1,6 @@
 # 13 — Acabamento de texto: reticências
 
-Status: em-andamento
+Status: resolvido
 Bloqueado por: nenhum
 
 ## O que entrega
