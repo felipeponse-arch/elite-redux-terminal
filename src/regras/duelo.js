@@ -269,6 +269,8 @@
     if ((x = f.match(/Boosts each battler's crit rate by \+(\d)/i))) { ef.critEstagio += parseInt(x[1], 10); ef.critTodos += parseInt(x[1], 10); }
     if ((x = f.match(/Contact moves get \+(\d) Crit/i))) ef.critContato += parseInt(x[1], 10);
     if ((x = f.match(/Move BP < (\d+) BP: \+(\d) to crit/i))) ef.critBP = { limite: parseInt(x[1], 10), n: parseInt(x[2], 10) };
+    // Perfectionist (ticket 08; abilities.cc onPriority: power <= 25): golpe de menos de 26 de poder ganha +1 de prioridade.
+    if ((x = f.match(/Move BP < (\d+) BP: \+1 priority/i))) ef.prioBP = parseInt(x[1], 10);
     if ((x = f.match(/^(\w+) moves get \+(\d) crit/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.critCategoria[c] = parseInt(x[2], 10); });
     if ((x = f.match(/^([A-Z][\w' -]+?) always crits\./))) ef.sempreCritGolpe[x[1]] = true;
     if (/Super-effective moves [^.]*always crit/i.test(f)) ef.critSuperEf = true;
@@ -969,6 +971,24 @@
     }
     return s;
   }
+  // Quedas de estágio que ficam com "u" no fim do duelo (revisão de 07/10, junto do ticket 05: os estágios só zeram
+  // para quem entra ou desmaia). Fontes: o próprio golpe (Close Combat, Superpower: usos = turnos), o Intimidate e a
+  // queda na entrada de quem saiu, e as quedas que o golpe do rival causa (golpes levados = turnos - 1). Só quedas.
+  function quedasQueFicamDuelo(u, outro, gU, gOutro, turnos) {
+    var s = {}, mult = u.ef.estagioMult || 1, usos = Math.max(1, turnos || 1), levados = Math.max(0, (turnos || 1) - 1);
+    function soma(k, delta, doRival) {
+      if (!(delta < 0)) return;
+      if (doRival && (u.ef.imuneQuedas[k] || (u.it && u.it.imuneQuedas))) return;
+      s[k] = (s[k] || 0) + delta * mult;
+    }
+    if (gU && gU.estagios && gU.estagios.proprio) Object.keys(gU.estagios.proprio).forEach(function (k) { soma(k, gU.estagios.proprio[k] * gU.estagios.p * usos, false); });
+    if (outro.ef.intimida && !u.ef.imuneIntimida && !u.ef.inverteIntimida) soma("atk", -outro.ef.intimida, true);
+    Object.keys(outro.ef.quedaNaEntrada).forEach(function (k) { soma(k, outro.ef.quedaNaEntrada[k], true); });
+    if (gOutro && gOutro.estagios && gOutro.estagios.alvo && !u.ef.imuneEfeitoDeGolpe) {
+      Object.keys(gOutro.estagios.alvo).forEach(function (k) { soma(k, gOutro.estagios.alvo[k] * gOutro.estagios.p * levados, true); });
+    }
+    return Object.keys(s).length ? s : null;
+  }
   function temFlagDuelo(m, nome) { return (m[8] || []).some(function (i) { return DATA.flags[i] === nome; }); }
   // Estágio de crítico do golpe (sem o que depende do alvo) e se sempre crita.
   function criticoDoGolpeDuelo(m, g, cats, u) {
@@ -1121,7 +1141,7 @@
       bonusCategoria: {}, categoriaEspecial: {}, categoriaNaSpDef: {}, categoriaExtra: {},
       statusAtaque: [], statusDefesa: [], imuneStatus: {}, chanceMult: 1, semEfeitoExtra: 0,
       semResiduo: false, semResiduoDe: {}, imuneEfeitoDeGolpe: false,
-      critEstagio: 0, critTodos: 0, critContato: 0, critBP: null, critCategoria: {}, sempreCritGolpe: {},
+      critEstagio: 0, critTodos: 0, critContato: 0, critBP: null, prioBP: 0, critCategoria: {}, sempreCritGolpe: {},
       critSuperEf: false, critContraStatus: [], critPrimeiroTurno: false, critMult: 1.5, critVsResistido: 1,
       critSangra: false, imuneCritico: false, critRecebido: 1,
       statusProprio: [], ultimoMult: 1, critUltimo: 0, antesReducao: 0, prioNoFinal: false,
@@ -1455,16 +1475,21 @@
       // Giant Shuriken deixava o Water Shuriken mais fraco - 1 acerto de 15).
       var alt = u.ef.golpeAlterado[m[0]];
       var poder = alt && alt.poder ? alt.poder : m[3] + (alt && alt.mais ? alt.mais : 0);
-      if (u.ef.tecnico && poder <= u.ef.tecnico.limite) hab *= u.ef.tecnico.mult;
+      // Poder variável (tickets 16/19): o poder do dado (1) não é o real - Technician e seguimento ficam para o dano,
+      // com o poder calculado contra o alvo (revisão de 07/10: Low Kick de 120 ganhava x1,5 da Technician).
+      var variavel = !!((typeof PODER_VARIAVEL !== "undefined" && PODER_VARIAVEL.golpes[id]) || PODER_QUE_CRESCE_DUELO[m[0]]);
+      var porPoder = variavel ? { tecnico: u.ef.tecnico, somas: [] } : null;
+      if (u.ef.tecnico && !variavel && poder <= u.ef.tecnico.limite) hab *= u.ef.tecnico.mult;
       if ((m[7] || 0) > 0) hab *= u.ef.prioMult;
       if (reforcado && tipo === reforcado) base *= CLIMA_OFICIAL.reforcoSolChuva; // NextDex 2.65beta + código oficial: 1,5x (mono_run.js)
       // Série: Water no sol e Fire na chuva saem pela metade (Catastrophe: reforçam; Nika: Water normal no sol).
       var enfraquecido = { sol: "Water", chuva: "Fire" }[clima];
       if (enfraquecido && tipo === enfraquecido && !(clima === "sol" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? CLIMA_OFICIAL.reforcoSolChuva : 0.5; // Catastrophe: o mesmo reforço do clima
-      if (u.ef.seguimento && u.ef.seguimento.tipo === tipo) hab *= (poder + u.ef.seguimento.poder) / poder;
+      if (u.ef.seguimento && u.ef.seguimento.tipo === tipo) { if (porPoder) porPoder.somas.push(u.ef.seguimento.poder); else hab *= (poder + u.ef.seguimento.poder) / poder; }
       u.ef.seguimentoCategoria.forEach(function (sg) {
         var vale = sg.quais === "todos" || (sg.quais === "som" && som) || (sg.quais === "danca" && flags.indexOf("Dance Move") !== -1) || cats.indexOf(sg.quais) !== -1;
-        if (vale && poder > 0) hab *= (poder + sg.poder) / poder;
+        if (vale && porPoder) porPoder.somas.push(sg.poder);
+        else if (vale && poder > 0) hab *= (poder + sg.poder) / poder;
       });
       var acertos = acertosDoGolpeDuelo(id);
       var doisACinco = MOVES[id] && MOVES[id][11] === "Multi Hit"; // efeito oficial (2 a 5 acertos)
@@ -1481,7 +1506,7 @@
       if (contato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
-      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF", fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: temContatoDuelo(m), som: som, prio: m[7] || 0,
+      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF", fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: temContatoDuelo(m), som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
           cats.some(function (c) { return u.ef.prioCheioCategoria[c]; }),
         precisao: Math.max(m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, u.ef.precisaoGolpe[m[0]] || 0), forcaBase: base, forca: base * hab };
@@ -1498,6 +1523,7 @@
       g.cats = cats;
       g.acertos = acertos;
       g.poder = poder;
+      g.porPoder = porPoder;
       // Poder que vem de outra coisa (ticket 16): peso, velocidade ou nível - calculado no dano (poderVariavelDuelo).
       g.poderVariavel = (typeof PODER_VARIAVEL !== "undefined" && PODER_VARIAVEL.golpes[id]) || PODER_QUE_CRESCE_DUELO[m[0]] || null;
       // Custo e retorno por golpe: recuo (fração do dano causado; Rock Head anula),
@@ -1687,7 +1713,12 @@
       if (!precisaoAtq && abreDef && def.ef.evasao !== 1) precisao /= def.ef.evasao; // Sand Veil, Olé!...
       if (!precisaoAtq) precisao = Math.min(1, precisao * comItem(itA.precisaoMult, ativoA) / comItem(itD.evasao, ativoD)); // Wide Lens, Bright Powder
       var forca = semBonus ? g.forcaBase : g.forca;
-      if (g.poderVariavel) forca *= poderVariavelDuelo(g.poderVariavel, atq, def) / Math.max(1, g.poder);
+      if (g.poderVariavel) {
+        var pv = poderVariavelDuelo(g.poderVariavel, atq, def), fv = pv / Math.max(1, g.poder);
+        if (g.porPoder && g.porPoder.tecnico && pv <= g.porPoder.tecnico.limite) fv *= g.porPoder.tecnico.mult; // Technician pelo poder real
+        if (g.porPoder && pv > 0) g.porPoder.somas.forEach(function (s) { fv *= (pv + s) / pv; }); // seguimento pelo poder real
+        forca *= fv;
+      }
       if ((atq.ef.critSuperEf || atq.ef.seQuebra) && efTipo >= 2) precisao = 1; // Fatal/Deadly Precision: "never miss"
       var crit = fatorCriticoDuelo(atq, def, g, efTipo);
       var dano = ((((2 * nivel) / 5 + 2) * forca * A / D) / 50 + 2) * efTipo * red * ROLAGEM_MEDIA_DUELO * precisao * crit.fator * noCampo * comItem(itA.danoMult, ativoA);
@@ -2084,12 +2115,13 @@
   // alvo e Freezy Frost os de todos (normalisebuffs); Spectral Thief rouba os positivos antes do dano.
   // Todos precisam acertar: tipo imune barra.
   var TIRA_SETUP_DUELO = { "Hit Switch Target": "troca", "Clear Smog": "zera", "Freezy Frost": "zera", "Spectral Thief": "rouba" };
-  function golpeQueTiraSetupDuelo(x, y) {
+  // semReservaY: o lado de y não tem outro vivo - a troca forçada não acontece (revisão de 07/10).
+  function golpeQueTiraSetupDuelo(x, y, semReservaY) {
     var achado = null;
     (x.golpesProntos || []).forEach(function (g) {
       var modo = TIRA_SETUP_DUELO[g.efeitoDado];
       if (!modo || achado) return;
-      if (modo === "troca" && y.ef.naoSaiForcado) return;
+      if (modo === "troca" && (y.ef.naoSaiForcado || semReservaY)) return;
       if (efetividadeNoDuelo(x, g.tipo, y) === 0) return;
       achado = { golpe: g, modo: modo };
     });
@@ -2252,7 +2284,9 @@
       CAMPO_DUELO.inversaAtiva = false;
       var fr = Math.min(CAMPO_DUELO.inversa, turnos) / turnos;
       meu = { melhor: Object.assign({}, meuInv.melhor.dano > meu.melhor.dano ? meuInv.melhor : meu.melhor, { dano: meuInv.melhor.dano * fr + meu.melhor.dano * (1 - fr) }), melhorPrio: meu.melhorPrio, segundo: meu.segundo, ia: null };
-      dele = { melhor: Object.assign({}, deleInv.melhor.dano > dele.melhor.dano ? deleInv.melhor : dele.melhor, { dano: deleInv.melhor.dano * fr + dele.melhor.dano * (1 - fr) }), melhorPrio: dele.melhorPrio, segundo: dele.segundo, ia: null };
+      // Chefão: o golpe é o que a IA escolhe na maior parte dos turnos (sala ou fora dela), não o de maior dano
+      // entre as duas escolhas (revisão de 07/10).
+      dele = { melhor: Object.assign({}, fr >= 0.5 ? deleInv.melhor : dele.melhor, { dano: deleInv.melhor.dano * fr + dele.melhor.dano * (1 - fr) }), melhorPrio: dele.melhorPrio, segundo: dele.segundo, ia: null };
     }
     var v1 = velocidadeNoDuelo(eu, turnos, foe, meu.melhor.golpe, dele.melhor.golpe), v2 = velocidadeNoDuelo(foe, turnos, eu, dele.melhor.golpe, meu.melhor.golpe);
     // Trick Room (Twist. Dimension): enquanto dura, o mais lento age primeiro.
@@ -2290,7 +2324,15 @@
       var meus = Math.max(0, (primeiro ? nD : nD - 1) - (atrasoE || 0)); // turnos gastos no plano não batem
       return { nota: 0.5 * Math.min(1, (meus * dM) / hpF), venceu: false, restoEu: 0, restoFoe: hpF - meus * dM, n: nD };
     }
-    function comFim(r) { var d = fim(r.nota, r.venceu, r.restoEu, r.restoFoe, r.n); if (ini.detalhe && d.planoEu === undefined) { d.planoEu = null; d.planoEle = null; } return d; }
+    function comFim(r) {
+      var d = fim(r.nota, r.venceu, r.restoEu, r.restoFoe, r.n);
+      if (ini.detalhe && d.planoEu === undefined) { d.planoEu = null; d.planoEle = null; }
+      if (ini.detalhe) { // quedas que ficam com quem continua em campo (revisão de 07/10)
+        d.quedasEu = quedasQueFicamDuelo(eu, foe, meu.melhor.golpe, dele.melhor.golpe, r.n || turnos);
+        d.quedasEle = quedasQueFicamDuelo(foe, eu, dele.melhor.golpe, meu.melhor.golpe, r.n || turnos);
+      }
+      return d;
+    }
     var semPlanos = corridaCrua(nec, elePrecisa, euPrimeiro, st.meu, st.dele, hpEu, hpFoe);
     // Quick Draw: com chance q, quem seria o segundo age primeiro - mistura os dois resultados.
     function comSaque(r, a, b) {
@@ -2325,11 +2367,15 @@
       var efE = pe, efF = pf;
       if (pe && pe.zeraSetup && pf && pf.tipo === "setup") efF = Object.assign({}, pf, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
       if (pf && pf.zeraSetup && pe && pe.tipo === "setup") efE = Object.assign({}, pe, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
-      // Golpe de dano que tira o setup (ticket 18): quem tem usa contra quem fez setup - o setup se perde.
-      if (efF && efF.tipo === "setup" && golpeQueTiraSetupDuelo(eu, foe)) efF = Object.assign({}, efF, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
-      if (efE && efE.tipo === "setup" && golpeQueTiraSetupDuelo(foe, eu)) efE = Object.assign({}, efE, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
+      // Golpe de dano que tira o setup (ticket 18): quem tem usa contra quem fez setup - o setup se perde. Usar
+      // o golpe custa o turno do melhor golpe, descontado o dano do próprio golpe (revisão de 07/10).
+      var tiraE = efF && efF.tipo === "setup" ? golpeQueTiraSetupDuelo(eu, foe, ini.semReservaFoe) : null;
+      var tiraF = efE && efE.tipo === "setup" ? golpeQueTiraSetupDuelo(foe, eu, ini.semReservaEu) : null;
+      var custoTira = function (t, melhor) { return t && melhor && melhor.golpe && melhor.golpe.forca > 0 ? Math.max(0, 1 - t.golpe.forca / melhor.golpe.forca) : 0; };
+      if (tiraE) efF = Object.assign({}, efF, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
+      if (tiraF) efE = Object.assign({}, efE, { multX: 1, multY: 1, velX: 1, estagiosGanhos: null });
       planosQueValeram = { eu: efE, ele: efF };
-      var dM = st.meu, dD = st.dele, hpE = hpEu, hpF = hpFoe, atE = 0, atF = 0, velE = 1, velF = 1, inverte = false;
+      var dM = st.meu, dD = st.dele, hpE = hpEu, hpF = hpFoe, atE = custoTira(tiraE, meu.melhor), atF = custoTira(tiraF, dele.melhor), velE = 1, velF = 1, inverte = false;
       // Golpe de status que a habilidade usa ao entrar (sem gastar turno).
       function naEntradaDe(x, y, golpeY, danoY) {
         var r = { perdeY: 0, multY: 1, danoY: 0 };
@@ -3566,7 +3612,11 @@
       time.concat(deles).forEach(function (c) { c.u = on ? c.uClima : c.uSem; });
     }
     aplicarClima();
-    function luta(c, f) { return resultadoDoDuelo(comoEstaDuelo(c), comoEstaDuelo(f), nivel, { fracEu: c.frac, fracFoe: f.frac, detalhe: true }); }
+    function luta(c, f) {
+      var semReserva = function (lado, quem) { return !lado.some(function (x) { return x !== quem && x.vivo; }); }; // troca forçada (ticket 18)
+      return resultadoDoDuelo(comoEstaDuelo(c), comoEstaDuelo(f), nivel, { fracEu: c.frac, fracFoe: f.frac, detalhe: true,
+        semReservaEu: semReserva(time, c), semReservaFoe: semReserva(deles, f) });
+    }
     // Setup levado de um duelo anterior (ticket 05) contra quem tem golpe que tira setup (ticket 18):
     // Clear Smog/Freezy Frost e a troca forçada zeram tudo (a troca só com outro vivo no time de quem
     // sai); Spectral Thief tira só os positivos e passa para quem rouba.
@@ -3737,10 +3787,10 @@
       else if (r.venceu === true) {
         var custoFinal = custoDoGolpeFinalDuelo(comoEstaDuelo(atual), comoEstaDuelo(f), f.frac, nivel);
         atual.apanhou = (atual.apanhou || 0) + Math.max(0, (r.turnos || 1) - 1); // Rage Fist: golpes levados ficam com ele
-        atual.frac = r.fracEu - custoFinal; f.vivo = false; f.frac = 0; somaEstagios(atual.bonus.estagios, r.setupEu); nocaute(atual, f);
+        atual.frac = r.fracEu - custoFinal; f.vivo = false; f.frac = 0; somaEstagios(atual.bonus.estagios, r.setupEu); somaEstagios(atual.bonus.estagios, r.quedasEu); nocaute(atual, f);
         if (atual.frac <= 0) { atual.frac = 0; atual.vivo = false; } // o recuo do nocaute derruba os dois
       }
-      else if (r.venceu === false) { f.apanhou = (f.apanhou || 0) + Math.max(0, (r.turnos || 1) - 1); f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; somaEstagios(f.bonus.estagios, r.setupEle); nocaute(f, atual); }
+      else if (r.venceu === false) { f.apanhou = (f.apanhou || 0) + Math.max(0, (r.turnos || 1) - 1); f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; somaEstagios(f.bonus.estagios, r.setupEle); somaEstagios(f.bonus.estagios, r.quedasEle); nocaute(f, atual); }
       // Empate de velocidade: conta como derrota (o lado seguro), o dele fica com o HP que sobrou.
       else { f.frac = r.fracFoe; atual.vivo = false; atual.frac = 0; }
     }

@@ -70,3 +70,11 @@ test("no duelo, do outro lado: o setup do chefão também se perde contra o meu 
   assert.deepEqual({ ...sem.setupEle }, { atk: 2 }, "pré-condição: sem Clear Smog o +2 dele fica");
   assert.equal(R.resultadoDoDuelo(parrudo(["Tackle", "Clear Smog"]), comSD(), 50, { detalhe: true }).setupEle, null);
 });
+
+test("revisão 07/10: Dragon Tail contra o último do time (sem reserva) não tira o setup; Clear Smog tira mesmo assim", () => {
+  const rem = (g) => unid("Rem", [400, 110, 120, 50, 120, 80], g);
+  const d = (g, semReservaFoe) => R.resultadoDoDuelo(rem(g), comSD(), 50, { detalhe: true, semReservaFoe });
+  assert.equal(d(["Body Slam", "Dragon Tail"], false).setupEle, null, "com reserva: a troca forçada tira");
+  assert.deepEqual({ ...d(["Body Slam", "Dragon Tail"], true).setupEle }, { atk: 2 }, "sem reserva: o setup fica");
+  assert.equal(d(["Body Slam", "Clear Smog"], true).setupEle, null, "Clear Smog não depende de troca");
+});

@@ -113,3 +113,20 @@ test("estratégia de clima: Brawly 2 com elenco de chuva só declara armador que
     assert.ok(res.simulacao.log.some((l) => l.meu === n || l.entra === n), "armador " + n + " declarado mas não entrou");
   }
 });
+
+// Segundo caso fixo (08/10, ticket 08): as revisões do duelo de 07/10 (quedas que ficam, tira-setup) mudaram o resultado do
+// Brawly 2 e a sabotagem passou a sobreviver. Elenco de chuva contra a Courtney (Meteor Falls), marco 3: sem a regra
+// o Ninetales viraria "armador" da estratégia sem nunca entrar na luta simulada.
+test("estratégia de clima: Courtney (Meteor Falls) com elenco de chuva só declara armador que entra na luta (marco 3)", async () => {
+  const { carregarRegras: carregar } = await import("./carregar_regras.mjs");
+  const R3 = carregar({ milestone: 3, difficulty: "ace" });
+  const nomes = ["Ninetales", "Politoed", "Pelipper", "Tyranitar", "Hippowdon", "Abomasnow", "Clefable", "Azumarill", "Granbull", "Wigglytuff"];
+  const cands = nomes.map((n) => R3.SPECIES.find((s) => s && s.n === n)).filter(Boolean).map((sp) => ({ sp, owned: sp.x }));
+  const courtney = R3.BOSSES.find((b) => b.name === "Courtney Meteor Falls");
+  const res = R3.montarTimeContraChefao(cands, courtney.party, 50, {});
+  assert.equal(res.escolhidos.length, 6);
+  if (res.estrategia) {
+    const n = res.estrategia.armador;
+    assert.ok(res.simulacao.log.some((l) => l.meu === n || l.entra === n), "armador " + n + " declarado mas não entrou");
+  }
+});

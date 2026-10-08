@@ -51,7 +51,9 @@
     "dex-strategy-do-jogo": { nivel: "confirmado", rotulo: "oficial do jogo" },
     "curadoria-do-projeto": { nivel: "confirmado", rotulo: "curadoria do projeto" },
     "discord-build-workshop-2.65": { nivel: "consenso", rotulo: "Discord Build Workshop" },
-    "discord-movesets": { nivel: "relato", rotulo: "Discord" }
+    "discord-movesets": { nivel: "relato", rotulo: "Discord" },
+    // Ticket 08: vídeo do canal MegaFidough - só o que o vídeo diz; natureza/EVs do padrão do app.
+    "video-megafidough": { nivel: "relato", rotulo: "vídeo MegaFidough" }
   };
   var SELO_SIMBOLO = { confirmado: "✔", consenso: "≈", relato: "?" };
   var SELO_NOME = { confirmado: "Confirmado", consenso: "Consenso", relato: "Relato" };

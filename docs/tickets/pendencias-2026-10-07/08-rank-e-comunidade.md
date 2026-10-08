@@ -15,3 +15,12 @@ Comparação antes/depois anexada ao ticket; builds novas passam no `validar_dad
 
 ## 07/10
 Rank recalculado com os tickets 02-19 e com a escolha de set corrigida (3 candidatos avaliados por inteiro). Falta: comparar com a comunidade (físicos fortes), nota de cobertura/suporte, Zarude, Floettite/Dragoninite Y e as builds dos vídeos.
+
+## Comentários
+
+### 08/10 (meta-pokemon)
+- Feito: pacote inicial (`data/pacote_inicial.json`, vídeo do usuário) e pedras do Adoption Center (`data/pedras_adoption_center.json`, er-config) viraram linhas no Onde achar; Floettite pós-jogo (etapa 9); Perfectionist com +1 de prioridade; revisões do duelo de 07/10 (ver `docs/decisoes_mecanicas.md`).
+- Builds dos vídeos: `SPECIES_GARCHOMP_MEGA_Z` criada (fonte `video-megafidough`, selo Relato). No Mega Redux Garchomp (Swords Dance, Last Respects) e no Wooly Worm (Assault Vest) a build curada do Discord NÃO foi trocada; o vídeo virou nota. Decisão do usuário pendente: o Assault Vest do Wooly Worm bloqueia o Sticky Web da build.
+- Zarude: ausente das 7 páginas do índice oficial e do er-repo (só marca `Unfinished`); continua `sem-fonte`. Floettite: er-config `talk_to_legendary_sage`. Dragoninite Y: er-config `adoption_center` (trava da 7ª insígnia mantida).
+- ADIADO: "comparar com a comunidade (físicos fortes)" e "nota cobertura/suporte". Dependem do rank final, que só será recalculado depois da troca para o dado 2.65.4 (`docs/tickets/dados-2654/10`). Texto da nota já escrito pela sessão anterior (tirado do tooltip do rank em `src/ui/dex_ficha.js` para não antecipar): "Mede o Pokémon sozinho, 1x1: cobertura para o time, suporte (hazard, clima para os outros, Costar) e sinergia não entram na nota."
+- Rank NÃO recalculado. As mudanças do motor (Perfectionist e revisões de 07/10) e a saída da Floette Mega do rank (`data/rank_disponibilidade.json`) só aparecem no próximo recálculo.

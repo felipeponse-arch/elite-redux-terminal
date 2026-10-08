@@ -19,7 +19,7 @@ const lista = (v) => (v === null || v === undefined ? [] : Array.isArray(v) ? v 
 // de "erros de digitação" que inventou nomes, tolerância de 1 letra que
 // gravava a grafia do post em vez da do jogo).
 // ---------------------------------------------------------------------------
-export const FONTES = ["discord-build-workshop-2.65", "discord-movesets", "curadoria-do-projeto", "ia-curada-playtester", "dex-strategy-do-jogo"];
+export const FONTES = ["discord-build-workshop-2.65", "discord-movesets", "curadoria-do-projeto", "ia-curada-playtester", "dex-strategy-do-jogo", "video-megafidough"];
 const FORMATOS = ["1x1", "dupla"];
 // Até 3 curadas por espécie, uma por estilo; o valor pode ser objeto ou lista
 // (o app normaliza em curadasDe(), src/regras/plano_build.js).

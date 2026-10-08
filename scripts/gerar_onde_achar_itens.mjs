@@ -14,6 +14,7 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { criarEtapaDoMapa } from "./etapa_do_mapa.mjs";
+import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 
 const repo = process.argv[2];
 if (!repo || !existsSync(repo)) { console.error("uso: node scripts/gerar_onde_achar_itens.mjs <er-repo>"); process.exit(2); }
@@ -77,14 +78,40 @@ for (const l of ler(join(repo, "data/scripts/general_mart.inc")).split(/\r?\n/))
   if (m && lista !== null) anotar(m[1], "Poké Mart (a partir da " + lista + "ª insígnia)".replace("da 0ª insígnia", "o começo"), "loja", lista);
 }
 
+// 4. Pacote inicial (ticket 08): o que o jogo dá no Centro Pokémon depois de sair da cidade inicial, lido
+// do vídeo do usuário (data/pacote_inicial.json). Vale mais que o código público, que é de outra versão.
+// Pedras Mega do pacote: só ao enfrentar o Norman (etapaDasPedras), ou mais tarde se a pedra já tem trava
+// própria em MEGA_PEDRAS_TARDIAS (src/regras/formas_mega.js) - essa regra continua valendo (usuário, 07/10).
+const pacote = JSON.parse(ler("data/pacote_inicial.json"));
+const TARDIAS = carregarRegras().MEGA_PEDRAS_TARDIAS;
+for (const [grupo, nomes] of Object.entries(pacote)) {
+  if (!Array.isArray(nomes)) continue;
+  const mega = grupo === "pedrasMega";
+  for (const nome of nomes) {
+    const etapa = mega ? Math.max(pacote.etapaDasPedras, TARDIAS[nome] || 0) : 0;
+    const como = !mega ? "o jogo dá no Centro Pokémon logo depois da cidade inicial"
+      : etapa > pacote.etapaDasPedras ? "vem no pacote do começo; libera a partir da " + etapa + "ª insígnia" : "vem no pacote do começo; libera ao enfrentar o Norman";
+    (achados[nome] = achados[nome] || []).push({ etapa, local: "Pacote inicial", como });
+  }
+}
+
+// 5. Pedras do Adoption Center (ticket 08): er-config oficial (data/pedras_adoption_center.json). Compra por BP
+// com o Mega Bracelet do Norman: mesma etapa das pedras do pacote, ou a trava que a pedra já tem.
+for (const nome of JSON.parse(ler("data/pedras_adoption_center.json")).pedras) {
+  const etapa = Math.max(pacote.etapaDasPedras, TARDIAS[nome] || 0);
+  (achados[nome] = achados[nome] || []).push({ etapa, local: "Adoption Center", como: "compra por BP (precisa do Mega Bracelet)" });
+}
+
 // Uma linha por (local, como), da etapa mais cedo para a mais tarde; no máximo 6 por item.
 const saida = {};
 for (const nome of Object.keys(achados).sort()) {
   const vistos = new Set();
   saida[nome] = achados[nome]
-    .sort((a, b) => (a.etapa === null) - (b.etapa === null) || (a.etapa || 0) - (b.etapa || 0) || a.local.localeCompare(b.local))
+    .sort((a, b) => (a.etapa === null) - (b.etapa === null) || (a.etapa || 0) - (b.etapa || 0) ||
+      (b.local === "Pacote inicial") - (a.local === "Pacote inicial") || a.local.localeCompare(b.local))
     .filter((x) => { const k = x.local + "|" + x.como; if (vistos.has(k)) return false; vistos.add(k); return true; })
-    .slice(0, 6);
+    // 6 linhas do código + as fontes do ticket 08 (pacote, Adoption Center), sem cortar fonte antiga.
+    .slice(0, 6 + achados[nome].filter((x) => x.local === "Pacote inicial" || x.local === "Adoption Center").length);
 }
 writeFileSync("data/onde_achar_itens.json", JSON.stringify(saida));
 const semEtapa = Object.entries(saida).filter(([, v]) => v.every((x) => x.etapa === null)).map(([k]) => k);

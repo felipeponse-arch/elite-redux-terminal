@@ -43,3 +43,25 @@ test("o setup do chefão também continua contra o meu próximo Pokémon", () =>
   const semLevar = R.resultadoDoDuelo(meuFraco, chefao, 50, { detalhe: true, fracFoe: s.log[0].fracFoe });
   assert.ok(segundo.fracFoe > semLevar.fracFoe + 0.05, segundo.fracFoe + " vs " + semLevar.fracFoe);
 });
+
+// Revisão de 07/10: as QUEDAS também ficam com quem continua em campo (Close Combat, Intimidate de quem saiu).
+test("quedas que ficam: Close Combat baixa Def/SpD por uso; Intimidate do rival baixa o Atk; Clear Amulet segura", () => {
+  const cc = unid("CC", [300, 150, 100, 50, 100, 120], ["Close Combat"]);
+  const q = R.quedasQueFicamDuelo(cc, parrudo(), cc.golpesProntos[0], null, 2);
+  assert.ok(q.def <= -2 && q.spd <= -2, JSON.stringify(q));
+  const intim = unid("Intim", [300, 100, 100, 50, 100, 50], ["Tackle"]);
+  intim.ef = R.efeitoDasHabilidadesNoDuelo([R.ABILITY_ID_BY_NAME["Intimidate"]], "QI", null);
+  assert.equal(R.quedasQueFicamDuelo(forte(), intim, null, null, 1).atk, -1);
+  const amuleto = Object.assign(forte(), { item: "Clear Amulet", it: R.itemDoDuelo("Clear Amulet", null) });
+  assert.equal(R.quedasQueFicamDuelo(amuleto, intim, null, null, 1), null);
+});
+
+test("luta contra o chefão: quem venceu com Close Combat entra no próximo duelo com a defesa baixa", () => {
+  const cc = () => unid("CC", [300, 150, 100, 50, 100, 120], ["Close Combat"]);
+  const fraco = unid("Fraco", [150, 60, 70, 40, 70, 50], ["Body Slam"]);
+  const s = R.simularLutaContraChefao([cc()], [fraco, forte()], 50);
+  assert.equal(s.log[0].venceu, true);
+  const doZero = R.resultadoDoDuelo(cc(), forte(), 50, { detalhe: true, fracEu: s.log[0].fracEu });
+  const segundo = s.log.find((l) => l.contra === "Forte");
+  assert.ok(segundo.fracEu < doZero.fracEu - 0.02 || (doZero.venceu && !segundo.venceu), segundo.fracEu + " x " + doZero.fracEu);
+});

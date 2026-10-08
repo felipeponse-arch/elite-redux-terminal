@@ -1113,7 +1113,7 @@
       "Flash Cannon",
       "Sticky Web"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Vídeo \"How Viable Are Pokémon With EXTREME Weaknesses??\" (MegaFidough, 23/08/2026; um vídeo só, confiança baixa) acha a bulk dele ótima com Assault Vest ou Tactical Vest. Item não alterado: os dois coletes (Assault e Tactical) bloqueiam golpe de status e esta build usa o Sticky Web - trocar o item fica para decisão do usuário.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -2334,7 +2334,7 @@
       "Shadow Claw",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell (Ω) / King's Rock (Ω).",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell (Ω) / King's Rock (Ω). Vídeo \"RANKING Every Garchomp Form!\" (MegaFidough, 30/08/2026; um vídeo só, confiança baixa) cita para esta forma Swords Dance (dobra o ataque depois do primeiro nocaute, que o Haunting Frenzy acelera) e Last Respects (mais forte a cada aliado caído); não diz que troca o Dragon Dance. Build não alterada: trocar golpe fica para decisão do usuário.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -3704,6 +3704,21 @@
     ],
     "note": "Set oficial do arquivo src/data/dex-strategy.md do código do jogo (\"Stockpile Wall\"), escrito pela comunidade/equipe e pode ser de uma versão anterior à 2.65; habilidade, golpes e item conferidos contra os dados 2.65beta. Opções do autor que ficaram de fora: golpe Gunk Shot.",
     "fonte": "dex-strategy-do-jogo",
+    "versao": "2.65beta"
+  },
+  "SPECIES_GARCHOMP_MEGA_Z": {
+    "ability": "Sinister Claws",
+    "nature": "Timid",
+    "evs": "252 SpA / 4 SpD / 252 Spe",
+    "item": "",
+    "moves": [
+      "Dragon Claw",
+      "Seismic Blade",
+      "Air Cutter",
+      "Dragon Dance"
+    ],
+    "note": "Do vídeo \"RANKING Every Garchomp Form!\" (canal MegaFidough): Sinister Claws torna os golpes cortantes especiais (+30%) e baixa a Sp. Def do alvo; Dragon Claw de STAB, Seismic Blade de cobertura, Air Cutter como \"segundo STAB\" (Air Lift) e Dragon Dance. O vídeo não diz item, natureza nem EVs: natureza e EVs são o padrão do app para set especial rápido.",
+    "fonte": "video-megafidough",
     "versao": "2.65beta"
   }
 }

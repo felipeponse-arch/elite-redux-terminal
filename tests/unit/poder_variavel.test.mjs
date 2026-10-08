@@ -41,3 +41,15 @@ test("no duelo: Heavy Slam do Snorlax causa dano de verdade; Seismic Toss tira o
   const st = R.danoNoDuelo(unid(1, S, ["Seismic Toss"]), unid(25, [200, 60, 60, 60, 60, 120]), 50);
   assert.equal(Math.round(st.melhor.dano), 50);
 });
+
+// Revisão de 07/10: Technician e seguimento olhavam o poder 1 do dado (Low Kick de 120 ganhava x1,5).
+test("Technician em golpe de poder variável usa o poder real: Low Kick em Snorlax (120) não ganha; em Pikachu (20) ganha", () => {
+  const comHab = (habs) => {
+    const u = { ef: R.efeitoDasHabilidadesNoDuelo(habs.map((n) => R.ABILITY_ID_BY_NAME[n]), "PVT_" + habs.join(), null), tipos: ["Fighting"], stats: S, ids: [], sp: { i: 1, n: "x1" } };
+    u.golpesProntos = R.prepararGolpesDuelo([R.MOVE_ID_BY_NAME["Low Kick"]], u, null);
+    return u;
+  };
+  const dano = (u, dex) => R.danoNoDuelo(u, unid(dex, S), 50).melhor.dano;
+  assert.ok(Math.abs(dano(comHab(["Technician"]), 143) - dano(comHab([]), 143)) < 1e-6, "120 de poder: sem bônus");
+  assert.ok(dano(comHab(["Technician"]), 25) / dano(comHab([]), 25) > 1.3, "20 de poder: ganha a Technician (x1,5 no poder)");
+});

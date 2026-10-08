@@ -125,6 +125,10 @@
     "Dragoninite Y": 7,
     "Galladite": 7,
     "Gardevoirite": 7,
+    // Floettite: nenhum script público a dá; a "Evolution Data" do jogo cita o "legendary sage in
+    // Littleroot Town", e o usuário confirmou (07/10, ticket 08) que o NPC da primeira cidade só a
+    // entrega depois de vencer a Elite 4 - pós-jogo, como a Purple Orb.
+    "Floettite": 9,
     "Granbullite": 7,
     "Gyaradosite Y": 7,
     "Haxorusite": 7,
