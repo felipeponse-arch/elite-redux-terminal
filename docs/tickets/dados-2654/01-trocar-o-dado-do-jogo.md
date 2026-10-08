@@ -24,3 +24,5 @@ O app passa a usar o Dado do jogo NextDex 2.65.4 (corte de 07/10/2026): Dex, che
 - [ ] Rank NÃO recalculado (fica para o ticket 10). Sem publicar.
 
 ## Comentários
+
+- 08/10 (usuário): remendar por cima do dado os 2 commits do er-config de 07/10 que valem: dfe30fb (Morpekyll Hangry com HP 97, Atk 104, SpD 74, iguais à forma base; no dado está 87/121/85) e b726428 (Kirlia Redux: Tidal Rush vira Hydration). ad5fb77 (times do Polartic) é da treinadora Catherine, que não está no app: só anotar.
