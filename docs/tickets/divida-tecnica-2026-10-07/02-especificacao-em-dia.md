@@ -1,6 +1,6 @@
 # 02 — Especificação de requisitos em dia
 
-Status: em-andamento
+Status: resolvido
 Bloqueado por: nenhum
 
 ## O que entrega
