@@ -1,6 +1,6 @@
 # 06 — Ferramentas da IA nas regras, com teste
 
-Status: em-andamento
+Status: resolvido
 Bloqueado por: 01
 
 ## O que entrega
