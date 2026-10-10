@@ -41,8 +41,9 @@ test("habilidade 'Normal vira X, golpes de X são empoderados' (Aerilate, Pixila
   }
 });
 
-// Ainda sem explicação (ver o ticket): a calculadora mostra 16% a 19% e o motor dá ~21%. O dado do app diz BP 80;
-// o jogo parece usar BP 70 (ou o Iron Fist não conta). Fica como pendência, sem derrubar a suíte.
-test("calculadora do jogo: Insect Impact do Ledian no Ninetales = 16% a 19%", { todo: "BP do Insect Impact no jogo parece 70 (o dado diz 80)" }, () => {
+// Ainda sem explicação: a calculadora mostra 16% a 19% e o motor dá ~21% (cerca de 10% acima do teto). O poder
+// (80), a chance de 30%, o contato e o 'Iron Fist boost' do jogo conferem com o dado do app (tela do golpe, 10/10).
+// Fica como pendência, sem derrubar a suíte.
+test("calculadora do jogo: Insect Impact do Ledian no Ninetales = 16% a 19%", { todo: "Insect Impact ~10% acima da calculadora do jogo; BP 80 confere, causa ainda desconhecida" }, () => {
   dentro(primeiroGolpe("Insect Impact", "Life Orb"), 0.16, 0.19, "com Life Orb");
 });
