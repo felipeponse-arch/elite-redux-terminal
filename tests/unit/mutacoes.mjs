@@ -2190,4 +2190,25 @@ export const MUTACOES = [
     de: "var itemAv = build.ponte ? stripNote(build.item || \"\") : \"\";",
     para: "var itemAv = stripNote(build.item || \"\");",
   },
+  {
+    id: "sync-progresso-ignora-marco",
+    descricao: "o progresso da run deixa de contar o marco: run zerada volta a apagar run adiantada",
+    arquivo: "save.js",
+    de: "return marco * 2 + (s && typeof s.runConfirmedAt",
+    para: "return 0 * marco + (s && typeof s.runConfirmedAt",
+  },
+  {
+    id: "sync-progresso-ignora-confirmada",
+    descricao: "o progresso da run deixa de contar a run confirmada: Novo jogo sem confirmar apaga a run confirmada",
+    arquivo: "save.js",
+    de: "typeof s.runConfirmedAt === \"string\" ? 1 : 0",
+    para: "typeof s.runConfirmedAt === \"string\" ? 0 : 0",
+  },
+  {
+    id: "sync-progresso-compara-invertido",
+    descricao: "o conflito de progresso dispara quando o save que chega tem MAIS progresso",
+    arquivo: "save.js",
+    de: "return progressoDoSave(remoto) < progressoDoSave(local);",
+    para: "return progressoDoSave(remoto) > progressoDoSave(local);",
+  },
 ];

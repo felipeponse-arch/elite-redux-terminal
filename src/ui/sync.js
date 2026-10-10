@@ -53,6 +53,34 @@
       persist({ manterData: true });
     }
   }
+  // Save de outro aparelho com MENOS progresso que o deste (10/10/2026: run zerada do PC
+  // apagou a run adiantada do celular, porque só a data do salvamento decidia). Não aplica e
+  // não empurra nada: o banner pergunta. "Manter" grava o local de novo (data nova), que então
+  // chega ao outro aparelho como o mais novo E com mais progresso. "Usar" aplica o que chegou.
+  var remotoPendente = null;
+  function conflitoDeProgresso(remote, local) {
+    if (!saveChegandoTemMenosProgresso(local, remote)) return false;
+    remotoPendente = remote;
+    var marco = function (sv) { return sv && sv.settings && typeof sv.settings.milestone === "number" ? sv.settings.milestone : 0; };
+    document.getElementById("progresso-banner-text").textContent =
+      "Chegou de outro aparelho um save com MENOS progresso (marco " + marco(remote) + ") que o deste aparelho (marco " + marco(local) + "). " +
+      "Nada foi trocado ainda. Qual vale?";
+    document.getElementById("progresso-banner").hidden = false;
+    return true;
+  }
+  document.getElementById("progresso-banner-manter").addEventListener("click", function () {
+    remotoPendente = null;
+    document.getElementById("progresso-banner").hidden = true;
+    persist();
+  });
+  document.getElementById("progresso-banner-usar").addEventListener("click", function () {
+    var r = remotoPendente;
+    remotoPendente = null;
+    document.getElementById("progresso-banner").hidden = true;
+    if (!r) return;
+    aplicarSaveRemoto(r);
+    showSyncBanner("Save do outro aparelho aplicado.");
+  });
   // Save de outro aparelho com a soma de verificação errada (save.js): não é
   // aplicado. O save local, que confere, sobe por cima e conserta a cópia do
   // banco - como a memória com redundância, que recupera a palavra pela cópia
@@ -168,8 +196,10 @@
             // continua existindo pra atualizar a TELA, mas persist() agora
             // nunca mais sobrescreve o remoto com dado velho enquanto isso
             // não acontece.
-            aplicarSaveRemoto(remote);
-            showSyncBanner("Encontramos um save mais novo de outro aparelho.");
+            if (!conflitoDeProgresso(remote, local)) {
+              aplicarSaveRemoto(remote);
+              showSyncBanner("Encontramos um save mais novo de outro aparelho.");
+            }
           } else {
             // Local has real differences and isn't older - push it up.
             syncRef.set(local).catch(function () {});
@@ -211,6 +241,7 @@
         syncRef.set(local3).catch(function () {});
         return;
       }
+      if (conflitoDeProgresso(remote, local3)) return;
       aplicarSaveRemoto(remote);
       showSyncBanner("Seu time foi atualizado em outro aparelho agora.");
     }, function () {

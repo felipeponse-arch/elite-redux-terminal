@@ -348,6 +348,23 @@
     };
   }
 
+  // Progresso da run (10/10/2026): o sync só olhava a data do último salvamento, e uma
+  // run nova e zerada criada depois, no PC, apagou a run adiantada do celular. Progresso =
+  // marco (settings.milestone) e, no mesmo marco, run confirmada (runConfirmedAt) vale mais
+  // que "Novo jogo" ainda sem confirmar. Não olha Pokémon do time/caixa: soltar um Pokémon
+  // de propósito não é perder a run. Duas runs no mesmo marco e as duas confirmadas não
+  // entram - nenhuma tem como ser dita "menos" que a outra.
+  function progressoDoSave(save) {
+    var s = save && save.settings;
+    var marco = s && typeof s.milestone === "number" && s.milestone > 0 ? s.milestone : 0;
+    return marco * 2 + (s && typeof s.runConfirmedAt === "string" ? 1 : 0);
+  }
+  // true: o save que está chegando tem MENOS progresso que o do aparelho (e o aparelho tem save).
+  function saveChegandoTemMenosProgresso(local, remoto) {
+    if (!local || !remoto) return false;
+    return progressoDoSave(remoto) < progressoDoSave(local);
+  }
+
   // Campos que NÃO contam como "o conteúdo mudou": versão/datas mudam a cada
   // gravação, e o log "O que o app fez sozinho" registra ações locais (se só
   // ele difere, não há nada pra oferecer ao jogador). Todo o resto conta - a

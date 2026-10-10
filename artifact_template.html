@@ -417,6 +417,13 @@
     <button id="run-setup-dismiss" type="button" aria-label="Lembrar na próxima abertura">&times;</button>
   </div>
 
+  <!-- Save que chegou de outro aparelho com menos progresso que o deste: pergunta antes de trocar. -->
+  <div id="progresso-banner" class="sync-banner" style="background:var(--sem-weak);" role="alert" hidden>
+    <span id="progresso-banner-text"></span>
+    <button id="progresso-banner-manter" type="button">Manter este aparelho</button>
+    <button id="progresso-banner-usar" type="button">Usar o que chegou</button>
+  </div>
+
   <div id="storage-banner" class="sync-banner" style="background:var(--sem-weak);" role="alert" hidden>
     <span id="storage-banner-text"></span>
     <button id="storage-banner-dismiss" type="button" aria-label="Dispensar">&times;</button>
