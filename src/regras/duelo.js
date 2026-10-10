@@ -1207,7 +1207,15 @@
       // próprio texto do jogo ("Sp. Atk", "Phys. moves", "vs. Steel").
       var frases = t.split(/(?<!\b(?:Sp|Phys|vs|Elec|Fight)\.)(?<=[.!])\s+(?=[A-Z])|\n/).filter(Boolean);
       // --- ofensivo: tipo do golpe e STAB ---
-      if ((x = t.match(/Normal(?:-type)? moves? becomes? (\w+)/i)) && tipoDoTextoDuelo(x[1])) { ef.ate = x[1]; ef.ateMult = 1.1; ef.converte.Normal = { para: x[1], mult: 1.1 }; }
+      // "Normal moves become X. X moves are empowered." (Aerilate, Pixilate, Refrigerate, Galvanize...): o golpe
+      // convertido vale x1,3, igual aos golpes naturais de X (a tabela de golpes empoderados). Medido na calculadora
+      // do próprio jogo (10/10/2026): o Mega Punch do Ledian mostra 78%-93% do Ninetales, que só fecha com x1,3
+      // (com x1,1 o motor dava 72%; com STAB x1,5 daria 98%+). As sem "empowered" no texto (Steelworker, Tectonize,
+      // Pollinate) seguem com x1,1: sem medida do jogo para elas.
+      if ((x = t.match(/Normal(?:-type)? moves? becomes? (\w+)/i)) && tipoDoTextoDuelo(x[1])) {
+        var empoderado = new RegExp(x[1] + " moves are empowered", "i").test(t) ? 1.3 : 1.1;
+        ef.ate = x[1]; ef.ateMult = empoderado; ef.converte.Normal = { para: x[1], mult: empoderado };
+      }
       var reConv = /(\w+)-type moves become (\w+)(?: and get a ([\d.]+)x boost)?/gi;
       while ((m = reConv.exec(t))) { if (m[1] !== "Normal" && tipoDoTextoDuelo(m[1]) && tipoDoTextoDuelo(m[2])) ef.converte[m[1]] = { para: m[2], mult: m[3] ? parseFloat(m[3]) : 1 }; }
       if (/Increases STAB from 1\.5x to 2x/i.test(t)) ef.stabMult = 2;

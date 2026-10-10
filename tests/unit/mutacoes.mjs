@@ -2232,4 +2232,11 @@ export const MUTACOES = [
     de: "if ((x = t.match(/(\\w+) moves hits? twice, both hits at (\\d+)% power/i)) && tipoDoTextoDuelo(x[1])) maxEm(ef.bonusTipo, x[1], 2 * parseInt(x[2], 10) / 100);",
     para: "",
   },
+  {
+    id: "ate-empoderado-1-3",
+    descricao: "Aerilate e parecidas voltam a valer x1,1 no golpe convertido (o jogo mostra x1,3)",
+    arquivo: "duelo.js",
+    de: "var empoderado = new RegExp(x[1] + \" moves are empowered\", \"i\").test(t) ? 1.3 : 1.1;",
+    para: "var empoderado = 1.1;",
+  },
 ];
