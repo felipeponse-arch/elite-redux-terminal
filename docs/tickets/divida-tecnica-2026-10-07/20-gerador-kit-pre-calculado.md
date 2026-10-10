@@ -14,3 +14,5 @@ Projetar duas vezes (codebase-design, design-it-twice) o caminho espécie → ki
 
 ## Comentários
 Origem: pedido de 07/10 de revisar o gerador de builds (kit de habilidades, golpes, EVs, item, natureza, Mega) com skills do repositório.
+
+- 10/10 (usuário): o desenho do ticket parte de `docs/pipeline_de_build.md`. Hit-kill vale em 2 níveis (1 golpe é o melhor, 2 golpes é o segundo), medido contra o próximo chefão da Etapa; kit = uma das 3 habilidades + as inatas. Caso de prova: espécie com Coil Up + Flaming Jaws + Hyper Aggressive deve sair com Fire Fang.

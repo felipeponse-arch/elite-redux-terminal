@@ -1,0 +1,48 @@
+# Pipeline de build com intenção (rascunho de 10/10/2026)
+
+Origem: relato do usuário. O app sugeriu Fire Lash para um Pokémon que tem Coil Up, Flaming Jaws e Hyper Aggressive; o certo seria Fire Fang, porque a sinergia de habilidade com inata faz o golpe valer mais. Além disso, o usuário quer builds que **batem primeiro e derrubam o Pokémon do chefão** (prioridade ou mais velocidade, com hit-kill).
+
+Este pipeline é o desenho do ticket `divida-tecnica-2026-10-07/20-gerador-kit-pre-calculado.md` (espécie → kit → candidatos → build validada). Os tickets 17, 18 e 19 continuam como estão.
+
+## Decisões do usuário (10/10/2026)
+- **Hit-kill, com ordem:** melhor = bate primeiro (golpe com prioridade ou Pokémon mais rápido) e **um golpe** derruba o Pokémon do chefão; segundo = bate primeiro e derruba em **2 golpes**. Quem mata em 1 sobe no ranking.
+- **Alvo da simulação:** o **próximo chefão da Etapa** (primeiro Pokémon e o ás).
+- Usar o kit completo: **uma das 3 habilidades + as inatas** (innates).
+- Nunca mudar regra ou dado existente sem permissão. Nenhuma mecânica nova entra no motor sem pergunta.
+
+## As fases
+1. **Kit (código, sem IA).** Espécie com as 3 habilidades e as inatas, golpes e itens liberados na Etapa e no Level cap, Mega da Etapa. Já existe em `blocoEspecieIA` e `blocoMovepoolIA` (`src/regras/prompts_ia.js`).
+2. **Sinergias (código, tabela).** Marca o que muda um golpe: prioridade condicional (Coil Up em mordida), efeito extra (Flaming Jaws: 50% de queimar em mordida), golpe duplo (Hyper Aggressive), bônus de tipo ou de golpe. Fonte: o registro de efeitos de habilidades do motor (`docs/tickets/divida-tecnica-2026-10-07/08-registro-de-efeitos-expandir.md`) e o código oficial do jogo (er-repo).
+3. **Candidatos (código).** Monta de 3 a 5 conjuntos de 4 golpes, priorizando sinergia, prioridade e cobertura, e simula cada um no duelo contra o próximo chefão (`resultadoDoDuelo`, `confrontoDuelo`). Marca o hit-kill (1 golpe ou 2 golpes) e quem bate primeiro.
+4. **Decisão (IA).** A IA só escolhe entre os candidatos e define EVs, item e natureza. É mais barato e erra menos que pedir a build do zero.
+5. **Validação (código).** O que já existe: `validateAiBuild`, avisos de build, `gravacao`.
+6. **Juízes.** `meta-pokemon` e `playtester-de-build` avaliam uma amostra; `supervisor` fecha (Gauntlet Loop).
+
+## Dois casos de prova (o pipeline tem que servir aos dois)
+**Caso A, sinergia do kit: Centiskorch.** Coil Up (habilidade escolhida) + Flaming Jaws e Hyper Aggressive (inatas). A build deve sair com Fire Fang (aprendido no nível 1; é mordida), não com Fire Lash (nível 24, não é mordida). A Coil Up dá +1 de prioridade UMA vez, ao primeiro golpe de mordida depois de entrar.
+
+**Caso B, matar um alvo no primeiro turno: o Ninetales (Fogo/Fantasma) da luta em dupla da Meteor Falls (você + May contra a dupla da Equipe Magma, Shiftry e Ninetales, nível 55).** Dado pelo usuário: Charcoal, Modest, HP 162, Atk 94, Def 104, SpA 171, SpD 132, Spe 166; habilidades Drought, Pyromancy, Flash Fire e Queenly Majesty. Pergunta: numa run mono Inseto, que build derruba esse Ninetales no turno 1?
+Restrições que o pipeline precisa enxergar sozinho:
+- **Queenly Majesty bloqueia golpe de prioridade**: a prioridade da Coil Up (e Fake Out) não vale contra ele. O "bater primeiro" tem que vir de velocidade (ele tem 166).
+- **Drought (sol)** reforça o Fogo e enfraquece a Água; **Flash Fire** absorve Fogo.
+- Fogo/Fantasma: golpe de Inseto causa 0,25x. O dano vem de cobertura (Pedra, Terra, Fantasma ou Sombrio, 2x).
+- Em dupla, o parceiro pode ajudar (a tratar depois: o motor 1x1 não simula dupla com aliado).
+Diferença entre os casos: no A a pergunta é "qual a melhor jogada deste Pokémon?"; no B é "qual Pokémon e golpe resolvem este alvo?". O passo 3 (candidatos + simulação) é comum; muda de onde parte (do Pokémon ou do alvo).
+
+## Achados de 10/10 que mudam o pipeline
+1. **Passo novo, fixo: calibrar contra a calculadora do jogo.** O motor errava (Raging Boxer valia x2,8; Aerilate x1,1 em vez de x1,3). Hoje a calculadora do jogo (formato Smogon, EVs reais, Life Orb, clima, faixa 85%-100%, só o 1º golpe) é a referência: `tests/unit/calibracao_calculadora_do_jogo.test.mjs`. Todo golpe/habilidade novo que o pipeline passar a usar se confere contra um número do jogo antes de confiar em "mata no turno 1".
+2. **Caso B resolvido no motor (Ninetales da Meteor Falls):** o Ledian (Mega Punch: Aerilate + Iron Fist + Raging Boxer) dá 109%-130% do HP dele num golpe, velocidade 189 contra 166. Não depende de prioridade (a Queenly Majesty bloqueia; agora o 1x1 também aplica). O que o impede na luta real é o Fake Out do Shiftry (prioridade +3), que o motor 1x1 não enxerga: a dupla é limite conhecido.
+3. **Motor protótipo do passo 3 já existe e é rápido:** 54 espécies de Inseto x todos os golpes x 5 itens em 7 segundos (script de 10/10 no scratchpad; reaproveitar como base do protótipo do ticket 20).
+4. **Erro meu a não repetir:** Mach Punch (Lutador) "imune" ao Ninetales era imunidade de tipo (Fantasma), não da Queenly Majesty. Antes de atribuir uma imunidade a habilidade, descartar o tipo.
+5. **Pendente no motor:** Insect Impact ~10% acima da calculadora (BP 80 e Iron Fist conferem); Sand Guard e Sun Basking ("bloqueia prioridade" no clima) sem medida.
+
+## Lacuna de dados achada
+A luta em dupla da Meteor Falls não está no app como o usuário a vê: `bosses.json` tem só "Courtney Meteor Falls" (Ninetales, Alakazam, Charizard), com o mesmo Ninetales (Drought, Charcoal, Modest, 4 HP/252 SpA/252 Spe, Dazzling Gleam, Heat Wave, Ominous Wind, Flame Burst). O Shiftry e a May não aparecem em nenhum lugar de `bosses.json`. Incluir a luta em dupla seria dado novo: perguntar antes.
+
+## O que falta decidir (perguntar ao usuário antes de implementar)
+- Como a tabela de sinergias é mantida (a mão, ou lida do registro de efeitos).
+- Se a simulação do passo 3 roda no clique ou fica pré-calculada.
+- Custo: a medir no protótipo (ticket 20).
+
+## Skills que apoiam
+`grilling` (sabatina), `codebase-design` e `prototype` (desenho e protótipo descartável), `tdd` (implementação), `sentry-skills:find-bugs` (17), `claude-api` (18), `sentry-skills:prompt-optimizer` (19), `importar-builds-discord` (builds da comunidade para comparar).
