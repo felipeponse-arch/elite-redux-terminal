@@ -2239,4 +2239,18 @@ export const MUTACOES = [
     de: "var empoderado = new RegExp(x[1] + \" moves are empowered\", \"i\").test(t) ? 1.3 : 1.1;",
     para: "var empoderado = 1.1;",
   },
+  {
+    id: "prioridade-1x1-bloqueio-some",
+    descricao: "Queenly Majesty, Dazzling e Armor Tail deixam de bloquear golpe de prioridade no duelo 1x1",
+    arquivo: "duelo.js",
+    de: "if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade && (atq.golpesProntos || []).some(function (g) { return g.prio > 0; })) {",
+    para: "if (false) {",
+  },
+  {
+    id: "prioridade-1x1-ignora-mold-breaker",
+    descricao: "o bloqueio de prioridade passa a valer também contra Mold Breaker e parecidos",
+    arquivo: "duelo.js",
+    de: "if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade &&",
+    para: "if (def.ef.bloqueiaPrioLado &&",
+  },
 ];

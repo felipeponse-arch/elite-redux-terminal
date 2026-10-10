@@ -26,5 +26,5 @@ Ledian nível 55 (Jolly, EVs 84/172/252, Life Orb) contra o Ninetales: jogo x mo
 
 ### Pendências
 - Insect Impact: ~10% acima da calculadora; BP conferido (80). Investigar só se outro dado do jogo apontar o mesmo desvio em golpe de soco.
-- Queenly Majesty no duelo 1x1: a calculadora do jogo já mostra "imune" a golpe de prioridade; o motor 1x1 não aplica (só a simulação em dupla).
+- (feito, 10/10, com o ok do usuário) Queenly Majesty/Dazzling/Armor Tail no duelo 1x1: golpe de prioridade não acerta o dono. CORREÇÃO DE ERRO: o "---" do Mach Punch na calculadora do jogo era imunidade de TIPO (Lutador x Fantasma), não prova da Queenly Majesty; a prova é o Beatdown do Accelgor acertando o Ninetales no motor.
 - Fake Out do Shiftry (prioridade +3) faz o Ledian recuar antes de agir: o motor 1x1 não vê dupla.

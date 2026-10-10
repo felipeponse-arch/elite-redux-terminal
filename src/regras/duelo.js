@@ -1639,6 +1639,12 @@
     if (def.ef.bloqueiaArea && (atq.golpesProntos || []).some(emAreaDuelo)) {
       atq = Object.assign({}, atq, { golpesProntos: atq.golpesProntos.filter(function (g) { return !emAreaDuelo(g); }) });
     }
+    // Queenly Majesty, Dazzling e Armor Tail: o dono é imune a golpe de prioridade (no 1x1 só o próprio dono conta;
+    // o aliado entra na simulação em dupla). Mold Breaker e parecidos ignoram. O Beatdown do Accelgor (Sombrio, +1)
+    // acertava o Ninetales da Meteor Falls, que tem Queenly Majesty (10/10/2026).
+    if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade && (atq.golpesProntos || []).some(function (g) { return g.prio > 0; })) {
+      atq = Object.assign({}, atq, { golpesProntos: atq.golpesProntos.filter(function (g) { return !(g.prio > 0); }) });
+    }
     var melhor = { dano: 0, prio: 0, golpe: null }, melhorPrio = { dano: 0 }, segundo = { dano: 0 }, candidatos = [];
     var semBonus = def.ef.bloqueiaBonus && !atq.ef.quebraHabilidade;
     var amuleto = atq.it && atq.it.imuneQuedas; // Clear Amulet
