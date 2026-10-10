@@ -1277,9 +1277,15 @@
         var mult = y ? (/%/.test(y[0]) ? 1 + parseInt(y[1], 10) / 100 : parseFloat(y[1])) : 1;
         if (/moves (?:use (?:Special Attack|SpAtk)|become special)/i.test(f)) cats.forEach(function (c) { ef.categoriaEspecial[c] = true; maxEm(ef.bonusCategoria, c, mult); });
         if (/moves target Special Defense/i.test(f)) cats.forEach(function (c) { ef.categoriaNaSpDef[c] = true; maxEm(ef.bonusCategoria, c, mult); });
-        var dois = f.match(/moves hit twice(?:\. 2nd hit does ([\d.]+)x damage| for (\d+)% damage)?/i);
-        if (dois) {
-          var total = dois[1] ? 1 + parseFloat(dois[1]) : dois[2] ? 2 * parseInt(dois[2], 10) / 100 : 2;
+        // Golpe duplo da categoria (10/10/2026): o total é a soma dos dois golpes. O texto vem em 4 formas:
+        // "2nd hit does 0.4x damage", "1st hit at 100% power, 2nd hit at 40%", "for 70% damage" (os dois a 70%)
+        // e "both hits at 70% power". Antes só as duas primeiras de tamanho conhecido eram lidas e a Raging
+        // Boxer caía no padrão x2, somado ao x1,4 de baixo: soco saía x2,8 (o jogo mostra o 1º golpe a 78%-93%).
+        if (/moves hits? twice/i.test(f)) {
+          var y2, total = 2;
+          if ((y2 = f.match(/2nd hit does ([\d.]+)x damage/i))) total = 1 + parseFloat(y2[1]);
+          else if ((y2 = f.match(/2nd hit at (\d+)%/i))) total = 1 + parseInt(y2[1], 10) / 100;
+          else if ((y2 = f.match(/for (\d+)% damage/i)) || (y2 = f.match(/both hits at (\d+)% power/i))) total = 2 * parseInt(y2[1], 10) / 100;
           cats.forEach(function (c) { maxEm(ef.categoriaExtra, c, total); });
         }
       });
@@ -1295,9 +1301,14 @@
       if (/Normal\/Fighting can hit Ghosts/i.test(t)) { (ef.contraTipo.Normal = ef.contraTipo.Normal || {}).Ghost = 1; (ef.contraTipo.Fighting = ef.contraTipo.Fighting || {}).Ghost = 1; }
       if (/Hits Fairies with Dragon moves/i.test(t)) (ef.contraTipo.Dragon = ef.contraTipo.Dragon || {}).Fairy = 1;
       // --- acertos e precisão ---
-      if ((x = t.match(/hit twice\. (?:1st hit at 100% power, )?2nd hit (?:at|does) (\d+)%/i)) || (x = t.match(/Second hit does (\d+)% damage/i))) {
+      // Só "Moves hit twice" (todos os golpes: Parental Bond, Hyper Aggressive). "Punching moves hit twice"
+      // (Raging Boxer) é de uma categoria e já entra em categoriaExtra acima: sem esta guarda o x1,4 valia
+      // para todos os golpes do Pokémon (10/10/2026).
+      if (/(?:^|\.\s)Moves hit twice/.test(t) && ((x = t.match(/hit twice\. (?:1st hit at 100% power, )?2nd hit (?:at|does) (\d+)%/i)) || (x = t.match(/Second hit does (\d+)% damage/i)))) {
         ef.golpeExtra = Math.max(ef.golpeExtra, 1 + parseInt(x[1], 10) / 100);
       }
+      // Golpe de um tipo que bate duas vezes (Raging Moth: Fogo, os dois golpes a 70% = x1,4).
+      if ((x = t.match(/(\w+) moves hits? twice, both hits at (\d+)% power/i)) && tipoDoTextoDuelo(x[1])) maxEm(ef.bonusTipo, x[1], 2 * parseInt(x[2], 10) / 100);
       // Multi-Headed (código oficial, battle_util.c GetParentalBondMultiplier): duas cabeças
       // = 2 golpes, o 2º a 25%; três = 100% + 20% + 15%. As cabeças vêm do dado (sp.cab,
       // stats.flags F_TWO/THREE_HEADED); antes era um chute de 1,5 pra todos (2026-10-02).

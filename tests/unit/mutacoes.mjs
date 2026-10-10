@@ -2211,4 +2211,25 @@ export const MUTACOES = [
     de: "return progressoDoSave(remoto) < progressoDoSave(local);",
     para: "return progressoDoSave(remoto) > progressoDoSave(local);",
   },
+  {
+    id: "golpe-duplo-2o-golpe-a-40",
+    descricao: "o texto '1st hit at 100% power, 2nd hit at 40%' deixa de ser lido e a Raging Boxer volta a valer x2 nos socos",
+    arquivo: "duelo.js",
+    de: "else if ((y2 = f.match(/2nd hit at (\\d+)%/i))) total = 1 + parseInt(y2[1], 10) / 100;",
+    para: "",
+  },
+  {
+    id: "golpe-duplo-escopo-todos",
+    descricao: "o golpe duplo de uma categoria (Raging Boxer) volta a valer para todos os golpes do Pokémon",
+    arquivo: "duelo.js",
+    de: "/(?:^|\\.\\s)Moves hit twice/.test(t) && ",
+    para: "",
+  },
+  {
+    id: "golpe-duplo-tipo-fogo",
+    descricao: "o golpe duplo por tipo (Raging Moth: Fogo) deixa de ser lido",
+    arquivo: "duelo.js",
+    de: "if ((x = t.match(/(\\w+) moves hits? twice, both hits at (\\d+)% power/i)) && tipoDoTextoDuelo(x[1])) maxEm(ef.bonusTipo, x[1], 2 * parseInt(x[2], 10) / 100);",
+    para: "",
+  },
 ];
