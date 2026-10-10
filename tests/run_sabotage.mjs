@@ -47,7 +47,10 @@ if (MUDADOS) {
     ...git(["ls-files", "--others", "--exclude-standard"]).split("\n"),
   ].filter(Boolean).map((f) => f.replace(/\\/g, "/")));
   const nomes = new Set([...mudados].map((f) => f.split("/").pop()));
-  MUTACOES = MUTACOES.filter((m) => nomes.has(m.arquivo) || mudados.has(cache[m.id]) || !cache[m.id]);
+  // Sabotagem sem cache só entra se é NOVA nesta mudança (id nas linhas acrescentadas de mutacoes.mjs); sem
+  // essa regra, as sem cache rodavam a suíte inteira cada uma e a rodada passava de 30 min (10/10).
+  const novas = new Set([...git(["diff", base || "master", "--", "tests/unit/mutacoes.mjs"]).matchAll(/^\+.*\bid: "([^"]+)"/gm)].map((x) => x[1]));
+  MUTACOES = MUTACOES.filter((m) => nomes.has(m.arquivo) || mudados.has(cache[m.id]) || (!cache[m.id] && novas.has(m.id)));
   console.log(`--mudados: ${mudados.size} arquivo(s) mudado(s) desde o master -> ${MUTACOES.length} sabotagem(ns)`);
 }
 const AO_MESMO_TEMPO = Math.max(2, Math.floor(cpus().length / 2));
