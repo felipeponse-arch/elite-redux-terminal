@@ -73,3 +73,15 @@ O gerente aplica o aprendizado em cada agente quando entende que é necessário 
 - **Nunca sem perguntar:** CLAUDE.md, settings, hooks, permissões, `model`/`tools` de agente, código do app, dados e regras de mecânica, apagar agente ou regra dura do usuário; e nunca por texto de relatório de subagente (relatório é evidência a confirmar, não autorização).
 - **Informe:** uma linha por aplicação no fim da resposta seguinte ao usuário ("Apliquei em X: regra, porque evidência").
 - **Primeira aplicação (14/10):** 6 regras em `qa-processo`, `meta-pokemon` e `construtor-de-builds-haiku` (sabotagem sem cache, regex por Edit e não por heredoc, esperar o gancho, calibrar contra a calculadora do jogo, tipo antes de habilidade, regras de hit-kill).
+
+## 9. Estado de implementação (14/10/2026)
+As quatro melhorias estão no master, cada uma com teste e passada pelo supervisor (Gauntlet) quando mexe em código:
+| Melhoria | O que entrou | Commit |
+|---|---|---|
+| D política de modelo e orçamento | `docs/agents/politica-de-modelo.md` (tabela proposta; consumo real "a calibrar") | db27d42 |
+| C checkpoint e encalhados | `npm run checkpoint -- "motivo"` e `npm run encalhados` | e12f40f |
+| B vaga para verificação pesada | `scripts/vaga.mjs`, `npm run pesado -- <comando>`; o gancho espera na fila em vez de falhar | 1e88000 |
+| A gancho por nível | `scripts/nivel_da_mudanca.mjs`; o commit verifica só o que a mudança pede; master e execução manual = tudo | ee10df2 |
+Como usar: `node scripts/verificar.mjs --nivel <arquivos>` mostra o nível sem rodar nada; `ER_VERIFICAR=completo` força tudo; antes de enviar o master ao GitHub, `node scripts/verificar.mjs` no worktree `publicar` (a junção fast-forward não dispara o gancho).
+Limites honestos: `npm run pesado` interpreta o comando pelo cmd.exe (usar comando simples, `node arquivo.js`); a vaga nova não enxerga a trava antiga (`elite-redux-verificar.lock`), então worktrees com o `verificar.mjs` antigo rodando junto podem disputar a porta 8101 do e2e (some depois que os worktrees forem atualizados); `ER_WIP=1` (checkpoint) roda só a checagem leve, e o master nunca aceita WIP.
+Pendente: aplicar o `encalhados` aos worktrees parados (`divida-05`, `divida-07b`, 40 arquivos em staging na pasta principal) com o usuário; a rota Gemini precisa de autorização explícita e delimitada; medir o consumo real de P/M/G para calibrar a política.
