@@ -350,11 +350,12 @@ test("Psychic Terrain zera a prioridade do alvo no motor: com Tapu Lele (Psychic
 });
 
 test("Indeedee: só quem arma o Psychic Terrain (habilidade Psychic Surge) escapa da prioridade do alvo", () => {
-  const r = R.candidatosDeBuild(sp("Indeedee"), { alvo: ninetales });
-  assert.ok(r.candidatos.some((c) => c.habilidade !== "Psychic Surge" && c.alvoAgeAntes === true), "o contraste: sem o terreno o Flame Burst vale");
+  // "Indeedee Female" é a forma que tem a habilidade Psychic Surge (o macho não tem: o filtro ficaria vazio e o teste não provaria nada).
+  const r = R.candidatosDeBuild(sp("Indeedee Female"), { alvo: ninetales });
+  assert.ok(r.candidatos.some((c) => c.habilidade === "Psychic Surge"), "premissa: a Indeedee Female tem candidato com Psychic Surge");
   r.candidatos.filter((c) => c.habilidade === "Psychic Surge").forEach((c) => assert.equal(c.alvoAgeAntes, false));
   // A mesma conta pelo motor: o Flame Burst do Ninetales tem prioridade efetiva 0 contra um atacante com Psychic Surge.
-  const indeedee = sp("Indeedee");
+  const indeedee = sp("Indeedee Female");
   const u = R.unidadeDaBuild(indeedee, { ability: "Psychic Surge", nature: "Modest", evs: [0, 0, 0, 252, 0, 252], item: "", moves: ["Psychic"] }, 55, "sol");
   const foe = R.foeDeDuelo(courtney.party[0], 55, "sol");
   const burst = foe.golpesProntos.find((g) => g.nome === "Flame Burst");

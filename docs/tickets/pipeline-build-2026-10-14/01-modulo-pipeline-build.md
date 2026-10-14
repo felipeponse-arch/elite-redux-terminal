@@ -19,7 +19,7 @@ Ranking (decisão do usuário): hit-kill de 1 golpe e bate primeiro > hit-kill d
 - [x] Caso B (Ledian x Ninetales da Meteor Falls): Mega Punch, hitKill 1, bate primeiro por velocidade, mas "estimada" com o aviso "O alvo age antes com Flame Burst (+1 de prioridade) e derruba Ledian antes de ele agir". Accelgor/Beatdown e Steelix/Coil Up não ganham "bate primeiro" por prioridade.
 - [x] Rótulo "calibrada" só por caso conferido (`CASOS_CALIBRADOS`: Ledian + Aerodynamics + Mega Punch ou Aerial Ace contra o Ninetales), sem prioridade do alvo que o atacante não supere e sem fuga no Intimidate. "Derruba no turno 1" só com `calibrada` e `garantido` (dano mínimo da rolagem já derruba); senão "Provável derrubar" com a faixa.
 - [x] Todo candidato passa em `validateAiBuild`; determinismo; não muta `state`; sem exceção por falta de dado (lista vazia sempre traz o motivo em `aviso` e `avisos`).
-- [x] Tempo: ~40 ms por espécie em média, no máximo ~140 ms (limite era ~2 s).
+- [x] Tempo: ~50 ms por espécie em média, no máximo ~230 ms medido com 3 processos em paralelo (limite era ~2 s).
 - [x] 39 testes em `tests/unit/pipeline_build.test.mjs`; 26 sabotagens `pipeline-*` em `tests/unit/mutacoes.mjs`, todas pegas.
 
 ## Comentários
@@ -56,3 +56,5 @@ Ranking (decisão do usuário): hit-kill de 1 golpe e bate primeiro > hit-kill d
 (c) Voltar a "calibrada" ignorando o Flame Burst (`CONSIDERA_PRIORIDADE_DO_ALVO = false`).
 
 **P2. Levar a correção para o motor (duelo.js, regra de mecânica)?** Pontos que o módulo trata por conta própria porque o motor não trata: (1) Coil Up (prioridade condicional) contra Queenly Majesty na luta completa: o motor só bloqueia o golpe de prioridade de base; (2) Psychic Terrain contra a prioridade condicional; (3) Opportunist (`prioNoFinal`) dá prioridade ao golpe que decide, e o módulo só usa a prioridade condicional quando o golpe derruba de uma vez. Opções: (a) deixar no módulo; (b) corrigir no motor e o módulo passa a reusar.
+
+- 14/10 (rodada 3 do supervisor-opus, APROVADO): pendências não bloqueantes: (a) Dragalge Mega leva Dragapultite e Meowstic Mega leva Meowscaradite como primeira pedra porque é o que data/mega_forms.json mapeia no dado do jogo (o aviso cita as duas pedras); (b) P1 e P2 seguem com o usuário (linhas acima).
