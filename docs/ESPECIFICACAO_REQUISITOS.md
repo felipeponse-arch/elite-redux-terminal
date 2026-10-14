@@ -8,7 +8,7 @@ aqui antes de ser considerada "pronta", como parte do rito de publicação.
 Convenção de escrita dos requisitos funcionais, conforme o material: `[Sistema] deve permitir que
 [ator] [ação]`.
 
-**Estado deste documento (2026-10-08):** descreve o app como está no `master` (commit `abf2b8a`), com os
+**Estado deste documento (2026-10-14, acréscimos RF115 a RF117, RNF29 e RN25 sobre a base de 2026-10-08):** descreve o app como está no `master` (commit `abf2b8a`), com os
 dados do jogo na versão 2.65beta (dado de 28/03/2026). A versão 2.65.4 do NextDex ainda não entrou no
 `master` e não é descrita aqui (decisão do usuário de 07/10, linha "Versão do jogo" em
 `docs/decisoes_mecanicas.md`).
@@ -719,6 +719,47 @@ nova entra no motor sem consultar e registrar lá.
   condição garantida, nature que reduz o atributo usado por todos os golpes, Black Sludge fora de Poison,
   atacante sem STAB e cura com Heal Block ativo; ela mantém o golpe-chave que o simulador provou. Item
   repetido: no máximo 2 membros do time com o mesmo item (RF63, decisão de 2026-09-29).
+- RF115 — **Sync não apaga run adiantada** [estende RF33 e RF34 e RNF22] (**implementado e publicado, v176**,
+  ticket `sync-2026-10-10/01`, commit 15231e2): o Terminal deve impedir que um save que chega de outro
+  aparelho com MENOS progresso troque o do aparelho sozinho. Progresso = a Etapa da run; na mesma Etapa, a
+  run confirmada vale mais que o Novo jogo sem confirmar (`saveChegandoTemMenosProgresso`, `src/regras/save.js`).
+  Nesse caso o Terminal mostra um aviso (`src/ui/sync.js`, na carga inicial e na atualização ao vivo) com
+  "Manter este aparelho" (grava o local de novo) ou "Usar o que chegou" (aplica o remoto). Limite: duas runs
+  na mesma Etapa e as duas confirmadas não entram na regra; soltar Pokémon não conta como perda. Origem: o
+  save adiantado do celular foi trocado por uma run zerada do PC. Teste: `tests/unit/sync_progresso.test.mjs`.
+- RNF29 — **Fidelidade do motor à calculadora de dano do jogo** [estende RNF08 e RF107] (**implementado;
+  publicado até a v177**, tickets `golpe-duplo-2026-10-10/01`; commits bc492eb, e2c0045, 56fc7ba): o dano do
+  duelo 1x1 deve cair dentro da faixa da calculadora do próprio jogo (formato Smogon, EVs reais, Life Orb,
+  clima, faixa de 85% a 100%, só o 1º golpe), que é a referência de calibração. Correções que saíram dela:
+  Raging Boxer x1,4 só nos socos (valia x2,8) e Raging Moth passa a valer; golpe convertido por Aerilate e
+  parecidas vale x1,3 (era x1,1). Teste: `tests/unit/calibracao_calculadora_do_jogo.test.mjs`. Todo golpe ou
+  habilidade novo que o duelo passe a usar deve ser conferido contra um número do jogo antes de confiar nele.
+  Desvio conhecido: Insect Impact ~10% acima da calculadora (causa desconhecida, sem efeito grande).
+- RF116 — **Pipeline de build com intenção** [estende RF21 a RF30 e RF114] (**planejado/decidido; fases 1 e 2
+  já existem no motor, ainda sem tela**; desenho em `docs/pipeline_de_build.md`): o Terminal deve montar, por
+  código e antes da IA, de 3 a 5 Candidatos de build (4 golpes e a habilidade) com o motivo de cada um,
+  simulá-los no duelo e marcar o hit-kill em 2 níveis: derruba em 1 golpe e bate primeiro é o melhor; derruba
+  em 2 golpes e bate primeiro é o segundo. "Bate primeiro" = golpe de prioridade ou mais Velocidade; a
+  prioridade não vale contra Queenly Majesty, Dazzling e Armor Tail. O alvo padrão é o próximo líder de
+  ginásio da Etapa, com a opção de escolher outro chefão. A tela mostra o motivo curto de cada Build e o
+  selo "calibrada" ou "estimada" (o rótulo "mata no turno 1" só sai com número conferido na calculadora do
+  jogo, RNF29). A IA só escolhe entre os candidatos e define EVs, item e natureza; a validação e a gravação
+  continuam as de RF114. Já existe no master: `sinergiasDaEspecie` (`src/regras/duelo.js`) devolve as
+  sinergias da espécie com `motivos`, usado nos prompts e na reconciliação da Build. Não existe ainda:
+  `src/regras/pipeline_build.js`, a ligação do botão e do lote e o motivo e o selo na tela. Decisões do
+  usuário de 10/10 e 14/10.
+- RF117 — **Proposta inicial por ponte OmniRoute opcional** [estende RF114 e RNF13] (**implementado, no
+  master, ainda não publicado; inerte sem host**, commits 842d6bd e 753f0cb): o cliente de IA só usa uma
+  ponte alternativa quando o host injeta `window.__ER_OMNIROUTE_BRIDGE__` com o modelo exatamente
+  `antigravity/gemini-3.1-pro-high` (`src/ui/ia.js`); o Artifact não contém chave, segredo nem rota fixa; se
+  a ponte falhar, usa `sample` como antes; a resposta de qualquer fornecedor passa pela mesma validação e
+  gravação local. O desenho do construtor em cascata (`docs/agents/construtor-de-builds-cascata.md`) ainda
+  não está no master.
+- RN25 — **Limite honesto do duelo** [estende RF107]: o duelo do Terminal é 1x1. Luta em dupla, o parceiro e
+  o Fake Out do adversário (prioridade +3, que faz o atacante recuar antes de agir) não são simulados; um
+  "derruba no turno 1" é válido só no 1x1 e o app não deve apresentá-lo como certeza numa luta em dupla
+  (caso da Meteor Falls: o Ledian derruba o Ninetales no 1x1, mas o Fake Out do Shiftry o impede na luta
+  real). A luta em dupla da Meteor Falls nem está em `data/bosses.json`; incluí-la seria dado novo (perguntar).
 - RN24 — **Auto-evolução sem duplicata** [estende RN15]: a auto-evolução nunca cria duas cópias da mesma
   espécie no elenco; a segunda fica sem evoluir, com o motivo no log "O que o app fez sozinho".
 

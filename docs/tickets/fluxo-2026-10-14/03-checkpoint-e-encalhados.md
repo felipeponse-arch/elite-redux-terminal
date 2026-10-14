@@ -1,6 +1,6 @@
 # 03 — Checkpoint do trabalho parado e lista de encalhados (melhoria C)
 
-Status: parcial (código pronto; depende da melhoria A para o nível leve)
+Status: feito
 Bloqueado por: A (gancho por nível) só para o `ER_WIP` ficar leve; o resto funciona já
 
 ## O que entrega
@@ -22,3 +22,4 @@ Incluir no prompt de todo agente de nível 1: "antes de parar, rode `npm run che
 
 ## Comentários
 - Alerta "à frente do master" dispara em todo ticket em andamento, por pedido; serve de lembrete para juntar ou descartar.
+- 14/10: a melhoria A (gancho por nível, ER_WIP leve) entrou no master em ee10df2; o critério pendente está atendido.

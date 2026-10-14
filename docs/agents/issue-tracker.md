@@ -38,4 +38,4 @@ Várias sessões usando a mesma pasta quebraram os commits em 06/10. Por isso ca
    `node_modules` real), depois `git worktree remove` e `git branch -d ticket/NN`.
 7. Marcar `Status: resolvido` no ticket, no master.
 
-Um ticket por vez (sem agentes em paralelo, decisão de 07/10, por economia de uso). Publicar uma vez quando o grupo de tickets fechar.
+Até 2 agentes em paralelo, em arquivos que não se cruzam, um worktree por ticket (decisão de 07/10 à noite, reafirmada em 14/10); fora disso, um ticket por vez. Publicar uma vez quando o grupo de tickets fechar.

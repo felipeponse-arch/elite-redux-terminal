@@ -87,3 +87,21 @@ _Avoid_: inobtível, sem rank
 
 **Marca**:
 Aviso sobre uma espécie que não altera a Nota, como "precisa de setter" ou "concorrência no tipo".
+
+## Duelo e builds com intenção
+
+**Hit-kill**:
+Golpe ou sequência de golpes que derruba o Pokémon do chefão antes de ele agir. Tem dois níveis: "1 golpe" (um só golpe derruba; é o melhor) e "2 golpes" (dois golpes derrubam; é o segundo). Só conta junto com Bate primeiro. No duelo 1x1 do app; dupla não é simulada.
+_Avoid_: OHKO, one-shot, mata no turno 1 (sem número conferido)
+
+**Bate primeiro**:
+O Pokémon da Build age antes do Pokémon do chefão: por golpe de prioridade ou por ter mais Velocidade. A prioridade não vale contra quem a bloqueia (Queenly Majesty, Dazzling, Armor Tail).
+_Avoid_: first strike, speed tie
+
+**Candidato de build**:
+Um conjunto de quatro golpes e a habilidade, montado por código para uma espécie, com o motivo curto que o justifica (sinergia, prioridade, cobertura) e o resultado do Hit-kill contra o alvo. A IA só escolhe entre Candidatos; ainda não aparece na tela.
+_Avoid_: opção de build, sugestão
+
+**Calibração**:
+Conferir o dano do motor do app contra a calculadora de dano do próprio jogo (EVs reais, Life Orb, clima, faixa de 85% a 100%, só o 1º golpe). Um dado calibrado tem número do jogo que o confirma; sem ele é estimado.
+_Avoid_: ajuste, tuning

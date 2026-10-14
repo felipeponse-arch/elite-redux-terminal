@@ -29,7 +29,7 @@ Nem tanto (depois, ou quando incomodar)
 - 11 ESLint 10: P, risco baixo.
 - 16 prompts da IA: M, risco baixo, a-avaliar.
 
-## C. Ondas (uma sessão = um ticket ou 2-3 P; worktree por ticket; sem agentes em paralelo)
+## C. Ondas (uma sessão = um ticket ou 2-3 P; worktree por ticket; até 2 agentes em paralelo, em arquivos que não se cruzam)
 Em toda sessão: seguir docs/agents/issue-tracker.md (worktree, Status em-andamento/resolvido); pré-commit `npm run check --silent && node --test tests/unit/*.test.mjs && node tests/run_sabotage.mjs`; commitar só os próprios arquivos; rank só no ticket 10.
 Publicar uma vez ao fechar cada grupo: após Onda 4 (grupo run/rank), após Onda 6 (grupo interface), após Onda 10 (grupo motor).
 

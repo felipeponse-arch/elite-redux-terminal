@@ -1,6 +1,6 @@
 # 01 — A sincronização não apaga run adiantada com run zerada
 
-Status: feito (aguardando juntar no master)
+Status: feito (no master e publicado na v176)
 Bloqueado por: nenhum
 
 ## O que entrega
@@ -16,3 +16,4 @@ Quando chega de outro aparelho um save com MENOS progresso que o deste, o app n�
 Origem: relato do usuário em 10/10/2026. O save avançado do celular foi trocado pela run zerada do PC porque o sync só comparava `savedAt`; o celular também recebeu a run zerada e perdeu a dele. Decisão do usuário: "avisar antes de trocar".
 Limite conhecido: duas runs no mesmo marco e as duas confirmadas não entram na regra (nenhuma é "menos"). Soltar Pokémon do time ou da caixa não conta como perda de progresso.
 Não coberto por teste de navegador: o banner novo (3 botões/ids no template). Conferir no celular depois de publicar.
+- 14/10: no master (15231e2) e publicado na v176, antes da v177.
