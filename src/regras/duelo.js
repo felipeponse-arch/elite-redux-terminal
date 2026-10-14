@@ -372,7 +372,7 @@
     if ((x = f.match(/Does (\d+)% more damage if the target has any lowered stat/i))) ef.bonusContraReduzido = 1 + parseInt(x[1], 10) / 100;
     if ((x = f.match(/Raises Atk by ([\d.]+)x in (sun|rain|sand|hail|fog)/i)) && climaOk(x[2])) ef.atkMult *= parseFloat(x[1]);
     // Primeiro golpe da categoria com prioridade (Coil Up, Cutthroat, Sidewinder): vale no 1º golpe.
-    if ((x = f.match(/first ((?:Keen )?\w+) move[^.]*\+1 priority|\+1 priority once to the first (\w+) move/i))) categoriasDoTextoDuelo(x[1] || x[2]).forEach(function (c) { ef.prioCheioCategoria[c] = true; });
+    if ((x = f.match(/first ((?:Keen )?\w+) move[^.]*\+1 priority|\+1 priority once to the first (\w+) move/i))) categoriasDoTextoDuelo(x[1] || x[2]).forEach(function (c) { ef.prioPrimeiroCategoria[c] = true; });
   }
   // ---------- golpes extras, bloqueio e entrada (2026-09-29) ----------
   function poderDoGolpeDuelo(nome) { var id = MOVE_ID_BY_NAME[nome]; return id === undefined ? 0 : MOVES[id][3]; }
@@ -1094,7 +1094,7 @@
     }
     Object.keys(ef.bonusCategoria).forEach(function (cat) { if (ef.bonusCategoria[cat] > 1) add(cat, "bônus de poder"); });
     Object.keys(ef.categoriaExtra).forEach(function (cat) { add(cat, "golpe extra"); });
-    Object.keys(ef.prioCheioCategoria).forEach(function (cat) { add(cat, "prioridade no primeiro golpe"); });
+    Object.keys(ef.prioCheioCategoria).concat(Object.keys(ef.prioPrimeiroCategoria)).forEach(function (cat) { add(cat, "prioridade no primeiro golpe"); });
     Object.keys(ef.categoriaEspecial).forEach(function (cat) { add(cat, "golpe especial"); });
     Object.keys(ef.categoriaNaSpDef).forEach(function (cat) { add(cat, "alvo na Defesa Especial"); });
     ef.statusAtaque.forEach(function (a) { add(a.filtro && a.filtro.cat, motivoDoStatusSinergia(a)); });
@@ -1173,7 +1173,7 @@
       critSuperEf: false, critContraStatus: [], critPrimeiroTurno: false, critMult: 1.5, critVsResistido: 1,
       critSangra: false, imuneCritico: false, critRecebido: 1,
       statusProprio: [], ultimoMult: 1, critUltimo: 0, antesReducao: 0, prioNoFinal: false,
-      prioCheioCategoria: {}, prioCheioSom: false, teraShell: false, reviveHP: 0, curaStatus: 0,
+      prioCheioCategoria: {}, prioPrimeiroCategoria: {}, prioCheioSom: false, teraShell: false, reviveHP: 0, curaStatus: 0,
       estagioEntrada: {}, download: false, aoApanhar: [], aoApanharAtacante: [], porTurno: {}, aoGolpear: [],
       aoSerReduzido: {}, imuneQuedas: {}, ignoraEstagios: false, estagioMult: 1, ruina: {}, berserk: false,
       bonusContraReduzido: 1,
@@ -1554,8 +1554,9 @@
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
       var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF", fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: temContatoDuelo(m), som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
+        prioPrimeiro: cats.some(function (c) { return u.ef.prioPrimeiroCategoria[c]; }), // 1º uso (Coil Up...): o estado é gasto no fim do turno
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
-          cats.some(function (c) { return u.ef.prioCheioCategoria[c]; }),
+          cats.some(function (c) { return u.ef.prioCheioCategoria[c] || u.ef.prioPrimeiroCategoria[c]; }),
         precisao: Math.max(m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, u.ef.precisaoGolpe[m[0]] || 0), forcaBase: base, forca: base * hab };
       g.area = extra && extra.al ? extra.al : null; // dupla: ambos/todos/aleatorio
       g.efeito = extra && extra.ef ? extra.ef : ""; // efeito do golpe no dado (Fake Out, Hex, Eruption, Knock Off...)
@@ -1601,7 +1602,7 @@
     // Poda: por (tipo, categoria, contato) fica só o mais forte - e o melhor de prioridade.
     var melhores = {}, prio = null;
     lista.forEach(function (g) {
-      var k = g.tipo + g.cat + g.contato + g.prioCheio;
+      var k = g.tipo + g.cat + g.contato + g.prioCheio + g.prioPrimeiro;
       if (!melhores[k] || melhores[k].forca * melhores[k].precisao < g.forca * g.precisao) melhores[k] = g;
       if (g.prio > 0 && (!prio || prio.forca < g.forca)) prio = g;
     });
@@ -1725,7 +1726,7 @@
       if (terreno && TIPO_DO_TERRENO_DUELO[terreno] === g.tipo && terreno !== "nevoa" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
       if (terreno === "nevoa" && g.tipo === "Fairy" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
       if (terreno === "nevoa" && g.tipo === "Dragon" && aterradoDuelo(def)) noCampo *= 0.5;
-      if (terreno === "psiquico" && prioAqui > 0 && aterradoDuelo(def)) prioAqui = 0; // Psychic Terrain barra prioridade
+      if (terreno === "psiquico" && prioAqui > 0 && aterradoDuelo(def)) return; // Psychic Terrain: o golpe com prioridade falha inteiro (CANCELLER_PSYCHIC_TERRAIN)
       if (def.ef.barraPrioridade && prioAqui > 0) prioAqui = 0; // Surprise! na névoa
       if (abreDef && def.ef.sempreResiste && efTipo > 0.5) efTipo = 0.5; // Color Change, Soothsayer
       var fisico = g.cat === "F", defF = g.defNaDef || (fisico && !g.defEspecial);
@@ -1866,12 +1867,32 @@
     if (def.ef.barraPrioridade) return true; // Surprise! na névoa
     return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === "psiquico" && aterradoDuelo(def)); // Psychic Terrain protege quem está no chão
   }
-  function temPrioridadeNoDuelo(u, dano, golpesParaVencer, def) {
+  // Barrada de verdade = o golpe FALHA inteiro (decisão de 14/10/2026): Queenly Majesty/Dazzling/Armor Tail (Mold Breaker
+  // atravessa; abilities.cc onImmune) e Psychic Terrain com o alvo no chão (battle_util.c CANCELLER_PSYCHIC_TERRAIN).
+  // A Surprise! fica de fora: no jogo ela Astonisha antes do golpe, o motor só zera a prioridade (aproximação antiga).
+  function prioFalhaDuelo(atq, def) {
+    if (!def || !def.ef) return false;
+    if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade) return true;
+    return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === "psiquico" && aterradoDuelo(def)); // o golpe cancelado pelo terreno falha
+  }
+  // O 1º golpe com prioridade condicional (Coil Up, Sidewinder, Cutthroat, Edgelord: g.prioPrimeiro; On the Prowl: qualquer
+  // golpe no 1º turno) falha contra quem barra: é um turno perdido (o estado só é gasto no fim do turno). As de "HP cheio"
+  // (Gale Wings, Blitz Boxer...) só falham se o golpe sai com o HP ainda cheio: `saiPrimeiro` = quem usa age antes no 1º turno.
+  function turnoPerdidoPorPrioridadeDuelo(u, dano, falha, hpCheio, saiPrimeiro) {
+    var g = dano.melhor.golpe;
+    if (!falha || !g) return false;
+    if (u.ef.prioridadeNoPrimeiro || g.prioPrimeiro) return true;
+    return !!g.prioCheio && hpCheio && saiPrimeiro;
+  }
+  // `opp` (opcional): { turno, ateMetade } - o turno em que a ordem importa e quantos golpes ele leva para pôr o alvo na
+  // metade do HP; o Opportunist só dá prioridade nesse turno se o alvo já estiver lá (turno - 1 >= ateMetade). Sem `opp`
+  // vale a regra antiga: o golpe que decide (2º em diante) acha o alvo abaixo da metade.
+  function temPrioridadeNoDuelo(u, dano, golpesParaVencer, def, opp) {
     if (dano.melhor.prio > 0) return true;
     if (prioCondicionalBarradaDuelo(u, def)) return false;
     var g = dano.melhor.golpe;
-    // Opportunist: o golpe que decide (2º em diante) acha o alvo abaixo da metade.
-    if (u.ef.prioNoFinal && golpesParaVencer >= 2) return true;
+    // Opportunist (abilities.cc: alvo com HP <= metade do máximo).
+    if (u.ef.prioNoFinal && (opp ? opp.turno - 1 >= opp.ateMetade : golpesParaVencer >= 2)) return true;
     return golpesParaVencer === 1 && (u.ef.prioridadeNoPrimeiro || !!(g && g.prioCheio));
   }
 
@@ -2376,22 +2397,46 @@
     // Focus Sash/Sturdy: só com HP cheio.
     if (fracFoe >= 1 && aguentaUmGolpe(foe, eu)) { if (euPreciso === 1) euPreciso = 2; if (comPrio === 1) comPrio = 2; }
     if (fracEu >= 1 && aguentaUmGolpe(eu, foe) && elePrecisa === 1) elePrecisa = 2;
+    // Golpe com prioridade barrada FALHA inteiro (decisão de 14/10/2026; abilities.cc Queenly Majesty onImmune e
+    // battle_util.c CANCELLER_PSYCHIC_TERRAIN): Opportunist dá +1 a QUALQUER golpe com o alvo na metade do HP ou menos,
+    // então contra esses bloqueios só derruba quem o faz com um único golpe dado acima da metade.
+    var falhaEu = prioFalhaDuelo(eu, foe), falhaEle = prioFalhaDuelo(foe, eu);
+    var golpesQueEntramEu = Infinity, golpesQueEntramEle = Infinity; // quantos golpes do Opportunist ainda acertam antes de o alvo passar da metade
+    if (falhaEu && eu.ef.prioNoFinal) {
+      if (!(euPreciso === 1 && hpFoe > foe.stats[0] / 2)) euPreciso = comPrio = Infinity;
+      golpesQueEntramEu = hpFoe <= foe.stats[0] / 2 ? 0 : golpesNecessariosDuelo(hpFoe - foe.stats[0] / 2, st.meu);
+    }
+    if (falhaEle && foe.ef.prioNoFinal) {
+      if (!(elePrecisa === 1 && hpEu > eu.stats[0] / 2)) elePrecisa = Infinity;
+      golpesQueEntramEle = hpEu <= eu.stats[0] / 2 ? 0 : golpesNecessariosDuelo(hpEu - eu.stats[0] / 2, st.dele);
+    }
     // Disguise/Ice Face: o primeiro golpe não faz nada.
     if (elePrecisa !== Infinity) elePrecisa += bloqueiosNoDuelo(eu, foe, dele);
     if (euPreciso !== Infinity) { var bq = bloqueiosNoDuelo(foe, eu, meu); euPreciso += bq; comPrio += bq; }
-    var prioDele = temPrioridadeNoDuelo(foe, dele, elePrecisa, eu);
+    // Prioridade condicional barrada no 1º uso (Coil Up, Sidewinder, Cutthroat, Edgelord, On the Prowl: o estado é gasto
+    // no fim do turno, battle_util.c ENDTURN_COILED_UP; "no HP cheio" - Gale Wings e parecidas - só se o golpe sai com
+    // o HP ainda cheio, isto é, se quem usa age antes no 1º turno): o primeiro golpe falha e é um turno perdido.
+    var prio1Dele = dele.melhor.prio > 0 || temPrioridadeNoDuelo(foe, dele, 1, eu), prio1Meu = meu.melhor.prio > 0 || temPrioridadeNoDuelo(eu, meu, 1, foe);
+    var perdiTurno = 0, eleperdeuTurno = 0; // o golpe que falhou conta como turno gasto, mas não acerta
+    if (euPreciso !== Infinity && turnoPerdidoPorPrioridadeDuelo(eu, meu, falhaEu, fracEu >= 1, prio1Dele ? v1 > v2 : true)) { euPreciso += 1; comPrio += 1; perdiTurno = 1; }
+    if (elePrecisa !== Infinity && turnoPerdidoPorPrioridadeDuelo(foe, dele, falhaEle, fracFoe >= 1, prio1Meu ? v2 > v1 : true)) { elePrecisa += 1; eleperdeuTurno = 1; }
+    // Opportunist: a prioridade vale no turno em que o alvo já está na metade; o que importa é o turno em que a luta se decide.
+    var turnoCritico = Math.min(euPreciso, elePrecisa);
+    var meiaFoe = hpFoe <= foe.stats[0] / 2 ? 0 : golpesNecessariosDuelo(hpFoe - foe.stats[0] / 2, st.meu);
+    var meiaEu = hpEu <= eu.stats[0] / 2 ? 0 : golpesNecessariosDuelo(hpEu - eu.stats[0] / 2, st.dele);
+    var prioDele = temPrioridadeNoDuelo(foe, dele, elePrecisa, eu, { turno: turnoCritico, ateMetade: meiaEu });
     var nec = euPreciso, euPrimeiro;
     if (comPrio <= elePrecisa && !prioDele) { nec = Math.min(euPreciso, comPrio); euPrimeiro = true; }
-    else if (temPrioridadeNoDuelo(eu, meu, euPreciso, foe) && !prioDele) euPrimeiro = true;
+    else if (temPrioridadeNoDuelo(eu, meu, euPreciso, foe, { turno: turnoCritico, ateMetade: meiaFoe }) && !prioDele) euPrimeiro = true;
     else if (prioDele && !(meu.melhor.prio > 0)) euPrimeiro = false;
     else euPrimeiro = v1 > v2 ? true : v1 < v2 ? false : null;
     var porPrioridade = (comPrio <= elePrecisa && !prioDele) || meu.melhor.prio > 0 || prioDele;
     // Corrida: turnos que cada lado precisa (com atraso de plano) - quem age antes leva um golpe a menos.
     function corridaCrua(nE, nD, primeiro, dM, dD, hpE, hpF, atrasoE) {
       if (nE === Infinity && nD === Infinity) return { nota: 0.5, venceu: null, restoEu: hpE, restoFoe: hpF, n: TURNOS_MAX_STATUS };
-      if (nE < nD || (nE === nD && primeiro)) return { nota: 1, venceu: true, restoEu: hpE - (primeiro ? Math.ceil(nE) - 1 : Math.ceil(nE)) * dD, restoFoe: 0, n: nE };
+      if (nE < nD || (nE === nD && primeiro)) return { nota: 1, venceu: true, restoEu: hpE - Math.max(0, Math.min(primeiro ? Math.ceil(nE) - 1 : Math.ceil(nE), golpesQueEntramEle) - eleperdeuTurno) * dD, restoFoe: 0, n: nE };
       if (nE === nD && primeiro === null) return { nota: 0.5, venceu: null, restoEu: hpE - (nE - 0.5) * dD, restoFoe: hpF - (nE - 0.5) * dM, n: nE };
-      var meus = Math.max(0, (primeiro ? nD : nD - 1) - (atrasoE || 0)); // turnos gastos no plano não batem
+      var meus = Math.max(0, Math.min(golpesQueEntramEu, Math.max(0, (primeiro ? nD : nD - 1) - (atrasoE || 0))) - perdiTurno); // turnos gastos no plano não batem
       return { nota: 0.5 * Math.min(1, (meus * dM) / hpF), venceu: false, restoEu: 0, restoFoe: hpF - meus * dM, n: nD };
     }
     function comFim(r) {
