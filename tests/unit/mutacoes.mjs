@@ -2416,6 +2416,13 @@ export const MUTACOES = [
     para: "return true; }).reduce(",
   },
   {
+    id: "pipeline-prioridade-do-alvo-ignora-sturdy-do-atacante",
+    descricao: "o Sturdy do atacante (Glalie) deixa de contar nos golpes que o alvo precisa para derrubá-lo",
+    arquivo: "pipeline_build.js",
+    de: "if (k === 1 && aguentaUmGolpe(unit, foe)) k = 2;",
+    para: "",
+  },
+  {
     id: "pipeline-prioridade-do-alvo-so-ko-em-1-golpe",
     descricao: "só o golpe do alvo que derruba o atacante em 1 golpe tira o 'bate primeiro' (o hit-kill de 2 golpes volta a ignorar o Flame Burst)",
     arquivo: "pipeline_build.js",

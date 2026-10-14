@@ -118,9 +118,10 @@
       // zeram a do dado (duelo.js, danoNoDuelo: prioAqui). A condicional (prioCheio) só entra em golpe sem prioridade no dado.
       var prio = r.meu.melhor.prio > 0 ? r.meu.melhor.prio : (!(gp.prio > 0) && gp.prioCheio ? 1 : 0);
       if (dano > 0 && prio > 0) {
-        // Quantos golpes DESTE golpe de prioridade o alvo precisa para derrubar o atacante (Focus Sash/Sturdy do atacante contam, como no lado dele).
+        // Quantos golpes DESTE golpe de prioridade o alvo precisa para derrubar o atacante (no módulo o atacante tem `item: ""`, então só vale o Sturdy, habilidade que aguenta um golpe; o item não entra na simulação. Caso real: Glalie, Sturdy inato, x Ninetales da Meteor Falls.)
         var k = golpesNecessariosDuelo(r.hpFoe, dano);
         if (k === 1 && aguentaUmGolpe(unit, foe)) k = 2;
+        
         lista.push({ nome: gp.nome, prio: prio, fracEu: r.hpFoe > 0 ? dano / r.hpFoe : 0, golpes: k });
       }
     });

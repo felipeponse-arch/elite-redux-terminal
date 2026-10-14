@@ -130,6 +130,17 @@ test("prioridade IGUAL à do golpe do alvo que o derruba: quem tem mais Velocida
   rapido.forEach((c) => { assert.equal(c.baterPrimeiro, true, c.golpes.join("/")); assert.equal(c.porQue, "velocidade"); });
 });
 
+test("Sturdy do atacante (Glalie, inato) x Ninetales: o Flame Burst o derrubaria em 1 golpe, mas o Sturdy o leva a 2 e ele segue batendo primeiro (nível 3)", () => {
+  const glalie = sp("Glalie");
+  const r = R.candidatosDeBuild(glalie, { alvo: ninetales });
+  const c = r.candidatos.find((x) => x.hitKill === 1 && x.golpes.includes("Head Smash") && x.golpes.includes("Seismic Slam"));
+  assert.ok(c, r.candidatos.map((x) => x.habilidade + ":" + x.golpes.join("/")).join(" ; "));
+  assert.equal(c.baterPrimeiro, true);
+  assert.equal(c.porQue, "velocidade");
+  assert.equal(tier(c), 3);
+  assert.equal(c.alvoAgeAntes, true, "o aviso segue: o alvo age antes com prioridade");
+});
+
 test("ranking do caso B: contra o Flame Burst do Ninetales nenhum candidato do Ledian é nível 3 ou 2 (cai no resto do ranking)", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales });
   assert.ok(r.candidatos.every((x) => tier(x) === 1), "contra o Flame Burst do Ninetales nenhum Ledian é nível 3 ou 2");
