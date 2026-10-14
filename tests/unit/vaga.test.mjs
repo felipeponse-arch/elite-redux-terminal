@@ -4,12 +4,22 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readdirSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const VAGA = pathToFileURL(fileURLToPath(new URL("../../scripts/vaga.mjs", import.meta.url))).href;
+
+// Espera o arquivo da fila do processo existir (sincronia sem relógio).
+async function esperaFila(pasta, pid, ms = 8000) {
+  const marca = "-" + String(pid).padStart(8, "0") + "-";
+  const t0 = Date.now();
+  while (!readdirSync(pasta).some((f) => f.includes(".fila.") && f.includes(marca))) {
+    if (Date.now() - t0 > ms) throw new Error("fila de " + pid + " não apareceu");
+    await new Promise((r) => setTimeout(r, 20));
+  }
+}
 
 // Filho: pede a vaga "pesada", imprime ENTROU, segura SEGURA ms, imprime SAIU.
 // Com FILHO=1 ainda roda um neto que pede a vaga de novo (reentrância).
@@ -138,7 +148,7 @@ test("vaga: ordem de chegada com 3 processos", async () => {
     await a.esperaLinha("ENTROU A");
     // B e C chegam em ordem, com folga entre eles para a fila registrar a chegada
     const b = rodar(pasta, "B", { SEGURA: "100" });
-    await new Promise((r) => setTimeout(r, 500));
+    await esperaFila(pasta, b.f.pid);
     const c = rodar(pasta, "C", { SEGURA: "100" });
     const rs = await Promise.all([a.fim, b.fim, c.fim]);
     for (const r of rs) assert.equal(r.codigo, 0, r.saida);
@@ -147,5 +157,91 @@ test("vaga: ordem de chegada com 3 processos", async () => {
     assert.deepEqual(todas.filter((l) => l.startsWith("ENTROU")), ["ENTROU A", "ENTROU B", "ENTROU C"]);
     // sem sobreposição: cada SAIU vem antes do próximo ENTROU
     assert.deepEqual(todas, ["ENTROU A", "SAIU A", "ENTROU B", "SAIU B", "ENTROU C", "SAIU C"]);
+  } finally { rmSync(pasta, { recursive: true, force: true }); }
+});
+
+test("vaga: dono vazio e velho (queda entre criar e gravar) é abandonado, não trava", async () => {
+  const pasta = pastaTemp();
+  try {
+    const arq = join(pasta, "pesada.dono");
+    writeFileSync(arq, "");
+    const velho = new Date(Date.now() - 60000);
+    utimesSync(arq, velho, velho);
+    const r = await rodar(pasta, "B", { SEGURA: "0", ESPERA_MAX: "4000" }).fim;
+    assert.equal(r.codigo, 0, r.saida);
+    assert.ok(r.linhas.includes("ENTROU B"));
+  } finally { rmSync(pasta, { recursive: true, force: true }); }
+});
+
+test("vaga: ER_VAGA_DONO de pid vivo que NÃO é o dono real não pula a fila", async () => {
+  const pasta = pastaTemp();
+  try {
+    const a = rodar(pasta, "A", { SEGURA: "700" });
+    await a.esperaLinha("ENTROU A");
+    // process.pid (deste teste) está vivo, mas não é o dono gravado; mesmo com token chutado
+    const b = rodar(pasta, "B", { SEGURA: "0", ER_VAGA_DONO: String(process.pid), ER_VAGA_TOKEN: "chute" });
+    await Promise.all([a.fim, b.fim]);
+    const ordem = cronologia.filter((l) => /^(ENTROU|SAIU)/.test(l));
+    assert.deepEqual(ordem, ["ENTROU A", "SAIU A", "ENTROU B", "SAIU B"]);
+  } finally { rmSync(pasta, { recursive: true, force: true }); }
+});
+
+test("vaga: pid certo com token errado (reuso de pid) não pula a fila", async () => {
+  const pasta = pastaTemp();
+  try {
+    const a = rodar(pasta, "A", { SEGURA: "700" });
+    await a.esperaLinha("ENTROU A");
+    const b = rodar(pasta, "B", { SEGURA: "0", ER_VAGA_DONO: String(a.f.pid), ER_VAGA_TOKEN: "errado" });
+    await Promise.all([a.fim, b.fim]);
+    const ordem = cronologia.filter((l) => /^(ENTROU|SAIU)/.test(l));
+    assert.deepEqual(ordem, ["ENTROU A", "SAIU A", "ENTROU B", "SAIU B"]);
+  } finally { rmSync(pasta, { recursive: true, force: true }); }
+});
+
+test("vaga: desistente (estourou o limite) não trava quem está atrás", async () => {
+  const pasta = pastaTemp();
+  try {
+    const a = rodar(pasta, "A", { SEGURA: "1200" });
+    await a.esperaLinha("ENTROU A");
+    const b = rodar(pasta, "B", { SEGURA: "0", ESPERA_MAX: "300" });
+    await esperaFila(pasta, b.f.pid);
+    const c = rodar(pasta, "C", { SEGURA: "0" });
+    const [, rb, rc] = await Promise.all([a.fim, b.fim, c.fim]);
+    assert.equal(rb.codigo, 3);
+    assert.equal(rc.codigo, 0, rc.saida);
+    const ordem = cronologia.filter((l) => /^(ENTROU|SAIU)/.test(l));
+    assert.deepEqual(ordem, ["ENTROU A", "SAIU A", "ENTROU C", "SAIU C"]);
+  } finally { rmSync(pasta, { recursive: true, force: true }); }
+});
+
+test("vaga: processo da fila que morre (kill) não trava quem está atrás", async () => {
+  const pasta = pastaTemp();
+  try {
+    const a = rodar(pasta, "A", { SEGURA: "1200" });
+    await a.esperaLinha("ENTROU A");
+    const b = rodar(pasta, "B", { SEGURA: "0" });
+    await esperaFila(pasta, b.f.pid);
+    const c = rodar(pasta, "C", { SEGURA: "0" });
+    await esperaFila(pasta, c.f.pid);
+    b.f.kill("SIGKILL");
+    const [, , rc] = await Promise.all([a.fim, b.fim, c.fim]);
+    assert.equal(rc.codigo, 0, rc.saida);
+    assert.ok(!cronologia.includes("ENTROU B"));
+    assert.ok(cronologia.includes("ENTROU C"));
+  } finally { rmSync(pasta, { recursive: true, force: true }); }
+});
+
+test("vaga: 5 processos simultâneos nunca se sobrepõem (exclusão mútua)", async () => {
+  const pasta = pastaTemp();
+  try {
+    const todos = ["A", "B", "C", "D", "E"].map((r) => rodar(pasta, r, { SEGURA: "120" }));
+    const rs = await Promise.all(todos.map((t) => t.fim));
+    for (const r of rs) assert.equal(r.codigo, 0, r.saida);
+    const ev = cronologia.filter((l) => /^(ENTROU|SAIU)/.test(l));
+    assert.equal(ev.length, 10);
+    for (let i = 0; i < ev.length; i += 2) {
+      assert.ok(ev[i].startsWith("ENTROU "), ev.join(","));
+      assert.equal(ev[i + 1], "SAIU " + ev[i].slice(7), ev.join(","));
+    }
   } finally { rmSync(pasta, { recursive: true, force: true }); }
 });

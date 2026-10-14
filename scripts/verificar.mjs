@@ -30,7 +30,8 @@ const ETAPAS = [
 // a porta 8101 dos testes é da máquina, e com reuseExistingServer uma sessão testa o build da
 // outra; na mesma pasta ainda apagam o test-results uma da outra. Antes a trava FALHAVA na
 // hora; agora a vaga "pesada" (scripts/vaga.mjs) faz fila e ESPERA, com pid do dono (morto =
-// libera). Os filhos herdam ER_VAGA_DONO e não pedem a vaga de novo (a sabotagem roda aqui dentro).
+// libera). NOTA p/ melhoria A: avaliar limpar variáveis GIT_* do ambiente dos passos filhos
+// (o gancho do git as herda); NÃO feito aqui. Os filhos herdam ER_VAGA_DONO e não pedem a vaga de novo (a sabotagem roda aqui dentro).
 try {
   await segurarVaga("pesada");
 } catch (e) {
