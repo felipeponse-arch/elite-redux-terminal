@@ -1,5 +1,37 @@
 [
   {
+    "date": "2026-10-10",
+    "items": [
+      "Ao sincronizar entre aparelhos, o app avisa antes de trocar um save com menos progresso (a run adiantada não é mais apagada)",
+      "Raging Boxer e Raging Moth passam a valer como no jogo (golpe duplo x1,4 no total, Boxer só nos socos)",
+      "Aerilate, Pixilate, Refrigerate, Galvanize e parecidas: o golpe convertido vale x1,3, conferido na calculadora do jogo",
+      "No duelo 1x1, Queenly Majesty, Dazzling e Armor Tail bloqueiam golpe de prioridade",
+      "Insect Impact conferido na tela do jogo (poder 80)"
+    ]
+  },
+  {
+    "date": "2026-10-08",
+    "items": [
+      "Solid Rock, Filter, Prism Armor e Primal Armor cortam o dano só em golpe super efetivo; a Dex e as telas mostram a efetividade real",
+      "Pacote inicial, pedras do Adoption Center e Floettite (só no pós-jogo) corrigidos; 2 builds novas dos vídeos (Garchomp Mega Redux e Wooly Worm)",
+      "Builds do Discord corrigidas: Kleavor Redux Mega, Aggron Redux Mega e Grotom Kick",
+      "Apagar uma Build agora tem Desfazer",
+      "Teclado e toque: golpe da tabela abre pelo teclado, toque sem atraso e 'Pular para o conteúdo' só aparece com o foco",
+      "Reticências (…) no lugar de três pontos nos textos do app"
+    ]
+  },
+  {
+    "date": "2026-10-07",
+    "items": [
+      "Chefões escolhem o golpe pela pontuação da IA do jogo, e 16 treinadores opcionais entram entre os chefões",
+      "Ficha da Dex com TOTAL, efetividade de tipos e botões anterior/próximo; tela do chefão com arte da equipe",
+      "Avisos de build e selo de confiança na Build; paleta Shiny (preto, ouro e rubi) e abas do celular sem rolar",
+      "Motor: Foul Play usa o Atk do alvo, Body Press a Def; Low Kick, Grass Knot e outros de poder variável valem pelo poder real",
+      "Fluffiest segue o código do jogo (contato x0,5, Fogo x2) e 11 Eviolites voltam aos chefões",
+      "Rank recalculado: a escolha do set agora avalia os 3 melhores candidatos, sem empate técnico"
+    ]
+  },
+  {
     "date": "2026-10-04",
     "items": [
       "Tela do chefe e card do plano mostram a regra de campo da luta (Trick Room e batalha invertida da Tate & Liza, Gravity do Steven) e o efeito dos 18 campeões monotype - esses últimos ainda não entram na simulação, e o app avisa",
