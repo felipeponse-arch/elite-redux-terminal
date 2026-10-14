@@ -67,6 +67,25 @@
   }
   var filaIA = Promise.resolve();
   var pedidosIAPendentes = 0;
+  // O Artifact não pode receber a chave do OmniRoute nem presumir acesso ao
+  // localhost do aparelho. Um host de desenvolvimento pode injetar este bridge
+  // sem segredo no HTML; ele deve expor apenas json(prompt, opcoes) e o modelo
+  // explícito. Sem bridge, o caminho oficial `sample` continua sendo usado.
+  var MODELO_OMNIROUTE_BUILD = "antigravity/gemini-3.1-pro-high";
+  function bridgeOmniRouteParaBuild() {
+    if (typeof window === "undefined") return null;
+    var bridge = window.__ER_OMNIROUTE_BRIDGE__;
+    if (!bridge || bridge.modelo !== MODELO_OMNIROUTE_BUILD || typeof bridge.json !== "function") return null;
+    return bridge;
+  }
+  function clienteDeIA(o, sample) {
+    var bridge = o && o.provedor === "omniroute" ? bridgeOmniRouteParaBuild() : null;
+    return bridge ? { cliente: bridge, nome: "OmniRoute/" + MODELO_OMNIROUTE_BUILD } : { cliente: sample, nome: "Claude" };
+  }
+  async function obterClienteSample() {
+    if (typeof claude === "undefined" || !claude.use) return null;
+    return await claude.use("sample");
+  }
   function esperarMs(ms) { return new Promise(function (ok) { setTimeout(ok, ms); }); }
   function pedirIA(o) {
     var aviso = o.aviso || function () {};
@@ -78,7 +97,7 @@
     return vez;
   }
   // Uma chamada ao modelo, com as novas tentativas de falha passageira.
-  async function chamarModelo(sample, prompt, opts, o, rotulo) {
+  async function chamarModelo(cliente, prompt, opts, o, rotulo) {
     var aviso = o.aviso || function () {};
     var pausas = o.pausasMs || PAUSAS_IA_MS;
     for (var i = 0; ; i++) {
@@ -87,7 +106,7 @@
       aviso(base);
       var relogio = setInterval(function () { aviso(base + " " + Math.round((Date.now() - inicio) / 1000) + " s"); }, 1000);
       try {
-        return await comTempoLimite(sample.json(prompt, opts));
+        return await comTempoLimite(cliente.json(prompt, opts));
       } catch (e) {
         if (i >= pausas.length || !erroIAPassageiro(e)) throw e;
         aviso("A IA está ocupada - tentando de novo em " + Math.round(pausas[i] / 1000) + " s…");
@@ -99,16 +118,34 @@
   }
   async function pedirIAAgora(o) {
     var oQue = o.oQue || "Geração";
-    if (typeof claude === "undefined" || !claude.use) return { ok: false, mensagem: oQue + " por IA não disponível neste ambiente." };
-    var sample = await claude.use("sample");
-    if (!sample) return { ok: false, mensagem: oQue + " por IA não disponível (recurso não concedido)." };
+    var bridge = o && o.provedor === "omniroute" ? bridgeOmniRouteParaBuild() : null;
+    var sample = null;
+    if (!bridge && (typeof claude === "undefined" || !claude.use)) return { ok: false, mensagem: oQue + " por IA não disponível neste ambiente." };
+    if (!bridge) sample = await obterClienteSample();
+    if (!bridge && !sample) return { ok: false, mensagem: oQue + " por IA não disponível (recurso não concedido)." };
+    var escolha = clienteDeIA(o, sample);
+    var cliente = escolha.cliente;
     var tentativas = o.tentativas || 2;
     var prompt = o.prompt;
     var ultimo = null;
     try {
       for (var t = 1; t <= tentativas; t++) {
-        var bruto = await chamarModelo(sample, prompt, o.ferramentas === false ? undefined : { tools: buildStandardAiTools() }, o,
-          t === 1 ? "Consultando o Claude…" : "A primeira sugestão não passou na validação - pedindo outra…");
+        var bruto;
+        try {
+          bruto = await chamarModelo(cliente, prompt, o.ferramentas === false ? undefined : { tools: buildStandardAiTools() }, o,
+            t === 1 ? "Consultando " + escolha.nome + "…" : "A primeira sugestão não passou na validação - pedindo outra…");
+        } catch (e) {
+          // O bridge alternativo é opcional: se cair, a chamada oficial assume
+          // o pedido inteiro, preservando a validação e a fila existentes.
+          if (cliente !== sample && o.fallback !== false) {
+            if (!sample) sample = await obterClienteSample();
+            if (!sample) throw e;
+            cliente = sample;
+            escolha = { cliente: sample, nome: "Claude" };
+            bruto = await chamarModelo(cliente, prompt, o.ferramentas === false ? undefined : { tools: buildStandardAiTools() }, o,
+              "OmniRoute indisponível - consultando o Claude…");
+          } else throw e;
+        }
         var r = o.validar ? o.validar(bruto) : { valor: bruto };
         if (r && !r.motivo) return { ok: true, valor: r.valor, bruto: bruto };
         // `motivo` vai pro modelo na nova tentativa; `motivoParaJogador` (se
@@ -184,6 +221,7 @@
       var resp = await pedirIA({
         prompt: montarPromptBuildsDoTime(members, optsLote),
         ferramentas: false,
+        provedor: "omniroute",
         tentativas: 1, // quem falhar vai pelo caminho individual (com a nova tentativa dele)
         oQue: "Builds do time",
         aviso: aviso,
@@ -249,6 +287,7 @@
       // segunda também falha o problema provavelmente não é azar.
       var resp = await pedirIA({
         prompt: montarPromptBuild(sp, opts),
+        provedor: "omniroute",
         ferramentas: false, // contexto já vai no prompt (blocoContextoIA): uma chamada só
         // Motivo técnico vai pro modelo na nova tentativa; o jogador vê a versão dele.
         validar: function (bruto) { return validarRespostaDeBuildDaIa(sp, bruto, opts); },

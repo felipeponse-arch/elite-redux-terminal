@@ -132,6 +132,7 @@ test("getAbilityMovepoolSynergy: repassa sinergiasDaEspecie, rotulando innate e 
     assert.equal(s.kind, hits[i].kind === "inn" ? "innate (sempre ativa)" : "escolhivel");
     assert.equal(s.categoria, hits[i].categoria);
     assert.deepEqual(plain(s.golpesReaisQueSeBeneficiam), plain(hits[i].golpes));
+    assert.deepEqual(plain(s.motivos), plain(hits[i].motivos || []));
     assert.ok(s.golpesReaisQueSeBeneficiam.length > 0);
   });
   assert.deepEqual(plain(R.aiTool_getAbilityMovepoolSynergy({ sname: "SPECIES_NAO_EXISTE" })), { synergies: [] });

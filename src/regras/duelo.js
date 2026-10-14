@@ -1078,21 +1078,47 @@
     return out;
   }
   var NOME_DA_CATEGORIA = { soco: "soco", mordida: "mordida", corte: "corte", pulso: "pulso/canhão", chifre: "chifre", chute: "chute", flecha: "flecha", martelo: "martelo" };
+  var NOME_DO_STATUS_SINERGIA = { queimar: "queimadura", envenenar: "envenenamento", paralisar: "paralisia", congelar: "congelamento", sangrar: "sangramento", recuar: "recuo", semente: "Leech Seed", confundir: "confusão" };
+  function motivoDoStatusSinergia(a) {
+    var sts = (a.st || []).map(function (s) { return NOME_DO_STATUS_SINERGIA[s] || s; });
+    return sts.length ? "efeito extra: " + sts.join("/ ") : "efeito extra";
+  }
+  // Deriva o motivo a partir do mesmo objeto de efeitos usado no duelo. Assim,
+  // uma categoria não aparece só porque foi encontrada: a saída explica se a
+  // habilidade aumenta poder, dá golpe extra, prioridade ou muda o alvo/efeito.
+  function motivosDasCategoriasDaHabilidade(id) {
+    var ef = efeitoDasHabilidadesNoDuelo([id], "CATEGORIAS_" + id, null), porCat = {};
+    function add(cat, motivo) {
+      if (!cat) return;
+      (porCat[cat] = porCat[cat] || []).push(motivo);
+    }
+    Object.keys(ef.bonusCategoria).forEach(function (cat) { if (ef.bonusCategoria[cat] > 1) add(cat, "bônus de poder"); });
+    Object.keys(ef.categoriaExtra).forEach(function (cat) { add(cat, "golpe extra"); });
+    Object.keys(ef.prioCheioCategoria).forEach(function (cat) { add(cat, "prioridade no primeiro golpe"); });
+    Object.keys(ef.categoriaEspecial).forEach(function (cat) { add(cat, "golpe especial"); });
+    Object.keys(ef.categoriaNaSpDef).forEach(function (cat) { add(cat, "alvo na Defesa Especial"); });
+    ef.statusAtaque.forEach(function (a) { add(a.filtro && a.filtro.cat, motivoDoStatusSinergia(a)); });
+    Object.keys(porCat).forEach(function (cat) { porCat[cat] = porCat[cat].filter(function (m, i, a) { return a.indexOf(m) === i; }); });
+    return porCat;
+  }
   function sinergiasDaEspecie(sp) {
     var lista = (ABILITY_SYNERGY[sp.sname] || []).slice();
     var inn = uniqueIds(sp.inn || []), esc = uniqueIds(sp.ab || []);
     var ids = uniqueIds(inn.concat(esc));
     var golpes = uniqueIds((sp.lm || []).map(function (p) { return p[1]; }).concat(sp.tu || []));
     ids.forEach(function (id) {
-      var nome = nomeHabDuelo(id);
-      var cats = categoriasDaHabilidade(id);
-      cats.forEach(function (cat) {
+      var nome = nomeHabDuelo(id), motivosPorCat = motivosDasCategoriasDaHabilidade(id);
+      Object.keys(motivosPorCat).forEach(function (cat) {
         var comCat = golpes.filter(function (g) { return categoriasDoGolpeDuelo(g).indexOf(cat) !== -1 && MOVES[g][3] > 0; })
           .map(function (g) { return MOVES[g][0]; });
         if (!comCat.length) return;
         var ja = lista.filter(function (h) { return h.name === nome; })[0];
-        if (ja) { ja.golpes = uniqueIds((ja.golpes || []).concat(comCat)); return; }
-        lista.push({ name: nome, kind: inn.indexOf(id) !== -1 ? "inn" : "ab", categoria: NOME_DA_CATEGORIA[cat] || cat, golpes: comCat });
+        if (ja) {
+          ja.golpes = uniqueIds((ja.golpes || []).concat(comCat));
+          ja.motivos = uniqueIds((ja.motivos || []).concat(motivosPorCat[cat]));
+          return;
+        }
+        lista.push({ name: nome, kind: inn.indexOf(id) !== -1 ? "inn" : "ab", categoria: NOME_DA_CATEGORIA[cat] || cat, golpes: comCat, motivos: motivosPorCat[cat].slice() });
       });
       // Serene Grace (dobra a chance) e Sheer Force (troca o efeito por força):
       // rendem nos golpes que têm efeito extra por chance.
@@ -1103,8 +1129,14 @@
         if (!e || !e.ch || !(MOVES[g][3] > 0)) return false;
         return efH.semEfeitoExtra ? temEfeitoExtraDuelo(e) : e.ch < 100 && !!(STATUS_DO_EFEITO_DUELO[e.ef] || e.ef === "Flinch Status");
       }).map(function (g) { return MOVES[g][0]; });
-      if (comEfeito.length && !lista.some(function (h) { return h.name === nome; })) {
-        lista.push({ name: nome, kind: inn.indexOf(id) !== -1 ? "inn" : "ab", categoria: "efeito extra", golpes: comEfeito });
+      if (comEfeito.length) {
+        var existente = lista.filter(function (h) { return h.name === nome; })[0];
+        if (existente) {
+          existente.golpes = uniqueIds((existente.golpes || []).concat(comEfeito));
+          existente.motivos = uniqueIds((existente.motivos || []).concat(["efeito extra"]));
+        } else {
+          lista.push({ name: nome, kind: inn.indexOf(id) !== -1 ? "inn" : "ab", categoria: "efeito extra", golpes: comEfeito, motivos: ["efeito extra"] });
+        }
       }
     });
     return lista;
@@ -1114,11 +1146,7 @@
   function temEfeitoExtraDuelo(e) { return !!e.ch && /Hit$|Fang$|Status$|Tri Attack/.test(e.ef) && !/ Up/.test(e.ef); }
   // Categorias que uma habilidade reforça, pelo texto (sem depender de espécie).
   function categoriasDaHabilidade(id) {
-    var ef = efeitoDasHabilidadesNoDuelo([id], "CATEGORIAS_" + id, null);
-    // + categorias que ganham status por chance (Solenoglyphs, Deep Cuts...).
-    return Object.keys(ef.bonusCategoria).concat(Object.keys(ef.categoriaExtra))
-      .concat(ef.statusAtaque.map(function (a) { return a.filtro.cat; }).filter(Boolean))
-      .filter(function (c, i, a) { return a.indexOf(c) === i; });
+    return Object.keys(motivosDasCategoriasDaHabilidade(id));
   }
   // `climaDaLuta` (2026-09-29, usuário: "no time temos um Poke que seta sol e no
   // mesmo time um que usa Solar Beam, logo a estratégia do time é feita"): o

@@ -83,7 +83,8 @@
           ability: h.name,
           kind: h.kind === "inn" ? "innate (sempre ativa)" : "escolhivel",
           categoria: h.categoria,
-          golpesReaisQueSeBeneficiam: h.golpes
+          golpesReaisQueSeBeneficiam: h.golpes,
+          motivos: h.motivos || []
         };
       })
     };

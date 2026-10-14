@@ -985,8 +985,8 @@ export const MUTACOES = [
     id: "sinergia-sem-categoria",
     descricao: "a sinergia da espécie ignora as categorias do NextDex",
     arquivo: "duelo.js",
-    de: "      var cats = categoriasDaHabilidade(id);\n",
-    para: "      var cats = [];\n",
+    de: "      var nome = nomeHabDuelo(id), motivosPorCat = motivosDasCategoriasDaHabilidade(id);\n",
+    para: "      var nome = nomeHabDuelo(id), motivosPorCat = {};\n",
   },
   {
     id: "duelo-ignora-status",

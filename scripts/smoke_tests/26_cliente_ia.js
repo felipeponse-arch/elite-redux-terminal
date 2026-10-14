@@ -99,8 +99,33 @@ async function section26() {
     chamadas = simular([new TypeError("bug do app"), { n: 1 }]);
     r = await TE.pedirIA({ prompt: "P" });
     check("erro sem code (bug do app) não é tratado como passageiro: 1 chamada só", chamadas.length === 1 && !r.ok, chamadas.length);
+
+    // OmniRoute é uma ponte opcional do host: não expõe segredo no Artifact,
+    // exige o modelo explícito e só entra quando o pedido marca o fornecedor.
+    let omniChamadas = 0;
+    let sampleChamadas = 0;
+    window.claude = { use: async () => ({ json: async () => { sampleChamadas++; return { n: "claude" }; } }) };
+    window.__ER_OMNIROUTE_BRIDGE__ = {
+      modelo: "antigravity/gemini-3.1-pro-high",
+      json: async function (prompt) { omniChamadas++; return { n: prompt === "OMNI" ? "omni" : "erro" }; }
+    };
+    r = await TE.pedirIA({ provedor: "omniroute", prompt: "OMNI", tentativas: 1 });
+    check("bridge OmniRoute usa o modelo explícito sem consumir sample", r.ok && r.valor.n === "omni" && omniChamadas === 1 && sampleChamadas === 0,
+      { r: r, omniChamadas: omniChamadas, sampleChamadas: sampleChamadas });
+
+    const bridgeFalha = new Error("bridge indisponível");
+    window.__ER_OMNIROUTE_BRIDGE__.json = async function () { omniChamadas++; throw bridgeFalha; };
+    r = await TE.pedirIA({ provedor: "omniroute", prompt: "FALLBACK", tentativas: 1 });
+    check("falha do bridge carrega sample sob demanda e faz fallback", r.ok && r.valor.n === "claude" && sampleChamadas === 1,
+      { r: r, omniChamadas: omniChamadas, sampleChamadas: sampleChamadas });
+
+    window.__ER_OMNIROUTE_BRIDGE__.modelo = "auto/qualquer";
+    r = await TE.pedirIA({ provedor: "omniroute", prompt: "MODELO INVALIDO", tentativas: 1 });
+    check("modelo não explícito não ativa o bridge", r.ok && r.valor.n === "claude" && sampleChamadas === 2, r);
+    delete window.__ER_OMNIROUTE_BRIDGE__;
   } finally {
     TE.definirPausasIA([4000, 10000]);
     if (claudeAntes === undefined) delete window.claude; else window.claude = claudeAntes;
+    delete window.__ER_OMNIROUTE_BRIDGE__;
   }
 }

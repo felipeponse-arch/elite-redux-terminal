@@ -556,7 +556,7 @@
     var sin = sinergiasDaEspecie(sp);
     linhas.push(sin.length
       ? "Sinergia habilidade x golpe CONFIRMADA no movepool real: " + sin.map(function (h) {
-        return h.name + (h.kind === "inn" ? " (innate)" : " (escolhivel)") + " reforca " + (h.golpes || []).join(", ");
+        return h.name + (h.kind === "inn" ? " (innate)" : " (escolhivel)") + " reforca " + (h.categoria || "") + " por " + (h.motivos || []).join(" e ") + ": " + (h.golpes || []).join(", ");
       }).join("; ") + "."
       : "Sinergia habilidade x golpe confirmada: nenhuma.");
     var combos = typeof CONDITION_MOVE_SYNERGY !== "undefined" ? (CONDITION_MOVE_SYNERGY[sp.sname] || []) : [];

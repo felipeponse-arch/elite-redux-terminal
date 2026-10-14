@@ -14,9 +14,12 @@ Este pipeline é o desenho do ticket `divida-tecnica-2026-10-07/20-gerador-kit-p
 1. **Kit (código, sem IA).** Espécie com as 3 habilidades e as inatas, golpes e itens liberados na Etapa e no Level cap, Mega da Etapa. Já existe em `blocoEspecieIA` e `blocoMovepoolIA` (`src/regras/prompts_ia.js`).
 2. **Sinergias (código, tabela).** Marca o que muda um golpe: prioridade condicional (Coil Up em mordida), efeito extra (Flaming Jaws: 50% de queimar em mordida), golpe duplo (Hyper Aggressive), bônus de tipo ou de golpe. Fonte: o registro de efeitos de habilidades do motor (`docs/tickets/divida-tecnica-2026-10-07/08-registro-de-efeitos-expandir.md`) e o código oficial do jogo (er-repo).
 3. **Candidatos (código).** Monta de 3 a 5 conjuntos de 4 golpes, priorizando sinergia, prioridade e cobertura, e simula cada um no duelo contra o próximo chefão (`resultadoDoDuelo`, `confrontoDuelo`). Marca o hit-kill (1 golpe ou 2 golpes) e quem bate primeiro.
-4. **Decisão (IA).** A IA só escolhe entre os candidatos e define EVs, item e natureza. É mais barato e erra menos que pedir a build do zero.
-5. **Validação (código).** O que já existe: `validateAiBuild`, avisos de build, `gravacao`.
-6. **Juízes.** `meta-pokemon` e `playtester-de-build` avaliam uma amostra; `supervisor` fecha (Gauntlet Loop).
+4. **Decisão (IA).** A IA só escolhe entre os candidatos e define EVs, item e natureza. É mais barato e erra menos que pedir a build do zero. Quando a chamada for a proposta inicial de build individual ou do lote, o host pode fornecer o modelo explícito `antigravity/gemini-3.1-pro-high` via uma ponte opcional do OmniRoute; sem ponte, usa `sample` como antes.
+5. **Validação (código).** O que já existe: `validateAiBuild`, avisos de build, `gravacao`. A origem da proposta não muda a autoridade: habilidade, golpes, level cap, natureza, item, EVs, sinergia e papel são validados localmente.
+6. **Juízes.** `meta-pokemon` e `playtester-de-build` avaliam uma amostra; `supervisor` fecha (Gauntlet Loop). Estratégia, revisão, plano manual e decisão final permanecem no caminho oficial do app/Claude.
+
+### Fronteira do fornecedor (10/10/2026)
+O Artifact não contém chave, segredo ou rota fixa para `localhost`. A integração alternativa só é reconhecida quando o host injeta `window.__ER_OMNIROUTE_BRIDGE__` com `modelo` exatamente igual a `antigravity/gemini-3.1-pro-high` e uma função `json(prompt, opcoes)`. Aliases `auto/*` e `COMBO-1` não são usados. Se a ponte falhar, o cliente `sample` é carregado sob demanda; qualquer resposta, de qualquer fornecedor, passa pela mesma validação e gravação. O runtime publicado não permite medir a ponte local com segurança; por isso a medição real fica bloqueada e não é simulada.
 
 ## Dois casos de prova (o pipeline tem que servir aos dois)
 **Caso A, sinergia do kit: Centiskorch.** Coil Up (habilidade escolhida) + Flaming Jaws e Hyper Aggressive (inatas). A build deve sair com Fire Fang (aprendido no nível 1; é mordida), não com Fire Lash (nível 24, não é mordida). A Coil Up dá +1 de prioridade UMA vez, ao primeiro golpe de mordida depois de entrar.

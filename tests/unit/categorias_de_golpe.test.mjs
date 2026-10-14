@@ -45,5 +45,33 @@ test("sinergia da espécie inclui a de categoria: quem tem Iron Fist e aprende s
   assert.ok(sp, "fixture: espécie com Iron Fist que aprende soco");
   const s = R.sinergiasDaEspecie(sp).find((h) => h.name === "Iron Fist");
   assert.ok(s && s.golpes.some((g) => /Punch/.test(g)), JSON.stringify(s));
-  assert.match(R.montarPromptBuild(sp, {}), /Iron Fist \((innate|escolhivel)\) reforca [^;\n]*Punch/);
+  assert.ok(s.motivos.includes("bônus de poder"), JSON.stringify(s));
+  assert.match(R.montarPromptBuild(sp, {}), /Iron Fist \((innate|escolhivel)\) reforca soco por bônus de poder/);
+});
+
+test("sinergia geral preserva o motivo de prioridade e separa Fire Fang de Fire Lash", () => {
+  const sp = R.SPECIES.find((s) => s && s.sname === "SPECIES_CENTISKORCH");
+  assert.ok(sp, "fixture: Centiskorch");
+  const sin = R.sinergiasDaEspecie(sp);
+  const coil = sin.find((h) => h.name === "Coil Up");
+  assert.ok(coil, JSON.stringify(sin));
+  assert.ok(coil.golpes.includes("Fire Fang"), JSON.stringify(coil));
+  assert.ok(!coil.golpes.includes("Fire Lash"), JSON.stringify(coil));
+  assert.ok(coil.motivos.includes("prioridade no primeiro golpe"), JSON.stringify(coil));
+  const jaws = sin.find((h) => h.name === "Flaming Jaws");
+  assert.ok(jaws && jaws.motivos.some((m) => /efeito extra/.test(m)), JSON.stringify(jaws));
+});
+
+test("motivo de categoria não altera a força do golpe", () => {
+  const sp = R.SPECIES.find((s) => s && s.sname === "SPECIES_CENTISKORCH");
+  const id = idGolpe("Fire Fang");
+  const nivel = 50;
+  const sem = R.unidadeDeDuelo(sp, R.SETS_DE_DUELO[0], null, nivel, [id], null);
+  const semEfeito = R.efeitoDasHabilidadesNoDuelo([], "PRIORIDADE_TEST_BASE", null);
+  const comPrioridade = R.efeitoDasHabilidadesNoDuelo([], "PRIORIDADE_TEST_META", null);
+  comPrioridade.prioCheioCategoria.mordida = true;
+  const base = R.prepararGolpesDuelo([id], Object.assign({}, sem, { ef: semEfeito, tipos: R.speciesTypeNames(sp) }), null)[0];
+  const alterado = R.prepararGolpesDuelo([id], Object.assign({}, sem, { ef: comPrioridade, tipos: R.speciesTypeNames(sp) }), null)[0];
+  assert.equal(alterado.forca, base.forca);
+  assert.equal(alterado.prioCheio, true);
 });
