@@ -60,3 +60,31 @@ export function dentroDoEfeito(razaoMedida, mult, rotulo, tolerancia = 0.1) {
   entre(razaoMedida, mult * (1 - tolerancia), mult * (1 + tolerancia), (rotulo || "razão") + " (efeito esperado x" + mult.toFixed(3) + ", +-" + tolerancia * 100 + "%)");
 }
 export const semEfeito = (razaoMedida, rotulo) => entre(razaoMedida, 0.97, 1.03, (rotulo || "razão") + " (sem efeito esperado)");
+
+// ---------- luta inteira contra o time do chefão (2ª metade do ticket 07) ----------
+// A linha de bosses.json de um Pokémon do chefão (a mesma que o app guarda na party).
+export function linha(nome, { hab = "", golpes, item = "", nat = "Hardy", evs = EV.nenhum } = {}) {
+  const sp = especie(nome);
+  if (hab) assert.notEqual(R.ABILITY_ID_BY_NAME[hab], undefined, "habilidade inexistente: " + hab);
+  golpes.forEach((g) => assert.notEqual(R.MOVE_ID_BY_NAME[g], undefined, "golpe inexistente: " + g));
+  return { x: sp.x, n: nome, abi: hab, abiId: hab ? R.ABILITY_ID_BY_NAME[hab] : -1, item, nat, evsRaw: evs, ivsRaw: [31, 31, 31, 31, 31, 31], mv: golpes, hpt: "" };
+}
+// Candidato do jogador como o app entrega ao botão (com ou sem build salva).
+export function candidato(nome, build = null) {
+  const sp = especie(nome);
+  return build ? { sp, owned: sp.x, build } : { sp, owned: sp.x };
+}
+export const build = (golpes, { hab = "", item = "", evs = EV.fisico, nat = "Adamant" } = {}) => ({ ability: hab, nature: nat, evs, item, moves: golpes });
+// O botão "Montar time contra este chefão": party do chefão + candidatos + opções (dupla, buffs, campo).
+export const montar = (cands, party, opcoes = {}) => R.montarTimeContraChefao(cands, party, NIVEL, opcoes);
+// A luta inteira com os meus (builds) contra a party (linhas), pelo mesmo caminho do app. `ids` = buffs do
+// ginásio (os ids de buffsAtivosDoChefao); `campo` = regra de campo (regraDeCampoDoChefao).
+function lutaPelaEntrada(simular, quantosAbrem, minhas, party, { ids = [], campo = null } = {}) {
+  const foes = R.foesComRegraDeCampo(R.foesComBuffsDoGinasio(party.map((l) => R.foeDeDuelo(l, NIVEL, null)), ids, quantosAbrem), campo);
+  const meus = minhas.map((m) => R.meuComBuffsDoGinasio(R.unidadeDaBuild(especie(m.nome), m.build, NIVEL, null), ids));
+  return simular(meus, foes, NIVEL, ids.length ? R.inicioDaLutaComBuffs(ids) : undefined);
+}
+export const lutaInteira = (minhas, party, o) => lutaPelaEntrada(R.simularLutaContraChefao, 1, minhas, party, o);
+// A luta 2x2 (chefão em dupla): os dois da frente recebem os buffs de abertura.
+export const lutaEmDupla = (minhas, party, o) => lutaPelaEntrada(R.simularDuplaContraChefao, 2, minhas, party, o);
+export const meu = (nome, golpes, o = {}) => ({ nome, build: build(golpes, o) });
