@@ -16,9 +16,10 @@
     { atacante: "SPECIES_LEDIAN", habilidade: "Aerodynamics", golpe: "Mega Punch", alvo: "SPECIES_NINETALES" },
     { atacante: "SPECIES_LEDIAN", habilidade: "Aerodynamics", golpe: "Aerial Ace", alvo: "SPECIES_NINETALES" }
   ];
-  // Reverter numa linha (false): a prioridade do ALVO deixa de rebaixar o rótulo e de gerar o aviso "O alvo age antes".
-  // Hoje (padrão conservador, 14/10/2026) o "bate primeiro" segue a definição do usuário (prioridade do golpe ou Velocidade)
-  // e o ranking não muda, mas um golpe de prioridade do alvo que o atacante-referência não supera tira o selo "calibrada".
+  // Decisão do usuário (P1, 14/10/2026): a prioridade EFETIVA do golpe do alvo entra na definição de "bate primeiro" (quem dá o KO
+  // primeiro na ordem real de turnos), então `baterPrimeiro` e o ranking já refletem a ordem real; `alvoAgeAntes` fica como motivo
+  // (aviso "O alvo age antes") e um golpe de prioridade do alvo que o atacante não supera tira o selo "calibrada".
+  // Reverter numa linha (false): a prioridade do alvo sai de tudo (definição antiga: só prioridade do golpe ou Velocidade).
   var CONSIDERA_PRIORIDADE_DO_ALVO = true;
 
   var AVISO_SIMULACAO_1X1 = "Simulação 1x1: luta em dupla e Fake Out não são simulados.";
@@ -152,9 +153,19 @@
     var prioNegativa = !!golpe && golpe.prio < 0;
     var primeiro = usaPrio || (!prioNegativa && r.v1 > r.v2);
     var porQue = usaPrio ? "prioridade" : (primeiro ? "velocidade" : null);
-    // A prioridade do próprio alvo fica FORA da definição (decisão do usuário), mas rebaixa o rótulo e gera aviso.
     var minha = usaPrio ? (prioReal ? melhor.prio : 1) : 0;
-    var alvoPrio = (ameacas || []).filter(function (a) { return a.prio > minha; }).sort(function (a, b) { return b.fracEu - a.fracEu || (a.nome < b.nome ? -1 : 1); })[0] || null;
+    // Decisão do usuário (P1, 14/10): "bate primeiro" = dá o KO primeiro na ORDEM REAL de turnos. O melhor golpe de prioridade do alvo
+    // que DERRUBA o atacante (fracEu >= 1) entra: o atacante só bate primeiro com prioridade maior; com prioridades iguais decide a
+    // Velocidade; com a do alvo maior o alvo age antes. Golpe de prioridade do alvo que não derruba não muda quem dá o KO.
+    var ameacas1 = ameacas || []; // vazia quando CONSIDERA_PRIORIDADE_DO_ALVO é false (pipelineAmeacasDePrioridade)
+    var prioDoKo = ameacas1.filter(function (a) { return a.fracEu >= 1; }).reduce(function (m, a) { return Math.max(m, a.prio); }, 0);
+    if (prioDoKo > 0) {
+      if (minha > prioDoKo) { primeiro = true; porQue = "prioridade"; }
+      else if (minha === prioDoKo && !prioNegativa && r.v1 > r.v2) { primeiro = true; porQue = "velocidade"; }
+      else { primeiro = false; porQue = null; }
+    }
+    // O aviso e o rótulo olham todo golpe de prioridade do alvo que o atacante não supera (derrube ou não).
+    var alvoPrio = ameacas1.filter(function (a) { return a.prio > minha; }).sort(function (a, b) { return b.fracEu - a.fracEu || (a.nome < b.nome ? -1 : 1); })[0] || null;
     return { nome: g.nome, dano: dano, hp: hp, frac: hp > 0 ? dano / hp : 0, n: n, extra: n === Infinity ? 0 : n - base, primeiro: primeiro, porQue: porQue,
       velEu: r.v1, velFoe: r.v2, sash: sash, alvoPrio: alvoPrio, foe: foe.nome, foeSname: foe.sp ? foe.sp.sname : "", foge: duelo.foge };
   }
@@ -335,7 +346,7 @@
       motivos.push("Não derruba o " + p.foe + " nem em 2 golpes: o melhor golpe (" + p.nome + ") tira " + Math.round(av.fracMin * 100) + "% a " + Math.round(av.fracMax * 100) + "% do HP dele." + medidos);
       return motivos;
     }
-    var como = av.baterPrimeiro ? (av.porQue === "prioridade" ? "bate primeiro por prioridade" : "bate primeiro por velocidade" + pipelineVelocidade(av.linhas.filter(function (l) { return l.porQue === "velocidade"; })[0] || p)) : "o alvo age antes";
+    var como = av.baterPrimeiro ? (av.porQue === "prioridade" ? "bate primeiro por prioridade" : "bate primeiro por velocidade" + pipelineVelocidade(av.linhas.filter(function (l) { return l.porQue === "velocidade"; })[0] || p)) : (av.alvoPrio ? "o alvo age antes (" + av.alvoPrio.alvoPrio.nome + ", +" + av.alvoPrio.alvoPrio.prio + " de prioridade)" : "o alvo age antes");
     var golpesDoKill = av.linhas.map(function (l) { return l.nome; }).filter(function (n, i, a) { return a.indexOf(n) === i; }).join(" e ");
     var faixa = " Tira " + Math.round(av.fracMin * 100) + "% a " + Math.round(av.fracMax * 100) + "% do HP dele por golpe.";
     if (av.hitKill === 1) motivos.push(garante ? golpesDoKill + " derruba no turno 1 o " + p.foe + "; " + como + "." + medidos

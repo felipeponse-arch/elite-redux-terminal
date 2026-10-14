@@ -2402,6 +2402,27 @@ export const MUTACOES = [
     para: "comSin = undefined;",
   },
   {
+    id: "pipeline-prioridade-do-alvo-fora-do-primeiro",
+    descricao: "o 'bate primeiro' volta a ignorar a prioridade do alvo (Ledian x Ninetales volta a bater primeiro)",
+    arquivo: "pipeline_build.js",
+    de: "    if (prioDoKo > 0) {",
+    para: "    if (false) {",
+  },
+  {
+    id: "pipeline-prioridade-do-alvo-sem-ko",
+    descricao: "qualquer golpe de prioridade do alvo tira o 'bate primeiro', mesmo o que não derruba o atacante",
+    arquivo: "pipeline_build.js",
+    de: "return a.fracEu >= 1; }).reduce(",
+    para: "return true; }).reduce(",
+  },
+  {
+    id: "pipeline-prioridade-igual-vence-sem-velocidade",
+    descricao: "prioridade do atacante igual à do golpe que o derruba passa a bastar para bater primeiro (sem olhar a Velocidade)",
+    arquivo: "pipeline_build.js",
+    de: "if (minha > prioDoKo) {",
+    para: "if (minha >= prioDoKo) {",
+  },
+  {
     id: "pipeline-prioridade-do-alvo-pelo-dado",
     descricao: "a prioridade do alvo volta a ser a do dado (ignora Psychic Terrain e Surprise!, que o motor aplica)",
     arquivo: "pipeline_build.js",
