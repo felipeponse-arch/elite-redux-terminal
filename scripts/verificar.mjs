@@ -1,37 +1,71 @@
-// Verificação completa antes de um commit (hook de pre-commit) e antes de
-// publicar (prepare_publish.ps1). Fase 8 da refatoração (2026-09-24): em Node,
-// roda igual em Windows, Linux e macOS - era um .ps1, e o PowerShell 5.1
-// tratava qualquer aviso no stderr de um processo filho como erro fatal.
+// Verificação antes de um commit (hook de pre-commit) e antes de publicar (prepare_publish.ps1).
+// Fase 8 da refatoração (2026-09-24): em Node, roda igual em Windows, Linux e macOS - era um .ps1,
+// e o PowerShell 5.1 tratava qualquer aviso no stderr de um processo filho como erro fatal.
+//
+// GANCHO POR NÍVEL (melhoria A, 2026-10-14): o gancho lê os arquivos em staging
+// (git diff --cached) e roda só o que o tipo de mudança pede. Quem decide é a função pura
+// scripts/nivel_da_mudanca.mjs (testada em tests/unit/nivel_da_mudanca.test.mjs). Na dúvida SOBE.
+//
+//   Nível | Mudou                                                  | Roda
+//   0     | só docs/, *.md, GLOSSARY.md, AUDITORIA-DOSSIE.md       | check
+//   1     | só tests/unit/                                         | check + unitários (+ sabotagem --mudados se mutacoes.mjs)
+//   2     | src/regras/, scripts/*.mjs (menos build*/verificar/vaga) | check + unitários + sabotagem (--mudados fora do master)
+//   3     | o resto: src/ui, css, template, build, e2e, data, configs, caminho desconhecido | tudo (+ build + navegador)
+//   Sempre 3: branch master, ER_VERIFICAR=completo, nada em staging (execução manual).
+//   ER_WIP=1 (npm run checkpoint) = nível 0, menos no master.
 //
 // Etapas, da mais barata pra mais cara (para na primeira que falhar):
 //   travas estáticas -> unitários -> sabotagem -> build -> testes de navegador
 //
 // Uso: npm run verificar   (pular no commit, sem recomendação: git commit --no-verify)
+//      node scripts/verificar.mjs --nivel [arquivos...]   só imprime o nível e as etapas (não roda nada)
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { segurarVaga } from "./vaga.mjs";
+import { nivelDaMudanca, etapasDoNivel, ambienteDosFilhos } from "./nivel_da_mudanca.mjs";
 
 const RAIZ = fileURLToPath(new URL("..", import.meta.url));
+const ARGS = process.argv.slice(2);
+
+// Os passos filhos NÃO herdam as variáveis de localização do git (GIT_DIR, GIT_INDEX_FILE...) que o
+// gancho recebe: senão um teste que roda `git` enxerga e ESCREVE no repositório real (incidente de
+// 14/10/2026: core.bare=true). Lido a cada passo, depois de segurarVaga (que acrescenta ER_VAGA_*).
+function rodar(comando) {
+  // shell: true pro "npm" resolver igual em todo sistema (npm.cmd no Windows).
+  return spawnSync(comando, { cwd: RAIZ, stdio: "inherit", shell: true, env: ambienteDosFilhos(process.env) });
+}
+
+// Sonda de teste: roda de verdade UM filho pelo mesmo caminho dos passos e mostra o env que ele recebeu.
+if (ARGS.includes("--sonda-env")) {
+  const r = rodar('node -p "Object.keys(process.env).filter(k=>k.startsWith(\'GIT_\')).join(\',\')+\'|\'+process.env.ER_SONDA"');
+  process.exit(r.status ?? 1);
+}
+
+// Lê staging (-z: nomes com acento não vêm entre aspas; --no-renames: renomear lista origem E destino).
+// Falha do git = lista vazia = nível 3.
+function arquivosEmStaging() {
+  const r = spawnSync("git", ["--no-pager", "diff", "--cached", "--name-only", "--no-renames", "-z"], { cwd: RAIZ, encoding: "utf8" });
+  if (r.status !== 0) return [];
+  return (r.stdout || "").split("\0").filter(Boolean);
+}
 // Regra do QA (08/10/2026): no branch de um ticket, só as sabotagens ligadas ao que
 // mudou; no master (merge e publicar) a suíte inteira.
 const BRANCH = (spawnSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: RAIZ, encoding: "utf8" }).stdout || "").trim();
-const SABOTAGEM = BRANCH === "master" ? "node tests/run_sabotage.mjs" : "node tests/run_sabotage.mjs --mudados";
-const ETAPAS = [
-  ["travas: codificação, sintaxe, lint (JS e CSS) e tipos", "npm run check --silent", "Trava estática falhou"],
-  ["testes unitários das regras", "npm run test:unit --silent", "Testes unitários falharam"],
-  ["sabotagem das regras (" + (BRANCH === "master" ? "catálogo inteiro" : "só o que mudou desde o master") + ")", SABOTAGEM, "Alguma sabotagem sobreviveu (ou o catálogo está desatualizado)"],
-  ["build (npm run build)", "npm run build --silent", "Build falhou"],
-  ["testes de navegador (Playwright, projeto funcional)", "npm run test:e2e --silent", "Teste de navegador falhou - detalhes: npm run test:relatorio"],
-];
 
+const modoNivel = ARGS.includes("--nivel");
+const manuais = ARGS.filter((a) => a !== "--nivel");
+const ARQUIVOS = modoNivel && manuais.length ? manuais : arquivosEmStaging();
+const { nivel: NIVEL, motivo: MOTIVO } = nivelDaMudanca(ARQUIVOS, { branch: BRANCH, env: process.env });
+const ETAPAS = etapasDoNivel(NIVEL, { branch: BRANCH, arquivos: ARQUIVOS });
+console.log(`Nível ${NIVEL} (${MOTIVO}): ${ETAPAS.map((e) => e.id).join(", ")}`);
+if (modoNivel) process.exit(0);
 
 // Vaga de sessão (ADR-001 em docs/decisoes_arquitetura.md, 2026-10-02; melhoria B, 2026-10-13):
 // duas sessões verificando ao mesmo tempo (mesma pasta OU worktrees diferentes) se atropelam -
 // a porta 8101 dos testes é da máquina, e com reuseExistingServer uma sessão testa o build da
 // outra; na mesma pasta ainda apagam o test-results uma da outra. Antes a trava FALHAVA na
 // hora; agora a vaga "pesada" (scripts/vaga.mjs) faz fila e ESPERA, com pid do dono (morto =
-// libera). NOTA p/ melhoria A: avaliar limpar variáveis GIT_* do ambiente dos passos filhos
-// (o gancho do git as herda); NÃO feito aqui. Os filhos herdam ER_VAGA_DONO e não pedem a vaga de novo (a sabotagem roda aqui dentro).
+// libera). Os filhos herdam ER_VAGA_DONO e não pedem a vaga de novo (a sabotagem roda aqui dentro).
 try {
   await segurarVaga("pesada");
 } catch (e) {
@@ -40,14 +74,13 @@ try {
 }
 
 const inicio = Date.now();
-for (const [titulo, comando, falha] of ETAPAS) {
+for (const { titulo, comando, falha } of ETAPAS) {
   console.log(`--- ${titulo} ---`);
-  // shell: true pro "npm" resolver igual em todo sistema (npm.cmd no Windows).
-  const r = spawnSync(comando, { cwd: RAIZ, stdio: "inherit", shell: true });
+  const r = rodar(comando);
   if (r.status !== 0) {
     console.error(`\n${falha} - bloqueado.`);
     console.error("Pra pular de propósito (não recomendado): git commit --no-verify");
     process.exit(1);
   }
 }
-console.log(`\nBuild + suíte completa passaram em ${Math.round((Date.now() - inicio) / 1000)} s - liberado.`);
+console.log(`\nNível ${NIVEL}: ${ETAPAS.map((e) => e.id).join(" + ")} passaram em ${Math.round((Date.now() - inicio) / 1000)} s - liberado.`);

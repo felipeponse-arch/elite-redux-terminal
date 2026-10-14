@@ -6,8 +6,8 @@
 // - Define ER_WIP=1 no ambiente do `git commit`. NÃO usa --no-verify: o gancho continua rodando.
 // - Recusa rodar no branch master e na pasta principal.
 // - Sem mudança: avisa e sai com 0.
-// PENDENTE (melhoria A, gancho por nível): hoje scripts/verificar.mjs AINDA IGNORA ER_WIP e roda o
-// gate completo. Quando a melhoria A entrar, o gancho passa a rodar só o nível leve com ER_WIP=1.
+// Melhoria A (gancho por nível) FEITA: scripts/verificar.mjs vê ER_WIP=1 e roda só o nível 0 (check),
+// menos no branch master, onde ignora ER_WIP e roda tudo.
 import { execFileSync, spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
