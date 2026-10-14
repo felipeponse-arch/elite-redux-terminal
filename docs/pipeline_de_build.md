@@ -49,3 +49,14 @@ A luta em dupla da Meteor Falls não está no app como o usuário a vê: `bosses
 
 ## Skills que apoiam
 `grilling` (sabatina), `codebase-design` e `prototype` (desenho e protótipo descartável), `tdd` (implementação), `sentry-skills:find-bugs` (17), `claude-api` (18), `sentry-skills:prompt-optimizer` (19), `importar-builds-discord` (builds da comunidade para comparar).
+
+## Desenho escolhido (14/10/2026, Design It Twice com 3 desenhos; supervisor aprovou na rodada 2)
+Híbrido do desenho 3 (chamador comum: uma linha no botão) com a pergunta invertida do desenho 1 (caso B), sem o registro de intenções do desenho 2 (framework para só 2 intenções; extrair quando a 3ª for pedida). Módulo novo `src/regras/pipeline_build.js` (escopo global, ES5, sem window/document):
+1. `candidatosDeBuild(sp, opts)`: do Pokémon para a build (caso A, botão e lote). Só `sp` é obrigatório; o cap vem de `getCurrentCap()`; `opts.alvo` opcional ({chefao, indice} | {foe}).
+2. `especiesQueResolvem(alvo, opts)`: do alvo para os Pokémon (caso B).
+3. `fecharBuild(candidato, escolha)`: fina; a IA devolve {indice, evs, item, natureza}, a função monta a build com os golpes e a habilidade do candidato e entrega ao `validarRespostaDeBuildDaIa` (validação e gravação que já existem).
+Ranking (decisão do usuário): mata em 1 golpe e bate primeiro > mata em 2 golpes e bate primeiro > resto por dano e sinergia. Prioridade não conta contra Queenly Majesty/Dazzling/Armor Tail. O rótulo "mata no turno 1" só sai com número conferido na calculadora do jogo; senão sai "estimado".
+Decisões do usuário (14/10): (a) alvo padrão = o PRÓXIMO LÍDER DE GINÁSIO da Etapa (mapa GYM_LEADER_MILESTONE em chefoes.js), com opção de escolher qualquer outro chefão (ex.: Courtney da Meteor Falls); (b) a tela mostra o motivo curto de cada build e o selo calibrada/estimada (muda a tela).
+Limites conhecidos: o Fake Out do Shiftry e a dupla não são simulados (o módulo avisa); não existe hoje "próximo chefão da Etapa" para lutas fora de ginásio; o selo perde valor se a tabela de calibração for esparsa (crescer com números da calculadora do jogo que o usuário trouxer).
+Ordem de entrega: (a) módulo + testes dos casos A e B pela interface, sem tocar a tela; (b) ligar o botão e o lote; (c) motivo e selo na tela; (d) a dívida 05 (o que a run libera) entra quando for fechada, sem bloquear.
+Custo no clique: medir no protótipo antes de decidir entre calcular na hora e pré-calcular. Tabela de sinergias: continua derivada do motor; o registro de efeitos (ticket 08) fica para depois.
