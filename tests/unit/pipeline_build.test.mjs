@@ -98,6 +98,38 @@ test("a prioridade do alvo só tira o 'bate primeiro' se o golpe dele DERRUBA o 
   assert.match(c.avisos.join(" | "), /O alvo age antes com Quick Attack \(\+2 de prioridade\) e tira \d+% do HP de Ledian/);
 });
 
+test("hit-kill de 2 golpes: o Flame Burst do alvo derruba o atacante antes do 2º golpe, então Raticate/Nidorino/Pidgeotto/Pidgeot x Ninetales NÃO batem primeiro", () => {
+  ["Raticate", "Nidorino", "Pidgeotto", "Pidgeot"].forEach((nome) => {
+    const r = R.candidatosDeBuild(sp(nome), { alvo: ninetales });
+    const dois = r.candidatos.filter((x) => x.hitKill === 2);
+    assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
+    dois.forEach((x) => {
+      assert.equal(x.baterPrimeiro, false, nome + " " + x.golpes.join("/"));
+      assert.equal(x.alvoAgeAntes, true, nome);
+      assert.equal(tier(x), 1, nome);
+    });
+  });
+});
+
+// Alvo sintético: o Ninetales da Meteor Falls só com Flame Burst (prioridade +2 aqui), 1 de HP e sem Queenly Majesty; `vel` é a Velocidade dele.
+const foeComPrioridadeIgual = (vel) => {
+  const base = R.foeDeDuelo(Object.assign({}, courtney.party[0], { mv: ["Flame Burst"] }), 55, null);
+  const foe = Object.assign({}, base, { stats: [1].concat(base.stats.slice(1, 5), [vel]), golpesProntos: base.golpesProntos.map((g) => Object.assign({}, g, { prio: 2 })) });
+  foe.ef = Object.assign({}, foe.ef, { bloqueiaPrioLado: false, barraPrioridade: false });
+  return foe;
+};
+test("prioridade IGUAL à do golpe do alvo que o derruba: quem tem mais Velocidade bate primeiro (Scizor com Feint +2 x Flame Burst +2)", () => {
+  const scizor = sp("Scizor");
+  // alvo mais rápido: a prioridade empata e a Velocidade do alvo decide - o Scizor NÃO bate primeiro
+  const lento = R.candidatosDeBuild(scizor, { alvo: { foe: foeComPrioridadeIgual(1000) } }).candidatos.filter((c) => c.golpes.includes("Feint"));
+  assert.ok(lento.length > 0, "premissa: candidato com Feint (+2)");
+  lento.forEach((c) => { assert.equal(c.baterPrimeiro, false, c.golpes.join("/")); assert.equal(c.porQue, null); });
+  // alvo mais lento: prioridade igual, o Scizor tem mais Velocidade e bate primeiro por velocidade
+  const rapido = R.candidatosDeBuild(scizor, { alvo: { foe: foeComPrioridadeIgual(1) } }).candidatos.filter((c) => c.golpes.includes("Feint") && c.hitKill === 1);
+  assert.ok(rapido.length > 0);
+  rapido.forEach((c) => { assert.equal(c.baterPrimeiro, true, c.golpes.join("/")); assert.equal(c.porQue, "velocidade"); });
+});
+
 test("ranking do caso B: contra o Flame Burst do Ninetales nenhum candidato do Ledian é nível 3 ou 2 (cai no resto do ranking)", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales });
   assert.ok(r.candidatos.every((x) => tier(x) === 1), "contra o Flame Burst do Ninetales nenhum Ledian é nível 3 ou 2");

@@ -2412,8 +2412,15 @@ export const MUTACOES = [
     id: "pipeline-prioridade-do-alvo-sem-ko",
     descricao: "qualquer golpe de prioridade do alvo tira o 'bate primeiro', mesmo o que não derruba o atacante",
     arquivo: "pipeline_build.js",
-    de: "return a.fracEu >= 1; }).reduce(",
+    de: "return n !== Infinity && a.golpes <= n; }).reduce(",
     para: "return true; }).reduce(",
+  },
+  {
+    id: "pipeline-prioridade-do-alvo-so-ko-em-1-golpe",
+    descricao: "só o golpe do alvo que derruba o atacante em 1 golpe tira o 'bate primeiro' (o hit-kill de 2 golpes volta a ignorar o Flame Burst)",
+    arquivo: "pipeline_build.js",
+    de: "return n !== Infinity && a.golpes <= n; }).reduce(",
+    para: "return a.golpes <= 1; }).reduce(",
   },
   {
     id: "pipeline-prioridade-igual-vence-sem-velocidade",

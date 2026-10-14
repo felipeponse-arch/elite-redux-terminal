@@ -117,7 +117,12 @@
       // Prioridade EFETIVA, a que o motor calcula (r.meu.melhor.prio): Psychic Terrain (Indeedee, Tapu Lele) e Surprise! (névoa)
       // zeram a do dado (duelo.js, danoNoDuelo: prioAqui). A condicional (prioCheio) só entra em golpe sem prioridade no dado.
       var prio = r.meu.melhor.prio > 0 ? r.meu.melhor.prio : (!(gp.prio > 0) && gp.prioCheio ? 1 : 0);
-      if (dano > 0 && prio > 0) lista.push({ nome: gp.nome, prio: prio, fracEu: r.hpFoe > 0 ? dano / r.hpFoe : 0 });
+      if (dano > 0 && prio > 0) {
+        // Quantos golpes DESTE golpe de prioridade o alvo precisa para derrubar o atacante (Focus Sash/Sturdy do atacante contam, como no lado dele).
+        var k = golpesNecessariosDuelo(r.hpFoe, dano);
+        if (k === 1 && aguentaUmGolpe(unit, foe)) k = 2;
+        lista.push({ nome: gp.nome, prio: prio, fracEu: r.hpFoe > 0 ? dano / r.hpFoe : 0, golpes: k });
+      }
     });
     return lista;
   }
@@ -155,10 +160,11 @@
     var porQue = usaPrio ? "prioridade" : (primeiro ? "velocidade" : null);
     var minha = usaPrio ? (prioReal ? melhor.prio : 1) : 0;
     // Decisão do usuário (P1, 14/10): "bate primeiro" = dá o KO primeiro na ORDEM REAL de turnos. O melhor golpe de prioridade do alvo
-    // que DERRUBA o atacante (fracEu >= 1) entra: o atacante só bate primeiro com prioridade maior; com prioridades iguais decide a
+    // que DERRUBA o atacante dentro dos n golpes que ele precisa (a.golpes <= n) entra: o atacante só bate primeiro com prioridade maior; com prioridades iguais decide a
     // Velocidade; com a do alvo maior o alvo age antes. Golpe de prioridade do alvo que não derruba não muda quem dá o KO.
     var ameacas1 = ameacas || []; // vazia quando CONSIDERA_PRIORIDADE_DO_ALVO é false (pipelineAmeacasDePrioridade)
-    var prioDoKo = ameacas1.filter(function (a) { return a.fracEu >= 1; }).reduce(function (m, a) { return Math.max(m, a.prio); }, 0);
+    // "Derruba" = em até `n` golpes (os que o atacante precisa): o alvo age primeiro a cada turno, então com k <= n ele derruba antes do último golpe do atacante.
+    var prioDoKo = ameacas1.filter(function (a) { return n !== Infinity && a.golpes <= n; }).reduce(function (m, a) { return Math.max(m, a.prio); }, 0);
     if (prioDoKo > 0) {
       if (minha > prioDoKo) { primeiro = true; porQue = "prioridade"; }
       else if (minha === prioDoKo && !prioNegativa && r.v1 > r.v2) { primeiro = true; porQue = "velocidade"; }
