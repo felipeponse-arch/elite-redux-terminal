@@ -14,21 +14,29 @@ Como funciona (resumo): kit = golpes liberados no cap (`golpesDeDueloAte` + `ava
 
 Ranking (decisão do usuário): hit-kill de 1 golpe e bate primeiro > hit-kill de 2 golpes e bate primeiro > resto por dano e sinergia. "Bate primeiro" = golpe de prioridade que o alvo não bloqueia (Queenly Majesty, Dazzling, Armor Tail; vale também para a prioridade condicional da Coil Up) OU mais Velocidade que o alvo. A prioridade condicional vale só quando o golpe derruba de uma vez.
 
-## Critérios de aceite
+## Critérios de aceite (comportamento ATUAL, fim da rodada 2)
 - [x] Caso A (Centiskorch): com Brawly, Tate e Liza e sem chefão adiante, o 1º candidato é Coil Up + Fire Fang e os motivos citam Coil Up e Flaming Jaws.
-- [x] Caso B (Ledian x Ninetales da Meteor Falls): Mega Punch, hitKill 1, bate primeiro por velocidade, "calibrada"; Accelgor/Beatdown e Steelix/Coil Up não ganham "bate primeiro" por prioridade.
-- [x] Rótulo "calibrada" só com golpe da lista `GOLPES_CALIBRADOS` (Mega Punch, Aerial Ace); "derruba no turno 1" só nesses casos.
-- [x] Todo candidato passa em `validateAiBuild`; determinismo; não muta `state`; sem exceção por falta de dado.
+- [x] Caso B (Ledian x Ninetales da Meteor Falls): Mega Punch, hitKill 1, bate primeiro por velocidade, mas "estimada" com o aviso "O alvo age antes com Flame Burst (+1 de prioridade) e derruba Ledian antes de ele agir". Accelgor/Beatdown e Steelix/Coil Up não ganham "bate primeiro" por prioridade.
+- [x] Rótulo "calibrada" só por caso conferido (`CASOS_CALIBRADOS`: Ledian + Aerodynamics + Mega Punch ou Aerial Ace contra o Ninetales), sem prioridade do alvo que o atacante não supere e sem fuga no Intimidate. "Derruba no turno 1" só com `calibrada` e `garantido` (dano mínimo da rolagem já derruba); senão "Provável derrubar" com a faixa.
+- [x] Todo candidato passa em `validateAiBuild`; determinismo; não muta `state`; sem exceção por falta de dado (lista vazia sempre traz o motivo em `aviso` e `avisos`).
 - [x] Tempo: ~40 ms por espécie em média, no máximo ~140 ms (limite era ~2 s).
-- [x] 25 testes em `tests/unit/pipeline_build.test.mjs`; 11 sabotagens `pipeline-*` em `tests/unit/mutacoes.mjs`, todas pegas.
+- [x] 39 testes em `tests/unit/pipeline_build.test.mjs`; 26 sabotagens `pipeline-*` em `tests/unit/mutacoes.mjs`, todas pegas.
 
 ## Comentários
 - Limite conhecido, avisado em `avisos`: "Simulação 1x1: luta em dupla e Fake Out não são simulados."
-- Decisão a confirmar (pergunta do módulo): o motor vê o Ninetales da Meteor Falls agindo antes com Flame Burst (+1 de prioridade no dado) e a luta completa dá derrota ao Ledian. Pela definição do usuário ("prioridade que não é bloqueada OU mais Velocidade") o Ledian "bate primeiro por velocidade"; o candidato carrega o aviso "o alvo tem golpe de prioridade (Flame Burst)...". Se o usuário quiser que a prioridade do alvo entre na definição, é uma linha em `pipelineLinhaDoGolpe`.
+- A prioridade do alvo (Flame Burst, +1) NÃO entra na definição de "bate primeiro" (decisão do usuário); ela rebaixa o rótulo e gera aviso (ver P1 abaixo). Usa a prioridade EFETIVA do motor, então Psychic Terrain (Tapu Lele, Indeedee com Psychic Surge) e Surprise! a zeram.
 - "Alvo qualquer" no caso A não vale ao pé da letra: contra o Nosepass da Roxanne, Molten Down + Flamethrower derruba em 2 golpes batendo primeiro e, pela ordem do usuário, sobe no ranking acima de Coil Up + Fire Fang. O teste do caso A usa Brawly, Tate e Liza e o modo sem chefão.
-- Habilidade que só funciona gastando o item (Gluttony, Ripen) é recusada pela validação sem item: o rascunho leva Sitrus Berry e o candidato avisa (a simulação não conta o item).
-- Quando a validação recusa todo conjunto (ex.: Pyukumuku, sem golpe do próprio tipo), `candidatos: []` e o motivo vai em `avisos`.
-- `tests/unit/pipeline_kit_legal.test.mjs` (vindo de outra sessão) foi aproveitado como contrato da fase 1 e entra neste commit.
+- Habilidade que só funciona gastando o item (Gluttony, Ripen) é recusada pela validação sem item: o rascunho leva Sitrus Berry e o candidato avisa. Mega no modo de mega temporária (duas pedras possíveis): o rascunho leva a primeira pedra e o candidato avisa. Nos dois casos a simulação não conta o item.
+- Quando a validação recusa todo conjunto (ex.: Pyukumuku, sem golpe do próprio tipo), `candidatos: []` e o motivo vai em `aviso` e `avisos`.
+- Fuga no Intimidate (Tactical Retreat): o motor devolve só a nota 0,5 em vez do duelo; o módulo mede o dano como se ninguém fugisse (cópias sem a fuga, motor intocado), marca o candidato "estimada" e avisa.
+- `tests/unit/pipeline_kit_legal.test.mjs` (vindo de outra sessão) foi aproveitado como contrato da fase 1.
+
+## Rodada 2 do supervisor (14/10, REFAZER): o que mudou
+1. O aviso/rótulo da prioridade do alvo usa a prioridade efetiva do motor (`r.meu.melhor.prio`), não a do dado: Tapu Lele e Indeedee com Psychic Surge não recebem "O alvo age antes". Teste e sabotagem `pipeline-prioridade-do-alvo-pelo-dado`.
+2. Fuga no Intimidate: 8 espécies (Tatsugiri e formas, Tatsugiri Mega, Deoxys Speed, Chansey e Blissey Redux) voltavam com 0 candidatos por ler o retorno numérico do motor como `{ meu }`. Corrigido nas duas chamadas; teste das 8 nos milestones 1, 4 e 6 e sabotagens `pipeline-fuga-no-intimidate-*`.
+3. Megas com duas pedras (Abomasnow, Dragalge, Excadrill, Skarmory, Meowstic): rascunho com a pedra + aviso; teste dos 5 e sabotagem `pipeline-pedra-do-rascunho-some`.
+4. Critérios de aceite reescritos conforme o comportamento atual (acima).
+5. Lista vazia sempre com motivo: varredura por amostra nos milestones 1 e 6 (inclui Alcremie, Pyukumuku, Budew, Castform Sandy) e sabotagem `pipeline-lista-vazia-sem-motivo`.
 
 ## Rodada 1 do supervisor (14/10, REFAZER): o que mudou
 1. `calibrada` só por caso conferido: lista `CASOS_CALIBRADOS` ({atacante, habilidade, golpe, alvo}); hoje só Ledian + Aerodynamics + Mega Punch/Aerial Ace contra o Ninetales. Qualquer outro atacante, habilidade ou alvo é "estimada" (o Scyther Mega com Aerial Ace contra o Charizard saía "calibrada" sem nunca ter sido conferido). Ampliar a lista é decisão do usuário.

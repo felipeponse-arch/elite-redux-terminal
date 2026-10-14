@@ -339,6 +339,83 @@ test("tempo: cada espécie leva bem menos de 2 s", () => {
   });
 });
 
+// ---------- rodada 2 do supervisor ----------
+test("Psychic Terrain zera a prioridade do alvo no motor: com Tapu Lele (Psychic Surge) o aviso 'O alvo age antes' não aparece", () => {
+  const r = R.candidatosDeBuild(sp("Tapu Lele"), { alvo: ninetales });
+  assert.ok(r.candidatos.length > 0);
+  r.candidatos.forEach((c) => {
+    assert.equal(c.alvoAgeAntes, false, c.habilidade + " " + c.golpes.join("/"));
+    assert.doesNotMatch(c.avisos.join(" "), /O alvo age antes/);
+  });
+});
+
+test("Indeedee: só quem arma o Psychic Terrain (habilidade Psychic Surge) escapa da prioridade do alvo", () => {
+  const r = R.candidatosDeBuild(sp("Indeedee"), { alvo: ninetales });
+  assert.ok(r.candidatos.some((c) => c.habilidade !== "Psychic Surge" && c.alvoAgeAntes === true), "o contraste: sem o terreno o Flame Burst vale");
+  r.candidatos.filter((c) => c.habilidade === "Psychic Surge").forEach((c) => assert.equal(c.alvoAgeAntes, false));
+  // A mesma conta pelo motor: o Flame Burst do Ninetales tem prioridade efetiva 0 contra um atacante com Psychic Surge.
+  const indeedee = sp("Indeedee");
+  const u = R.unidadeDaBuild(indeedee, { ability: "Psychic Surge", nature: "Modest", evs: [0, 0, 0, 252, 0, 252], item: "", moves: ["Psychic"] }, 55, "sol");
+  const foe = R.foeDeDuelo(courtney.party[0], 55, "sol");
+  const burst = foe.golpesProntos.find((g) => g.nome === "Flame Burst");
+  assert.ok(burst && burst.prio > 0, "premissa: o dado dá +1 ao Flame Burst");
+  const d = R.resultadoDoDuelo(Object.assign({}, foe, { golpesProntos: [burst] }), u, 55, { soPar: true });
+  assert.equal(d.meu.melhor.prio, 0);
+});
+
+test("fuga no Intimidate (Tactical Retreat): o motor devolve só uma nota e o módulo não lança - Tatsugiri, Deoxys Speed, Chansey e Blissey Redux", () => {
+  const nomes = /^(Tatsugiri|Deoxys Speed|Chansey Redux|Blissey Redux)/;
+  [1, 4, 6].forEach((ms) => {
+    const Rm = carregarRegras({ milestone: ms, difficulty: "ace", levelCapMode: "more" });
+    const lista = Rm.SPECIES.filter((x) => x && nomes.test(x.n));
+    assert.equal(lista.length, 8);
+    lista.forEach((x) => {
+      const r = Rm.candidatosDeBuild(x, {});
+      assert.ok(r.candidatos.length > 0, "milestone " + ms + " " + x.n + ": " + r.aviso);
+      assert.doesNotMatch(String(r.aviso) + r.avisos.join(" "), /Cannot read|não consegui montar/);
+    });
+  });
+  // Deoxys Speed no milestone 1 (Brawly): um lado foge; o candidato avisa e é estimada, nunca calibrada.
+  const R1 = carregarRegras({ milestone: 1, difficulty: "ace", levelCapMode: "more" });
+  const r = R1.candidatosDeBuild(R1.SPECIES.find((x) => x && x.n === "Deoxys Speed"), {});
+  const comAviso = r.candidatos.filter((c) => /foge no Intimidate/.test(c.avisos.join(" ")));
+  assert.ok(comAviso.length > 0);
+  comAviso.forEach((c) => assert.equal(c.rotulo, "estimada"));
+});
+
+test("Mega no modo de mega temporária (milestone 6): o rascunho leva a pedra e o candidato avisa (Abomasnow, Dragalge, Excadrill, Skarmory, Meowstic)", () => {
+  const R6 = carregarRegras({ milestone: 6, difficulty: "ace", levelCapMode: "more" });
+  ["Abomasnow Mega", "Dragalge Mega", "Excadrill Mega", "Skarmory Mega", "Meowstic Mega"].forEach((nome) => {
+    const mega = R6.SPECIES.find((x) => x && x.n === nome);
+    assert.ok(mega, nome);
+    const r = R6.candidatosDeBuild(mega, {});
+    assert.ok(r.candidatos.length > 0, nome + ": " + r.aviso);
+    const pedras = R6.megaStoneRuleFor(mega).stones;
+    r.candidatos.forEach((c) => {
+      assert.ok(pedras.includes(c.build.item), nome + " item " + c.build.item);
+      assert.match(c.avisos.join(" "), /precisa segurar a pedra/);
+      assert.ok(R6.validateAiBuild(mega, c.build, {}, {}));
+    });
+  });
+});
+
+test("lista vazia sempre vem com motivo (varredura por amostra nos milestones 1 e 6)", () => {
+  [1, 6].forEach((ms) => {
+    const Rm = carregarRegras({ milestone: ms, difficulty: "ace", levelCapMode: "more" });
+    const todas = Rm.SPECIES.filter(Boolean);
+    const amostra = todas.filter((_, i) => i % 9 === 0);
+    // espécies que já voltaram vazias antes (com motivo): Alcremie, Pyukumuku, Budew, Castform Sandy
+    ["Alcremie", "Pyukumuku", "Budew", "Castform Sandy"].forEach((n) => { const x = todas.find((y) => y.n === n); if (x && amostra.indexOf(x) === -1) amostra.push(x); });
+    amostra.forEach((x) => {
+      const r = Rm.candidatosDeBuild(x, {});
+      if (r.candidatos.length) return;
+      assert.ok(typeof r.aviso === "string" && r.aviso.length > 10, "milestone " + ms + " " + x.n + ": lista vazia sem motivo");
+      assert.ok(r.avisos.includes(r.aviso), x.n);
+      assert.doesNotMatch(r.aviso, /Cannot read|undefined/, x.n);
+    });
+  });
+});
+
 // ---------- 2. do alvo para os Pokémon ----------
 test("especiesQueResolvem: time e caixa, só quem derruba (hitKill > 0), 1 golpe antes de 2 e quem bate primeiro antes", () => {
   const Rx = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });

@@ -108,17 +108,35 @@
     if (unit.ef.bloqueiaPrioLado && !foe.ef.quebraHabilidade) return [];
     var lista = [];
     (foe.golpesProntos || []).forEach(function (gp) {
-      var prio = gp.prio > 0 ? gp.prio : (gp.prioCheio ? 1 : 0);
-      if (prio <= 0) return;
-      var r = resultadoDoDuelo(Object.assign({}, foe, { golpesProntos: [gp] }), unit, nivel, { soPar: true });
+      if (!(gp.prio > 0) && !gp.prioCheio) return;
+      var atacando = Object.assign({}, foe, { golpesProntos: [gp] });
+      var r = pipelineDuelo(atacando, unit, nivel).r;
+      if (!r) return;
       var dano = r.meu.melhor.golpe ? r.meu.melhor.dano : 0;
-      if (dano > 0) lista.push({ nome: gp.nome, prio: prio, fracEu: r.hpFoe > 0 ? dano / r.hpFoe : 0 });
+      // Prioridade EFETIVA, a que o motor calcula (r.meu.melhor.prio): Psychic Terrain (Indeedee, Tapu Lele) e Surprise! (névoa)
+      // zeram a do dado (duelo.js, danoNoDuelo: prioAqui). A condicional (prioCheio) só entra em golpe sem prioridade no dado.
+      var prio = r.meu.melhor.prio > 0 ? r.meu.melhor.prio : (!(gp.prio > 0) && gp.prioCheio ? 1 : 0);
+      if (dano > 0 && prio > 0) lista.push({ nome: gp.nome, prio: prio, fracEu: r.hpFoe > 0 ? dano / r.hpFoe : 0 });
     });
     return lista;
   }
+  // Quando um lado foge do Intimidate (Tactical Retreat; fogeJa em resultadoNoCampoDuelo) o motor devolve só a nota (0,5, empate), sem
+  // { meu, dele }. Aí o módulo mede o dano como se ninguém fugisse (cópias sem a fuga; o motor não muda) e marca `foge`:
+  // o candidato sai "estimada" com aviso.
+  function pipelineSemFuga(u) { return Object.assign({}, u, { ef: Object.assign({}, u.ef, { fogeAoCair: false }) }); }
+  function pipelineDuelo(eu, foe, nivel) {
+    var r = resultadoDoDuelo(eu, foe, nivel, { soPar: true }), foge = false;
+    if (!r || typeof r !== "object" || !r.meu) {
+      foge = true;
+      r = resultadoDoDuelo(pipelineSemFuga(eu), pipelineSemFuga(foe), nivel, { soPar: true });
+      if (!r || typeof r !== "object" || !r.meu) r = null;
+    }
+    return { r: r, foge: foge };
+  }
   // Uma linha da tabela: o golpe `g` (único golpe da unidade) contra um alvo.
   function pipelineLinhaDoGolpe(u1, g, foe, nivel, ameacas) {
-    var r = resultadoDoDuelo(u1, foe, nivel, { soPar: true });
+    var duelo = pipelineDuelo(u1, foe, nivel), r = duelo.r;
+    if (!r) return { nome: g.nome, dano: 0, hp: foe.stats[0], frac: 0, n: Infinity, extra: 0, primeiro: false, porQue: null, velEu: 0, velFoe: 0, sash: false, alvoPrio: null, foe: foe.nome, foeSname: foe.sp ? foe.sp.sname : "", foge: true };
     var melhor = r.meu.melhor, golpe = melhor.golpe, dano = golpe ? melhor.dano : 0, hp = r.hpFoe;
     var n = dano > 0 ? golpesNecessariosDuelo(hp, dano) : Infinity;
     var base = n, sash = false;
@@ -138,7 +156,7 @@
     var minha = usaPrio ? (prioReal ? melhor.prio : 1) : 0;
     var alvoPrio = (ameacas || []).filter(function (a) { return a.prio > minha; }).sort(function (a, b) { return b.fracEu - a.fracEu || (a.nome < b.nome ? -1 : 1); })[0] || null;
     return { nome: g.nome, dano: dano, hp: hp, frac: hp > 0 ? dano / hp : 0, n: n, extra: n === Infinity ? 0 : n - base, primeiro: primeiro, porQue: porQue,
-      velEu: r.v1, velFoe: r.v2, sash: sash, alvoPrio: alvoPrio, foe: foe.nome, foeSname: foe.sp ? foe.sp.sname : "" };
+      velEu: r.v1, velFoe: r.v2, sash: sash, alvoPrio: alvoPrio, foe: foe.nome, foeSname: foe.sp ? foe.sp.sname : "", foge: duelo.foge };
   }
   function pipelineTierDaLinha(l) {
     if (l.n === 1 && l.primeiro) return 3;
@@ -290,7 +308,7 @@
 
   // O caso (atacante + habilidade + golpe + alvo) está na lista conferida na calculadora do jogo?
   function pipelineCasoConferido(sname, habilidade, linha) {
-    return CASOS_CALIBRADOS.some(function (c) { return c.atacante === sname && c.habilidade === habilidade && c.golpe === linha.nome && c.alvo === linha.foeSname; });
+    return CASOS_CALIBRADOS.some(function (c) { return !linha.foge && c.atacante === sname && c.habilidade === habilidade && c.golpe === linha.nome && c.alvo === linha.foeSname; });
   }
   function pipelineTierDoCandidato(c) { return c.hitKill === 1 && c.baterPrimeiro ? 3 : c.hitKill === 2 && c.baterPrimeiro ? 2 : 1; }
 
@@ -336,18 +354,21 @@
   // Rascunho de build que a IA vai fechar: sem item (a referência da simulação). Habilidade que só funciona gastando o
   // item (Gluttony, Ripen...) é recusada sem item, então o rascunho leva uma Berry - e o candidato avisa.
   var ITEM_DE_RASCUNHO_PIPELINE = "Sitrus Berry";
+  // Mega no modo de mega temporária só existe segurando a pedra (megaStoneRuleFor): sem item a validação recusa, então o rascunho
+  // leva a pedra (a primeira, quando há duas) e o candidato avisa.
   function pipelineValidarRascunho(sp, g) {
     var bruto = { ability: g.hab, nature: g.nat.nome, item: "", evs: g.nat.evs.slice(), moves: g.av.golpes.slice() };
     var recusa = {}, v = validateAiBuild(sp, bruto, recusa, {});
     if (v) return { v: v, itemDeRascunho: null };
-    if (/só funciona gastando o item/.test(recusa.txt || "") && ITEMS.indexOf(ITEM_DE_RASCUNHO_PIPELINE) !== -1) {
-      bruto.item = ITEM_DE_RASCUNHO_PIPELINE;
-      var recusa2 = {};
-      v = validateAiBuild(sp, bruto, recusa2, {});
-      if (v) return { v: v, itemDeRascunho: v.item === ITEM_DE_RASCUNHO_PIPELINE ? ITEM_DE_RASCUNHO_PIPELINE : null };
-      return { v: null, motivo: recusa2.txt };
-    }
-    return { v: null, motivo: recusa.txt };
+    var item = null, tipo = null, regra = megaStoneRuleFor(sp);
+    if (/só funciona gastando o item/.test(recusa.txt || "") && ITEMS.indexOf(ITEM_DE_RASCUNHO_PIPELINE) !== -1) { item = ITEM_DE_RASCUNHO_PIPELINE; tipo = "gasta"; }
+    else if (/precisa segurar a pedra/.test(recusa.txt || "") && regra && regra.stones.length) { item = regra.stones[0]; tipo = "pedra"; }
+    if (!item) return { v: null, motivo: recusa.txt };
+    bruto.item = item;
+    var recusa2 = {};
+    v = validateAiBuild(sp, bruto, recusa2, {});
+    if (!v) return { v: null, motivo: recusa2.txt };
+    return { v: v, itemDeRascunho: v.item === item ? item : null, tipoDoItem: tipo, pedras: regra ? regra.stones.slice() : [] };
   }
 
   // ---- 1. do Pokémon para a build (caso A) ----
@@ -403,7 +424,7 @@
         for (var vi = 0; vi < variantes.length; vi++) {
           var g = variantes[vi];
           var r = pipelineValidarRascunho(sp, g);
-          if (r.v) { validos.push({ g: g, v: r.v, itemDeRascunho: r.itemDeRascunho }); return; }
+          if (r.v) { validos.push({ g: g, v: r.v, itemDeRascunho: r.itemDeRascunho, tipoDoItem: r.tipoDoItem, pedras: r.pedras }); return; }
           if (r.motivo && motivosDescartados.indexOf(r.motivo) === -1) motivosDescartados.push(r.motivo);
         }
       });
@@ -423,7 +444,9 @@
         var av = c.g.av;
         var calibrada = av.hitKill > 0 && av.linhas.length > 0 && !av.alvoPrio && av.linhas.every(function (l) { return pipelineCasoConferido(sp.sname, c.g.hab, l); });
         var avisos = [];
-        if (c.itemDeRascunho) avisos.push("A habilidade escolhida só funciona gastando o item: o rascunho leva " + c.itemDeRascunho + " (a IA pode trocar); a simulação não conta o item.");
+        if (c.itemDeRascunho && c.tipoDoItem === "pedra") avisos.push("No modo de mega temporária " + sp.n + " precisa segurar a pedra: o rascunho leva " + c.itemDeRascunho + (c.pedras.length > 1 ? " (a IA escolhe entre " + c.pedras.join(" e ") + ")" : "") + "; a simulação não conta o item.");
+        else if (c.itemDeRascunho) avisos.push("A habilidade escolhida só funciona gastando o item: o rascunho leva " + c.itemDeRascunho + " (a IA pode trocar); a simulação não conta o item.");
+        if (av.linhas.some(function (l) { return l.foge; })) avisos.push("Um dos lados foge no Intimidate (Tactical Retreat): o motor trata a luta como empate; o dano aqui é o de quem ficasse em campo, só uma estimativa.");
         if (av.hitKill > 0 && !calibrada) avisos.push("Número do motor, ainda não conferido na calculadora do jogo: trate como estimativa.");
         if (av.alvoPrio) {
           var ap = av.alvoPrio.alvoPrio;
