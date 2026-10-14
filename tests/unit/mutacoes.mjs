@@ -2253,6 +2253,56 @@ export const MUTACOES = [
     de: "if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade &&",
     para: "if (def.ef.bloqueiaPrioLado &&",
   },
+  // ---- prioridade condicional no duelo (14/10/2026; tests/unit/prioridade_condicional_no_duelo.test.mjs) ----
+  {
+    id: "prio-condicional-queenly-some",
+    descricao: "Coil Up e parecidas voltam a ter prioridade contra Queenly Majesty, Dazzling e Armor Tail",
+    arquivo: "duelo.js",
+    de: "if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade) return true; // Queenly Majesty, Dazzling, Armor Tail (Mold Breaker ignora)",
+    para: "",
+  },
+  {
+    id: "prio-condicional-ignora-mold-breaker",
+    descricao: "o bloqueio da prioridade condicional passa a valer também contra Mold Breaker e parecidos",
+    arquivo: "duelo.js",
+    de: "if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade) return true; // Queenly Majesty, Dazzling, Armor Tail (Mold Breaker ignora)",
+    para: "if (def.ef.bloqueiaPrioLado) return true;",
+  },
+  {
+    id: "prio-condicional-surprise-some",
+    descricao: "a Surprise! na névoa deixa de zerar a prioridade condicional",
+    arquivo: "duelo.js",
+    de: "if (def.ef.barraPrioridade) return true; // Surprise! na névoa",
+    para: "",
+  },
+  {
+    id: "prio-condicional-terreno-psiquico-some",
+    descricao: "o Psychic Terrain deixa de zerar a prioridade condicional de quem ataca o Pokémon no chão",
+    arquivo: "duelo.js",
+    de: "return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === \"psiquico\" && aterradoDuelo(def));",
+    para: "return false;",
+  },
+  {
+    id: "prio-condicional-psiquico-sem-chao",
+    descricao: "o Psychic Terrain passa a barrar a prioridade também de quem ataca um Pokémon que não está no chão",
+    arquivo: "duelo.js",
+    de: "return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === \"psiquico\" && aterradoDuelo(def));",
+    para: "return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === \"psiquico\");",
+  },
+  {
+    id: "prio-condicional-luta-sem-alvo-do-eu",
+    descricao: "na luta completa a prioridade condicional de quem eu simulo deixa de olhar o alvo (volta a ignorar o bloqueio)",
+    arquivo: "duelo.js",
+    de: "else if (temPrioridadeNoDuelo(eu, meu, euPreciso, foe) && !prioDele) euPrimeiro = true;",
+    para: "else if (temPrioridadeNoDuelo(eu, meu, euPreciso) && !prioDele) euPrimeiro = true;",
+  },
+  {
+    id: "prio-condicional-luta-sem-alvo-do-foe",
+    descricao: "na luta completa a prioridade condicional do chefão deixa de olhar quem enfrenta (Queenly Majesty minha não barra o Opportunist dele)",
+    arquivo: "duelo.js",
+    de: "var prioDele = temPrioridadeNoDuelo(foe, dele, elePrecisa, eu);",
+    para: "var prioDele = temPrioridadeNoDuelo(foe, dele, elePrecisa);",
+  },
   // ---- pipeline de build com intenção (ticket 20 da dívida, 14/10/2026; src/regras/pipeline_build.js) ----
   {
     id: "pipeline-prioridade-bloqueada-vira-primeiro",

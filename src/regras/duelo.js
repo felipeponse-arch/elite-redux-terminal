@@ -1856,8 +1856,19 @@
   }
   // Prioridade que vale no golpe que decide: golpe de prioridade real, ou
   // prioridade de habilidade no 1º golpe (On the Prowl, Gale Wings e parecidas).
-  function temPrioridadeNoDuelo(u, dano, golpesParaVencer) {
+  // `def` (opcional): o alvo. A prioridade CONDICIONAL (Coil Up, Sidewinder, Cutthroat, +1 no 1º turno, Opportunist)
+  // entra na prioridade do golpe (battle_main.c GetMovePriority), então Queenly Majesty/Dazzling/Armor Tail
+  // (abilities.cc: imune se a prioridade for > 0), o Psychic Terrain (CANCELLER_PSYCHIC_TERRAIN) e a Surprise!
+  // a atingem como atingem a de base. Sem `def` o chamador diz que o alvo não bloqueia nada.
+  function prioCondicionalBarradaDuelo(atq, def) {
+    if (!def || !def.ef) return false;
+    if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade) return true; // Queenly Majesty, Dazzling, Armor Tail (Mold Breaker ignora)
+    if (def.ef.barraPrioridade) return true; // Surprise! na névoa
+    return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === "psiquico" && aterradoDuelo(def)); // Psychic Terrain protege quem está no chão
+  }
+  function temPrioridadeNoDuelo(u, dano, golpesParaVencer, def) {
     if (dano.melhor.prio > 0) return true;
+    if (prioCondicionalBarradaDuelo(u, def)) return false;
     var g = dano.melhor.golpe;
     // Opportunist: o golpe que decide (2º em diante) acha o alvo abaixo da metade.
     if (u.ef.prioNoFinal && golpesParaVencer >= 2) return true;
@@ -2368,10 +2379,10 @@
     // Disguise/Ice Face: o primeiro golpe não faz nada.
     if (elePrecisa !== Infinity) elePrecisa += bloqueiosNoDuelo(eu, foe, dele);
     if (euPreciso !== Infinity) { var bq = bloqueiosNoDuelo(foe, eu, meu); euPreciso += bq; comPrio += bq; }
-    var prioDele = temPrioridadeNoDuelo(foe, dele, elePrecisa);
+    var prioDele = temPrioridadeNoDuelo(foe, dele, elePrecisa, eu);
     var nec = euPreciso, euPrimeiro;
     if (comPrio <= elePrecisa && !prioDele) { nec = Math.min(euPreciso, comPrio); euPrimeiro = true; }
-    else if (temPrioridadeNoDuelo(eu, meu, euPreciso) && !prioDele) euPrimeiro = true;
+    else if (temPrioridadeNoDuelo(eu, meu, euPreciso, foe) && !prioDele) euPrimeiro = true;
     else if (prioDele && !(meu.melhor.prio > 0)) euPrimeiro = false;
     else euPrimeiro = v1 > v2 ? true : v1 < v2 ? false : null;
     var porPrioridade = (comPrio <= elePrecisa && !prioDele) || meu.melhor.prio > 0 || prioDele;
