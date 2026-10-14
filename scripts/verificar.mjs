@@ -9,9 +9,7 @@
 // Uso: npm run verificar   (pular no commit, sem recomendação: git commit --no-verify)
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { openSync, closeSync, writeSync, readFileSync, unlinkSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { segurarVaga } from "./vaga.mjs";
 
 const RAIZ = fileURLToPath(new URL("..", import.meta.url));
 // Regra do QA (08/10/2026): no branch de um ticket, só as sabotagens ligadas ao que
@@ -26,41 +24,19 @@ const ETAPAS = [
   ["testes de navegador (Playwright, projeto funcional)", "npm run test:e2e --silent", "Teste de navegador falhou - detalhes: npm run test:relatorio"],
 ];
 
-// Trava de sessão (ADR-001 em docs/decisoes_arquitetura.md, 2026-10-02): duas sessões
-// verificando ao mesmo tempo (mesma pasta OU worktrees diferentes) se atropelam - a
-// porta 8101 dos testes é da máquina, e com reuseExistingServer uma sessão testa o build
-// da outra; na mesma pasta ainda apagam o test-results uma da outra (02/10: prepare_publish
-// recusou 3 vezes assim). A trava é da máquina (pasta temporária), com o pid do dono:
-// outra verificação viva = para na hora; dono morto (queda de energia, Ctrl+C) = assume.
-const TRAVA = join(tmpdir(), "elite-redux-verificar.lock");
-function pegarTrava() {
-  for (let tentativa = 0; tentativa < 2; tentativa++) {
-    try {
-      const fd = openSync(TRAVA, "wx");
-      writeSync(fd, JSON.stringify({ pid: process.pid, pasta: RAIZ, desde: new Date().toISOString() }));
-      closeSync(fd);
-      return;
-    } catch (e) {
-      if (e.code !== "EEXIST") throw e;
-      let dono = null;
-      try { dono = JSON.parse(readFileSync(TRAVA, "utf8")); } catch { /* trava ilegível: trata como abandonada */ }
-      let vivo = false;
-      try { if (dono && dono.pid) { process.kill(dono.pid, 0); vivo = true; } } catch { /* pid não existe mais */ }
-      if (vivo) {
-        console.error("Outra sessão já está verificando (pid " + dono.pid + ", " + dono.pasta + ", desde " + dono.desde + ").");
-        console.error("Espere ela terminar e rode de novo - as duas juntas se atropelam (porta 8101 e test-results).");
-        process.exit(1);
-      }
-      try { unlinkSync(TRAVA); } catch { /* outra sessão limpou antes */ }
-    }
-  }
-  console.error("Não consegui pegar a trava " + TRAVA + " - rode de novo.");
+
+// Vaga de sessão (ADR-001 em docs/decisoes_arquitetura.md, 2026-10-02; melhoria B, 2026-10-13):
+// duas sessões verificando ao mesmo tempo (mesma pasta OU worktrees diferentes) se atropelam -
+// a porta 8101 dos testes é da máquina, e com reuseExistingServer uma sessão testa o build da
+// outra; na mesma pasta ainda apagam o test-results uma da outra. Antes a trava FALHAVA na
+// hora; agora a vaga "pesada" (scripts/vaga.mjs) faz fila e ESPERA, com pid do dono (morto =
+// libera). Os filhos herdam ER_VAGA_DONO e não pedem a vaga de novo (a sabotagem roda aqui dentro).
+try {
+  await segurarVaga("pesada");
+} catch (e) {
+  console.error(e.message);
   process.exit(1);
 }
-pegarTrava();
-process.on("exit", () => {
-  try { if (JSON.parse(readFileSync(TRAVA, "utf8")).pid === process.pid) unlinkSync(TRAVA); } catch { /* já saiu */ }
-});
 
 const inicio = Date.now();
 for (const [titulo, comando, falha] of ETAPAS) {

@@ -1,0 +1,143 @@
+// Vaga de máquina para verificação pesada (melhoria B de docs/pipeline_do_projeto.md, 2026-10-13).
+// Antes só o gancho tinha trava, e ela FALHAVA na hora; testes avulsos (node --test, sabotagem)
+// não tinham nenhuma - duas sabotagens completas juntas levaram 90+ min. Aqui a vaga é um
+// semáforo em arquivos na pasta temporária (um dono por nome, pid do dono pra detectar morte)
+// com FILA em ordem de chegada: quem chega depois ESPERA, avisando de tempos em tempos.
+//
+// Uso em código:  await comVaga("pesada", async () => { ... }, { esperaMaxMs, avisoMs })
+// Uso em terminal: npm run pesado -- node --test tests/unit/x.test.mjs   (devolve o código de saída)
+//
+// Reentrância: enquanto segura a vaga, o processo põe ER_VAGA_DONO=<seu pid> no ambiente dos
+// filhos. Quem recebe esse valor e vê o dono vivo NÃO pede de novo (senão o gancho, que segura
+// "pesada" e roda a sabotagem, travaria em deadlock com o próprio filho).
+//
+// ER_VAGA_PASTA troca a pasta das vagas (os testes usam uma por teste, sem tocar a real).
+import { mkdirSync, writeFileSync, readFileSync, readdirSync, unlinkSync, openSync, closeSync, writeSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const ESPERA_MAX_PADRAO_MS = 20 * 60 * 1000;
+const AVISO_PADRAO_MS = 30 * 1000;
+const SONDAGEM_MS = 250;
+
+function pasta() {
+  const p = process.env.ER_VAGA_PASTA || join(tmpdir(), "elite-redux-vagas");
+  mkdirSync(p, { recursive: true });
+  return p;
+}
+
+function vivo(pid) {
+  if (!pid) return false;
+  try { process.kill(Number(pid), 0); return true; } catch (e) { return e.code === "EPERM"; }
+}
+
+function lerJson(arq) {
+  try { return JSON.parse(readFileSync(arq, "utf8")); } catch { return null; }
+}
+
+function dorme(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+// Fila viva do nome, em ordem de chegada (a fila tem o instante no nome do arquivo).
+// Entradas de processos mortos são removidas no caminho.
+function filaViva(dir, nome) {
+  const prefixo = nome + ".fila.";
+  const fila = [];
+  for (const f of readdirSync(dir).filter((x) => x.startsWith(prefixo)).sort()) {
+    const dados = lerJson(join(dir, f));
+    if (dados && vivo(dados.pid)) fila.push({ arquivo: f, ...dados });
+    else if (!dados) { /* ainda sendo escrita: ignora nesta rodada */ }
+    else { try { unlinkSync(join(dir, f)); } catch { /* outro limpou */ } }
+  }
+  return fila;
+}
+
+// Pega a vaga (esperando na fila) e devolve a função que a solta. Também solta sozinha no exit.
+export async function segurarVaga(nome, { esperaMaxMs = ESPERA_MAX_PADRAO_MS, avisoMs = AVISO_PADRAO_MS } = {}) {
+  // Reentrância: o pai já segura a vaga e me avisou pelo ambiente.
+  const pai = Number(process.env.ER_VAGA_DONO);
+  if (pai && vivo(pai)) return () => {};
+
+  const dir = pasta();
+  const dono = join(dir, nome + ".dono");
+  const chegada = Date.now();
+  const meu = nome + ".fila." + String(chegada).padStart(15, "0") + "-" + String(process.pid).padStart(8, "0") + "-" + Math.random().toString(36).slice(2, 6);
+  const info = { pid: process.pid, pasta: process.cwd(), desde: new Date(chegada).toISOString() };
+  writeFileSync(join(dir, meu), JSON.stringify(info));
+
+  const sair = () => { try { unlinkSync(join(dir, meu)); } catch { /* já saiu */ } };
+  let ultimoAviso = chegada;
+  try {
+    for (;;) {
+      const fila = filaViva(dir, nome);
+      if (fila.length && fila[0].arquivo === meu) {
+        // Sou o primeiro: libero dono morto e tento assumir (só o primeiro da fila faz isso).
+        const atual = lerJson(dono);
+        if (atual && !vivo(atual.pid)) { try { unlinkSync(dono); } catch { /* já limpo */ } }
+        try {
+          const fd = openSync(dono, "wx");
+          writeSync(fd, JSON.stringify(info));
+          closeSync(fd);
+          break;
+        } catch (e) {
+          if (e.code !== "EEXIST") throw e;
+        }
+      }
+      const agora = Date.now();
+      if (agora - chegada >= esperaMaxMs) {
+        const d = lerJson(dono) || (fila[0] && fila[0]);
+        throw new Error("Vaga " + nome + ": esperei " + Math.round((agora - chegada) / 1000) + " s e estourei o limite de " +
+          Math.round(esperaMaxMs / 1000) + " s (dono: pid " + (d && d.pid) + ", pasta " + (d && d.pasta) + ").");
+      }
+      if (agora - ultimoAviso >= avisoMs) {
+        ultimoAviso = agora;
+        const d = lerJson(dono);
+        const atras = d || fila.find((x) => x.arquivo !== meu) || {};
+        console.error("Aguardando vaga " + nome + ": na fila atrás de pid " + atras.pid + ", pasta " + atras.pasta + ", há " + Math.round((agora - chegada) / 1000) + " s");
+      }
+      await dorme(SONDAGEM_MS);
+    }
+  } catch (e) {
+    sair();
+    throw e;
+  }
+  sair();
+
+  const antes = process.env.ER_VAGA_DONO;
+  process.env.ER_VAGA_DONO = String(process.pid);
+  const soltar = () => {
+    process.off("exit", soltar);
+    try { if (lerJson(dono)?.pid === process.pid) unlinkSync(dono); } catch { /* já solta */ }
+    if (antes === undefined) delete process.env.ER_VAGA_DONO; else process.env.ER_VAGA_DONO = antes;
+  };
+  // Se o processo sair (process.exit, fim normal) o gancho de exit solta; queda feia: o pid morto libera.
+  process.on("exit", soltar);
+  return soltar;
+}
+
+export async function comVaga(nome, fn, opcoes) {
+  const soltar = await segurarVaga(nome, opcoes);
+  try { return await fn(); } finally { soltar(); }
+}
+
+// CLI: node scripts/vaga.mjs <comando...>  -> roda o comando segurando a vaga "pesada".
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  const args = process.argv.slice(2);
+  if (!args.length) {
+    console.error("Uso: npm run pesado -- <comando...>");
+    process.exit(2);
+  }
+  const comando = args.map((a) => (/[\s"]/.test(a) ? '"' + a.replace(/"/g, '\\"') + '"' : a)).join(" ");
+  try {
+    const codigo = await comVaga("pesada", () => new Promise((resolve) => {
+      const f = spawn(comando, { stdio: "inherit", shell: true });
+      f.on("exit", (c, sinal) => resolve(c === null ? (sinal ? 1 : 0) : c));
+      f.on("error", () => resolve(1));
+    }));
+    process.exit(codigo);
+  } catch (e) {
+    console.error(e.message);
+    process.exit(1);
+  }
+}

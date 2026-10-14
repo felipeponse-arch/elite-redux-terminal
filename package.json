@@ -12,6 +12,7 @@
     "verificar": "node scripts/verificar.mjs",
     "encalhados": "node scripts/encalhados.mjs",
     "checkpoint": "node scripts/checkpoint.mjs",
+    "pesado": "node scripts/vaga.mjs",
     "alarme:upstream": "node scripts/alarme_upstream.mjs",
     "diff:versoes": "node scripts/diff_versoes.mjs",
     "validar:cru": "node scripts/validar_dado_cru.mjs",

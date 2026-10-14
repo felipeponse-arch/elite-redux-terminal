@@ -17,6 +17,10 @@ import { spawn, spawnSync } from "node:child_process";
 import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { cpus } from "node:os";
 import { MUTACOES as TODAS } from "./unit/mutacoes.mjs";
+import { segurarVaga } from "../scripts/vaga.mjs";
+
+// Vaga pesada (melhoria B): rodada direta espera na fila; dentro do gancho (ER_VAGA_DONO) não pede de novo.
+await segurarVaga("pesada");
 
 const ARGS = process.argv.slice(2);
 const COMPLETO = ARGS.includes("--completo");
