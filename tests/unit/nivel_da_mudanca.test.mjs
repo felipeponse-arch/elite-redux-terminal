@@ -3,9 +3,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import {
   nivelDaMudanca, etapasDoNivel, ambienteDosFilhos, VARIAVEIS_GIT_DE_LOCALIZACAO,
+  arquivosEmStaging, classificarPorStaging,
 } from '../../scripts/nivel_da_mudanca.mjs';
 
 const TICKET = { branch: 'ticket-x', env: {} };
@@ -172,4 +176,132 @@ test('verificar.mjs --nivel: imprime nível e etapas sem rodar nada', () => {
   const r = spawnSync(process.execPath, [VERIFICAR, '--nivel', 'docs/x.md'], { env, encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /^Nível [03] \(/);
+});
+
+// ---------------------------------------------------------------------------
+// Rodada 2 (supervisor): lista branca de scripts/, contexto de commit e leitura REAL do staging.
+// ---------------------------------------------------------------------------
+
+test('scripts/: só a lista branca é nível 2; o resto (inclusive script novo) sobe para 3', () => {
+  for (const a of ['checkpoint', 'encalhados', 'validar_dado_cru', 'diff_versoes', 'rank_escolha', 'calcular_rank_v2']) {
+    assert.equal(nivel([`scripts/${a}.mjs`]), 2, a);
+  }
+  // importado pelo build / webServer do playwright / o próprio gate / dado por .ps1
+  for (const a of ['validar_dados', 'servidor_estatico', 'nivel_da_mudanca', 'checar_css', 'checar_encoding',
+    'etapa_do_mapa', 'gerar_presentes', 'script_novo_qualquer']) {
+    assert.equal(nivel([`scripts/${a}.mjs`]), 3, a);
+  }
+});
+
+test('classificarPorStaging: só dentro do commit (GIT_INDEX_FILE) ou com --por-staging', () => {
+  assert.equal(classificarPorStaging({ GIT_INDEX_FILE: '/x/.git/index' }, []), true);
+  assert.equal(classificarPorStaging({}, ['--por-staging']), true);
+  assert.equal(classificarPorStaging({}, []), false);
+  assert.equal(classificarPorStaging({ GIT_INDEX_FILE: '' }, []), false);
+});
+
+test('verificar.mjs --nivel manual (sem GIT_INDEX_FILE, sem arquivos) é SEMPRE nível 3', () => {
+  const env = { ...process.env };
+  for (const v of Object.keys(env)) if (v.startsWith('GIT_')) delete env[v];
+  delete env.ER_WIP; delete env.ER_VERIFICAR;
+  const r = spawnSync(process.execPath, [VERIFICAR, '--nivel'], { env, encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /^Nível 3 /);
+});
+
+// --- staging de verdade, num repositório git de TESTE em tmpdir -----------------------------------
+function envLimpo() {
+  const env = { ...process.env };
+  for (const v of Object.keys(env)) if (v.startsWith('GIT_')) delete env[v];
+  return env;
+}
+function git(cwd, ...args) {
+  const r = spawnSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'core.autocrlf=false', ...args],
+    { cwd, env: envLimpo(), encoding: 'utf8' });
+  assert.equal(r.status, 0, `git ${args.join(' ')}: ${r.stderr}`);
+  return r.stdout;
+}
+function escrever(dir, rel, texto = 'x\n') {
+  const p = path.join(dir, rel);
+  mkdirSync(path.dirname(p), { recursive: true });
+  writeFileSync(p, texto);
+}
+const MODULO = pathToFileURL(fileURLToPath(new URL('../../scripts/nivel_da_mudanca.mjs', import.meta.url))).href;
+
+/** Repositório de teste com um pre-commit que grava a lista de staging usada (e o GIT_INDEX_FILE visto). */
+function repoDeTeste() {
+  const pai = mkdtempSync(path.join(tmpdir(), 'nivel-'));
+  const dir = path.join(pai, 'repo');
+  mkdirSync(dir);
+  git(dir, 'init', '-q');
+  escrever(dir, 'src/ui/a.mjs', 'a\n');
+  escrever(dir, 'docs/b.md', 'b\n');
+  escrever(dir, 'src/regras/c.mjs', 'c\n');
+  git(dir, 'add', '-A');
+  git(dir, 'commit', '-q', '-m', 'base');
+  const saida = path.join(pai, 'lista.json');
+  const ganchoJs = path.join(pai, 'gancho.mjs');
+  writeFileSync(ganchoJs, `import { arquivosEmStaging } from ${JSON.stringify(MODULO)};\nimport { writeFileSync } from 'node:fs';\n` +
+    `writeFileSync(${JSON.stringify(saida)}, JSON.stringify({ arquivos: arquivosEmStaging(process.cwd()), indice: process.env.GIT_INDEX_FILE || '' }));\n`);
+  const hook = path.join(dir, '.git', 'hooks', 'pre-commit');
+  writeFileSync(hook, `#!/bin/sh\nnode ${JSON.stringify(ganchoJs.split(path.sep).join('/'))}\n`, { mode: 0o755 });
+  const lerLista = () => JSON.parse(readFileSync(saida, 'utf8'));
+  const limpar = () => rmSync(pai, { recursive: true, force: true });
+  return { dir, lerLista, limpar };
+}
+/** Arquivos que o commit mais recente realmente contém. */
+const doCommit = (dir) => git(dir, 'diff-tree', '--no-commit-id', '--name-only', '-r', '--no-renames', '-z', 'HEAD')
+  .split('\0').filter(Boolean).sort();
+
+test('arquivosEmStaging: apagado, renomeado de src/ui para docs, acento/espaço/apóstrofo', () => {
+  const t = repoDeTeste();
+  try {
+    git(t.dir, 'rm', '-q', 'src/regras/c.mjs');
+    git(t.dir, 'mv', 'src/ui/a.mjs', 'docs/a_movido.md');
+    const esquisito = "docs/ação d'água ç.md";
+    escrever(t.dir, esquisito);
+    git(t.dir, 'add', '-A');
+    const lista = arquivosEmStaging(t.dir, envLimpo()).sort();
+    assert.deepEqual(lista, ['docs/a_movido.md', esquisito, 'src/regras/c.mjs', 'src/ui/a.mjs'].sort());
+    // a origem do rename (src/ui) não pode sumir da lista: sobe para 3
+    assert.equal(nivelDaMudanca(lista, TICKET).nivel, 3);
+    // só apagar um arquivo de regra = nível 2 (a deleção conta)
+    git(t.dir, 'reset', '-q');
+    git(t.dir, 'rm', '-q', '--cached', 'src/regras/c.mjs');
+    assert.deepEqual(arquivosEmStaging(t.dir, envLimpo()), ['src/regras/c.mjs']);
+  } finally { t.limpar(); }
+});
+
+test('arquivosEmStaging: fora de repositório git devolve [] (nível 3)', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'nivel-fora-'));
+  try {
+    const env = { ...envLimpo(), GIT_CEILING_DIRECTORIES: path.dirname(dir) };
+    assert.deepEqual(arquivosEmStaging(dir, env), []);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('item crítico: no pre-commit a lista é a do COMMIT (commit -a, commit <arquivo>, commit -o)', () => {
+  const casos = [
+    ['commit -a', (t) => { escrever(t.dir, 'src/ui/a.mjs', 'mudou\n'); escrever(t.dir, 'docs/b.md', 'mudou\n'); return ['commit', '-q', '-a', '-m', 'm']; }, 3],
+    ['commit <arquivo>', (t) => {
+      escrever(t.dir, 'docs/b.md', 'mudou\n'); escrever(t.dir, 'src/ui/a.mjs', 'mudou\n');
+      return ['commit', '-q', '-m', 'm', 'docs/b.md'];
+    }, 0],
+    ['commit -o', (t) => {
+      escrever(t.dir, 'docs/b.md', 'mudou\n'); escrever(t.dir, 'src/ui/a.mjs', 'mudou\n');
+      git(t.dir, 'add', 'src/ui/a.mjs'); // no índice real, mas FORA do commit -o
+      return ['commit', '-q', '-o', '-m', 'm', 'docs/b.md'];
+    }, 0],
+    ['commit simples (staging)', (t) => { escrever(t.dir, 'docs/b.md', 'mudou\n'); git(t.dir, 'add', 'docs/b.md'); return ['commit', '-q', '-m', 'm']; }, 0],
+  ];
+  for (const [nome, preparar, esperado] of casos) {
+    const t = repoDeTeste();
+    try {
+      git(t.dir, ...preparar(t));
+      const { arquivos, indice } = t.lerLista();
+      assert.deepEqual([...arquivos].sort(), doCommit(t.dir), `${nome}: lista do gancho = arquivos do commit`);
+      assert.ok(indice, `${nome}: o git define GIT_INDEX_FILE no gancho`);
+      assert.equal(nivelDaMudanca(arquivos, TICKET).nivel, esperado, nome);
+    } finally { t.limpar(); }
+  }
 });

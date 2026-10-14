@@ -9,9 +9,10 @@
 //   Nível | Mudou                                                  | Roda
 //   0     | só docs/, *.md, GLOSSARY.md, AUDITORIA-DOSSIE.md       | check
 //   1     | só tests/unit/                                         | check + unitários (+ sabotagem --mudados se mutacoes.mjs)
-//   2     | src/regras/, scripts/*.mjs (menos build*/verificar/vaga) | check + unitários + sabotagem (--mudados fora do master)
+//   2     | src/regras/, scripts/ da lista branca (checkpoint, encalhados...) | check + unitários + sabotagem (--mudados fora do master)
 //   3     | o resto: src/ui, css, template, build, e2e, data, configs, caminho desconhecido | tudo (+ build + navegador)
-//   Sempre 3: branch master, ER_VERIFICAR=completo, nada em staging (execução manual).
+//   Sempre 3: branch master, ER_VERIFICAR=completo, nada em staging, execução MANUAL fora de um commit
+//   (GIT_INDEX_FILE ausente; --por-staging força a classificação por staging).
 //   ER_WIP=1 (npm run checkpoint) = nível 0, menos no master.
 //
 // Etapas, da mais barata pra mais cara (para na primeira que falhar):
@@ -22,7 +23,7 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { segurarVaga } from "./vaga.mjs";
-import { nivelDaMudanca, etapasDoNivel, ambienteDosFilhos } from "./nivel_da_mudanca.mjs";
+import { nivelDaMudanca, etapasDoNivel, ambienteDosFilhos, arquivosEmStaging, classificarPorStaging } from "./nivel_da_mudanca.mjs";
 
 const RAIZ = fileURLToPath(new URL("..", import.meta.url));
 const ARGS = process.argv.slice(2);
@@ -41,20 +42,15 @@ if (ARGS.includes("--sonda-env")) {
   process.exit(r.status ?? 1);
 }
 
-// Lê staging (-z: nomes com acento não vêm entre aspas; --no-renames: renomear lista origem E destino).
-// Falha do git = lista vazia = nível 3.
-function arquivosEmStaging() {
-  const r = spawnSync("git", ["--no-pager", "diff", "--cached", "--name-only", "--no-renames", "-z"], { cwd: RAIZ, encoding: "utf8" });
-  if (r.status !== 0) return [];
-  return (r.stdout || "").split("\0").filter(Boolean);
-}
 // Regra do QA (08/10/2026): no branch de um ticket, só as sabotagens ligadas ao que
 // mudou; no master (merge e publicar) a suíte inteira.
 const BRANCH = (spawnSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: RAIZ, encoding: "utf8" }).stdout || "").trim();
 
 const modoNivel = ARGS.includes("--nivel");
-const manuais = ARGS.filter((a) => a !== "--nivel");
-const ARQUIVOS = modoNivel && manuais.length ? manuais : arquivosEmStaging();
+const manuais = ARGS.filter((a) => !a.startsWith("--"));
+// Arquivos dados na linha de comando valem só no --nivel (simulação). Senão: staging (dentro do commit ou
+// com --por-staging); execução manual fora do commit = lista vazia = nível 3. Lido ANTES de limpar o ambiente.
+const ARQUIVOS = modoNivel && manuais.length ? manuais : classificarPorStaging(process.env, ARGS) ? arquivosEmStaging(RAIZ) : [];
 const { nivel: NIVEL, motivo: MOTIVO } = nivelDaMudanca(ARQUIVOS, { branch: BRANCH, env: process.env });
 const ETAPAS = etapasDoNivel(NIVEL, { branch: BRANCH, arquivos: ARQUIVOS });
 console.log(`Nível ${NIVEL} (${MOTIVO}): ${ETAPAS.map((e) => e.id).join(", ")}`);
