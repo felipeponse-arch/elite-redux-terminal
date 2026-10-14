@@ -105,13 +105,16 @@ async function section26() {
     let omniChamadas = 0;
     let sampleChamadas = 0;
     window.claude = { use: async () => ({ json: async () => { sampleChamadas++; return { n: "claude" }; } }) };
+    let omniOpcoes = "nunca chamado";
     window.__ER_OMNIROUTE_BRIDGE__ = {
       modelo: "antigravity/gemini-3.1-pro-high",
-      json: async function (prompt) { omniChamadas++; return { n: prompt === "OMNI" ? "omni" : "erro" }; }
+      json: async function (prompt, opcoes) { omniChamadas++; omniOpcoes = opcoes; return { n: prompt === "OMNI" ? "omni" : "erro" }; }
     };
     r = await TE.pedirIA({ provedor: "omniroute", prompt: "OMNI", tentativas: 1 });
     check("bridge OmniRoute usa o modelo explícito sem consumir sample", r.ok && r.valor.n === "omni" && omniChamadas === 1 && sampleChamadas === 0,
       { r: r, omniChamadas: omniChamadas, sampleChamadas: sampleChamadas });
+    // Revisão de segurança (13/10): as ferramentas do app leem o estado e só vão ao cliente oficial; o bridge recebe só o prompt.
+    check("bridge OmniRoute não recebe as ferramentas do app (só o prompt)", omniOpcoes === undefined, omniOpcoes);
 
     const bridgeFalha = new Error("bridge indisponível");
     window.__ER_OMNIROUTE_BRIDGE__.json = async function () { omniChamadas++; throw bridgeFalha; };
@@ -122,6 +125,16 @@ async function section26() {
     window.__ER_OMNIROUTE_BRIDGE__.modelo = "auto/qualquer";
     r = await TE.pedirIA({ provedor: "omniroute", prompt: "MODELO INVALIDO", tentativas: 1 });
     check("modelo não explícito não ativa o bridge", r.ok && r.valor.n === "claude" && sampleChamadas === 2, r);
+    // Um bridge com `modelo` em getter que muda a cada leitura: o pedido lê o bridge uma vez só e não cai no meio.
+    let leituras = 0;
+    window.__ER_OMNIROUTE_BRIDGE__ = {
+      get modelo() { leituras++; return leituras === 1 ? "antigravity/gemini-3.1-pro-high" : "outro"; },
+      json: async function () { omniChamadas++; return { n: "omni" }; }
+    };
+    const omniAntes = omniChamadas;
+    r = await TE.pedirIA({ provedor: "omniroute", prompt: "OMNI", tentativas: 1 });
+    check("bridge lido uma vez por pedido: getter que muda de resposta não derruba a chamada", r.ok && r.valor.n === "omni" && omniChamadas === omniAntes + 1 && leituras === 1,
+      { r: r, leituras: leituras, omniChamadas: omniChamadas });
     delete window.__ER_OMNIROUTE_BRIDGE__;
   } finally {
     TE.definirPausasIA([4000, 10000]);

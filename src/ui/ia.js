@@ -78,9 +78,14 @@
     if (!bridge || bridge.modelo !== MODELO_OMNIROUTE_BUILD || typeof bridge.json !== "function") return null;
     return bridge;
   }
-  function clienteDeIA(o, sample) {
-    var bridge = o && o.provedor === "omniroute" ? bridgeOmniRouteParaBuild() : null;
+  // O bridge é lido UMA vez por pedido (revisão de segurança, 13/10): reler a cada passo deixaria um getter
+  // malicioso mudar de resposta no meio do pedido.
+  function clienteDeIA(bridge, sample) {
     return bridge ? { cliente: bridge, nome: "OmniRoute/" + MODELO_OMNIROUTE_BUILD } : { cliente: sample, nome: "Claude" };
+  }
+  // As ferramentas do app (que leem o estado) só vão ao cliente oficial; o bridge recebe só o prompt.
+  function opcoesDaIA(o, cliente, sample) {
+    return o.ferramentas === false || cliente !== sample ? undefined : { tools: buildStandardAiTools() };
   }
   async function obterClienteSample() {
     if (typeof claude === "undefined" || !claude.use) return null;
@@ -123,7 +128,7 @@
     if (!bridge && (typeof claude === "undefined" || !claude.use)) return { ok: false, mensagem: oQue + " por IA não disponível neste ambiente." };
     if (!bridge) sample = await obterClienteSample();
     if (!bridge && !sample) return { ok: false, mensagem: oQue + " por IA não disponível (recurso não concedido)." };
-    var escolha = clienteDeIA(o, sample);
+    var escolha = clienteDeIA(bridge, sample);
     var cliente = escolha.cliente;
     var tentativas = o.tentativas || 2;
     var prompt = o.prompt;
@@ -132,7 +137,7 @@
       for (var t = 1; t <= tentativas; t++) {
         var bruto;
         try {
-          bruto = await chamarModelo(cliente, prompt, o.ferramentas === false ? undefined : { tools: buildStandardAiTools() }, o,
+          bruto = await chamarModelo(cliente, prompt, opcoesDaIA(o, cliente, sample), o,
             t === 1 ? "Consultando " + escolha.nome + "…" : "A primeira sugestão não passou na validação - pedindo outra…");
         } catch (e) {
           // O bridge alternativo é opcional: se cair, a chamada oficial assume
@@ -142,7 +147,7 @@
             if (!sample) throw e;
             cliente = sample;
             escolha = { cliente: sample, nome: "Claude" };
-            bruto = await chamarModelo(cliente, prompt, o.ferramentas === false ? undefined : { tools: buildStandardAiTools() }, o,
+            bruto = await chamarModelo(cliente, prompt, opcoesDaIA(o, cliente, sample), o,
               "OmniRoute indisponível - consultando o Claude…");
           } else throw e;
         }
