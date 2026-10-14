@@ -62,20 +62,114 @@ test("caso A: sem chefão adiante, os candidatos saem só por sinergia (hit-kill
 });
 
 // ---------- caso B: Ninetales da Meteor Falls ----------
-test("caso B: Ledian derruba o Ninetales com Mega Punch, bate primeiro por velocidade, calibrada", () => {
+test("caso B: Ledian derruba o Ninetales com Mega Punch e bate primeiro por velocidade, mas o Flame Burst do alvo (+1) rebaixa o rótulo", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales });
-  const c = r.candidatos.find((x) => x.golpes.includes("Mega Punch"));
+  const c = r.candidatos.find((x) => x.golpes.includes("Mega Punch") && x.habilidade === "Aerodynamics");
   assert.ok(c, "nenhum candidato com Mega Punch: " + r.candidatos.map((x) => x.golpes.join("/")).join(" ; "));
   assert.equal(c.hitKill, 1);
   assert.equal(c.baterPrimeiro, true);
   assert.equal(c.porQue, "velocidade");
-  assert.equal(c.rotulo, "calibrada");
-  assert.match(c.motivos.join(" | "), /derruba no turno 1/);
   assert.match(c.motivos.join(" | "), /Velocidade contra 166/);
+  // Padrão conservador (14/10): o alvo age antes com Flame Burst (+1) e derruba o Ledian - não promete "calibrada".
+  assert.equal(c.alvoAgeAntes, true);
+  assert.equal(c.rotulo, "estimada");
+  assert.match(c.avisos.join(" | "), /O alvo age antes com Flame Burst \(\+1 de prioridade\) e derruba Ledian antes de ele agir/);
+  // O mínimo da rolagem (99,4%) fica abaixo do HP: nada de "derruba no turno 1", só "provável" com a faixa.
+  assert.equal(c.garantido, false);
+  assert.doesNotMatch(c.motivos.join(" | "), /derruba no turno 1/);
+  assert.match(c.motivos.join(" | "), /Provável derrubar o Ninetales em 1 golpe \(Mega Punch\)/);
+  assert.match(c.motivos.join(" | "), /Tira 99% a 117% do HP dele por golpe/);
   deepEqual(r.alvo, { chefao: "Courtney Meteor Falls", indice: 0, pokemon: ["Ninetales"], origem: "informado" });
   assert.ok(r.avisos.includes("Simulação 1x1: luta em dupla e Fake Out não são simulados."));
-  // O motor vê o Flame Burst (+1) do Ninetales: o candidato avisa, em vez de prometer mais do que sabe.
-  assert.match(c.avisos.join(" | "), /Flame Burst/);
+});
+
+// Ninetales da Meteor Falls sem o Flame Burst e com Def menor (Mild): o caso conferido na calculadora, sem prioridade do alvo.
+const foeSemPrioridade = () => R.foeDeDuelo(Object.assign({}, courtney.party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Shadow Ball"], nat: "Mild" }), 55, null);
+
+test("caso conferido (Ledian + Aerodynamics + Mega Punch x Ninetales) sem prioridade do alvo: calibrada, garantido e 'derruba no turno 1'", () => {
+  const r = R.candidatosDeBuild(sp("Ledian"), { alvo: { foe: foeSemPrioridade() } });
+  const c = r.candidatos.find((x) => x.golpes.includes("Mega Punch") && x.habilidade === "Aerodynamics" && x.hitKill === 1);
+  assert.ok(c, r.candidatos.map((x) => x.habilidade + ":" + x.golpes.join("/")).join(" ; "));
+  assert.equal(c.alvoAgeAntes, false);
+  assert.equal(c.garantido, true);
+  assert.equal(c.rotulo, "calibrada");
+  assert.match(c.motivos.join(" | "), /Mega Punch derruba no turno 1 o Ninetales/);
+});
+
+test("calibrada exige o MESMO atacante, habilidade, golpe e alvo: outro atacante, outra habilidade ou outro alvo é estimada", () => {
+  const alvo = { foe: foeSemPrioridade() };
+  // outra habilidade do Ledian com o mesmo Mega Punch
+  R.candidatosDeBuild(sp("Ledian"), { alvo }).candidatos.filter((x) => x.habilidade !== "Aerodynamics").forEach((x) => assert.equal(x.rotulo, "estimada", x.habilidade));
+  // outro atacante (Scyther Mega com Aerial Ace x Charizard: nunca foi conferido)
+  R.candidatosDeBuild(sp("Scyther Mega"), { alvo: { chefao: courtney, indice: 2 } }).candidatos.forEach((x) => assert.equal(x.rotulo, "estimada", x.golpes.join("/")));
+  // outro alvo (Alakazam) com o mesmo atacante e golpe
+  R.candidatosDeBuild(sp("Ledian"), { alvo: alakazam }).candidatos.forEach((x) => assert.equal(x.rotulo, "estimada"));
+});
+
+test("Typhlosion x Ninetales: o Earthquake derruba, o Aerial Ace é só acessório e NÃO deixa o candidato 'calibrada'", () => {
+  const r = R.candidatosDeBuild(sp("Typhlosion"), { alvo: { foe: foeSemPrioridade() } });
+  const comAce = r.candidatos.filter((x) => x.golpes.includes("Aerial Ace") && x.golpes.includes("Earthquake") && x.hitKill === 1);
+  assert.ok(comAce.length > 0, r.candidatos.map((x) => x.golpes.join("/")).join(" ; "));
+  comAce.forEach((x) => assert.equal(x.rotulo, "estimada"));
+});
+
+test("calibrada vale só se TODO alvo medido é caso conferido (primeiro e ás): com um alvo não conferido no meio, é estimada", () => {
+  // O ás da luta vira o Alakazam: a linha do Ninetales é um caso conferido, a do Alakazam não.
+  const luta = Object.assign({}, courtney, { party: [Object.assign({}, courtney.party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Shadow Ball"], nat: "Mild" }), courtney.party[1]] });
+  const r = R.candidatosDeBuild(sp("Ledian"), { alvo: { chefao: luta } });
+  assert.deepEqual(plain(r.alvo.pokemon), ["Ninetales", "Alakazam"]);
+  const doLedian = r.candidatos.filter((x) => x.habilidade === "Aerodynamics" && x.hitKill > 0);
+  assert.ok(doLedian.length > 0);
+  doLedian.forEach((x) => assert.equal(x.rotulo, "estimada", x.golpes.join("/")));
+});
+
+test("prioridade NEGATIVA nunca 'bate primeiro por velocidade' (Avalanche do Vanilluxe Mega) e Focus Punch fica fora do kit", () => {
+  const r = R.candidatosDeBuild(sp("Vanilluxe Mega"), { alvo: alakazam });
+  assert.ok(r.candidatos.length > 0);
+  r.candidatos.forEach((x) => { if (x.golpes[0] === "Avalanche") assert.equal(x.baterPrimeiro, false, x.golpes.join("/")); });
+  R.candidatosDeBuild(sp("Ledian"), { alvo: alakazam }).candidatos.forEach((x) => assert.ok(!x.golpes.includes("Focus Punch")));
+});
+
+test("lista vazia inesperada: golpe de sinergia que bate em pelo menos um alvo vale (Aerodactyl, Pinsir Mega, Diancie)", () => {
+  const Ra = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+  assert.ok(Ra.candidatosDeBuild(Ra.SPECIES.find((x) => x && x.n === "Aerodactyl"), {}).candidatos.length > 0);
+  const R6 = carregarRegras({ milestone: 6, difficulty: "ace", levelCapMode: "easy" });
+  const pinsir = R6.candidatosDeBuild(R6.SPECIES.find((x) => x && x.n === "Pinsir Mega"), {});
+  assert.ok(pinsir.candidatos.length > 0, pinsir.aviso);
+  // a única sinergia de Pinsir Mega é Aerodynamics + Tailwind (golpe de status do movepool)
+  pinsir.candidatos.forEach((x) => { assert.equal(x.habilidade, "Aerodynamics"); assert.ok(x.golpes.includes("Tailwind")); });
+  const diancie = R6.candidatosDeBuild(R6.SPECIES.find((x) => x && x.n === "Diancie"), {});
+  assert.ok(diancie.candidatos.length > 0, diancie.aviso);
+  diancie.candidatos.forEach((x) => assert.ok(R6.validateAiBuild(R6.SPECIES.find((y) => y && y.n === "Diancie"), x.build, {}, {})));
+});
+
+test("golpe de sinergia que bate em só UM dos dois alvos (Omastar x Flannery: Wring Out) continua entre os 3 primeiros candidatos", () => {
+  const omastar = R.candidatosDeBuild(sp("Omastar"), {});
+  assert.equal(omastar.alvo.chefao, "Flannery 1");
+  assert.ok(omastar.candidatos.slice(0, 2).some((c) => c.golpes.includes("Wring Out")), omastar.candidatos.map((c) => c.golpes.join("/")).join(" ; "));
+});
+
+test("alvo com prioridade que o atacante não supera: aviso com o golpe e a parte do HP; desligável pela constante", () => {
+  // Typhlosion (rápido) x Ninetales do jogo: o Flame Burst (+1) tira uma parte do HP dele.
+  const c = R.candidatosDeBuild(sp("Typhlosion"), { alvo: ninetales }).candidatos[0];
+  assert.equal(c.alvoAgeAntes, true);
+  assert.match(c.avisos.join(" | "), /O alvo age antes com Flame Burst \(\+1 de prioridade\) e tira \d+% do HP de Typhlosion/);
+  // sem golpe de prioridade no alvo, nada de aviso nem rebaixa
+  const limpo = R.candidatosDeBuild(sp("Typhlosion"), { alvo: { foe: foeSemPrioridade() } }).candidatos[0];
+  assert.equal(limpo.alvoAgeAntes, false);
+  assert.doesNotMatch(limpo.avisos.join(" | "), /O alvo age antes/);
+});
+
+test("todos os golpes de prioridade do alvo contam, não só o melhor (Bullet Punch do Metang, Aqua Jet do Gabite Redux, Extreme Speed do Genesect)", () => {
+  const casos = [["Steven Granite Cave", 3, "Bullet Punch"], ["Archie Slateport", 1, "Aqua Jet"], ["Steven Route118", 0, "Extreme Speed"]];
+  casos.forEach(([chefao, indice, golpe]) => {
+    const boss = R.BOSSES.find((b) => b.name === chefao);
+    const foe = R.foeDeDuelo(R.bossPartyPorDificuldade(boss)[indice], 55, null);
+    assert.ok(foe.golpesProntos.some((g) => g.nome === golpe && g.prio > 0), chefao + ": a premissa (golpe de prioridade no dado)");
+    const r = R.candidatosDeBuild(sp("Ledian"), { alvo: { chefao: boss, indice } });
+    assert.ok(r.candidatos.length > 0, chefao);
+    assert.match(r.candidatos.map((x) => x.avisos.join(" ")).join(" "), new RegExp("O alvo age antes com " + golpe + " \\(\\+\\d de prioridade\\)"), chefao);
+  });
 });
 
 test("caso B: a faixa de dano do candidato está em % do HP do alvo e min < max", () => {
@@ -258,7 +352,9 @@ test("especiesQueResolvem: time e caixa, só quem derruba (hitKill > 0), 1 golpe
   deepEqual(lista.map((e) => e.sp.sname).filter((s, i, a) => a.indexOf(s) === i), lista.map((e) => e.sp.sname));
   for (let i = 1; i < lista.length; i++) {
     const a = lista[i - 1].candidato, b = lista[i].candidato;
-    assert.ok(a.hitKill < b.hitKill || (a.hitKill === b.hitKill && (a.baterPrimeiro || !b.baterPrimeiro)), "ordem do caso B");
+    const ta = tier(a), tb = tier(b);
+    assert.ok(ta > tb || (ta === tb && (a.hitKill <= b.hitKill || a.hitKill === 0 || b.hitKill === 0)), "os 3 níveis do usuário: 1 golpe e bate primeiro > 2 golpes e bate primeiro > resto");
+    if (ta === tb && a.hitKill === b.hitKill) assert.ok(a.dano.max >= b.dano.max, "dentro do nível, mais dano antes");
   }
   // quem bate primeiro e derruba em 1 golpe vem antes do Steelix (que derruba, mas não bate primeiro)
   const nomes = lista.map((e) => e.sp.n);

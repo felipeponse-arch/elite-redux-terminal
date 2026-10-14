@@ -29,3 +29,22 @@ Ranking (decisão do usuário): hit-kill de 1 golpe e bate primeiro > hit-kill d
 - Habilidade que só funciona gastando o item (Gluttony, Ripen) é recusada pela validação sem item: o rascunho leva Sitrus Berry e o candidato avisa (a simulação não conta o item).
 - Quando a validação recusa todo conjunto (ex.: Pyukumuku, sem golpe do próprio tipo), `candidatos: []` e o motivo vai em `avisos`.
 - `tests/unit/pipeline_kit_legal.test.mjs` (vindo de outra sessão) foi aproveitado como contrato da fase 1 e entra neste commit.
+
+## Rodada 1 do supervisor (14/10, REFAZER): o que mudou
+1. `calibrada` só por caso conferido: lista `CASOS_CALIBRADOS` ({atacante, habilidade, golpe, alvo}); hoje só Ledian + Aerodynamics + Mega Punch/Aerial Ace contra o Ninetales. Qualquer outro atacante, habilidade ou alvo é "estimada" (o Scyther Mega com Aerial Ace contra o Charizard saía "calibrada" sem nunca ter sido conferido). Ampliar a lista é decisão do usuário.
+2. Campo novo `garantido`: "derruba no turno 1" só com o dano mínimo (rolagem de 85%) já derrubando; senão o motivo diz "Provável derrubar" e mostra a faixa. O ranking segue pela média.
+3. Prioridade negativa (Avalanche -4...) nunca "bate primeiro por velocidade"; Focus Punch saiu do kit (falha se o atacante leva dano).
+4. `especiesQueResolvem` ordena pelos 3 níveis do usuário, depois por dano (o teste que travava o erro foi corrigido).
+5. Listas vazias (Aerodactyl x Flannery, Pinsir Mega e Diancie na milestone 6): o golpe de sinergia forçado só precisa bater em UM alvo, e a sinergia pode estar num golpe de status do movepool (Pinsir Mega: Aerodynamics + Tailwind). Travado por teste.
+6. O aviso de prioridade do alvo olha TODOS os golpes dele com prioridade > 0 (Bullet Punch do Metang, Aqua Jet do Gabite Redux, Extreme Speed do Genesect), não só o melhor.
+7. Padrão conservador `alvoAgeAntes` (constante `CONSIDERA_PRIORIDADE_DO_ALVO`, reverte numa linha): se o alvo tem golpe de prioridade não bloqueado, mais alta que a do atacante, o rótulo cai para "estimada" e o aviso diz "O alvo age antes com <golpe> (+N de prioridade) e tira X% do HP de <atacante>" (ou "derruba <atacante> antes de ele agir"). `baterPrimeiro` e o ranking seguem a definição do usuário. Ledian x Ninetales: hitKill 1, bate primeiro por velocidade, mas "estimada".
+8. Testes novos: Typhlosion x Ninetales (Earthquake derruba, Aerial Ace acessório não deixa "calibrada"), calibrada exige todos os alvos, desempate por dano e sinergia, aviso com todos os golpes de prioridade. 10 sabotagens novas (21 `pipeline-*`, todas pegas, incluindo every->some).
+9. Motor NÃO mudou. Reuso de `temPrioridadeNoDuelo`, `aguentaUmGolpe`, `bloqueiosNoDuelo`, `resultadoDoDuelo`. Cópias que ficaram no módulo (comentadas): o bloqueio da prioridade CONDICIONAL por Queenly Majesty (`pipelinePrioridadeBloqueada`, espelha `danoNoDuelo`, duelo.js ~1673) e a leitura de prioridade do alvo (`pipelineAmeacasDePrioridade`, espelha `prioAqui`/`prioCheio`); as regras de sinergia/STAB espelham `validateAiBuild`.
+
+## Perguntas ao usuário (ele estava dormindo: ficou o padrão conservador)
+**P1. A prioridade do alvo (Flame Burst +1 do Ninetales da Meteor Falls; o motor dá derrota ao Ledian na luta completa).**
+(a) Manter assim: "bate primeiro" pela definição dele, rótulo "estimada" e aviso "O alvo age antes..." (padrão atual).
+(b) A prioridade do alvo passa a definir "bate primeiro" (muda o ranking: o Ledian deixa de bater primeiro e sai do topo).
+(c) Voltar a "calibrada" ignorando o Flame Burst (`CONSIDERA_PRIORIDADE_DO_ALVO = false`).
+
+**P2. Levar a correção para o motor (duelo.js, regra de mecânica)?** Pontos que o módulo trata por conta própria porque o motor não trata: (1) Coil Up (prioridade condicional) contra Queenly Majesty na luta completa: o motor só bloqueia o golpe de prioridade de base; (2) Psychic Terrain contra a prioridade condicional; (3) Opportunist (`prioNoFinal`) dá prioridade ao golpe que decide, e o módulo só usa a prioridade condicional quando o golpe derruba de uma vez. Opções: (a) deixar no módulo; (b) corrigir no motor e o módulo passa a reusar.

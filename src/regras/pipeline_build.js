@@ -7,11 +7,19 @@
   // Testes: tests/unit/pipeline_build.test.mjs. Escopo global, ES5, sem window/document (ADR-004).
   // Função pura: não muda `state` nem grava nada; o único efeito é o cache interno do motor (benigno).
 
-  // Golpes cujo dano o motor já foi conferido contra a calculadora do próprio jogo
-  // (tests/unit/calibracao_calculadora_do_jogo.test.mjs, prints do usuário de 10/10/2026: Mega Punch 78%-93% e
-  // Aerial Ace 58%-69% do Ninetales da Meteor Falls, com Life Orb). Só o hit-kill sustentado por golpe desta lista
-  // sai com o rótulo "calibrada"; o resto é "estimada". Crescer a lista só com número novo da calculadora do jogo.
-  var GOLPES_CALIBRADOS = ["Mega Punch", "Aerial Ace"];
+  // Casos em que o motor foi CONFERIDO contra a calculadora do próprio jogo (tests/unit/calibracao_calculadora_do_jogo.test.mjs,
+  // prints do usuário de 10/10/2026): o Ledian (habilidade Aerodynamics, nível 55) com Mega Punch (78%-93%) e com Aerial Ace
+  // (58%-69%) contra o Ninetales da luta Courtney Meteor Falls, com Life Orb. Só o hit-kill sustentado por um caso desta lista
+  // sai "calibrada"; outro atacante, outra habilidade que mude o dano ou outro alvo é "estimada" (a conferência de um golpe
+  // não vale para quem não foi conferido). AMPLIAR A LISTA É DECISÃO DO USUÁRIO, com número novo da calculadora do jogo.
+  var CASOS_CALIBRADOS = [
+    { atacante: "SPECIES_LEDIAN", habilidade: "Aerodynamics", golpe: "Mega Punch", alvo: "SPECIES_NINETALES" },
+    { atacante: "SPECIES_LEDIAN", habilidade: "Aerodynamics", golpe: "Aerial Ace", alvo: "SPECIES_NINETALES" }
+  ];
+  // Reverter numa linha (false): a prioridade do ALVO deixa de rebaixar o rótulo e de gerar o aviso "O alvo age antes".
+  // Hoje (padrão conservador, 14/10/2026) o "bate primeiro" segue a definição do usuário (prioridade do golpe ou Velocidade)
+  // e o ranking não muda, mas um golpe de prioridade do alvo que o atacante-referência não supera tira o selo "calibrada".
+  var CONSIDERA_PRIORIDADE_DO_ALVO = true;
 
   var AVISO_SIMULACAO_1X1 = "Simulação 1x1: luta em dupla e Fake Out não são simulados.";
   var MAX_CANDIDATOS_PIPELINE = 5;
@@ -31,6 +39,9 @@
   // (Aspas simples de propósito: tests/unit/auditoria_do_motor.test.mjs procura o nome entre aspas duplas para saber
   // se o MOTOR trata o efeito, e esta lista não é regra do motor.)
   var GOLPES_QUE_DEPENDEM_DE_ITEM = ['Fling', 'Natural Gift'];
+  // Golpes que falham se o atacante leva dano antes de agir (Focus Punch, prioridade -3): o motor lê só o poder e a
+  // simulação não os modela, então ficam fora do kit em vez de prometer dano que o alvo impede.
+  var GOLPES_QUE_FALHAM_SE_LEVAR_DANO = ['Focus Punch'];
   // A rolagem média do motor é 0,925 (ROLAGEM_MEDIA_DUELO); a faixa do jogo vai de 85% a 100%.
   var FAIXA_DE_ROLAGEM_PIPELINE = { media: 0.925, min: 0.85, max: 1 };
 
@@ -89,27 +100,45 @@
   function pipelinePrioridadeBloqueada(eu, foe) {
     return (!!foe.ef.bloqueiaPrioLado && !eu.ef.quebraHabilidade) || !!foe.ef.barraPrioridade;
   }
+  // Golpes de prioridade do ALVO que o atacante-referência não bloqueia (ele não tem Queenly Majesty & cia.): { nome, prio, fracEu }.
+  // fracEu = parte do HP do atacante que o golpe tira (média da rolagem), pela mesma simulação do duelo com o alvo no papel de atacante.
+  // Espelha a leitura de prioridade de duelo.js (danoNoDuelo: prioAqui = g.prio; golpe.prioCheio = +1 no primeiro golpe).
+  function pipelineAmeacasDePrioridade(unit, foe, nivel) {
+    if (!CONSIDERA_PRIORIDADE_DO_ALVO) return [];
+    if (unit.ef.bloqueiaPrioLado && !foe.ef.quebraHabilidade) return [];
+    var lista = [];
+    (foe.golpesProntos || []).forEach(function (gp) {
+      var prio = gp.prio > 0 ? gp.prio : (gp.prioCheio ? 1 : 0);
+      if (prio <= 0) return;
+      var r = resultadoDoDuelo(Object.assign({}, foe, { golpesProntos: [gp] }), unit, nivel, { soPar: true });
+      var dano = r.meu.melhor.golpe ? r.meu.melhor.dano : 0;
+      if (dano > 0) lista.push({ nome: gp.nome, prio: prio, fracEu: r.hpFoe > 0 ? dano / r.hpFoe : 0 });
+    });
+    return lista;
+  }
   // Uma linha da tabela: o golpe `g` (único golpe da unidade) contra um alvo.
-  function pipelineLinhaDoGolpe(u1, g, foe, nivel) {
+  function pipelineLinhaDoGolpe(u1, g, foe, nivel, ameacas) {
     var r = resultadoDoDuelo(u1, foe, nivel, { soPar: true });
     var melhor = r.meu.melhor, golpe = melhor.golpe, dano = golpe ? melhor.dano : 0, hp = r.hpFoe;
     var n = dano > 0 ? golpesNecessariosDuelo(hp, dano) : Infinity;
-    var sash = false;
+    var base = n, sash = false;
     if (n === 1 && aguentaUmGolpe(foe, u1)) { n = 2; sash = true; } // Focus Sash/Sturdy: o primeiro golpe não derruba
     if (n !== Infinity) n += bloqueiosNoDuelo(foe, u1, r.meu); // Disguise, Ice Face...
     var prioReal = !!golpe && melhor.prio > 0;
-    var prioCondicional = !!golpe && !prioReal && (!!golpe.prioCheio || !!u1.ef.prioridadeNoPrimeiro) && !pipelinePrioridadeBloqueada(u1, foe);
+    // Prioridade condicional (Coil Up, Gale Wings...): reusa temPrioridadeNoDuelo do motor, só para o golpe que derruba de
+    // uma vez; o bloqueio por Queenly Majesty & cia. o motor não aplica a ela (só ao golpe de prioridade de base), então vem daqui.
+    var prioCondicional = !!golpe && !prioReal && n === 1 && !pipelinePrioridadeBloqueada(u1, foe) && temPrioridadeNoDuelo(u1, r.meu, 1);
     // "Bate primeiro" (decisão do usuário, 14/10): golpe de prioridade que o alvo não bloqueia OU mais Velocidade que
-    // o alvo. A prioridade condicional vale uma vez: só no golpe que derruba de uma vez.
-    // Fora da definição, de propósito: a prioridade do PRÓPRIO alvo (o motor vê o Ninetales da Meteor Falls agindo
-    // antes com Flame Burst, +1) - vira aviso no candidato, não muda a conta.
-    var usaPrio = prioReal || (n === 1 && prioCondicional);
-    var primeiro = usaPrio || r.v1 > r.v2;
+    // o alvo. Golpe de prioridade NEGATIVA (Focus Punch -3...) age por último: nunca "bate primeiro por velocidade".
+    var usaPrio = prioReal || prioCondicional;
+    var prioNegativa = !!golpe && golpe.prio < 0;
+    var primeiro = usaPrio || (!prioNegativa && r.v1 > r.v2);
     var porQue = usaPrio ? "prioridade" : (primeiro ? "velocidade" : null);
-    var golpeDele = r.dele.melhor.golpe;
-    var prioDele = golpeDele && (r.dele.melhor.prio > 0 || golpeDele.prioCheio) ? golpeDele.nome : null;
-    return { nome: g.nome, dano: dano, hp: hp, frac: hp > 0 ? dano / hp : 0, n: n, primeiro: primeiro, porQue: porQue,
-      velEu: r.v1, velFoe: r.v2, sash: sash, prioDele: prioDele, foe: foe.nome };
+    // A prioridade do próprio alvo fica FORA da definição (decisão do usuário), mas rebaixa o rótulo e gera aviso.
+    var minha = usaPrio ? (prioReal ? melhor.prio : 1) : 0;
+    var alvoPrio = (ameacas || []).filter(function (a) { return a.prio > minha; }).sort(function (a, b) { return b.fracEu - a.fracEu || (a.nome < b.nome ? -1 : 1); })[0] || null;
+    return { nome: g.nome, dano: dano, hp: hp, frac: hp > 0 ? dano / hp : 0, n: n, extra: n === Infinity ? 0 : n - base, primeiro: primeiro, porQue: porQue,
+      velEu: r.v1, velFoe: r.v2, sash: sash, alvoPrio: alvoPrio, foe: foe.nome, foeSname: foe.sp ? foe.sp.sname : "" };
   }
   function pipelineTierDaLinha(l) {
     if (l.n === 1 && l.primeiro) return 3;
@@ -138,11 +167,12 @@
   function pipelineTabela(sp, hab, nat, kit, alvo) {
     var unit = unidadeDaBuild(sp, { ability: hab, nature: nat.nome, evs: nat.evs, item: "", moves: kit }, alvo.nivel, alvo.clima);
     var tabela = {}, tipos = unit.tipos || [], maiorProxy = 0;
+    var ameacas = alvo.foes.map(function (foe) { return pipelineAmeacasDePrioridade(unit, foe, alvo.nivel); });
     (unit.golpesProntos || []).forEach(function (g) {
       if (tabela[g.nome]) return;
       var u1 = Object.assign({}, unit, { golpesProntos: [g] });
       var entrada = { g: g, tipo: g.tipo, linhas: [], proxy: 0 };
-      if (alvo.foes.length) entrada.linhas = alvo.foes.map(function (foe) { return pipelineLinhaDoGolpe(u1, g, foe, alvo.nivel); });
+      if (alvo.foes.length) entrada.linhas = alvo.foes.map(function (foe, i) { return pipelineLinhaDoGolpe(u1, g, foe, alvo.nivel, ameacas[i]); });
       else {
         // Sem alvo: só ordena os golpes pelo que o kit rende (força com habilidade, STAB, precisão, atributo de ataque).
         entrada.proxy = g.forca * (tipos.indexOf(g.tipo) !== -1 ? 1.5 : 1) * g.precisao * (g.cat === "F" ? unit.stats[1] : unit.stats[3]);
@@ -154,6 +184,7 @@
       var e = tabela[nome];
       if (!alvo.foes.length) { e.relativo = maiorProxy > 0 ? e.proxy / maiorProxy : 0; }
       e.fracMin = alvo.foes.length ? Math.min.apply(null, e.linhas.map(function (l) { return l.frac; })) : e.relativo;
+      e.fracMax = alvo.foes.length ? Math.max.apply(null, e.linhas.map(function (l) { return l.frac; })) : e.relativo; // bate em pelo menos um alvo
       e.tierMin = alvo.foes.length ? Math.min.apply(null, e.linhas.map(pipelineTierDaLinha)) : 1;
     });
     return tabela;
@@ -164,7 +195,7 @@
 
   // Avalia um conjunto de golpes contra o alvo: por alvo vale o melhor golpe do conjunto; o conjunto vale o pior alvo.
   function pipelineAvaliarConjunto(tabela, golpes, sinergias, alvo) {
-    var res = { golpes: golpes.slice(), hitKill: 0, baterPrimeiro: false, porQue: null, fracMin: 0, fracMax: 0, linhas: [], tier: 1, pior: null };
+    var res = { garantido: false, alvoPrio: null, golpes: golpes.slice(), hitKill: 0, baterPrimeiro: false, porQue: null, fracMin: 0, fracMax: 0, linhas: [], tier: 1, pior: null };
     if (alvo.foes.length) {
       var linhas = alvo.foes.map(function (foe, i) {
         var melhor = null;
@@ -188,6 +219,12 @@
       res.pior = piorFrac;
       res.tier = res.hitKill === 1 && res.baterPrimeiro ? 3 : res.hitKill === 2 && res.baterPrimeiro ? 2 : 1;
       res.fracMedia = piorFrac.frac;
+      // Garantido = mesmo na rolagem mínima (85%) o alvo cai no número de golpes anunciado. O ranking segue pela média.
+      res.garantido = res.hitKill > 0 && linhas.every(function (l) {
+        var minimo = l.frac / FAIXA_DE_ROLAGEM_PIPELINE.media * FAIXA_DE_ROLAGEM_PIPELINE.min;
+        return minimo > 0 && Math.ceil(1 / minimo - 1e-9) + l.extra <= res.hitKill;
+      });
+      res.alvoPrio = linhas.filter(function (l) { return l.alvoPrio; }).sort(function (a, b) { return b.alvoPrio.fracEu - a.alvoPrio.fracEu; })[0] || null;
     } else {
       res.fracMedia = Math.max.apply(null, golpes.map(function (nome) { return tabela[nome] ? tabela[nome].relativo : 0; }));
     }
@@ -218,8 +255,15 @@
     }
     // A regra do especialista (validateAiBuild): pelo menos um golpe com sinergia ativa, se a espécie tem alguma.
     if (sinergias.length && pipelinePesoDoConjunto(sinergias, escolhidos) === 0) {
-      var comSin = nomes.filter(function (n) { return escolhidos.indexOf(n) === -1 && pipelinePesoDoGolpe(sinergias, n) > 0 && tabela[n].fracMin > 0; })
+      var comSin = nomes.filter(function (n) { return escolhidos.indexOf(n) === -1 && pipelinePesoDoGolpe(sinergias, n) > 0 && tabela[n].fracMax > 0; })
         .sort(function (a, b) { return pipelineValorDoGolpe(tabela[b], sinergias) - pipelineValorDoGolpe(tabela[a], sinergias) || (a < b ? -1 : 1); })[0];
+      // Sem golpe de dano com sinergia que bata no alvo: a sinergia pode estar num golpe de status do movepool (Pinsir Mega:
+      // Aerodynamics + Tailwind), que a regra do especialista também aceita.
+      if (!comSin) {
+        var deStatus = [];
+        sinergias.forEach(function (h) { h.golpes.forEach(function (n) { if (movepool.indexOf(n) !== -1 && escolhidos.indexOf(n) === -1 && moveRoleOf(n) !== "dupla" && deStatus.indexOf(n) === -1) deStatus.push(n); }); });
+        comSin = deStatus.sort()[0];
+      }
       if (comSin) escolhidos[escolhidos.length < 4 ? escolhidos.length : 3] = comSin;
     }
     // A regra do STAB (validateAiBuild): atacante com 2+ golpes de dano precisa de um golpe do próprio tipo (ou do que a
@@ -244,9 +288,21 @@
     return escolhidos.length === 4 ? escolhidos : null;
   }
 
+  // O caso (atacante + habilidade + golpe + alvo) está na lista conferida na calculadora do jogo?
+  function pipelineCasoConferido(sname, habilidade, linha) {
+    return CASOS_CALIBRADOS.some(function (c) { return c.atacante === sname && c.habilidade === habilidade && c.golpe === linha.nome && c.alvo === linha.foeSname; });
+  }
+  function pipelineTierDoCandidato(c) { return c.hitKill === 1 && c.baterPrimeiro ? 3 : c.hitKill === 2 && c.baterPrimeiro ? 2 : 1; }
+
   // ---- frases ----
-  function pipelineVelocidade(l) { return isFinite(l.velEu) && isFinite(l.velFoe) ? " (" + Math.round(Math.abs(l.velEu)) + " de Velocidade contra " + Math.round(Math.abs(l.velFoe)) + ")" : ""; }
+  function pipelineVelocidade(l) {
+    if (!isFinite(l.velEu) || !isFinite(l.velFoe)) return "";
+    // Trick Room: o motor inverte o sinal das duas Velocidades (quem tem MENOS age primeiro).
+    var sala = l.velEu < 0 && l.velFoe < 0 ? "Trick Room, o mais lento age primeiro: " : "";
+    return " (" + sala + Math.round(Math.abs(l.velEu)) + " de Velocidade contra " + Math.round(Math.abs(l.velFoe)) + ")";
+  }
   function pipelineMotivos(av, sinergias, habilidade, calibrada, alvo) {
+    var garante = calibrada && av.garantido; // só caso conferido E mínimo da rolagem já derruba
     var motivos = [];
     sinergias.forEach(function (h) {
       var nossos = h.golpes.filter(function (g) { return av.golpes.indexOf(g) !== -1; });
@@ -263,9 +319,10 @@
     }
     var como = av.baterPrimeiro ? (av.porQue === "prioridade" ? "bate primeiro por prioridade" : "bate primeiro por velocidade" + pipelineVelocidade(av.linhas.filter(function (l) { return l.porQue === "velocidade"; })[0] || p)) : "o alvo age antes";
     var golpesDoKill = av.linhas.map(function (l) { return l.nome; }).filter(function (n, i, a) { return a.indexOf(n) === i; }).join(" e ");
-    if (av.hitKill === 1) motivos.push(calibrada ? golpesDoKill + " derruba no turno 1 o " + p.foe + "; " + como + "." + medidos
-      : "Provável derrubar o " + p.foe + " em 1 golpe (" + golpesDoKill + "); " + como + "." + medidos);
-    else motivos.push((calibrada ? "Derruba" : "Provável derrubar") + " o " + p.foe + " em 2 golpes (" + golpesDoKill + "); " + como + "." + medidos);
+    var faixa = " Tira " + Math.round(av.fracMin * 100) + "% a " + Math.round(av.fracMax * 100) + "% do HP dele por golpe.";
+    if (av.hitKill === 1) motivos.push(garante ? golpesDoKill + " derruba no turno 1 o " + p.foe + "; " + como + "." + medidos
+      : "Provável derrubar o " + p.foe + " em 1 golpe (" + golpesDoKill + "); " + como + "." + faixa + medidos);
+    else motivos.push((garante ? "Derruba" : "Provável derrubar") + " o " + p.foe + " em 2 golpes (" + golpesDoKill + "); " + como + "." + (garante ? "" : faixa) + medidos);
     return motivos;
   }
 
@@ -310,7 +367,7 @@
       var cap = getCurrentCap();
       var liberados = availableMovesFor(sp).names;
       var kit = golpesDeDueloAte(sp, cap).map(function (id) { return MOVES[id][0]; })
-        .filter(function (n, i, a) { return a.indexOf(n) === i && liberados.indexOf(n) !== -1 && moveRoleOf(n) !== "dupla" && GOLPES_QUE_DEPENDEM_DE_ITEM.indexOf(n) === -1; });
+        .filter(function (n, i, a) { return a.indexOf(n) === i && liberados.indexOf(n) !== -1 && moveRoleOf(n) !== "dupla" && GOLPES_QUE_DEPENDEM_DE_ITEM.indexOf(n) === -1 && GOLPES_QUE_FALHAM_SE_LEVAR_DANO.indexOf(n) === -1; });
       if (!kit.length) { saida.aviso = saida.aviso || sp.n + " não tem golpe de dano liberado nesta Etapa"; saida.avisos.push(sp.n + " não tem golpe de dano liberado nesta Etapa"); return saida; }
       var habilidades = uniqueIds(sp.ab || []).map(nomeHabDuelo).filter(Boolean);
       var geradas = {};
@@ -322,7 +379,8 @@
           var nomes = Object.keys(tabela).sort();
           // Âncoras: os golpes de maior valor e os de maior sinergia (a pergunta do caso A: Fire Fang, não Fire Lash).
           var porValor = nomes.filter(function (n) { return tabela[n].fracMin > 0; }).sort(function (a, b) { return pipelineValorDoGolpe(tabela[b], sinergias) - pipelineValorDoGolpe(tabela[a], sinergias) || (a < b ? -1 : 1); });
-          var porSin = porValor.filter(function (n) { return pipelinePesoDoGolpe(sinergias, n) > 0; }).slice(0, 3);
+          var porSin = nomes.filter(function (n) { return pipelinePesoDoGolpe(sinergias, n) > 0 && tabela[n].fracMax > 0; })
+            .sort(function (a, b) { return pipelineValorDoGolpe(tabela[b], sinergias) - pipelineValorDoGolpe(tabela[a], sinergias) || (a < b ? -1 : 1); }).slice(0, 3);
           var ancoras = porValor.slice(0, 8).concat(porSin).filter(function (n, i, a) { return a.indexOf(n) === i; });
           ancoras.forEach(function (ancora) {
             MODOS_DE_PREENCHER_PIPELINE.forEach(function (modo) {
@@ -363,18 +421,20 @@
       var innNomes = innatesAtivasNoNivel(sp, alvo.nivel).map(nomeHabDuelo);
       aceitos.forEach(function (c) {
         var av = c.g.av;
-        var calibrada = av.hitKill > 0 && av.linhas.length > 0 && av.linhas.every(function (l) { return GOLPES_CALIBRADOS.indexOf(l.nome) !== -1; });
+        var calibrada = av.hitKill > 0 && av.linhas.length > 0 && !av.alvoPrio && av.linhas.every(function (l) { return pipelineCasoConferido(sp.sname, c.g.hab, l); });
         var avisos = [];
         if (c.itemDeRascunho) avisos.push("A habilidade escolhida só funciona gastando o item: o rascunho leva " + c.itemDeRascunho + " (a IA pode trocar); a simulação não conta o item.");
         if (av.hitKill > 0 && !calibrada) avisos.push("Número do motor, ainda não conferido na calculadora do jogo: trate como estimativa.");
-        var comPrioDele = av.baterPrimeiro ? av.linhas.filter(function (l) { return l.prioDele; })[0] : null;
-        if (comPrioDele) avisos.push("Atenção: o " + comPrioDele.foe + " tem golpe de prioridade (" + comPrioDele.prioDele + ") e pode agir antes mesmo com menos Velocidade; o \"bate primeiro\" compara só a Velocidade e a prioridade do seu golpe.");
+        if (av.alvoPrio) {
+          var ap = av.alvoPrio.alvoPrio;
+          avisos.push("O alvo age antes com " + ap.nome + " (+" + ap.prio + " de prioridade) e " + (ap.fracEu >= 1 ? "derruba " + sp.n + " antes de ele agir" : "tira " + Math.round(ap.fracEu * 100) + "% do HP de " + sp.n) + ".");
+        }
         if (av.linhas.some(function (l) { return l.sash; })) avisos.push("O alvo aguenta o primeiro golpe (Focus Sash ou Sturdy): o hit-kill de 1 golpe virou 2.");
         saida.candidatos.push({
           sname: sp.sname,
           golpes: c.v.moves.slice(), habilidade: c.v.ability, inatas: innNomes.slice(),
           motivos: pipelineMotivos(av, c.g.sinergias, c.g.hab, calibrada, alvo),
-          hitKill: av.hitKill, baterPrimeiro: !!av.baterPrimeiro, porQue: av.porQue,
+          hitKill: av.hitKill, garantido: !!av.garantido, baterPrimeiro: !!av.baterPrimeiro, porQue: av.porQue, alvoAgeAntes: !!av.alvoPrio,
           dano: { min: Math.round(av.fracMin * 1000) / 10, max: Math.round(av.fracMax * 1000) / 10 },
           rotulo: calibrada ? "calibrada" : "estimada", avisos: avisos,
           build: { ability: c.v.ability, moves: c.v.moves.slice(), item: c.v.item, nature: c.v.nature, evs: c.v.evs.slice() }
@@ -415,7 +475,8 @@
       if (melhor) achados.push({ sp: s, candidato: melhor });
     });
     achados.sort(function (a, b) {
-      return a.candidato.hitKill - b.candidato.hitKill || (b.candidato.baterPrimeiro ? 1 : 0) - (a.candidato.baterPrimeiro ? 1 : 0) ||
+      // Os 3 níveis do usuário: 1 golpe e bate primeiro > 2 golpes e bate primeiro > o resto; dentro do nível, mais dano antes.
+      return pipelineTierDoCandidato(b.candidato) - pipelineTierDoCandidato(a.candidato) || a.candidato.hitKill - b.candidato.hitKill ||
         b.candidato.dano.max - a.candidato.dano.max || (a.sp.sname < b.sp.sname ? -1 : a.sp.sname > b.sp.sname ? 1 : 0);
     });
     var max = typeof opts.max === "number" && opts.max > 0 ? opts.max : 10;
