@@ -2,11 +2,14 @@
 // Etapas falsas rodam com `node -e`; a lista real é comparada à cadeia antiga.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, mkdtempSync, symlinkSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import {
   ETAPAS, executarChecagens, separarArgumentos, resolverComando,
-} from "../../scripts/checar_paralelo.mjs";
+} from "../../scripts/checar_paralelo_lib.mjs";
 
 // O comando fake É o código JS: o resolvedor injetado o passa para `node -e`.
 const falso = (codigo) => [process.execPath, ["-e", codigo]];
@@ -90,25 +93,62 @@ test("separarArgumentos respeita aspas e resolverComando monta node + bin", () =
   assert.deepEqual(args.slice(1), [".", "artifact_template.html"]);
 });
 
-// Cadeia do `check` do master em 14/10/2026. Se alguém tirar ou trocar uma
-// etapa, este teste e o do package.json acusam.
-const CADEIA_ANTIGA = 'node scripts/checar_encoding.mjs && node scripts/checar_sintaxe.mjs && eslint . artifact_template.html && stylelint "src/css/*.css" && node scripts/checar_css.mjs && node scripts/checar_fronteira.mjs && tsc -p tsconfig.json';
 
-test("lista real de etapas é IGUAL à cadeia antiga", () => {
-  assert.deepEqual(ETAPAS, CADEIA_ANTIGA.split(" && "));
+const RAIZ = fileURLToPath(new URL("../..", import.meta.url));
+const pkg = JSON.parse(readFileSync(join(RAIZ, "package.json"), "utf8"));
+const LIB = new URL("../../scripts/checar_paralelo_lib.mjs", import.meta.url).href;
+
+test("ETAPAS é IGUAL (comandos e argumentos) ao check:serie do package.json", () => {
+  assert.deepEqual(ETAPAS, pkg.scripts["check:serie"].split(" && "));
+  assert.equal(ETAPAS.length, 7);
+  assert.equal(pkg.scripts.check, "node scripts/checar_paralelo.mjs");
 });
 
-test("package.json: check:serie é a cadeia antiga e check chama o paralelo", () => {
-  const { scripts } = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8"));
-  assert.equal(scripts["check:serie"], CADEIA_ANTIGA);
-  assert.equal(scripts.check, "node scripts/checar_paralelo.mjs");
+test("entrada real chamada por JUNÇÃO executa o main (não falha aberta)", () => {
+  const dir = mkdtempSync(join(tmpdir(), "paralelo-"));
+  const juncao = join(dir, "juncao");
+  try {
+    symlinkSync(RAIZ, juncao, "junction");
+    const r = spawnSync(process.execPath, [join(juncao, "scripts", "checar_paralelo.mjs"), "--listar"],
+      { encoding: "utf8" });
+    assert.equal(r.status, 0);
+    assert.deepEqual(r.stdout.trim().split(/\r?\n/), pkg.scripts["check:serie"].split(" && "));
+  } finally {
+    rmSync(juncao, { force: true, recursive: false });
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
-test("o script real propaga o código de saída da etapa que falha", () => {
-  // Roda o script real com cwd/raiz intacta só para provar o caminho feliz de
-  // ponta a ponta é caro; aqui basta provar que um arquivo inválido sai com 1.
-  const r = spawnSync(process.execPath, ["-e",
-    `import("./scripts/checar_paralelo.mjs").then(async m=>{const r=await m.executarChecagens(["process.exit(7)"],{resolver:c=>[process.execPath,["-e",c]]});process.exitCode=r.codigo})`],
-  { cwd: new URL("../..", import.meta.url), encoding: "utf8" });
+// Roda o main REAL como processo, com etapas falsas (node -e).
+function mainComoProcesso(etapas) {
+  const prog = `import(${JSON.stringify(LIB)}).then(m=>m.main(${JSON.stringify(etapas)},["--silent"]))`;
+  return spawnSync(process.execPath, ["-e", prog], { encoding: "utf8" });
+}
+// main usa resolverComando: "node -e codigo" vira node + args.
+const E = (js) => `node -e "${js}"`;
+
+test("main real: código != 0 numa falha e a ordem da saída segue a lista", () => {
+  const r = mainComoProcesso([
+    E("setTimeout(()=>console.log('A-lenta'),300)"),
+    E("console.log('B');process.exit(3)"),
+  ]);
+  assert.notEqual(r.status, 0);
+  assert.ok(r.stdout.indexOf("A-lenta") < r.stdout.indexOf("B"));
+});
+
+test("main real: falha dupla mostra as duas e sai com 1", () => {
+  const r = mainComoProcesso([E("console.log('X');process.exit(3)"), E("console.log('Y');process.exit(4)")]);
   assert.equal(r.status, 1);
+  assert.match(r.stdout, /X/);
+  assert.match(r.stdout, /Y/);
+  assert.match(r.stderr, /falharam 2 de 2/);
+});
+
+test("main real: etapa que não inicia derruba com código != 0", () => {
+  const r = mainComoProcesso(["programa-que-nao-existe-xyz --x"]);
+  assert.notEqual(r.status, 0);
+});
+
+test("main real: tudo passando sai com 0", () => {
+  assert.equal(mainComoProcesso([E("process.exit(0)")]).status, 0);
 });

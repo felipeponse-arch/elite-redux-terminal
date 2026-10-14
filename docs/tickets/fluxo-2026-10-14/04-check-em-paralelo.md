@@ -4,9 +4,11 @@ Status: feito
 Bloqueado por: nada
 
 ## O que entrega
-- `scripts/checar_paralelo.mjs`: roda as 7 etapas do antigo `check` ao mesmo tempo (sem shell, `node` + bin direto, funciona no Windows) e mostra os resultados na ordem antiga. Toda falha aparece (inclusive falha dupla) antes do código 1; etapa que não inicia ou morre por sinal conta como falha. Ctrl+C/SIGTERM mata os filhos. Exporta `executarChecagens(etapas, opcoes)` (função pura, lista e resolvedor injetáveis) e `ETAPAS`.
-- `package.json`: `check` chama o script; `check:serie` guarda a cadeia antiga com && (comparação e fallback); `check:fronteira` como atalho.
+- `scripts/checar_paralelo.mjs` (entrada, sempre chama `main()`; `--listar` imprime as etapas e sai 0) + `scripts/checar_paralelo_lib.mjs` (`executarChecagens`, `ETAPAS`, `resolverComando`, `main`): roda as 7 etapas do antigo `check` ao mesmo tempo (sem shell, `node` + bin direto, funciona no Windows) e mostra os resultados na ordem antiga. Toda falha aparece (inclusive falha dupla) antes do código 1; etapa que não inicia ou morre por sinal conta como falha. Ctrl+C/SIGTERM mata os filhos. Exporta `executarChecagens(etapas, opcoes)` (função pura, lista e resolvedor injetáveis) e `ETAPAS`.
+- `package.json`: `check` chama o script; `check:serie` guarda a cadeia antiga com && (comparação e fallback).
 - `tests/unit/checar_paralelo.test.mjs`: etapas falsas (sucesso, falha única, falha dupla, ordem, paralelismo, stderr, executável inexistente, sinal) e a lista real IGUAL à cadeia antiga.
+
+Igualdade com o `check` do master conferida em 14/10 por `git show master:package.json`; o teste compara `ETAPAS` com `scripts["check:serie"]`. Correção da revisão (rodada 1): a trava "sou o principal" falhava aberta por junção; agora há teste que chama a entrada por junção.
 
 ## Medição (6 núcleos, `npm run check --silent`, 3 execuções cada)
 - Série (master): 12,50 s / 12,34 s / 12,28 s.
