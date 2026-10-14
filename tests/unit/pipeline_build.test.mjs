@@ -62,25 +62,88 @@ test("caso A: sem chefão adiante, os candidatos saem só por sinergia (hit-kill
 });
 
 // ---------- caso B: Ninetales da Meteor Falls ----------
-test("caso B: Ledian derruba o Ninetales com Mega Punch e bate primeiro por velocidade, mas o Flame Burst do alvo (+1) rebaixa o rótulo", () => {
+test("caso B: Ledian derruba o Ninetales com Mega Punch, mas NÃO bate primeiro: o Flame Burst do alvo (+1) o derruba antes (decisão P1, 14/10)", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales });
   const c = r.candidatos.find((x) => x.golpes.includes("Mega Punch") && x.habilidade === "Aerodynamics");
   assert.ok(c, "nenhum candidato com Mega Punch: " + r.candidatos.map((x) => x.golpes.join("/")).join(" ; "));
   assert.equal(c.hitKill, 1);
-  assert.equal(c.baterPrimeiro, true);
-  assert.equal(c.porQue, "velocidade");
-  assert.match(c.motivos.join(" | "), /Velocidade contra 166/);
-  // Padrão conservador (14/10): o alvo age antes com Flame Burst (+1) e derruba o Ledian - não promete "calibrada".
+  // "Bate primeiro" = dá o KO primeiro na ordem real: o Ledian é mais rápido (189 x 166), mas o Flame Burst (+1) vence a Velocidade.
+  assert.equal(c.baterPrimeiro, false);
+  assert.equal(c.porQue, null);
+  assert.equal(tier(c), 1, "cai para o resto do ranking");
   assert.equal(c.alvoAgeAntes, true);
   assert.equal(c.rotulo, "estimada");
   assert.match(c.avisos.join(" | "), /O alvo age antes com Flame Burst \(\+1 de prioridade\) e derruba Ledian antes de ele agir/);
-  // O mínimo da rolagem (99,4%) fica abaixo do HP: nada de "derruba no turno 1", só "provável" com a faixa.
+  assert.match(c.motivos.join(" | "), /o alvo age antes/);
   assert.equal(c.garantido, false);
   assert.doesNotMatch(c.motivos.join(" | "), /derruba no turno 1/);
   assert.match(c.motivos.join(" | "), /Provável derrubar o Ninetales em 1 golpe \(Mega Punch\)/);
   assert.match(c.motivos.join(" | "), /Tira 99% a 117% do HP dele por golpe/);
   deepEqual(r.alvo, { chefao: "Courtney Meteor Falls", indice: 0, pokemon: ["Ninetales"], origem: "informado" });
   assert.ok(r.avisos.includes("Simulação 1x1: luta em dupla e Fake Out não são simulados."));
+  // Nenhum candidato do Ledian "bate primeiro" contra este Ninetales (todo golpe dele é mais lento que o Flame Burst).
+  r.candidatos.filter((x) => x.hitKill > 0 && x.alvoAgeAntes).forEach((x) => assert.equal(x.baterPrimeiro, false, x.golpes.join("/")));
+});
+
+test("a prioridade do alvo só tira o 'bate primeiro' se o golpe dele DERRUBA o atacante: Quick Attack (+2) que não derruba não muda a ordem do KO", () => {
+  // Ninetales do jogo trocado por um com Quick Attack no lugar do Flame Burst: tira HP do Ledian, mas não o derruba.
+  const foe = R.foeDeDuelo(Object.assign({}, courtney.party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Quick Attack"], nat: "Mild" }), 55, null);
+  assert.ok(foe.golpesProntos.some((g) => g.nome === "Quick Attack" && g.prio > 0), "premissa: Quick Attack tem prioridade");
+  const r = R.candidatosDeBuild(sp("Ledian"), { alvo: { foe } });
+  const c = r.candidatos.find((x) => x.golpes.includes("Mega Punch") && x.habilidade === "Aerodynamics" && x.hitKill === 1);
+  assert.ok(c, r.candidatos.map((x) => x.habilidade + ":" + x.golpes.join("/")).join(" ; "));
+  assert.equal(c.baterPrimeiro, true);
+  assert.equal(c.porQue, "velocidade");
+  assert.equal(c.alvoAgeAntes, true, "o aviso segue: ele age antes, só não derruba");
+  assert.match(c.avisos.join(" | "), /O alvo age antes com Quick Attack \(\+2 de prioridade\) e tira \d+% do HP de Ledian/);
+});
+
+test("hit-kill de 2 golpes: o Flame Burst do alvo derruba o atacante antes do 2º golpe, então Raticate/Nidorino/Pidgeotto/Pidgeot x Ninetales NÃO batem primeiro", () => {
+  ["Raticate", "Nidorino", "Pidgeotto", "Pidgeot"].forEach((nome) => {
+    const r = R.candidatosDeBuild(sp(nome), { alvo: ninetales });
+    const dois = r.candidatos.filter((x) => x.hitKill === 2);
+    assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
+    dois.forEach((x) => {
+      assert.equal(x.baterPrimeiro, false, nome + " " + x.golpes.join("/"));
+      assert.equal(x.alvoAgeAntes, true, nome);
+      assert.equal(tier(x), 1, nome);
+    });
+  });
+});
+
+// Alvo sintético: o Ninetales da Meteor Falls só com Flame Burst (prioridade +2 aqui), 1 de HP e sem Queenly Majesty; `vel` é a Velocidade dele.
+const foeComPrioridadeIgual = (vel) => {
+  const base = R.foeDeDuelo(Object.assign({}, courtney.party[0], { mv: ["Flame Burst"] }), 55, null);
+  const foe = Object.assign({}, base, { stats: [1].concat(base.stats.slice(1, 5), [vel]), golpesProntos: base.golpesProntos.map((g) => Object.assign({}, g, { prio: 2 })) });
+  foe.ef = Object.assign({}, foe.ef, { bloqueiaPrioLado: false, barraPrioridade: false });
+  return foe;
+};
+test("prioridade IGUAL à do golpe do alvo que o derruba: quem tem mais Velocidade bate primeiro (Scizor com Feint +2 x Flame Burst +2)", () => {
+  const scizor = sp("Scizor");
+  // alvo mais rápido: a prioridade empata e a Velocidade do alvo decide - o Scizor NÃO bate primeiro
+  const lento = R.candidatosDeBuild(scizor, { alvo: { foe: foeComPrioridadeIgual(1000) } }).candidatos.filter((c) => c.golpes.includes("Feint"));
+  assert.ok(lento.length > 0, "premissa: candidato com Feint (+2)");
+  lento.forEach((c) => { assert.equal(c.baterPrimeiro, false, c.golpes.join("/")); assert.equal(c.porQue, null); });
+  // alvo mais lento: prioridade igual, o Scizor tem mais Velocidade e bate primeiro por velocidade
+  const rapido = R.candidatosDeBuild(scizor, { alvo: { foe: foeComPrioridadeIgual(1) } }).candidatos.filter((c) => c.golpes.includes("Feint") && c.hitKill === 1);
+  assert.ok(rapido.length > 0);
+  rapido.forEach((c) => { assert.equal(c.baterPrimeiro, true, c.golpes.join("/")); assert.equal(c.porQue, "velocidade"); });
+});
+
+test("Sturdy do atacante (Glalie, inato) x Ninetales: o Flame Burst o derrubaria em 1 golpe, mas o Sturdy o leva a 2 e ele segue batendo primeiro (nível 3)", () => {
+  const glalie = sp("Glalie");
+  const r = R.candidatosDeBuild(glalie, { alvo: ninetales });
+  const c = r.candidatos.find((x) => x.hitKill === 1 && x.golpes.includes("Head Smash") && x.golpes.includes("Seismic Slam"));
+  assert.ok(c, r.candidatos.map((x) => x.habilidade + ":" + x.golpes.join("/")).join(" ; "));
+  assert.equal(c.baterPrimeiro, true);
+  assert.equal(c.porQue, "velocidade");
+  assert.equal(tier(c), 3);
+  assert.equal(c.alvoAgeAntes, true, "o aviso segue: o alvo age antes com prioridade");
+});
+
+test("ranking do caso B: contra o Flame Burst do Ninetales nenhum candidato do Ledian é nível 3 ou 2 (cai no resto do ranking)", () => {
+  const r = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales });
+  assert.ok(r.candidatos.every((x) => tier(x) === 1), "contra o Flame Burst do Ninetales nenhum Ledian é nível 3 ou 2");
 });
 
 // Ninetales da Meteor Falls sem o Flame Burst e com Def menor (Mild): o caso conferido na calculadora, sem prioridade do alvo.
@@ -434,10 +497,15 @@ test("especiesQueResolvem: time e caixa, só quem derruba (hitKill > 0), 1 golpe
     assert.ok(ta > tb || (ta === tb && (a.hitKill <= b.hitKill || a.hitKill === 0 || b.hitKill === 0)), "os 3 níveis do usuário: 1 golpe e bate primeiro > 2 golpes e bate primeiro > resto");
     if (ta === tb && a.hitKill === b.hitKill) assert.ok(a.dano.max >= b.dano.max, "dentro do nível, mais dano antes");
   }
-  // quem bate primeiro e derruba em 1 golpe vem antes do Steelix (que derruba, mas não bate primeiro)
+  // Contra o Ninetales do jogo (Flame Burst +1) ninguém bate primeiro: todos caem no resto e a ordem é por dano (o Ledian não sobe mais).
   const nomes = lista.map((e) => e.sp.n);
   assert.ok(nomes.indexOf("Ledian") !== -1 && nomes.indexOf("Steelix") !== -1);
-  assert.ok(nomes.indexOf("Ledian") < nomes.indexOf("Steelix"));
+  lista.forEach((e) => assert.equal(tier(e.candidato), 1, e.sp.n));
+  assert.ok(nomes.indexOf("Steelix") < nomes.indexOf("Ledian"), "mais dano antes dentro do mesmo nível");
+  // Sem o Flame Burst (Ninetales sem prioridade), o Ledian volta a bater primeiro por velocidade e sobe acima do Steelix.
+  const semBurst = Rx.foeDeDuelo(Object.assign({}, Rx.BOSSES.find((b) => b.name === "Courtney Meteor Falls").party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Shadow Ball"], nat: "Mild" }), 55, null);
+  const lista2 = Rx.especiesQueResolvem({ foe: semBurst }, {}).map((e) => e.sp.n);
+  assert.ok(lista2.indexOf("Ledian") !== -1 && lista2.indexOf("Ledian") < lista2.indexOf("Steelix"), lista2.join(","));
   // quem não está no time nem na caixa não entra
   assert.ok(!nomes.includes("Fearow"));
 });
