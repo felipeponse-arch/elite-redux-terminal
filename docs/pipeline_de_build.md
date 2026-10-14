@@ -60,3 +60,9 @@ Decisões do usuário (14/10): (a) alvo padrão = o PRÓXIMO LÍDER DE GINÁSIO 
 Limites conhecidos: o Fake Out do Shiftry e a dupla não são simulados (o módulo avisa); não existe hoje "próximo chefão da Etapa" para lutas fora de ginásio; o selo perde valor se a tabela de calibração for esparsa (crescer com números da calculadora do jogo que o usuário trouxer).
 Ordem de entrega: (a) módulo + testes dos casos A e B pela interface, sem tocar a tela; (b) ligar o botão e o lote; (c) motivo e selo na tela; (d) a dívida 05 (o que a run libera) entra quando for fechada, sem bloquear.
 Custo no clique: medir no protótipo antes de decidir entre calcular na hora e pré-calcular. Tabela de sinergias: continua derivada do motor; o registro de efeitos (ticket 08) fica para depois.
+
+## Estado (14/10/2026)
+- **(a) Módulo: pronto no branch `pipeline-modulo`** (ticket `docs/tickets/pipeline-build-2026-10-14/01-modulo-pipeline-build.md`): `src/regras/pipeline_build.js` com `candidatosDeBuild`, `especiesQueResolvem` e `fecharBuild`; 25 testes e 11 sabotagens `pipeline-*`. Medido: ~40 ms por espécie (máximo ~140 ms), então calcular no clique é viável (a pergunta de custo fica respondida para o 1x1).
+- (b) ligar o botão e o lote, (c) motivo e selo na tela, (d) dívida 05: **não começaram**.
+- Decisão pendente do usuário: o motor vê o Ninetales da Meteor Falls agindo antes com Flame Burst (+1); hoje o "bate primeiro" segue a definição do usuário (só prioridade do golpe ou Velocidade) e o candidato carrega o aviso.
+- Alvo "qualquer" do caso A: contra o Nosepass da Roxanne o ranking do usuário põe Molten Down + Flamethrower (hit-kill de 2 batendo primeiro) acima de Coil Up + Fire Fang; com Brawly, Tate e Liza e sem chefão o Coil Up + Fire Fang lidera.
