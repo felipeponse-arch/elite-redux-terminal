@@ -105,6 +105,7 @@
     764: { resist: { Fire: 0.5 } },                         // Deep Freeze
     804: { resist: { Fire: 0.5 } },                         // Firefighter
     889: { resist: { Fire: 0.25, Ice: 0.25 } },             // Thick Blubber
+    855: { resist: { Poison: 0.5 } },                       // Hyper Cleanse (abilities.cc:10317-10323: Poison x0,5; o resto do texto é imunidade a status)
     904: { resist: { Water: 0.5, Ground: 0.5 } },           // Strong Foundation
     995: { resist: { Fire: 0.5, Electric: 0.5, Water: 0.5 } },      // Elemental Aegis
     996: { resist: { Dark: 0.5, Ghost: 0.5, Psychic: 0.5 } },       // Aegis Ward

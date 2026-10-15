@@ -169,3 +169,33 @@ test("categorias que nenhuma habilidade do dado 2.65beta lê (luz, lunar, broca)
   assert.ok(R.categoriasDoGolpeDuelo(idDe("Drill Run")).includes("broca"));
   perto(hab(u, "Moonblast"), hab(u, "Fairy Wind"), "Moonblast x Fairy Wind: a categoria lunar não reforça nada");
 });
+
+// ---------- recuo e acertos pelo effect/hit_count (ticket calibracao-03, B5) ----------
+test("lerGolpesDaConfig: lê o effect e o hit_count do golpe (e ignora o hit_count dentro de argument { })", () => {
+  const l = M.lerGolpesDaConfig(`moves {
+  id: MOVE_ATOMIC_FIRE
+  name: "Atomic Fire"
+  effect: EFFECT_RECOIL_33
+  power: 120
+}
+moves {
+  id: MOVE_DOUBLE_SHOCK
+  name: "Double Shock"
+  effect: EFFECT_BURN_UP
+  hit_count: 2
+  argument {
+    hit_count: 9
+  }
+}
+`);
+  assert.equal(l[0].efeito, "EFFECT_RECOIL_33");
+  assert.equal(l[0].acertos, undefined);
+  assert.equal(l[1].acertos, 2);
+});
+
+test("recuoDoEfeito: EFFECT_RECOIL_25/33/50 dão o percentual; os outros efeitos de recuo (de vida, por erro, com recuo e susto) não", () => {
+  assert.equal(M.recuoDoEfeito("EFFECT_RECOIL_33"), 33);
+  assert.equal(M.recuoDoEfeito("EFFECT_RECOIL_50"), 50);
+  assert.equal(M.recuoDoEfeito("EFFECT_RECOIL_25"), 25);
+  for (const e of ["EFFECT_RECOIL_HP_25", "EFFECT_RECOIL_IF_MISS", "EFFECT_FLINCH_RECOIL_33", "EFFECT_BURN_UP", undefined]) assert.equal(M.recuoDoEfeito(e), null, String(e));
+});

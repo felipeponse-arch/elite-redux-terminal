@@ -54,7 +54,14 @@
   // é outro (Poison Hit, Drench Hit...) mas o golpe acerta mais de uma vez:
   var ACERTOS_POR_EFEITO_DUELO = { "Multi Hit": 3, "Double Hit": 2, "Triple Kick": 3, "Ten Hits": 6 };
   var ACERTOS_PELO_TEXTO_DUELO = { "Twineedle": 2, "Cross Poison": 2, "Double Iron Bash": 2, "Rapid River": 2,
-    "Chiller": 3, "Surging Strikes": 3, "Sparkling Barrage": 3 };
+    "Chiller": 3, "Surging Strikes": 3, "Sparkling Barrage": 3,
+    "Double Shock": 2 }; // hit_count: 2 na er-config (o efeito do dado é Burn Up; o texto "two strong shocks" não casava)
+  // Habilidades do ticket calibracao-03 cujo multiplicador de golpe passou a ser lido do texto (contato, flag air, tipo, categoria).
+  // Para elas a sinergia por golpe da espécie (species_ability_synergy.json) não soma de novo. As outras (Nocturnal, Levitate,
+  // Electrocytes, Overgrow...) já liam o texto E recebiam a sinergia: ver docs/tickets/calibracao-2026-10-15/03-perguntas.md.
+  var BONUS_DE_GOLPE_LIDO_DO_TEXTO_DUELO = { "Tough Claws": 1, "Big Pecks": 1, "Giant Wings": 1, "Steely Spirit": 1, "Airborne": 1, "Warmonger": 1,
+    "Deep Freeze": 1, "Devious Present": 1, "Imposing Wings": 1, "Lucky Wings": 1, "Apex Predator": 1, "Lead Claws": 1, "Ice Picks": 1,
+    "Bird of Prey": 1, "Reaper's Embarce": 1 };
   function acertosDoGolpeDuelo(id) {
     var m = MOVES[id];
     if (!m) return 1;
@@ -436,7 +443,12 @@
       ef.curaEnvenenado = 1 / parseInt(x[1], 10); ef.semResiduoDe.envenenar = true; ef.semResiduoDe.envenenarForte = true;
     }
     if ((x = f.match(/Heals the user for 1\/(\d+) of the damage they deal/i))) ef.drenoPct += 1 / parseInt(x[1], 10);
-    if ((x = f.match(/Contact moves do \+(\d+)% damage and heal 1\/(\d+) of damage dealt/i))) { ef.contatoMult *= 1 + parseInt(x[1], 10) / 100; ef.drenoContato = 1 / parseInt(x[2], 10); }
+    // Nosferatu: o texto da NextDex diz "Contact moves do +20% damage and heal 1/2", mas o código do jogo só cura
+    // (battle_util.c:4748-4756, savedDmg/2); nenhuma outra referência a ABILITY_NOSFERATU. Vale o código: sem o +20% (ticket 03).
+    if ((x = f.match(/Contact moves do \+(\d+)% damage and heal 1\/(\d+) of damage dealt/i))) ef.drenoContato = 1 / parseInt(x[2], 10);
+    // Tough Claws e Big Pecks (abilities.cc:2089 e 2438): golpe que faz contato x1,3. Long Reach, Protective Pads e Punching Glove tiram o contato.
+    if ((x = f.match(/Boosts the power of contact moves by ([\d.]+)x/i))) ef.contatoMult *= parseFloat(x[1]);
+    if (/don't make contact/i.test(f)) ef.semContato = true; // Long Reach (IsMoveMakingContact, battle_util.c:6578)
     if ((x = f.match(/Enemies lose 1\/(\d+) of max HP if they use a contact move|1\/(\d+) HP damage when touched/i))) ef.danoAoContato = Math.max(ef.danoAoContato, 1 / parseInt(x[1] || x[2], 10));
     if (/Immune to recoil damage/i.test(f)) ef.semRecuo = true;
     if ((x = f.match(/Moves causing recoil damage deal ([\d.]+)x more damage/i))) ef.recuoMult = parseFloat(x[1]);
@@ -540,6 +552,25 @@
     if ((x = f.match(/Reduces damage taken by (\d+)%, but lowers speed by (\d+)%/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.speMult *= 1 - parseInt(x[2], 10) / 100; }
     if ((x = f.match(/Takes (\d+)% less damage from attacks, (\d+)% if resisted/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
     if ((x = f.match(/Halves dmg taken by (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.resistTipo[tipoDoTextoDuelo(x[1])] = 0.5;
+    // Punk Rock (abilities.cc:3279-3289): golpe de som recebido x0,5 ("Takes -50% dmg from sound moves").
+    if ((x = f.match(/Takes -(\d+)% dmg from sound moves/i))) ef.reducao.som *= 1 - parseInt(x[1], 10) / 100;
+    // Water Bubble (abilities.cc:2706-2718): o Water do dono sai x2 ("Doubles Water dmg dealt").
+    if ((x = f.match(/Doubles (\w+) dmg dealt/i)) && tipoDoTextoDuelo(x[1])) ef.bonusTipo[tipoDoTextoDuelo(x[1])] = Math.max(ef.bonusTipo[tipoDoTextoDuelo(x[1])] || 1, 2);
+    // Thick Blubber (abilities.cc:10838-10847): Speed x0,5 em troca de Fire/Ice x0,25 ("in return for having 1/2 speed").
+    if (/in return for having 1\/2 speed/i.test(f)) ef.speMult *= 0.5;
+    // Reforço de uma lista de tipos e categorias: Warmonger "the user's rock, steel, and fighting moves by 30%", Hammer Fist "punch
+    // and hammer moves by 25%", Devious Present "Ice and throwing moves by 50%", Deep Freeze "Water and Ice by 1.25x", Plasma Lamp
+    // "power of Fire & Electric type moves by 1.2x" (abilities.cc:10787, 11551, 11439, 9361, 6072). Cada palavra é tipo ou categoria.
+    var lista = f.match(/^Boosts (?:the user's )?([A-Za-z]+(?:(?:, | and | & |, and )[A-Za-z]+)+)(?: type)?(?: moves)? by (\d+)%/i),
+      multLista = lista ? 1 + parseInt(lista[2], 10) / 100 : 0;
+    if (!lista) { lista = f.match(/^Boosts ([A-Za-z]+ and [A-Za-z]+) by ([\d.]+)x/i) || f.match(/^Boost accuracy & power of ([A-Za-z]+ & [A-Za-z]+) type moves by ([\d.]+)x/i); multLista = lista ? parseFloat(lista[2]) : 0; }
+    if (lista) {
+      lista[1].split(/, and |, | and | & /i).forEach(function (w) {
+        var tp = tipoDoTextoDuelo(w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()); // Warmonger escreve "rock, steel" em minúsculas
+        if (tp) ef.bonusTipo[tp] = Math.max(ef.bonusTipo[tp] || 1, multLista);
+        else categoriasDoTextoDuelo(w).forEach(function (c) { ef.bonusCategoria[c] = Math.max(ef.bonusCategoria[c] || 1, multLista); });
+      });
+    }
     if (/^Fire\/Sun hurts/i.test(f)) ef.resistTipo.Fire = 1.25; // Dry Skin: Fire 1,25x, como na série
     if (/Super-effective moves never miss and ignore abilities/i.test(f)) ef.seQuebra = true; // Deadly Precision
     if (/Inflicting poison also lowers Attack, SpAtk, and Speed/i.test(f)) ef.venenoReduz = true; // Neurotoxin
@@ -576,12 +607,15 @@
     if ((x = f.match(/^(\w+) moves hit SpDef and get a ([\d.]+)x power boost/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.categoriaNaSpDef[c] = true; ef.bonusCategoria[c] = Math.max(ef.bonusCategoria[c] || 1, parseFloat(x[2])); });
     if ((x = f.match(/^(\w+ ?\w*) moves hit twice for (\d+)% damage/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.categoriaExtra[c] = Math.max(ef.categoriaExtra[c] || 1, 2 * parseInt(x[2], 10) / 100); });
     if ((x = f.match(/^(Air-based|Wind) moves get a ([\d.]+)x boost/i))) ef.flagMult["Air/Wing Based"] = { mult: parseFloat(x[2]) };
+    // Giant Wings (abilities.cc:4661-4666): golpe com a flag air x1,3 ("wing, wind or air-based moves").
+    if ((x = f.match(/Boosts the power of wing, wind or air-based moves by ([\d.]+)x/i))) ef.flagMult["Air/Wing Based"] = { mult: parseFloat(x[1]) };
     if ((x = f.match(/^(\w+) moves get \+1 Priority/i)) && tipoDoTextoDuelo(x[1])) ef.prioTipoSempre.push(tipoDoTextoDuelo(x[1]));
     if ((x = f.match(/^(\w+) moves \+(\d+)%; (\w+) moves siphon (\d+)% damage/i))) {
       if (tipoDoTextoDuelo(x[1])) ef.bonusTipo[tipoDoTextoDuelo(x[1])] = Math.max(ef.bonusTipo[tipoDoTextoDuelo(x[1])] || 1, 1 + parseInt(x[2], 10) / 100);
       if (tipoDoTextoDuelo(x[3])) ef.drenoTipo[tipoDoTextoDuelo(x[3])] = parseInt(x[4], 10) / 100;
     }
-    if ((x = f.match(/Boosts own (\w+) moves by ([\d.]+)x/i)) && tipoDoTextoDuelo(x[1])) ef.bonusTipo[tipoDoTextoDuelo(x[1])] = Math.max(ef.bonusTipo[tipoDoTextoDuelo(x[1])] || 1, parseFloat(x[2]));
+    // "Boosts own Fire moves by 1.3x" e "Boosts own & ally's Steel-type moves by 1.3x" (Steely Spirit, Airborne: abilities.cc:3435 e 6861).
+    if ((x = f.match(/Boosts own (?:& ally's )?(\w+?)(?:-type)? moves by ([\d.]+)x/i)) && tipoDoTextoDuelo(x[1])) ef.bonusTipo[tipoDoTextoDuelo(x[1])] = Math.max(ef.bonusTipo[tipoDoTextoDuelo(x[1])] || 1, parseFloat(x[2]));
     // Seguimentos (golpe grátis depois do golpe).
     var sg = f.match(/(?:Triggers|follows? up with) (?:a )?(\d+)\s?BP [\w' -]+? after using (?:a |an )?(special move|attack|move|(\w+)(?: or (\w+))?-type move)/i) ||
       f.match(/After using (?:a |an )?(special move|attack|move), (?:launch|follow up with) (?:a )?(\d+)\s?BP/i);
@@ -1182,7 +1216,7 @@
     if (cacheEfeitoDuelo[chave]) return cacheEfeitoDuelo[chave];
     var ef = { ate: null, ateMult: 1, converte: {}, stabMult: 1.5, stabExtra: [], stabTodos: false, tipoExtra: [],
       atkMult: 1, spaMult: 1, speMult: 1, fisicoMult: 1, especialMult: 1, danoMult: 1,
-      reducao: { F: 1, E: 1, todos: 1, superEf: 1, contato: 1 }, resistTipo: {}, vsTipo: {},
+      reducao: { F: 1, E: 1, todos: 1, superEf: 1, contato: 1, som: 1 }, resistTipo: {}, vsTipo: {},
       intimida: 0, assusta: 0, imuneIntimida: false, imuneAssusta: false,
       prioridadeNoPrimeiro: false, prioTipoCheio: [], prioMult: 1,
       bonusTipo: {}, bonusGolpes: {}, golpeExtra: 1, seguimento: null, contraTipo: {},
@@ -1206,7 +1240,7 @@
       ataqueNaEntrada: 0, seguimentoCategoria: [], aoUsar: [], limpaBuffsNaEntrada: false, quedaNaEntrada: {},
       maiorNaEntrada: 0, maiorAtaqueNaEntrada: 0, shellSmashNaMetade: false, inverteIntimida: false, dobraQuedas: false,
       encadeiaStatus: {},
-      curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, danoAoContato: 0,
+      curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, danoAoContato: 0,
       semRecuo: false, recuoMult: 1, custoPorAtaque: 0, custoTipo: {}, bloqueiaCura: false, liquidOoze: false,
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
       bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {},
@@ -1298,7 +1332,7 @@
         if ((y = f.match(/Boosts (\w+) moves by (\d+)%/i)) && tipoDoTextoDuelo(y[1])) maxEm(ef.bonusTipo, y[1], 1 + parseInt(y[2], 10) / 100);
         // --- defensivo: dano recebido ---
         if ((y = f.match(/Takes -(\d+)% (special|physical) damage/i))) ef.reducao[/^s/i.test(y[2]) ? "E" : "F"] *= 1 - parseInt(y[1], 10) / 100;
-        if ((y = f.match(/Takes (\d+)% less (?:damage )?(?:from )?(Special|Physical|Phys\.)?(?! ?Super)[^.]*?(?:attacks|moves|damage)?/i)) && !/Super-?effective|sound/i.test(f)) {
+        if ((y = f.match(/Takes (\d+)% less (?:damage )?(?:from )?(Special|Physical|Phys\.)?(?! ?Super)[^.]*?(?:attacks|moves|damage)?/i)) && !/Super-?effective|sound/i.test(f) && !/less dmg from [\w/]+-type moves/i.test(f)) { // Magma Armor ("from Water/Ice-type moves"): só nos tipos, pela tabela de tipos.js
           var qual = y[2] ? (/^s/i.test(y[2]) ? "E" : "F") : "todos";
           ef.reducao[qual] *= 1 - parseInt(y[1], 10) / 100;
         }
@@ -1452,6 +1486,9 @@
     (ABILITY_SYNERGY[sname] || []).forEach(function (h) {
       var id = ids.filter(function (i) { return nomeHabDuelo(i) === h.name; })[0];
       if (id === undefined) return;
+      // Habilidade cujo bônus de golpe o texto agora ensina (ticket 03): a leitura do texto vale para todo golpe e a sinergia por golpe
+      // da espécie, que era a aproximação de antes, contaria o mesmo bônus duas vezes (Tough Claws x1,3 x 1,3 = 1,69).
+      if (BONUS_DE_GOLPE_LIDO_DO_TEXTO_DUELO[h.name]) return;
       var t = textoHabDuelo(id);
       var x = t.match(/(\d+(?:\.\d+)?)x/) || t.match(/(\d+)%/);
       var mult = x ? (/%$/.test(x[0]) ? 1 + parseInt(x[1], 10) / 100 : parseFloat(x[1])) : 1.3;
@@ -1575,10 +1612,12 @@
       // Sheer Force: golpe com efeito extra perde o efeito e ganha força.
       var extra = typeof MOVE_CATEGORIAS !== "undefined" ? MOVE_CATEGORIAS[id] : null;
       if (u.ef.semEfeitoExtra && extra && temEfeitoExtraDuelo(extra)) hab *= u.ef.semEfeitoExtra;
-      // Reckless: golpe com recuo rende mais. Nosferatu: golpe de contato rende mais.
+      // Reckless: golpe com recuo rende mais. Tough Claws e Big Pecks: golpe que faz contato rende mais; Long Reach, Protective Pads
+      // e Punching Glove (num soco) tiram o contato (IsMoveMakingContact, battle_util.c:6578-6590).
       if (extra && extra.rc) hab *= u.ef.recuoMult;
       var contato = temContatoDuelo(m);
-      if (contato) hab *= u.ef.contatoMult;
+      var itemTiraContato = u.it && !u.ef.klutz && (u.it.semEfeitoContato || (u.it.categoriaMult.soco && cats.indexOf("soco") !== -1));
+      if (contato && !u.ef.semContato && !itemTiraContato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
       var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF", fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: temContatoDuelo(m), som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
@@ -1785,6 +1824,7 @@
         red = def.ef.reducao.todos * (fisico ? def.ef.reducao.F : def.ef.reducao.E);
         if (efTipo >= 2) red *= def.ef.reducao.superEf;
         if (g.contato) red *= def.ef.reducao.contato;
+        if (g.som) red *= def.ef.reducao.som; // Punk Rock
       }
       red *= danoNoClima; // Eerie Fog: Ghost/Psychic recebem 20% menos
       if (efTipo >= 2 && !semBonus) red *= atq.ef.seBonus;

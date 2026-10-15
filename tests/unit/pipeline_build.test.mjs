@@ -102,10 +102,13 @@ test("a prioridade do alvo só tira o 'bate primeiro' se o golpe dele DERRUBA o 
 });
 
 test("hit-kill de 2 golpes: o Flame Burst do alvo derruba o atacante antes do 2º golpe, então Raticate/Nidorino/Pidgeotto/Pidgeot x Ninetales NÃO batem primeiro", () => {
+  // Pidgeotto e Pidgeot saíram da premissa em 15/10/2026 (ticket calibracao-03): a Giant Wings, innate deles, passou a valer x1,3
+  // nos golpes de ar (Air Cutter, Air Slash...), os sets mais fortes viram hit-kill de 1 golpe e já não sobra candidato de 2.
+  // A propriedade segue valendo para o que sobrar de hit-kill de 2 neles (nenhum, hoje).
   ["Raticate", "Nidorino", "Pidgeotto", "Pidgeot"].forEach((nome) => {
     const r = R.candidatosDeBuild(sp(nome), { alvo: ninetales });
     const dois = r.candidatos.filter((x) => x.hitKill === 2);
-    assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
+    if (nome === "Raticate" || nome === "Nidorino") assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
     dois.forEach((x) => {
       assert.equal(x.baterPrimeiro, false, nome + " " + x.golpes.join("/"));
       assert.equal(x.alvoAgeAntes, true, nome);

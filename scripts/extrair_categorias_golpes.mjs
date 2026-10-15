@@ -24,7 +24,8 @@ const versao = dex.meta && dex.meta.version;
 // scripts/categorias_pela_config.mjs), como o código do jogo as lê. O texto da descrição só citava a marcação em
 // parte dos golpes (ticket calibracao-2026-10-15/01: 98 golpes sem categoria). Chance, recuo, dreno, alvo e efeito
 // de status continuam vindo do NextDex.
-const FLAGS = JSON.parse(readFileSync(join(RAIZ, "data", "golpes_flags_config.json"), "utf8")).golpes;
+const CONFIG_GOLPES = JSON.parse(readFileSync(join(RAIZ, "data", "golpes_flags_config.json"), "utf8"));
+const FLAGS = CONFIG_GOLPES.golpes;
 
 const caminho = process.argv[2];
 const raw = caminho
@@ -45,8 +46,10 @@ raw.moves.forEach((m, id) => {
   // Recuo ("33% recoil") e dreno ("drains 50%", "recovers 50% of the damage") da descrição longa;
   // efeito "Absorb" sem número vale 50% (padrão da série).
   const efeito = raw.effT[m.eff] || "";
+  // O recuo de efeito fixo (EFFECT_RECOIL_25/33/50) vem da config do jogo: a descrição da NextDex do Atomic Fire diz 50% e o jogo faz 33%.
   const rc = texto.match(/(\d+)% recoil/i) || efeito.match(/^Recoil (\d+)$/);
-  if (rc && m.pwr > 0) { e.rc = parseInt(rc[1], 10); comRecuo++; }
+  const recuoDoJogo = CONFIG_GOLPES.recuos[m.name];
+  if ((rc || recuoDoJogo) && m.pwr > 0) { e.rc = recuoDoJogo || parseInt(rc[1], 10); comRecuo++; }
   const dr = texto.match(/(?:drains|recovers|restores HP by) (\d+)%/i);
   if (m.pwr > 0 && (dr || efeito === "Absorb")) { e.dr = dr ? parseInt(dr[1], 10) : 50; comDreno++; }
   // Alvo em dupla (targetT): "ambos" = os dois rivais, "todos" = rivais e aliado

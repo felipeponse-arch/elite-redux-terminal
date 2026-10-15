@@ -6,7 +6,9 @@
 // hornBased, arrowBased, throwingBased...), e a flag vem do MoveList.textproto da er-config.
 //
 // Uso: node scripts/categorias_pela_config.mjs <MoveList.textproto> [--commit=<hash da er-config>]
-// Grava data/golpes_flags_config.json: { meta, golpes: { "<nome do golpe>": ["iron_fist", ...] } } (só golpes com flag).
+// Grava data/golpes_flags_config.json: { meta, golpes: { "<nome do golpe>": ["iron_fist", ...] }, recuos: { "<golpe>": 33 }, acertos: { "<golpe>": 2 } }
+//   golpes = só golpes com flag; recuos = golpes cujo `effect` é EFFECT_RECOIL_25/33/50 (a descrição da NextDex pode dizer outro número:
+//   Atomic Fire diz 50% e o jogo faz 33%); acertos = golpes com hit_count maior que 1 (ticket calibracao-03, B5).
 // A tradução flag -> categoria fica aqui (FLAG_PARA_CATEGORIA) e é usada por extrair_categorias_golpes.mjs.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -52,9 +54,17 @@ export function lerGolpesDaConfig(texto) {
     if (!m) continue;
     if (m[1] === "id") atual.id = m[2];
     else if (m[1] === "name") atual.nome = m[2].replace(/^"|"$/g, "").replace(/\\'/g, "'");
+    else if (m[1] === "effect") atual.efeito = m[2];
+    else if (m[1] === "hit_count") atual.acertos = parseInt(m[2], 10);
     else if (m[2] === "true" && FLAG_PARA_CATEGORIA[m[1]]) atual.flags.push(m[1]);
   }
   return golpes;
+}
+
+// Recuo em % do dano que o jogo faz pelo `effect` do golpe (EFFECT_RECOIL_33 -> 33); null se o efeito não é de recuo fixo.
+export function recuoDoEfeito(efeito) {
+  const m = /^EFFECT_RECOIL_(25|33|50)$/.exec(efeito || "");
+  return m ? parseInt(m[1], 10) : null;
 }
 
 // Categorias do motor de um golpe, na ordem de FLAG_PARA_CATEGORIA.
@@ -71,15 +81,17 @@ if ((process.argv[1] || "").endsWith("categorias_pela_config.mjs")) {
   const dex = JSON.parse(readFileSync(join(RAIZ, "data", "dex_compact.json"), "utf8"));
   const config = lerGolpesDaConfig(readFileSync(arq, "utf8"));
   const porNome = new Map(config.filter((g) => g.nome).map((g) => [g.nome, g]));
-  const golpes = {}, semPar = [];
+  const golpes = {}, recuos = {}, acertos = {}, semPar = [];
   for (const m of dex.moves) {
     if (!m) continue;
     const g = porNome.get(m[0]);
     if (!g) { semPar.push(m[0]); continue; }
     if (g.flags.length) golpes[m[0]] = g.flags;
+    if (recuoDoEfeito(g.efeito)) recuos[m[0]] = recuoDoEfeito(g.efeito);
+    if (g.acertos > 1) acertos[m[0]] = g.acertos;
   }
   if (semPar.length) { console.error("golpes do app sem par na config: " + semPar.join(", ")); process.exit(1); }
   const meta = { fonte: "Elite-Redux/er-config MoveList.textproto", commit, versaoDoDado: dex.meta && dex.meta.version, golpesDaConfig: config.length, golpesDoApp: dex.moves.filter(Boolean).length };
-  writeFileSync(join(RAIZ, "data", "golpes_flags_config.json"), JSON.stringify({ meta, golpes }) + "\n");
+  writeFileSync(join(RAIZ, "data", "golpes_flags_config.json"), JSON.stringify({ meta, golpes, recuos, acertos }) + "\n");
   console.log("data/golpes_flags_config.json: " + Object.keys(golpes).length + " golpes com flag (de " + meta.golpesDoApp + ") - er-config " + commit);
 }
