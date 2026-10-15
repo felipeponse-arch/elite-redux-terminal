@@ -26,22 +26,11 @@ const HABILIDADES_SEM_REGRA = {
   "Multitype": "cada placa é uma espécie própria no dado",
 };
 
+// A conta mora no motor (habilidadeSemRegraNoDuelo): é a mesma que decide o selo "estimada" do pipeline de build (versao-nova/03).
 function habilidadesNaoLidas() {
-  const semClimas = (k, v) => (k === "climasProprios" ? undefined : v);
-  const base = JSON.stringify(R.efeitoDasHabilidadesNoDuelo([], "AUD_BASE", null), semClimas);
-  const CLIMA = { rain: "chuva", sun: "sol", sand: "areia", sandstorm: "areia", hail: "granizo", fog: "nevoa" };
-  const comSinergia = new Set(Object.values(R.ABILITY_SYNERGY).flatMap((hs) => hs.map((h) => h.name)));
   const emUso = new Set();
   R.SPECIES.forEach((s) => s && R.uniqueIds((s.ab || []).concat(s.inn || [])).forEach((id) => emUso.add(id)));
-  return [...emUso].filter((id) => {
-    const nome = R.ABILITIES[id][0], texto = R.descricaoDeHabilidadePorId(id);
-    // Condicional de clima conta ligada no clima que o próprio texto pede.
-    const c = ((texto.match(/\b(rain|rains|sun|sunny|sand|sandstorm|hail|fog)\b/i) || [])[1] || "").toLowerCase().replace(/s$|ny$/, "");
-    const ef = R.efeitoDasHabilidadesNoDuelo([id], "AUD_" + id, CLIMA[c] || null);
-    if (JSON.stringify(ef, semClimas) !== base) return false;
-    if (R.TYPE_MOD_ABILITIES[id] || comSinergia.has(nome)) return false; // tabela de tipos / sinergia com golpes
-    return !["chuva", "sol", "areia", "granizo", "nevoa"].some((cl) => R.habilidadeArma(nome, cl));
-  }).map((id) => R.ABILITIES[id][0]);
+  return [...emUso].filter((id) => R.habilidadeSemRegraNoDuelo(id)).map((id) => R.ABILITIES[id][0]);
 }
 
 test("habilidades em uso sem regra: só as registradas, cada uma com motivo", () => {

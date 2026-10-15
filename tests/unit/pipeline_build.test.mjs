@@ -75,7 +75,7 @@ test("caso B: Ledian derruba o Ninetales (agora com Seismic Fist, soco pela flag
   assert.equal(c.porQue, null);
   assert.equal(tier(c), 1, "cai para o resto do ranking");
   assert.equal(c.alvoAgeAntes, true);
-  assert.equal(c.rotulo, "estimada");
+  assert.equal(c.rotulo, "calibrada", "versao-nova/03: a prioridade do alvo vira aviso, não tira o selo");
   assert.match(c.avisos.join(" | "), /O alvo age antes com Flame Burst \(\+1 de prioridade\) e derruba Ledian antes de ele agir/);
   assert.match(c.motivos.join(" | "), /o alvo age antes/);
   assert.equal(c.garantido, true, "o Seismic Fist tira no mínimo 138%: o KO em 1 golpe é garantido, só a ordem não");
@@ -155,70 +155,22 @@ test("ranking do caso B: contra o Flame Burst do Ninetales nenhum candidato do L
 // Ninetales da Meteor Falls sem o Flame Burst e com Def menor (Mild): o caso conferido na calculadora, sem prioridade do alvo.
 const foeSemPrioridade = () => R.foeDeDuelo(Object.assign({}, courtney.party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Shadow Ball"], nat: "Mild" }), 55, null);
 
-test("caso conferido (Ledian + Aerodynamics + Mega Punch x Ninetales): a lista de calibrados reconhece o Mega Punch e o Aerial Ace, não o Seismic Fist", () => {
-  const linha = (nome) => ({ nome, foeSname: "SPECIES_NINETALES", foge: false });
-  assert.equal(R.pipelineCasoConferido("SPECIES_LEDIAN", "Aerodynamics", linha("Mega Punch")), true);
-  assert.equal(R.pipelineCasoConferido("SPECIES_LEDIAN", "Aerodynamics", linha("Aerial Ace")), true);
-  assert.equal(R.pipelineCasoConferido("SPECIES_LEDIAN", "Aerodynamics", linha("Seismic Fist")), false, "golpe sem conferência na calculadora do jogo");
-});
-
-test("sem prioridade do alvo, o melhor golpe do Ledian é o Seismic Fist (soco pela flag do jogo): garantido e bate primeiro por velocidade, mas 'estimada' - a calculadora só conferiu Mega Punch e Aerial Ace", () => {
+test("sem prioridade do alvo, o melhor golpe do Ledian é o Seismic Fist (soco pela flag do jogo): garantido e bate primeiro por velocidade; selo 'calibrada' (versao-nova/03)", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: { foe: foeSemPrioridade() } });
   // com o STAB x1,5 da Aerilate (versao-nova/02) o Mega Punch passa a ser o melhor golpe de alguns kits: procura o kit em que o melhor é o Seismic Fist
-  const c = r.candidatos.find((x) => x.golpes.includes("Seismic Fist") && x.habilidade === "Aerodynamics" && x.hitKill === 1 && /em 1 golpe \(Seismic Fist\)/.test(x.motivos.join(" | ")));
+  const c = r.candidatos.find((x) => x.golpes.includes("Seismic Fist") && x.habilidade === "Aerodynamics" && x.hitKill === 1 && /Seismic Fist derruba no turno 1 o Ninetales/.test(x.motivos.join(" | ")));
   assert.ok(c, r.candidatos.map((x) => x.habilidade + ":" + x.golpes.join("/")).join(" ; "));
   assert.equal(c.alvoAgeAntes, false);
   assert.equal(c.garantido, true);
-  assert.equal(c.rotulo, "estimada");
-  assert.match(c.motivos.join(" | "), /Provável derrubar o Ninetales em 1 golpe \(Seismic Fist\); bate primeiro por velocidade/, "estimada: o texto é 'Provável', não 'derruba no turno 1'");
+  assert.equal(c.rotulo, "calibrada");
+  assert.match(c.motivos.join(" | "), /Seismic Fist derruba no turno 1 o Ninetales; bate primeiro por velocidade/, "calibrada e garantido: o texto diz 'derruba no turno 1'");
 });
 
-test("calibrada exige o MESMO atacante, habilidade, golpe e alvo: outro atacante, outra habilidade ou outro alvo é estimada", () => {
-  const alvo = { foe: foeSemPrioridade() };
-  // outra habilidade do Ledian com o mesmo Mega Punch
-  R.candidatosDeBuild(sp("Ledian"), { alvo }).candidatos.filter((x) => x.habilidade !== "Aerodynamics").forEach((x) => assert.equal(x.rotulo, "estimada", x.habilidade));
-  // outro atacante (Scyther Mega com Aerial Ace x Charizard: nunca foi conferido)
-  R.candidatosDeBuild(sp("Scyther Mega"), { alvo: { chefao: courtney, indice: 2 } }).candidatos.forEach((x) => assert.equal(x.rotulo, "estimada", x.golpes.join("/")));
-  // outro alvo (Alakazam) com o mesmo atacante e golpe
-  R.candidatosDeBuild(sp("Ledian"), { alvo: alakazam }).candidatos.forEach((x) => assert.equal(x.rotulo, "estimada"));
-});
-
-test("Typhlosion x Ninetales: o Earthquake derruba, o Aerial Ace é só acessório e NÃO deixa o candidato 'calibrada'", () => {
+test("Typhlosion x Ninetales: o Earthquake derruba, o Aerial Ace é só acessório e o selo é 'calibrada' do mesmo jeito (versao-nova/03)", () => {
   const r = R.candidatosDeBuild(sp("Typhlosion"), { alvo: { foe: foeSemPrioridade() } });
   const comAce = r.candidatos.filter((x) => x.golpes.includes("Aerial Ace") && x.golpes.includes("Earthquake") && x.hitKill === 1);
   assert.ok(comAce.length > 0, r.candidatos.map((x) => x.golpes.join("/")).join(" ; "));
-  comAce.forEach((x) => assert.equal(x.rotulo, "estimada"));
-});
-
-test("calibrada vale só se TODO alvo medido é caso conferido (primeiro e ás): com um alvo não conferido no meio, é estimada", () => {
-  // O ás da luta vira o Alakazam: a linha do Ninetales é um caso conferido, a do Alakazam não.
-  const luta = Object.assign({}, courtney, { party: [Object.assign({}, courtney.party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Shadow Ball"], nat: "Mild" }), courtney.party[1]] });
-  const r = R.candidatosDeBuild(sp("Ledian"), { alvo: { chefao: luta } });
-  assert.deepEqual(plain(r.alvo.pokemon), ["Ninetales", "Alakazam"]);
-  const doLedian = r.candidatos.filter((x) => x.habilidade === "Aerodynamics" && x.hitKill > 0);
-  assert.ok(doLedian.length > 0);
-  doLedian.forEach((x) => assert.equal(x.rotulo, "estimada", x.golpes.join("/")));
-});
-
-// Ledian só com golpes que a calculadora do jogo conferiu (Mega Punch e Aerial Ace): tira da lista o Seismic Fist e parecidos, que
-// passam o Mega Punch no dano e deixam o caso conferido fora do melhor golpe. Dado real do jogo (lm/tu do Ledian), só filtrado.
-function ledianSoComGolpesConferidos() {
-  const fora = ["Seismic Fist", "One-Inch Punch", "Insect Impact", "Thunder Punch", "Bug Buzz", "Rock Throw"];
-  const ids = new Set(Object.keys(R.MOVES).filter((id) => fora.includes(R.MOVES[id][0])));
-  const led = sp("Ledian");
-  return Object.assign({}, led, { lm: (led.lm || []).filter((p) => !ids.has(String(p[1]))), tu: (led.tu || []).filter((id) => !ids.has(String(id))) });
-}
-
-test("calibrada com um alvo conferido (Ninetales) e outro NÃO (Alakazam): só o alvo único é calibrada, os dois alvos são estimada (every, não some)", () => {
-  const ledian = ledianSoComGolpesConferidos();
-  const luta = Object.assign({}, courtney, { party: [Object.assign({}, courtney.party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Shadow Ball"], nat: "Mild" }), courtney.party[1]] });
-  const so = R.candidatosDeBuild(ledian, { alvo: { foe: foeSemPrioridade() } }).candidatos.find((x) => x.habilidade === "Aerodynamics" && x.golpes.includes("Mega Punch"));
-  assert.ok(so, "o Ledian com Mega Punch contra o Ninetales tem que aparecer");
-  assert.equal(so.hitKill, 1);
-  assert.equal(so.rotulo, "calibrada", "um alvo, caso conferido: calibrada");
-  const dois = R.candidatosDeBuild(ledian, { alvo: { chefao: luta } }).candidatos.filter((x) => x.habilidade === "Aerodynamics" && x.golpes.includes("Mega Punch") && x.hitKill > 0);
-  assert.ok(dois.length > 0);
-  dois.forEach((x) => assert.equal(x.rotulo, "estimada", "o Alakazam não foi conferido: " + x.golpes.join("/")));
+  comAce.forEach((x) => assert.equal(x.rotulo, "calibrada"));
 });
 
 test("garantido vale pela rolagem MÍNIMA: Charmeleon x Ninetales derruba em 1 golpe na média (94% a 110%), mas não é garantido", () => {
@@ -305,14 +257,16 @@ test("caso B: a prioridade condicional (Coil Up) também não vale contra Queenl
   assert.ok(k.every((x) => !x.baterPrimeiro), "a prioridade condicional vale só no golpe que derruba de uma vez");
 });
 
-test("rótulo 'estimada' para golpe fora da lista calibrada, e o texto não promete 'turno 1'", () => {
-  const c = R.candidatosDeBuild(sp("Accelgor"), { alvo: ninetales }).candidatos.find((x) => x.hitKill === 1);
-  assert.ok(c);
-  assert.equal(c.rotulo, "estimada");
-  const texto = c.motivos.join(" | ");
-  assert.match(texto, /Provável derrubar/);
-  assert.doesNotMatch(texto, /derruba no turno 1/);
-  assert.match(c.avisos.join(" | "), /ainda não conferido na calculadora/);
+test("o texto só promete 'turno 1' quando o dano MÍNIMO já derruba (garantido) e o alvo não age antes, em qualquer build calibrada", () => {
+  const todos = ["Accelgor", "Ledian", "Charmeleon", "Typhlosion"].flatMap((n) => R.candidatosDeBuild(sp(n), { alvo: ninetales }).candidatos).filter((x) => x.hitKill === 1);
+  assert.ok(todos.some((x) => x.garantido) && todos.some((x) => !x.garantido), "a amostra tem os dois casos");
+  todos.forEach((x) => {
+    assert.equal(x.rotulo, "calibrada");
+    const texto = x.motivos.join(" | ");
+    if (x.garantido && !x.alvoAgeAntes) assert.match(texto, /derruba no turno 1/, x.golpes.join("/"));
+    else { // sem garantia, ou com o alvo agindo antes (Flame Burst do Ninetales): nunca 'turno 1'
+ assert.match(texto, /Provável derrubar/, x.golpes.join("/")); assert.doesNotMatch(texto, /derruba no turno 1/, x.golpes.join("/")); }
+  });
 });
 
 test("Focus Sash do alvo (Alakazam): o hit-kill de 1 golpe vira 2 e o candidato avisa", () => {
@@ -366,13 +320,11 @@ test("a prioridade vence a Velocidade só quando o golpe é de prioridade e não
   });
 });
 
-test("rótulo 'calibrada' só quando o hit-kill é sustentado por golpe da lista", () => {
+test("rótulo 'estimada' só com habilidade sem regra no motor (atacante ou alvo) ou fuga no Intimidate: na amostra, nenhuma estimada sem motivo", () => {
   AMOSTRA.forEach((nome) => {
     R.candidatosDeBuild(sp(nome), { alvo: ninetales }).candidatos.forEach((c) => {
-      if (c.rotulo === "calibrada") {
-        assert.ok(c.hitKill > 0 && c.golpes.some((g) => ["Mega Punch", "Aerial Ace"].includes(g)), nome + " " + c.golpes.join("/"));
-        assert.match(c.motivos.join(" "), /Mega Punch|Aerial Ace/);
-      } else assert.doesNotMatch(c.motivos.join(" "), /derruba no turno 1/);
+      if (c.rotulo === "estimada") assert.match(c.selo, /não lê|fuga no Intimidate/, nome + " " + c.golpes.join("/") + ": " + c.selo);
+      else assert.equal(c.selo, "Calculado pelo código do jogo");
     });
   });
 });

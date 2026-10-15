@@ -7,18 +7,15 @@
   // Testes: tests/unit/pipeline_build.test.mjs. Escopo global, ES5, sem window/document (ADR-004).
   // Função pura: não muda `state` nem grava nada; o único efeito é o cache interno do motor (benigno).
 
-  // Casos em que o motor foi CONFERIDO contra a calculadora do próprio jogo (tests/unit/calibracao_calculadora_do_jogo.test.mjs,
-  // prints do usuário de 10/10/2026): o Ledian (habilidade Aerodynamics, nível 55) com Mega Punch (78%-93%) e com Aerial Ace
-  // (58%-69%) contra o Ninetales da luta Courtney Meteor Falls, com Life Orb. Só o hit-kill sustentado por um caso desta lista
-  // sai "calibrada"; outro atacante, outra habilidade que mude o dano ou outro alvo é "estimada" (a conferência de um golpe
-  // não vale para quem não foi conferido). AMPLIAR A LISTA É DECISÃO DO USUÁRIO, com número novo da calculadora do jogo.
-  var CASOS_CALIBRADOS = [
-    { atacante: "SPECIES_LEDIAN", habilidade: "Aerodynamics", golpe: "Mega Punch", alvo: "SPECIES_NINETALES" },
-    { atacante: "SPECIES_LEDIAN", habilidade: "Aerodynamics", golpe: "Aerial Ace", alvo: "SPECIES_NINETALES" }
-  ];
+  // Selo do candidato (ticket versao-nova/03, decisão do Felipe de 15/10/2026): o motor é calibrado pelo código do jogo (tickets 01 a 06 da
+  // calibração, v01 e v02), então TODA build sai "calibrada" ("Calculado pelo código do jogo"). Só fica "estimada" o que o motor não simula:
+  // habilidade em jogo SEM regra no motor (a lista da auditoria, `habilidadeSemRegraNoDuelo`), do atacante (escolhida ou inata) ou do alvo;
+  // a fuga no Intimidate (o motor devolve empate); e a consulta sem alvo (nada foi simulado). A lista CASOS_CALIBRADOS (Ledian + Mega Punch/
+  // Aerial Ace contra a calculadora do jogo, 10/10) deixou de ser o critério: depois do M9 o motor segue o código e já não reproduz aquela calculadora.
+  var SELO_CALIBRADO = "Calculado pelo código do jogo";
   // Decisão do usuário (P1, 14/10/2026): a prioridade EFETIVA do golpe do alvo entra na definição de "bate primeiro" (quem dá o KO
   // primeiro na ordem real de turnos), então `baterPrimeiro` e o ranking já refletem a ordem real; `alvoAgeAntes` fica como motivo
-  // (aviso "O alvo age antes") e um golpe de prioridade do alvo que o atacante não supera tira o selo "calibrada".
+  // (aviso "O alvo age antes") e e o aviso fica, mas o selo não cai: o motor simula a prioridade (ticket versao-nova/03).
   // Reverter numa linha (false): a prioridade do alvo sai de tudo (definição antiga: só prioridade do golpe ou Velocidade).
   var CONSIDERA_PRIORIDADE_DO_ALVO = true;
 
@@ -324,9 +321,14 @@
     return escolhidos.length === 4 ? escolhidos : null;
   }
 
-  // O caso (atacante + habilidade + golpe + alvo) está na lista conferida na calculadora do jogo?
-  function pipelineCasoConferido(sname, habilidade, linha) {
-    return CASOS_CALIBRADOS.some(function (c) { return !linha.foge && c.atacante === sname && c.habilidade === habilidade && c.golpe === linha.nome && c.alvo === linha.foeSname; });
+  // Habilidades em jogo que o motor não lê, do atacante (escolhida e inatas ativas) e de cada alvo medido. Devolve ex.: ["Temporal Rupture (inata)"].
+  function pipelineHabilidadesSemRegra(habEscolhida, idsInatas, foes) {
+    var achadas = [];
+    var poe = function (id, nome, quem) { var rot = nome + " (" + quem + ")"; if (habilidadeSemRegraNoDuelo(id) && achadas.indexOf(rot) === -1) achadas.push(rot); };
+    if (habEscolhida) poe(ABILITY_ID_BY_NAME[habEscolhida], habEscolhida, "habilidade escolhida");
+    idsInatas.forEach(function (id) { poe(id, nomeHabDuelo(id), "inata"); });
+    foes.forEach(function (f) { (f.ids || []).forEach(function (id) { poe(id, nomeHabDuelo(id), "do alvo " + f.nome); }); });
+    return achadas;
   }
   function pipelineTierDoCandidato(c) { return c.hitKill === 1 && c.baterPrimeiro ? 3 : c.hitKill === 2 && c.baterPrimeiro ? 2 : 1; }
 
@@ -338,7 +340,7 @@
     return " (" + sala + Math.round(Math.abs(l.velEu)) + " de Velocidade contra " + Math.round(Math.abs(l.velFoe)) + ")";
   }
   function pipelineMotivos(av, sinergias, habilidade, calibrada, alvo) {
-    var garante = calibrada && av.garantido; // só caso conferido E mínimo da rolagem já derruba
+    var garante = calibrada && av.garantido && !av.alvoPrio; // selo calibrada, mínimo da rolagem já derruba E o alvo não age antes
     var motivos = [];
     sinergias.forEach(function (h) {
       var nossos = h.golpes.filter(function (g) { return av.golpes.indexOf(g) !== -1; });
@@ -461,12 +463,19 @@
       var innNomes = innatesAtivasNoNivel(sp, alvo.nivel).map(nomeHabDuelo);
       aceitos.forEach(function (c) {
         var av = c.g.av;
-        var calibrada = av.hitKill > 0 && av.linhas.length > 0 && !av.alvoPrio && av.linhas.every(function (l) { return pipelineCasoConferido(sp.sname, c.g.hab, l); });
+        var idsInatas = innatesAtivasNoNivel(sp, alvo.nivel);
+        var semRegra = alvo.foes.length ? pipelineHabilidadesSemRegra(c.g.hab, idsInatas, alvo.foes) : [];
+        var fuga = av.linhas.some(function (l) { return l.foge; });
+        var motivosEstimada = [];
+        if (!alvo.foes.length) motivosEstimada.push("sem alvo, nada foi simulado");
+        if (semRegra.length) motivosEstimada.push("o motor não lê " + semRegra.join(", "));
+        if (fuga) motivosEstimada.push("fuga no Intimidate (o motor trata como empate)");
+        var calibrada = !motivosEstimada.length;
         var avisos = [];
         if (c.itemDeRascunho && c.tipoDoItem === "pedra") avisos.push("No modo de mega temporária " + sp.n + " precisa segurar a pedra: o rascunho leva " + c.itemDeRascunho + (c.pedras.length > 1 ? " (a IA escolhe entre " + c.pedras.join(" e ") + ")" : "") + "; a simulação não conta o item.");
         else if (c.itemDeRascunho) avisos.push("A habilidade escolhida só funciona gastando o item: o rascunho leva " + c.itemDeRascunho + " (a IA pode trocar); a simulação não conta o item.");
         if (av.linhas.some(function (l) { return l.foge; })) avisos.push("Um dos lados foge no Intimidate (Tactical Retreat): o motor trata a luta como empate; o dano aqui é o de quem ficasse em campo, só uma estimativa.");
-        if (av.hitKill > 0 && !calibrada) avisos.push("Número do motor, ainda não conferido na calculadora do jogo: trate como estimativa.");
+        if (semRegra.length) avisos.push("O motor não simula " + semRegra.join(", ") + ": o número é uma estimativa.");
         if (av.alvoPrio) {
           var ap = av.alvoPrio.alvoPrio;
           avisos.push("O alvo age antes com " + ap.nome + " (+" + ap.prio + " de prioridade) e " + (ap.fracEu >= 1 ? "derruba " + sp.n + " antes de ele agir" : "tira " + Math.round(ap.fracEu * 100) + "% do HP de " + sp.n) + ".");
@@ -478,7 +487,7 @@
           motivos: pipelineMotivos(av, c.g.sinergias, c.g.hab, calibrada, alvo),
           hitKill: av.hitKill, garantido: !!av.garantido, baterPrimeiro: !!av.baterPrimeiro, porQue: av.porQue, alvoAgeAntes: !!av.alvoPrio,
           dano: { min: Math.round(av.fracMin * 1000) / 10, max: Math.round(av.fracMax * 1000) / 10 },
-          rotulo: calibrada ? "calibrada" : "estimada", avisos: avisos,
+          rotulo: calibrada ? "calibrada" : "estimada", selo: calibrada ? SELO_CALIBRADO : "Estimado: " + motivosEstimada.join("; "), avisos: avisos,
           build: { ability: c.v.ability, moves: c.v.moves.slice(), item: c.v.item, nature: c.v.nature, evs: c.v.evs.slice() }
         });
       });

@@ -1521,6 +1521,29 @@
     cacheEfeitoDuelo[chave] = ef;
     return ef;
   }
+  // Habilidade que o motor NÃO lê: sozinha, o efeito dela é igual ao de nenhuma habilidade, e ela não está na tabela de tipos, nem na
+  // sinergia por golpe, nem arma clima. É a conta da auditoria permanente (tests/unit/auditoria_do_motor.test.mjs, lista
+  // HABILIDADES_SEM_REGRA) e do selo "estimada" do pipeline de build (ticket versao-nova/03): o número do motor não conta o efeito dela.
+  var cacheSemRegraDuelo = {}, baseSemRegraDuelo = null, nomesComSinergiaDuelo = null;
+  function habilidadeSemRegraNoDuelo(id) {
+    if (id === undefined || id === null || id < 0 || !ABILITIES[id]) return false;
+    if (cacheSemRegraDuelo[id] !== undefined) return cacheSemRegraDuelo[id];
+    var semClimas = function (k, v) { return k === "climasProprios" ? undefined : v; };
+    if (baseSemRegraDuelo === null) {
+      baseSemRegraDuelo = JSON.stringify(efeitoDasHabilidadesNoDuelo([], "SEMREGRA_BASE", null), semClimas);
+      nomesComSinergiaDuelo = {};
+      Object.keys(ABILITY_SYNERGY).forEach(function (sn) { ABILITY_SYNERGY[sn].forEach(function (h) { nomesComSinergiaDuelo[h.name] = true; }); });
+    }
+    var nome = ABILITIES[id][0], texto = textoHabDuelo(id);
+    // Condicional de clima conta ligada no clima que o próprio texto pede.
+    var CLIMA = { rain: "chuva", sun: "sol", sand: "areia", sandstorm: "areia", hail: "granizo", fog: "nevoa" };
+    var c = ((texto.match(/\b(rain|rains|sun|sunny|sand|sandstorm|hail|fog)\b/i) || [])[1] || "").toLowerCase().replace(/s$|ny$/, "");
+    var ef = efeitoDasHabilidadesNoDuelo([id], "SEMREGRA_" + id, CLIMA[c] || null);
+    var semRegra = JSON.stringify(ef, semClimas) === baseSemRegraDuelo && !TYPE_MOD_ABILITIES[id] && !nomesComSinergiaDuelo[nome]
+      && !["chuva", "sol", "areia", "granizo", "nevoa"].some(function (cl) { return habilidadeArma(nome, cl); });
+    cacheSemRegraDuelo[id] = semRegra;
+    return semRegra;
+  }
   // Clima no campo entre os dois lados: o que cada um arma (habilidade) ou o do
   // time (u.clima). Se os dois armam climas diferentes, depende de quem entra por
   // último - fica sem clima (não dá pra saber no modelo por valor esperado).
