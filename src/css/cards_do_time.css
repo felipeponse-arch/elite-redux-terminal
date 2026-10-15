@@ -263,7 +263,7 @@
 }
 /* "Gerar build com IA": ação principal do estado vazio, não link solto (lote 1,
    2026-10-03) - botão secundário com borda e fundo. */
-.ts-ai-generate-btn, #mybuild-ai-generate {
+.ts-ai-generate-btn, #mybuild-ai-generate, #mybuild-pipeline-ver {
   justify-content: center;
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -271,8 +271,8 @@
   padding: 4px 14px;
   font-size: var(--fs-pequeno);
 }
-.ts-ai-generate-btn:hover, #mybuild-ai-generate:hover { background: var(--surface-3); }
-.ts-ai-generate-btn:disabled, #mybuild-ai-generate:disabled { color: var(--text-dim); cursor: default; }
+.ts-ai-generate-btn:hover, #mybuild-ai-generate:hover, #mybuild-pipeline-ver:hover { background: var(--surface-3); }
+.ts-ai-generate-btn:disabled, #mybuild-ai-generate:disabled, #mybuild-pipeline-ver:disabled { color: var(--text-dim); cursor: default; }
 .ts-build-note { font-size: var(--fs-legenda); color: var(--text-dim); margin-top: 6px; font-style: italic; max-width: 70ch; }
 .ts-nota-fonte .ts-build-note { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .ts-item-desc { font-size: var(--fs-legenda); color: var(--text-dim); margin-top: 4px; }

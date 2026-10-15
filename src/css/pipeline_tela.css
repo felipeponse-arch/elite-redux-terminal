@@ -1,0 +1,62 @@
+/* Sugestões do jogo (pipeline de build, ticket pipeline-build/02). Mesmo vocabulário dos sets de
+   Estratégias: bloco em --surface-2, sem sombra, com uma linha lateral que diz o tamanho do
+   resultado (ouro = derruba em 1 golpe; cinza escuro = em 2; fio = não derruba). A cor nunca
+   é a única pista: o veredito está sempre escrito. */
+.pipe-painel { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+.pipe-painel[hidden] { display: none; }
+.pipe-alvo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: var(--fs-texto); }
+.pipe-alvo-campo { font-weight: 700; color: var(--text-dim); font-size: var(--fs-pequeno); }
+.pipe-alvo-select { max-width: 100%; min-width: 0; }
+.pipe-alvo-resumo { color: var(--text); font-weight: 600; }
+.pipe-vazio, .pipe-nota { margin: 0; color: var(--text-dim); font-size: var(--fs-texto); max-width: 65ch; }
+.pipe-rodape-nota { margin: 0; }
+
+.pipe-cand {
+  display: flex; flex-direction: column; gap: 6px; min-width: 0;
+  background: var(--surface-2); border-radius: var(--radius-md); border-left: 3px solid var(--border);
+  padding: 10px 12px;
+}
+.pipe-cand.k1 { border-left-color: var(--accent-2); }
+.pipe-cand.k2 { border-left-color: var(--text-dim); }
+.pipe-cand-topo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.pipe-veredito { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: var(--fs-destaque); color: var(--text); }
+.pipe-cand.k1 .pipe-veredito { color: var(--badge-accent); }
+.pipe-ordem { font-size: var(--fs-pequeno); font-weight: 600; color: var(--badge-accent2); }
+.pipe-golpes { display: flex; flex-wrap: wrap; gap: 6px; }
+.pipe-golpe {
+  display: inline-flex; align-items: center; gap: 6px; min-width: 0;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill);
+  padding: 3px 10px 3px 8px; font-size: var(--fs-pequeno); font-weight: 600;
+}
+.pipe-hab { font-size: var(--fs-pequeno); color: var(--text-dim); }
+.pipe-hab b { color: var(--text); }
+.pipe-motivos { margin: 0; padding-left: 16px; font-size: var(--fs-pequeno); line-height: 1.45; max-width: 75ch; }
+.pipe-motivos li + li { margin-top: 3px; }
+.pipe-rodape { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 2px; }
+.pipe-selo {
+  display: inline-block; font-size: var(--fs-legenda); font-weight: 600; line-height: 1.35; max-width: 100%;
+  padding: 2px 8px; border-radius: var(--radius-sm); background: var(--surface-3); color: var(--text);
+  border: 1px solid var(--border); cursor: help;
+}
+.pipe-selo.calc { border-color: var(--badge-resist); }
+.pipe-selo.est { border-style: dashed; border-color: var(--aviso); }
+
+/* Bloco do time: recolhido, uma linha por membro. */
+.pipe-time { margin-top: 12px; }
+.pipe-time summary {
+  cursor: pointer; font-weight: 700; font-size: var(--fs-destaque); min-height: var(--alvo-min);
+  display: flex; align-items: center; gap: 6px; list-style: none;
+}
+.pipe-time summary:hover { color: var(--badge-accent); }
+.pipe-time summary::-webkit-details-marker { display: none; }
+.pipe-time summary::before { content: "▸"; color: var(--text-dim); }
+.pipe-time[open] summary::before { content: "▾"; }
+.pipe-time-corpo { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+.pipe-time-corpo:empty { display: none; }
+.pipe-membro { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.pipe-membro-cab { display: flex; align-items: center; gap: 8px; }
+.pipe-membro-nome { font-weight: 700; font-size: var(--fs-destaque); flex: 1 1 auto; min-width: 0; }
+
+@media (pointer: coarse) {
+  .pipe-time summary, .pipe-usar, .pipe-ver { min-height: 44px; }
+}
