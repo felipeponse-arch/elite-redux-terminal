@@ -159,7 +159,7 @@ test("item de ataque do jogador: Choice Band x1,5, Life Orb x1,3, item do tipo x
 
 test("Expert Belt só vale no golpe super efetivo", () => {
   const luta = (item, alvo) => lutar(eu("Charizard", { hab: "Giant Wings", golpes: ["Dragon Claw"], item }), alvo);
-  const dragao = () => chefao("Dragonite", { hab: "Inner Focus", golpes: ["Body Slam"], evs: [252, 252, 4, 0, 0, 0], nat: "Adamant" });
+  const dragao = () => chefao("Dragonite", { hab: "Inner Focus", golpes: ["Body Slam"], evs: [252, 252, 4, 0, 0, 0], nat: "Adamant", item: "Choice Band" }); // Choice Band: sem o x1,3 do "empowered" da Aerilate (versao-nova/02) o Dragonite perdia a luta
   dentroDoEfeito(razao(luta("Expert Belt", dragao()), luta("", dragao()), causado), 1.2, "Expert Belt contra Dragon");
   semEfeito(razao(luta("Expert Belt", snorlax()), luta("", snorlax()), causado), "Expert Belt contra Normal");
 });
@@ -253,7 +253,7 @@ test("clima defensivo: areia dá +50% de Sp. Def ao Rock, granizo +50% de Def ao
 });
 
 test("terreno armado por habilidade: Electro Surge reforça golpe Electric (x1,3) e não mexe nos outros tipos", () => {
-  const dragonite = () => chefao("Dragonite", { hab: "Inner Focus", golpes: ["Body Slam"], evs: [252, 252, 4, 0, 0, 0], nat: "Adamant" });
+  const dragonite = () => chefao("Dragonite", { hab: "Inner Focus", golpes: ["Body Slam"], evs: [252, 252, 4, 0, 0, 0], nat: "Adamant", item: "Choice Band" });
   const jolteon = (hab, golpe) => lutar(eu("Jolteon", { hab, golpes: [golpe], evs: [0, 0, 0, 0, 0, 252], nat: "Modest" }), dragonite());
   dentroDoEfeito(razao(jolteon("Electro Surge", "Thunderbolt"), jolteon("Volt Absorb", "Thunderbolt"), causado), 1.3, "Electric Terrain");
   semEfeito(razao(jolteon("Electro Surge", "Energy Ball"), jolteon("Volt Absorb", "Energy Ball"), causado), "Energy Ball no terreno elétrico");

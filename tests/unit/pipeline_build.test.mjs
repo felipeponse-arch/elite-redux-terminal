@@ -164,7 +164,8 @@ test("caso conferido (Ledian + Aerodynamics + Mega Punch x Ninetales): a lista d
 
 test("sem prioridade do alvo, o melhor golpe do Ledian é o Seismic Fist (soco pela flag do jogo): garantido e bate primeiro por velocidade, mas 'estimada' - a calculadora só conferiu Mega Punch e Aerial Ace", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: { foe: foeSemPrioridade() } });
-  const c = r.candidatos.find((x) => x.golpes.includes("Seismic Fist") && x.habilidade === "Aerodynamics" && x.hitKill === 1);
+  // com o STAB x1,5 da Aerilate (versao-nova/02) o Mega Punch passa a ser o melhor golpe de alguns kits: procura o kit em que o melhor é o Seismic Fist
+  const c = r.candidatos.find((x) => x.golpes.includes("Seismic Fist") && x.habilidade === "Aerodynamics" && x.hitKill === 1 && /em 1 golpe \(Seismic Fist\)/.test(x.motivos.join(" | ")));
   assert.ok(c, r.candidatos.map((x) => x.habilidade + ":" + x.golpes.join("/")).join(" ; "));
   assert.equal(c.alvoAgeAntes, false);
   assert.equal(c.garantido, true);

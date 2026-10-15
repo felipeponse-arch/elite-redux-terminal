@@ -23,22 +23,53 @@ function primeiroGolpe(golpe, item) {
   const duploDoGolpe = (g.cats || []).reduce((mx, c) => Math.max(mx, eu.ef.categoriaExtra[c] || 1), 1); // 2º golpe (Raging Boxer)
   return d.melhor.dano / duploDoGolpe / alvo.stats[0];
 }
+const perto = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, (msg || "") + ": " + a + " x " + b + " (tolerância " + tol + ")");
 const dentro = (v, min, max, rotulo) => assert.ok(v >= min && v <= max, rotulo + ": motor " + (v * 100).toFixed(1) + "%, jogo " + min * 100 + "% a " + max * 100 + "%");
 
-test("calculadora do jogo: Mega Punch do Ledian no Ninetales = 78% a 93% (60% a 72% sem a Life Orb)", () => {
-  dentro(primeiroGolpe("Mega Punch", "Life Orb"), 0.78, 0.93, "com Life Orb");
-  dentro(primeiroGolpe("Mega Punch", ""), 0.60, 0.72, "sem item");
+// 15/10/2026 (ticket versao-nova/02, decisão 4 do Felipe: "Normal vira X" segue o CÓDIGO do jogo, STAB x1,5): a calculadora de 10/10 só
+// fechava com x1,3 (Mega Punch 78%-93%, Aerial Ace 58%-69%). O código (abilities.cc:295-301, `ATE_ABILITY`) troca o tipo e dá STAB ao tipo
+// novo, sem multiplicador; o Ledian não é Flying, então o STAB x1,5 vale para o Mega Punch convertido E para o Aerial Ace. O motor agora
+// fica ACIMA da faixa da calculadora (a diferença é a conta x1,5 contra x1,3 e o STAB do Aerial Ace); se a medida em batalha real
+// mostrar a calculadora certa, este teste e a decisão de 15/10 voltam para a mesa.
+test("código do jogo: Mega Punch do Ledian no Ninetales com Aerilate = STAB x1,5 (calculadora do jogo dizia 78% a 93%; motor 98%)", () => {
+  dentro(primeiroGolpe("Mega Punch", "Life Orb"), 0.96, 1.0, "com Life Orb");
 });
 
-test("calculadora do jogo: Aerial Ace do Ledian no Ninetales = 58% a 69%", () => {
-  dentro(primeiroGolpe("Aerial Ace", "Life Orb"), 0.58, 0.69, "com Life Orb");
+test("código do jogo: Aerial Ace do Ledian (não é Flying) ganha o STAB da Aerilate em todo golpe Flying (calculadora dizia 58% a 69%; motor 92%)", () => {
+  dentro(primeiroGolpe("Aerial Ace", "Life Orb"), 0.89, 0.95, "com Life Orb");
 });
 
-test("habilidade 'Normal vira X, golpes de X são empoderados' (Aerilate, Pixilate...): o golpe convertido vale x1,3", () => {
-  for (const nome of ["Aerilate", "Pixilate", "Refrigerate", "Galvanize"]) {
+// Atacante Garchomp (Dragon/Ground, sem STAB nos tipos abaixo) contra um Magikarp sem EV (Water: neutro para Flying, Fairy e Bug).
+const NOME_ATE = { Aerilate: ["Flying", "Aerial Ace"], Pixilate: ["Fairy", "Dazzling Gleam"], Pollinate: ["Bug", "Bug Bite"] };
+function razaoAte(hab, golpe, extra) {
+  const mk = (habs) => {
+    const s = R.SPECIES.find((x) => x && x.n === "Garchomp");
+    const u = R.unidadeDaBuild(s, { ability: "Run Away", nature: "Hardy", evs: [0, 252, 0, 252, 0, 0], item: "", moves: [golpe] }, NIVEL, null);
+    const ids = habs.map((n) => R.ABILITY_ID_BY_NAME[n]);
+    u.ids = ids; u.ef = R.efeitoDasHabilidadesNoDuelo(ids, "ATE_" + habs.join("+"), null); u.tipos = R.tiposNaBatalha(s, u.ef);
+    u.golpeIds = [R.MOVE_ID_BY_NAME[golpe]]; u.golpesProntos = R.prepararGolpesDuelo(u.golpeIds, u, null);
+    return u;
+  };
+  const m = R.SPECIES.find((x) => x && x.n === "Magikarp");
+  const alvo = R.unidadeDaBuild(m, { ability: "Run Away", nature: "Hardy", evs: [0, 0, 0, 0, 0, 0], item: "", moves: ["Tackle"] }, NIVEL, null);
+  alvo.ids = []; alvo.ef = R.efeitoDasHabilidadesNoDuelo([], "ATE_ALVO", null); alvo.tipos = ["Water"];
+  alvo.golpeIds = [R.MOVE_ID_BY_NAME.Tackle]; alvo.golpesProntos = R.prepararGolpesDuelo(alvo.golpeIds, alvo, null);
+  return R.danoNoDuelo(mk(hab), alvo, NIVEL).melhor.dano / R.danoNoDuelo(mk(extra || []), alvo, NIVEL).melhor.dano;
+}
+
+test("'Normal vira X' (Aerilate, Pixilate, Pollinate...): o golpe convertido e os golpes nativos de X ganham STAB x1,5, sem multiplicador (abilities.cc:295-301)", () => {
+  for (const [nome, [tipo, nativo]] of Object.entries(NOME_ATE)) {
     const e = R.efeitoDasHabilidadesNoDuelo([R.ABILITY_ID_BY_NAME[nome]], "SPECIES_RATTATA", null);
-    assert.equal(e.converte.Normal.mult, 1.3, nome);
+    assert.equal(e.converte.Normal.mult, 1, nome + ": sem multiplicador");
+    assert.equal(e.ateMult, 1, nome);
+    assert.deepEqual(Array.from(e.stabExtra), [tipo], nome + ": STAB do tipo novo");
+    assert.ok(Math.abs(razaoAte([nome], nativo) - 1.5) < 0.04, nome + " / " + nativo + " (nativo): " + razaoAte([nome], nativo));
   }
+});
+
+test("'Normal vira X': Body Slam vira o tipo novo com STAB x1,5; com Adaptability o STAB do tipo novo é x2", () => {
+  perto(razaoAte(["Aerilate"], "Body Slam"), 1.5, 0.04, "Aerilate / Body Slam");
+  perto(razaoAte(["Aerilate", "Adaptability"], "Body Slam", ["Adaptability"]), 2, 0.05, "Aerilate + Adaptability / Body Slam");
 });
 
 // Ainda sem explicação: a calculadora mostra 16% a 19% e o motor dá ~21% (cerca de 10% acima do teto). O poder

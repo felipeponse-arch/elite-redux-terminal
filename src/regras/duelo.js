@@ -44,7 +44,17 @@
   var TIPO_REFORCADO_PELO_CLIMA = { sol: "Fire", chuva: "Water" };
 
   function nomeHabDuelo(id) { return ABILITIES[id] ? ABILITIES[id][0] : ""; }
-  function textoHabDuelo(id) { return descricaoDeHabilidadePorId(id); } // pelo número: nomes repetidos (As One)
+  // Texto da versão NOVA (er-config d1a9a4c, 14/10/2026) das habilidades cujo número mudou entre a 2.65beta (dado do app, 28/03) e hoje. Decisão do
+  // Felipe de 15/10/2026 (ticket versao-nova/02): o app mira a versão mais nova, código primeiro. Os leitores seguem lendo TEXTO; quando o dado novo
+  // entrar (ticket versao-nova/05) o texto do dado passa a ser igual a este e a tabela pode sair (teste `texto_da_versao_nova` avisa).
+  // Código: Madness Enhancement abilities.cc:9939-9947 (.5 -> .8), Feathercoat 12377-12386 (.9/.8 -> .85/.7).
+  var TEXTO_DA_VERSAO_NOVA_DUELO = {
+    "Madness Enhancement": "Enrages in fog, reduces damage taken by 20% when enraged.",
+    "Feathercoat": "Takes 15% less damage from attacks, 30% if resisted." };
+  function textoHabDuelo(id) { // pelo número: nomes repetidos (As One)
+    var novo = TEXTO_DA_VERSAO_NOVA_DUELO[nomeHabDuelo(id)];
+    return novo !== undefined ? novo : descricaoDeHabilidadePorId(id);
+  }
 
   // ---------- golpes ----------
   // Acertos pelo EFEITO oficial do golpe (MOVES[id][11], effT do dado bruto) - 2026-10-02,
@@ -550,7 +560,10 @@
     // Redução de dano geral.
     if ((x = f.match(/Takes (\d+)% reduced damage/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
     if ((x = f.match(/Reduces damage taken by (\d+)%, but lowers speed by (\d+)%/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.speMult *= 1 - parseInt(x[2], 10) / 100; }
-    if ((x = f.match(/Takes (\d+)% less damage from attacks, (\d+)% if resisted/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
+    // Feathercoat (abilities.cc:12377-12386): x(1 - a%) em todo golpe e x(1 - b%) NO TOTAL se o golpe é resistido (não soma: o jogo troca o fator).
+    if ((x = f.match(/Takes (\d+)% less damage from attacks, (\d+)% if resisted/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.reducao.resistido *= (1 - parseInt(x[2], 10) / 100) / (1 - parseInt(x[1], 10) / 100); }
+    // Dead Bark (abilities.cc:11401-11412, igual na 2.65beta): x0,85 em todo golpe e x0,7 no total se é super efetivo.
+    if ((x = f.match(/^Takes (\d+)% less damage\. (\d+)% less damage if SE/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.reducao.superEf *= (1 - parseInt(x[2], 10) / 100) / (1 - parseInt(x[1], 10) / 100); }
     if ((x = f.match(/Halves dmg taken by (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.resistTipo[tipoDoTextoDuelo(x[1])] = 0.5;
     // Flash Fire (abilities.cc:696-706, battle_util.c:4479): depois de absorver um golpe Fire, os Fire do dono saem x1,5 até ele sair
     // ("Powers up Fire-type moves by 1.5x if hit by a Fire-type move"). A imunidade em si vem da tabela de tipos.js.
@@ -1225,7 +1238,7 @@
     if (cacheEfeitoDuelo[chave]) return cacheEfeitoDuelo[chave];
     var ef = { ate: null, ateMult: 1, converte: {}, stabMult: 1.5, stabExtra: [], stabTodos: false, tipoExtra: [],
       atkMult: 1, spaMult: 1, speMult: 1, fisicoMult: 1, especialMult: 1, danoMult: 1,
-      reducao: { F: 1, E: 1, todos: 1, superEf: 1, contato: 1, som: 1 }, resistTipo: {}, vsTipo: {},
+      reducao: { F: 1, E: 1, todos: 1, superEf: 1, resistido: 1, contato: 1, som: 1 }, resistTipo: {}, vsTipo: {},
       intimida: 0, assusta: 0, imuneIntimida: false, imuneAssusta: false,
       prioridadeNoPrimeiro: false, prioTipoCheio: [], prioMult: 1,
       bonusTipo: {}, bonusGolpes: {}, golpeExtra: 1, seguimento: null, contraTipo: {},
@@ -1303,14 +1316,14 @@
       // próprio texto do jogo ("Sp. Atk", "Phys. moves", "vs. Steel").
       var frases = t.split(/(?<!\b(?:Sp|Phys|vs|Elec|Fight)\.)(?<=[.!])\s+(?=[A-Z])|\n/).filter(Boolean);
       // --- ofensivo: tipo do golpe e STAB ---
-      // "Normal moves become X. X moves are empowered." (Aerilate, Pixilate, Refrigerate, Galvanize...): o golpe
-      // convertido vale x1,3, igual aos golpes naturais de X (a tabela de golpes empoderados). Medido na calculadora
-      // do próprio jogo (10/10/2026): o Mega Punch do Ledian mostra 78%-93% do Ninetales, que só fecha com x1,3
-      // (com x1,1 o motor dava 72%; com STAB x1,5 daria 98%+). As sem "empowered" no texto (Steelworker, Tectonize,
-      // Pollinate) seguem com x1,1: sem medida do jogo para elas.
+      // "Normal moves become X. X moves are empowered." (Aerilate, Pixilate, Refrigerate, Galvanize, Steelworker, Tectonize, Pollinate...):
+      // no código do jogo (abilities.cc:295-301, macro `ATE_ABILITY`) a habilidade só troca o tipo do golpe Normal e dá STAB ao tipo novo
+      // (x1,5; x2 com Adaptability) - não há multiplicador. Decisão do Felipe de 15/10/2026 (ticket versao-nova/02): vale o código, não a
+      // calculadora do jogo (que fechava com x1,3 em 10/10; o texto "empowered" da NextDex é só descrição). O x1,1 do código é de Normalize,
+      // Crystallize e Superconductor (abilities.cc:1562, 3734, 8208), lidos mais abaixo.
       if ((x = t.match(/Normal(?:-type)? moves? becomes? (\w+)/i)) && tipoDoTextoDuelo(x[1])) {
-        var empoderado = new RegExp(x[1] + " moves are empowered", "i").test(t) ? 1.3 : 1.1;
-        ef.ate = x[1]; ef.ateMult = empoderado; ef.converte.Normal = { para: x[1], mult: empoderado };
+        ef.ate = x[1]; ef.ateMult = 1; ef.converte.Normal = { para: x[1], mult: 1 };
+        ef.stabExtra.push(tipoDoTextoDuelo(x[1]));
       }
       var reConv = /(\w+)-type moves become (\w+)(?: and get a ([\d.]+)x boost)?/gi;
       while ((m = reConv.exec(t))) { if (m[1] !== "Normal" && tipoDoTextoDuelo(m[1]) && tipoDoTextoDuelo(m[2])) ef.converte[m[1]] = { para: m[2], mult: m[3] ? parseFloat(m[3]) : 1 }; }
@@ -1860,6 +1873,7 @@
       if (!quebraAqui) {
         red = def.ef.reducao.todos * (fisico ? def.ef.reducao.F : def.ef.reducao.E);
         if (efTipo >= 2) red *= def.ef.reducao.superEf;
+        if (efTipo > 0 && efTipo < 1) red *= def.ef.reducao.resistido; // Feathercoat
         if (g.contato) red *= def.ef.reducao.contato;
         if (g.som) red *= def.ef.reducao.som; // Punk Rock
       }
@@ -3054,9 +3068,9 @@
     // Sand Guard e Sun Basking: "Blocks priority and reduces special damage by 1/2 in sand" - sob o clima, golpe com prioridade do outro lado falha.
     if ((x = f.match(/^Blocks priority and reduces \w+ damage by 1\/2 in (sand|sun)/i)) && climaOk(x[1])) ef.bloqueiaPrioClima = CLIMA_DO_TEXTO_DUELO[x[1].toLowerCase()] === "areia" ? "areia" : "sol";
     // "Enraged" (código oficial do jogo, src/abilities.cc, lido em 2026-10-01): Madness
-    // Enhancement enfurece na névoa; Berserk DNA, na entrada. O NextDex (versão dos nossos
-    // dados) diz "halves damage when enraged" - o branch upcoming do código usa 0,8.
-    if (/Enrages in fog, halves damage when enraged/i.test(f) && climaOk("fog")) { ef.reducao.todos *= 0.5; ef.enfurecido = true; }
+    // Enhancement enfurece na névoa; Berserk DNA, na entrada. O NextDex 2.65beta dizia "halves damage when enraged" (x0,5); a versão
+    // nova (e o texto de TEXTO_DA_VERSAO_NOVA_DUELO) dá x0,8.
+    if ((x = f.match(/^Enrages in fog, (?:halves damage|reduces damage taken by (\d+)%) when enraged/i)) && climaOk("fog")) { ef.reducao.todos *= x[1] ? 1 - parseInt(x[1], 10) / 100 : 0.5; ef.enfurecido = true; }
     if (/enrages on entry/i.test(f)) ef.enfurecido = true;
     // Mental Pollution: enfurecido, põe Gastro Acid em todos os outros - como Neutralizing Gas.
     if (/Suppresses others' abilities when it becomes enraged/i.test(f)) ef.poluicaoMental = true;

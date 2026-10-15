@@ -122,9 +122,9 @@ test("iniciais por BP: a base diz a loja, a evolução manda comprar a base; Meg
 
 // ---------------- habilidades que o código oficial do jogo destravou ----------------
 const efDe = (nomes, clima) => R.efeitoDasHabilidadesNoDuelo(nomes.map((n) => R.ABILITY_ID_BY_NAME[n]), "LT_" + nomes.join("+") + "_" + clima, clima || null);
-test("Madness Enhancement: enfurece na névoa e leva metade do dano; fora dela, nada", () => {
+test("Madness Enhancement: enfurece na névoa e leva x0,8 do dano (versão nova, abilities.cc:9939-9947; era x0,5 na 2.65beta); fora dela, nada", () => {
   const naNevoa = efDe(["Madness Enhancement"], "nevoa");
-  assert.equal(naNevoa.reducao.todos, 0.5);
+  assert.equal(naNevoa.reducao.todos, 0.8);
   assert.equal(naNevoa.enfurecido, true);
   assert.equal(efDe(["Madness Enhancement"], null).reducao.todos, 1);
 });

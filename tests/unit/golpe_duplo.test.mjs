@@ -40,11 +40,11 @@ test("Ice Cold Hunter: golpe de Gelo bate duas vezes (x2) só no granizo", () =>
   assert.equal(ef("Ice Cold Hunter").bonusTipo.Ice, undefined, "sem granizo não vale");
 });
 
-test("Ledian: o poder do Mega Punch carrega a Raging Boxer uma vez só (x1,4 sobre Aerilate e Iron Fist)", () => {
+test("Ledian: o poder do Mega Punch carrega a Raging Boxer uma vez só (x1,4 sobre Aerilate, STAB e Iron Fist)", () => {
   const sp = R.SPECIES.find((s) => s && s.n === "Ledian");
   const eu = R.unidadeDaBuild(sp, { ability: "Aerodynamics", nature: "Jolly", evs: [84, 172, 0, 0, 0, 252], item: "", moves: ["Mega Punch"] }, 55, null);
   const g = eu.golpesProntos[0];
   assert.equal(g.tipo, "Flying", "Aerilate vira o Mega Punch em Voador");
-  const semBoxer = g.forcaBase * eu.ef.converte.Normal.mult * eu.ef.bonusCategoria.soco;
+  const semBoxer = g.forcaBase * eu.ef.converte.Normal.mult * eu.ef.bonusCategoria.soco * eu.ef.stabMult; // STAB x1,5 do tipo novo (Ledian não é Flying; versao-nova/02)
   assert.ok(Math.abs(g.forca / semBoxer - 1.4) < 0.01, "razão da Raging Boxer = " + (g.forca / semBoxer).toFixed(3) + " (esperado 1,4)");
 });
