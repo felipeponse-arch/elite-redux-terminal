@@ -311,7 +311,8 @@
     if ((x = f.match(/At full HP, gives \+1 priority to this Pok\S+ (\w+) moves/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.prioCheioCategoria[c] = true; });
     if (/Sound moves get \+1 priority at full HP/i.test(f)) ef.prioCheioSom = true;
     if (/All hits will be not very effective while at full HP/i.test(f)) ef.teraShell = true;
-    if (/Halves damage taken while at full HP/i.test(f)) ef.reducao.todos *= 0.75; // como Multiscale: metade da luta, em média
+    // Brain Mass (abilities.cc:11518): metade do dano só no 1º golpe com o HP cheio, depois x1,0 (antes: x0,75 fixo na luta toda).
+    if (/Halves damage taken while at full HP/i.test(f)) ef.golpeCheio = Math.min(ef.golpeCheio, 0.5);
     if ((x = f.match(/Triggers ([A-Z][\w ]+?) at (\d+)% power when using an? (\w+) move/)) && tipoDoTextoDuelo(x[3]) && MOVE_ID_BY_NAME[x[1]] !== undefined) {
       ef.seguimento = { tipo: tipoDoTextoDuelo(x[3]), poder: MOVES[MOVE_ID_BY_NAME[x[1]]][3] * parseInt(x[2], 10) / 100 };
     }
@@ -595,7 +596,10 @@
     if ((x = f.match(/use (\d+)% of (spdef|def|speed) during moves/i))) ef.ataqueExtra.push({ fonte: /speed/i.test(x[2]) ? "spe" : /spdef/i.test(x[2]) ? "spd" : "def", pct: parseInt(x[1], 10) / 100 });
     if ((x = f.match(/uses \+(\d+)% of its Speed when defending/i))) ef.defesaExtraVel = parseInt(x[1], 10) / 100;
     if (/Boosts Atk or SpAtk to match the higher value/i.test(f)) ef.equinox = true;
-    if (/Boosts highest stat in (Sun|Rain|Sand|Hail|Fog)/i.test(f) && climaOk(f.match(/in (Sun|Rain|Sand|Hail|Fog)/i)[1])) ef.maiorMult = 1.3;
+    // Protosynthesis e Quark Drive (abilities.cc:6917-6970): o maior atributo sobe x1,3 (Speed x1,5), pelo clima OU pelo Booster Energy
+    // ("Boosts highest stat in Sun or with Booster Energy"; o item é consumido na entrada e o bônus fica até o Pokémon sair).
+    if (/Boosts highest stat in (Sun|Rain|Sand|Hail|Fog)/i.test(f) && climaOk(f.match(/in (Sun|Rain|Sand|Hail|Fog)/i)[1])) { ef.maiorMult = 1.3; ef.maiorVel = 1.5; }
+    if (/Boosts highest stat in [\w ]+ or with Booster Energy/i.test(f)) ef.paradoxoItem = true;
     // Categoria de golpe ganha por tipo (Mixed Martial Arts, Brawling Wyvern, Chestnut Axe, Reverberate).
     if ((x = f.match(/^(\w+) moves are flagged as (\w+) \+ (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.categoriaPorTipo[tipoDoTextoDuelo(x[1])] = categoriasDoTextoDuelo(x[2] + " " + x[3]);
     if ((x = f.match(/(\w+) type moves become (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.categoriaPorTipo[tipoDoTextoDuelo(x[1])] = categoriasDoTextoDuelo(x[2]);
@@ -756,7 +760,7 @@
       custoAtaque: 0, drenoPct: 0, drenoMult: 1, danoAoContato: 0, contraCatUmaVez: null, bagaHP: 0, bagaHPLimite: 0, bagaResiste: null,
       bagaAperto: null, curaStatusUmaVez: false, estagioUmaVez: [], recuar: 0, imuneEfeito: false, imuneQuedas: false, semEfeitoContato: false,
       balao: false, cargaUmaVez: false, dadoCarregado: false, metronomo: false, consumivel: false, baga: false,
-      gemaMult: 1.5, garra: 0, guardaChuvaSol: false };
+      gemaMult: 1.5, garra: 0, guardaChuvaSol: false, boosterEnergy: false };
     var t = (typeof ITEM_DESC !== "undefined" && ITEM_DESC[nome]) || "";
     var x, tp;
     if (!nome) { cacheItemDuelo[chave] = it; return it; }
@@ -769,6 +773,9 @@
     if (nome === "Soul Dew" && sp && /^SPECIES_LATI(AS|OS)(_MEGA)?$/.test(sp.sname || "")) { it.especialMult = modificadorDoItemDuelo(nome, "SOUL_DEW", 50); it.spdMult = it.especialMult; }
     if (nome === "Quick Claw") it.garra = (itemDaConfigDuelo(nome) && itemDaConfigDuelo(nome).f || 20) / 100; // battle_main.c:4419: Random() % 100 < força
     if (nome === "Utility Umbrella") it.guardaChuvaSol = true; // battle_util.c:8674-8683
+    // Booster Energy: liga Protosynthesis/Quark Drive na entrada (abilities.cc:6946). O item some, mas o bônus fica até o Pokémon sair,
+    // então não é "consumível" aqui (o consumível sai da luta seguinte da sequência e levaria o bônus junto).
+    if (nome === "Booster Energy") it.boosterEnergy = true;
     if (nome === "Punching Glove") it.categoriaMult.soco = 1.1;
     if (nome === "Metronome") it.metronomo = true;
     if (nome === "Loaded Dice") it.dadoCarregado = true;
@@ -1248,7 +1255,7 @@
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
       bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {},
       menorDefesaCategoria: {}, menorDefesaSeStatus: false, flagMult: {}, prioTipoSempre: [], drenoTipo: {}, malicious: false,
-      equinox: false, maiorMult: 0, ritmico: 0, bonusVsStatus: {}, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
+      equinox: false, maiorMult: 0, maiorVel: 0, paradoxoItem: false, ritmico: 0, bonusVsStatus: {}, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
       campoResiduo: [], statusNaEntrada: {}, forcaUltimo: false, semStabOutros: false, recuoFrac: 1,
       seQuebra: false, venenoReduz: false, mudaTipoNoContato: null, telaNaEntrada: 0, imuneTipoNaEntrada: null,
       sincroniza: false, almaLigada: false, drenoCategoria: {},
@@ -1266,7 +1273,7 @@
       pesadelo: 0, statusIgnoraImune: false, statusSom: false, precisaoGolpe: {}, triage: false, entradaSono: false, futuro: 0,
       entradaDisable: false, entradaTorment: false, adicionaFantasma: false, quash: false, po: false,
       prende: null, ignoraDefesa: 0, prisaoForte: false, quedaPorTurno: {}, prisaoParalisa: false, recuoSePrimeiro: 0,
-      primeiroGolpeRecebido: 1, expulsaAoApanhar: false, expulsaQuemEnrola: false, naoSaiForcado: false, fogeNaMetade: false,
+      primeiroGolpeRecebido: 1, golpeCheio: 1, expulsaAoApanhar: false, expulsaQuemEnrola: false, naoSaiForcado: false, fogeNaMetade: false,
       fogeAoCair: false, ultimaCartada: false, brasas: false, tocaia: 0, anulaClima: false, ventoForte: false,
       bloqueiaGolpeClima: false, catastrofe: false, aguaNoSol: false, disableAoContato: 0, disableSom: 0, disableComGelo: false,
       saque: 0, barraPrioridade: false, firmeza: false, contraMega: 1, apagao: false, resistSeTipo: null, arquimago: 0,
@@ -1466,7 +1473,7 @@
         if ((x = t.match(/Weakens incoming physical and special moves by (\d+)%/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
         if (/deal min damage/i.test(t)) ef.reducao.todos *= 0.85 / ROLAGEM_MEDIA_DUELO;
       }
-      if (/At full HP, halves damage/i.test(t)) ef.reducao.todos *= 0.75;
+      if (/At full HP, halves damage/i.test(t)) ef.golpeCheio = Math.min(ef.golpeCheio, 0.5); // Multiscale e Shadow Shield (abilities.cc:1947, 3171)
       // Primeiro turno (Violent Rush, Rapid Response): o duelo é curto e o 1º turno
       // decide quem bate primeiro - aproximação: vale o duelo todo.
       if ((x = t.match(/Boosts Speed by (\d+)% \+ (Attack|SpAtk|Sp\. ?Atk) by (\d+)% on first turn/i))) {
@@ -1518,6 +1525,16 @@
     return conflito ? null : achado;
   }
 
+  // O maior atributo (Protosynthesis, Quark Drive; GetHighestStatId, battle_util.c:8754: o primeiro estritamente maior, na ordem Atk, Def, Speed,
+  // SpA, SpD) e quanto ele sobe: { atributo: índice em stats, mult, vel } ou null. Vem do clima (texto) ou do Booster Energy (item, sem Klutz).
+  function maiorAtributoDuelo(u) {
+    var mult = u.ef.maiorMult, vel = u.ef.maiorVel || 1;
+    if (!mult && u.ef.paradoxoItem && u.it && u.it.boosterEnergy && !u.ef.klutz) { mult = 1.3; vel = 1.5; }
+    if (!mult) return null;
+    var melhor = 1;
+    [1, 2, 5, 3, 4].forEach(function (i) { if (u.stats[i] > u.stats[melhor]) melhor = i; });
+    return { atributo: melhor, mult: melhor === 5 ? vel : mult };
+  }
   // O rival só tem golpe de dano desse tipo (então é forçado a lançá-lo, mesmo contra uma absorção)?
   function rivalSoTemOTipoDuelo(u, tipo) {
     var dano = (u.golpesProntos || []).filter(function (g) { return g.forca > 0; });
@@ -1729,7 +1746,8 @@
     if (g.fonteAtk) return A; // Foul Play / Body Press: o atributo vem de outra fonte (battle_util.c CalcAttackStat), sem Equinox nem maior-atributo
     if (atq.ef.equinox) A = Math.max(atq.stats[1], atq.stats[3]); // Equinox: o menor sobe até o maior
     // Protosynthesis e parecidas: o maior atributo x1,3 (no clima).
-    if (atq.ef.maiorMult && Math.max.apply(null, atq.stats.slice(1)) === (fisico ? atq.stats[1] : atq.stats[3])) A *= atq.ef.maiorMult;
+    var maiorAtq = maiorAtributoDuelo(atq);
+    if (maiorAtq && maiorAtq.atributo === (fisico ? 1 : 3)) A *= maiorAtq.mult;
     atq.ef.ataqueExtra.forEach(function (r) {
       if (r.contato !== undefined && r.contato !== g.contato) return;
       if (r.cat && r.cat !== g.cat) return;
@@ -1815,7 +1833,8 @@
       if (abreDef && def.ef.semStabOutros && g.stab) A /= 1.5;
       var dv = def.ef.defesaPelaVelocidade;
       var dFis = def.stats[2] * def.ef.defMult, dEsp = def.stats[4] * def.ef.spdMult;
-      if (def.ef.maiorMult && Math.max.apply(null, def.stats.slice(1)) === def.stats[defF ? 2 : 4]) { if (defF) dFis *= def.ef.maiorMult; else dEsp *= def.ef.maiorMult; }
+      var maiorDef = maiorAtributoDuelo(def);
+      if (maiorDef && maiorDef.atributo === (defF ? 2 : 4)) { if (defF) dFis *= maiorDef.mult; else dEsp *= maiorDef.mult; }
       var D = dv && dv.contato === g.contato && abreDef ? def.stats[5] * def.ef.speMult
         : g.menorDefesa ? Math.min(dFis, dEsp) : (defF ? dFis : dEsp);
       if (def.ef.defesaExtraVel && abreDef) D += def.stats[5] * def.ef.defesaExtraVel; // Sleek Scales
@@ -1925,6 +1944,12 @@
     return 1; // Sky Drop / Level Damage: dano fixo, tratado no danoNoDuelo
   }
   function golpesNecessariosDuelo(hp, d) { return d > 0 ? Math.ceil(hp / d) : Infinity; }
+  // Quantos golpes de dano `d` derrubam `hp` quando o 1º golpe sai multiplicado por `pm` (Multiscale: 0,5) e os outros saem inteiros.
+  function golpesNecessariosComPrimeiroDuelo(hp, d, pm) {
+    if (!(d > 0)) return Infinity;
+    if (!(pm < 1)) return Math.ceil(hp / d);
+    return d * pm >= hp ? 1 : 1 + Math.ceil((hp - d * pm) / d);
+  }
   // Aguenta o primeiro golpe com HP cheio: Focus Sash (item: "If the holder has
   // full HP, it endures KO hits with 1 HP") ou Sturdy ("At full HP, cannot be
   // KO in one hit") - Mold Breaker do atacante atravessa a Sturdy.
@@ -2197,8 +2222,15 @@
     // Glaive Rush (NextDex: "The foe's next move deals double damage"): usado todo turno, quem usa leva sempre o dobro.
     function glaive(melhor) { return melhor.golpe && melhor.golpe.nome === "Glaive Rush" ? 2 : 1; }
     condDele *= glaive(meu.melhor); condMeu *= glaive(dele.melhor);
-    function meuDano(d) { return d > 0 ? d * critMeu * spMeu.ataque * spDele.defesa * ordemMeu * estagioMeu * ritmoMeu * condMeu * nele.recebeMais * nMim.corte + extraMeu + nele.residuo : nele.residuo; }
-    function deleDano(d) { return d > 0 ? d * critDele * spDele.ataque * spMeu.defesa * ordemDele * estagioDele * ritmoDele * condDele * nMim.recebeMais * nele.corte + extraDele + nMim.residuo : nMim.residuo; }
+    // O 1º golpe que cada lado leva sai reduzido: Chuckster ("1/2 damage" na entrada) e Multiscale, Brain Mass e Shadow Shield (metade com o
+    // HP cheio; o Mold Breaker de quem ataca atravessa). Só o 1º golpe: na média de n turnos o dano vale (p + n - 1) / n do normal.
+    function diluicaoDoPrimeiro(defensor, atacante) {
+      var p = defensor.ef.primeiroGolpeRecebido * (atacante.ef.quebraHabilidade ? 1 : defensor.ef.golpeCheio);
+      return p < 1 ? (p + Math.max(1, turnos) - 1) / Math.max(1, turnos) : 1;
+    }
+    var primeiroMeu = diluicaoDoPrimeiro(foe, eu), primeiroDele = diluicaoDoPrimeiro(eu, foe);
+    function meuDano(d) { return d > 0 ? d * critMeu * spMeu.ataque * spDele.defesa * ordemMeu * estagioMeu * ritmoMeu * condMeu * nele.recebeMais * nMim.corte * primeiroMeu + extraMeu + nele.residuo : nele.residuo; }
+    function deleDano(d) { return d > 0 ? d * critDele * spDele.ataque * spMeu.defesa * ordemDele * estagioDele * ritmoDele * condDele * nMim.recebeMais * nele.corte * primeiroDele + extraDele + nMim.residuo : nMim.residuo; }
     // Balanço de HP de cada lado por turno: o que ele mesmo perde (recuo, custo,
     // Rough Skin do outro ao fazer contato) entra como dano a mais contra ele; o
     // que ele recupera (cura por turno, dreno, Poison Heal) sai. Magic Guard anula
@@ -2267,6 +2299,8 @@
   // estagiosMediosDuelo com 2n-1 turnos dá (n-1) acúmulos, o estado do n-ésimo.
   function velocidadeNoDuelo(u, turnos, outro, gU, gOutro) {
     var v = u.stats[5] * u.ef.speMult * noTerrenoDuelo(u, "spe"), orbe = ORBE_DE_STATUS_DUELO[u.item];
+    var maiorVel = maiorAtributoDuelo(u);
+    if (maiorVel && maiorVel.atributo === 5) v *= maiorVel.mult; // Protosynthesis/Quark Drive com a Speed no topo: x1,5
     if (u.it && outro) {
       var atv = itemAtivoDuelo(u, outro, gOutro ? gOutro.contato : undefined);
       v *= comItem(u.it.speMult, atv); // Iron Ball
@@ -2604,10 +2638,7 @@
       }
       dD *= disablePorChance(eu, meu.melhor.golpe, foe, dele.melhor.golpe, dele);
       dM *= disablePorChance(foe, dele.melhor.golpe, eu, meu.melhor.golpe, meu);
-      // Chuckster: o 1º golpe que leva sai pela metade.
-      var n0 = Math.max(1, turnos);
-      if (eu.ef.primeiroGolpeRecebido < 1) dD *= (eu.ef.primeiroGolpeRecebido + n0 - 1) / n0;
-      if (foe.ef.primeiroGolpeRecebido < 1) dM *= (foe.ef.primeiroGolpeRecebido + n0 - 1) / n0;
+      // (O 1º golpe que cada lado leva sai reduzido - Chuckster, Multiscale e parecidas - já entra no dano por turno em danoComStatusNoDuelo.)
       atF += entE.perdeY; dD *= entE.multY; hpF -= entE.danoY;
       atE += entF.perdeY; dM *= entF.multY; hpE -= entF.danoY;
       if (efE) { atE += efE.atraso; dM = dM * efE.multX + efE.residuoY; dD *= efE.multY; velE *= efE.velX; velF *= efE.velY; hpE -= efE.custo * eu.stats[0]; atF += efE.perdeY; inverte = inverte || !!efE.inverteOrdem; hpF -= efE.danoUmaVezY || 0; hpE += efE.curaX || 0; }
