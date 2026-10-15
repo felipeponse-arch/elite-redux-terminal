@@ -742,21 +742,6 @@
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
-  "SPECIES_ARBOK_MEGA": {
-    "ability": "Merciless",
-    "nature": "Jolly or Adamant",
-    "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "Arbokite",
-    "moves": [
-      "Poison Fang",
-      "Crunch",
-      "Poison Sting",
-      "Dragon Dance"
-    ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Arbokite / Shell Bell (Perm) / Black Sludge (Perm).",
-    "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
-  },
   "SPECIES_HAWLUCHA_MEGA": {
     "ability": "Wrestle Showman",
     "nature": "Jolly",

@@ -4,12 +4,12 @@
 //    Level Damage = Night Shade);
 //  - pesos: número da Pokédex nacional -> peso em hectogramas (o jogo lê o peso pela Pokédex:
 //    GetPokedexHeightWeight(SpeciesToNationalPokedexNum), então formas e Megas usam o peso da base).
-// Fonte: data/gameData_265beta.json (NextDex: effT do golpe e dex.hw da espécie).
+// Fonte: data/gameData_2654.json (NextDex: effT do golpe e dex.hw da espécie).
 // Uso: node scripts/gerar_poder_variavel.mjs
 import { readFileSync, writeFileSync } from "node:fs";
 
 const EFEITOS = ["Low Kick", "Heat Crash", "Gyro Ball", "Electro Ball", "Sky Drop", "Level Damage"];
-const gd = JSON.parse(readFileSync("data/gameData_265beta.json", "utf8"));
+const gd = JSON.parse(readFileSync("data/gameData_2654.json", "utf8"));
 const golpes = {};
 // Só golpe de dano com poder 1 no dado (o Sky Drop de verdade tem poder próprio e divide o efeito com o
 // Seismic Toss). No Elite Redux o Splash é golpe físico com o efeito Heat Crash (dano pelo peso) e entra.

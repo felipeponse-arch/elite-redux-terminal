@@ -5,7 +5,7 @@
 // destino conhecido (índice >= 0) e espécie real; golpe que faz Mega (Dragon Ascent) não é pedra.
 // Uso: node scripts/gerar_mega_forms.mjs [--gravar]   (sem --gravar só lista o que faltaria)
 import { readFileSync, writeFileSync } from "node:fs";
-const g = JSON.parse(readFileSync("data/gameData_265beta.json", "utf8"));
+const g = JSON.parse(readFileSync("data/gameData_2654.json", "utf8"));
 const atual = JSON.parse(readFileSync("data/mega_forms.json", "utf8"));
 const itens = Object.fromEntries(g.items.map((i) => [i.NAME, i.name]));
 const KIND = g.evoKindT;

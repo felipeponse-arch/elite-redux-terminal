@@ -154,7 +154,7 @@ if ((process.argv[1] || "").endsWith("conferir_chefoes_config.mjs")) {
   const FILTRO = new RegExp(argCat ? argCat.slice(13) : "Alto Comando|^Campeao$|Equipe");
   const COMO_JSON = process.argv.includes("--json");
   const bosses = JSON.parse(readFileSync(new URL("../data/bosses.json", import.meta.url), "utf8"));
-  const gd = JSON.parse(readFileSync(new URL("../data/gameData_265beta.json", import.meta.url), "utf8"));
+  const gd = JSON.parse(readFileSync(new URL("../data/gameData_2654.json", import.meta.url), "utf8"));
   const abArq = arq.replace(/TrainerList/, "AbilityList");
   const abIds = existsSync(abArq) ? [...readFileSync(abArq, "utf8").matchAll(/^ {2}id: (\w+)/gm)].map((m) => m[1]) : [];
   usarMapas(mapasDoDado(gd, abIds));

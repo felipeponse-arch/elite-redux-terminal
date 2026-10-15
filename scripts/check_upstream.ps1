@@ -15,7 +15,7 @@ then re-run expand_combo_abilities.ps1.
 . (Join-Path $PSScriptRoot "common.ps1")
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"
-$localPath = Join-Path $dataDir "gameData_265beta.json"
+$localPath = Join-Path $dataDir "gameData_2654.json"
 $OUR_VERSION = "2.65beta"
 $base = "https://raw.githubusercontent.com/ForwardFeed/ER-nextdex/main"
 

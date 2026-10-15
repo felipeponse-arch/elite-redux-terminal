@@ -23,17 +23,16 @@ function centiskorch(milestone) {
   return { Rm, r: Rm.candidatosDeBuild(Rm.SPECIES.find((s) => s && s.n === "Centiskorch"), {}) };
 }
 
-test("caso A: Brawly (milestone 1) - o 1º candidato é Coil Up + Fire Fang, nunca Fire Lash no lugar", () => {
+test("caso A: Brawly (milestone 1) - o 1º candidato é Coil Up com a Flaming Jaws nos motivos, e o Fire Fang (mordida + Fire) aparece entre os 2 primeiros", () => {
+  // versao-nova/05: o Fire Lash subiu de 80 para 90 de poder no dado 2.65.4 e passa à frente do Fire Fang no 1º lugar; o que o caso A prova (a Flaming Jaws
+  // vê os golpes de mordida pela flag do jogo e o ranking cita Coil Up) continua valendo.
   const { r } = centiskorch(1);
   const c = r.candidatos[0];
   assert.equal(c.habilidade, "Coil Up");
-  assert.ok(c.golpes.includes("Fire Fang"), c.golpes.join("/"));
-  assert.ok(!c.golpes.includes("Fire Lash"));
   const motivos = c.motivos.join(" | ");
   assert.match(motivos, /Coil Up/);
   assert.match(motivos, /Flaming Jaws/);
-  // nenhum candidato acima de um com Fire Lash fica sem o Fire Fang
-  r.candidatos.forEach((x) => { if (x.golpes.includes("Fire Lash")) assert.ok(x.golpes.includes("Fire Fang") || r.candidatos.indexOf(x) > 0); });
+  assert.ok(r.candidatos.slice(0, 2).some((x) => x.golpes.includes("Fire Fang") && x.habilidade === "Coil Up"), r.candidatos.map((x) => x.golpes.join("/")).join(" ; "));
 });
 
 test("caso A: Tate e Liza (milestone 6) - Coil Up + Fire Fang de novo, com Flaming Jaws nos motivos", () => {
@@ -509,9 +508,9 @@ test("fuga no Intimidate (Tactical Retreat): o motor devolve só uma nota e o m�
   comAviso.forEach((c) => assert.equal(c.rotulo, "estimada"));
 });
 
-test("Mega no modo de mega temporária (milestone 6): o rascunho leva a pedra e o candidato avisa (Abomasnow, Dragalge, Excadrill, Skarmory, Meowstic)", () => {
+test("Mega no modo de mega temporária (milestone 6): o rascunho leva a pedra e o candidato avisa (Abomasnow, Dragalge, Excadrill, Meowstic; o Skarmory saiu da lista no dado 2.65.4: Skarmorite virou X e Y e ficou uma pedra por forma)", () => {
   const R6 = carregarRegras({ milestone: 6, difficulty: "ace", levelCapMode: "more" });
-  ["Abomasnow Mega", "Dragalge Mega", "Excadrill Mega", "Skarmory Mega", "Meowstic Mega"].forEach((nome) => {
+  ["Abomasnow Mega", "Dragalge Mega", "Excadrill Mega", "Meowstic Mega"].forEach((nome) => {
     const mega = R6.SPECIES.find((x) => x && x.n === nome);
     assert.ok(mega, nome);
     const r = R6.candidatosDeBuild(mega, {});

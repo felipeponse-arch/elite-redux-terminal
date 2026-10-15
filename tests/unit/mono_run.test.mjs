@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 // Mono run: disponibilidade por tipo e etapa (2026-09-26). O dado vem da
 // planilha da comunidade, importada por scripts/importar_mono.mjs; aqui se
 // garante que o que o app mostra é coerente com o jogo atual.
@@ -19,20 +20,25 @@ test("todo tipo tem opção desde o início, e toda entrada é uma espécie real
   }
 });
 
+const PENDENTES_DE_TIPO = new Set(JSON.parse(readFileSync(new URL("../../data/rank_pendente_ate_10.json", import.meta.url), "utf8")).tiposMudaram);
+
 test("entrada sem marca tem o tipo no jogo atual; com # uma evolução tem", () => {
   for (const [tipo, lista] of Object.entries(R.MONO_DISP.porTipo)) {
     for (const e of lista) {
       const sp = R.getSpeciesBySname(e.s);
-      if (/[#%M]/.test(e.m || "")) continue;
+      if (/[#%M]/.test(e.m || "") || PENDENTES_DE_TIPO.has(e.s)) continue; // tipo mudado pelo dado 2.65.4 (Volbeat...): planilha revista no fechamento
       assert.ok(sp.t.map(nomeTipo).includes(tipo), `${sp.n} listado em ${tipo} sem ter o tipo`);
     }
     for (const e of lista.filter((x) => (x.m || "").includes("#"))) {
       const linha = R.linhaEvolutivaDe(R.getSpeciesBySname(e.s));
+      // Espécie da linha com o tipo mudado pelo dado 2.65.4 (versao-nova/05): a planilha "Mono earliest locations" é de antes; o fechamento (dados-2654/10) a revisa.
+      if (linha.some((s) => PENDENTES_DE_TIPO.has(s.sname))) continue;
       assert.ok(linha.some((s) => s.t.map(nomeTipo).includes(tipo)), `${e.s}: alguma evolução é ${tipo}`);
     }
     // "M": o tipo só aparece numa Mega da linha evolutiva.
     for (const e of lista.filter((x) => (x.m || "").includes("M"))) {
       const formas = R.linhaEvolutivaDe(R.getSpeciesBySname(e.s)).flatMap((s) => R.formFamilyOf(s));
+      if (formas.some((s) => PENDENTES_DE_TIPO.has(s.sname))) continue; // Serperior Mega perdeu o Dragon no dado 2.65.4: planilha revista no fechamento
       assert.ok(formas.some((s) => R.isMegaForm(s) && s.t.map(nomeTipo).includes(tipo)), `${e.s}: uma Mega da linha é ${tipo}`);
     }
   }

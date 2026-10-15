@@ -23,7 +23,7 @@ test("dado: alvo de área dos golpes (Rock Slide nos dois, Earthquake também no
 
 test("habilidades de aliado: Friend Guard corta o dano no parceiro; Power Spot reforça; Plus/Minus dobra", () => {
   const a = part(unidade(efDe([]), golpe("F"))), b = part(unidade(efDe([]), golpe("F")));
-  assert.ok(perto(R.fatorDupla(a, null, b, part(unidade(efDe(["Friend Guard"]), golpe("F"))), golpe("F"), false), 0.5));
+  assert.ok(perto(R.fatorDupla(a, null, b, part(unidade(efDe(["Friend Guard"]), golpe("F"))), golpe("F"), false), 0.75)); // versao-nova/05: 25% a menos (battle_util.c:7664); eram 50% na 2.65beta
   assert.ok(perto(R.fatorDupla(a, part(unidade(efDe(["Power Spot"]), golpe("F"))), b, null, golpe("F"), false), 1.3));
   const plus = part(unidade(efDe(["Plus"]), golpe("E")));
   assert.ok(perto(R.fatorDupla(plus, part(unidade(efDe(["Minus"]), golpe("E"))), b, null, golpe("E"), false), 2));

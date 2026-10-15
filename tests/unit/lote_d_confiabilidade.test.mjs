@@ -56,7 +56,7 @@ test("sync: mudar só a ordenação ou o filtro de tipo da Dex não é 'conteúd
 
 // ---------------- travas que pegam o problema antes do jogador ----------------
 test("trava: dado derivado (dex_compact/bosses) bate com o bruto 2.65beta", () => {
-  const bruto = JSON.parse(readFileSync(join(raiz, "data", "gameData_265beta.json"), "utf8"));
+  const bruto = JSON.parse(readFileSync(join(raiz, "data", "gameData_2654.json"), "utf8"));
   const dex = R.DATA;
   bruto.moves.forEach((m, i) => {
     if (!m) return;

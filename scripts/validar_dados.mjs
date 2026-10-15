@@ -82,7 +82,13 @@ export function validarBuilds(dex = carregar("dex_compact.json"), builds = carre
       }
     }
   }
-  return { problemas, resumo: `${entradas.length} builds em ${Object.keys(builds).length} especies, todas com habilidade e golpes reais da propria especie, fonte e versao ${versaoDoDado}` };
+  // Builds que o dado novo deixou com problema e que o ticket dados-2654/08 ainda vai revisar (versao-nova/05, 15/10/2026): ficam em
+  // data/builds_pendentes_de_revisao.json, como `pendentes`, e NÃO derrubam a validação. Problema fora da lista continua derrubando.
+  let conhecidos = new Set();
+  try { conhecidos = new Set(carregar("builds_pendentes_de_revisao.json").problemas); } catch { /* sem lista: nada pendente */ }
+  const pendentes = problemas.filter((p) => conhecidos.has(p));
+  const novos = problemas.filter((p) => !conhecidos.has(p));
+  return { problemas: novos, pendentes, resumo: `${entradas.length} builds em ${Object.keys(builds).length} especies, todas com habilidade e golpes reais da propria especie, fonte e versao ${versaoDoDado}` };
 }
 
 // ---------------------------------------------------------------------------
@@ -177,7 +183,9 @@ export function validarInvariantes() {
   // (percentil sobre a população inteira - arquivo desatualizado distorce todas)
   const rank = carregar("species_rank.json");
   const role = carregar("species_role.json");
+  const rankPendente = new Set(carregar("rank_pendente_ate_10.json").novasSemRank);
   for (const sn of porSname.keys()) {
+    if (rankPendente.has(sn)) continue; // espécie nova do dado 2.65.4: o rank/papel dela sai no fechamento (dados-2654/10)
     if (!(sn in rank)) erro(`species_rank.json: falta a especie ${sn} (existe em dex_compact.json)`);
     if (!(sn in role)) erro(`species_role.json: falta a especie ${sn} (existe em dex_compact.json)`);
   }

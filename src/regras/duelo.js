@@ -44,13 +44,10 @@
   var TIPO_REFORCADO_PELO_CLIMA = { sol: "Fire", chuva: "Water" };
 
   function nomeHabDuelo(id) { return ABILITIES[id] ? ABILITIES[id][0] : ""; }
-  // Texto da versão NOVA (er-config d1a9a4c, 14/10/2026) das habilidades cujo número mudou entre a 2.65beta (dado do app, 28/03) e hoje. Decisão do
-  // Felipe de 15/10/2026 (ticket versao-nova/02): o app mira a versão mais nova, código primeiro. Os leitores seguem lendo TEXTO; quando o dado novo
-  // entrar (ticket versao-nova/05) o texto do dado passa a ser igual a este e a tabela pode sair (teste `texto_da_versao_nova` avisa).
-  // Código: Madness Enhancement abilities.cc:9939-9947 (.5 -> .8), Feathercoat 12377-12386 (.9/.8 -> .85/.7).
+  // Texto que o parser lê no lugar do texto do dado, por NOME, quando o código do jogo (a regra do Felipe de 15/10/2026: o código manda) diz outra coisa que o texto
+  // da NextDex. Hoje só Best Offense e Magus Blades (P2). Madness Enhancement (x0,8) e Feathercoat (x0,85/x0,7) saíram daqui no ticket versao-nova/05: o dado
+  // 2.65.4 já traz o texto novo e os leitores de texto dão o número do código.
   var TEXTO_DA_VERSAO_NOVA_DUELO = {
-    "Madness Enhancement": "Enrages in fog, reduces damage taken by 20% when enraged.",
-    "Feathercoat": "Takes 15% less damage from attacks, 30% if resisted.",
     // P2 do Felipe (15/10): Best Offense e Magus Blades pelo CÓDIGO (abilities.cc:10208-10214 e 10230-10237): corte vira especial, +20% da DEFESA física no ataque.
     "Best Offense": "Keen Edge moves are special and use +20% Sp. Def.",
     "Magus Blades": "Best Offense + Keen Edge moves hit twice for 60%." };
@@ -193,16 +190,10 @@
       "+1 Atk after using recoil move. 1/2 recoil damage."],
     ["Petal Shield", "Enters with +6 Defense, reduces Defense by -1 after each hit.",
       "Maxes Def on entry. -1 Def when hit."],
-    ["Super Hot Goo", "Flame Body + Gooey.",
-      "Inflicts burn and lowers Speed on contact."],
     ["Fire's Wrath", "Intimidate + Scare; 10% chance to inflict burn on non contact.",
       "Intimidate + Scare; 10% burn chance on non contact moves."],
-    ["Chestnut Axe", "Keen Edge + Grass moves become Keen Edge boosted.",
-      "Keen edge + Grass moves become Keen Edge boosted."],
     ["Yuki Onna", "Intimidate + Scare. 30% chance to infatuate on contact.",
       "Scare + Intimidate. 30% chance to infatuate on hit."],
-    ["Nika", "Iron Fist + Water moves function normally under sun.",
-      "Iron fist + Water moves function normally under sun."],
     ["Atomic Punch", "Iron Fist + boosts the power of Steel-type moves by 1.3x.",
       "Iron Fist + 30% Steel type damage."],
     ["Komodo", "Adds Dragon-type. Attacks have a 30% chance to badly poison.",

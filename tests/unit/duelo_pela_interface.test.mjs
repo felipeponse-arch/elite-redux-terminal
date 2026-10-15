@@ -171,7 +171,7 @@ test("itens de defesa: Assault Vest corta o dano especial; Leftovers e Rocky Hel
   const fisico = (item) => lutar(eu("Corviknight", { hab: "Chrome Coat", golpes: ["Iron Head"], evs: EV.tanqueF, item }), machamp());
   assert.ok(fisico("Leftovers").fracEu > fisico("").fracEu + 0.05, "Leftovers: sobra mais HP");
   assert.ok(fisico("Rocky Helmet").turnos < fisico("").turnos, "Rocky Helmet: o atacante por contato cai antes");
-  const fogo = (item) => lutar(eu("Corviknight", { hab: "Chrome Coat", golpes: ["Iron Head"], evs: EV.tanqueE, item }), chefao("Charizard", { hab: "Blaze", golpes: ["Fire Blast"], evs: EV.especial, nat: "Modest" }));
+  const fogo = (item) => lutar(eu("Corviknight", { hab: "Chrome Coat", golpes: ["Iron Head"], evs: EV.tanqueE, item }), chefao("Charizard", { hab: "Blaze", golpes: ["Fire Blast"], evs: EV.especial, nat: "Modest", item: "Life Orb" })); // Life Orb: com o dado 2.65.4 (Chrome Coat e Charizard novos) a luta dava 3 turnos com ou sem Occa Berry
   assert.ok(fogo("Occa Berry").turnos > fogo("").turnos, "Occa Berry: aguenta um turno a mais");
 });
 

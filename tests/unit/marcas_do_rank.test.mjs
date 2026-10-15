@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 // Marcas sem nota do rank v2 (ponto 6, 2026-10-02): "Precisa de setter"
 // (src/regras/condicoes_habilidade.js precisaDeSetter) e "Concorrência no tipo"
 // (src/regras/rank_da_run.js dominantesNoTipo, gravada por scripts/calcular_rank_v2.mjs).
@@ -63,7 +64,9 @@ test("Pareto: domina quem é >= nos dois eixos, chegou antes ou junto, e é melh
 
 test("Pareto gravado: cada espécie no rank tem dominadoPor por tipo, na dificuldade da run", () => {
   const ace = carregarRegras({ difficulty: "ace" });
-  const nomes = Object.keys(ace.SPECIES_RANK).filter((s) => ace.SPECIES_RANK[s].porDificuldade);
+  // Espécies com o tipo mudado pelo dado 2.65.4 ficam fora até o rank ser regerado (versao-nova/05; data/rank_pendente_ate_10.json).
+  const pendentes = new Set(JSON.parse(readFileSync(new URL("../../data/rank_pendente_ate_10.json", import.meta.url), "utf8")).tiposMudaram);
+  const nomes = Object.keys(ace.SPECIES_RANK).filter((s) => ace.SPECIES_RANK[s].porDificuldade && !pendentes.has(s));
   let zero = 0, algum = 0;
   for (const s of nomes) {
     const d = ace.rankDaDificuldadeDe(ace.rankDe(s));

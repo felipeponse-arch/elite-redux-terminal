@@ -3444,20 +3444,6 @@ export const MUTACOES = [
     para: "ef.ate = x[1]; ef.ateMult = 1.3; ef.converte.Normal = { para: x[1], mult: 1.3 };",
   },
   {
-    id: "versao-madness-volta-0-5",
-    descricao: "Madness Enhancement volta ao texto da 2.65beta (x0,5 enfurecido) em vez do da versão nova (x0,8)",
-    arquivo: "duelo.js",
-    de: "    \"Madness Enhancement\": \"Enrages in fog, reduces damage taken by 20% when enraged.\",\n",
-    para: "",
-  },
-  {
-    id: "versao-feathercoat-volta-0-9",
-    descricao: "Feathercoat volta ao texto da 2.65beta (x0,9 em todo golpe) em vez do da versão nova (x0,85)",
-    arquivo: "duelo.js",
-    de: "    \"Feathercoat\": \"Takes 15% less damage from attacks, 30% if resisted.\" };",
-    para: "    };",
-  },
-  {
     id: "versao-feathercoat-sem-resistido",
     descricao: "Feathercoat deixa de trocar o fator quando o golpe é resistido (x0,7 no total)",
     arquivo: "duelo.js",
@@ -3526,8 +3512,8 @@ export const MUTACOES = [
     id: "versao-chefao-archie-volta-speed-force",
     descricao: "o Sharpedo do Archie Mt Pyre (Insane, 6) volta à habilidade Aerodynamics em vez de Rain Shroud",
     arquivo: "bosses.json",
-    de: "\"n\":\"Sharpedo\",\"abi\":\"Rain Shroud\"",
-    para: "\"n\":\"Sharpedo\",\"abi\":\"Speed Force\"",
+    de: "\"abi\":\"Rain Shroud\",\"item\":\"Sharpedonite\",\"nat\":\"Jolly\",\"evs\":\"4 HP / 252 Atk / 252 Spe\",\"evsRaw\":[4,252,0,0,0,252],\"ivsRaw\":[31,31,31,31,31,31],\"mv\":[\"Aqua Fang\",\"Crunch\",\"Ice Fang\",\"Aqua Jet\"]",
+    para: "\"abi\":\"Speed Force\",\"item\":\"Sharpedonite\",\"nat\":\"Jolly\",\"evs\":\"4 HP / 252 Atk / 252 Spe\",\"evsRaw\":[4,252,0,0,0,252],\"ivsRaw\":[31,31,31,31,31,31],\"mv\":[\"Aqua Fang\",\"Crunch\",\"Ice Fang\",\"Aqua Jet\"]",
   },
   {
     id: "versao-chefao-matt-sem-barbaracite",
@@ -3571,5 +3557,19 @@ export const MUTACOES = [
     arquivo: "duelo.js",
     de: "          else if ((y2 = f.match(/hit twice for (\\d+)%(?! damage)/i))) total = 1 + parseInt(y2[1], 10) / 100;",
     para: "          else if (false) total = 1;",
+  },
+  {
+    id: "versao-madness-lido-0-5",
+    descricao: "Madness Enhancement volta a valer x0,5 (a 2.65beta) mesmo com o texto novo de 20%",
+    arquivo: "duelo.js",
+    de: "ef.reducao.todos *= x[1] ? 1 - parseInt(x[1], 10) / 100 : 0.5; ef.enfurecido = true;",
+    para: "ef.reducao.todos *= 0.5; ef.enfurecido = true;",
+  },
+  {
+    id: "versao-feathercoat-lido-0-9",
+    descricao: "Feathercoat volta a valer x0,9 em todo golpe (a 2.65beta) mesmo com o texto novo de 15%",
+    arquivo: "duelo.js",
+    de: "{ ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.reducao.resistido *= (1 - parseInt(x[2], 10) / 100) / (1 - parseInt(x[1], 10) / 100); }",
+    para: "{ ef.reducao.todos *= 0.9; ef.reducao.resistido *= (1 - parseInt(x[2], 10) / 100) / (1 - parseInt(x[1], 10) / 100); }",
   },
 ];

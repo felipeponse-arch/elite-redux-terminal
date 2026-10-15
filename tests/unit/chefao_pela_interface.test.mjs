@@ -181,8 +181,10 @@ test("dupla: golpe de área (Rock Slide) derruba mais que o de alvo único mesmo
 
 test("dupla: Earthquake fere o parceiro (Solid Rock leva), Telepathy protege e Friend Guard amortece", () => {
   const alvo = [snorlax(), snorlax(), machamp(), machamp()];
-  const parceiro = (hab) => meu("Rhyperior", ["Rock Slide"], { hab, evs: EV.tanqueF });
+  // Blissey no lugar do Rhyperior (versao-nova/05): a Friend Guard da versão nova corta 25% (battle_util.c:7664; eram 50% na 2.65beta) e com o Rhyperior a luta
+  // dava o mesmo placar com qualquer habilidade. A Blissey (Friend Guard no parceiro Garchomp) ainda muda a luta.
+  const parceiro = (hab) => meu("Blissey", ["Seismic Toss"], { hab, evs: EV.tanqueF });
   const pontos = (hab) => lutaEmDupla([meu("Garchomp", ["Earthquake"]), parceiro(hab)], alvo).pontos;
   assert.ok(pontos("Telepathy") > pontos("Solid Rock") + 0.5, "Telepathy: " + pontos("Telepathy") + " x " + pontos("Solid Rock"));
-  assert.ok(pontos("Friend Guard") > pontos("Solid Rock") + 3, "Friend Guard muda a luta: " + pontos("Friend Guard") + " x " + pontos("Solid Rock"));
+  assert.ok(pontos("Friend Guard") > pontos("Solid Rock") + 0.5, "Friend Guard muda a luta: " + pontos("Friend Guard") + " x " + pontos("Solid Rock"));
 });

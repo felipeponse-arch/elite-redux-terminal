@@ -1,5 +1,5 @@
-// Ticket versao-nova/02 (15/10/2026): o app mira a versão MAIS NOVA do jogo (código/config primeiro, NextDex depois). Três números que o dado
-// de 28/03 (2.65beta) tem diferentes do código de 14/10 (486026e) e da er-config (d1a9a4c):
+// Ticket versao-nova/02 (15/10/2026): o app mira a versão MAIS NOVA do jogo (código/config primeiro, NextDex depois). Três números que a 2.65beta (28/03)
+// tinha diferentes do código de 14/10 (486026e) e da er-config (d1a9a4c); desde o v05 o dado do app é a NextDex 2.65.4 e traz o texto novo:
 //   Madness Enhancement  x0,5 -> x0,8 quando enfurecido        (abilities.cc:9939-9947)
 //   Feathercoat          x0,9 / x0,8 resistido -> x0,85 / x0,7 (abilities.cc:12377-12386; o jogo TROCA o fator quando o golpe é resistido)
 //   Dead Bark            x0,85, x0,7 se super efetivo           (abilities.cc:11401-11412; igual na 2.65beta, mas o motor não lia o texto)
@@ -48,9 +48,11 @@ test("Dead Bark: x0,85 em todo golpe e x0,7 no TOTAL quando o golpe é super efe
   perto(razao("Dead Bark", "Thunder Shock"), 0.7, 0.02, "super efetivo");
 });
 
-test("os textos da versão nova valem enquanto o dado do app é o de 28/03; quando o dado novo entrar (versao-nova/05) a tabela sai", () => {
-  const velho = (n) => R.descricaoDeHabilidadePorId(idHab(n));
-  assert.match(velho("Madness Enhancement"), /halves damage when enraged/, "se isto falhar, o dado já é o novo: apague TEXTO_DA_VERSAO_NOVA_DUELO");
-  assert.match(velho("Feathercoat"), /10% less damage/, "se isto falhar, o dado já é o novo: apague TEXTO_DA_VERSAO_NOVA_DUELO");
+test("o dado do app (NextDex 2.65.4) já traz o texto novo de Madness Enhancement e Feathercoat: o parser lê o texto do dado, sem tabela", () => {
+  const txt = (n) => R.descricaoDeHabilidadePorId(idHab(n));
+  assert.match(txt("Madness Enhancement"), /reduces damage taken by 20% when enraged/);
+  assert.match(txt("Feathercoat"), /15% less damage from attacks, 30% if resisted/);
+  assert.equal(R.TEXTO_DA_VERSAO_NOVA_DUELO["Madness Enhancement"], undefined);
+  assert.equal(R.TEXTO_DA_VERSAO_NOVA_DUELO["Feathercoat"], undefined);
   assert.equal(R.efeitoDasHabilidadesNoDuelo([idHab("Feathercoat")], "SOLO_FC", null).reducao.todos, 0.85);
 });
