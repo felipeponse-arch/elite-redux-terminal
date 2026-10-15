@@ -1561,6 +1561,9 @@
         // Dragonslayer, Lumberjack, Insect Eater (abilities.cc:4073, 5752, 4086): IS_BATTLER_OF_TYPE(attacker, ...) - vale pelo tipo de QUEM ATACA, não do golpe.
         if ((y = f.match(/Takes ([\d.]+)x damage from (\w+?)s\b/i)) && tipoDoTextoDuelo(y[2])) ef.resistDeAtacante[y[2]] = parseFloat(y[1]);
         if ((y = f.match(/Take ([\d.]+)x dmg from (\w+)-types/i)) && tipoDoTextoDuelo(y[2])) ef.resistDeAtacante[y[2]] = parseFloat(y[1]);
+        // Lumberjack: "Deals 1.5x damage to Grass. Takes 0.5x damage from Grass." (o nome do tipo sem plural)
+        if ((y = f.match(/Takes ([\d.]+)x damage from (\w+)\b/i)) && tipoDoTextoDuelo(y[2])) ef.resistDeAtacante[y[2]] = parseFloat(y[1]);
+        if ((y = f.match(/Deals ([\d.]+)x damage to (\w+)\b/i)) && tipoDoTextoDuelo(y[2])) ef.vsTipo[y[2]] = parseFloat(y[1]);
         if ((y = f.match(/Deal ([\d.]+)x dmg to (\w+)-types/i)) && tipoDoTextoDuelo(y[2])) ef.vsTipo[y[2]] = parseFloat(y[1]);
         if ((y = f.match(/Deals ([\d.]+)x damage to (\w+?)s\b/i)) && tipoDoTextoDuelo(y[2])) ef.vsTipo[y[2]] = parseFloat(y[1]);
       });

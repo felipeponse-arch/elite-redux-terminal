@@ -23,7 +23,7 @@ Comparei os 1032 golpes da NextDex 2.65.4 com a MoveList de `d1a9a4c`, golpe a g
 Pelo código manda o `effect_chance` (Scorching Ray: 20%, a descrição inglesa diz 30%; Arc Blast: o efeito é -SpDef, a descrição diz "defense"). A config não traz PP em 8 deles: o app guarda 10 (o motor não gasta PP).
 
 ## Quem aprende
-48 espécies ganham os golpes novos por level-up ou tutor (ex.: Alakazam Luster Glow 51, Electrode Arc Blast 56, Hitmonlee Baneful Kick 46, Rhyhorn Cheap Stab por tutor), como a config.
+56 espécies ganham os golpes novos por level-up ou tutor (ex.: Alakazam Luster Glow 51, Electrode Arc Blast 56, Hitmonlee Baneful Kick 46, Rhyhorn Cheap Stab por tutor), como a config.
 
 ## Como entra no dado
 `scripts/extracao/config_nova.mjs` ganhou `golpes` e `aprende` no patch (`data/config_nova.json`); `transform.mjs --config-nova` aplica; `scripts/extracao/golpes_novos.mjs` acerta os derivados por id (`move_categorias.json`, `move_roles.json` — Eerie Laugh é "suporte" —, `move_translations_pt.json`, com tradução PT dos 9). Teste `extracao_transform` continua travando dex == bruto + patch.

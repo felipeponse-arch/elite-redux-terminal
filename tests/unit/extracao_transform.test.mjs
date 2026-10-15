@@ -24,7 +24,7 @@ test("dex_compact.json gravado == extração do dado bruto (2.65.4) + o delta da
   aplicarPatch(dex, JSON.parse(ler("data/config_nova.json")));
   assert.equal(JSON.stringify(dex), ler("data/dex_compact.json"));
   assert.equal(dexGravado.meta.version, "2.65.4");
-  assert.equal(dexGravado.species.length, 1923, "2.65.4: 1923 entradas de espécie");
+  assert.equal(dexGravado.species.length, 1925, "2.65.4: 1923 entradas de espécie + as Mega Bruxish e Jellicent da config");
   assert.equal(dexGravado.abilities.length, 1072, "1063 da NextDex + 9 da config nova");
 });
 

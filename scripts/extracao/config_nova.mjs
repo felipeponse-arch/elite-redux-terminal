@@ -6,7 +6,9 @@
 // O patch tem: habilidades renomeadas (mesmo id: Keen Edge vira Sharpness), texto novo das que existem nos dois lados, habilidades novas (ids em
 // seguida aos da NextDex) e, por espécie, o que a config tem de diferente: habilidades e innates (por nome) e atributos base.
 // Golpes (ticket versao-nova/09): golpes da config que a NextDex não tem (entram em seguida aos 1032 do dado, na ordem da config) e onde as espécies os aprendem
-// (level-up e tutor). As outras diferenças de golpe aprendido entre a config e a NextDex (tutores novos em ~600 espécies) NÃO entram: ver o ticket 09.
+// (level-up e tutor). Ticket versao-nova/10: o aprendizado de TODAS as espécies segue a config (level-up e tutor; adições e retiradas), menos os tutores
+// "universais" (Snore, Metronome, Rest...: a config os marca por golpe e a NextDex os expande por conta própria; ficam como a NextDex) e as espécies que a
+// config não descreve (forma sem learnset nem uses_learnset). Espécies novas (as Mega Bruxish e Jellicent) entram a partir da config.
 import { readFileSync, writeFileSync } from "node:fs";
 
 const SEM = "-------";
@@ -42,29 +44,36 @@ export function lerGolpesNovosDaConfig(arq) {
     return c;
   }).filter((c) => c.id && c.name).map((c) => ({
     enum: c.id, nome: texto(c.name), tipo: (c.type || "TYPE_NORMAL").replace("TYPE_", ""), split: c.split || "PHYSICAL", poder: +(c.power || 0), precisao: +(c.accuracy || 0),
-    pp: +(c.pp || 0), prio: +(c.priority || 0), efeito: nomeDoEfeito(c.effect), chance: +(c.effect_chance || 0), light: c.light === "true",
+    pp: +(c.pp || 0), prio: +(c.priority || 0), efeito: nomeDoEfeito(c.effect), chance: +(c.effect_chance || 0), light: c.light === "true", tutor: c.tutor || null,
     flags: Object.keys(FLAG_DA_CONFIG_PARA_FLAG_DO_DEX).filter((k) => c[k] === "true").map((k) => FLAG_DA_CONFIG_PARA_FLAG_DO_DEX[k]),
   }));
 }
 
-// O que cada espécie aprende dos golpes indicados (por nome): level-up [[nível, golpe]] e tutor [golpe].
-export function lerAprendizadoDaConfig(arq, nomePorEnum, golpes) {
-  const alvo = new Set(golpes), out = {};
+// O que cada espécie aprende pela config: level-up [[nível, golpe]] e tutor [golpe] (sem os universais), com uses_learnset resolvido.
+export function lerAprendizadoDaConfig(arq, nomePorEnum) {
+  const cfg = {};
   let cur = null, prof = 0, nivel = null;
   for (const bruta of arq.split(/\r?\n/)) {
     const l = bruta.trim();
-    if (!cur) { if (l === "species {") { cur = { lm: [], tu: [] }; prof = 1; } continue; }
-    if (l.endsWith("{")) { prof++; if (l === "level {") nivel = { lv: null, mv: [] }; continue; }
+    if (!cur) { if (l === "species {") { cur = { lm: [], tu: [], tem: false }; prof = 1; } continue; }
+    if (l.endsWith("{")) { prof++; if (l === "level {") nivel = { lv: null, mv: [] }; if (l === "learnset {") cur.tem = true; continue; }
     if (l === "}") {
       prof--;
-      if (prof === 2 && nivel) { nivel.mv.forEach((m) => { if (alvo.has(m)) cur.lm.push([nivel.lv, m]); }); nivel = null; }
-      if (prof === 0) { if (cur.sname && (cur.lm.length || cur.tu.length)) out[cur.sname] = { lm: cur.lm, tu: cur.tu }; cur = null; }
+      if (prof === 2 && nivel) { nivel.mv.forEach((m) => cur.lm.push([nivel.lv, nomePorEnum[m]])); nivel = null; }
+      if (prof === 0) { if (cur.sname) cfg[cur.sname] = cur; cur = null; }
       continue;
     }
     let m;
     if (prof === 1 && (m = l.match(/^id: (SPECIES_\w+)/))) cur.sname = m[1];
-    if (prof === 3 && nivel) { if ((m = l.match(/^level: (\d+)/))) nivel.lv = +m[1]; if ((m = l.match(/^move: (MOVE_\w+)/))) nivel.mv.push(nomePorEnum[m[1]]); }
-    if (prof === 2 && (m = l.match(/^tutor: (MOVE_\w+)/)) && alvo.has(nomePorEnum[m[1]])) cur.tu.push(nomePorEnum[m[1]]);
+    if (prof === 1 && (m = l.match(/^uses_learnset: (SPECIES_\w+)/))) cur.usa = m[1];
+    if (prof === 3 && nivel) { if ((m = l.match(/^level: (\d+)/))) nivel.lv = +m[1]; if ((m = l.match(/^move: (MOVE_\w+)/))) nivel.mv.push(m[1]); }
+    if (prof === 2 && (m = l.match(/^tutor: (MOVE_\w+)/))) cur.tu.push(nomePorEnum[m[1]]);
+  }
+  const out = {};
+  for (const [sn, c] of Object.entries(cfg)) {
+    const base = c.usa && cfg[c.usa] ? cfg[c.usa] : c;
+    if (!c.tem && !c.usa) continue;
+    out[sn] = { lm: base.lm.map(([lv, n]) => [lv, typeof n === "string" && n.startsWith("MOVE_") ? nomePorEnum[n] : n]), tu: base.tu.slice() };
   }
   return out;
 }
@@ -76,11 +85,17 @@ export function lerEspeciesDaConfig(arq) {
   for (const bruta of arq.split(/\r?\n/)) {
     const l = bruta.trim();
     if (!atual) { if (l === "species {") { atual = { ab: [], inn: [] }; prof = 1; } continue; }
-    if (l.endsWith("{")) { prof++; continue; }
-    if (l === "}") { prof--; if (prof === 0) { if (atual.sname) out[atual.sname] = atual; atual = null; } continue; }
+    if (l.endsWith("{")) { prof++; if (prof === 2) { atual.emMega = l === "mega {"; atual.emDex = l === "dex {"; } continue; }
+    if (l === "}") { prof--; if (prof === 1) { atual.emMega = false; atual.emDex = false; } if (prof === 0) { if (atual.sname) out[atual.sname] = atual; atual = null; } continue; }
+    if (prof === 2 && atual.emMega) { const mm = l.match(/^(from|item): (.*)$/); if (mm) atual["mega" + mm[1]] = mm[2]; continue; }
+    if (prof === 2 && l.startsWith("name: ") && atual.emDex) { atual.nome = texto(l.slice(6)); continue; }
     if (prof !== 1) continue;
     const m = l.match(/^(\w+): (.*)$/);
     if (!m) continue;
+    if (m[1] === "type") atual.tipo1 = m[2].replace("TYPE_", "");
+    else if (m[1] === "type2") atual.tipo2 = m[2].replace("TYPE_", "");
+    else if (m[1] === "form_of") atual.formaDe = m[2];
+    else if (m[1] === "uses_learnset") atual.usaLearnset = m[2];
     if (m[1] === "id") atual.sname = m[2];
     else if (m[1] === "ability") atual.ab.push(m[2]);
     else if (m[1] === "innate") atual.inn.push(m[2]);
@@ -90,7 +105,7 @@ export function lerEspeciesDaConfig(arq) {
 }
 
 // Compara a config com o dex e devolve o patch.
-export function gerarPatch(dex, habilidadesDaConfig, especiesDaConfig, commit, golpesDaConfig = [], aprendizado = {}) {
+export function gerarPatch(dex, habilidadesDaConfig, especiesDaConfig, commit, golpesDaConfig = [], aprendizado = {}, universais = new Set()) {
   const nomesDex = new Set(dex.abilities.map((a) => a[0]));
   const nomesCfg = new Set(habilidadesDaConfig.map((a) => a.nome));
   const renomeadas = [];
@@ -132,14 +147,32 @@ export function gerarPatch(dex, habilidadesDaConfig, especiesDaConfig, commit, g
   }
   const nomesDeGolpe = new Set(dex.moves.map((m) => m && m[0]));
   const golpesNovos = golpesDaConfig.filter((g) => !nomesDeGolpe.has(g.nome));
+  // Aprendizado: adições e retiradas de level-up e de tutor por espécie (golpes por nome). Tutores universais ficam como a NextDex.
   const aprende = {};
-  for (const [sn, a] of Object.entries(aprendizado)) {
-    const s = dex.species.find((x) => x && x.sname === sn);
-    if (!s) continue;
-    const lm = a.lm.filter(([lv, m]) => golpesNovos.some((g) => g.nome === m)), tu = a.tu.filter((m) => golpesNovos.some((g) => g.nome === m));
-    if (lm.length || tu.length) aprende[sn] = { lm, tu };
+  for (const s of dex.species) {
+    const a = s && aprendizado[s.sname];
+    if (!a) continue;
+    const lmD = s.lm.map(([lv, id]) => lv + ":" + dex.moves[id][0]), lmC = a.lm.map(([lv, n]) => lv + ":" + n);
+    const tuD = new Set(s.tu.map((id) => dex.moves[id][0]).filter((n) => !universais.has(n))), tuC = new Set(a.tu.filter((n) => !universais.has(n)));
+    const par = (x) => { const i = x.indexOf(":"); return [+x.slice(0, i), x.slice(i + 1)]; };
+    const lm = [...new Set(lmC.filter((x) => !lmD.includes(x)))].map(par), lmRem = [...new Set(lmD.filter((x) => !lmC.includes(x)))].map(par);
+    const tu = [...tuC].filter((n) => !tuD.has(n)), tuRem = [...tuD].filter((n) => !tuC.has(n));
+    if (lm.length || lmRem.length || tu.length || tuRem.length) aprende[s.sname] = { lm, lmRem, tu, tuRem };
   }
-  return { fonte: "Elite-Redux/er-config AbilityList, SpeciesList e MoveList.textproto", commit, renomeadas, descricoes, novas, especies, golpes: golpesNovos, aprende };
+  // Espécies da config que o dex não tem (as Mega Bruxish e Jellicent): entram no fim, a partir da config.
+  const snames = new Set(dex.species.filter(Boolean).map((x) => x.sname));
+  const especiesNovas = [];
+  for (const c of Object.values(especiesDaConfig)) {
+    if (snames.has(c.sname) || !c.formaDe || !c.megafrom) continue;
+    const base = dex.species.find((x) => x && x.sname === c.megafrom);
+    if (!base) continue;
+    const b = c.b || {};
+    const nomeAb = (e) => nomeDoEnum.get(e);
+    especiesNovas.push({ sname: c.sname, base: c.megafrom, pedraEnum: c.megaitem, tipos: [c.tipo1, c.tipo2].filter(Boolean),
+      b: ["hp", "atk", "def", "spatk", "spdef", "spe"].map((k, i) => (b[k] !== undefined ? b[k] : base.b[i])), // a config omite `spe` nas duas Megas: vale a da espécie base
+      speDaConfig: b.spe !== undefined, ab: c.ab.map(nomeAb), inn: c.inn.map(nomeAb), usaLearnset: c.usaLearnset || c.megafrom });
+  }
+  return { fonte: "Elite-Redux/er-config AbilityList, SpeciesList e MoveList.textproto", commit, renomeadas, descricoes, novas, especies, golpes: golpesNovos, aprende, especiesNovas };
 }
 
 // Aplica o patch ao dex (muda o dex) e devolve um resumo. Idempotente.
@@ -184,6 +217,8 @@ export function aplicarPatch(dex, patch) {
   for (const s of dex.species) {
     const a = s && (patch.aprende || {})[s.sname];
     if (!a) continue;
+    for (const [lv, m] of a.lmRem || []) { const i = s.lm.findIndex((e) => e[0] === lv && e[1] === idDoGolpe.get(m)); if (i >= 0) s.lm.splice(i, 1); }
+    for (const m of a.tuRem || []) { const i = s.tu.indexOf(idDoGolpe.get(m)); if (i >= 0) s.tu.splice(i, 1); }
     for (const [lv, m] of a.lm) {
       const id = idDoGolpe.get(m);
       if (s.lm.some((e) => e[0] === lv && e[1] === id)) continue;
@@ -192,6 +227,20 @@ export function aplicarPatch(dex, patch) {
     }
     for (const m of a.tu) { const id = idDoGolpe.get(m); if (!s.tu.includes(id)) s.tu.push(id); }
     resumo.aprende++;
+  }
+  // espécies novas (Mega): copiam descrição, aprendizado (uses_learnset) e `cab` da base; a base passa a apontar para a Mega
+  resumo.especiesNovas = 0;
+  for (const n of patch.especiesNovas || []) {
+    if (dex.species.some((x) => x && x.sname === n.sname)) continue;
+    const base = dex.species.find((x) => x && x.sname === n.base), usa = dex.species.find((x) => x && x.sname === n.usaLearnset) || base;
+    const x = dex.species.length;
+    const tipos = n.tipos.map((t) => dex.types.indexOf(t[0] + t.slice(1).toLowerCase()));
+    if (tipos.some((t) => t < 0)) throw new Error("tipo desconhecido em " + n.sname);
+    dex.species.push({ x, i: base.i, n: base.n + " Mega", sname: n.sname, t: tipos, b: n.b.slice(), ab: ids(n.ab), inn: ids(n.inn), ev: [], lm: usa.lm.map((e) => e.slice()), tu: usa.tu.slice(),
+      d: base.d, senc: [], wenc: null, frm: [], cab: base.cab });
+    const evo = base.ev.find((e) => e[1] === n.pedraEnum);
+    if (evo) evo[2] = x;
+    resumo.especiesNovas++;
   }
   return resumo;
 }
@@ -202,8 +251,8 @@ if ((process.argv[1] || "").endsWith("config_nova.mjs")) {
   const dex = JSON.parse(readFileSync(dexArq, "utf8"));
   const golpesTxt = readFileSync(pasta + "/MoveList.textproto", "utf8"), especiesTxt = readFileSync(pasta + "/SpeciesList.textproto", "utf8");
   const golpesDaConfig = lerGolpesNovosDaConfig(golpesTxt), nomePorEnum = Object.fromEntries(golpesDaConfig.map((g) => [g.enum, g.nome]));
-  const novosNomes = golpesDaConfig.filter((g) => !dex.moves.some((m) => m && m[0] === g.nome)).map((g) => g.nome);
-  const patch = gerarPatch(dex, lerHabilidadesDaConfig(readFileSync(pasta + "/AbilityList.textproto", "utf8")), lerEspeciesDaConfig(especiesTxt), commit, golpesDaConfig, lerAprendizadoDaConfig(especiesTxt, nomePorEnum, novosNomes));
+  const universais = new Set(golpesDaConfig.filter((g) => /^TUTOR_UNIVERSAL/.test(g.tutor || "")).map((g) => g.nome));
+  const patch = gerarPatch(dex, lerHabilidadesDaConfig(readFileSync(pasta + "/AbilityList.textproto", "utf8")), lerEspeciesDaConfig(especiesTxt), commit, golpesDaConfig, lerAprendizadoDaConfig(especiesTxt, nomePorEnum), universais);
   writeFileSync(saida, JSON.stringify(patch, null, 1) + "\n");
-  console.log("config_nova.mjs: renomeadas " + patch.renomeadas.length + ", texto novo " + Object.keys(patch.descricoes).length + ", habilidades novas " + patch.novas.length + ", espécies " + Object.keys(patch.especies).length + ", golpes novos " + patch.golpes.length + ", espécies que aprendem " + Object.keys(patch.aprende).length + " -> " + saida);
+  console.log("config_nova.mjs: renomeadas " + patch.renomeadas.length + ", texto novo " + Object.keys(patch.descricoes).length + ", habilidades novas " + patch.novas.length + ", espécies " + Object.keys(patch.especies).length + ", golpes novos " + patch.golpes.length + ", espécies com aprendizado diferente " + Object.keys(patch.aprende).length + ", espécies novas " + patch.especiesNovas.length + " -> " + saida);
 }

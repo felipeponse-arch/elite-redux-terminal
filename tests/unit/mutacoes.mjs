@@ -3825,4 +3825,32 @@ export const MUTACOES = [
     de: "[[1,663],[1,280],[1,24],[1,26],[1,96],[1,1031],[17,739],[17,252],[17,23],[24,495],[24,299],[24,25],[24,266],[37,370],[37,932],[37,661],[46,136],[46,179],[46,1033],[51,387],[51,741],[51,167]]",
     para: "[[1,663],[1,280],[1,24],[1,26],[1,96],[1,1031],[17,739],[17,252],[17,23],[24,495],[24,299],[24,25],[24,266],[37,370],[37,932],[37,661],[46,136],[46,179],[46,1],[51,387],[51,741],[51,167]]",
   },
+  {
+    id: "versao-lumberjack-sem-defesa",
+    descricao: "Lumberjack/Fae Hunter/Monster Hunter/Firefighter deixam de reduzir o dano de atacante do tipo (nome do tipo sem plural)",
+    arquivo: "duelo.js",
+    de: "f.match(/Takes ([\\d.]+)x damage from (\\w+)\\b/i)",
+    para: "f.match(/Takes ([\\d.]+)x damage from NUNCA(\\w+)\\b/i)",
+  },
+  {
+    id: "versao-lumberjack-sem-ataque",
+    descricao: "Lumberjack/Fae Hunter/Monster Hunter/Firefighter deixam de dar x1,5 contra alvo do tipo",
+    arquivo: "duelo.js",
+    de: "f.match(/Deals ([\\d.]+)x damage to (\\w+)\\b/i)",
+    para: "f.match(/Deals ([\\d.]+)x damage to NUNCA(\\w+)\\b/i)",
+  },
+  {
+    id: "versao-lumberjack-volta-pelo-golpe",
+    descricao: "o Lumberjack volta à tabela de tipos (resiste ao tipo do GOLPE Grass)",
+    arquivo: "tipos.js",
+    de: "    // Lumberjack (445), Fae Hunter (442), Monster Hunter (526) e Firefighter (804) saíram daqui",
+    para: "    445: { resist: { Grass: 0.5 } },\n    // Lumberjack (445), Fae Hunter (442), Monster Hunter (526) e Firefighter (804) saíram daqui",
+  },
+  {
+    id: "versao-mega-bruxish-sem-pedra",
+    descricao: "a Bruxishite deixa de apontar para a Mega Bruxish",
+    arquivo: "mega_forms.json",
+    de: "\"Bruxishite\":\"SPECIES_BRUXISH_MEGA\"",
+    para: "\"Bruxishite\":\"SPECIES_BRUXISH\"",
+  },
 ];

@@ -36,8 +36,18 @@ for (const g of patch.golpes || []) {
   pt[String(id)] = PT[g.nome];
   n++;
 }
+// Megas novas (ticket versao-nova/10): a pedra aponta para a forma em data/mega_forms.json, como as outras Megas.
+const mega = ler("data/mega_forms.json");
+const norm = (t) => String(t).toLowerCase().replace(/[^a-z0-9]/g, "");
+let nm = 0;
+for (const e of patch.especiesNovas || []) {
+  const pedra = dex.items.find((i) => norm(i) === norm(e.pedraEnum.replace(/^ITEM_/, "")));
+  if (!pedra) throw new Error("pedra fora do dex: " + e.pedraEnum);
+  mega[pedra] = e.sname; nm++;
+}
+if (nm) writeFileSync("data/mega_forms.json", JSON.stringify(mega));
 const ordena = (o) => Object.fromEntries(Object.entries(o).sort((a, b) => +a[0] - +b[0]));
 writeFileSync("data/move_categorias.json", JSON.stringify(ordena(cat)) + "\n");
 writeFileSync("data/move_roles.json", JSON.stringify(ordena(papeis)));
 writeFileSync("data/move_translations_pt.json", JSON.stringify(ordena(pt), null, 2) + "\n");
-console.log("golpes_novos.mjs: OK (" + n + " golpes)");
+console.log("golpes_novos.mjs: OK (" + n + " golpes, " + nm + " pedras de Mega)");

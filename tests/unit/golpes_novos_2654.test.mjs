@@ -56,7 +56,8 @@ test("quem aprende os golpes novos: level-up e tutor da config (Alakazam: Luster
   assert.ok(!aprende("Magikarp", "Arc Blast"));
   const lvs = sp("Alakazam").lm.map((e) => e[0]); // a entrada nova entra no lugar do nível, sem quebrar a ordem que a espécie já tinha
   assert.deepEqual(lvs, [...lvs].sort((x, y) => x - y));
-  assert.equal(Object.keys(patch.aprende).length, 48);
+  const comNovos = Object.values(patch.aprende).filter((a) => a.lm.concat(a.tu.map((m) => [0, m])).some(([, m]) => ESPERADO.some((e) => e[0] === m)));
+  assert.equal(comNovos.length, 56, "espécies que ganham algum dos 9 golpes novos");
 });
 
 test("os golpes de luz novos rendem com Photokinesis (x1,3); Baneful Kick é chute (Striker conta) e Cheap Stab é chifre (Mighty Horn conta)", () => {

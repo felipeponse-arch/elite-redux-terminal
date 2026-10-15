@@ -152,6 +152,7 @@
    "efeito": "Paralyze Ignore Type",
    "chance": 0,
    "light": false,
+   "tutor": null,
    "flags": [
     "Sound Based"
    ]
@@ -168,6 +169,7 @@
    "efeito": "Poison Hit",
    "chance": 10,
    "light": false,
+   "tutor": null,
    "flags": [
     "Makes Contact",
     "Kick Based"
@@ -185,6 +187,7 @@
    "efeito": "Hit",
    "chance": 0,
    "light": false,
+   "tutor": "TUTOR_ATTACK",
    "flags": [
     "Makes Contact",
     "Horn Based"
@@ -202,6 +205,7 @@
    "efeito": "Special Defense Down Hit",
    "chance": 20,
    "light": true,
+   "tutor": null,
    "flags": []
   },
   {
@@ -216,6 +220,7 @@
    "efeito": "Hit",
    "chance": 0,
    "light": false,
+   "tutor": null,
    "flags": [
     "Makes Contact",
     "Horn Based"
@@ -233,6 +238,7 @@
    "efeito": "Accuracy Down Hit",
    "chance": 20,
    "light": true,
+   "tutor": null,
    "flags": []
   },
   {
@@ -247,6 +253,7 @@
    "efeito": "Attack Down Hit",
    "chance": 40,
    "light": true,
+   "tutor": null,
    "flags": []
   },
   {
@@ -261,6 +268,7 @@
    "efeito": "Hit",
    "chance": 0,
    "light": true,
+   "tutor": null,
    "flags": []
   },
   {
@@ -275,10 +283,63 @@
    "efeito": "Burn Hit",
    "chance": 20,
    "light": true,
+   "tutor": null,
    "flags": []
   }
  ],
  "aprende": {
+  "SPECIES_ARBOK": {
+   "lm": [],
+   "lmRem": [
+    [
+     61,
+     "Baneful Bunker"
+    ]
+   ],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_CLEFABLE": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Tailwind"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_JIGGLYPUFF": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Foresight"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_WIGGLYTUFF": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Focus Punch"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_VENOMOTH": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Reflect",
+    "Light Screen"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_GOLDUCK": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Clear Skies"
+   ],
+   "tuRem": []
+  },
   "SPECIES_ALAKAZAM": {
    "lm": [
     [
@@ -286,7 +347,33 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_TENTACOOL": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Acid Armor"
+   ]
+  },
+  "SPECIES_HAUNTER": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Clear Smog"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_GENGAR": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Clear Smog"
+   ],
+   "tuRem": []
   },
   "SPECIES_ELECTRODE": {
    "lm": [
@@ -295,7 +382,9 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_HITMONLEE": {
    "lm": [
@@ -304,19 +393,44 @@
      "Baneful Kick"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_RHYHORN": {
    "lm": [],
+   "lmRem": [],
    "tu": [
     "Cheap Stab"
-   ]
+   ],
+   "tuRem": []
   },
   "SPECIES_RHYDON": {
    "lm": [],
+   "lmRem": [],
    "tu": [
     "Cheap Stab"
-   ]
+   ],
+   "tuRem": []
+  },
+  "SPECIES_TANGELA": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Aura Sphere",
+    "Earthquake",
+    "Earth Power",
+    "Sludge Bomb"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_DRAGONITE": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Clear Skies"
+   ],
+   "tuRem": []
   },
   "SPECIES_CHINCHOU": {
    "lm": [
@@ -329,7 +443,9 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_LANTURN": {
    "lm": [
@@ -342,7 +458,17 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_TOGETIC": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Life Dew"
+   ],
+   "tuRem": []
   },
   "SPECIES_NATU": {
    "lm": [
@@ -351,7 +477,9 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_XATU": {
    "lm": [
@@ -360,7 +488,11 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [
+    "Clear Skies"
+   ],
+   "tuRem": []
   },
   "SPECIES_AMPHAROS": {
    "lm": [
@@ -373,7 +505,42 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_SCIZOR": {
+   "lm": [
+    [
+     17,
+     "Aerial Ace"
+    ],
+    [
+     24,
+     "Air Cutter"
+    ],
+    [
+     24,
+     "Sacred Sword"
+    ],
+    [
+     37,
+     "Dual Wingbeat"
+    ],
+    [
+     46,
+     "Fury Swipes"
+    ],
+    [
+     56,
+     "Fury Cutter"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [
+    "Karate Chop"
+   ],
+   "tuRem": []
   },
   "SPECIES_RAIKOU": {
    "lm": [
@@ -390,7 +557,9 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_ELECTRIKE": {
    "lm": [
@@ -403,7 +572,9 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_MANECTRIC": {
    "lm": [
@@ -416,7 +587,25 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_ROSELIA": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Life Dew"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_CACTURNE": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Fluttering Leaf"
+   ],
+   "tuRem": []
   },
   "SPECIES_SOLROCK": {
    "lm": [
@@ -425,7 +614,43 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_CLAYDOL": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Clear Skies"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_SNORUNT": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Shadow Claw",
+    "Trick"
+   ]
+  },
+  "SPECIES_GLALIE": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Draining Kiss",
+    "Power Gem"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_BAGON": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Take Flight"
+   ]
   },
   "SPECIES_LATIAS": {
    "lm": [
@@ -434,7 +659,9 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_LATIOS": {
    "lm": [
@@ -443,7 +670,17 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_SHINX": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Knock Off"
+   ]
   },
   "SPECIES_LUXIO": {
    "lm": [
@@ -452,7 +689,11 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Knock Off"
+   ]
   },
   "SPECIES_LUXRAY": {
    "lm": [
@@ -461,7 +702,136 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_ROSERADE": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Life Dew"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_BURMY": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Nasty Plot",
+    "Razor Leaf"
+   ]
+  },
+  "SPECIES_RHYPERIOR": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Stealth Rock"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_TANGROWTH": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Aura Sphere",
+    "Earthquake",
+    "Earth Power",
+    "Sludge Bomb"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_ELECTIVIRE": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Earth Power",
+    "Flamethrower"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_TOGEKISS": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Clear Skies",
+    "Life Dew"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_PATRAT": {
+   "lm": [],
+   "lmRem": [
+    [
+     56,
+     "Baton Pass"
+    ]
+   ],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_WATCHOG": {
+   "lm": [
+    [
+     17,
+     "Crunch"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_LILLIPUP": {
+   "lm": [
+    [
+     24,
+     "Jagged Fangs"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_HERDIER": {
+   "lm": [
+    [
+     24,
+     "Jagged Fangs"
+    ],
+    [
+     46,
+     "Crunch"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [
+    "Earthquake",
+    "Stone Edge"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_STOUTLAND": {
+   "lm": [
+    [
+     24,
+     "Jagged Fangs"
+    ],
+    [
+     46,
+     "Crunch"
+    ],
+    [
+     56,
+     "Close Combat"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [
+    "Earthquake",
+    "Stone Edge"
+   ],
+   "tuRem": []
   },
   "SPECIES_BLITZLE": {
    "lm": [
@@ -470,7 +840,9 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_ZEBSTRIKA": {
    "lm": [
@@ -479,7 +851,9 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_SCRAFTY": {
    "lm": [
@@ -488,7 +862,67 @@
      "Baneful Kick"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_AMOONGUSS": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Rain Dance",
+    "Toxic Terrain"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_FERROTHORN": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Rapid Spin"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_LITWICK": {
+   "lm": [],
+   "lmRem": [
+    [
+     24,
+     "Trailblaze"
+    ]
+   ],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_LAMPENT": {
+   "lm": [],
+   "lmRem": [
+    [
+     24,
+     "Trailblaze"
+    ]
+   ],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_CUBCHOO": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Earth Power",
+    "Hydro Pump"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_BEARTIC": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Hydro Pump",
+    "Earthquake",
+    "Earth Power"
+   ],
+   "tuRem": []
   },
   "SPECIES_MIENSHAO": {
    "lm": [
@@ -497,7 +931,34 @@
      "Baneful Kick"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_PAWNIARD": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Nasty Plot"
+   ]
+  },
+  "SPECIES_BISHARP": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Nasty Plot"
+   ]
+  },
+  "SPECIES_ESPURR": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Spikes",
+    "Stealth Rock"
+   ]
   },
   "SPECIES_INKAY": {
    "lm": [
@@ -506,9 +967,11 @@
      "Luster Glow"
     ]
    ],
+   "lmRem": [],
    "tu": [
     "Cheap Stab"
-   ]
+   ],
+   "tuRem": []
   },
   "SPECIES_MALAMAR": {
    "lm": [
@@ -517,9 +980,11 @@
      "Luster Glow"
     ]
    ],
+   "lmRem": [],
    "tu": [
     "Cheap Stab"
-   ]
+   ],
+   "tuRem": []
   },
   "SPECIES_HELIOPTILE": {
    "lm": [
@@ -528,7 +993,9 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_HELIOLISK": {
    "lm": [
@@ -537,7 +1004,17 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_SALANDIT": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Tearful Look"
+   ]
   },
   "SPECIES_MINIOR": {
    "lm": [
@@ -546,7 +1023,9 @@
      "Glitter Beam"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_PHEROMOSA": {
    "lm": [
@@ -555,7 +1034,9 @@
      "Baneful Kick"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_XURKITREE": {
    "lm": [
@@ -572,7 +1053,9 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_MARSHADOW": {
    "lm": [
@@ -581,7 +1064,9 @@
      "Baneful Kick"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_DOTTLER": {
    "lm": [
@@ -590,7 +1075,9 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_ORBEETLE": {
    "lm": [
@@ -599,7 +1086,17 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_APPLIN": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Weather Ball"
+   ]
   },
   "SPECIES_INDEEDEE": {
    "lm": [
@@ -608,7 +1105,17 @@
      "Ghoulish Gore"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_DRAGAPULT": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Dive"
+   ],
+   "tuRem": []
   },
   "SPECIES_WYRDEER": {
    "lm": [
@@ -617,19 +1124,131 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_KLEAVOR": {
+   "lm": [
+    [
+     17,
+     "Aerial Ace"
+    ],
+    [
+     24,
+     "Air Cutter"
+    ],
+    [
+     24,
+     "Sacred Sword"
+    ],
+    [
+     37,
+     "Dual Wingbeat"
+    ],
+    [
+     37,
+     "Reversal"
+    ],
+    [
+     46,
+     "Fury Swipes"
+    ],
+    [
+     56,
+     "Fury Cutter"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [
+    "Karate Chop",
+    "Tailwind",
+    "Pluck",
+    "Wing Attack",
+    "Fly"
+   ],
+   "tuRem": []
   },
   "SPECIES_OVERQWIL": {
    "lm": [],
+   "lmRem": [],
    "tu": [
-    "Cheap Stab"
-   ]
+    "Cheap Stab",
+    "Toxic Terrain"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_QUAXWELL": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Water Pulse",
+    "Whirlpool",
+    "Wing Attack"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_QUAQUAVAL": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Rapid Spin",
+    "Water Pulse",
+    "Whirlpool",
+    "Wing Attack"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_GLIMMORA": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Pebble Shower"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_ANNIHILAPE": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Stone Edge"
+   ],
+   "tuRem": []
   },
   "SPECIES_TING_LU": {
    "lm": [],
+   "lmRem": [],
    "tu": [
     "Cheap Stab"
-   ]
+   ],
+   "tuRem": []
+  },
+  "SPECIES_POLARTIC": {
+   "lm": [
+    [
+     37,
+     "Brine"
+    ],
+    [
+     51,
+     "Sheer Cold"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [
+    "Hydro Pump",
+    "Earthquake",
+    "Earth Power"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_BOARLOCK": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Clear Skies"
+   ],
+   "tuRem": []
   },
   "SPECIES_HELIOSUNNY": {
    "lm": [
@@ -638,13 +1257,271 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_SOPRANICE": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Covet"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_SALAZARUS": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": [
+    "Tearful Look"
+   ]
+  },
+  "SPECIES_GYARADEATH": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Take Flight"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_SCRAFSTER": {
+   "lm": [
+    [
+     51,
+     "Baneful Kick"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_SEERKAT": {
+   "lm": [
+    [
+     17,
+     "Crunch"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_HERACREUS": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Pixie Beam",
+    "Terrain Pulse",
+    "Solar Blade",
+    "Solar Beam"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_WEEZING_GALARIAN": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Toxic Terrain"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_WORMADAM_SANDY_CLOAK": {
+   "lm": [
+    [
+     56,
+     "Silk Trap"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_WORMADAM_TRASH_CLOAK": {
+   "lm": [
+    [
+     56,
+     "Silk Trap"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [
+    "Nasty Plot"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_MEOWSTIC_FEMALE": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Taunt"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_MINIOR_CORE_RED": {
+   "lm": [
+    [
+     46,
+     "Glitter Beam"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_MINIOR_CORE_ORANGE": {
+   "lm": [
+    [
+     46,
+     "Glitter Beam"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_MINIOR_CORE_YELLOW": {
+   "lm": [
+    [
+     46,
+     "Glitter Beam"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_MINIOR_CORE_GREEN": {
+   "lm": [
+    [
+     46,
+     "Glitter Beam"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_MINIOR_CORE_BLUE": {
+   "lm": [
+    [
+     46,
+     "Glitter Beam"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_MINIOR_CORE_INDIGO": {
+   "lm": [
+    [
+     46,
+     "Glitter Beam"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_MINIOR_CORE_VIOLET": {
+   "lm": [
+    [
+     46,
+     "Glitter Beam"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_QWILFISH_HISUIAN": {
    "lm": [],
+   "lmRem": [],
    "tu": [
     "Cheap Stab"
-   ]
+   ],
+   "tuRem": []
+  },
+  "SPECIES_POLARTIC_BLUEMOON": {
+   "lm": [
+    [
+     1,
+     "Muddy Water"
+    ],
+    [
+     1,
+     "Water Gun"
+    ],
+    [
+     17,
+     "Chilling Water"
+    ],
+    [
+     17,
+     "Frost Breath"
+    ],
+    [
+     37,
+     "Brine"
+    ],
+    [
+     51,
+     "Sheer Cold"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [
+    "Earth Power",
+    "Hydro Pump"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_DRAGONITE_MEGA": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Clear Skies"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_MINCCINO_REDUX": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Energy Wave"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_FROSTUCCINO": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Energy Wave"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_GROTOM_GLASS": {
+   "lm": [
+    [
+     51,
+     "Septic Switch"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_GROTOM_ROLL": {
+   "lm": [
+    [
+     1,
+     "Rollout"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_GROTOM_KICK": {
    "lm": [
@@ -653,7 +1530,9 @@
      "Baneful Kick"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_LITWICK_REDUX": {
    "lm": [
@@ -670,7 +1549,9 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_LAMPENT_REDUX": {
    "lm": [
@@ -687,7 +1568,9 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_CHANDELURE_REDUX": {
    "lm": [
@@ -704,7 +1587,9 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_VOLBEEP": {
    "lm": [
@@ -713,16 +1598,24 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_ASTROBEEP": {
    "lm": [
+    [
+     24,
+     "Eerie Impulse"
+    ],
     [
      51,
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_ILLUMARS": {
    "lm": [
@@ -735,7 +1628,11 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [
+    "Dazzling Gleam"
+   ],
+   "tuRem": []
   },
   "SPECIES_ILLUMINAUT": {
    "lm": [
@@ -748,7 +1645,33 @@
      "Luster Glow"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_KECLEONG": {
+   "lm": [
+    [
+     null,
+     "Aqua Fang"
+    ],
+    [
+     null,
+     "Sheer Cold"
+    ]
+   ],
+   "lmRem": [
+    [
+     0,
+     "Aqua Fang"
+    ],
+    [
+     0,
+     "Sheer Cold"
+    ]
+   ],
+   "tu": [],
+   "tuRem": []
   },
   "SPECIES_LUXZERO": {
    "lm": [
@@ -757,7 +1680,53 @@
      "Arc Blast"
     ]
    ],
-   "tu": []
+   "lmRem": [],
+   "tu": [
+    "Play Rough",
+    "Cut"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_ZWEILOUS_REDUX": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Moonblast"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_HYDREIGON_REDUX": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Moonblast"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_LUXRAY_REDUX": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Pluck"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_ARON_REDUX": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Giga Impact"
+   ],
+   "tuRem": []
+  },
+  "SPECIES_LAIRON_REDUX": {
+   "lm": [],
+   "lmRem": [],
+   "tu": [
+    "Hyper Beam",
+    "Giga Impact"
+   ],
+   "tuRem": []
   },
   "SPECIES_GARDEVOIR_REDUX": {
    "lm": [
@@ -766,9 +1735,82 @@
      "Ghoulish Gore"
     ]
    ],
+   "lmRem": [],
    "tu": [
     "Cheap Stab"
-   ]
+   ],
+   "tuRem": []
+  },
+  "SPECIES_GALLADE_REDUX": {
+   "lm": [
+    [
+     24,
+     "Beat Up"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
   }
- }
+ },
+ "especiesNovas": [
+  {
+   "sname": "SPECIES_BRUXISH_MEGA",
+   "base": "SPECIES_BRUXISH",
+   "pedraEnum": "ITEM_BRUXISHITE",
+   "tipos": [
+    "WATER",
+    "PSYCHIC"
+   ],
+   "b": [
+    68,
+    105,
+    70,
+    70,
+    70,
+    92
+   ],
+   "speDaConfig": false,
+   "ab": [
+    "Dazzling",
+    "Defiant",
+    "Predator"
+   ],
+   "inn": [
+    "Strong Jaw",
+    "Wonder Skin",
+    "Psychic Mind"
+   ],
+   "usaLearnset": "SPECIES_BRUXISH"
+  },
+  {
+   "sname": "SPECIES_JELLICENT_MEGA",
+   "base": "SPECIES_JELLICENT",
+   "pedraEnum": "ITEM_JELLICENTITE",
+   "tipos": [
+    "WATER",
+    "GHOST"
+   ],
+   "b": [
+    120,
+    60,
+    70,
+    85,
+    105,
+    60
+   ],
+   "speDaConfig": false,
+   "ab": [
+    "Cursed Body",
+    "Clear Body",
+    "Immunity"
+   ],
+   "inn": [
+    "Water Bubble",
+    "Soul Eater",
+    "Poison Touch"
+   ],
+   "usaLearnset": "SPECIES_JELLICENT"
+  }
+ ]
 }
