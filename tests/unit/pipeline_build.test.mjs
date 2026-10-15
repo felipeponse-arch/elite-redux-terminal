@@ -199,6 +199,34 @@ test("calibrada vale só se TODO alvo medido é caso conferido (primeiro e ás):
   doLedian.forEach((x) => assert.equal(x.rotulo, "estimada", x.golpes.join("/")));
 });
 
+// Ledian só com golpes que a calculadora do jogo conferiu (Mega Punch e Aerial Ace): tira da lista o Seismic Fist e parecidos, que
+// passam o Mega Punch no dano e deixam o caso conferido fora do melhor golpe. Dado real do jogo (lm/tu do Ledian), só filtrado.
+function ledianSoComGolpesConferidos() {
+  const fora = ["Seismic Fist", "One-Inch Punch", "Insect Impact", "Thunder Punch", "Bug Buzz", "Rock Throw"];
+  const ids = new Set(Object.keys(R.MOVES).filter((id) => fora.includes(R.MOVES[id][0])));
+  const led = sp("Ledian");
+  return Object.assign({}, led, { lm: (led.lm || []).filter((p) => !ids.has(String(p[1]))), tu: (led.tu || []).filter((id) => !ids.has(String(id))) });
+}
+
+test("calibrada com um alvo conferido (Ninetales) e outro NÃO (Alakazam): só o alvo único é calibrada, os dois alvos são estimada (every, não some)", () => {
+  const ledian = ledianSoComGolpesConferidos();
+  const luta = Object.assign({}, courtney, { party: [Object.assign({}, courtney.party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Shadow Ball"], nat: "Mild" }), courtney.party[1]] });
+  const so = R.candidatosDeBuild(ledian, { alvo: { foe: foeSemPrioridade() } }).candidatos.find((x) => x.habilidade === "Aerodynamics" && x.golpes.includes("Mega Punch"));
+  assert.ok(so, "o Ledian com Mega Punch contra o Ninetales tem que aparecer");
+  assert.equal(so.hitKill, 1);
+  assert.equal(so.rotulo, "calibrada", "um alvo, caso conferido: calibrada");
+  const dois = R.candidatosDeBuild(ledian, { alvo: { chefao: luta } }).candidatos.filter((x) => x.habilidade === "Aerodynamics" && x.golpes.includes("Mega Punch") && x.hitKill > 0);
+  assert.ok(dois.length > 0);
+  dois.forEach((x) => assert.equal(x.rotulo, "estimada", "o Alakazam não foi conferido: " + x.golpes.join("/")));
+});
+
+test("garantido vale pela rolagem MÍNIMA: Pikachu x Ninetales derruba em 1 golpe na média (93% a 110%), mas não é garantido", () => {
+  const r = R.candidatosDeBuild(sp("Pikachu"), { alvo: ninetales });
+  const ambiguos = r.candidatos.filter((x) => x.hitKill === 1 && x.dano.min < 100 && x.dano.max >= 100);
+  assert.ok(ambiguos.length > 0, r.candidatos.map((x) => x.hitKill + ":" + x.dano.min + "-" + x.dano.max).join(" ; "));
+  ambiguos.forEach((x) => assert.equal(x.garantido, false, x.golpes.join("/") + " (" + x.dano.min + "% a " + x.dano.max + "%)"));
+});
+
 test("prioridade NEGATIVA nunca 'bate primeiro por velocidade' (Avalanche do Vanilluxe Mega) e Focus Punch fica fora do kit", () => {
   const r = R.candidatosDeBuild(sp("Vanilluxe Mega"), { alvo: alakazam });
   assert.ok(r.candidatos.length > 0);
