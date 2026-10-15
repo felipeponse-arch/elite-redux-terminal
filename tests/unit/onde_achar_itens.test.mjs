@@ -39,7 +39,7 @@ test("o pacote não corta fonte antiga: Honey e Ultra Ball mantêm o Poké Mart 
 
 test("pedras do Adoption Center (er-config oficial): compra por BP, no Norman ou na trava que já têm", () => {
   const ad = JSON.parse(readFileSync(new URL("../../data/pedras_adoption_center.json", import.meta.url), "utf8")).pedras;
-  assert.equal(ad.length, 139);
+  assert.equal(ad.length, 140); // er-config d1a9a4c (versao-nova/05): sai Arbokite e Skarmorite; entram Duraludite, Raichunite X e Skarmorite Y
   const linha = (n) => ONDE[n].find((x) => x.local === "Adoption Center");
   assert.equal(linha("Garchompite Z").etapa, 4);
   assert.equal(linha("Dragoninite Y").etapa, 7, "trava da 7ª continua");

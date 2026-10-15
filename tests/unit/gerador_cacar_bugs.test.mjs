@@ -106,13 +106,14 @@ test("achado 4: o texto que o modelo escreveu volta limitado no motivo da rejei�
   }
 });
 
-test("achado 5: build curada no time novo não leva habilidade que a forma não tem (Arbok Mega: Merciless é da base)", () => {
+test("achado 5: build curada no time novo não leva habilidade que a forma não tem (a curada do Arbok, Merciless, numa espécie que não a escolhe)", () => {
+  // Era o Arbok Mega (Merciless é da base); a Arbok Mega saiu do jogo na 2.65.4 (ticket versao-nova/05), então o caso é montado com a curada real do Arbok e outra espécie.
   const R2 = carregarRegras({ milestone: 9, difficulty: "ace", levelCapMode: "more" });
-  const mega = R2.getSpeciesBySname("SPECIES_ARBOK_MEGA");
-  const cur = R2.curadasDe("SPECIES_ARBOK_MEGA")[0];
-  const escolhiveis = R2.uniqueIds(mega.ab).map((id) => R2.ABILITIES[id][0]);
-  assert.ok(!escolhiveis.includes(cur.ability), "pré-condição (dado real): a curada usa uma habilidade que a Mega não escolhe");
-  assert.equal(R2.entradaDaCuradaParaTimeNovo(mega, cur), null);
+  const outra = R2.getSpeciesBySname("SPECIES_PIKACHU");
+  const cur = R2.curadasDe("SPECIES_ARBOK")[0];
+  const escolhiveis = R2.uniqueIds(outra.ab).map((id) => R2.ABILITIES[id][0]);
+  assert.ok(!escolhiveis.includes(cur.ability), "pré-condição (dado real): a curada usa uma habilidade que a espécie não escolhe");
+  assert.equal(R2.entradaDaCuradaParaTimeNovo(outra, cur), null);
 });
 
 test("achado 5b: curada válida entra no time novo, com golpes e habilidade da curada", () => {

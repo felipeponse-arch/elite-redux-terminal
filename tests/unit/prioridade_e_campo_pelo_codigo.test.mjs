@@ -118,7 +118,7 @@ test("Utility Umbrella do dono desliga o bloqueio do Sun Basking no sol, mas nã
   assert.equal(R.prioFalhaDuelo(rapido, comItem(sandGuard, "Utility Umbrella")), true, "o guarda-chuva não mexe na areia");
 });
 
-test("chefões reais: Dudunsparce, Claydol e Gastrodon (Sand Guard, areia) e o Exeggutor Alolan de Flannery 1 (Sun Basking, sol) barram o Quick Attack", () => {
+test("chefões reais: Dudunsparce, Claydol e Gastrodon (Sand Guard, areia) e o Koraidon da Maxie Mossdeep (Sun Basking, sol) barram o Quick Attack", () => {
   const quick = sintetica([], [golpe("Normal", "F", { prio: 1, nome: "Quick Attack" })]);
   const membro = (chefao, i, clima) => R.foeDeDuelo(R.BOSSES.find((x) => x.name === chefao).party[i], NIVEL, clima);
   for (const [chefao, i] of [["Lucy Lavaridge", 3], ["Tate And Liza 2", 1], ["Calvin 2", 5]]) {
@@ -127,9 +127,10 @@ test("chefões reais: Dudunsparce, Claydol e Gastrodon (Sand Guard, areia) e o E
     assert.equal(R.prioFalhaDuelo(quick, foe), true, chefao + " na areia");
     assert.equal(R.prioFalhaDuelo(quick, membro(chefao, i, null)), false, chefao + " sem areia");
   }
-  const exeggutor = membro("Flannery 1", 2, "sol");
-  assert.equal(exeggutor.ef.bloqueiaPrioClima, "sol");
-  assert.equal(R.prioFalhaDuelo(quick, exeggutor), true, "Exeggutor Alolan no sol");
+  // Sun Basking: o Exeggutor Alolan da Flannery 1 (2.65beta) perdeu a habilidade no dado 2.65.4 (versao-nova/05); o Koraidon da Maxie Mossdeep (Hell) a tem.
+  const koraidon = R.foeDeDuelo([].concat(R.BOSSES.find((x) => x.name === "Maxie Mossdeep").hell)[1], NIVEL, "sol");
+  assert.equal(koraidon.ef.bloqueiaPrioClima, "sol");
+  assert.equal(R.prioFalhaDuelo(quick, koraidon), true, "Koraidon no sol");
 });
 
 test("prioridade condicional (Coil Up, On the Prowl...): o alvo com Sand Guard na areia também a barra, como a Queenly Majesty (decisão de 14/10)", () => {

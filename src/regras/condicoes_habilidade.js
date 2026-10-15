@@ -114,6 +114,7 @@
       var sub = p && p !== nome ? ABILITIES.filter(function (x) { return x && x[0] === p; })[0] : null;
       // A parte entra com o texto que o parser lê (LIDO_PELO_TEXTO_NOVO_DUELO, ticket versao-nova/04), não com a redação nova do dado.
       var lido = sub && typeof LIDO_PELO_TEXTO_NOVO_DUELO !== "undefined" ? LIDO_PELO_TEXTO_NOVO_DUELO[sub[1]] : undefined;
+      if (sub && typeof TEXTO_DA_VERSAO_NOVA_DUELO !== "undefined" && TEXTO_DA_VERSAO_NOVA_DUELO[p] !== undefined) lido = TEXTO_DA_VERSAO_NOVA_DUELO[p]; // número da versão nova (v02, P2)
       if (sub) extra += " " + expandirTextoDeHabilidade(lido !== undefined ? lido : (sub[1] || ""), p, nivel + 1);
     });
     return txt + extra;

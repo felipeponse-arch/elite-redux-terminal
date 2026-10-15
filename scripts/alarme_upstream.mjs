@@ -7,7 +7,7 @@
 //   1. a versão que o NextDex oficial abre por padrão (último item de
 //      allVersions em static/js/data_version.js - o próprio site usa essa regra);
 //   2. se o arquivo de dados dessa versão continua idêntico ao nosso snapshot
-//      (data/gameData_265beta.json) - os devs às vezes corrigem dados sem trocar
+//      (data/gameData_2654.json) - os devs às vezes corrigem dados sem trocar
 //      o número da versão;
 //   3. a "Latest Version" da página de download do site oficial.
 //
@@ -24,7 +24,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { validarDadoCru } from "./validar_dado_cru.mjs";
 
-export const VERSAO_DEX = "2.65beta";
+export const VERSAO_DEX = "2.65.4"; // NextDex 2.65.4 (07/10/2026), versão mais nova (decisão do Felipe de 15/10); VERSAO_JOGO segue a página oficial de download
 export const VERSAO_JOGO = "2.65.3b";
 const BASE_DEX = "https://raw.githubusercontent.com/ForwardFeed/ER-nextdex/main";
 const PAGINA_DOWNLOAD = "https://eliteredux.net/download/";
@@ -73,7 +73,7 @@ export async function baixar(url, comoBytes = false) {
 
 async function main() {
   const raiz = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-  const snapshot = readFileSync(path.join(raiz, "data", "gameData_265beta.json"));
+  const snapshot = readFileSync(path.join(raiz, "data", "gameData_2654.json"));
   const linhas = []; // { item, esperado, encontrado, estado: "ok" | "mudou" | "sem-rede" }
 
   const conferir = async (item, esperado, obter) => {

@@ -147,3 +147,23 @@ test("estratégia de clima: Flannery 2 com elenco de granizo só declara armador
   // 'node tests/run_sabotage.mjs loteB-estrategia'.
   assert.ok(!res.estrategia, "estratégia declarada sem o armador em campo: " + (res.estrategia && res.estrategia.armador));
 });
+
+// Quarto e quinto casos fixos (15/10/2026, troca do dado para a NextDex 2.65.4): com o dado novo os três casos acima deixaram de provar a regra
+// (a sabotagem 'loteB-estrategia-sem-armador' sobreviveu). Achados varrendo os chefões do marco 7 com elencos de granizo e de sol:
+// sem a regra, a Abomasnow (Flannery 1) e o Torkoal (Winona 1) viram "armador" da estratégia sem nunca entrar na luta simulada.
+for (const [titulo, nomes, chefe] of [
+  ["granizo contra a Flannery 1", ["Abomasnow", "Ninetales", "Glaceon", "Weavile", "Clefable", "Azumarill", "Granbull", "Wigglytuff", "Pelipper", "Politoed"], "Flannery 1"],
+  ["sol contra a Winona 1", ["Ninetales", "Torkoal", "Venusaur", "Charizard", "Clefable", "Azumarill", "Granbull", "Wigglytuff", "Pelipper", "Politoed"], "Winona 1"],
+]) {
+  test("estratégia de clima: " + titulo + " (marco 7) não declara armador que fica fora da luta", async () => {
+    const { carregarRegras: carregar } = await import("./carregar_regras.mjs");
+    const R7 = carregar({ milestone: 7, difficulty: "ace" });
+    const cands = nomes.map((n) => R7.SPECIES.find((s) => s && s.n === n)).filter(Boolean).map((sp) => ({ sp, owned: sp.x }));
+    const boss = R7.BOSSES.find((b) => b.name === chefe);
+    assert.ok(boss, "fixture: chefão " + chefe + " no dado");
+    const res = R7.montarTimeContraChefao(cands, boss.party, 50, {});
+    assert.equal(res.escolhidos.length, 6);
+    // Asserção sem 'if': hoje o armador não entra na luta, então não pode haver estratégia (com a sabotagem ela aparece).
+    assert.ok(!res.estrategia, "estratégia declarada sem o armador em campo: " + (res.estrategia && res.estrategia.armador));
+  });
+}

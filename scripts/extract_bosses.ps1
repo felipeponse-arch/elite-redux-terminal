@@ -1,10 +1,10 @@
 ﻿# Generates data/bosses.json (boss trainers + their difficulty variants) from
-# data/gameData_265beta.json. Run via build.ps1, or standalone for debugging.
+# data/gameData_2654.json. Run via build.ps1, or standalone for debugging.
 
 . (Join-Path $PSScriptRoot "common.ps1")
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"
-$srcPath = Join-Path $dataDir "gameData_265beta.json"
+$srcPath = Join-Path $dataDir "gameData_2654.json"
 
 $ser = New-GameDataParser
 $json = Get-Content $srcPath -Raw -Encoding UTF8

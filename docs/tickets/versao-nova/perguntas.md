@@ -1,9 +1,16 @@
 # Perguntas da fila v01–v05 (para a Construção / Felipe)
 
+## P1 (v04). RESPONDIDA (Felipe, 15/10): a camada serve; seguir com ela e rodar `scripts/medir_texto_novo.mjs` a cada dado novo; não gerar regras do abilities.cc.
+
+(texto original)
 ## P1 (v04). "Dado estruturado da er-config" não existe para habilidade
 O pedido do v04 era ler as habilidades pelo dado estruturado da `er-config`. A `er-config` só tem `description` e `expanded_description` (texto livre); o efeito está em `abilities.cc` (C++). Medido: o parser só reproduz o efeito em 94 de 848 habilidades quando lê o `expanded_description`, e derruba 237 quando lê o `description` da `er-config` (que não é o texto curto da NextDex). O v04 entregou no lugar uma camada de compatibilidade medida (74 textos novos -> texto que o parser conhece, script de portão `scripts/medir_texto_novo.mjs`). **Pergunta:** serve? A alternativa estrutural é gerar as regras a partir de `abilities.cc` (projeto grande, outro ticket). Recomendação: seguir com a camada e rodar o script a cada dado novo.
 
+## P2 (v04). RESPONDIDA (Felipe, 15/10): pelo CÓDIGO (+20% de Def física nos golpes de corte); feito no v05, ver decisões.
+
+(texto original)
 ## P2 (v04). Best Offense: código x texto
 No código novo (`abilities.cc` de `486026e`), Best Offense perdeu o multiplicador de Keen Edge e passou a somar +20 ao ataque secundário de DEFESA (`secondaryAtkStatToUse[STAT_DEF] += 20`) nos golpes Keen Edge/Sharpness; o texto novo diz "Keen Edge moves are special and use +20% Sp. Def". Pela regra (código manda) vale a defesa física, mas o texto e o código discordam entre si. O motor hoje não lê nada do texto novo (perde o efeito). **Pergunta:** implemento pelo código (DEF +20) ou pelo texto (Sp. Def +20)? Quem usa: Best Offense e Magus Blades.
 
-## P3 (v05). Ver `estado.md`: a troca de dado depende de scripts PowerShell e do branch `dados-2654`, que não existem neste ambiente.
+## P3 (v05). RESOLVIDA: extração portada para Node (a decisão da Construção de 15/10 mandou seguir)
+Os `.ps1` não rodam aqui (JavaScriptSerializer). O v05 portou a extração que a troca de dado precisa para Node (`scripts/extracao/`), com equivalência byte a byte provada contra o dado antigo, e trocou o dado para a NextDex 2.65.4. Ver `05-dado.md`. Sobra para decidir: portar também `compute_species_rank/role/ability_movepool_synergy.ps1` (hoje o rank fica para o fechamento e não precisou).

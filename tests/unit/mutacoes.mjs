@@ -1413,10 +1413,13 @@ export const MUTACOES = [
   },
   {
     id: "rev-embody-aspect-nao-lido",
-    descricao: "\"+1 Attack/Defense on Entry\" (Embody Aspect) deixa de ser lido - a auditoria do motor tem que acusar",
+    // Reapontada em 15/10/2026 (2.65.4): o jogo trocou o texto do Embody Aspect de "+1 Attack on Entry" para "On entry, raises Attack by one stage."
+    // (confere com o código: abilities.cc, Embody Aspect Hearthflame/Cornerstone = Intrepid Sword/Dauntless Shield, +1 Atk/Def). Nenhuma habilidade do dado
+    // usa mais a redação "+N Stat on entry"; quem lê o Embody Aspect hoje é a regra genérica "On entry, raises X by one stage".
+    descricao: "\"On entry, raises Attack/Defense by one stage\" (Embody Aspect Hearthflame/Cornerstone) deixa de ser lido - a auditoria do motor tem que acusar",
     arquivo: "duelo.js",
-    de: "|Speed|Attack|Defense|Sp\\. Atk|Sp\\. Def) on entry/i",
-    para: "|Speed) on entry/i",
+    de: "On entry, raises (Attack|Defense|Sp\\. Atk|SpAtk|Sp\\. Def|SpDef|Speed) by",
+    para: "On entry, raises (Sp\\. Atk|SpAtk|Sp\\. Def|SpDef|Speed) by",
   },
   // Efeitos de golpe (2026-09-30, apontados pela auditoria do motor).
   {
@@ -2233,13 +2236,6 @@ export const MUTACOES = [
     para: "",
   },
   {
-    id: "ate-empoderado-1-3",
-    descricao: "Aerilate e parecidas deixam de dar STAB ao tipo novo do golpe convertido (código do jogo, abilities.cc:295-301; decisão de 15/10)",
-    arquivo: "duelo.js",
-    de: "ef.stabExtra.push(tipoDoTextoDuelo(x[1]));",
-    para: "void 0;",
-  },
-  {
     id: "prioridade-1x1-bloqueio-some",
     descricao: "Queenly Majesty, Dazzling e Armor Tail deixam de bloquear golpe de prioridade no duelo 1x1",
     arquivo: "duelo.js",
@@ -3044,10 +3040,13 @@ export const MUTACOES = [
   },
   {
     id: "habilidades-lista-tipo-em-minuscula",
-    descricao: "o reforço de lista deixa de capitalizar o tipo (a Warmonger escreve \"rock, steel\" em minúsculas e nenhum tipo casa)",
+    // Reapontada em 15/10/2026 (2.65.4): o texto da Warmonger passou a ser "Rock, Steel, and Fighting" (capitalizado; a 2.65beta escrevia
+    // "rock, steel"), e nenhuma habilidade do dado novo traz lista em minúsculas - a capitalização ficou sem objeto no dado real. A sabotagem
+    // passa a provar o que a substitui: o tipo de cada palavra da lista tem que ser reconhecido (Warmonger x1,3 em Rock/Steel/Fighting).
+    descricao: "o reforço de lista deixa de reconhecer o tipo de cada palavra (a Warmonger \"Rock, Steel, and Fighting\" fica sem bônus de tipo)",
     arquivo: "duelo.js",
     de: "tipoDoTextoDuelo(w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())",
-    para: "tipoDoTextoDuelo(w)",
+    para: "tipoDoTextoDuelo(\"\")",
   },
   {
     id: "habilidades-lista-sem-categoria",
@@ -3444,20 +3443,6 @@ export const MUTACOES = [
     para: "ef.ate = x[1]; ef.ateMult = 1.3; ef.converte.Normal = { para: x[1], mult: 1.3 };",
   },
   {
-    id: "versao-madness-volta-0-5",
-    descricao: "Madness Enhancement volta ao texto da 2.65beta (x0,5 enfurecido) em vez do da versão nova (x0,8)",
-    arquivo: "duelo.js",
-    de: "    \"Madness Enhancement\": \"Enrages in fog, reduces damage taken by 20% when enraged.\",\n",
-    para: "",
-  },
-  {
-    id: "versao-feathercoat-volta-0-9",
-    descricao: "Feathercoat volta ao texto da 2.65beta (x0,9 em todo golpe) em vez do da versão nova (x0,85)",
-    arquivo: "duelo.js",
-    de: "    \"Feathercoat\": \"Takes 15% less damage from attacks, 30% if resisted.\" };",
-    para: "    };",
-  },
-  {
     id: "versao-feathercoat-sem-resistido",
     descricao: "Feathercoat deixa de trocar o fator quando o golpe é resistido (x0,7 no total)",
     arquivo: "duelo.js",
@@ -3513,5 +3498,77 @@ export const MUTACOES = [
     arquivo: "duelo.js",
     de: "    [\"Guts\", \"Ups Attack by 1.5x if statused.\",\n      \"Ups Atk by 1.5x if suffering from a status condition.\"],\n",
     para: "",
+  },
+  // ---- ticket versao-nova/05 (15/10/2026): chefões contra o TrainerList da versão mais nova (er-config d1a9a4c) ----
+  {
+    id: "versao-chefao-drake-volta-adamant",
+    descricao: "o Machamp Redux do Drake (Padrão, 6) volta à natureza Adamant (a config d1a9a4c diz Modest)",
+    arquivo: "bosses.json",
+    de: "\"item\":\"Machampite R\",\"nat\":\"Modest\"",
+    para: "\"item\":\"Machampite R\",\"nat\":\"Adamant\"",
+  },
+  {
+    id: "versao-chefao-archie-volta-speed-force",
+    descricao: "o Sharpedo do Archie Mt Pyre (Insane, 6) volta à habilidade Aerodynamics em vez de Rain Shroud",
+    arquivo: "bosses.json",
+    de: "\"abi\":\"Rain Shroud\",\"item\":\"Sharpedonite\",\"nat\":\"Jolly\",\"evs\":\"4 HP / 252 Atk / 252 Spe\",\"evsRaw\":[4,252,0,0,0,252],\"ivsRaw\":[31,31,31,31,31,31],\"mv\":[\"Aqua Fang\",\"Crunch\",\"Ice Fang\",\"Aqua Jet\"]",
+    para: "\"abi\":\"Speed Force\",\"item\":\"Sharpedonite\",\"nat\":\"Jolly\",\"evs\":\"4 HP / 252 Atk / 252 Spe\",\"evsRaw\":[4,252,0,0,0,252],\"ivsRaw\":[31,31,31,31,31,31],\"mv\":[\"Aqua Fang\",\"Crunch\",\"Ice Fang\",\"Aqua Jet\"]",
+  },
+  {
+    id: "versao-chefao-matt-sem-barbaracite",
+    descricao: "o Barbaracle do Matt (Padrão, 6) volta ao Choice Band em vez do Barbaracite",
+    arquivo: "bosses.json",
+    de: "\"item\":\"Barbaracite\"",
+    para: "\"item\":\"Choice Band\"",
+  },
+  {
+    id: "versao-chefao-drake-sem-hustle",
+    descricao: "o Fujiflap do Drake (Padrão, 2) volta à habilidade Aerodynamics em vez de Hustle",
+    arquivo: "bosses.json",
+    de: "\"n\":\"Fujiflap\",\"abi\":\"Hustle\"",
+    para: "\"n\":\"Fujiflap\",\"abi\":\"Aerodynamics\"",
+  },
+  // ---- ticket versao-nova/05, P2 do Felipe: Best Offense e Magus Blades pelo código da versão mais nova ----
+  {
+    id: "versao-bo-categoria-ignorada",
+    descricao: "a soma de 20% da Def da Best Offense passa a valer em TODO golpe, não só nos de corte",
+    arquivo: "duelo.js",
+    de: "      if (r.categoria && (g.cats || []).indexOf(r.categoria) === -1) return; // só nos golpes da categoria (Best Offense: corte)\n",
+    para: "",
+  },
+  {
+    id: "versao-bo-sem-especial",
+    descricao: "o golpe de corte deixa de virar especial com a Best Offense",
+    arquivo: "duelo.js",
+    de: "      ef.categoriaEspecial[c] = true; ef.ataqueExtra.push({ fonte: \"def\"",
+    para: "      ef.ataqueExtra.push({ fonte: \"def\"",
+  },
+  {
+    id: "versao-bo-usa-spdef",
+    descricao: "a Best Offense soma 20% da Sp. Def (o texto) em vez da Def (o código)",
+    arquivo: "duelo.js",
+    de: "ef.ataqueExtra.push({ fonte: \"def\", pct: parseInt(x[2], 10) / 100, categoria: c });",
+    para: "ef.ataqueExtra.push({ fonte: \"spd\", pct: parseInt(x[2], 10) / 100, categoria: c });",
+  },
+  {
+    id: "versao-magus-golpe-duplo-60-nos-dois",
+    descricao: "a Magus Blades volta a contar os dois golpes (x2) em vez de 100% + 60%",
+    arquivo: "duelo.js",
+    de: "          else if ((y2 = f.match(/hit twice for (\\d+)%(?! damage)/i))) total = 1 + parseInt(y2[1], 10) / 100;",
+    para: "          else if (false) total = 1;",
+  },
+  {
+    id: "versao-madness-lido-0-5",
+    descricao: "Madness Enhancement volta a valer x0,5 (a 2.65beta) mesmo com o texto novo de 20%",
+    arquivo: "duelo.js",
+    de: "ef.reducao.todos *= x[1] ? 1 - parseInt(x[1], 10) / 100 : 0.5; ef.enfurecido = true;",
+    para: "ef.reducao.todos *= 0.5; ef.enfurecido = true;",
+  },
+  {
+    id: "versao-feathercoat-lido-0-9",
+    descricao: "Feathercoat volta a valer x0,9 em todo golpe (a 2.65beta) mesmo com o texto novo de 15%",
+    arquivo: "duelo.js",
+    de: "{ ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.reducao.resistido *= (1 - parseInt(x[2], 10) / 100) / (1 - parseInt(x[1], 10) / 100); }",
+    para: "{ ef.reducao.todos *= 0.9; ef.reducao.resistido *= (1 - parseInt(x[2], 10) / 100) / (1 - parseInt(x[1], 10) / 100); }",
   },
 ];

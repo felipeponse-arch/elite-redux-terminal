@@ -3,7 +3,7 @@
 // de o transform derivar lixo que só aparece como conselho errado na tela.
 // (validar_dados.mjs cobre o dado DERIVADO; este cobre o que chega de fora.)
 //
-// Uso: node scripts/validar_dado_cru.mjs [arquivo.json[.gz]]   (padrão: data/gameData_265beta.json)
+// Uso: node scripts/validar_dado_cru.mjs [arquivo.json[.gz]]   (padrão: data/gameData_2654.json)
 //      npm run validar:cru
 // Referências no gameData: habilidades/golpes por `id`; espécies e itens dos times
 // por POSIÇÃO no array (species[i], items[i]). in:-1 em evolução = megapedra sem
@@ -64,7 +64,7 @@ export function validarDadoCru(g, minimos = MINIMOS) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-  const arq = process.argv[2] ?? path.join(raiz, "data", "gameData_265beta.json");
+  const arq = process.argv[2] ?? path.join(raiz, "data", "gameData_2654.json");
   const erros = validarDadoCru(lerGameData(arq));
   if (erros.length) { console.error(`validar_dado_cru: ${erros.length} problema(s) em ${arq}:\n- ${erros.join("\n- ")}`); process.exit(1); }
   console.log(`validar_dado_cru: OK (${arq})`);

@@ -38,7 +38,8 @@ test("Flash Fire e Dry Skin são imunidades (o código do jogo absorve o golpe, 
 test("toda imunidade nova da tabela bate com o texto da própria habilidade", () => {
   const novas = [10, 11, 31, 78, 114, 154, 157, 282, 344, 379, 446, 665, 746, 749, 865, 868, 869, 872];
   for (const n of novas) {
-    const texto = R.ABILITY_PT[String(n)] || "";
+    // Sem tradução PT (efeito mudou na 2.65.4, o app cai no inglês): vale a descrição inglesa do dado do jogo.
+    const texto = R.ABILITY_PT[String(n)] || R.ABILITIES[n][1] || "";
     for (const tipo of R.TYPE_MOD_ABILITIES[n].immune) {
       assert.ok(texto.includes(tipo), R.ABILITIES[n][0] + " (" + n + ") não cita " + tipo + " no texto: " + texto);
     }
