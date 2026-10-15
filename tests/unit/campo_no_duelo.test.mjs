@@ -40,13 +40,8 @@ test("terreno elétrico: golpe Electric de quem está no chão rende 1,3x; quem 
   assert.equal(R.aterradoDuelo(unidade(efDe(["Levitate"]), golpe("F"), { ids: [idHab("Levitate")] })), false);
 });
 
-test("Trick Room: o mais lento vence o empate de golpes enquanto a sala dura", () => {
-  const forte = golpe("F", { forca: 5000, forcaBase: 5000 });
-  const lento = (ab) => unidade(efDe(ab), forte, { stats: [320, 100, 100, 100, 100, 50] });
-  const rapido = unidade(efDe([]), forte, { stats: [320, 100, 100, 100, 100, 150] });
-  assert.equal(R.resultadoDoDuelo(lento([]), rapido, 50) < 1, true, "sem sala o rápido nocauteia antes");
-  assert.equal(R.resultadoDoDuelo(lento(["Twist. Dimension"]), rapido, 50), 1, "com a sala o lento age primeiro");
-});
+// O teste de Trick Room (o mais lento age primeiro) virou cenário de luta inteira em
+// chefao_pela_interface.test.mjs (Tate & Liza 2, Starmie x Rhyperior); ticket 07, 08/10/2026.
 
 test("Tailwind (Air Blower) dobra a velocidade nos turnos em que dura", () => {
   const u = unidade(efDe(["Air Blower"]), golpe("F"));

@@ -1,6 +1,6 @@
 # 07 — Testes e sabotagens pela interface do duelo
 
-Status: em-andamento
+Status: em-andamento (2ª metade feita e rebaseada no master 78f5756 em 14/10/2026; falta só o resto listado em "Falta")
 Bloqueado por: nenhum
 
 ## O que entrega
@@ -27,3 +27,14 @@ Prova: 23 sabotagens em memória removendo o efeito, 16 VIZINHAS (sol 1,3, chuva
 - Efeitos do duelo ainda só cobertos por teste interno: crítico (critico_no_duelo), cura e recuo, condições/status em geral (condicoes_no_duelo, status_no_duelo), extras e diversos, estágios, poder variável, IA do chefão (ia_do_chefao_golpe).
 - Critério 2: sabotagens que não dependem do texto exato do código (hoje o catálogo troca trecho literal; pensar em sabotagem por comportamento, ex.: envolver a função e distorcer o retorno).
 - Critério 3: depois que a 2ª metade existir, enxugar os testes internos que viraram duplicata (areia_e_sets_rapidos, clima_oficial_e_revisao, itens_no_duelo, campo_no_duelo...) deixando só fórmulas; conferir antes com o cache das sabotagens quais testes cada sabotagem do duelo usa.
+
+### 08/10/2026 - 2ª metade feita (branch divida-07b); critério 3 só em parte
+Novos: `tests/unit/chefao_pela_interface.test.mjs` (18 cenários) e `tests/unit/efeitos_pela_interface.test.mjs` (9), mais helpers em `cenarios_do_duelo.mjs` (`linha`, `meu`, `candidato`, `montar`, `lutaInteira`, `lutaEmDupla`). Tudo com Pokémon, golpes, itens e buffs reais; nada toca em ef/stats/golpesProntos.
+- **Luta contra o chefão** (`simularLutaContraChefao`, `montarTimeContraChefao`, `simularDuplaContraChefao`): HP entre lutas e troca da reserva; hazard de habilidade (Loose Rocks) e de golpe (Stealth Rock) com Heavy-Duty Boots; buffs de ginásio com ids reais (Spikes, Reflect x Light Screen, Heal Block, Last Stand, e o botão com os 7 buffs do Norman 1 virando a luta); regra de campo (Trick Room da Tate&Liza 2, inversa da 1, Gravity do Steven); botão com chefão real (Sidney 1), time só de Fire, build salva; dupla 2x2 com Sidney 2, área x alvo único, Earthquake no parceiro com Telepathy/Friend Guard.
+- **Efeitos**: crítico (Sniper, Super Luck, Lucky Chant), recuo (Rock Head), dreno, Competitive x Intimidate, Moxie, poder variável (Low Kick por peso), IA do chefão (prefere o super efetivo ao de maior dano).
+- **Critério 2 (sabotagem por comportamento)**: `carregar_regras.mjs` aceita `MUTACAO_ARQUIVO="@comportamento"`, onde `de` é o NOME da função e `para` o corpo JS que reembrulha (vê `original`, `args`, `this`). 9 entradas `comp-*` no fim de `mutacoes.mjs` (buffs, início da luta, regra de campo, hazards, fator de aliado na dupla, IA, HP do vencedor, próximo do chefão); cada uma é pega só pelos dois arquivos novos (conferido rodando só eles).
+- **Critério 3 (parcial)**: removidos 3 testes internos que viraram duplicata (2 de areia em `areia_e_sets_rapidos`, Trick Room em `campo_no_duelo`). Os demais internos (Life Orb, Expert Belt, terreno elétrico/aterrado, Rough Skin...) conferem fórmula ou ramo que o cenário de luta não isola; ficam.
+- **Falta**: status/condições gerais (Flame Body, paralisia, Shed Skin, Shallow Grave) e extras (Disguise, Truant: os Pokémon reais já nascem com a habilidade, então não dá para comparar com/sem); poder que cresce (Last Respects, Rage Fist: o motor não escolheu o Houndstone/Annihilape nos cenários montados); crítico do defensor (Battle Armor, no 2.65 também corta o dano em geral, então a razão não isola o crítico); enxugar o resto dos internos.
+
+### 14/10/2026 - rebase no master e portão
+Branch divida-07b rebaseada sobre o master 78f5756 (conflito só no fim de `mutacoes.mjs`: mantidas as entradas do master e as 9 `comp-*`). Portão: check ok, 68/68 nos unitários do duelo/chefão/efeitos/areia/campo, sabotagem `--mudados` 25/25 pegas. O hook do commit anterior passou a suíte completa (3031 s). Segue o "Falta" da nota de 08/10 (status/condições gerais, Disguise/Truant, poder que cresce, Battle Armor, enxugar internos); alguns dependem de cenário que o motor ainda não monta.

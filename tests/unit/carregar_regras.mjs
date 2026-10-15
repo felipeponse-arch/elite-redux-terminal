@@ -63,15 +63,23 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
   const mutacao = process.env.MUTACAO_ARQUIVO
     ? { arquivo: process.env.MUTACAO_ARQUIVO, de: process.env.MUTACAO_DE, para: process.env.MUTACAO_PARA || "" }
     : null;
+  // Sabotagem por COMPORTAMENTO (ticket 07 da dívida técnica, 08/10/2026): arquivo "@comportamento" não
+  // troca texto; depois de carregar tudo, reembrulha a função `de` com o corpo `para` (JS que enxerga
+  // `original`, `args` e `this`). Sobrevive a refatoração do miolo da função: só depende do nome dela.
+  const mutacaoPorComportamento = !!mutacao && mutacao.arquivo === "@comportamento";
   for (const nome of nomes) {
     // Quebra de linha sempre LF: com core.autocrlf o checkout do Windows vem em
     // CRLF, e os trechos das sabotagens (com "\n") deixavam de ser achados.
     let codigo = readFileSync(join(root, "src", "regras", nome), "utf8").replace(/\r\n/g, "\n");
-    if (mutacao && mutacao.arquivo === nome) {
+    if (mutacao && !mutacaoPorComportamento && mutacao.arquivo === nome) {
       if (codigo.split(mutacao.de).length !== 2) throw new Error("trecho da sabotagem não encontrado (ou repetido) em " + nome + ": " + mutacao.de);
       codigo = codigo.replace(mutacao.de, () => mutacao.para);
     }
     vm.runInContext(codigo, contexto, { filename: "src/regras/" + nome });
+  }
+  if (mutacaoPorComportamento) {
+    if (vm.runInContext("typeof " + mutacao.de, contexto) !== "function") throw new Error("trecho da sabotagem não encontrado (função inexistente): " + mutacao.de);
+    vm.runInContext("(function () { var original = " + mutacao.de + "; " + mutacao.de + " = function () { var args = arguments; " + mutacao.para + " }; })();", contexto);
   }
   return contexto;
 }
