@@ -1,23 +1,22 @@
-# v05 — Dado da versão mais nova (d1a9a4c): PARCIAL
+# v05 — Dado da versão mais nova (NextDex 2.65.4 + config d1a9a4c)
 
-Status: **parcial** (branch `versao-05-dado`, empilhada em `versao-04-parser`, sem merge, sem PR). Entregue o que roda neste ambiente; a troca do dado em si está **bloqueada** (ver abaixo e `estado.md`).
+Status: pronto-para-revisao, com ressalvas (branch `versao-05-dado`, empilhada em `versao-04-parser`, sem merge, sem PR). Rank NÃO recalculado; builds NÃO revisadas.
 Tamanho: G
-Bloqueado por: v04
 Autorização: Felipe, 15/10/2026 (fila v01–v05; `docs/tickets/dados-2654/01` com o limite da versão nova).
 
 ## Entregue
-1. **Chefões contra o TrainerList `d1a9a4c`**: `scripts/conferir_chefoes_config.mjs --aplicar-tudo` (função `corrigirTimes`) troca no `bosses.json` o mon inteiro que a config diz diferente; mon igual não é tocado; o que não tem par no dado do app dá erro, não palpite. Rodado contra o `TrainerList` de `d1a9a4c`: as **6 diferenças** (Matt Mt Pyre Insane 6 e Matt Insane 6 viram Starmie com Starminite; Matt Padrão 6 leva Barbaracite; Drake Padrão 2 com Hustle; Drake Padrão 6 Modest com EVs de especial; Archie Mt Pyre Insane 6 com Rain Shroud) e depois **`diferenças: 0`**. Teste: `tests/unit/chefoes_pela_config_nova.test.mjs` (4 testes); 4 sabotagens `versao-chefao-*` em `bosses.json`.
-2. `golpes_flags_config.json` e `itens_config.json`: **já estavam em `d1a9a4c`** (os geradores da calibração 01/02 rodaram contra o clone atual da `er-config`); regerados de novo agora, **0 diferenças**. Nada a trocar.
-3. A comparação dos chefões passou a mirar a config mais nova (comentário do script), em vez do commit `7be1617`.
+1. **Extração do dado em Node** (`scripts/extracao/`): os 23 scripts PowerShell só rodam no Windows PowerShell 5.1 (`JavaScriptSerializer`); a extração que a troca precisa foi portada: `transform.mjs` (transform.ps1 + slim_dex.ps1), `expandir_compostas.mjs` (expand_combo_abilities.ps1), `chefoes.mjs` (extract_bosses.ps1 + extract_boss_builds.ps1), `pedras_adoption_center.mjs`. **Equivalência provada com o dado antigo** antes de trocar: `dex_compact.json` e `ability_translations_pt.json` saíram idênticos byte a byte; `bosses.json` igual, exceto 5 Eviolites dos times Hell (o PowerShell lia o item de índice 0 como "sem item": é o bug do Eviolite do ticket `dados-2654/01`, que a extração nova não tem). Teste permanente: `tests/unit/extracao_transform.test.mjs` (os arquivos gravados == o que a extração produz do dado bruto).
+2. **Dado trocado**: `data/gameData_2654.json` (NextDex 2.65.4, 07/10) no lugar de `gameData_265beta.json` (o snapshot da 2.65beta continua em `data/raw/snapshots/`). Regerados: `dex_compact.json` (1923 espécies, 1063 habilidades), `bosses.json`, `boss_reference_builds.json`, `ability_translations_pt.json`, `move_categorias.json`, `poder_variavel.json`, `onde_achar_itens.json`, `rank_disponibilidade.json`, `mega_forms.json` (Skarmorite X/Y e Duraludite entram; Skarmorite e Arbokite saem), `pedras_adoption_center.json` (config d1a9a4c: 140 pedras; sai Arbokite).
+3. **Chefões contra o TrainerList `d1a9a4c`**: `--aplicar-tudo` (`corrigirTimes`): 6 mons corrigidos (Matt, Drake, Archie), `diferenças: 0`.
+4. **Arbok Mega fora** da Dex, das builds, das pedras, do rank e do papel. **Eviolite (item 0)** resolvido na extração. Rótulo do app e `VERSAO_DEX` do alarme: 2.65.4 (`VERSAO_JOGO` segue a página oficial, 2.65.3b).
+5. **Best Offense e Magus Blades pelo código (P2)**: ver `docs/decisoes_mecanicas.md`.
+6. Relatório do que mudou na versão: `diff_2654_vs_265beta.md` (espécies, golpes, habilidades, itens, treinadores).
 
-## NÃO entregue (e por quê)
-- **Trocar o dado (`gameData_265beta.json` -> NextDex 2.65.4)**: os scripts que extraem o dado (`transform.ps1`, `extract_bosses.ps1`, `slim_dex.ps1`, `compute_*.ps1`: 23 scripts PowerShell, 3.061 linhas) usam `System.Web.Script.Serialization.JavaScriptSerializer`, que só existe no Windows PowerShell 5.1. Instalei o PowerShell 7.4.6 (Linux) aqui para tentar e `transform.ps1` falha (`0 species, 0 abilities`, "Cannot index into a null array"). Não há Windows neste ambiente. O branch `dados-2654` (dado baixado e caminhos) também não está no GitHub.
-- Também medi que **808 índices de espécie mudam** (a partir do 1099, onde entram as espécies novas): tudo que guarda índice de espécie tem de ser regerado junto (bosses, dex_compact, builds, rank). Habilidades: 29 novas no fim (1034–1062) e 13 renomeadas no mesmo id; golpes: mesmos 1032; itens: 929.
-- Eviolite (item 0), Arbok Mega fora, renomeações (Keen Edge -> Sharpness etc.), "onde achar itens": dependem da troca do dado.
-- O portão de texto para a troca já existe (v04): `node scripts/medir_texto_novo.mjs <gameData novo>`.
-
-## Para destravar (decisão da Construção/Felipe)
-(a) rodar os `.ps1` no Windows e trazer o resultado, ou (b) portar os scripts de extração para Node (~3.000 linhas de PowerShell; o `build.mjs` já é Node), com teste de equivalência: gerar o `dex_compact.json` atual a partir do dado atual e exigir byte a byte antes de trocar o dado. Recomendação: (b), um ticket só para o porte. Ver `perguntas.md` P3 e `estado.md`.
-
-## Rank
-Não recalculado. O `build.ps1` completo chamaria `calcular_rank_duelo.mjs --gravar`; nenhum passo de rank foi rodado.
+## Ressalvas (o que NÃO foi feito, de propósito)
+- **Rank não recalculado.** `species_rank.json` e `species_role.json` seguem como estavam (menos a Arbok Mega). 17 espécies novas ficam sem rank e 6 têm o tipo mudado (Volbeat, Polartic, Beefender, Phanfernal, Serperior Mega, Iron Exo): `data/rank_pendente_ate_10.json`. Validações e testes de rank ignoram só essas; o fechamento (`dados-2654/10`) regera tudo. O app carrega e abre sem erro de JavaScript com o dado novo (conferido no navegador: rótulo "build 2.65.4"); a Dex dessas 17 espécies não tem rank na ficha até o fechamento.
+- **Builds não revisadas**: 258 problemas em `data/builds_pendentes_de_revisao.json` (244 builds "validadas contra 2.65beta" e 14 com habilidade ou golpe que a espécie não tem mais: Arcanine Hisuian Mega/Tough Claws, Cacjack/Destiny Bond, Scovillain Mega/Big Leaves, Machamp Redux/Multiscale, Beefender/Beast Boost, Roserade Mega/Corrosion e Victory Dance, Fujiflap/Air Blower, Flairgrance/Fairy Aura, Brontonana/Dragon Energy, Sneasler Mega/Weak Armor, Wormadam Trash/Roost, Morpekyll/Unburden, Boarlock/Gluttony). Não mexi em nenhuma: `dados-2654/08`. Qualquer problema novo, fora dessa lista, continua derrubando a validação.
+- Dois remendos do `dados-2654/01` não foram aplicados: Morpekyll Hangry com HP 97/Atk 104/SpD 74 (`dfe30fb`) e Kirlia Redux (Tidal Rush vira Hydration, `b726428`); entram no delta do upcoming (v07), junto com os golpes alterados.
+- 15 habilidades novas sem regra no motor (7 delas listadas na auditoria): v07.
+- Traduções PT das 29 habilidades novas não existem (a ficha cai para o texto em inglês); `move_translations_pt.json` e os golpes não mudaram de índice.
+- A suíte de navegador do Playwright não roda neste ambiente (versão do Chromium instalada x esperada); abri o `artifact_final.html` no Chromium instalado: 0 erros de JavaScript.
+- `build.ps1` e os `.ps1` seguem no repositório; quem rodar no Windows deve preferir os scripts Node (`scripts/extracao/`) até o porte dos `compute_*.ps1` (rank, papel, sinergia), que não foi necessário.

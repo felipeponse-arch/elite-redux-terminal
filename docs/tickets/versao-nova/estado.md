@@ -1,4 +1,7 @@
-# Estado da fila v01–v05 (15/10/2026, ~11:30 UTC)
+# Estado da fila v01–v05 e seguintes (15/10/2026, atualizado ~12:30 UTC)
+
+Novo (12:30): v05 fechado com a troca do dado; segue a fila v06 (habilidades mudadas), v07 (habilidades novas + delta do upcoming), v08 (sono e paralisia), v09 (golpes). Parar antes das builds (dados-2654/08, 09) e do fechamento (10).
+Achados do /code-review (calibração, ainda não tratados; não bloqueiam): `drill` mapeado para "chifre" no leitor de texto mas gravado como "broca" pela flag; `arremesso: /throw/i` sem âncora; `NOME_DA_CATEGORIA` sem arremesso/broca/luz/lunar; `categorias_pela_config.mjs` junta golpe por nome com `Map` (nome repetido sobrescreve).
 
 Branches no GitHub, todas empilhadas a partir do master `cb8d1ce`, sem PR, sem master:
 `versao-01-dupla-contagem` -> `versao-02-decisoes` -> `versao-03-selo` -> `versao-04-parser` -> `versao-05-dado` (parcial).
@@ -11,7 +14,7 @@ Nada de rank recalculado. Nada publicado.
 | v02 decisões | Decisão 75 reescrita (versão mais nova; código/config primeiro); fontes reordenadas; M9 "Normal vira X" = STAB x1,5 (31 habilidades, sem x1,3; o motor deixa de reproduzir a calculadora do Ledian: 98% x 78%-93%); Madness Enhancement x0,8; Feathercoat x0,85/x0,7 resistido; Dead Bark x0,85/x0,7 super efetivo (o motor nem lia). Tabela temporária `TEXTO_DA_VERSAO_NOVA_DUELO`. 8 sabotagens novas. |
 | v03 selo | Toda build `calibrada` ("Calculado pelo código do jogo"); `estimada` só com habilidade sem regra no motor (atacante ou alvo; `habilidadeSemRegraNoDuelo`, a mesma conta da auditoria), fuga no Intimidate ou consulta sem alvo. `CASOS_CALIBRADOS` saiu. Prioridade do alvo vira só aviso. 11 sabotagens novas. |
 | v04 parser | **Desvio do pedido** (ver `perguntas.md` P1): a `er-config` não tem dado estruturado de efeito de habilidade. Entregue: tabela de 74 textos novos da NextDex 2.65.4 -> redação que o parser conhece (57 habilidades perdiam o efeito), inclusive dentro de compostas, e o portão `scripts/medir_texto_novo.mjs`. Falta: Best Offense (código e texto discordam, P2). 4 sabotagens novas. |
-| v05 dado | **Parcial** (`05-dado.md`): chefões contra o TrainerList `d1a9a4c` (6 mons corrigidos, `diferenças: 0`, `--aplicar-tudo`); flags de golpe e itens já estavam em `d1a9a4c`. **A troca do dado está bloqueada** (P3). |
+| v05 dado | **Entregue com ressalvas** (`05-dado.md`): dado trocado para a NextDex 2.65.4; extração portada para Node com equivalência byte a byte; chefões contra o TrainerList `d1a9a4c` (`diferenças: 0`); Arbok Mega fora; Eviolite (item 0); Best Offense/Magus Blades pelo código (P2). Rank e builds NÃO refeitos (`rank_pendente_ate_10.json`, `builds_pendentes_de_revisao.json`). |
 
 ## Portões (`npm run check` e suíte: verdes em cada branch; sabotagem `--mudados`: ver abaixo)
 - Suíte inteira rodada: v01 918 testes (917 + 1 `todo`), v02 923, v04 933, v05 938; 0 falhas. No v03 não rodei a suíte inteira isolada (rodei `pipeline_build`, `selo_do_pipeline` e `auditoria_do_motor`; o v04, que a contém, passou inteira). `npm run check` limpo em v01, v02, v04 e v05 (o erro de lint antigo foi corrigido no v01); no v03 não rodei.
