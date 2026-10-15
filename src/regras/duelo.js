@@ -280,6 +280,7 @@
   // nocautear; efeito que depende de status/clima que o dono não garante;
   // categoria de golpe sem marcação no dado (soco, mordida, corte).
   var cacheEfeitoDuelo = {};
+  var RESISTE_FORT_KNOX_DUELO = { "Parental Bond": true, "Multi-Headed": true, "Hydra": true, "Hand Barnacles": true, "3 > 1": true, "Familia Bond": true };
   var ABREV_TIPO_DUELO = { "Elec.": "Electric", "Elec": "Electric", "Fight.": "Fighting", "Fight": "Fighting" };
   function tipoDoTextoDuelo(palavra) {
     var p = ABREV_TIPO_DUELO[palavra] || palavra;
@@ -293,11 +294,13 @@
   // Palavras do texto da habilidade -> categoria de golpe marcada no NextDex.
   var PALAVRAS_DE_CATEGORIA = [
     { nome: "soco", re: /punch|iron fist/i }, { nome: "mordida", re: /bit(?:e|ing)|fang|strong jaw/i },
-    { nome: "corte", re: /slash|slicing|keen edge/i }, { nome: "pulso", re: /mega launcher|beam\/pump|cannon|pulse/i },
+    { nome: "corte", re: /slash|slicing|keen edge|sharpness/i }, { nome: "pulso", re: /mega launcher|beam\/pump|cannon|pulse/i },
     { nome: "chifre", re: /horn|drill/i }, { nome: "chute", re: /kick/i },
     { nome: "flecha", re: /arrow/i }, { nome: "martelo", re: /hammer|slamm/i },
     // Rocky Payload e Devious Present: "Rock-type and throwing moves" (flag `throwing` do golpe na er-config).
-    { nome: "arremesso", re: /throw/i }
+    { nome: "arremesso", re: /throw/i },
+    // Photokinesis, Photon Burst, Blinking Flash: "light moves" (flag `light` do golpe na er-config; categoria "luz" em move_categorias.json).
+    { nome: "luz", re: /\blight\b/i }
   ];
   function categoriasDoTextoDuelo(trecho) {
     return PALAVRAS_DE_CATEGORIA.filter(function (p) { return p.re.test(trecho); }).map(function (p) { return p.nome; });
@@ -411,7 +414,7 @@
       var ignoraGenero = /ignoring gender/i.test(f);
       var filtro = {};
       if (/Biting moves/i.test(f)) filtro.cat = "mordida";
-      else if (/Slashing moves|Keen Edge moves/i.test(f)) filtro.cat = "corte";
+      else if (/Slashing moves|Keen Edge moves|Sharpness moves/i.test(f)) filtro.cat = "corte";
       else if (/with punches|punching moves/i.test(f)) filtro.cat = "soco";
       else if (/Sound(?:-based)? moves/i.test(f)) filtro.som = true;
       else if (/Contact moves|with contact moves/i.test(f)) filtro.contato = true;
@@ -522,8 +525,8 @@
     if (/Raises own Speed by one stage after every turn/i.test(f)) ef.porTurno.spe = 1;
     // Ao golpear (no alvo): Whiplash, Chainsaw, Denting Blows.
     if (/^Physical attacks lower defense/i.test(f)) ef.aoGolpear.push({ stat: "def", n: -1, cat: "F" });
-    if ((x = f.match(/^(Keen edge|Hammer|Slicing|Biting|Punching) (?:attacks|moves) lower Defense(?: by -?(\d))?/i))) {
-      categoriasDoTextoDuelo(/keen/i.test(x[1]) ? "slicing" : x[1]).forEach(function (c) { ef.aoGolpear.push({ stat: "def", n: -(x[2] ? parseInt(x[2], 10) : 1), categoria: c }); });
+    if ((x = f.match(/^(Keen edge|Sharpness|Slashing|Hammer|Slicing|Biting|Punching) (?:attacks|moves) lower Defense(?: by -?(\d))?/i))) {
+      categoriasDoTextoDuelo(/keen|sharpness/i.test(x[1]) ? "slicing" : x[1]).forEach(function (c) { ef.aoGolpear.push({ stat: "def", n: -(x[2] ? parseInt(x[2], 10) : 1), categoria: c }); });
     }
     // Quando o rival reduz os atributos: Competitive, Defiant, Run Away.
     if ((x = f.match(/Raises (Sp\. Atk|Attack) by two stages if stats are lowered by an enemy/i))) ef.aoSerReduzido[estagioDoTexto(x[1])] = 2;
@@ -568,7 +571,7 @@
     if (/Clears stat buffs (?:on entry|then)/i.test(f)) ef.limpaBuffsNaEntrada = true;
     if (/then lowers speed by one stage on entry/i.test(f)) ef.quedaNaEntrada.spe = -1;
     if (/On entry, raises highest calculated stat by one stage/i.test(f)) ef.maiorNaEntrada = 1;
-    if ((x = f.match(/Ups highest stat by \+1 on entry (?:when it rains|when sunny|in fog|in sand|in hail)/i))) {
+    if ((x = f.match(/Ups highest stat by \+1 on entry (?:when it rains|when sunny|in rain|in sun|in fog|in sand|in hail)/i))) {
       var cl = /rain/i.test(x[0]) ? "rain" : /sun/i.test(x[0]) ? "sun" : /fog/i.test(x[0]) ? "fog" : /sand/i.test(x[0]) ? "sand" : "hail";
       if (climaOk(cl)) ef.maiorNaEntrada = 1;
     }
@@ -651,7 +654,22 @@
     }
     // Status por categoria/tipo, com ou sem "%" na frente.
     if ((x = f.match(/^(\w+) moves have an? (\d+)% (\w+) chance/i)) && (fl = filtroDoTextoDuelo(x[1]))) empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[3]), parseInt(x[2], 10) / 100, fl);
-    if ((x = f.match(/^(\w+) moves have an? (\d+)% (?:chance )?to cause (\w+)/i)) && (fl = filtroDoTextoDuelo(x[1]))) empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[3]), parseInt(x[2], 10) / 100, fl);
+    // ("X moves have a N% chance to cause Y" já é lido por lerStatusDaFraseDuelo: ler de novo aqui contava a chance em dobro - Resonance 30% virava 51%.)
+    // Spicy Spray (abilities.cc:12687-12695, onDefender sem contato e sem chance): levar dano de golpe queima o atacante.
+    if (/^Taking damage from a move burns the attacker/i.test(f)) ef.statusDefesa.push({ st: ["queimar"], pContato: 1, pOutro: 1, filtro: {}, porTipo: false, ignoraGenero: false });
+    // Cackling (abilities.cc:12864-12875): Eerie Laugh na entrada (Dark, paralisa ignorando o tipo; 2 vezes por batalha - uma entrada no modelo).
+    if (/^Uses Eerie Laugh on entry/i.test(f)) ef.statusNaEntrada.paralisar = 1;
+    // Light Wield (abilities.cc:12819-12834): Light Screen do lado do dono por 3 turnos na entrada.
+    if ((x = f.match(/^Sets up Light Screen for (\d+) turns on entry/i))) ef.telaE = Math.max(ef.telaE || 0, parseInt(x[1], 10));
+    // Rippling Punch (abilities.cc:12854-12862, onModifyMoveFlags): golpe de soco também é de som.
+    if (/^Punching moves are also Sound moves/i.test(f)) ef.socoSom = true;
+    // Sticky Situation (abilities.cc:12888-12898): golpe Bug derruba a Speed do alvo (-1 em cada acerto, sem chance).
+    if ((x = f.match(/^(\w+)[- ]type moves lower speed/i)) && tipoDoTextoDuelo(x[1])) ef.aoGolpear.push({ stat: "spe", n: -1, tipo: tipoDoTextoDuelo(x[1]) });
+    // Third-Degree Burn (abilities.cc:12735-12752): queima qualquer tipo; golpe Fire atravessa as habilidades do alvo (onMoldBreaker).
+    if (/^Can burn any type/i.test(f)) ef.queimaQualquerTipo = true;
+    if ((x = f.match(/^(\w+)-type moves ignore abilities/i)) && tipoDoTextoDuelo(x[1])) ef.quebraTipo = tipoDoTextoDuelo(x[1]);
+    // Hemorrhage (abilities.cc:12714-12720): o Hemotoxin do sangramento - o alvo que sangra perde as habilidades.
+    if (/Supp?resses target's abilities when user inflicts bleeding/i.test(f)) ef.hemorragia = true;
     if ((x = f.match(/Every attack has an? (\d+)% (\w+) chance(?: and (\d+)% (\w+) chance)?/i))) {
       empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[2]), parseInt(x[1], 10) / 100, {});
       if (x[3]) empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[4]), parseInt(x[3], 10) / 100, {});
@@ -772,7 +790,7 @@
     // Categoria de golpe ganha por tipo (Mixed Martial Arts, Brawling Wyvern, Chestnut Axe, Reverberate).
     if ((x = f.match(/^(\w+) moves are flagged as (\w+) \+ (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.categoriaPorTipo[tipoDoTextoDuelo(x[1])] = categoriasDoTextoDuelo(x[2] + " " + x[3]);
     if ((x = f.match(/(\w+) type moves become (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.categoriaPorTipo[tipoDoTextoDuelo(x[1])] = categoriasDoTextoDuelo(x[2]);
-    if ((x = f.match(/(\w+) moves become Keen Edge boosted/i)) && tipoDoTextoDuelo(x[1])) ef.categoriaPorTipo[tipoDoTextoDuelo(x[1])] = ["corte"];
+    if ((x = f.match(/(\w+) moves become (?:Keen Edge|Sharpness) boosted/i)) && tipoDoTextoDuelo(x[1])) ef.categoriaPorTipo[tipoDoTextoDuelo(x[1])] = ["corte"];
     if ((x = f.match(/^(\w+) moves are Sound moves/i)) && tipoDoTextoDuelo(x[1])) ef.somPorTipo[tipoDoTextoDuelo(x[1])] = true;
     if (/Punches and Kicks are both Punches and Kicks/i.test(f)) { ef.categoriaPorTipo["cat:soco"] = ["chute"]; ef.categoriaPorTipo["cat:chute"] = ["soco"]; }
     // Nunca erra / menor defesa por categoria.
@@ -805,6 +823,8 @@
     if ((x = f.match(/Attacks with ([A-Z][\w ]+?) when hit by a contact move/)) && poderDoGolpeDuelo(x[1])) ef.contraAtaque = { poder: poderDoGolpeDuelo(x[1]) };
     if ((x = f.match(/Uses (\d+)BP ([A-Z][\w ]+?) when hit by contact/)) && MOVE_ID_BY_NAME[x[2]] !== undefined) ef.contraAtaque = { poder: parseInt(x[1], 10) * acertosDoGolpeDuelo(MOVE_ID_BY_NAME[x[2]]) };
     if ((x = f.match(/Uses (\d+)BP [\w ]+? when it takes damage/i))) ef.contraAtaque = { poder: parseInt(x[1], 10), qualquer: true };
+    // Fresh Snowfall (abilities.cc:12877-12886): Powder Snow de 30 de poder ao levar golpe ESPECIAL.
+    if ((x = f.match(/Launches a (\d+) ?BP [\w ]+? when hit by a special attack/i))) ef.contraAtaque = { poder: parseInt(x[1], 10), soEspecial: true };
     if ((x = f.match(/Attacks with ([A-Z][\w ]+?) on entry/)) && poderDoGolpeDuelo(x[1])) ef.ataqueNaEntrada = poderDoGolpeDuelo(x[1]);
     if ((x = f.match(/(\d+)\s?BP ([A-Z][\w ]+?) on entry/))) ef.ataqueNaEntrada = parseInt(x[1], 10);
     if ((x = f.match(/Uses ([A-Z][\w ]+?) on switch-in/)) && poderDoGolpeDuelo(x[1])) ef.ataqueNaEntrada = poderDoGolpeDuelo(x[1]);
@@ -871,6 +891,8 @@
     if ((x = f.match(/If (Electric|Grassy|Psychic|Misty) Terrain is active, gets a ([\d.]+)x Speed boost/i))) ef.noTerreno.push({ terreno: ter(x[1]), stat: "spe", mult: parseFloat(x[2]) });
     if ((x = f.match(/Boosts highest stat in (Electric|Grassy|Psychic|Misty) Terrain/i))) ef.noTerreno.push({ terreno: ter(x[1]), stat: "maior", mult: 1.3 });
     if ((x = f.match(/\+(\d+)% SpAtk in (Electric|Grassy|Psychic|Misty) Terrain/i))) ef.noTerreno.push({ terreno: ter(x[2]), stat: "spa", mult: 1 + parseInt(x[1], 10) / 100 });
+    // Mana Coat (abilities.cc:12705-12711, onOffensiveMultiplier): golpe físico x1,3 com Psychic Terrain no campo (de quem estiver armando).
+    if ((x = f.match(/Physical attacks deal (\d+)% more damage on (Electric|Grassy|Psychic|Misty) Terrain/i))) ef.noTerreno.push({ terreno: ter(x[2]), stat: "atk", mult: 1 + parseInt(x[1], 10) / 100 });
     if ((x = f.match(/Recovers 1\/(\d+) of its health each turn under (Electric|Grassy|Psychic|Misty) Terrain/i))) ef.noTerreno.push({ terreno: ter(x[2]), stat: "cura", mult: 1 / parseInt(x[1], 10) });
     if ((x = f.match(/Revives at (\d+)% HP once after fainting in (Electric|Grassy|Psychic|Misty) Terrain/i))) ef.noTerreno.push({ terreno: ter(x[2]), stat: "revive", mult: parseInt(x[1], 10) / 100 });
     if (/Charges up once on entry/i.test(f)) ef.carregaNaEntrada = true; // Generator: 1º golpe Electric 2x
@@ -1184,6 +1206,7 @@
       outro.ef.aoGolpear.forEach(function (a) {
         if (a.cat && gOutro.cat !== a.cat) return;
         if (a.categoria && (gOutro.cats || []).indexOf(a.categoria) === -1) return;
+        if (a.tipo && gOutro.tipo !== a.tipo) return;
         soma(a.stat, a.n * acumula, true);
       });
       if (gOutro.estagios && gOutro.estagios.alvo && !u.ef.imuneEfeitoDeGolpe) {
@@ -1285,27 +1308,28 @@
   // Static...). Tipo e habilidade de "def" dão imunidade; Shield Dust barra só o
   // efeito extra do golpe.
   // Imunidade de tipo e de habilidade ao status.
-  function podeSofrerStatusDuelo(u, s) {
+  function podeSofrerStatusDuelo(u, s, quemCausa, ignoraTipo) {
     if (u.ef.imuneStatus[s]) return false;
     // Lum/Chesto Berry não entram aqui (revisão de 2026-09-30): são de uso único e
     // o Unnerve do rival barra - o sono por chance já desconta a Lum (itemAtivoDuelo
     // em "fica"), e o plano de sono usa podeDormirDuelo.
     if (s === "sono" && CAMPO_DUELO && CAMPO_DUELO.terreno === "eletrico" && aterradoDuelo(u)) return false;
     if (CAMPO_DUELO && CAMPO_DUELO.terreno === "nevoa" && s !== "recuar" && aterradoDuelo(u)) return false; // Misty Terrain
+    if (ignoraTipo || (s === "queimar" && quemCausa && quemCausa.queimaQualquerTipo)) return true; // Eerie Laugh (ignora o tipo); Third-Degree Burn (onCanStatusType)
     return !(STATUS_DUELO[s].imunes || []).some(function (tp) { return u.tipos.indexOf(tp) !== -1; });
   }
   // Item que põe status no próprio portador (Guts, Flare Boost, Poison Heal...).
   var ORBE_DE_STATUS_DUELO = { "Flame Orb": "queimar", "Toxic Orb": "envenenarForte" };
   function chancesDeStatusNoDuelo(atq, def, gAtq, gDef) {
     var falta = {};
-    function soma(s, p, ignoraGenero) {
-      if (!podeSofrerStatusDuelo(def, s)) return;
+    function soma(s, p, ignoraGenero, ignoraTipo) {
+      if (!podeSofrerStatusDuelo(def, s, atq.ef, ignoraTipo)) return;
       // Paixão sem restrição de gênero (ticket versao-nova/06): CanInfatuate (battle_util.c:5159, igual em 28/03 e 14/10) não olha gênero e nenhum script do jogo usa
       // jumpifoppositegenders; o changelog 2.65 Beta 2 diz "removing some old restrictions". Antes o motor cortava a chance pela metade.
       falta[s] = (falta[s] === undefined ? 1 : falta[s]) * (1 - Math.min(1, p));
     }
     // Status certo na entrada (Let's Dance: confunde o campo).
-    Object.keys(atq.ef.statusNaEntrada || {}).forEach(function (s) { soma(s, atq.ef.statusNaEntrada[s], false); });
+    Object.keys(atq.ef.statusNaEntrada || {}).forEach(function (s) { soma(s, atq.ef.statusNaEntrada[s], false, true); });
     var capa = def.ef.imuneEfeitoDeGolpe || (def.it && def.it.imuneEfeito); // Shield Dust, Covert Cloak
     if (gAtq) (gAtq.status || []).forEach(function (s) { if (!(s.doGolpe && capa)) soma(s.st, s.p, s.ignoraGenero); });
     if (gAtq && atq.it && atq.it.recuar && !capa) soma("recuar", atq.it.recuar * itemAtivoDuelo(atq, def, gDef ? gDef.contato : undefined), false); // King's Rock
@@ -1323,7 +1347,7 @@
     });
     return out;
   }
-  var NOME_DA_CATEGORIA = { soco: "soco", mordida: "mordida", corte: "corte", pulso: "pulso/canhão", chifre: "chifre", chute: "chute", flecha: "flecha", martelo: "martelo" };
+  var NOME_DA_CATEGORIA = { soco: "soco", mordida: "mordida", corte: "corte", pulso: "pulso/canhão", chifre: "chifre", chute: "chute", flecha: "flecha", martelo: "martelo", luz: "luz", arremesso: "arremesso", broca: "broca", lunar: "lunar" };
   var NOME_DO_STATUS_SINERGIA = { queimar: "queimadura", envenenar: "envenenamento", paralisar: "paralisia", congelar: "congelamento", sangrar: "sangramento", recuar: "recuo", semente: "Leech Seed", confundir: "confusão" };
   function motivoDoStatusSinergia(a) {
     var sts = (a.st || []).map(function (s) { return NOME_DO_STATUS_SINERGIA[s] || s; });
@@ -1409,10 +1433,11 @@
       bonusTipo: {}, bonusGolpes: {}, golpeExtra: 1, seguimento: null, contraTipo: {},
       tecnico: null, resistidoX2: false, seBonus: 1, skillLink: false,
       precisaoMult: 1, semErrar: false, semErrarContraMim: false,
-      quebraHabilidade: false, bloqueiaBonus: false, aguenta: false,
+      quebraHabilidade: false, quebraTipo: null, queimaQualquerTipo: false, socoSom: false, hemorragia: false, resisteFortKnox: false, resistDeAtacante: {},
+      bloqueiaBonus: false, aguenta: false,
       somMult: 1, somVira: null, ataqueExtra: [], defesaPelaVelocidade: null,
       defMult: 1, spdMult: 1, chloroplast: false,
-      bonusCategoria: {}, categoriaEspecial: {}, categoriaNaSpDef: {}, categoriaExtra: {},
+      bonusCategoria: {}, categoriaEspecial: {}, categoriaNaSpDef: {}, categoriaNaDef: {}, categoriaExtra: {},
       statusAtaque: [], statusDefesa: [], imuneStatus: {}, chanceMult: 1, semEfeitoExtra: 0,
       semResiduo: false, semResiduoDe: {}, imuneEfeitoDeGolpe: false,
       critEstagio: 0, critTodos: 0, critContato: 0, critBP: null, prioBP: 0, critCategoria: {}, sempreCritGolpe: {},
@@ -1524,7 +1549,10 @@
           ef.reducao[qual] *= 1 - parseInt(y[1], 10) / 100;
         }
         if ((y = f.match(/Reduces (special|physical) damage taken by (\d+)%/i))) ef.reducao[/^s/i.test(y[1]) ? "E" : "F"] *= 1 - parseInt(y[2], 10) / 100;
-        if ((y = f.match(/Takes ([\d.]+)x damage from (\w+?)s\b/i)) && tipoDoTextoDuelo(y[2])) ef.resistTipo[y[2]] = parseFloat(y[1]);
+        // Dragonslayer, Lumberjack, Insect Eater (abilities.cc:4073, 5752, 4086): IS_BATTLER_OF_TYPE(attacker, ...) - vale pelo tipo de QUEM ATACA, não do golpe.
+        if ((y = f.match(/Takes ([\d.]+)x damage from (\w+?)s\b/i)) && tipoDoTextoDuelo(y[2])) ef.resistDeAtacante[y[2]] = parseFloat(y[1]);
+        if ((y = f.match(/Take ([\d.]+)x dmg from (\w+)-types/i)) && tipoDoTextoDuelo(y[2])) ef.resistDeAtacante[y[2]] = parseFloat(y[1]);
+        if ((y = f.match(/Deal ([\d.]+)x dmg to (\w+)-types/i)) && tipoDoTextoDuelo(y[2])) ef.vsTipo[y[2]] = parseFloat(y[1]);
         if ((y = f.match(/Deals ([\d.]+)x damage to (\w+?)s\b/i)) && tipoDoTextoDuelo(y[2])) ef.vsTipo[y[2]] = parseFloat(y[1]);
       });
       // Fluffiest (678): o texto diz "Quarters contact damage", mas o código do jogo (abilities.cc
@@ -1548,7 +1576,7 @@
       // (data/move_categorias.json; 2026-09-29: antes nenhuma destas era lida).
       // O texto do jogo tem "Beam/Pump/Cannon/Shot/ Gun/Pulse, etc. moves" (Mega
       // Launcher) e "horn and drill-based by 1.3x" (Mighty Horn, sem "moves").
-      var reCat = /Boosts (?:the power of )?(.{1,60}?)(?: moves)? by ([\d.]+)x/gi, mc;
+      var reCat = /Boosts? (?:the power of )?(.{1,60}?)(?: moves)? by ([\d.]+)x/gi, mc;
       while ((mc = reCat.exec(t))) {
         categoriasDoTextoDuelo(mc[1]).forEach(function (cat) { maxEm(ef.bonusCategoria, cat, parseFloat(mc[2])); });
       }
@@ -1559,6 +1587,8 @@
         var mult = y ? (/%/.test(y[0]) ? 1 + parseInt(y[1], 10) / 100 : parseFloat(y[1])) : 1;
         if (/moves (?:use (?:Special Attack|SpAtk)|become special)/i.test(f)) cats.forEach(function (c) { ef.categoriaEspecial[c] = true; maxEm(ef.bonusCategoria, c, mult); });
         if (/moves target Special Defense/i.test(f)) cats.forEach(function (c) { ef.categoriaNaSpDef[c] = true; maxEm(ef.bonusCategoria, c, mult); });
+        // Photon Burst (abilities.cc:12845-12852, onChooseDefensiveStat): o golpe de luz é calculado contra a Defesa física, mesmo sendo especial.
+        if (/moves target Defense\b/i.test(f)) cats.forEach(function (c) { ef.categoriaNaDef[c] = true; maxEm(ef.bonusCategoria, c, mult); });
         // Golpe duplo da categoria (10/10/2026): o total é a soma dos dois golpes. O texto vem em 4 formas:
         // "2nd hit does 0.4x damage", "1st hit at 100% power, 2nd hit at 40%", "hit twice for 60%" (Magus Blades: só o 2º a 60%), "for 70% damage" (os dois a 70%)
         // e "both hits at 70% power". Antes só as duas primeiras de tamanho conhecido eram lidas e a Raging
@@ -1684,6 +1714,8 @@
     });
     if (ef.poluicaoMental && ef.enfurecido) ef.gasNeutro = true; // as duas partes podem vir em qualquer ordem
     ef.climasProprios = Object.keys(climaProprio); // climas que as próprias habilidades armam
+    // Golpe múltiplo que atravessa Fort Knox/Wonder Skin (resistsFortKnox, abilities.cc:2491, 4465, 11318, 11572, 12525, 12664; battle_script_commands.c:999).
+    ids.forEach(function (id) { if (id !== undefined && id !== null && ABILITIES[id] && RESISTE_FORT_KNOX_DUELO[ABILITIES[id][0]]) ef.resisteFortKnox = true; });
     cacheEfeitoDuelo[chave] = ef;
     return ef;
   }
@@ -1796,6 +1828,8 @@
       cats.slice().forEach(function (c) { cats = cats.concat(u.ef.categoriaPorTipo["cat:" + c] || []); });
       cats = cats.filter(function (c, i, a) { return a.indexOf(c) === i; });
       var flags = (m[8] || []).map(function (i) { return DATA.flags[i]; });
+      // Rippling Punch (abilities.cc:12854, onModifyMoveFlags): o soco também é som (Soundproof barra, Punk Rock e Throat Spray contam).
+      if (u.ef.socoSom && cats.indexOf("soco") !== -1) { if (flags.indexOf("Sound Based") === -1) flags = flags.concat(["Sound Based"]); if (!som) { som = true; hab *= u.ef.somMult; } }
       if (u.ef.tudoDanca && flags.indexOf("Dance Move") === -1) flags = flags.concat(["Dance Move"]); // Taekkyeon
       if (u.ef.dancaSom) { if (som && flags.indexOf("Dance Move") === -1) flags = flags.concat(["Dance Move"]); if (flags.indexOf("Dance Move") !== -1) som = true; } // Festivities
       if (u.ef.flagMult["Air/Wing Based"] && flags.indexOf("Air/Wing Based") !== -1) hab *= u.ef.flagMult["Air/Wing Based"].mult;
@@ -1854,11 +1888,11 @@
       if (contato && !u.ef.semContato && !itemTiraContato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
-      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF", fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: temContatoDuelo(m), som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
+      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: temContatoDuelo(m), som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
         prioPrimeiro: cats.some(function (c) { return u.ef.prioPrimeiroCategoria[c]; }), // 1º uso (Coil Up...): o estado é gasto no fim do turno
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
           cats.some(function (c) { return u.ef.prioCheioCategoria[c] || u.ef.prioPrimeiroCategoria[c]; }),
-        precisao: Math.max(m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, u.ef.precisaoGolpe[m[0]] || 0), forcaBase: base, forca: base * hab };
+        precisao: Math.max(m[4] > 0 && m[4] <= 100 ? m[4] / 100 : 1, u.ef.precisaoGolpe[m[0]] || 0), forcaBase: base * (u.ef.resisteFortKnox ? u.ef.golpeExtra : 1), forca: base * hab };
       g.area = extra && extra.al ? extra.al : null; // dupla: ambos/todos/aleatorio
       g.efeito = extra && extra.ef ? extra.ef : ""; // efeito do golpe no dado (Fake Out, Hex, Eruption, Knock Off...)
       g.efeitoDado = m[11] || ""; // efeito do dado bruto (o move_categorias não traz todos: Dragon Tail)
@@ -1934,7 +1968,7 @@
       return m * v;
     }, 1);
     var mult = raw;
-    if (!atq.ef.quebraHabilidade && !(gravidade && abilityTypeModFor("Ground", [], def.ids || []).mult === 0)) {
+    if (!atq.ef.quebraHabilidade && atq.ef.quebraTipo !== tipo && !(gravidade && abilityTypeModFor("Ground", [], def.ids || []).mult === 0)) {
       var r = abilityTypeModFor(tipo, def.tipos, def.ids);
       if (r.raw !== 0 && r.mult === 0) return 0; // imune por habilidade
       if (r.raw > 0) mult *= r.real / r.raw; // real: sem o corte de Solid Rock/Filter (entra uma vez em reducao.superEf; o golpe segue super efetivo)
@@ -1945,6 +1979,7 @@
       if (def.ef.resistTipo[tipo] !== undefined && !naTabela) mult *= def.ef.resistTipo[tipo];
       if (def.ef.resistSeTipo && def.ef.resistSeTipo.tipo === tipo && def.tipos.indexOf(def.ef.resistSeTipo.se) !== -1) mult *= 0.5; // Old Mariner
       if (atq.ef.alcatrao && tipo === "Fire") mult *= 2; // Tar Shot na entrada (Tar Toss)
+      (atq.tipos || []).forEach(function (t) { if (def.ef.resistDeAtacante[t]) mult *= def.ef.resistDeAtacante[t]; }); // Dragonslayer, Lumberjack, Insect Eater
     }
     def.tipos.forEach(function (t) { if (atq.ef.vsTipo[t]) mult *= atq.ef.vsTipo[t]; });
     return mult;
@@ -1978,7 +2013,7 @@
       atq = Object.assign({}, atq, { golpesProntos: atq.golpesProntos.filter(function (g) { return !(g.prio > 0); }) });
     }
     var melhor = { dano: 0, prio: 0, golpe: null }, melhorPrio = { dano: 0 }, segundo = { dano: 0 }, candidatos = [];
-    var semBonus = def.ef.bloqueiaBonus && !atq.ef.quebraHabilidade;
+    var semBonusBase = def.ef.bloqueiaBonus && !atq.ef.quebraHabilidade;
     var amuleto = atq.it && atq.it.imuneQuedas; // Clear Amulet
     var intim = def.ef.intimida && !atq.ef.imuneIntimida && !amuleto ? 2 / (2 + def.ef.intimida) : 1;
     var assus = def.ef.assusta && !atq.ef.imuneAssusta && !amuleto ? 2 / (2 + def.ef.assusta) : 1;
@@ -1987,7 +2022,7 @@
     var itA = atq.it || itemDoDuelo("", null), itD = def.it || itemDoDuelo("", null);
     var ativoA = itemAtivoDuelo(atq, def, contatoDe(def)), ativoD = itemAtivoDuelo(def, atq, contatoDe(atq));
     var precisaoAtq = atq.ef.semErrar || def.ef.semErrarContraMim;
-    var abreDef = !atq.ef.quebraHabilidade;
+    var abreDefBase = !atq.ef.quebraHabilidade;
     // Clima no campo (Weather Rework oficial, 2026-09-30): Ice ganha Defesa no
     // granizo; o ataque contra Ghost sai x0,8 na Eerie Fog.
     var climaCampo = climaNoCampoDuelo(atq, def);
@@ -1997,6 +2032,9 @@
     // Eerie Fog (battle_util.c:7275-7277): o Atk de quem ataca um alvo Ghost sai x0,8 (só Ghost, não Psychic; no ataque, não no dano final).
     var ataqueNaNevoa = climaCampo === "nevoa" && def.tipos.indexOf("Ghost") !== -1 ? CLIMA_OFICIAL.ataqueContraGhostNaNevoa : 1;
     atq.golpesProntos.forEach(function (g) {
+      // Third-Degree Burn: o golpe Fire atravessa as habilidades do alvo, como o Mold Breaker (onMoldBreaker, abilities.cc:12735).
+      var quebraDoTipo = !!atq.ef.quebraTipo && atq.ef.quebraTipo === g.tipo;
+      var semBonus = semBonusBase && !quebraDoTipo, abreDef = abreDefBase && !quebraDoTipo;
       var flags = g.flags || [];
       // Bulletproof, Soundproof: imune pela marcação do golpe.
       if (abreDef && flags.some(function (fl) { return def.ef.imuneFlag[fl]; })) return;
@@ -2025,7 +2063,7 @@
       if (osso && efTipo < 1) efTipo *= 2;
       if (atq.ef.ignoraResist[g.tipo] && efTipo < 1) efTipo = 1; // Normalize, Corrupted Mind
       if (abreDef && def.ef.soSuperEf && efTipo < 2) return; // Wonder Guard
-      var quebraAqui = atq.ef.quebraHabilidade || (atq.ef.seQuebra && efTipo >= 2); // Deadly Precision
+      var quebraAqui = atq.ef.quebraHabilidade || quebraDoTipo || (atq.ef.seQuebra && efTipo >= 2); // Deadly Precision
       var terreno = CAMPO_DUELO && CAMPO_DUELO.terreno, noCampo = 1, prioAqui = g.prio;
       if (terreno && TIPO_DO_TERRENO_DUELO[terreno] === g.tipo && terreno !== "nevoa" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
       if (terreno === "nevoa" && g.tipo === "Fairy" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
@@ -2037,7 +2075,7 @@
       if (abreDef && def.ef.sempreResiste && efTipo > 0.5) efTipo = 0.5; // Color Change, Soothsayer
       var fisico = g.cat === "F", defF = g.defNaDef || (fisico && !g.defEspecial);
       var A = ataqueNoDuelo(atq, g, def) * (fisico ? intim : assus) * ataqueNaNevoa;
-      if (!fisico) A *= noTerrenoDuelo(atq, "spa");
+      A *= noTerrenoDuelo(atq, fisico ? "atk" : "spa");
       // Item de poder (tipo, Muscle Band, Punching Glove) entra no poder; o Life Orb, no dano final.
       A *= comItem((fisico ? itA.fisicoMult : itA.especialMult) * (itA.tipoMult[g.tipo] || 1) *
         (g.cats || []).reduce(function (mx, c) { return Math.max(mx, itA.categoriaMult[c] || 1); }, 1), ativoA);
@@ -2424,7 +2462,7 @@
     function extraPorTurno(u, d, g, gOutro) {
       if (!(d > 0) || !g || !(g.poder > 0)) return 0;
       var e = 0;
-      if (u.ef.contraAtaque && gOutro && (gOutro.contato || u.ef.contraAtaque.qualquer)) e += d * u.ef.contraAtaque.poder / g.poder;
+      if (u.ef.contraAtaque && gOutro && (u.ef.contraAtaque.soEspecial ? gOutro.cat === "E" : (gOutro.contato || u.ef.contraAtaque.qualquer))) e += d * u.ef.contraAtaque.poder / g.poder;
       if (u.ef.ataqueNaEntrada && turnos > 0) e += d * u.ef.ataqueNaEntrada / g.poder / turnos;
       var roubador = u === eu ? foe : eu;
       if (u.ef.ladrao && u.item && (roubador.ef.roubaContato || roubador.ef.roubaSemContato) && turnos > 0) e += d * 60 / g.poder / turnos; // Greedy: Thief (60)
@@ -2615,6 +2653,10 @@
     var pVeneno = function (g) { return (g && g.status || []).reduce(function (mx, st) { return /envenenar/.test(st.st) ? Math.max(mx, st.p) : mx; }, 0); };
     if (eu.ef.hemotoxina && pVeneno(meu.melhor.golpe) > 0) { foe2 = comHabilidadesDuelo(foe, "nenhuma"); parte = pVeneno(meu.melhor.golpe); }
     if (foe.ef.hemotoxina && pVeneno(dele.melhor.golpe) > 0) { eu2 = comHabilidadesDuelo(eu, "nenhuma"); parte = pVeneno(dele.melhor.golpe); }
+    // Hemorrhage: o mesmo com sangramento (abilities.cc:12714, setStateOnEffect = MOVE_EFFECT_BLEED).
+    var pSangra = function (g) { return (g && g.status || []).reduce(function (mx, st) { return /sangrar/.test(st.st) ? Math.max(mx, st.p) : mx; }, 0); };
+    if (eu.ef.hemorragia && pSangra(meu.melhor.golpe) > 0) { foe2 = comHabilidadesDuelo(foe, "nenhuma"); parte = pSangra(meu.melhor.golpe); }
+    if (foe.ef.hemorragia && pSangra(dele.melhor.golpe) > 0) { eu2 = comHabilidadesDuelo(eu, "nenhuma"); parte = pSangra(dele.melhor.golpe); }
     if (eu2 === eu && foe2 === foe) return { meu: meu, dele: dele };
     var meu2 = danoNoDuelo(eu2, foe2, nivel), dele2 = danoNoDuelo(foe2, eu2, nivel);
     var n = Math.max(1, Math.min(TURNOS_MAX_STATUS, golpesNecessariosDuelo(foe.stats[0], meu.melhor.dano)));
@@ -3476,7 +3518,7 @@
         return r;
       }
       var regra = STATUS_DUELO[s];
-      if (!regra || (!x.ef.statusIgnoraImune && !podeSofrerStatusDuelo(y, s))) return null; // Mycelium Might ignora imunidade
+      if (!regra || (!x.ef.statusIgnoraImune && !podeSofrerStatusDuelo(y, s, x.ef))) return null; // Mycelium Might ignora imunidade
       if (s === "paralisar" && !p.ignoraTipo && efetividadeNoDuelo(x, "Electric", y) === 0) return null; // Thunder Wave não pega em Ground
       if (regra.residuo && !y.ef.semResiduo && !y.ef.semResiduoDe[s]) r.residuoY += regra.residuo * base.hpY * acc;
       if (regra.recuo) r.residuoY += regra.recuo * base.dY * acc;

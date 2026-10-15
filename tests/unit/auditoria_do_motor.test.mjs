@@ -24,12 +24,6 @@ const HABILIDADES_SEM_REGRA = {
   "Honey Gather": "acha item fora de batalha",
   "Tag": "Pursuit em quem troca; o jogador não troca contra o chefão no modelo",
   "Multitype": "cada placa é uma espécie própria no dado",
-  // Novas na NextDex 2.65.4 (ticket versao-nova/05, 15/10/2026): entram no dado sem regra no motor; o ticket versao-nova/07 (habilidades novas) escreve a regra de cada uma.
-  "Light Wield": "nova na 2.65.4: monta Light Screen por 3 turnos na entrada; sem regra ainda (versao-nova/07)",
-  "Sea Guardian": "nova na 2.65.4; sem regra ainda (versao-nova/07)",
-  "Spicy Spray": "nova na 2.65.4: queima o atacante ao levar dano; sem regra ainda (versao-nova/07)",
-  "Sun Worship": "nova na 2.65.4; sem regra ainda (versao-nova/07)",
-  "Third-Degree Burn": "nova na 2.65.4: queima qualquer tipo, golpes Fire ignoram habilidade; sem regra ainda (versao-nova/07)",
 };
 
 // A conta mora no motor (habilidadeSemRegraNoDuelo): é a mesma que decide o selo "estimada" do pipeline de build (versao-nova/03).

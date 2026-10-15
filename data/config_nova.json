@@ -1,0 +1,142 @@
+{
+ "fonte": "Elite-Redux/er-config AbilityList.textproto e SpeciesList.textproto",
+ "commit": "d1a9a4c",
+ "renomeadas": [
+  [
+   "Keen Edge",
+   "Sharpness"
+  ]
+ ],
+ "descricoes": {
+  "Power Fists": "Punching moves target Special Defense and get a 1.3x boost.",
+  "Sweeping Edge": "Slashing moves always hit and hit both foes.",
+  "Dual Wield": "Mega Launcher and Sharpness moves hit twice for 70% damage.",
+  "Mystic Blades": "Sharpness moves become special and deal 30% more damage.",
+  "Blade's Essence": "Sharpness + Mystic Blades.",
+  "Blademaster": "Sweeping Edge + Sharpness.",
+  "Molten Blades": "Sharpness + Slashing moves have a 20% chance to burn.",
+  "Power Edge": "Slashing moves target Special Defense and get a 1.3x boost.",
+  "Cutthroat": "First slashing move each entry gets +1 priority.",
+  "Best Offense": "Slashing moves are special and use +20% Sp. Def.",
+  "Magus Blades": "Best Offense + Slashing moves hit twice for 60%.",
+  "Edgelord": "First slashing move each entry gets +1 priority. Resets on KO.",
+  "Lightsaber": "Adds Fire-type. Slashing moves have 25% burn or paralysis.",
+  "Chainsaw": "Slashing moves lower defense by one stage.",
+  "Cool Exit": "Uses Chilly Reception at the end of your 2nd turn. Works once per battle.",
+  "Chestnut Axe": "Sharpness + Grass moves become Sharpness boosted.",
+  "Sinister Claws": "Mystic Blades + slashing moves lower SpDef."
+ },
+ "novas": [
+  {
+   "nome": "Photokinesis",
+   "desc": "Boost the power of light moves by 1.3x"
+  },
+  {
+   "nome": "Photon Burst",
+   "desc": "Light moves target Defense and get a 1.3x boost."
+  },
+  {
+   "nome": "Rippling Punch",
+   "desc": "Punching moves are also Sound moves as well."
+  },
+  {
+   "nome": "Cackling",
+   "desc": "Uses Eerie Laugh on entry. Works only twice per battle."
+  },
+  {
+   "nome": "Fresh Snowfall",
+   "desc": "Launches a 30 BP Powder Snow when hit by a special attack."
+  },
+  {
+   "nome": "Sticky Situation",
+   "desc": "Bug type moves lower speed."
+  },
+  {
+   "nome": "Bioluminescent",
+   "desc": "Adds Electric Type to the user + Illuminate."
+  },
+  {
+   "nome": "Blinking Flash",
+   "desc": "Light moves have a 10% chance to lower accuracy."
+  },
+  {
+   "nome": "Brain Freeze",
+   "desc": "Psychic moves have a 30% chance to cause frostbite."
+  }
+ ],
+ "especies": {
+  "SPECIES_CHINCHOU": {
+   "ab": [
+    "Swift Swim",
+    "Dazzling",
+    "Photokinesis"
+   ]
+  },
+  "SPECIES_LANTURN": {
+   "ab": [
+    "Swift Swim",
+    "Dazzling",
+    "Photon Burst"
+   ]
+  },
+  "SPECIES_LUMINEON": {
+   "inn": [
+    "Storm Drain",
+    "Giant Wings",
+    "Photon Burst"
+   ]
+  },
+  "SPECIES_HELIOLISK": {
+   "inn": [
+    "Photokinesis",
+    "Dry Skin",
+    "Lightning Rod"
+   ]
+  },
+  "SPECIES_RAICHU_MEGA_Y": {
+   "inn": [
+    "Generator",
+    "No Guard",
+    "Ground Shock"
+   ]
+  },
+  "SPECIES_MORPEKYLL_HANGRY": {
+   "b": [
+    97,
+    104,
+    78,
+    62,
+    74,
+    121
+   ]
+  },
+  "SPECIES_LITWICK_REDUX": {
+   "ab": [
+    "Backup Power",
+    "Volt Absorb",
+    "Photokinesis"
+   ]
+  },
+  "SPECIES_LAMPENT_REDUX": {
+   "ab": [
+    "Backup Power",
+    "Lightning Rod",
+    "Photokinesis"
+   ]
+  },
+  "SPECIES_CHANDELURE_REDUX": {
+   "ab": [
+    "Backup Power",
+    "Dazzling",
+    "Photokinesis"
+   ]
+  },
+  "SPECIES_KIRLIA_REDUX": {
+   "ab": [
+    "Run Away",
+    "Water Absorb",
+    "Hydration"
+   ]
+  }
+ }
+}

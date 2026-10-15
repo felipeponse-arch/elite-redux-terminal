@@ -4,7 +4,8 @@
 // sem `hw` e `tm` por espécie e sem a descrição em inglês dos golpes quando todos têm tradução). Equivalência com os .ps1 provada por
 // tests/unit/extracao_transform.test.mjs (o dex_compact.json atual sai igual do dado atual).
 //
-// Uso: node scripts/extracao/transform.mjs <gameData.json> <saida dex_compact.json> [--versao=2.65.4] [--gerado=AAAA-MM-DD] [--traducoes=data/move_translations_pt.json]
+// Uso: node scripts/extracao/transform.mjs <gameData.json> <saida dex_compact.json> [--versao=2.65.4] [--gerado=AAAA-MM-DD] [--config-nova=data/config_nova.json] [--traducoes=data/move_translations_pt.json]
+import { aplicarPatch } from "./config_nova.mjs";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 // Ordem do Sort-Object -Unique do PowerShell (cultura invariante, sem diferenciar maiúscula): usado nos itens.
@@ -106,6 +107,8 @@ if ((process.argv[1] || "").endsWith("transform.mjs")) {
   const arg = (n, padrao) => { const a = process.argv.find((x) => x.startsWith("--" + n + "=")); return a ? a.slice(n.length + 3) : padrao; };
   const trad = arg("traducoes", "data/move_translations_pt.json");
   const dex = extrairDex(JSON.parse(readFileSync(entrada, "utf8")), { versao: arg("versao", "2.65beta"), gerado: arg("gerado", undefined), traducoesDeGolpe: existsSync(trad) ? JSON.parse(readFileSync(trad, "utf8")) : null });
+  const patch = arg("config-nova", null);
+  if (patch) { const r = aplicarPatch(dex, JSON.parse(readFileSync(patch, "utf8"))); console.log("  config nova: " + JSON.stringify(r)); }
   writeFileSync(saida, JSON.stringify(dex));
   console.log("transform.mjs: OK (" + dex.species.length + " espécies, " + dex.abilities.length + " habilidades, " + dex.moves.length + " golpes) -> " + saida);
 }

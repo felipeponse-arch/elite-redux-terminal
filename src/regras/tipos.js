@@ -145,7 +145,9 @@
     865: { immune: ["Fire"] },                             // Heat Sink
     868: { immune: ["Electric"] },                         // Lightning Aspect
     869: { immune: ["Fire"] },                             // Fire Aspect
-    872: { immune: ["Rock"] }                              // Molten Core (Furnace + absorve Rock)
+    872: { immune: ["Rock"] },                             // Molten Core (Furnace + absorve Rock)
+    // Packed Ice (1057, ticket versao-nova/07; abilities.cc:12781-12790, onAbsorb: golpe Ice vira +2 de Defesa em vez de dano). O +2 não está no motor.
+    1057: { immune: ["Ice"] }
   };
 
   // Which of a species' abilities are safe to treat as ALWAYS active without
