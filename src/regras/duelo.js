@@ -319,13 +319,22 @@
   // SpAtk; Fear = +50% de dano recebido; Infatuation = metade do dano (só gênero
   // oposto); Confusion = 33% do dano causado volta como recuo. Burn, paralisia e
   // veneno a fonte oficial não redefine: valem as da série (Burn 1/16 e metade do
-  // Atk; paralisia 25% de perder o turno; veneno 1/8; o tóxico, que cresce, ~1/8
-  // na média de uma luta curta). Sono (Sleep Clause) fica de fora;
+  // Atk; veneno 1/8; o tóxico, que cresce, ~1/8 na média de uma luta curta).
+  // Paralisia e sono seguem o estilo Pokémon Champions que o código novo liga (ticket versao-nova/08, 15/10/2026):
+  // paralisia 12,5% de perder o turno (battle_util.c:3406) e sono de 1 a 2 turnos perdidos (battle_script_commands.c:2558). Sono (Sleep Clause) fica de fora;
   // Drench muda a ordem dos turnos, não o dano (chanceDeEncharcarDuelo, ticket 17).
+  // Pokémon Champions (battle_config.h:156-157, B_USE_CHAMPIONS_PARALYSIS e B_USE_CHAMPIONS_SLEEP = TRUE no upcoming 486026e):
+  // paralisia: 1 chance em 8 de não agir (battle_util.c:3406, `mod = 8`), Velocidade pela metade (battle_main.c:4196); no modo Hell o Pokémon do chefão
+  // paralisado sempre age (battle_util.c:3403, disableParalysisCancel) e só perde a Velocidade.
+  // sono: contador 2 com chance 1/3 e 3 com 2/3 (battle_script_commands.c:2558-2563); cada tentativa de agir tira 1 (2 com Early Bird) e o Pokémon age no turno
+  // em que o contador zera (battle_util.c:3210-3245): perde 1 turno (1/3) ou 2 (2/3) = 5/3 de média; com Early Bird perde 0 (1/3) ou 1 (2/3) = 2/3.
+  var CHANCE_DE_NAO_AGIR_PARALISIA_DUELO = 1 / 8;
+  var TURNOS_PERDIDOS_NO_SONO_DUELO = 5 / 3, TURNOS_PERDIDOS_NO_SONO_EARLY_BIRD_DUELO = 2 / 3;
+  function modoHellDuelo() { return typeof state !== "undefined" && !!state && !!state.settings && state.settings.difficulty === "hell"; }
   var STATUS_DUELO = {
     queimar: { residuo: 1 / 16, corteF: 0.5, imunes: ["Fire"] },
     congelar: { residuo: 1 / 16, corteE: 0.5, imunes: ["Ice"] },
-    paralisar: { corte: 0.25, imunes: ["Electric"] },
+    paralisar: { corte: CHANCE_DE_NAO_AGIR_PARALISIA_DUELO, imunes: ["Electric"] },
     envenenar: { residuo: 1 / 8, imunes: ["Poison", "Steel"] },
     envenenarForte: { residuo: 1 / 8, imunes: ["Poison", "Steel"] },
     sangrar: { residuo: 1 / 16, imunes: ["Rock", "Ghost"] },
@@ -341,7 +350,7 @@
     maldicao: { residuo: 1 / 4, imunes: [] },
     // Prisão do Grappler: 1/6 por turno (texto da habilidade).
     presoForte: { residuo: 1 / 6, imunes: [] },
-    // Sono: 1 a 3 turnos sem agir (série; Sleep Clause: um de cada vez) - na luta curta, ~metade dos turnos.
+    // Sono (Champions): contador 2 (1/3) ou 3 (2/3), -1 a cada tentativa de agir, e acorda no turno em que zera: perde 1 turno (1/3) ou 2 (2/3).
     sono: { corte: 0.5, imunes: [] }
   };
   // Efeito extra do golpe no NextDex (effT) -> status do duelo.
@@ -2321,6 +2330,7 @@
         if (s === "recuar") { r.corte *= 1 - (alvoAntes === null ? p / 2 : alvoAntes ? 0 : p); return; } // só recua quem bate depois
         var doOrbe = s === orbe && turnos > 0 ? (turnos - 1) / turnos : s === "confundir" ? rampage : 0;
         var corte = regra.corte || (golpeDoAlvo && golpeDoAlvo.cat === "F" ? regra.corteF : regra.corteE) || 0;
+        if (s === "paralisar" && alvo.chefao && modoHellDuelo()) corte = 0; // Hell: o chefão paralisado sempre age (battle_util.c:3403)
         if (corte) r.corte *= 1 - corte * fica * Math.max(doOrbe, presencaDoStatus(p, turnos, alvoAntes ? 0 : 1));
         var pres = fica * Math.max(doOrbe, presencaDoStatus(p, turnos, 1));
         r.pres[s] = pres;
@@ -2874,7 +2884,7 @@
       // Golpe de status que a habilidade usa ao entrar (sem gastar turno).
       function naEntradaDe(x, y, golpeY, danoY) {
         var r = { perdeY: 0, multY: 1, danoY: 0 };
-        if (x.ef.entradaSono && !y.ef.imuneStatus.sono && statusPassaDuelo(x, y) && podeDormirDuelo(y, x) === true) r.perdeY += (y.ef.acordaCedo ? 1 : 2) * (1 - (y.ef.curaStatus || 0)); // Yawn: dorme 1-3 turnos
+        if (x.ef.entradaSono && !y.ef.imuneStatus.sono && statusPassaDuelo(x, y) && podeDormirDuelo(y, x) === true) r.perdeY += (y.ef.acordaCedo ? TURNOS_PERDIDOS_NO_SONO_EARLY_BIRD_DUELO : TURNOS_PERDIDOS_NO_SONO_DUELO) * (1 - (y.ef.curaStatus || 0)); // Yawn: sono Champions
         if ((x.ef.entradaDisable || x.ef.entradaTorment) && golpeY && danoY && danoY.melhor.dano > 0 && statusPassaDuelo(x, y)) {
           var razao = danoY.segundo.dano / danoY.melhor.dano;
           r.multY *= x.ef.entradaDisable ? razao : (1 + razao) / 2; // Torment: alterna o melhor e o segundo
@@ -2968,6 +2978,7 @@
     foe.tipos = tiposNaBatalha(sp, foe.ef);
     aplicarFormaDuelo(foe, function (alt) { return [0, 1, 2, 3, 4, 5].map(function (i) { return calcFinalStat(alt.b[i], iv[i], ev[i], nivel, i, m.nat, m.item, alt.n); }); }, clima);
     foe.clima = clima || null;
+    foe.chefao = true;
     foe.dormindoAtaca = (m.mv || []).indexOf("Sleep Talk") !== -1;
     foe.abId = abiId !== undefined && !megaSname ? abiId : null;
     foe.golpeIds = (m.mv || []).map(function (n) { return MOVE_ID_BY_NAME[n]; }).filter(function (id) { return id !== undefined && golpeUtilNoDuelo(id); });
@@ -3507,7 +3518,7 @@
         if (y.ef.imuneStatus.sono || y.ef.aliadoImuneStatus && y.ef.aliadoImuneStatus.sono) return null;
         var podeDormir = podeDormirDuelo(y, x);
         if (!podeDormir) return null;
-        var turnosDormindo = (y.ef.acordaCedo ? 1 : 2) * acc; // série: 1 a 3 turnos (média 2); Early Bird acorda na metade
+        var turnosDormindo = (y.ef.acordaCedo ? TURNOS_PERDIDOS_NO_SONO_EARLY_BIRD_DUELO : TURNOS_PERDIDOS_NO_SONO_DUELO) * acc; // Champions: 5/3 turnos; Early Bird 2/3
         turnosDormindo *= 1 - (y.ef.curaStatus || 0); // Shed Skin, Hydration...: acorda antes
         if (y.dormindoAtaca) turnosDormindo *= 0.5; // Sleep Talk: ataca dormindo (golpe ao acaso)
         r.perdeY = turnosDormindo;
@@ -3523,6 +3534,7 @@
       if (regra.residuo && !y.ef.semResiduo && !y.ef.semResiduoDe[s]) r.residuoY += regra.residuo * base.hpY * acc;
       if (regra.recuo) r.residuoY += regra.recuo * base.dY * acc;
       var corte = regra.corte || (gY && gY.cat === "F" ? regra.corteF : regra.corteE) || 0;
+      if (s === "paralisar" && y.chefao && modoHellDuelo()) corte = 0; // Hell: o chefão paralisado sempre age, só perde Velocidade
       r.multY *= 1 - corte * acc;
       if (regra.recebeMais) r.multX *= 1 + regra.recebeMais * acc;
       if (s === "paralisar") r.velY = 1 - 0.5 * acc; // série: velocidade pela metade

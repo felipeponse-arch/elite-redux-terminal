@@ -1,6 +1,7 @@
 # Estado da fila v01–v09 (15/10/2026, atualizado ~13:15 UTC)
 
-Novo (13:00): v06 (`versao-06-habilidades-mudadas`) e v07 (`versao-07-habilidades-novas`) prontos e enviados; segue v08 (sono e paralisia) e v09 (golpes). `NOME_DA_CATEGORIA` ganhou luz/arremesso/broca/lunar no v07.
+Novo (13:40): v08 (`versao-08-sono-paralisia`) pronto. Segue v09 (golpes) e para.
+Antes (13:00): v06 (`versao-06-habilidades-mudadas`) e v07 (`versao-07-habilidades-novas`) prontos e enviados; segue v08 (sono e paralisia) e v09 (golpes). `NOME_DA_CATEGORIA` ganhou luz/arremesso/broca/lunar no v07.
 Antes (12:30): v05 fechado com a troca do dado; segue a fila v06 (habilidades mudadas), v07 (habilidades novas + delta do upcoming), v08 (sono e paralisia), v09 (golpes). Parar antes das builds (dados-2654/08, 09) e do fechamento (10).
 Achados do /code-review (calibração, ainda não tratados; não bloqueiam): `drill` mapeado para "chifre" no leitor de texto mas gravado como "broca" pela flag; `arremesso: /throw/i` sem âncora; `NOME_DA_CATEGORIA` sem arremesso/broca/luz/lunar; `categorias_pela_config.mjs` junta golpe por nome com `Map` (nome repetido sobrescreve).
 
@@ -24,7 +25,7 @@ Nada de rank recalculado. Nada publicado.
 
 ## O que falta
 1. ~~Troca do dado (v05, P3)~~ **feita no v05** (NextDex 2.65.4; Arbok Mega fora; Eviolite). Os remendos do upcoming (Keen Edge -> Sharpness, Kirlia Redux, Morpekyll Hangry, as 9 habilidades) entraram no v07 pelo patch `data/config_nova.json`. As outras 5 renomeações (Absorbent, Phobia, Apple Cake, Frosty Presence, Malediction) já vieram com o dado do v05.
-2. `dados-2654/02` a `06` feitos nos v06 e v07; `07` (sono e paralisia Champions) é o v08.
+2. `dados-2654/02` a `06` feitos nos v06 e v07; `07` (sono e paralisia Champions) foi o v08.
 3. **Delta do upcoming** (`d1a9a4c` sobre `7285071`): 9 habilidades e 9 golpes novos, Keen Edge -> Sharpness, 15 habilidades novas sem efeito lido, partes novas de compostas (Serpent Bind, Cotton Down, Grim Neigh...), chefões novos do TrainerList, Best Offense (P2), King of the Jungle.
 4. Builds `dados-2654/08` (revisar afetadas) e `09` (17 espécies novas).
 5. M10 (ordem do cálculo, multiplicador de habilidade depois do +2): não feito.

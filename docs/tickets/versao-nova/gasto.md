@@ -16,3 +16,4 @@ o acumulado fica registrado para o Felipe comparar com o saldo que ele vê na co
 | 15/10 12:20 | fim do v06 (leitura em get_session) | 57,32 (v05+v06 juntos desde 47,98: ≈9,3) | 941.878 | 492.520 / 1.000.000 | não aparece |
 | 15/10 13:00 | fim do v07 (leitura em get_session; o valor não avançou desde o v06) | 57,32 (leitura repetida) | 941.878 | 492.520 / 1.000.000 | não aparece |
 | 15/10 13:20 | usuário informa ~US$ 21 de saldo | — | — | — | ~21 (informado pelo Felipe) |
+| 15/10 13:40 | fim do v08 (sem releitura; Felipe informou ~US$ 21) | — | — | — | ~21 (informado) |
