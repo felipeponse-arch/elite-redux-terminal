@@ -134,6 +134,16 @@ test("Psychic Terrain: o golpe de prioridade de BASE (Mach Punch) também falha 
   assert.equal(lutar(machamp, indeedee("Psychic Surge")).fracFoe, 1, "no Psychic Terrain o Mach Punch falha: nenhum dano");
 });
 
+test("Psychic Terrain: o Mach Punch FALHA em cada turno (não é só perder a prioridade): o Machamp resistente que venceria sem o terreno não derruba a Indeedee", () => {
+  const machamp = unidade("Machamp", "No Guard", ["Mach Punch"], [252, 252, 4, 0, 0, 0]);
+  const indeedee = (hab) => unidade("Indeedee Female", hab, ["Tackle"], [0, 0, 0, 252, 0, 252], null, "Modest");
+  assert.ok(machamp.golpesProntos[0].prio > 0, "premissa: o Mach Punch tem prioridade");
+  const sem = lutar(machamp, indeedee("Own Tempo")), com = lutar(machamp, indeedee("Psychic Surge"));
+  assert.equal(sem.venceu, true, "controle: sem o terreno o Mach Punch derruba a Indeedee");
+  assert.equal(com.venceu, false, "no Psychic Terrain nenhum Mach Punch acerta: a luta não é vencível por ele");
+  assert.equal(com.fracFoe, 1, "a Indeedee não perdeu HP nenhum, em nenhum turno");
+});
+
 test("Psychic Terrain só protege quem está no chão: o mesmo alvo voando (tipo Flying) não barra o golpe com prioridade", () => {
   const cent = unidade("Centiskorch", "Coil Up", ["Bite"]);
   const indeedee = unidade("Indeedee Female", "Psychic Surge", ["Psychic"], [0, 0, 0, 252, 0, 252], null, "Modest");
@@ -229,4 +239,26 @@ test("Opportunist em luta PERDIDA: o motor não dá a prioridade do golpe que de
   assert.equal(r.turnos, 1, "o Ninetales derruba o Golbat no 1º turno");
   assert.equal(r.fracFoe, 1, "o Golbat não ganha um golpe a mais: no turno 1 o alvo está com HP cheio e não há prioridade");
   assert.equal(forma(r), forma(lutar(comEf(golbat, { prioNoFinal: false }), ninetalesSemQueenly, 1)), "luta perdida igual à de quem não tem Opportunist");
+});
+
+test("Coil Up do chefão contra a Queenly Majesty de quem o enfrenta: o 1º Bite falha e custa o turno do chefão (nenhum dano em mim), enquanto sem a habilidade ele bate no 1º turno", () => {
+  const meu = unidade("Ninetales", "Queenly Majesty", ["Heat Wave"], [252, 0, 252, 0, 4, 0], null, "Modest");
+  const meuSem = comEf(meu, { bloqueiaPrioLado: false });
+  const chefao = unidade("Centiskorch", "Coil Up", ["Bite"]);
+  assert.ok(chefao.stats[5] < meu.stats[5], "premissa: o meu Ninetales é mais rápido");
+  const luta = (eu) => R.resultadoDoDuelo(eu, chefao, NIVEL, { detalhe: true, fracEu: 1 });
+  assert.ok(luta(meuSem).fracEu < 1, "controle: sem a Queenly Majesty o Bite do chefão acerta com prioridade");
+  assert.equal(luta(meu).venceu, true);
+  assert.equal(luta(meu).fracEu, 1, "o Bite falhou e foi o turno do chefão: eu venci sem levar dano");
+});
+
+test("Opportunist do chefão olha quem ele enfrenta: contra a minha Queenly Majesty ele não passa na frente e eu derrubo o Drapion no 1º golpe sem levar dano", () => {
+  const meu = unidade("Ninetales", "Queenly Majesty", ["Heat Wave"], [252, 0, 252, 0, 4, 0], null, "Modest");
+  const meuSem = comEf(meu, { bloqueiaPrioLado: false });
+  const chefao = drapion("Crunch");
+  assert.ok(meu.stats[5] < chefao.stats[5], "premissa: o Drapion é mais rápido");
+  const luta = (eu) => R.resultadoDoDuelo(eu, chefao, NIVEL, { detalhe: true, fracEu: 1, fracFoe: 0.5 });
+  assert.ok(luta(meuSem).fracEu < 1, "controle: sem a Queenly Majesty o Drapion age primeiro e me acerta");
+  assert.equal(luta(meu).venceu, true);
+  assert.equal(luta(meu).fracEu, 1, "com a Queenly Majesty o golpe do chefão falha: ele não me tira HP");
 });

@@ -2412,10 +2412,17 @@ export const MUTACOES = [
   // ---- pipeline de build com intenção (ticket 20 da dívida, 14/10/2026; src/regras/pipeline_build.js) ----
   {
     id: "pipeline-prioridade-bloqueada-vira-primeiro",
-    descricao: "a prioridade condicional (Coil Up) volta a contar como 'bate primeiro' contra Queenly Majesty",
+    descricao: "a prioridade condicional (Coil Up) volta a contar como 'bate primeiro' contra Queenly Majesty (o bloqueio do alvo some da chamada ao motor)",
     arquivo: "pipeline_build.js",
-    de: "return (!!foe.ef.bloqueiaPrioLado && !eu.ef.quebraHabilidade) || !!foe.ef.barraPrioridade;",
-    para: "return false;",
+    de: "temPrioridadeNoCampoDuelo(u1, foe, r.meu, 1, foe);",
+    para: "temPrioridadeNoCampoDuelo(u1, foe, r.meu, 1, u1);",
+  },
+  {
+    id: "pipeline-prioridade-condicional-sem-o-campo",
+    descricao: "a prioridade condicional (Coil Up) é lida fora do campo do confronto: o Psychic Terrain do alvo (Indeedee Female) deixa de barrá-la",
+    arquivo: "pipeline_build.js",
+    de: "temPrioridadeNoCampoDuelo(u1, foe, r.meu, 1, foe);",
+    para: "temPrioridadeNoDuelo(u1, r.meu, 1, foe);",
   },
   {
     id: "pipeline-prioridade-condicional-em-todo-golpe",
@@ -2593,11 +2600,13 @@ export const MUTACOES = [
     para: "if (minha >= prioDoKo) {",
   },
   {
-    id: "pipeline-prioridade-do-alvo-pelo-dado",
-    descricao: "a prioridade do alvo volta a ser a do dado (ignora Psychic Terrain e Surprise!, que o motor aplica)",
+    // O que o teste "prioridade condicional do alvo (prioCheio)" pega: a condicional do alvo (prioCheio, sem +1 no dado) só entra pela leitura do motor.
+    // Psychic Terrain (o golpe falha, dano 0) e Surprise! (inalcançável: teste "Surprise! nunca chega a candidata") não distinguem a leitura do dado da do motor.
+    id: "pipeline-prioridade-do-alvo-sem-a-condicional",
+    descricao: "a prioridade condicional do alvo (Coil Up no primeiro golpe de mordida etc.) deixa de contar como ameaça",
     arquivo: "pipeline_build.js",
     de: "var prio = r.meu.melhor.prio > 0 ? r.meu.melhor.prio : (!(gp.prio > 0) && gp.prioCheio ? 1 : 0);",
-    para: "var prio = gp.prio > 0 ? gp.prio : (gp.prioCheio ? 1 : 0);",
+    para: "var prio = r.meu.melhor.prio > 0 ? r.meu.melhor.prio : 0;",
   },
   {
     id: "pipeline-fuga-no-intimidate-sem-medida",

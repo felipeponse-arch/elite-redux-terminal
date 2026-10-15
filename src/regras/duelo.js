@@ -1896,6 +1896,13 @@
     return golpesParaVencer === 1 && (u.ef.prioridadeNoPrimeiro || !!(g && g.prioCheio));
   }
 
+  // Encanamento (14/10/2026): temPrioridadeNoDuelo com o campo (terreno) que os dois montam, para quem chama FORA de
+  // resultadoDoDuelo (o pipeline de build). Sem isso CAMPO_DUELO é nulo e o Psychic Terrain nunca barra. Não muda regra.
+  function temPrioridadeNoCampoDuelo(eu, foe, dano, golpesParaVencer, def, opp) {
+    var antes = CAMPO_DUELO;
+    CAMPO_DUELO = campoDoDuelo(eu, foe);
+    try { return temPrioridadeNoDuelo(eu, dano, golpesParaVencer, def, opp); } finally { CAMPO_DUELO = antes; }
+  }
   // Status por chance no dano de cada turno (valor esperado): o status que eu
   // causo nele soma dano residual e recuo de confusão ao meu dano, o medo nele
   // aumenta o meu dano, e o que ele sofre (queimadura, frostbite, paralisia,

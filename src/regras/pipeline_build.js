@@ -95,12 +95,8 @@
   }
 
   // ---- o que cada golpe faz contra o alvo ----
-  // Prioridade que o golpe tem no turno 1 contra este alvo. A de base o motor já filtra (Queenly Majesty, Dazzling
-  // e Armor Tail zeram o dano do golpe com prioridade); a CONDICIONAL (Coil Up no primeiro golpe de mordida,
-  // On the Prowl...) o motor não filtra, então o bloqueio é aplicado aqui (docs/pipeline_de_build.md, caso B).
-  function pipelinePrioridadeBloqueada(eu, foe) {
-    return (!!foe.ef.bloqueiaPrioLado && !eu.ef.quebraHabilidade) || !!foe.ef.barraPrioridade;
-  }
+  // Prioridade condicional (Coil Up no primeiro golpe de mordida, On the Prowl...) e o bloqueio dela (Queenly Majesty, Dazzling,
+  // Armor Tail, Psychic Terrain, Surprise!) vêm do motor: temPrioridadeNoCampoDuelo recebe o alvo e o campo (decisão de 14/10/2026, P2).
   // Golpes de prioridade do ALVO que o atacante-referência não bloqueia (ele não tem Queenly Majesty & cia.): { nome, prio, fracEu }.
   // fracEu = parte do HP do atacante que o golpe tira (média da rolagem), pela mesma simulação do duelo com o alvo no papel de atacante.
   // Espelha a leitura de prioridade de duelo.js (danoNoDuelo: prioAqui = g.prio; golpe.prioCheio = +1 no primeiro golpe).
@@ -150,9 +146,10 @@
     if (n === 1 && aguentaUmGolpe(foe, u1)) { n = 2; sash = true; } // Focus Sash/Sturdy: o primeiro golpe não derruba
     if (n !== Infinity) n += bloqueiosNoDuelo(foe, u1, r.meu); // Disguise, Ice Face...
     var prioReal = !!golpe && melhor.prio > 0;
-    // Prioridade condicional (Coil Up, Gale Wings...): reusa temPrioridadeNoDuelo do motor, só para o golpe que derruba de
-    // uma vez; o bloqueio por Queenly Majesty & cia. o motor não aplica a ela (só ao golpe de prioridade de base), então vem daqui.
-    var prioCondicional = !!golpe && !prioReal && n === 1 && !pipelinePrioridadeBloqueada(u1, foe) && temPrioridadeNoDuelo(u1, r.meu, 1);
+    // Prioridade condicional (Coil Up, Gale Wings...): reusa o motor (temPrioridadeNoCampoDuelo monta o campo do confronto;
+    // o Psychic Terrain precisa dele fora de resultadoDoDuelo), só para o golpe que derruba de uma vez. Queenly Majesty, Armor Tail,
+    // Surprise! e Psychic Terrain barram a condicional como barram a prioridade de base.
+    var prioCondicional = !!golpe && !prioReal && n === 1 && temPrioridadeNoCampoDuelo(u1, foe, r.meu, 1, foe);
     // "Bate primeiro" (decisão do usuário, 14/10): golpe de prioridade que o alvo não bloqueia OU mais Velocidade que
     // o alvo. Golpe de prioridade NEGATIVA (Focus Punch -3...) age por último: nunca "bate primeiro por velocidade".
     var usaPrio = prioReal || prioCondicional;

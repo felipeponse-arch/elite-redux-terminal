@@ -427,6 +427,65 @@ test("Indeedee: só quem arma o Psychic Terrain (habilidade Psychic Surge) escap
   assert.equal(d.meu.melhor.prio, 0);
 });
 
+// Prioridade CONDICIONAL do alvo (prioCheio: Coil Up e cia. no primeiro golpe; o dado não dá +1): o motor a conta e o aviso aparece.
+// Alvo sintético: o Ninetales com só o Flame Burst, prioridade 0 no dado, Velocidade 1000 (nunca perde na Velocidade).
+test("prioridade condicional do alvo (prioCheio) conta como ameaça: o Ledian recebe o aviso 'O alvo age antes' e sem a condicional não recebe", () => {
+  const foeCom = (cheio) => {
+    const base = R.foeDeDuelo(Object.assign({}, courtney.party[0], { mv: ["Flame Burst"] }), 55, null);
+    const foe = Object.assign({}, base, { stats: base.stats.slice(0, 5).concat([1000]), golpesProntos: base.golpesProntos.map((g) => Object.assign({}, g, { prio: 0, prioCheio: cheio })) });
+    foe.ef = Object.assign({}, foe.ef, { bloqueiaPrioLado: false, barraPrioridade: false });
+    return foe;
+  };
+  const com = R.candidatosDeBuild(sp("Ledian"), { alvo: { foe: foeCom(true) } }).candidatos;
+  const sem = R.candidatosDeBuild(sp("Ledian"), { alvo: { foe: foeCom(false) } }).candidatos;
+  assert.ok(com.length > 0 && sem.length > 0);
+  com.forEach((c) => assert.equal(c.alvoAgeAntes, true, c.golpes.join("/")));
+  assert.match(com[0].avisos.join(" "), /O alvo age antes com Flame Burst \(\+1 de prioridade\)/);
+  sem.forEach((c) => assert.equal(c.alvoAgeAntes, false, c.golpes.join("/")));
+});
+
+// Crítica 1 do supervisor (rodada 2 de 3, 14/10): a prioridade condicional (Coil Up) é barrada pelo Psychic Terrain do ALVO no chão. O motor lê o
+// terreno de CAMPO_DUELO, que só existe dentro de resultadoDoDuelo; o pipeline chama temPrioridadeNoCampoDuelo (monta o campo do confronto).
+// Dado real: Centiskorch (Coil Up) x Indeedee Female no milestone 1 (cap de nível 20). Controle: com Synchronize no lugar do Psychic Surge o
+// mesmo kit bate primeiro por prioridade; com o terreno, o Fire Fang não bate primeiro por prioridade (falharia inteiro no motor).
+test("Coil Up x Indeedee Female (Psychic Surge, alvo no chão): nenhum candidato com Coil Up diz 'bate primeiro por prioridade'; sem o terreno diz", () => {
+  const R1 = carregarRegras({ milestone: 1, difficulty: "ace", levelCapMode: "more" });
+  const base = R1.BOSSES.find((b) => b.name === "Courtney Meteor Falls").party[0];
+  const idDe = (nome) => Number(Object.keys(R1.ABILITIES).find((k) => R1.ABILITIES[k][0] === nome));
+  const foeCom = (abi) => R1.foeDeDuelo(Object.assign({}, base, { x: 1418, n: "Indeedee Female", abi, abiId: idDe(abi), item: "", nat: "Modest", mv: ["Psychic"] }), 20, null);
+  const coilUp = (abi) => R1.candidatosDeBuild(R1.SPECIES.find((x) => x && x.n === "Centiskorch"), { alvo: { foe: foeCom(abi) } }).candidatos.filter((c) => c.habilidade === "Coil Up" && c.golpes.includes("Fire Fang"));
+  const controle = coilUp("Synchronize");
+  assert.ok(controle.some((c) => c.hitKill === 1 && c.baterPrimeiro && c.porQue === "prioridade"), "premissa: sem o terreno o Coil Up + Fire Fang bate primeiro por prioridade");
+  const terreno = coilUp("Psychic Surge");
+  assert.ok(terreno.length > 0, "premissa: há candidato com Coil Up + Fire Fang");
+  terreno.forEach((c) => assert.notEqual(c.porQue, "prioridade", c.golpes.join("/")));
+});
+
+// Crítica 3 (mesma rodada): a Surprise! (Misdreavus, Shuppet, Banette, Mismagius, Gimmighoul, Wispywaspy, Ash-Greninja, Houndoom Mega Redux...) só zera a
+// prioridade na Eerie Fog e a validação exige Eerie Fog na build ou no time. O módulo nunca monta kit com Eerie Fog, então nenhum candidato a carrega
+// e o ramo "Surprise! zera a prioridade do alvo" em pipelineAmeacasDePrioridade é inalcançável pela interface pública.
+test("Surprise! nunca chega a candidata: a validação a recusa sem Eerie Fog e nenhum candidato das espécies que a têm a usa", () => {
+  [1, 3, 6].forEach((ms) => {
+    const Rm = carregarRegras({ milestone: ms, difficulty: "ace", levelCapMode: "easy" });
+    const comSurprise = Rm.SPECIES.filter((x) => x && (x.ab || []).concat(x.inn || []).some((a) => Rm.ABILITIES[a] && Rm.ABILITIES[a][0] === "Surprise!"));
+    assert.ok(comSurprise.length >= 10, "premissa: ao menos 10 espécies têm Surprise! (" + comSurprise.length + ")");
+    comSurprise.forEach((esp) => {
+      const r = Rm.candidatosDeBuild(esp, {});
+      r.candidatos.forEach((c) => {
+        assert.notEqual(c.habilidade, "Surprise!", esp.n + " milestone " + ms);
+        assert.ok(!(c.inatas || []).includes("Surprise!"), esp.n);
+        assert.ok(!c.golpes.includes("Eerie Fog"), esp.n);
+      });
+      if (r.candidatos.length) {
+        const rec = {};
+        const v = Rm.validateAiBuild(esp, Object.assign({}, r.candidatos[0].build, { ability: "Surprise!" }), rec, {});
+        assert.equal(v, null, esp.n + ": a Surprise! sem Eerie Fog passou na validação");
+        assert.match(rec.txt, /Eerie Fog/, esp.n);
+      }
+    });
+  });
+});
+
 test("fuga no Intimidate (Tactical Retreat): o motor devolve só uma nota e o módulo não lança - Tatsugiri, Deoxys Speed, Chansey e Blissey Redux", () => {
   const nomes = /^(Tatsugiri|Deoxys Speed|Chansey Redux|Blissey Redux)/;
   [1, 4, 6].forEach((ms) => {
