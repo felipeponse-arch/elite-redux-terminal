@@ -70,8 +70,10 @@ if (-not $SkipExtract) {
     # Fase 3 do roadmap de sinergia (2026-09-11): precisa dos flags de golpe
     # (transform.ps1) e do texto de habilidade ja combo-expandido
     # (expand_combo_abilities.ps1), por isso roda depois dos dois.
-    Write-Output "--- computing ability x movepool synergy (Fase 3) ---"
-    & (Join-Path $PSScriptRoot "compute_ability_movepool_synergy.ps1")
+    # 15/10/2026: porte em Node (lê o inglês do dado; a tradução desalinha ids na versão nova).
+    Write-Output "--- computing ability x movepool synergy (gerar_sinergia_habilidade_movepool.mjs) ---"
+    node (Join-Path $PSScriptRoot "gerar_sinergia_habilidade_movepool.mjs") (Join-Path $dataDir "dex_compact.json") (Join-Path $dataDir "species_ability_synergy.json")
+    if ($LASTEXITCODE -ne 0) { throw "gerar_sinergia_habilidade_movepool.mjs falhou" }
     # Rank por duelo simulado (2026-09-28): reescreve tier/score/estagio/
     # Monotype de species_rank.json. Precisa da sinergia acima (bonus de
     # habilidade a golpe) - por isso roda depois dela. Leva ~6 min.

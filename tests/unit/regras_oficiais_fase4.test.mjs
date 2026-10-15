@@ -22,6 +22,10 @@ test("A. habilidade composta aplica TODAS as partes (Fearmonger, Yuki Onna, Fire
   const asOne = R.DATA.abilities.map((a, i) => ({ a, i })).filter((o) => o.a && o.a[0] === "As One" && /Grim Neigh/.test(o.a[1]));
   assert.equal(asOne.length, 1);
   assert.match(R.descricaoDeHabilidadePorId(asOne[0].i), /KOs raise Sp\. Atk/);
+  // O dado grava a parte como "ChillngNeigh" (nome cortado no jogo): a de Chilling Neigh também ganha o efeito (15/10).
+  const asOneAtk = R.DATA.abilities.map((a, i) => ({ a, i })).filter((o) => o.a && o.a[0] === "As One" && /Chilling Neigh/.test(o.a[1]));
+  assert.equal(asOneAtk.length, 1);
+  assert.match(R.descricaoDeHabilidadePorId(asOneAtk[0].i), /KOs raise Attack/);
   assert.match(R.descricaoDeHabilidadePorId(idHab("Atlantic Ruler")), /Boosts the power of Water-type moves by 1\.5x/);
 });
 

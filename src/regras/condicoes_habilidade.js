@@ -106,11 +106,14 @@
   // o nome da parte vai só até "." ou ";" ("Intimidate + Scare; 10% chance..."
   // perdia o Scare) e a expansão desce até 3 níveis ("Atlantic Ruler: Aquatic
   // Dweller + Swift Swim", e Aquatic Dweller é "Aquatic + ...").
+  // Parte citada pelo nome completo, mas gravada no dado com o nome cortado do jogo (15/10: As One perdia o Chilling Neigh).
+  var NOME_DA_PARTE_NO_DADO = { "Chilling Neigh": "ChillngNeigh" };
   function expandirTextoDeHabilidade(txt, nome, nivel) {
     var extra = "";
     if (nivel >= 3 || txt.indexOf("+") === -1) return txt;
     txt.split("+").forEach(function (parte) {
       var p = parte.split(/[.;]/)[0].trim();
+      p = NOME_DA_PARTE_NO_DADO[p] || p;
       var sub = p && p !== nome ? ABILITIES.filter(function (x) { return x && x[0] === p; })[0] : null;
       // A parte entra com o texto que o parser lê (LIDO_PELO_TEXTO_NOVO_DUELO, ticket versao-nova/04), não com a redação nova do dado.
       var lido = sub && typeof LIDO_PELO_TEXTO_NOVO_DUELO !== "undefined" ? LIDO_PELO_TEXTO_NOVO_DUELO[sub[1]] : undefined;
