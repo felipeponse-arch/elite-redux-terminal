@@ -220,11 +220,48 @@
       concluirBuildDoLote(sp.x);
       return false;
     });
-    var faltam = members.slice();
-    if (members.length > 1) {
-      progresso("Gerando as " + members.length + " builds numa consulta só…");
+    var faltam = [];
+    var falhouNaEscolha = [];
+    // A IA escolhe entre os candidatos do pipeline (ticket 03): quem tem candidato vai numa consulta só, bem menor; quem não tem
+    // (sem alvo adiante, sem candidato) segue o caminho antigo logo abaixo. Escolha inválida cai no melhor do motor, sem outra chamada.
+    var comCand = [];
+    var semCand = [];
+    members.forEach(function (sp) {
+      var r = candidatosParaAEscolhaDaIa(sp, optsDe(sp));
+      if (r) comCand.push({ sp: sp, r: r }); else semCand.push(sp);
+    });
+    if (comCand.length) {
+      progresso("Escolhendo as " + comCand.length + " builds entre os candidatos do jogo…");
+      var respC = await pedirIA({
+        prompt: montarPromptEscolhaDoTime(comCand, optsLote),
+        ferramentas: false,
+        provedor: "omniroute",
+        tentativas: 1,
+        oQue: "Builds do time",
+        aviso: aviso,
+        validar: validarRespostaDoLoteDeBuilds
+      });
+      aviso("");
+      comCand.forEach(function (it) {
+        var sp = it.sp;
+        // Chamada do lote falhou: o melhor candidato do motor, sem pedir de novo (economia). Só quem fica sem NENHUM candidato válido vai ao caminho individual.
+        var bruto = respC.ok ? (respC.valor[sp.sname] || respC.valor[sp.n]) : null;
+        var esc = escolherCandidatoDaIa(sp, it.r, bruto, optsDe(sp), !respC.ok);
+        if (!esc.build) { falhouNaEscolha.push(sp); return; }
+        var r = gravarBuildValidadaDaIa(sp, esc.build, esc.origem === "motor" ? null : bruto, optsDe(sp), cap, aviso);
+        if (r === false) { // lista cheia: pedir de novo não adianta
+          resultado[sp.sname] = false;
+          resultado.ultimoMotivo = textoDeLimiteDeBuilds(sp, optsDe(sp));
+        } else resultado[sp.sname] = r;
+        concluirBuildDoLote(sp.x);
+      });
+    }
+    // O caminho antigo (uma consulta do zero) só para quem não tem candidato.
+    faltam = semCand.slice();
+    if (semCand.length > 1) {
+      progresso("Gerando as " + semCand.length + " builds numa consulta só…");
       var resp = await pedirIA({
-        prompt: montarPromptBuildsDoTime(members, optsLote),
+        prompt: montarPromptBuildsDoTime(semCand, optsLote),
         ferramentas: false,
         provedor: "omniroute",
         tentativas: 1, // quem falhar vai pelo caminho individual (com a nova tentativa dele)
@@ -235,7 +272,7 @@
       aviso("");
       if (resp.ok) {
         faltam = [];
-        members.forEach(function (sp) {
+        semCand.forEach(function (sp) {
           var daIa = buildDoLoteDeBuilds(sp, resp.valor, optsDe(sp));
           var r = daIa.validada ? gravarBuildValidadaDaIa(sp, daIa.validada, daIa.bruto, optsDe(sp), cap, aviso) : false;
           // Só sai do lote quem ganhou build: quem vai ser pedido de novo continua
@@ -244,6 +281,7 @@
         });
       }
     }
+    faltam = faltam.concat(falhouNaEscolha);
     // Sem vaga (3 builds, todas feitas pelo jogador): pedir de novo só gastaria
     // outra chamada - a build nova não teria onde ficar.
     var semVaga = function (s) { var l = getBuildList(s.sname); return l.length >= 3 && l.every(function (b) { return b.source === "manual"; }); };
@@ -284,8 +322,29 @@
       };
       var travada = motivoDeNaoGerarBuild(sp);
       if (travada) { aviso(travada); return false; }
-      aviso("Consultando o Claude…");
       var cap = getCurrentCap();
+      // A IA escolhe ENTRE os candidatos do pipeline (ticket 03): prompt menor, e a resposta fora dos candidatos
+      // cai no melhor do motor sem outra chamada. Sem alvo/candidato (ou nos modos revisão/ponte) segue o caminho antigo.
+      var cands = candidatosParaAEscolhaDaIa(sp, opts);
+      if (cands) {
+        aviso("Consultando o Claude…");
+        var respE = await pedirIA({
+          prompt: montarPromptEscolhaDeBuild(sp, cands, opts),
+          provedor: "omniroute",
+          ferramentas: false,
+          tentativas: 1, // a escolha inválida não gasta outra chamada: o motor decide
+          oQue: "Build",
+          aviso: aviso,
+          validar: function (bruto) { return { valor: escolherCandidatoDaIa(sp, cands, bruto, opts) }; }
+        });
+        if (!respE.ok) { aviso(respE.mensagem); return false; }
+        if (respE.valor.build) {
+          aviso("");
+          return gravarBuildValidadaDaIa(sp, respE.valor.build, respE.valor.origem === "motor" ? null : respE.bruto, opts, cap, aviso);
+        }
+        // Nenhum candidato passou na validação (ex.: a do chefão): caminho antigo.
+      }
+      aviso("Consultando o Claude…");
       // Uma nova tentativa automática, já dizendo à IA por que a primeira foi
       // rejeitada (item U3 da pauta técnica, 2026-09-16) - antes o trabalho de
       // "tente de novo" ficava com o jogador. Só UMA: cada chamada custa, e se a

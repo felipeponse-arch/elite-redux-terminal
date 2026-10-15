@@ -1,6 +1,13 @@
 // Seções 25 a 29: time e caixa nunca compartilham o mesmo Pokémon, auditoria WCAG/eMAG, trava de level cap no gerador de build por IA, botão 'Gerar build com IA' no Meu Time e 'remover' banca pra caixa.
 // Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
+// Estas checagens são do prompt de build do ZERO (o caminho de antes, que segue valendo em revisão/ponte e sem candidato); a escolha entre candidatos é a seção 29.
+// A chave da escolha entre candidatos fica desligada SÓ aqui dentro e volta a ligar mesmo com return antecipado ou erro.
 async function section10() {
+  var T = window.__erTest;
+  if (T && T.definirEscolhaEntreCandidatos) T.definirEscolhaEntreCandidatos(false);
+  try { await section10Corpo(); } finally { if (T && T.definirEscolhaEntreCandidatos) T.definirEscolhaEntreCandidatos(true); }
+}
+async function section10Corpo() {
   // --- 25. Time e caixa nunca compartilham o mesmo Pokémon (achado real em
   // revisão de código, 2026-09-12) - o botão "+ Caixa" na ficha da Dex só
   // desabilitava por `inBox`, nunca por `inTeam`: dava pra clicar

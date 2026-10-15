@@ -4,7 +4,14 @@
 // A IA é simulada (window.claude), a validação é a real. A fixture é achada
 // no dado: espécie sem sinergia conhecida (isola a regra de sinergia), com 4
 // golpes de dano liberados no cap atual e sem build salva.
+// Nova tentativa com o motivo é do prompt de build do ZERO (revisão/ponte, ou sem candidato); a escolha entre candidatos é a seção 29.
+// A chave da escolha entre candidatos fica desligada SÓ aqui dentro e volta a ligar mesmo com return antecipado ou erro.
 async function section16() {
+  var T = window.__erTest;
+  if (T && T.definirEscolhaEntreCandidatos) T.definirEscolhaEntreCandidatos(false);
+  try { await section16Corpo(); } finally { if (T && T.definirEscolhaEntreCandidatos) T.definirEscolhaEntreCandidatos(true); }
+}
+async function section16Corpo() {
   var T = window.__erTest;
   if (!T) { check("ponte de teste disponível", false); return; }
   document.querySelector('.tab-btn[data-tab="dex"]').click();

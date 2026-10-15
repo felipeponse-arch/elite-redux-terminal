@@ -321,8 +321,11 @@
         (list.length >= 3
           ? '<p class="hint" style="margin:0;">Limite de 3 builds atingido - apague uma antes de gerar outra.</p>'
           : '<button id="mybuild-ai-generate" class="text-action-btn" type="button">Gerar build com IA</button>') +
+        // Sugestões do jogo (pipeline de build, ticket pipeline-build/02): calculadas pelo código, sem IA e sem gravar nada.
+        '<button id="mybuild-pipeline-ver" class="text-action-btn" type="button" aria-expanded="false" aria-controls="mybuild-pipeline-painel">Ver sugestões do jogo</button>' +
         '<span id="mybuild-ai-status" class="notes-status" role="status" aria-live="polite"></span>' +
       '</div>' +
+      '<div id="mybuild-pipeline-painel" class="pipe-painel" hidden></div>' +
     '</div>';
   }
 
@@ -483,6 +486,7 @@
     }
     updateMyBuildEvTotal();
     updateMyBuildStatus(sp);
+    pipelineDesenharFicha(sp);
   }
 
   // O que está digitado no editor agora (a build salva só muda ao salvar).

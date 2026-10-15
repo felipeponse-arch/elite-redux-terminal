@@ -8,6 +8,8 @@ async function section27() {
   var T = window.__erTest;
   if (!T) { check("ponte de teste disponível", false); return; }
   var claudeAntes = window.claude;
+  // O fluxo do botão (time, status, aviso de faltou build) é testado com o prompt de build do zero; a escolha entre candidatos no lote é a seção 29.
+  T.definirEscolhaEntreCandidatos(false);
   T.definirPausasIA([0, 0]);
   var timeAntes = T.state.team.slice();
   var donos = T.state.team.concat(T.state.box);
@@ -166,6 +168,7 @@ async function section27() {
     }
   } finally {
     T.definirPausasIA([4000, 10000]);
+    T.definirEscolhaEntreCandidatos(true);
     if (claudeAntes === undefined) delete window.claude; else window.claude = claudeAntes;
   }
 }

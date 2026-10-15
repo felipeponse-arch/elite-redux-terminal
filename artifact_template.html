@@ -36,6 +36,8 @@
   /*@css cards_do_time.css*/
   /*@css dialogos_e_notas.css*/
   /*@css estrategia.css*/
+  /*@css pipeline_tela.css*/
+  /*@css quem_resolve.css*/
   /*@css insignias.css*/
   /*@css tipos_e_rodape.css*/
   /*@css responsivo.css*/
@@ -200,6 +202,12 @@
           </div>
           <div class="team-slots" id="team-slots"></div>
         </div>
+
+        <!-- Sugestões do jogo para o time (pipeline de build, ticket pipeline-build/02): recolhido; só calcula ao abrir. -->
+        <details class="card pipe-time" id="team-pipeline">
+          <summary>Sugestões do jogo para o time</summary>
+          <div id="team-pipeline-corpo" class="pipe-time-corpo"></div>
+        </details>
 
         <!-- Mono run (revisão de front/CX, 2026-09-27): abaixo do time, nunca
              acima - o time vem primeiro. Ver renderMonoRun() em arquetipo.js. -->
@@ -718,6 +726,7 @@
 /*@regras duelo.js*/
 /*@regras prompts_ia.js*/
 /*@regras pipeline_build.js*/
+/*@regras escolha_ia_candidatos.js*/
 /*@regras ferramentas_ia.js*/
 /*@regras lista_de_builds.js*/
 /*@regras gravacao_build_ia.js*/
@@ -829,6 +838,10 @@
 
 /*@ui ia.js*/
 
+/*@ui pipeline_tela.js*/
+
+/*@ui quem_resolve.js*/
+
 /*@ui revisao_automatica.js*/
 
 /*@ui ficha_extras.js*/
@@ -914,6 +927,13 @@
     definirTempoLimiteIA: function (ms) { TEMPO_LIMITE_IA_MS = ms; },
     sampleErrorMessage: sampleErrorMessage,
     desligarRevisaoAutomatica: function (sim) { revisaoAutomaticaDesligada = !!sim; },
+    // Ticket 03 do pipeline: liga/desliga a IA que escolhe entre candidatos (desligada = o prompt de build do zero de antes).
+    definirEscolhaEntreCandidatos: function (sim) { escolhaEntreCandidatosLigada = !!sim; },
+    montarPromptEscolhaDeBuild: montarPromptEscolhaDeBuild,
+    montarPromptEscolhaDoTime: montarPromptEscolhaDoTime,
+    montarPromptBuildsDoTime: montarPromptBuildsDoTime,
+    gerarBuildsDoTimeComIA: gerarBuildsDoTimeComIA,
+    candidatosDeBuild: candidatosDeBuild,
     strategySetsHtml: strategySetsHtml,
     confrontoParaParty: confrontoParaParty,
     bossConfrontoHtml: bossConfrontoHtml,

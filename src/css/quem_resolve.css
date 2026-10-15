@@ -1,0 +1,41 @@
+/* Quem derruba este chefão (ticket pipeline-build/04). Reaproveita os cartões .pipe-* do ticket 02; aqui só o
+   invólucro: o card recolhido, um grupo por Pokémon do chefão e a etiqueta de origem. A origem sempre vem escrita
+   (a cor só reforça), e nada novo de sombra: o fundo é o mesmo bloco --surface-2. */
+.qr-card { margin-top: 12px; }
+.qr-card > summary {
+  cursor: pointer; font-weight: 700; font-size: var(--fs-destaque); min-height: var(--alvo-min);
+  display: flex; align-items: center; gap: 6px; list-style: none;
+}
+.qr-card > summary:hover { color: var(--badge-accent); }
+.qr-card > summary::-webkit-details-marker { display: none; }
+.qr-card > summary::before { content: "▸"; color: var(--text-dim); }
+.qr-card[open] > summary::before { content: "▾"; }
+.qr-corpo-card { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; min-width: 0; }
+.qr-corpo-card > p { margin: 0; }
+
+.qr-membro { border-top: 1px solid var(--border); min-width: 0; }
+.qr-membro > summary {
+  cursor: pointer; min-height: var(--alvo-min); display: flex; align-items: center; gap: 8px;
+  list-style: none; font-weight: 600; font-size: var(--fs-texto);
+}
+.qr-membro > summary:hover { color: var(--badge-accent); }
+.qr-membro > summary::-webkit-details-marker { display: none; }
+.qr-membro > summary::before { content: "▸"; color: var(--text-dim); flex: none; }
+.qr-membro[open] > summary::before { content: "▾"; }
+.qr-membro-nome { min-width: 0; overflow-wrap: anywhere; }
+.qr-corpo { display: flex; flex-direction: column; gap: 10px; padding: 4px 0 12px; min-width: 0; }
+.qr-grupo { margin: 4px 0 0; font-size: var(--fs-pequeno); font-weight: 700; color: var(--text-dim); }
+.qr-item { gap: 6px; }
+.qr-item .pipe-membro-cab { flex-wrap: wrap; row-gap: 4px; }
+.qr-item .pipe-membro-nome { flex: 0 1 auto; }
+.qr-origem {
+  font-size: var(--fs-legenda); font-weight: 600; padding: 2px 8px; border-radius: var(--radius-pill);
+  border: 1px solid var(--border); background: var(--surface-3); color: var(--text);
+}
+.qr-origem.meu { border-color: var(--badge-resist); }
+.qr-origem.fora { border-style: dashed; color: var(--text-dim); }
+.qr-item .pipe-ver { margin-left: auto; }
+
+@media (pointer: coarse) {
+  .qr-card > summary, .qr-membro > summary { min-height: 44px; }
+}

@@ -104,10 +104,12 @@ test("hit-kill de 2 golpes: o Flame Burst do alvo derruba o atacante antes do 2�
   // Pidgeotto e Pidgeot saíram da premissa em 15/10/2026 (ticket calibracao-03): a Giant Wings, innate deles, passou a valer x1,3
   // nos golpes de ar (Air Cutter, Air Slash...), os sets mais fortes viram hit-kill de 1 golpe e já não sobra candidato de 2.
   // A propriedade segue valendo para o que sobrar de hit-kill de 2 neles (nenhum, hoje).
+  // O Nidorino saiu da premissa em 15/10/2026 (ticket pipeline-build/05): os hit-kill de 2 dele eram sets MISTOS (Sludge Bomb + Drill Run +
+  // Earthquake + Thunderbolt) com Modest num bicho de Atk 72 x SpA 55; com a natureza seguindo o split dos golpes sobram os Adamant (hit-kill de 1).
   ["Raticate", "Nidorino", "Pidgeotto", "Pidgeot"].forEach((nome) => {
     const r = R.candidatosDeBuild(sp(nome), { alvo: ninetales });
     const dois = r.candidatos.filter((x) => x.hitKill === 2);
-    if (nome === "Raticate" || nome === "Nidorino") assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
+    if (nome === "Raticate") assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
     dois.forEach((x) => {
       assert.equal(x.baterPrimeiro, false, nome + " " + x.golpes.join("/"));
       assert.equal(x.alvoAgeAntes, true, nome);
@@ -577,6 +579,38 @@ test("especiesQueResolvem: opts.especies substitui a lista e opts.max corta", ()
   assert.equal(R.especiesQueResolvem(ninetales, { especies: ["SPECIES_LEDIAN", "SPECIES_ACCELGOR", "SPECIES_SCIZOR"], max: 2 }).length, 2);
   deepEqual(R.especiesQueResolvem({ chefao: "Ninguém" }, { especies: ["SPECIES_LEDIAN"] }), []);
   deepEqual(R.especiesQueResolvem(ninetales, { especies: [] }).length, 0);
+});
+
+test("especiesQueResolvem: opts.demais soma as melhores do rank da Etapa, depois do time e da caixa, com a origem de cada uma", () => {
+  const Rx = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+  const x = (s) => Rx.getSpeciesBySname(s).x;
+  const alvo = { chefao: Rx.BOSSES.find((b) => b.name === "Courtney Meteor Falls"), indice: 0 };
+  Rx.state.team = [x("SPECIES_LEDIAN")];
+  Rx.state.box = [x("SPECIES_STEELIX")];
+  const sem = Rx.especiesQueResolvem(alvo, {});
+  assert.ok(sem.length >= 1);
+  sem.forEach((e) => assert.ok(e.origem === "time" || e.origem === "caixa", "sem demais só time e caixa: " + e.origem));
+  const com = Rx.especiesQueResolvem(alvo, { demais: 12, max: 5, maxDemais: 3 });
+  const origens = com.map((e) => e.origem);
+  assert.ok(origens.indexOf("outros") !== -1, "ao menos um dos demais derruba: " + origens.join(","));
+  assert.ok(origens.filter((o) => o === "outros").length <= 3, "maxDemais corta só os demais");
+  assert.equal(origens.indexOf("time") !== -1 && origens.indexOf("time") < origens.indexOf("outros"), true, "time antes dos demais");
+  assert.equal(origens.lastIndexOf("caixa") < origens.indexOf("outros") || origens.indexOf("caixa") === -1, true, "caixa antes dos demais");
+  com.filter((e) => e.origem === "outros").forEach((e) => {
+    assert.notEqual(e.sp.sname, "SPECIES_LEDIAN");
+    assert.notEqual(e.sp.sname, "SPECIES_STEELIX");
+    assert.ok(Rx.rankDe(e.sp.sname).etapa <= 3, e.sp.n + " ainda não dá para pegar na Etapa 3");
+    assert.ok(e.candidato.hitKill > 0);
+  });
+  // os demais vêm do topo do rank: nenhum fica abaixo da 12ª melhor da Etapa
+  const topo = Rx.SPECIES.filter((s) => s && !["SPECIES_LEDIAN", "SPECIES_STEELIX"].includes(s.sname) && Rx.rankDe(s.sname) && Rx.rankDe(s.sname).etapa <= 3)
+    .sort((a, b) => Rx.rankDe(b.sname).score - Rx.rankDe(a.sname).score || (a.sname < b.sname ? -1 : 1)).slice(0, 12).map((s) => s.sname);
+  com.filter((e) => e.origem === "outros").forEach((e) => assert.ok(topo.includes(e.sp.sname), e.sp.n));
+  // Monotype: os demais respeitam o tipo
+  Rx.state.archetype.monotype = "Bug";
+  Rx.especiesQueResolvem(alvo, { demais: 12 }).forEach((e) => assert.ok(Rx.speciesTypeNames(e.sp).includes("Bug"), e.sp.n));
+  // opts.especies marca "informada"
+  assert.equal(R.especiesQueResolvem(ninetales, { especies: ["SPECIES_LEDIAN"] })[0].origem, "informada");
 });
 
 // ---------- 3. fechar a build ----------

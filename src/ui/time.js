@@ -83,6 +83,7 @@
     renderTeamAnalysis(members);
     renderSavedTeams();
     renderNextFightCard();
+    pipelineDesenharTime(); // bloco "Sugestões do jogo para o time": só desenha se estiver aberto
   }
 
   // Um ouvinte só pra todos os cards do time (fase 5 da refatoração,
