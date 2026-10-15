@@ -691,14 +691,26 @@
   }
   // ---------- itens (2026-09-29) ----------
   // O texto do item no jogo não traz número ("Boosts the power of moves at the
-  // cost of HP"): valem os da série - Life Orb 1,3x com 10% do HP por ataque,
-  // Leftovers 1/16, item de tipo 1,2x, gema 1,3x uma vez, Expert Belt 1,2x no
-  // super efetivo, Sitrus 1/4 com metade do HP, bagas "que podem confundir" 1/3
+  // cost of HP"): valem os do código do jogo - Life Orb 1,3x com 10% do HP por
+  // ataque, Leftovers 1/16, Expert Belt 1,2x no super efetivo (fixos no código,
+  // battle_util.c:7674-7679) - e, nos itens que leem o `hold_effect_strength` da
+  // er-config (data/itens_config.json: item de tipo e Plate 1,3x, Muscle Band e
+  // Wise Glasses 1,15x, gema 1,5x uma vez, Soul Dew 1,5x, Wide Lens +12%, Quick
+  // Claw 20%), o número da config: modificador = 1 + força/100 (ticket
+  // calibracao-02, 15/10/2026; antes: tipo 1,2, Muscle/Wise 1,1, gema 1,3, Wide
+  // Lens 1,1). Sitrus 1/4 com metade do HP, bagas "que podem confundir" 1/3
   // com 1/4 do HP, baga de resistência corta o 1º super efetivo pela metade,
   // baga de aperto +1 com 1/4 do HP. Atributo fixo (Choice, Assault Vest...)
   // já entra em calcFinalStat. Camada separada da habilidade (u.it) porque
   // Klutz, Frisk, Pickpocket e Unnerve desligam o item.
   var cacheItemDuelo = {};
+  // Linha do item na config do jogo ({ e: efeito, f: força, t: tipo }) ou null.
+  function itemDaConfigDuelo(nome) { return (typeof ITENS_CONFIG !== "undefined" && ITENS_CONFIG.itens[nome]) || null; }
+  // 1 + força/100 do item na config; sem a linha (item fora da config), vale o padrão do código do jogo.
+  function modificadorDoItemDuelo(nome, efeito, padraoPct) {
+    var c = itemDaConfigDuelo(nome);
+    return 1 + (c && c.e === efeito && c.f ? c.f : padraoPct) / 100;
+  }
   function itemDoDuelo(nome, sp) {
     var chave = (nome || "") + "|" + (sp ? sp.sname : "");
     if (cacheItemDuelo[chave]) return cacheItemDuelo[chave];
@@ -706,27 +718,38 @@
       critEstagio: 0, precisaoMult: 1, evasao: 1, defMult: 1, spdMult: 1, speMult: 1, lento: false, curaTurno: 0, perdaTurno: 0,
       custoAtaque: 0, drenoPct: 0, drenoMult: 1, danoAoContato: 0, contraCatUmaVez: null, bagaHP: 0, bagaHPLimite: 0, bagaResiste: null,
       bagaAperto: null, curaStatusUmaVez: false, estagioUmaVez: [], recuar: 0, imuneEfeito: false, imuneQuedas: false, semEfeitoContato: false,
-      balao: false, cargaUmaVez: false, dadoCarregado: false, metronomo: false, consumivel: false, baga: false };
+      balao: false, cargaUmaVez: false, dadoCarregado: false, metronomo: false, consumivel: false, baga: false,
+      gemaMult: 1.5, garra: 0, guardaChuvaSol: false };
     var t = (typeof ITEM_DESC !== "undefined" && ITEM_DESC[nome]) || "";
     var x, tp;
     if (!nome) { cacheItemDuelo[chave] = it; return it; }
     if (nome === "Life Orb") { it.danoMult = 1.3; it.custoAtaque = 0.1; }
     if (nome === "Expert Belt") it.seMult = 1.2;
-    if (nome === "Muscle Band") it.fisicoMult = 1.1;
-    if (nome === "Wise Glasses") it.especialMult = 1.1;
+    if (nome === "Muscle Band") it.fisicoMult = modificadorDoItemDuelo(nome, "MUSCLE_BAND", 15);
+    if (nome === "Wise Glasses") it.especialMult = modificadorDoItemDuelo(nome, "WISE_GLASSES", 15);
+    // Soul Dew (battle_util.c:7020-7026 e 7455-7461, B_SOUL_DEW_BOOST = GEN_3): Latias e Latios (e as megas) levam o golpe
+    // especial e a Defesa Especial x1,5.
+    if (nome === "Soul Dew" && sp && /^SPECIES_LATI(AS|OS)(_MEGA)?$/.test(sp.sname || "")) { it.especialMult = modificadorDoItemDuelo(nome, "SOUL_DEW", 50); it.spdMult = it.especialMult; }
+    if (nome === "Quick Claw") it.garra = (itemDaConfigDuelo(nome) && itemDaConfigDuelo(nome).f || 20) / 100; // battle_main.c:4419: Random() % 100 < força
+    if (nome === "Utility Umbrella") it.guardaChuvaSol = true; // battle_util.c:8674-8683
     if (nome === "Punching Glove") it.categoriaMult.soco = 1.1;
     if (nome === "Metronome") it.metronomo = true;
     if (nome === "Loaded Dice") it.dadoCarregado = true;
     if (nome === "Power Herb") { it.cargaUmaVez = true; it.consumivel = true; }
-    if ((x = t.match(/(?:raises|boosts|ups) the power of (\w+)-type moves|boosts (\w+)-type moves|ups the power of (\w+)-type moves|Increases the power of (\w+) Type moves/i)) &&
+    // Item de tipo, Plate e gema: o tipo e a força vêm da config (hold_effect_type/hold_effect_strength); o texto só
+    // vale para item que a config não traz.
+    var cfgItem = itemDaConfigDuelo(nome);
+    if (cfgItem && cfgItem.t && (cfgItem.e === "TYPE_POWER" || cfgItem.e === "PLATE")) it.tipoMult[cfgItem.t] = 1 + cfgItem.f / 100;
+    else if (cfgItem && cfgItem.t && cfgItem.e === "GEMS") { it.gema = cfgItem.t; it.gemaMult = 1 + cfgItem.f / 100; it.consumivel = true; }
+    else if ((x = t.match(/(?:raises|boosts|ups) the power of (\w+)-type moves|boosts (\w+)-type moves|ups the power of (\w+)-type moves|Increases the power of (\w+) Type moves/i)) &&
       (tp = tipoDoTextoDuelo(x[1] || x[2] || x[3] || x[4]))) {
-      if (/ Gem$/.test(nome)) { it.gema = tp; it.consumivel = true; } else it.tipoMult[tp] = 1.2;
+      if (/ Gem$/.test(nome)) { it.gema = tp; it.consumivel = true; } else it.tipoMult[tp] = 1.3;
     }
     if (nome === "Eviolite" && sp && (sp.ev || []).some(function (ev) { return !isMegaEvoKind(ev[0]); })) { it.defMult = 1.5; it.spdMult = 1.5; }
     if (nome === "Scope Lens" || nome === "Razor Claw") it.critEstagio = 1;
     if (nome === "King's Rock" || nome === "Razor Fang") it.recuar = 0.1;
     if (nome === "Bright Powder") it.evasao = 1.1;
-    if (nome === "Wide Lens") it.precisaoMult = 1.1;
+    if (nome === "Wide Lens") it.precisaoMult = modificadorDoItemDuelo(nome, "WIDE_LENS", 12); // battle_script_commands.c:1381: precisão x (100+força)/100
     if (nome === "Iron Ball") it.speMult = 0.5;
     if (nome === "Lagging Tail") it.lento = true;
     if (nome === "Covert Cloak") it.imuneEfeito = true;
@@ -1460,7 +1483,10 @@
   // Cada golpe guarda a força sem os bônus de habilidade (forcaBase) e com eles
   // (forca): Wonder Skin/Fort Knox do defensor anulam os bônus do atacante.
   function prepararGolpesDuelo(ids, u, clima) {
-    var reforcado = TIPO_REFORCADO_PELO_CLIMA[clima];
+    // Utility Umbrella (battle_util.c:7589-7637 + 8674-8683): sol e chuva não mexem no DANO do portador (sem o x1,5 de
+    // Fire/Water e sem o corte); a carga do Solar Beam (IsWeatherActive) segue valendo.
+    var climaDoDano = (clima === "sol" || clima === "chuva") && u.it && u.it.guardaChuvaSol && !u.ef.klutz ? null : clima;
+    var reforcado = TIPO_REFORCADO_PELO_CLIMA[climaDoDano];
     // Golpe de carga só entra se não precisa carregar: Solar Beam/Solar Blade no
     // sol ou com Chloroplast ("Solar Beam/Blade ... act as if used in sun").
     ids = ids.filter(function (id) {
@@ -1532,8 +1558,8 @@
       if ((m[7] || 0) > 0) hab *= u.ef.prioMult;
       if (reforcado && tipo === reforcado) base *= CLIMA_OFICIAL.reforcoSolChuva; // NextDex 2.65beta + código oficial: 1,5x (mono_run.js)
       // Série: Water no sol e Fire na chuva saem pela metade (Catastrophe: reforçam; Nika: Water normal no sol).
-      var enfraquecido = { sol: "Water", chuva: "Fire" }[clima];
-      if (enfraquecido && tipo === enfraquecido && !(clima === "sol" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? CLIMA_OFICIAL.reforcoSolChuva : 0.5; // Catastrophe: o mesmo reforço do clima
+      var enfraquecido = { sol: "Water", chuva: "Fire" }[climaDoDano];
+      if (enfraquecido && tipo === enfraquecido && !(climaDoDano === "sol" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? CLIMA_OFICIAL.reforcoSolChuva : 0.5; // Catastrophe: o mesmo reforço do clima
       if (u.ef.seguimento && u.ef.seguimento.tipo === tipo) { if (porPoder) porPoder.somas.push(u.ef.seguimento.poder); else hab *= (poder + u.ef.seguimento.poder) / poder; }
       u.ef.seguimentoCategoria.forEach(function (sg) {
         var vale = sg.quais === "todos" || (sg.quais === "som" && som) || (sg.quais === "danca" && flags.indexOf("Dance Move") !== -1) || cats.indexOf(sg.quais) !== -1;
@@ -2081,7 +2107,7 @@
       if (u.ef.ritmico && turnos > 0) f *= 1 + u.ef.ritmico * (turnos - 1) / 2; // Rhythmic: +10% por repetição
       var itU = u.it || itemDoDuelo("", null), outroU = u === eu ? foe : eu, atv = itemAtivoDuelo(u, outroU);
       if (itU.metronomo && turnos > 0) f *= comItem(Math.min(2, 1 + 0.2 * (turnos - 1) / 2), atv); // Metronome: +20% por repetição
-      if (itU.gema && g && g.tipo === itU.gema && turnos > 0) f *= comItem((1.3 + turnos - 1) / turnos, atv); // gema: 1,3x uma vez
+      if (itU.gema && g && g.tipo === itU.gema && turnos > 0) f *= comItem((itU.gemaMult + turnos - 1) / turnos, atv); // gema: 1,5x uma vez
       if (u.ef.carregaAoApanhar && g && g.tipo === "Electric" && turnos > 0) f *= (2 * turnos - 1) / turnos; // Electromorphosis
       else if (u.ef.carregaNaEntrada && g && g.tipo === "Electric" && turnos > 0) f *= (turnos + 1) / turnos; // Generator: o 1º sai 2x
       // Power Outage: o 1º golpe Electric sai 2x, depois perde o tipo (e o STAB).
@@ -2458,9 +2484,11 @@
       return d;
     }
     var semPlanos = corridaCrua(nec, elePrecisa, euPrimeiro, st.meu, st.dele, hpEu, hpFoe);
-    // Quick Draw: com chance q, quem seria o segundo age primeiro - mistura os dois resultados.
+    // Quick Draw e Quick Claw: com chance q, quem seria o segundo age primeiro - mistura os dois resultados.
+    // No jogo (battle_main.c:4413-4420) os dois sorteios são independentes, um depois do outro: 1 - (1-q)(1-c).
+    function saqueDe(u, outro) { return 1 - (1 - u.ef.saque) * (1 - (u.it && u.it.garra ? u.it.garra * itemAtivoDuelo(u, outro) : 0)); }
     function comSaque(r, a, b) {
-      var q = (euPrimeiro === false ? a.ef.saque : 0) - (euPrimeiro === true ? b.ef.saque : 0);
+      var q = (euPrimeiro === false ? saqueDe(a, b) : 0) - (euPrimeiro === true ? saqueDe(b, a) : 0);
       if (!q || porPrioridade) return r;
       var outra = corridaCrua(nec, elePrecisa, q > 0, st.meu, st.dele, hpEu, hpFoe);
       var w = Math.abs(q);

@@ -1,5 +1,6 @@
 // Itens no duelo (2026-09-29, decisão do usuário: "item nos sets do duelo").
-// Valores da série (o texto do item no jogo não traz número). Também o bug
+// Valores da série e, desde 15/10/2026, os da config do jogo nos itens que leem hold_effect_strength (tests/unit/itens_da_config.test.mjs).
+// O texto do item no jogo não traz número. Também o bug
 // achado no caminho: Choice Band/Specs do chefão contavam duas vezes.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -34,13 +35,13 @@ test("Life Orb: 1,3x no dano e 10% do HP por ataque; Magic Guard não paga", () 
   assert.ok(perto(mg, combinar(unidade(efDe(["Magic Guard"]), golpe("F")), alvo).dele));
 });
 
-test("Expert Belt só no super efetivo; item de tipo 1,2x no tipo", () => {
+test("Expert Belt só no super efetivo; item de tipo 1,3x no tipo (força 30 da config, 15/10/2026; antes 1,2x)", () => {
   const alvo = unidade(efDe([]), golpe("F"));
   const r = (item, tipo) => dano(unidade(efDe([]), golpe("F", { tipo }), item), alvo) / dano(unidade(efDe([]), golpe("F", { tipo })), alvo);
   assert.ok(perto(r("Expert Belt", "Grass"), 1.2));
   assert.ok(perto(r("Expert Belt", "Normal"), 1));
-  // Item de tipo entra no poder: pela fórmula (+2 no fim), um pouco abaixo de 1,2x no dano.
-  assert.ok(r("Charcoal", "Fire") > 1.15 && r("Charcoal", "Fire") < 1.2, String(r("Charcoal", "Fire")));
+  // Item de tipo entra no poder: pela fórmula (+2 no fim), um pouco abaixo de 1,3x no dano.
+  assert.ok(r("Charcoal", "Fire") > 1.25 && r("Charcoal", "Fire") < 1.3, String(r("Charcoal", "Fire")));
 });
 
 test("Leftovers cura 1/16 por turno; Klutz desliga o item", () => {

@@ -53,6 +53,7 @@ const ARQUIVOS_DE_DADOS = {
   __GYM_SKILLS_JSON__: "gym_skills.json",
   __MONO_DISP_JSON__: "mono_disponibilidade.json",
   __MOVE_CATEGORIAS_JSON__: "move_categorias.json",
+  __ITENS_CONFIG_JSON__: "itens_config.json",
 };
 
 for (const nome of Object.values(ARQUIVOS_DE_DADOS)) {
