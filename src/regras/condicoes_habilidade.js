@@ -112,7 +112,9 @@
     txt.split("+").forEach(function (parte) {
       var p = parte.split(/[.;]/)[0].trim();
       var sub = p && p !== nome ? ABILITIES.filter(function (x) { return x && x[0] === p; })[0] : null;
-      if (sub) extra += " " + expandirTextoDeHabilidade(sub[1] || "", p, nivel + 1);
+      // A parte entra com o texto que o parser lê (LIDO_PELO_TEXTO_NOVO_DUELO, ticket versao-nova/04), não com a redação nova do dado.
+      var lido = sub && typeof LIDO_PELO_TEXTO_NOVO_DUELO !== "undefined" ? LIDO_PELO_TEXTO_NOVO_DUELO[sub[1]] : undefined;
+      if (sub) extra += " " + expandirTextoDeHabilidade(lido !== undefined ? lido : (sub[1] || ""), p, nivel + 1);
     });
     return txt + extra;
   }

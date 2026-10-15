@@ -3485,4 +3485,33 @@ export const MUTACOES = [
     de: "ef.reducao.superEf *= (1 - parseInt(x[2], 10) / 100) / (1 - parseInt(x[1], 10) / 100); }",
     para: "}",
   },
+  // ---- ticket versao-nova/04 (15/10/2026): o parser lê a redação que conhece quando o dado traz a redação nova da NextDex 2.65.4 ----
+  {
+    id: "versao-lido-indice-vazio",
+    descricao: "o índice do texto novo fica vazio (o texto da 2.65.4 volta a derrubar o efeito de 57 habilidades)",
+    arquivo: "duelo.js",
+    de: "  TEXTO_LIDO_DA_VERSAO_NOVA_DUELO.forEach(function (t) { LIDO_PELO_TEXTO_NOVO_DUELO[t[1]] = t[2]; });\n",
+    para: "",
+  },
+  {
+    id: "versao-lido-textohab-ignora",
+    descricao: "textoHabDuelo ignora o texto lido e devolve o texto do dado",
+    arquivo: "duelo.js",
+    de: "return lido !== undefined ? expandirTextoDeHabilidade(lido, nome, 0) : descricaoDeHabilidadePorId(id);",
+    para: "return descricaoDeHabilidadePorId(id);",
+  },
+  {
+    id: "versao-lido-composta-ignora",
+    descricao: "a parte de uma composta (Poison Quills = Rough Skin + Poison Point) volta a entrar com a redação nova do dado",
+    arquivo: "condicoes_habilidade.js",
+    de: "expandirTextoDeHabilidade(lido !== undefined ? lido : (sub[1] || \"\"), p, nivel + 1)",
+    para: "expandirTextoDeHabilidade(sub[1] || \"\", p, nivel + 1)",
+  },
+  {
+    id: "versao-lido-entrada-guts-some",
+    descricao: "a entrada do Guts sai da tabela (o texto novo \"Ups Attack by 1.5x if statused.\" deixa de ser lido)",
+    arquivo: "duelo.js",
+    de: "    [\"Guts\", \"Ups Attack by 1.5x if statused.\",\n      \"Ups Atk by 1.5x if suffering from a status condition.\"],\n",
+    para: "",
+  },
 ];
