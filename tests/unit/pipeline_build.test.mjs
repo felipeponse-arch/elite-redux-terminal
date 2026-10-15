@@ -62,7 +62,10 @@ test("caso A: sem chefão adiante, os candidatos saem só por sinergia (hit-kill
 });
 
 // ---------- caso B: Ninetales da Meteor Falls ----------
-test("caso B: Ledian derruba o Ninetales com Mega Punch, mas NÃO bate primeiro: o Flame Burst do alvo (+1) o derruba antes (decisão P1, 14/10)", () => {
+// 15/10/2026 (calibracao-2026-10-15/01): o MoveList da er-config marca o Seismic Fist (Ground, poder 85) como golpe de soco, então
+// Iron Fist e Raging Boxer o reforçam; com isso ele passa a ser o melhor golpe do Ledian contra o Ninetales (138% a 162% do HP) e
+// o KO é garantido. O Mega Punch segue no kit (ver a lista de casos conferidos mais abaixo).
+test("caso B: Ledian derruba o Ninetales (agora com Seismic Fist, soco pela flag do jogo), mas NÃO bate primeiro: o Flame Burst do alvo (+1) o derruba antes (decisão P1, 14/10)", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales });
   const c = r.candidatos.find((x) => x.golpes.includes("Mega Punch") && x.habilidade === "Aerodynamics");
   assert.ok(c, "nenhum candidato com Mega Punch: " + r.candidatos.map((x) => x.golpes.join("/")).join(" ; "));
@@ -75,10 +78,10 @@ test("caso B: Ledian derruba o Ninetales com Mega Punch, mas NÃO bate primeiro:
   assert.equal(c.rotulo, "estimada");
   assert.match(c.avisos.join(" | "), /O alvo age antes com Flame Burst \(\+1 de prioridade\) e derruba Ledian antes de ele agir/);
   assert.match(c.motivos.join(" | "), /o alvo age antes/);
-  assert.equal(c.garantido, false);
+  assert.equal(c.garantido, true, "o Seismic Fist tira no mínimo 138%: o KO em 1 golpe é garantido, só a ordem não");
   assert.doesNotMatch(c.motivos.join(" | "), /derruba no turno 1/);
-  assert.match(c.motivos.join(" | "), /Provável derrubar o Ninetales em 1 golpe \(Mega Punch\)/);
-  assert.match(c.motivos.join(" | "), /Tira 99% a 117% do HP dele por golpe/);
+  assert.match(c.motivos.join(" | "), /Provável derrubar o Ninetales em 1 golpe \(Seismic Fist\)/);
+  assert.match(c.motivos.join(" | "), /Tira 138% a 162% do HP dele por golpe/);
   deepEqual(r.alvo, { chefao: "Courtney Meteor Falls", indice: 0, pokemon: ["Ninetales"], origem: "informado" });
   assert.ok(r.avisos.includes("Simulação 1x1: luta em dupla e Fake Out não são simulados."));
   // Nenhum candidato do Ledian "bate primeiro" contra este Ninetales (todo golpe dele é mais lento que o Flame Burst).
@@ -99,10 +102,13 @@ test("a prioridade do alvo só tira o 'bate primeiro' se o golpe dele DERRUBA o 
 });
 
 test("hit-kill de 2 golpes: o Flame Burst do alvo derruba o atacante antes do 2º golpe, então Raticate/Nidorino/Pidgeotto/Pidgeot x Ninetales NÃO batem primeiro", () => {
+  // Pidgeotto e Pidgeot saíram da premissa em 15/10/2026 (ticket calibracao-03): a Giant Wings, innate deles, passou a valer x1,3
+  // nos golpes de ar (Air Cutter, Air Slash...), os sets mais fortes viram hit-kill de 1 golpe e já não sobra candidato de 2.
+  // A propriedade segue valendo para o que sobrar de hit-kill de 2 neles (nenhum, hoje).
   ["Raticate", "Nidorino", "Pidgeotto", "Pidgeot"].forEach((nome) => {
     const r = R.candidatosDeBuild(sp(nome), { alvo: ninetales });
     const dois = r.candidatos.filter((x) => x.hitKill === 2);
-    assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
+    if (nome === "Raticate" || nome === "Nidorino") assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
     dois.forEach((x) => {
       assert.equal(x.baterPrimeiro, false, nome + " " + x.golpes.join("/"));
       assert.equal(x.alvoAgeAntes, true, nome);
@@ -149,14 +155,21 @@ test("ranking do caso B: contra o Flame Burst do Ninetales nenhum candidato do L
 // Ninetales da Meteor Falls sem o Flame Burst e com Def menor (Mild): o caso conferido na calculadora, sem prioridade do alvo.
 const foeSemPrioridade = () => R.foeDeDuelo(Object.assign({}, courtney.party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Shadow Ball"], nat: "Mild" }), 55, null);
 
-test("caso conferido (Ledian + Aerodynamics + Mega Punch x Ninetales) sem prioridade do alvo: calibrada, garantido e 'derruba no turno 1'", () => {
+test("caso conferido (Ledian + Aerodynamics + Mega Punch x Ninetales): a lista de calibrados reconhece o Mega Punch e o Aerial Ace, não o Seismic Fist", () => {
+  const linha = (nome) => ({ nome, foeSname: "SPECIES_NINETALES", foge: false });
+  assert.equal(R.pipelineCasoConferido("SPECIES_LEDIAN", "Aerodynamics", linha("Mega Punch")), true);
+  assert.equal(R.pipelineCasoConferido("SPECIES_LEDIAN", "Aerodynamics", linha("Aerial Ace")), true);
+  assert.equal(R.pipelineCasoConferido("SPECIES_LEDIAN", "Aerodynamics", linha("Seismic Fist")), false, "golpe sem conferência na calculadora do jogo");
+});
+
+test("sem prioridade do alvo, o melhor golpe do Ledian é o Seismic Fist (soco pela flag do jogo): garantido e bate primeiro por velocidade, mas 'estimada' - a calculadora só conferiu Mega Punch e Aerial Ace", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: { foe: foeSemPrioridade() } });
-  const c = r.candidatos.find((x) => x.golpes.includes("Mega Punch") && x.habilidade === "Aerodynamics" && x.hitKill === 1);
+  const c = r.candidatos.find((x) => x.golpes.includes("Seismic Fist") && x.habilidade === "Aerodynamics" && x.hitKill === 1);
   assert.ok(c, r.candidatos.map((x) => x.habilidade + ":" + x.golpes.join("/")).join(" ; "));
   assert.equal(c.alvoAgeAntes, false);
   assert.equal(c.garantido, true);
-  assert.equal(c.rotulo, "calibrada");
-  assert.match(c.motivos.join(" | "), /Mega Punch derruba no turno 1 o Ninetales/);
+  assert.equal(c.rotulo, "estimada");
+  assert.match(c.motivos.join(" | "), /Provável derrubar o Ninetales em 1 golpe \(Seismic Fist\); bate primeiro por velocidade/, "estimada: o texto é 'Provável', não 'derruba no turno 1'");
 });
 
 test("calibrada exige o MESMO atacante, habilidade, golpe e alvo: outro atacante, outra habilidade ou outro alvo é estimada", () => {
@@ -237,7 +250,8 @@ test("todos os golpes de prioridade do alvo contam, não só o melhor (Bullet Pu
 
 test("caso B: a faixa de dano do candidato está em % do HP do alvo e min < max", () => {
   const c = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales }).candidatos[0];
-  assert.ok(c.dano.min > 90 && c.dano.max > c.dano.min && c.dano.max < 125, JSON.stringify(c.dano) + " (referência sem item: com Life Orb passaria de 130%)");
+  // 15/10/2026: o melhor golpe é o Seismic Fist (soco pela flag do jogo), 138% a 162%. Antes, com o Mega Punch, 99% a 117%.
+  assert.ok(c.dano.min > 130 && c.dano.max > c.dano.min && c.dano.max < 170, JSON.stringify(c.dano) + " (referência sem item)");
 });
 
 test("caso B: a prioridade não vale contra Queenly Majesty - o Accelgor não 'bate primeiro por prioridade'", () => {

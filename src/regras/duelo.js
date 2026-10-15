@@ -54,7 +54,14 @@
   // é outro (Poison Hit, Drench Hit...) mas o golpe acerta mais de uma vez:
   var ACERTOS_POR_EFEITO_DUELO = { "Multi Hit": 3, "Double Hit": 2, "Triple Kick": 3, "Ten Hits": 6 };
   var ACERTOS_PELO_TEXTO_DUELO = { "Twineedle": 2, "Cross Poison": 2, "Double Iron Bash": 2, "Rapid River": 2,
-    "Chiller": 3, "Surging Strikes": 3, "Sparkling Barrage": 3 };
+    "Chiller": 3, "Surging Strikes": 3, "Sparkling Barrage": 3,
+    "Double Shock": 2 }; // hit_count: 2 na er-config (o efeito do dado é Burn Up; o texto "two strong shocks" não casava)
+  // Habilidades do ticket calibracao-03 cujo multiplicador de golpe passou a ser lido do texto (contato, flag air, tipo, categoria).
+  // Para elas a sinergia por golpe da espécie (species_ability_synergy.json) não soma de novo. As outras (Nocturnal, Levitate,
+  // Electrocytes, Overgrow...) já liam o texto E recebiam a sinergia: ver docs/tickets/calibracao-2026-10-15/03-perguntas.md.
+  var BONUS_DE_GOLPE_LIDO_DO_TEXTO_DUELO = { "Tough Claws": 1, "Big Pecks": 1, "Giant Wings": 1, "Steely Spirit": 1, "Airborne": 1, "Warmonger": 1,
+    "Deep Freeze": 1, "Devious Present": 1, "Imposing Wings": 1, "Lucky Wings": 1, "Apex Predator": 1, "Lead Claws": 1, "Ice Picks": 1,
+    "Bird of Prey": 1, "Reaper's Embarce": 1 };
   function acertosDoGolpeDuelo(id) {
     var m = MOVES[id];
     if (!m) return 1;
@@ -128,7 +135,9 @@
     { nome: "soco", re: /punch|iron fist/i }, { nome: "mordida", re: /bit(?:e|ing)|fang|strong jaw/i },
     { nome: "corte", re: /slash|slicing|keen edge/i }, { nome: "pulso", re: /mega launcher|beam\/pump|cannon|pulse/i },
     { nome: "chifre", re: /horn|drill/i }, { nome: "chute", re: /kick/i },
-    { nome: "flecha", re: /arrow/i }, { nome: "martelo", re: /hammer|slamm/i }
+    { nome: "flecha", re: /arrow/i }, { nome: "martelo", re: /hammer|slamm/i },
+    // Rocky Payload e Devious Present: "Rock-type and throwing moves" (flag `throwing` do golpe na er-config).
+    { nome: "arremesso", re: /throw/i }
   ];
   function categoriasDoTextoDuelo(trecho) {
     return PALAVRAS_DE_CATEGORIA.filter(function (p) { return p.re.test(trecho); }).map(function (p) { return p.nome; });
@@ -302,7 +311,8 @@
     if ((x = f.match(/At full HP, gives \+1 priority to this Pok\S+ (\w+) moves/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.prioCheioCategoria[c] = true; });
     if (/Sound moves get \+1 priority at full HP/i.test(f)) ef.prioCheioSom = true;
     if (/All hits will be not very effective while at full HP/i.test(f)) ef.teraShell = true;
-    if (/Halves damage taken while at full HP/i.test(f)) ef.reducao.todos *= 0.75; // como Multiscale: metade da luta, em média
+    // Brain Mass (abilities.cc:11518): metade do dano só no 1º golpe com o HP cheio, depois x1,0 (antes: x0,75 fixo na luta toda).
+    if (/Halves damage taken while at full HP/i.test(f)) ef.golpeCheio = Math.min(ef.golpeCheio, 0.5);
     if ((x = f.match(/Triggers ([A-Z][\w ]+?) at (\d+)% power when using an? (\w+) move/)) && tipoDoTextoDuelo(x[3]) && MOVE_ID_BY_NAME[x[1]] !== undefined) {
       ef.seguimento = { tipo: tipoDoTextoDuelo(x[3]), poder: MOVES[MOVE_ID_BY_NAME[x[1]]][3] * parseInt(x[2], 10) / 100 };
     }
@@ -434,7 +444,12 @@
       ef.curaEnvenenado = 1 / parseInt(x[1], 10); ef.semResiduoDe.envenenar = true; ef.semResiduoDe.envenenarForte = true;
     }
     if ((x = f.match(/Heals the user for 1\/(\d+) of the damage they deal/i))) ef.drenoPct += 1 / parseInt(x[1], 10);
-    if ((x = f.match(/Contact moves do \+(\d+)% damage and heal 1\/(\d+) of damage dealt/i))) { ef.contatoMult *= 1 + parseInt(x[1], 10) / 100; ef.drenoContato = 1 / parseInt(x[2], 10); }
+    // Nosferatu: o texto da NextDex diz "Contact moves do +20% damage and heal 1/2", mas o código do jogo só cura
+    // (battle_util.c:4748-4756, savedDmg/2); nenhuma outra referência a ABILITY_NOSFERATU. Vale o código: sem o +20% (ticket 03).
+    if ((x = f.match(/Contact moves do \+(\d+)% damage and heal 1\/(\d+) of damage dealt/i))) ef.drenoContato = 1 / parseInt(x[2], 10);
+    // Tough Claws e Big Pecks (abilities.cc:2089 e 2438): golpe que faz contato x1,3. Long Reach, Protective Pads e Punching Glove tiram o contato.
+    if ((x = f.match(/Boosts the power of contact moves by ([\d.]+)x/i))) ef.contatoMult *= parseFloat(x[1]);
+    if (/don't make contact/i.test(f)) ef.semContato = true; // Long Reach (IsMoveMakingContact, battle_util.c:6578)
     if ((x = f.match(/Enemies lose 1\/(\d+) of max HP if they use a contact move|1\/(\d+) HP damage when touched/i))) ef.danoAoContato = Math.max(ef.danoAoContato, 1 / parseInt(x[1] || x[2], 10));
     if (/Immune to recoil damage/i.test(f)) ef.semRecuo = true;
     if ((x = f.match(/Moves causing recoil damage deal ([\d.]+)x more damage/i))) ef.recuoMult = parseFloat(x[1]);
@@ -538,6 +553,28 @@
     if ((x = f.match(/Reduces damage taken by (\d+)%, but lowers speed by (\d+)%/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.speMult *= 1 - parseInt(x[2], 10) / 100; }
     if ((x = f.match(/Takes (\d+)% less damage from attacks, (\d+)% if resisted/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
     if ((x = f.match(/Halves dmg taken by (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.resistTipo[tipoDoTextoDuelo(x[1])] = 0.5;
+    // Flash Fire (abilities.cc:696-706, battle_util.c:4479): depois de absorver um golpe Fire, os Fire do dono saem x1,5 até ele sair
+    // ("Powers up Fire-type moves by 1.5x if hit by a Fire-type move"). A imunidade em si vem da tabela de tipos.js.
+    if ((x = f.match(/Powers up (\w+)-type moves by ([\d.]+)x if hit by a (\w+)-type move/i)) && tipoDoTextoDuelo(x[1]) && x[1] === x[3]) ef.absorveReforca = { tipo: tipoDoTextoDuelo(x[1]), mult: parseFloat(x[2]) };
+    // Punk Rock (abilities.cc:3279-3289): golpe de som recebido x0,5 ("Takes -50% dmg from sound moves").
+    if ((x = f.match(/Takes -(\d+)% dmg from sound moves/i))) ef.reducao.som *= 1 - parseInt(x[1], 10) / 100;
+    // Water Bubble (abilities.cc:2706-2718): o Water do dono sai x2 ("Doubles Water dmg dealt").
+    if ((x = f.match(/Doubles (\w+) dmg dealt/i)) && tipoDoTextoDuelo(x[1])) ef.bonusTipo[tipoDoTextoDuelo(x[1])] = Math.max(ef.bonusTipo[tipoDoTextoDuelo(x[1])] || 1, 2);
+    // Thick Blubber (abilities.cc:10838-10847): Speed x0,5 em troca de Fire/Ice x0,25 ("in return for having 1/2 speed").
+    if (/in return for having 1\/2 speed/i.test(f)) ef.speMult *= 0.5;
+    // Reforço de uma lista de tipos e categorias: Warmonger "the user's rock, steel, and fighting moves by 30%", Hammer Fist "punch
+    // and hammer moves by 25%", Devious Present "Ice and throwing moves by 50%", Deep Freeze "Water and Ice by 1.25x", Plasma Lamp
+    // "power of Fire & Electric type moves by 1.2x" (abilities.cc:10787, 11551, 11439, 9361, 6072). Cada palavra é tipo ou categoria.
+    var lista = f.match(/^Boosts (?:the user's )?([A-Za-z]+(?:(?:, | and | & |, and )[A-Za-z]+)+)(?: type)?(?: moves)? by (\d+)%/i),
+      multLista = lista ? 1 + parseInt(lista[2], 10) / 100 : 0;
+    if (!lista) { lista = f.match(/^Boosts ([A-Za-z]+ and [A-Za-z]+) by ([\d.]+)x/i) || f.match(/^Boost accuracy & power of ([A-Za-z]+ & [A-Za-z]+) type moves by ([\d.]+)x/i); multLista = lista ? parseFloat(lista[2]) : 0; }
+    if (lista) {
+      lista[1].split(/, and |, | and | & /i).forEach(function (w) {
+        var tp = tipoDoTextoDuelo(w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()); // Warmonger escreve "rock, steel" em minúsculas
+        if (tp) ef.bonusTipo[tp] = Math.max(ef.bonusTipo[tp] || 1, multLista);
+        else categoriasDoTextoDuelo(w).forEach(function (c) { ef.bonusCategoria[c] = Math.max(ef.bonusCategoria[c] || 1, multLista); });
+      });
+    }
     if (/^Fire\/Sun hurts/i.test(f)) ef.resistTipo.Fire = 1.25; // Dry Skin: Fire 1,25x, como na série
     if (/Super-effective moves never miss and ignore abilities/i.test(f)) ef.seQuebra = true; // Deadly Precision
     if (/Inflicting poison also lowers Attack, SpAtk, and Speed/i.test(f)) ef.venenoReduz = true; // Neurotoxin
@@ -559,7 +596,10 @@
     if ((x = f.match(/use (\d+)% of (spdef|def|speed) during moves/i))) ef.ataqueExtra.push({ fonte: /speed/i.test(x[2]) ? "spe" : /spdef/i.test(x[2]) ? "spd" : "def", pct: parseInt(x[1], 10) / 100 });
     if ((x = f.match(/uses \+(\d+)% of its Speed when defending/i))) ef.defesaExtraVel = parseInt(x[1], 10) / 100;
     if (/Boosts Atk or SpAtk to match the higher value/i.test(f)) ef.equinox = true;
-    if (/Boosts highest stat in (Sun|Rain|Sand|Hail|Fog)/i.test(f) && climaOk(f.match(/in (Sun|Rain|Sand|Hail|Fog)/i)[1])) ef.maiorMult = 1.3;
+    // Protosynthesis e Quark Drive (abilities.cc:6917-6970): o maior atributo sobe x1,3 (Speed x1,5), pelo clima OU pelo Booster Energy
+    // ("Boosts highest stat in Sun or with Booster Energy"; o item é consumido na entrada e o bônus fica até o Pokémon sair).
+    if (/Boosts highest stat in (Sun|Rain|Sand|Hail|Fog)/i.test(f) && climaOk(f.match(/in (Sun|Rain|Sand|Hail|Fog)/i)[1])) { ef.maiorMult = 1.3; ef.maiorVel = 1.5; }
+    if (/Boosts highest stat in [\w ]+ or with Booster Energy/i.test(f)) ef.paradoxoItem = true;
     // Categoria de golpe ganha por tipo (Mixed Martial Arts, Brawling Wyvern, Chestnut Axe, Reverberate).
     if ((x = f.match(/^(\w+) moves are flagged as (\w+) \+ (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.categoriaPorTipo[tipoDoTextoDuelo(x[1])] = categoriasDoTextoDuelo(x[2] + " " + x[3]);
     if ((x = f.match(/(\w+) type moves become (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.categoriaPorTipo[tipoDoTextoDuelo(x[1])] = categoriasDoTextoDuelo(x[2]);
@@ -574,12 +614,15 @@
     if ((x = f.match(/^(\w+) moves hit SpDef and get a ([\d.]+)x power boost/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.categoriaNaSpDef[c] = true; ef.bonusCategoria[c] = Math.max(ef.bonusCategoria[c] || 1, parseFloat(x[2])); });
     if ((x = f.match(/^(\w+ ?\w*) moves hit twice for (\d+)% damage/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.categoriaExtra[c] = Math.max(ef.categoriaExtra[c] || 1, 2 * parseInt(x[2], 10) / 100); });
     if ((x = f.match(/^(Air-based|Wind) moves get a ([\d.]+)x boost/i))) ef.flagMult["Air/Wing Based"] = { mult: parseFloat(x[2]) };
+    // Giant Wings (abilities.cc:4661-4666): golpe com a flag air x1,3 ("wing, wind or air-based moves").
+    if ((x = f.match(/Boosts the power of wing, wind or air-based moves by ([\d.]+)x/i))) ef.flagMult["Air/Wing Based"] = { mult: parseFloat(x[1]) };
     if ((x = f.match(/^(\w+) moves get \+1 Priority/i)) && tipoDoTextoDuelo(x[1])) ef.prioTipoSempre.push(tipoDoTextoDuelo(x[1]));
     if ((x = f.match(/^(\w+) moves \+(\d+)%; (\w+) moves siphon (\d+)% damage/i))) {
       if (tipoDoTextoDuelo(x[1])) ef.bonusTipo[tipoDoTextoDuelo(x[1])] = Math.max(ef.bonusTipo[tipoDoTextoDuelo(x[1])] || 1, 1 + parseInt(x[2], 10) / 100);
       if (tipoDoTextoDuelo(x[3])) ef.drenoTipo[tipoDoTextoDuelo(x[3])] = parseInt(x[4], 10) / 100;
     }
-    if ((x = f.match(/Boosts own (\w+) moves by ([\d.]+)x/i)) && tipoDoTextoDuelo(x[1])) ef.bonusTipo[tipoDoTextoDuelo(x[1])] = Math.max(ef.bonusTipo[tipoDoTextoDuelo(x[1])] || 1, parseFloat(x[2]));
+    // "Boosts own Fire moves by 1.3x" e "Boosts own & ally's Steel-type moves by 1.3x" (Steely Spirit, Airborne: abilities.cc:3435 e 6861).
+    if ((x = f.match(/Boosts own (?:& ally's )?(\w+?)(?:-type)? moves by ([\d.]+)x/i)) && tipoDoTextoDuelo(x[1])) ef.bonusTipo[tipoDoTextoDuelo(x[1])] = Math.max(ef.bonusTipo[tipoDoTextoDuelo(x[1])] || 1, parseFloat(x[2]));
     // Seguimentos (golpe grátis depois do golpe).
     var sg = f.match(/(?:Triggers|follows? up with) (?:a )?(\d+)\s?BP [\w' -]+? after using (?:a |an )?(special move|attack|move|(\w+)(?: or (\w+))?-type move)/i) ||
       f.match(/After using (?:a |an )?(special move|attack|move), (?:launch|follow up with) (?:a )?(\d+)\s?BP/i);
@@ -689,14 +732,26 @@
   }
   // ---------- itens (2026-09-29) ----------
   // O texto do item no jogo não traz número ("Boosts the power of moves at the
-  // cost of HP"): valem os da série - Life Orb 1,3x com 10% do HP por ataque,
-  // Leftovers 1/16, item de tipo 1,2x, gema 1,3x uma vez, Expert Belt 1,2x no
-  // super efetivo, Sitrus 1/4 com metade do HP, bagas "que podem confundir" 1/3
+  // cost of HP"): valem os do código do jogo - Life Orb 1,3x com 10% do HP por
+  // ataque, Leftovers 1/16, Expert Belt 1,2x no super efetivo (fixos no código,
+  // battle_util.c:7674-7679) - e, nos itens que leem o `hold_effect_strength` da
+  // er-config (data/itens_config.json: item de tipo e Plate 1,3x, Muscle Band e
+  // Wise Glasses 1,15x, gema 1,5x uma vez, Soul Dew 1,5x, Wide Lens +12%, Quick
+  // Claw 20%), o número da config: modificador = 1 + força/100 (ticket
+  // calibracao-02, 15/10/2026; antes: tipo 1,2, Muscle/Wise 1,1, gema 1,3, Wide
+  // Lens 1,1). Sitrus 1/4 com metade do HP, bagas "que podem confundir" 1/3
   // com 1/4 do HP, baga de resistência corta o 1º super efetivo pela metade,
   // baga de aperto +1 com 1/4 do HP. Atributo fixo (Choice, Assault Vest...)
   // já entra em calcFinalStat. Camada separada da habilidade (u.it) porque
   // Klutz, Frisk, Pickpocket e Unnerve desligam o item.
   var cacheItemDuelo = {};
+  // Linha do item na config do jogo ({ e: efeito, f: força, t: tipo }) ou null.
+  function itemDaConfigDuelo(nome) { return (typeof ITENS_CONFIG !== "undefined" && ITENS_CONFIG.itens[nome]) || null; }
+  // 1 + força/100 do item na config; sem a linha (item fora da config), vale o padrão do código do jogo.
+  function modificadorDoItemDuelo(nome, efeito, padraoPct) {
+    var c = itemDaConfigDuelo(nome);
+    return 1 + (c && c.e === efeito && c.f ? c.f : padraoPct) / 100;
+  }
   function itemDoDuelo(nome, sp) {
     var chave = (nome || "") + "|" + (sp ? sp.sname : "");
     if (cacheItemDuelo[chave]) return cacheItemDuelo[chave];
@@ -704,27 +759,41 @@
       critEstagio: 0, precisaoMult: 1, evasao: 1, defMult: 1, spdMult: 1, speMult: 1, lento: false, curaTurno: 0, perdaTurno: 0,
       custoAtaque: 0, drenoPct: 0, drenoMult: 1, danoAoContato: 0, contraCatUmaVez: null, bagaHP: 0, bagaHPLimite: 0, bagaResiste: null,
       bagaAperto: null, curaStatusUmaVez: false, estagioUmaVez: [], recuar: 0, imuneEfeito: false, imuneQuedas: false, semEfeitoContato: false,
-      balao: false, cargaUmaVez: false, dadoCarregado: false, metronomo: false, consumivel: false, baga: false };
+      balao: false, cargaUmaVez: false, dadoCarregado: false, metronomo: false, consumivel: false, baga: false,
+      gemaMult: 1.5, garra: 0, guardaChuvaSol: false, boosterEnergy: false };
     var t = (typeof ITEM_DESC !== "undefined" && ITEM_DESC[nome]) || "";
     var x, tp;
     if (!nome) { cacheItemDuelo[chave] = it; return it; }
     if (nome === "Life Orb") { it.danoMult = 1.3; it.custoAtaque = 0.1; }
     if (nome === "Expert Belt") it.seMult = 1.2;
-    if (nome === "Muscle Band") it.fisicoMult = 1.1;
-    if (nome === "Wise Glasses") it.especialMult = 1.1;
+    if (nome === "Muscle Band") it.fisicoMult = modificadorDoItemDuelo(nome, "MUSCLE_BAND", 15);
+    if (nome === "Wise Glasses") it.especialMult = modificadorDoItemDuelo(nome, "WISE_GLASSES", 15);
+    // Soul Dew (battle_util.c:7020-7026 e 7455-7461, B_SOUL_DEW_BOOST = GEN_3): Latias e Latios (e as megas) levam o golpe
+    // especial e a Defesa Especial x1,5.
+    if (nome === "Soul Dew" && sp && /^SPECIES_LATI(AS|OS)(_MEGA)?$/.test(sp.sname || "")) { it.especialMult = modificadorDoItemDuelo(nome, "SOUL_DEW", 50); it.spdMult = it.especialMult; }
+    if (nome === "Quick Claw") it.garra = (itemDaConfigDuelo(nome) && itemDaConfigDuelo(nome).f || 20) / 100; // battle_main.c:4419: Random() % 100 < força
+    if (nome === "Utility Umbrella") it.guardaChuvaSol = true; // battle_util.c:8674-8683
+    // Booster Energy: liga Protosynthesis/Quark Drive na entrada (abilities.cc:6946). O item some, mas o bônus fica até o Pokémon sair,
+    // então não é "consumível" aqui (o consumível sai da luta seguinte da sequência e levaria o bônus junto).
+    if (nome === "Booster Energy") it.boosterEnergy = true;
     if (nome === "Punching Glove") it.categoriaMult.soco = 1.1;
     if (nome === "Metronome") it.metronomo = true;
     if (nome === "Loaded Dice") it.dadoCarregado = true;
     if (nome === "Power Herb") { it.cargaUmaVez = true; it.consumivel = true; }
-    if ((x = t.match(/(?:raises|boosts|ups) the power of (\w+)-type moves|boosts (\w+)-type moves|ups the power of (\w+)-type moves|Increases the power of (\w+) Type moves/i)) &&
+    // Item de tipo, Plate e gema: o tipo e a força vêm da config (hold_effect_type/hold_effect_strength); o texto só
+    // vale para item que a config não traz.
+    var cfgItem = itemDaConfigDuelo(nome);
+    if (cfgItem && cfgItem.t && (cfgItem.e === "TYPE_POWER" || cfgItem.e === "PLATE")) it.tipoMult[cfgItem.t] = 1 + cfgItem.f / 100;
+    else if (cfgItem && cfgItem.t && cfgItem.e === "GEMS") { it.gema = cfgItem.t; it.gemaMult = 1 + cfgItem.f / 100; it.consumivel = true; }
+    else if ((x = t.match(/(?:raises|boosts|ups) the power of (\w+)-type moves|boosts (\w+)-type moves|ups the power of (\w+)-type moves|Increases the power of (\w+) Type moves/i)) &&
       (tp = tipoDoTextoDuelo(x[1] || x[2] || x[3] || x[4]))) {
-      if (/ Gem$/.test(nome)) { it.gema = tp; it.consumivel = true; } else it.tipoMult[tp] = 1.2;
+      if (/ Gem$/.test(nome)) { it.gema = tp; it.consumivel = true; } else it.tipoMult[tp] = 1.3;
     }
     if (nome === "Eviolite" && sp && (sp.ev || []).some(function (ev) { return !isMegaEvoKind(ev[0]); })) { it.defMult = 1.5; it.spdMult = 1.5; }
     if (nome === "Scope Lens" || nome === "Razor Claw") it.critEstagio = 1;
     if (nome === "King's Rock" || nome === "Razor Fang") it.recuar = 0.1;
     if (nome === "Bright Powder") it.evasao = 1.1;
-    if (nome === "Wide Lens") it.precisaoMult = 1.1;
+    if (nome === "Wide Lens") it.precisaoMult = modificadorDoItemDuelo(nome, "WIDE_LENS", 12); // battle_script_commands.c:1381: precisão x (100+força)/100
     if (nome === "Iron Ball") it.speMult = 0.5;
     if (nome === "Lagging Tail") it.lento = true;
     if (nome === "Covert Cloak") it.imuneEfeito = true;
@@ -1157,7 +1226,7 @@
     if (cacheEfeitoDuelo[chave]) return cacheEfeitoDuelo[chave];
     var ef = { ate: null, ateMult: 1, converte: {}, stabMult: 1.5, stabExtra: [], stabTodos: false, tipoExtra: [],
       atkMult: 1, spaMult: 1, speMult: 1, fisicoMult: 1, especialMult: 1, danoMult: 1,
-      reducao: { F: 1, E: 1, todos: 1, superEf: 1, contato: 1 }, resistTipo: {}, vsTipo: {},
+      reducao: { F: 1, E: 1, todos: 1, superEf: 1, contato: 1, som: 1 }, resistTipo: {}, vsTipo: {},
       intimida: 0, assusta: 0, imuneIntimida: false, imuneAssusta: false,
       prioridadeNoPrimeiro: false, prioTipoCheio: [], prioMult: 1,
       bonusTipo: {}, bonusGolpes: {}, golpeExtra: 1, seguimento: null, contraTipo: {},
@@ -1181,12 +1250,12 @@
       ataqueNaEntrada: 0, seguimentoCategoria: [], aoUsar: [], limpaBuffsNaEntrada: false, quedaNaEntrada: {},
       maiorNaEntrada: 0, maiorAtaqueNaEntrada: 0, shellSmashNaMetade: false, inverteIntimida: false, dobraQuedas: false,
       encadeiaStatus: {},
-      curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, danoAoContato: 0,
+      curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
       semRecuo: false, recuoMult: 1, custoPorAtaque: 0, custoTipo: {}, bloqueiaCura: false, liquidOoze: false,
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
       bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {},
       menorDefesaCategoria: {}, menorDefesaSeStatus: false, flagMult: {}, prioTipoSempre: [], drenoTipo: {}, malicious: false,
-      equinox: false, maiorMult: 0, ritmico: 0, bonusVsStatus: {}, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
+      equinox: false, maiorMult: 0, maiorVel: 0, paradoxoItem: false, ritmico: 0, bonusVsStatus: {}, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
       campoResiduo: [], statusNaEntrada: {}, forcaUltimo: false, semStabOutros: false, recuoFrac: 1,
       seQuebra: false, venenoReduz: false, mudaTipoNoContato: null, telaNaEntrada: 0, imuneTipoNaEntrada: null,
       sincroniza: false, almaLigada: false, drenoCategoria: {},
@@ -1204,10 +1273,10 @@
       pesadelo: 0, statusIgnoraImune: false, statusSom: false, precisaoGolpe: {}, triage: false, entradaSono: false, futuro: 0,
       entradaDisable: false, entradaTorment: false, adicionaFantasma: false, quash: false, po: false,
       prende: null, ignoraDefesa: 0, prisaoForte: false, quedaPorTurno: {}, prisaoParalisa: false, recuoSePrimeiro: 0,
-      primeiroGolpeRecebido: 1, expulsaAoApanhar: false, expulsaQuemEnrola: false, naoSaiForcado: false, fogeNaMetade: false,
+      primeiroGolpeRecebido: 1, golpeCheio: 1, expulsaAoApanhar: false, expulsaQuemEnrola: false, naoSaiForcado: false, fogeNaMetade: false,
       fogeAoCair: false, ultimaCartada: false, brasas: false, tocaia: 0, anulaClima: false, ventoForte: false,
       bloqueiaGolpeClima: false, catastrofe: false, aguaNoSol: false, disableAoContato: 0, disableSom: 0, disableComGelo: false,
-      saque: 0, barraPrioridade: false, firmeza: false, contraMega: 1, apagao: false, resistSeTipo: null, arquimago: 0,
+      saque: 0, barraPrioridade: false, bloqueiaPrioClima: null, firmeza: false, contraMega: 1, apagao: false, resistSeTipo: null, arquimago: 0,
       espiao: false, pintaAlvo: null, golpeAlterado: {}, golpeTaunt: null, curaComLuta: false, sonoCura: 0,
       curaTimeNaEntrada: false, mimetismo: false, ventoAtaque: false, ventoCarga: false,
       forma: null, cuspe: false, critMetade: false,
@@ -1273,7 +1342,7 @@
         if ((y = f.match(/Boosts (\w+) moves by (\d+)%/i)) && tipoDoTextoDuelo(y[1])) maxEm(ef.bonusTipo, y[1], 1 + parseInt(y[2], 10) / 100);
         // --- defensivo: dano recebido ---
         if ((y = f.match(/Takes -(\d+)% (special|physical) damage/i))) ef.reducao[/^s/i.test(y[2]) ? "E" : "F"] *= 1 - parseInt(y[1], 10) / 100;
-        if ((y = f.match(/Takes (\d+)% less (?:damage )?(?:from )?(Special|Physical|Phys\.)?(?! ?Super)[^.]*?(?:attacks|moves|damage)?/i)) && !/Super-?effective|sound/i.test(f)) {
+        if ((y = f.match(/Takes (\d+)% less (?:damage )?(?:from )?(Special|Physical|Phys\.)?(?! ?Super)[^.]*?(?:attacks|moves|damage)?/i)) && !/Super-?effective|sound/i.test(f) && !/less dmg from [\w/]+-type moves/i.test(f)) { // Magma Armor ("from Water/Ice-type moves"): só nos tipos, pela tabela de tipos.js
           var qual = y[2] ? (/^s/i.test(y[2]) ? "E" : "F") : "todos";
           ef.reducao[qual] *= 1 - parseInt(y[1], 10) / 100;
         }
@@ -1404,7 +1473,7 @@
         if ((x = t.match(/Weakens incoming physical and special moves by (\d+)%/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
         if (/deal min damage/i.test(t)) ef.reducao.todos *= 0.85 / ROLAGEM_MEDIA_DUELO;
       }
-      if (/At full HP, halves damage/i.test(t)) ef.reducao.todos *= 0.75;
+      if (/At full HP, halves damage/i.test(t)) ef.golpeCheio = Math.min(ef.golpeCheio, 0.5); // Multiscale e Shadow Shield (abilities.cc:1947, 3171)
       // Primeiro turno (Violent Rush, Rapid Response): o duelo é curto e o 1º turno
       // decide quem bate primeiro - aproximação: vale o duelo todo.
       if ((x = t.match(/Boosts Speed by (\d+)% \+ (Attack|SpAtk|Sp\. ?Atk) by (\d+)% on first turn/i))) {
@@ -1427,6 +1496,9 @@
     (ABILITY_SYNERGY[sname] || []).forEach(function (h) {
       var id = ids.filter(function (i) { return nomeHabDuelo(i) === h.name; })[0];
       if (id === undefined) return;
+      // Habilidade cujo bônus de golpe o texto agora ensina (ticket 03): a leitura do texto vale para todo golpe e a sinergia por golpe
+      // da espécie, que era a aproximação de antes, contaria o mesmo bônus duas vezes (Tough Claws x1,3 x 1,3 = 1,69).
+      if (BONUS_DE_GOLPE_LIDO_DO_TEXTO_DUELO[h.name]) return;
       var t = textoHabDuelo(id);
       var x = t.match(/(\d+(?:\.\d+)?)x/) || t.match(/(\d+)%/);
       var mult = x ? (/%$/.test(x[0]) ? 1 + parseInt(x[1], 10) / 100 : parseFloat(x[1])) : 1.3;
@@ -1453,12 +1525,38 @@
     return conflito ? null : achado;
   }
 
+  // O maior atributo (Protosynthesis, Quark Drive; GetHighestStatId, battle_util.c:8754: o primeiro estritamente maior, na ordem Atk, Def, Speed,
+  // SpA, SpD) e quanto ele sobe: { atributo: índice em stats, mult, vel } ou null. Vem do clima (texto) ou do Booster Energy (item, sem Klutz).
+  function maiorAtributoDuelo(u) {
+    var mult = u.ef.maiorMult, vel = u.ef.maiorVel || 1;
+    if (!mult && u.ef.paradoxoItem && u.it && u.it.boosterEnergy && !u.ef.klutz) { mult = 1.3; vel = 1.5; }
+    if (!mult) return null;
+    var melhor = 1;
+    [1, 2, 5, 3, 4].forEach(function (i) { if (u.stats[i] > u.stats[melhor]) melhor = i; });
+    return { atributo: melhor, mult: melhor === 5 ? vel : mult };
+  }
+  // A habilidade do alvo barra o golpe com prioridade de quem ataca (o golpe falha inteiro): Queenly Majesty, Dazzling e Armor Tail sempre;
+  // Sand Guard na areia e Sun Basking no sol (abilities.cc:6238-6241 e 7437-7440 delegam ao onImmune da Queenly Majesty sob o clima).
+  // O Utility Umbrella do dono desliga o do sol (IsBattlerWeatherAffected, battle_util.c:8674-8683). Mold Breaker atravessa.
+  function prioBloqueadaPelaHabilidadeDuelo(def, atq) {
+    if (atq.ef.quebraHabilidade) return false;
+    if (def.ef.bloqueiaPrioLado) return true;
+    return !!def.ef.bloqueiaPrioClima && !(def.ef.bloqueiaPrioClima === "sol" && def.it && def.it.guardaChuvaSol && !def.ef.klutz);
+  }
+  // O rival só tem golpe de dano desse tipo (então é forçado a lançá-lo, mesmo contra uma absorção)?
+  function rivalSoTemOTipoDuelo(u, tipo) {
+    var dano = (u.golpesProntos || []).filter(function (g) { return g.forca > 0; });
+    return dano.length > 0 && dano.every(function (g) { return g.tipo === tipo; });
+  }
   // ---------- golpes prontos e dano ----------
   function temSomDuelo(m) { return (m[8] || []).some(function (i) { return DATA.flags[i] === "Sound Based"; }); }
   // Cada golpe guarda a força sem os bônus de habilidade (forcaBase) e com eles
   // (forca): Wonder Skin/Fort Knox do defensor anulam os bônus do atacante.
   function prepararGolpesDuelo(ids, u, clima) {
-    var reforcado = TIPO_REFORCADO_PELO_CLIMA[clima];
+    // Utility Umbrella (battle_util.c:7589-7637 + 8674-8683): sol e chuva não mexem no DANO do portador (sem o x1,5 de
+    // Fire/Water e sem o corte); a carga do Solar Beam (IsWeatherActive) segue valendo.
+    var climaDoDano = (clima === "sol" || clima === "chuva") && u.it && u.it.guardaChuvaSol && !u.ef.klutz ? null : clima;
+    var reforcado = TIPO_REFORCADO_PELO_CLIMA[climaDoDano];
     // Golpe de carga só entra se não precisa carregar: Solar Beam/Solar Blade no
     // sol ou com Chloroplast ("Solar Beam/Blade ... act as if used in sun").
     ids = ids.filter(function (id) {
@@ -1530,8 +1628,8 @@
       if ((m[7] || 0) > 0) hab *= u.ef.prioMult;
       if (reforcado && tipo === reforcado) base *= CLIMA_OFICIAL.reforcoSolChuva; // NextDex 2.65beta + código oficial: 1,5x (mono_run.js)
       // Série: Water no sol e Fire na chuva saem pela metade (Catastrophe: reforçam; Nika: Water normal no sol).
-      var enfraquecido = { sol: "Water", chuva: "Fire" }[clima];
-      if (enfraquecido && tipo === enfraquecido && !(clima === "sol" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? CLIMA_OFICIAL.reforcoSolChuva : 0.5; // Catastrophe: o mesmo reforço do clima
+      var enfraquecido = { sol: "Water", chuva: "Fire" }[climaDoDano];
+      if (enfraquecido && tipo === enfraquecido && !(climaDoDano === "sol" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? CLIMA_OFICIAL.reforcoSolChuva : 0.5; // Catastrophe: o mesmo reforço do clima
       if (u.ef.seguimento && u.ef.seguimento.tipo === tipo) { if (porPoder) porPoder.somas.push(u.ef.seguimento.poder); else hab *= (poder + u.ef.seguimento.poder) / poder; }
       u.ef.seguimentoCategoria.forEach(function (sg) {
         var vale = sg.quais === "todos" || (sg.quais === "som" && som) || (sg.quais === "danca" && flags.indexOf("Dance Move") !== -1) || cats.indexOf(sg.quais) !== -1;
@@ -1547,10 +1645,12 @@
       // Sheer Force: golpe com efeito extra perde o efeito e ganha força.
       var extra = typeof MOVE_CATEGORIAS !== "undefined" ? MOVE_CATEGORIAS[id] : null;
       if (u.ef.semEfeitoExtra && extra && temEfeitoExtraDuelo(extra)) hab *= u.ef.semEfeitoExtra;
-      // Reckless: golpe com recuo rende mais. Nosferatu: golpe de contato rende mais.
+      // Reckless: golpe com recuo rende mais. Tough Claws e Big Pecks: golpe que faz contato rende mais; Long Reach, Protective Pads
+      // e Punching Glove (num soco) tiram o contato (IsMoveMakingContact, battle_util.c:6578-6590).
       if (extra && extra.rc) hab *= u.ef.recuoMult;
       var contato = temContatoDuelo(m);
-      if (contato) hab *= u.ef.contatoMult;
+      var itemTiraContato = u.it && !u.ef.klutz && (u.it.semEfeitoContato || (u.it.categoriaMult.soco && cats.indexOf("soco") !== -1));
+      if (contato && !u.ef.semContato && !itemTiraContato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
       var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF", fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: temContatoDuelo(m), som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
@@ -1654,7 +1754,8 @@
     if (g.fonteAtk) return A; // Foul Play / Body Press: o atributo vem de outra fonte (battle_util.c CalcAttackStat), sem Equinox nem maior-atributo
     if (atq.ef.equinox) A = Math.max(atq.stats[1], atq.stats[3]); // Equinox: o menor sobe até o maior
     // Protosynthesis e parecidas: o maior atributo x1,3 (no clima).
-    if (atq.ef.maiorMult && Math.max.apply(null, atq.stats.slice(1)) === (fisico ? atq.stats[1] : atq.stats[3])) A *= atq.ef.maiorMult;
+    var maiorAtq = maiorAtributoDuelo(atq);
+    if (maiorAtq && maiorAtq.atributo === (fisico ? 1 : 3)) A *= maiorAtq.mult;
     atq.ef.ataqueExtra.forEach(function (r) {
       if (r.contato !== undefined && r.contato !== g.contato) return;
       if (r.cat && r.cat !== g.cat) return;
@@ -1671,7 +1772,7 @@
     // Queenly Majesty, Dazzling e Armor Tail: o dono é imune a golpe de prioridade (no 1x1 só o próprio dono conta;
     // o aliado entra na simulação em dupla). Mold Breaker e parecidos ignoram. O Beatdown do Accelgor (Sombrio, +1)
     // acertava o Ninetales da Meteor Falls, que tem Queenly Majesty (10/10/2026).
-    if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade && (atq.golpesProntos || []).some(function (g) { return g.prio > 0; })) {
+    if (prioBloqueadaPelaHabilidadeDuelo(def, atq) && (atq.golpesProntos || []).some(function (g) { return g.prio > 0; })) {
       atq = Object.assign({}, atq, { golpesProntos: atq.golpesProntos.filter(function (g) { return !(g.prio > 0); }) });
     }
     var melhor = { dano: 0, prio: 0, golpe: null }, melhorPrio = { dano: 0 }, segundo = { dano: 0 }, candidatos = [];
@@ -1686,12 +1787,13 @@
     var precisaoAtq = atq.ef.semErrar || def.ef.semErrarContraMim;
     var abreDef = !atq.ef.quebraHabilidade;
     // Clima no campo (Weather Rework oficial, 2026-09-30): Ice ganha Defesa no
-    // granizo; Ghost/Psychic recebem menos dano na Eerie Fog.
+    // granizo; o ataque contra Ghost sai x0,8 na Eerie Fog.
     var climaCampo = climaNoCampoDuelo(atq, def);
     var defNoClima = climaCampo === "granizo" && def.tipos.indexOf("Ice") !== -1 ? CLIMA_OFICIAL.defesaIceNoGranizo : 1;
     // Tempestade de areia (código oficial, battle_util.c: STAT_SPDEF "Sandstorm"): tipo Rock ganha +50% de Sp. Def.
     var spdNoClima = climaCampo === "areia" && def.tipos.indexOf("Rock") !== -1 ? CLIMA_OFICIAL.spdRockNaAreia : 1;
-    var danoNoClima = climaCampo === "nevoa" && (def.tipos.indexOf("Ghost") !== -1 || def.tipos.indexOf("Psychic") !== -1) ? CLIMA_OFICIAL.danoGhostPsychicNaNevoa : 1;
+    // Eerie Fog (battle_util.c:7275-7277): o Atk de quem ataca um alvo Ghost sai x0,8 (só Ghost, não Psychic; no ataque, não no dano final).
+    var ataqueNaNevoa = climaCampo === "nevoa" && def.tipos.indexOf("Ghost") !== -1 ? CLIMA_OFICIAL.ataqueContraGhostNaNevoa : 1;
     atq.golpesProntos.forEach(function (g) {
       var flags = g.flags || [];
       // Bulletproof, Soundproof: imune pela marcação do golpe.
@@ -1725,12 +1827,14 @@
       var terreno = CAMPO_DUELO && CAMPO_DUELO.terreno, noCampo = 1, prioAqui = g.prio;
       if (terreno && TIPO_DO_TERRENO_DUELO[terreno] === g.tipo && terreno !== "nevoa" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
       if (terreno === "nevoa" && g.tipo === "Fairy" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
-      if (terreno === "nevoa" && g.tipo === "Dragon" && aterradoDuelo(def)) noCampo *= 0.5;
+      // (Misty Terrain não corta Dragon: battle_util.c:7088-7112 só dá o x1,3 do tipo do terreno. O x0,5 que ficava aqui era só do motor.)
+      // Grassy Glide: +1 de prioridade no Grassy Terrain (battle_main.c:4276-4278, só para quem está no chão).
+      if (g.nome === "Grassy Glide" && terreno === "grama" && aterradoDuelo(atq)) prioAqui += 1;
       if (terreno === "psiquico" && prioAqui > 0 && aterradoDuelo(def)) return; // Psychic Terrain: o golpe com prioridade falha inteiro (CANCELLER_PSYCHIC_TERRAIN)
       if (def.ef.barraPrioridade && prioAqui > 0) prioAqui = 0; // Surprise! na névoa
       if (abreDef && def.ef.sempreResiste && efTipo > 0.5) efTipo = 0.5; // Color Change, Soothsayer
       var fisico = g.cat === "F", defF = g.defNaDef || (fisico && !g.defEspecial);
-      var A = ataqueNoDuelo(atq, g, def) * (fisico ? intim : assus);
+      var A = ataqueNoDuelo(atq, g, def) * (fisico ? intim : assus) * ataqueNaNevoa;
       if (!fisico) A *= noTerrenoDuelo(atq, "spa");
       // Item de poder (tipo, Muscle Band, Punching Glove) entra no poder; o Life Orb, no dano final.
       A *= comItem((fisico ? itA.fisicoMult : itA.especialMult) * (itA.tipoMult[g.tipo] || 1) *
@@ -1740,7 +1844,8 @@
       if (abreDef && def.ef.semStabOutros && g.stab) A /= 1.5;
       var dv = def.ef.defesaPelaVelocidade;
       var dFis = def.stats[2] * def.ef.defMult, dEsp = def.stats[4] * def.ef.spdMult;
-      if (def.ef.maiorMult && Math.max.apply(null, def.stats.slice(1)) === def.stats[defF ? 2 : 4]) { if (defF) dFis *= def.ef.maiorMult; else dEsp *= def.ef.maiorMult; }
+      var maiorDef = maiorAtributoDuelo(def);
+      if (maiorDef && maiorDef.atributo === (defF ? 2 : 4)) { if (defF) dFis *= maiorDef.mult; else dEsp *= maiorDef.mult; }
       var D = dv && dv.contato === g.contato && abreDef ? def.stats[5] * def.ef.speMult
         : g.menorDefesa ? Math.min(dFis, dEsp) : (defF ? dFis : dEsp);
       if (def.ef.defesaExtraVel && abreDef) D += def.stats[5] * def.ef.defesaExtraVel; // Sleek Scales
@@ -1757,8 +1862,8 @@
         red = def.ef.reducao.todos * (fisico ? def.ef.reducao.F : def.ef.reducao.E);
         if (efTipo >= 2) red *= def.ef.reducao.superEf;
         if (g.contato) red *= def.ef.reducao.contato;
+        if (g.som) red *= def.ef.reducao.som; // Punk Rock
       }
-      red *= danoNoClima; // Eerie Fog: Ghost/Psychic recebem 20% menos
       if (efTipo >= 2 && !semBonus) red *= atq.ef.seBonus;
       if (efTipo >= 2) red *= comItem(itA.seMult, ativoA); // Expert Belt
       // Tera Shell: com HP cheio todo golpe é pouco efetivo - vale no 1º de ~2 golpes.
@@ -1849,6 +1954,12 @@
     return 1; // Sky Drop / Level Damage: dano fixo, tratado no danoNoDuelo
   }
   function golpesNecessariosDuelo(hp, d) { return d > 0 ? Math.ceil(hp / d) : Infinity; }
+  // Quantos golpes de dano `d` derrubam `hp` quando o 1º golpe sai multiplicado por `pm` (Multiscale: 0,5) e os outros saem inteiros.
+  function golpesNecessariosComPrimeiroDuelo(hp, d, pm) {
+    if (!(d > 0)) return Infinity;
+    if (!(pm < 1)) return Math.ceil(hp / d);
+    return d * pm >= hp ? 1 : 1 + Math.ceil((hp - d * pm) / d);
+  }
   // Aguenta o primeiro golpe com HP cheio: Focus Sash (item: "If the holder has
   // full HP, it endures KO hits with 1 HP") ou Sturdy ("At full HP, cannot be
   // KO in one hit") - Mold Breaker do atacante atravessa a Sturdy.
@@ -1863,7 +1974,7 @@
   // a atingem como atingem a de base. Sem `def` o chamador diz que o alvo não bloqueia nada.
   function prioCondicionalBarradaDuelo(atq, def) {
     if (!def || !def.ef) return false;
-    if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade) return true; // Queenly Majesty, Dazzling, Armor Tail (Mold Breaker ignora)
+    if (prioBloqueadaPelaHabilidadeDuelo(def, atq)) return true; // Queenly Majesty, Dazzling, Armor Tail, Sand Guard, Sun Basking (Mold Breaker ignora)
     if (def.ef.barraPrioridade) return true; // Surprise! na névoa
     return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === "psiquico" && aterradoDuelo(def)); // Psychic Terrain protege quem está no chão
   }
@@ -1872,7 +1983,7 @@
   // A Surprise! fica de fora: no jogo ela Astonisha antes do golpe, o motor só zera a prioridade (aproximação antiga).
   function prioFalhaDuelo(atq, def) {
     if (!def || !def.ef) return false;
-    if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade) return true;
+    if (prioBloqueadaPelaHabilidadeDuelo(def, atq)) return true;
     return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === "psiquico" && aterradoDuelo(def)); // o golpe cancelado pelo terreno falha
   }
   // O 1º golpe com prioridade condicional (Coil Up, Sidewinder, Cutthroat, Edgelord: g.prioPrimeiro; On the Prowl: qualquer
@@ -2079,7 +2190,12 @@
       if (u.ef.ritmico && turnos > 0) f *= 1 + u.ef.ritmico * (turnos - 1) / 2; // Rhythmic: +10% por repetição
       var itU = u.it || itemDoDuelo("", null), outroU = u === eu ? foe : eu, atv = itemAtivoDuelo(u, outroU);
       if (itU.metronomo && turnos > 0) f *= comItem(Math.min(2, 1 + 0.2 * (turnos - 1) / 2), atv); // Metronome: +20% por repetição
-      if (itU.gema && g && g.tipo === itU.gema && turnos > 0) f *= comItem((1.3 + turnos - 1) / turnos, atv); // gema: 1,3x uma vez
+      if (itU.gema && g && g.tipo === itU.gema && turnos > 0) f *= comItem((itU.gemaMult + turnos - 1) / turnos, atv); // gema: 1,5x uma vez
+      // Flash Fire: o 1º golpe do tipo que o rival lançar é absorvido e dali em diante o tipo do dono sai x1,5 (sem acumular). O rival
+      // só lança esse tipo se não tem outro golpe de dano (uma IA que sabe da habilidade evita o golpe absorvido, e o motor também);
+      // Mold Breaker atravessa e não há absorção.
+      var ar = u.ef.absorveReforca;
+      if (ar && g && g.tipo === ar.tipo && turnos > 0 && !outroU.ef.quebraHabilidade && rivalSoTemOTipoDuelo(outroU, ar.tipo)) f *= (1 + ar.mult * (turnos - 1)) / turnos;
       if (u.ef.carregaAoApanhar && g && g.tipo === "Electric" && turnos > 0) f *= (2 * turnos - 1) / turnos; // Electromorphosis
       else if (u.ef.carregaNaEntrada && g && g.tipo === "Electric" && turnos > 0) f *= (turnos + 1) / turnos; // Generator: o 1º sai 2x
       // Power Outage: o 1º golpe Electric sai 2x, depois perde o tipo (e o STAB).
@@ -2116,8 +2232,15 @@
     // Glaive Rush (NextDex: "The foe's next move deals double damage"): usado todo turno, quem usa leva sempre o dobro.
     function glaive(melhor) { return melhor.golpe && melhor.golpe.nome === "Glaive Rush" ? 2 : 1; }
     condDele *= glaive(meu.melhor); condMeu *= glaive(dele.melhor);
-    function meuDano(d) { return d > 0 ? d * critMeu * spMeu.ataque * spDele.defesa * ordemMeu * estagioMeu * ritmoMeu * condMeu * nele.recebeMais * nMim.corte + extraMeu + nele.residuo : nele.residuo; }
-    function deleDano(d) { return d > 0 ? d * critDele * spDele.ataque * spMeu.defesa * ordemDele * estagioDele * ritmoDele * condDele * nMim.recebeMais * nele.corte + extraDele + nMim.residuo : nMim.residuo; }
+    // O 1º golpe que cada lado leva sai reduzido: Chuckster ("1/2 damage" na entrada) e Multiscale, Brain Mass e Shadow Shield (metade com o
+    // HP cheio; o Mold Breaker de quem ataca atravessa). Só o 1º golpe: na média de n turnos o dano vale (p + n - 1) / n do normal.
+    function diluicaoDoPrimeiro(defensor, atacante) {
+      var p = defensor.ef.primeiroGolpeRecebido * (atacante.ef.quebraHabilidade ? 1 : defensor.ef.golpeCheio);
+      return p < 1 ? (p + Math.max(1, turnos) - 1) / Math.max(1, turnos) : 1;
+    }
+    var primeiroMeu = diluicaoDoPrimeiro(foe, eu), primeiroDele = diluicaoDoPrimeiro(eu, foe);
+    function meuDano(d) { return d > 0 ? d * critMeu * spMeu.ataque * spDele.defesa * ordemMeu * estagioMeu * ritmoMeu * condMeu * nele.recebeMais * nMim.corte * primeiroMeu + extraMeu + nele.residuo : nele.residuo; }
+    function deleDano(d) { return d > 0 ? d * critDele * spDele.ataque * spMeu.defesa * ordemDele * estagioDele * ritmoDele * condDele * nMim.recebeMais * nele.corte * primeiroDele + extraDele + nMim.residuo : nMim.residuo; }
     // Balanço de HP de cada lado por turno: o que ele mesmo perde (recuo, custo,
     // Rough Skin do outro ao fazer contato) entra como dano a mais contra ele; o
     // que ele recupera (cura por turno, dreno, Poison Heal) sai. Magic Guard anula
@@ -2186,6 +2309,8 @@
   // estagiosMediosDuelo com 2n-1 turnos dá (n-1) acúmulos, o estado do n-ésimo.
   function velocidadeNoDuelo(u, turnos, outro, gU, gOutro) {
     var v = u.stats[5] * u.ef.speMult * noTerrenoDuelo(u, "spe"), orbe = ORBE_DE_STATUS_DUELO[u.item];
+    var maiorVel = maiorAtributoDuelo(u);
+    if (maiorVel && maiorVel.atributo === 5) v *= maiorVel.mult; // Protosynthesis/Quark Drive com a Speed no topo: x1,5
     if (u.it && outro) {
       var atv = itemAtivoDuelo(u, outro, gOutro ? gOutro.contato : undefined);
       v *= comItem(u.it.speMult, atv); // Iron Ball
@@ -2456,9 +2581,11 @@
       return d;
     }
     var semPlanos = corridaCrua(nec, elePrecisa, euPrimeiro, st.meu, st.dele, hpEu, hpFoe);
-    // Quick Draw: com chance q, quem seria o segundo age primeiro - mistura os dois resultados.
+    // Quick Draw e Quick Claw: com chance q, quem seria o segundo age primeiro - mistura os dois resultados.
+    // No jogo (battle_main.c:4413-4420) os dois sorteios são independentes, um depois do outro: 1 - (1-q)(1-c).
+    function saqueDe(u, outro) { return 1 - (1 - u.ef.saque) * (1 - (u.it && u.it.garra ? u.it.garra * itemAtivoDuelo(u, outro) : 0)); }
     function comSaque(r, a, b) {
-      var q = (euPrimeiro === false ? a.ef.saque : 0) - (euPrimeiro === true ? b.ef.saque : 0);
+      var q = (euPrimeiro === false ? saqueDe(a, b) : 0) - (euPrimeiro === true ? saqueDe(b, a) : 0);
       if (!q || porPrioridade) return r;
       var outra = corridaCrua(nec, elePrecisa, q > 0, st.meu, st.dele, hpEu, hpFoe);
       var w = Math.abs(q);
@@ -2521,10 +2648,7 @@
       }
       dD *= disablePorChance(eu, meu.melhor.golpe, foe, dele.melhor.golpe, dele);
       dM *= disablePorChance(foe, dele.melhor.golpe, eu, meu.melhor.golpe, meu);
-      // Chuckster: o 1º golpe que leva sai pela metade.
-      var n0 = Math.max(1, turnos);
-      if (eu.ef.primeiroGolpeRecebido < 1) dD *= (eu.ef.primeiroGolpeRecebido + n0 - 1) / n0;
-      if (foe.ef.primeiroGolpeRecebido < 1) dM *= (foe.ef.primeiroGolpeRecebido + n0 - 1) / n0;
+      // (O 1º golpe que cada lado leva sai reduzido - Chuckster, Multiscale e parecidas - já entra no dano por turno em danoComStatusNoDuelo.)
       atF += entE.perdeY; dD *= entE.multY; hpF -= entE.danoY;
       atE += entF.perdeY; dM *= entF.multY; hpE -= entF.danoY;
       if (efE) { atE += efE.atraso; dM = dM * efE.multX + efE.residuoY; dD *= efE.multY; velE *= efE.velX; velF *= efE.velY; hpE -= efE.custo * eu.stats[0]; atF += efE.perdeY; inverte = inverte || !!efE.inverteOrdem; hpF -= efE.danoUmaVezY || 0; hpE += efE.curaX || 0; }
@@ -2928,6 +3052,8 @@
     // Sorte na ordem.
     if ((x = f.match(/(\d+)% chance to move first/i))) ef.saque = parseInt(x[1], 10) / 100; // Quick Draw
     if (/Astonishes enemy priority users in fog/i.test(f) && climaOk("fog")) ef.barraPrioridade = true; // Surprise!
+    // Sand Guard e Sun Basking: "Blocks priority and reduces special damage by 1/2 in sand" - sob o clima, golpe com prioridade do outro lado falha.
+    if ((x = f.match(/^Blocks priority and reduces \w+ damage by 1\/2 in (sand|sun)/i)) && climaOk(x[1])) ef.bloqueiaPrioClima = CLIMA_DO_TEXTO_DUELO[x[1].toLowerCase()] === "areia" ? "areia" : "sol";
     // "Enraged" (código oficial do jogo, src/abilities.cc, lido em 2026-10-01): Madness
     // Enhancement enfurece na névoa; Berserk DNA, na entrada. O NextDex (versão dos nossos
     // dados) diz "halves damage when enraged" - o branch upcoming do código usa 0,8.

@@ -38,5 +38,6 @@ declare var ONDE_ACHAR_ITENS: Record<string, { etapa: number | null; local: stri
 declare var MONO_DISP: any;
 /** Categoria de golpe (soco, mordida, corte...) e chance de efeito extra, por id (data/move_categorias.json). */
 declare var MOVE_CATEGORIAS: Record<string, { c?: string[]; ch?: number; ef?: string; rc?: number; dr?: number; al?: string; se?: string }>;
+declare var ITENS_CONFIG: { meta: Record<string, unknown>; itens: Record<string, { e: string; f?: number; t?: string }> };
 /** Papel natural por espécie (data/species_role.json). */
 declare var SPECIES_ROLE: Record<string, any>;

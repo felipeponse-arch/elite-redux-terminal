@@ -102,7 +102,7 @@
   // Espelha a leitura de prioridade de duelo.js (danoNoDuelo: prioAqui = g.prio; golpe.prioCheio = +1 no primeiro golpe).
   function pipelineAmeacasDePrioridade(unit, foe, nivel) {
     if (!CONSIDERA_PRIORIDADE_DO_ALVO) return [];
-    if (unit.ef.bloqueiaPrioLado && !foe.ef.quebraHabilidade) return [];
+    if (prioBloqueadaPelaHabilidadeDuelo(unit, foe)) return [];
     var lista = [];
     (foe.golpesProntos || []).forEach(function (gp) {
       if (!(gp.prio > 0) && !gp.prioCheio) return;
@@ -141,7 +141,10 @@
     var duelo = pipelineDuelo(u1, foe, nivel), r = duelo.r;
     if (!r) return { nome: g.nome, dano: 0, hp: foe.stats[0], frac: 0, n: Infinity, extra: 0, primeiro: false, porQue: null, velEu: 0, velFoe: 0, sash: false, alvoPrio: null, foe: foe.nome, foeSname: foe.sp ? foe.sp.sname : "", foge: true };
     var melhor = r.meu.melhor, golpe = melhor.golpe, dano = golpe ? melhor.dano : 0, hp = r.hpFoe;
-    var n = dano > 0 ? golpesNecessariosDuelo(hp, dano) : Infinity;
+    // Multiscale, Brain Mass, Shadow Shield (ticket calibracao-05): o 1º golpe contra o alvo com HP cheio sai pela metade, os outros inteiros
+    // (o Mold Breaker do atacante atravessa). Antes era x0,75 em todo golpe.
+    var primeiroMult = foe.ef.golpeCheio < 1 && !u1.ef.quebraHabilidade ? foe.ef.golpeCheio : 1;
+    var n = dano > 0 ? golpesNecessariosComPrimeiroDuelo(hp, dano, primeiroMult) : Infinity;
     var base = n, sash = false;
     if (n === 1 && aguentaUmGolpe(foe, u1)) { n = 2; sash = true; } // Focus Sash/Sturdy: o primeiro golpe não derruba
     if (n !== Infinity) n += bloqueiosNoDuelo(foe, u1, r.meu); // Disguise, Ice Face...
@@ -170,7 +173,7 @@
     }
     // O aviso e o rótulo olham todo golpe de prioridade do alvo que o atacante não supera (derrube ou não).
     var alvoPrio = ameacas1.filter(function (a) { return a.prio > minha; }).sort(function (a, b) { return b.fracEu - a.fracEu || (a.nome < b.nome ? -1 : 1); })[0] || null;
-    return { nome: g.nome, dano: dano, hp: hp, frac: hp > 0 ? dano / hp : 0, n: n, extra: n === Infinity ? 0 : n - base, primeiro: primeiro, porQue: porQue,
+    return { nome: g.nome, dano: dano, hp: hp, frac: hp > 0 ? dano / hp : 0, primeiroMult: primeiroMult, n: n, extra: n === Infinity ? 0 : n - base, primeiro: primeiro, porQue: porQue,
       velEu: r.v1, velFoe: r.v2, sash: sash, alvoPrio: alvoPrio, foe: foe.nome, foeSname: foe.sp ? foe.sp.sname : "", foge: duelo.foge };
   }
   function pipelineTierDaLinha(l) {
@@ -255,7 +258,7 @@
       // Garantido = mesmo na rolagem mínima (85%) o alvo cai no número de golpes anunciado. O ranking segue pela média.
       res.garantido = res.hitKill > 0 && linhas.every(function (l) {
         var minimo = l.frac / FAIXA_DE_ROLAGEM_PIPELINE.media * FAIXA_DE_ROLAGEM_PIPELINE.min;
-        return minimo > 0 && Math.ceil(1 / minimo - 1e-9) + l.extra <= res.hitKill;
+        return minimo > 0 && golpesNecessariosComPrimeiroDuelo(1 - 1e-9, minimo, l.primeiroMult || 1) + l.extra <= res.hitKill;
       });
       res.alvoPrio = linhas.filter(function (l) { return l.alvoPrio; }).sort(function (a, b) { return b.alvoPrio.fracEu - a.alvoPrio.fracEu; })[0] || null;
     } else {
@@ -346,16 +349,17 @@
     if (!alvo.foes.length) return motivos;
     var medidos = alvo.foes.length > 1 ? " Medido contra o primeiro (" + alvo.foes[0].nome + ") e o ás (" + alvo.foes[alvo.foes.length - 1].nome + "); vale o pior." : "";
     var p = av.pior;
+    var cheio = p.primeiroMult < 1 ? " O 1º golpe contra o " + p.foe + " vale metade (HP cheio: Multiscale e parecidas)." : "";
     if (av.hitKill === 0) {
-      motivos.push("Não derruba o " + p.foe + " nem em 2 golpes: o melhor golpe (" + p.nome + ") tira " + Math.round(av.fracMin * 100) + "% a " + Math.round(av.fracMax * 100) + "% do HP dele." + medidos);
+      motivos.push("Não derruba o " + p.foe + " nem em 2 golpes: o melhor golpe (" + p.nome + ") tira " + Math.round(av.fracMin * 100) + "% a " + Math.round(av.fracMax * 100) + "% do HP dele." + cheio + medidos);
       return motivos;
     }
     var como = av.baterPrimeiro ? (av.porQue === "prioridade" ? "bate primeiro por prioridade" : "bate primeiro por velocidade" + pipelineVelocidade(av.linhas.filter(function (l) { return l.porQue === "velocidade"; })[0] || p)) : (av.alvoPrio ? "o alvo age antes (" + av.alvoPrio.alvoPrio.nome + ", +" + av.alvoPrio.alvoPrio.prio + " de prioridade)" : "o alvo age antes");
     var golpesDoKill = av.linhas.map(function (l) { return l.nome; }).filter(function (n, i, a) { return a.indexOf(n) === i; }).join(" e ");
-    var faixa = " Tira " + Math.round(av.fracMin * 100) + "% a " + Math.round(av.fracMax * 100) + "% do HP dele por golpe.";
+    var faixa = " Tira " + Math.round(av.fracMin * 100) + "% a " + Math.round(av.fracMax * 100) + "% do HP dele por golpe." + cheio;
     if (av.hitKill === 1) motivos.push(garante ? golpesDoKill + " derruba no turno 1 o " + p.foe + "; " + como + "." + medidos
       : "Provável derrubar o " + p.foe + " em 1 golpe (" + golpesDoKill + "); " + como + "." + faixa + medidos);
-    else motivos.push((garante ? "Derruba" : "Provável derrubar") + " o " + p.foe + " em 2 golpes (" + golpesDoKill + "); " + como + "." + (garante ? "" : faixa) + medidos);
+    else motivos.push((garante ? "Derruba" : "Provável derrubar") + " o " + p.foe + " em 2 golpes (" + golpesDoKill + "); " + como + "." + (garante ? cheio : faixa) + medidos);
     return motivos;
   }
 

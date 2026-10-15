@@ -33,7 +33,9 @@ test("Giant Shuriken: Water Shuriken vira 1 acerto de 100 de poder (antes ficava
   assert.ok(com.forca > sem.forca, com.forca + " x " + sem.forca);
 });
 
-test("granizo: Ice ganha +50% de Defesa (só contra físico); Eerie Fog: Ghost/Psychic recebem 20% menos", () => {
+// Eerie Fog (15/10/2026, ticket calibracao-06): o código do jogo (battle_util.c:7275-7277) corta x0,8 o Atk de quem ataca um alvo Ghost;
+// Psychic não entra (a linha de 30/09, do Full Features, dava -20% de dano em Ghost e Psychic).
+test("granizo: Ice ganha +50% de Defesa (só contra físico); Eerie Fog: quem ataca um Ghost tem o Atk x0,8, Psychic não muda", () => {
   const atq = (clima, cat) => unidade(efDe([]), golpe(cat), { clima });
   const gelo = unidade(efDe([]), golpe("F"), { tipos: ["Ice"] });
   const fis = (clima) => R.danoNoDuelo(atq(clima, "F"), gelo, 50).melhor.dano;
@@ -44,7 +46,11 @@ test("granizo: Ice ganha +50% de Defesa (só contra físico); Eerie Fog: Ghost/P
   const fogo = (clima) => unidade(efDe([]), golpe("E", { tipo: "Fire" }), { clima }); // Normal não acerta Ghost
   const naNevoa = R.danoNoDuelo(fogo("nevoa"), fantasma, 50).melhor.dano, semNevoa = R.danoNoDuelo(fogo(null), fantasma, 50).melhor.dano;
   assert.ok(semNevoa > 0);
-  assert.ok(perto(naNevoa / semNevoa, R.CLIMA_OFICIAL.danoGhostPsychicNaNevoa));
+  assert.equal(R.CLIMA_OFICIAL.ataqueContraGhostNaNevoa, 0.8);
+  assert.ok(perto(naNevoa / semNevoa, 0.8, 0.03), "Ghost: " + naNevoa / semNevoa);
+  const psiquico = unidade(efDe([]), golpe("F"), { tipos: ["Psychic"] });
+  const naNevoaPsiquico = R.danoNoDuelo(fogo("nevoa"), psiquico, 50).melhor.dano, semNevoaPsiquico = R.danoNoDuelo(fogo(null), psiquico, 50).melhor.dano;
+  assert.ok(perto(naNevoaPsiquico / semNevoaPsiquico, 1), "Psychic: " + naNevoaPsiquico / semNevoaPsiquico);
 });
 
 test("dois climas diferentes no campo: fica sem clima (depende de quem entra por último)", () => {
