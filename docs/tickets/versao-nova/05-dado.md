@@ -1,6 +1,6 @@
 # v05 — Dado da versão mais nova (NextDex 2.65.4 + config d1a9a4c)
 
-Status: pronto-para-revisao, com ressalvas (branch `versao-05-dado`, empilhada em `versao-04-parser`, sem merge, sem PR). Rank NÃO recalculado; builds NÃO revisadas.
+Status: pronto-para-revisao, com ressalvas (APROVADO na revisão da Construção, 15/10) (branch `versao-05-dado`, empilhada em `versao-04-parser`, sem merge, sem PR). Rank NÃO recalculado; builds NÃO revisadas.
 Tamanho: G
 Autorização: Felipe, 15/10/2026 (fila v01–v05; `docs/tickets/dados-2654/01` com o limite da versão nova).
 
@@ -15,7 +15,7 @@ Autorização: Felipe, 15/10/2026 (fila v01–v05; `docs/tickets/dados-2654/01` 
 ## Ressalvas (o que NÃO foi feito, de propósito)
 - **Rank não recalculado.** `species_rank.json` e `species_role.json` seguem como estavam (menos a Arbok Mega). 17 espécies novas ficam sem rank e 6 têm o tipo mudado (Volbeat, Polartic, Beefender, Phanfernal, Serperior Mega, Iron Exo): `data/rank_pendente_ate_10.json`. Validações e testes de rank ignoram só essas; o fechamento (`dados-2654/10`) regera tudo. O app carrega e abre sem erro de JavaScript com o dado novo (conferido no navegador: rótulo "build 2.65.4"); a Dex dessas 17 espécies não tem rank na ficha até o fechamento.
 - **Builds não revisadas**: 258 problemas em `data/builds_pendentes_de_revisao.json` (244 builds "validadas contra 2.65beta" e 14 com habilidade ou golpe que a espécie não tem mais: Arcanine Hisuian Mega/Tough Claws, Cacjack/Destiny Bond, Scovillain Mega/Big Leaves, Machamp Redux/Multiscale, Beefender/Beast Boost, Roserade Mega/Corrosion e Victory Dance, Fujiflap/Air Blower, Flairgrance/Fairy Aura, Brontonana/Dragon Energy, Sneasler Mega/Weak Armor, Wormadam Trash/Roost, Morpekyll/Unburden, Boarlock/Gluttony). Não mexi em nenhuma: `dados-2654/08`. Qualquer problema novo, fora dessa lista, continua derrubando a validação.
-- Dois remendos do `dados-2654/01` não foram aplicados: Morpekyll Hangry com HP 97/Atk 104/SpD 74 (`dfe30fb`) e Kirlia Redux (Tidal Rush vira Hydration, `b726428`); entram no delta do upcoming (v07), junto com os golpes alterados.
+- Dois remendos do `dados-2654/01` não foram aplicados no v05: Morpekyll Hangry com HP 97/Atk 104/SpD 74 (`dfe30fb`) e Kirlia Redux (Tidal Rush vira Hydration, `b726428`). **Keen Edge -> Sharpness** também ficou fora do v05. Os três entraram no **v07** (patch `data/config_nova.json`, ver `07-habilidades-novas.md`), junto com o delta do upcoming.
 - 15 habilidades novas sem regra no motor (7 delas listadas na auditoria): v07.
 - Traduções PT das 29 habilidades novas não existem (a ficha cai para o texto em inglês); `move_translations_pt.json` e os golpes não mudaram de índice.
 - A suíte de navegador do Playwright não roda neste ambiente (versão do Chromium instalada x esperada); abri o `artifact_final.html` no Chromium instalado: 0 erros de JavaScript.
