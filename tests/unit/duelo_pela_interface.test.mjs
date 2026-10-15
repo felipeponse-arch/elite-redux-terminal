@@ -236,14 +236,17 @@ test("sol dá x1,5 em golpe Fire e a chuva corta pela metade", () => {
   dentroDoEfeito(razao(luta("chuva"), luta(null), causado), 0.5, "chuva");
 });
 
-test("clima defensivo: areia dá +50% de Sp. Def ao Rock, granizo +50% de Def ao Ice, névoa -20% de dano em Ghost/Psychic", () => {
+test("clima defensivo: areia dá +50% de Sp. Def ao Rock, granizo +50% de Def ao Ice, névoa -20% de dano em Ghost (e em Psychic não)", () => {
   const golem = (clima) => lutar(eu("Golem", { golpes: ["Earthquake"], evs: EV.tanqueE, clima }), alakazam(["Shadow Ball"], { clima }));
   dentroDoEfeito(razao(golem("areia"), golem(null), sofrido), 1 / 1.5, "areia no Golem");
   const weavile = (clima) => lutar(eu("Weavile", { hab: "Pressure", golpes: ["Ice Punch"], evs: EV.tanqueF, clima }), machamp(["Knock Off"], { clima }));
   dentroDoEfeito(razao(weavile("granizo"), weavile(null), sofrido), 1 / 1.5, "granizo no Weavile");
+  // Eerie Fog (15/10/2026, battle_util.c:7275-7277): o Atk de quem ataca um alvo Ghost sai x0,8; Psychic não entra.
+  const mismagius = (clima) => lutar(eu("Mismagius", { hab: "Levitate", golpes: ["Shadow Ball"], evs: EV.tanqueE, nat: "Calm", clima }), alakazam(["Psychic"], { clima }));
+  dentroDoEfeito(razao(mismagius("nevoa"), mismagius(null), sofrido), 0.8, "névoa no Mismagius (Ghost)");
   const espeon = (clima) => lutar(eu("Espeon", { hab: "Soul-Heart", golpes: ["Psychic"], evs: EV.tanqueE, nat: "Calm", clima }), alakazam(["Psychic"], { clima }));
   assert.equal(espeon(null).venceu, false, "pré-condição: sem névoa o Alakazam vence o Espeon");
-  assert.equal(espeon("nevoa").venceu, true, "na névoa o Espeon (Psychic) recebe 20% menos e vence");
+  assert.equal(espeon("nevoa").venceu, false, "na névoa o Espeon (Psychic) segue perdendo: o corte de dano é só contra Ghost");
   // controle: o clima só mexe em quem tem o tipo (Corviknight não é Rock, Ice, Ghost nem Psychic)
   const corv = (clima) => lutar(eu("Corviknight", { hab: "Chrome Coat", golpes: ["Iron Head"], evs: EV.tanqueF, clima }), machamp());
   for (const c of ["areia", "granizo"]) semEfeito(razao(corv(c), corv(null), sofrido), c + " em quem não é do tipo");

@@ -119,7 +119,8 @@
   // confirmado em fonte oficial: "Weather Rework" da página Full Features
   // (eliteredux.net/full-features: "Damage bonus reduced to 20% for Sun/Rain",
   // "Ice-types get 50% defense boost in Hail") e o FAQ (Eerie Fog: "Ghost- and
-  // Psychic-types get a 20% damage reduction from moves", e os aumentos de
+  // Psychic-types get a 20% damage reduction from moves" - o código do jogo, que vale desde 15/10/2026,
+  // corta só quem ataca um Ghost: battle_util.c:7275-7277 - e os aumentos de
   // status de quem NÃO é Ghost/Psychic caem 1 por turno). Areia pra Rock é do
   // jogo original e não aparece nas páginas oficiais deste hack - fica de fora.
   // Números oficiais num lugar só (2026-09-30): o motor do duelo (duelo.js) usa
@@ -129,14 +130,14 @@
   // (battle_util.c: clima de habilidade ou golpe dura 8 turnos e reforça 1,5x; o 1,2x é só
   // do clima permanente de mapa). O Full Features (+20%, infinito) ficou desatualizado.
   // A duração (duracaoTurnos) entra na luta inteira junto com "o armador precisa entrar".
-  var CLIMA_OFICIAL = { reforcoSolChuva: 1.5, duracaoTurnos: 8, defesaIceNoGranizo: 1.5, spdRockNaAreia: 1.5, danoGhostPsychicNaNevoa: 0.8 };
+  var CLIMA_OFICIAL = { reforcoSolChuva: 1.5, duracaoTurnos: 8, defesaIceNoGranizo: 1.5, spdRockNaAreia: 1.5, ataqueContraGhostNaNevoa: 0.8 };
   var pctClima = function (mult) { return Math.round(Math.abs(mult - 1) * 100) + "%"; };
   var CLIMA_QUE_COMBINA = {
     Fire: { clima: "Sun", curto: "+" + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " em golpes Fire", porque: "golpes Fire causam " + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " a mais no sol" },
     Water: { clima: "Rain", curto: "+" + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " em golpes Water", porque: "golpes Water causam " + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " a mais na chuva" },
     Ice: { clima: "Hail", curto: "+" + pctClima(CLIMA_OFICIAL.defesaIceNoGranizo) + " de Defesa pra Ice", porque: "tipo Ice ganha " + pctClima(CLIMA_OFICIAL.defesaIceNoGranizo) + " de Defesa no granizo" },
-    Ghost: { clima: "Eerie Fog", curto: "-" + pctClima(CLIMA_OFICIAL.danoGhostPsychicNaNevoa) + " de dano recebido", porque: "Ghost recebe " + pctClima(CLIMA_OFICIAL.danoGhostPsychicNaNevoa) + " menos dano e seus aumentos de status não caem na névoa" },
-    Psychic: { clima: "Eerie Fog", curto: "-" + pctClima(CLIMA_OFICIAL.danoGhostPsychicNaNevoa) + " de dano recebido", porque: "Psychic recebe " + pctClima(CLIMA_OFICIAL.danoGhostPsychicNaNevoa) + " menos dano e seus aumentos de status não caem na névoa" }
+    Ghost: { clima: "Eerie Fog", curto: "-" + pctClima(CLIMA_OFICIAL.ataqueContraGhostNaNevoa) + " no ataque contra Ghost", porque: "quem ataca um Ghost na névoa tem o Atk " + pctClima(CLIMA_OFICIAL.ataqueContraGhostNaNevoa) + " menor (battle_util.c) e os aumentos de status do Ghost não caem na névoa" },
+    Psychic: { clima: "Eerie Fog", curto: "aumentos de status não caem", porque: "na névoa os aumentos de status de quem é Ghost ou Psychic não caem 1 por turno (o corte de dano da névoa é só contra Ghost, pelo código do jogo)" }
   };
   function climaQueCombina(tipo) { return CLIMA_QUE_COMBINA[tipo] || null; }
 

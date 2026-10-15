@@ -1276,7 +1276,7 @@
       primeiroGolpeRecebido: 1, golpeCheio: 1, expulsaAoApanhar: false, expulsaQuemEnrola: false, naoSaiForcado: false, fogeNaMetade: false,
       fogeAoCair: false, ultimaCartada: false, brasas: false, tocaia: 0, anulaClima: false, ventoForte: false,
       bloqueiaGolpeClima: false, catastrofe: false, aguaNoSol: false, disableAoContato: 0, disableSom: 0, disableComGelo: false,
-      saque: 0, barraPrioridade: false, firmeza: false, contraMega: 1, apagao: false, resistSeTipo: null, arquimago: 0,
+      saque: 0, barraPrioridade: false, bloqueiaPrioClima: null, firmeza: false, contraMega: 1, apagao: false, resistSeTipo: null, arquimago: 0,
       espiao: false, pintaAlvo: null, golpeAlterado: {}, golpeTaunt: null, curaComLuta: false, sonoCura: 0,
       curaTimeNaEntrada: false, mimetismo: false, ventoAtaque: false, ventoCarga: false,
       forma: null, cuspe: false, critMetade: false,
@@ -1535,6 +1535,14 @@
     [1, 2, 5, 3, 4].forEach(function (i) { if (u.stats[i] > u.stats[melhor]) melhor = i; });
     return { atributo: melhor, mult: melhor === 5 ? vel : mult };
   }
+  // A habilidade do alvo barra o golpe com prioridade de quem ataca (o golpe falha inteiro): Queenly Majesty, Dazzling e Armor Tail sempre;
+  // Sand Guard na areia e Sun Basking no sol (abilities.cc:6238-6241 e 7437-7440 delegam ao onImmune da Queenly Majesty sob o clima).
+  // O Utility Umbrella do dono desliga o do sol (IsBattlerWeatherAffected, battle_util.c:8674-8683). Mold Breaker atravessa.
+  function prioBloqueadaPelaHabilidadeDuelo(def, atq) {
+    if (atq.ef.quebraHabilidade) return false;
+    if (def.ef.bloqueiaPrioLado) return true;
+    return !!def.ef.bloqueiaPrioClima && !(def.ef.bloqueiaPrioClima === "sol" && def.it && def.it.guardaChuvaSol && !def.ef.klutz);
+  }
   // O rival só tem golpe de dano desse tipo (então é forçado a lançá-lo, mesmo contra uma absorção)?
   function rivalSoTemOTipoDuelo(u, tipo) {
     var dano = (u.golpesProntos || []).filter(function (g) { return g.forca > 0; });
@@ -1764,7 +1772,7 @@
     // Queenly Majesty, Dazzling e Armor Tail: o dono é imune a golpe de prioridade (no 1x1 só o próprio dono conta;
     // o aliado entra na simulação em dupla). Mold Breaker e parecidos ignoram. O Beatdown do Accelgor (Sombrio, +1)
     // acertava o Ninetales da Meteor Falls, que tem Queenly Majesty (10/10/2026).
-    if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade && (atq.golpesProntos || []).some(function (g) { return g.prio > 0; })) {
+    if (prioBloqueadaPelaHabilidadeDuelo(def, atq) && (atq.golpesProntos || []).some(function (g) { return g.prio > 0; })) {
       atq = Object.assign({}, atq, { golpesProntos: atq.golpesProntos.filter(function (g) { return !(g.prio > 0); }) });
     }
     var melhor = { dano: 0, prio: 0, golpe: null }, melhorPrio = { dano: 0 }, segundo = { dano: 0 }, candidatos = [];
@@ -1779,12 +1787,13 @@
     var precisaoAtq = atq.ef.semErrar || def.ef.semErrarContraMim;
     var abreDef = !atq.ef.quebraHabilidade;
     // Clima no campo (Weather Rework oficial, 2026-09-30): Ice ganha Defesa no
-    // granizo; Ghost/Psychic recebem menos dano na Eerie Fog.
+    // granizo; o ataque contra Ghost sai x0,8 na Eerie Fog.
     var climaCampo = climaNoCampoDuelo(atq, def);
     var defNoClima = climaCampo === "granizo" && def.tipos.indexOf("Ice") !== -1 ? CLIMA_OFICIAL.defesaIceNoGranizo : 1;
     // Tempestade de areia (código oficial, battle_util.c: STAT_SPDEF "Sandstorm"): tipo Rock ganha +50% de Sp. Def.
     var spdNoClima = climaCampo === "areia" && def.tipos.indexOf("Rock") !== -1 ? CLIMA_OFICIAL.spdRockNaAreia : 1;
-    var danoNoClima = climaCampo === "nevoa" && (def.tipos.indexOf("Ghost") !== -1 || def.tipos.indexOf("Psychic") !== -1) ? CLIMA_OFICIAL.danoGhostPsychicNaNevoa : 1;
+    // Eerie Fog (battle_util.c:7275-7277): o Atk de quem ataca um alvo Ghost sai x0,8 (só Ghost, não Psychic; no ataque, não no dano final).
+    var ataqueNaNevoa = climaCampo === "nevoa" && def.tipos.indexOf("Ghost") !== -1 ? CLIMA_OFICIAL.ataqueContraGhostNaNevoa : 1;
     atq.golpesProntos.forEach(function (g) {
       var flags = g.flags || [];
       // Bulletproof, Soundproof: imune pela marcação do golpe.
@@ -1818,12 +1827,14 @@
       var terreno = CAMPO_DUELO && CAMPO_DUELO.terreno, noCampo = 1, prioAqui = g.prio;
       if (terreno && TIPO_DO_TERRENO_DUELO[terreno] === g.tipo && terreno !== "nevoa" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
       if (terreno === "nevoa" && g.tipo === "Fairy" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
-      if (terreno === "nevoa" && g.tipo === "Dragon" && aterradoDuelo(def)) noCampo *= 0.5;
+      // (Misty Terrain não corta Dragon: battle_util.c:7088-7112 só dá o x1,3 do tipo do terreno. O x0,5 que ficava aqui era só do motor.)
+      // Grassy Glide: +1 de prioridade no Grassy Terrain (battle_main.c:4276-4278, só para quem está no chão).
+      if (g.nome === "Grassy Glide" && terreno === "grama" && aterradoDuelo(atq)) prioAqui += 1;
       if (terreno === "psiquico" && prioAqui > 0 && aterradoDuelo(def)) return; // Psychic Terrain: o golpe com prioridade falha inteiro (CANCELLER_PSYCHIC_TERRAIN)
       if (def.ef.barraPrioridade && prioAqui > 0) prioAqui = 0; // Surprise! na névoa
       if (abreDef && def.ef.sempreResiste && efTipo > 0.5) efTipo = 0.5; // Color Change, Soothsayer
       var fisico = g.cat === "F", defF = g.defNaDef || (fisico && !g.defEspecial);
-      var A = ataqueNoDuelo(atq, g, def) * (fisico ? intim : assus);
+      var A = ataqueNoDuelo(atq, g, def) * (fisico ? intim : assus) * ataqueNaNevoa;
       if (!fisico) A *= noTerrenoDuelo(atq, "spa");
       // Item de poder (tipo, Muscle Band, Punching Glove) entra no poder; o Life Orb, no dano final.
       A *= comItem((fisico ? itA.fisicoMult : itA.especialMult) * (itA.tipoMult[g.tipo] || 1) *
@@ -1853,7 +1864,6 @@
         if (g.contato) red *= def.ef.reducao.contato;
         if (g.som) red *= def.ef.reducao.som; // Punk Rock
       }
-      red *= danoNoClima; // Eerie Fog: Ghost/Psychic recebem 20% menos
       if (efTipo >= 2 && !semBonus) red *= atq.ef.seBonus;
       if (efTipo >= 2) red *= comItem(itA.seMult, ativoA); // Expert Belt
       // Tera Shell: com HP cheio todo golpe é pouco efetivo - vale no 1º de ~2 golpes.
@@ -1964,7 +1974,7 @@
   // a atingem como atingem a de base. Sem `def` o chamador diz que o alvo não bloqueia nada.
   function prioCondicionalBarradaDuelo(atq, def) {
     if (!def || !def.ef) return false;
-    if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade) return true; // Queenly Majesty, Dazzling, Armor Tail (Mold Breaker ignora)
+    if (prioBloqueadaPelaHabilidadeDuelo(def, atq)) return true; // Queenly Majesty, Dazzling, Armor Tail, Sand Guard, Sun Basking (Mold Breaker ignora)
     if (def.ef.barraPrioridade) return true; // Surprise! na névoa
     return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === "psiquico" && aterradoDuelo(def)); // Psychic Terrain protege quem está no chão
   }
@@ -1973,7 +1983,7 @@
   // A Surprise! fica de fora: no jogo ela Astonisha antes do golpe, o motor só zera a prioridade (aproximação antiga).
   function prioFalhaDuelo(atq, def) {
     if (!def || !def.ef) return false;
-    if (def.ef.bloqueiaPrioLado && !atq.ef.quebraHabilidade) return true;
+    if (prioBloqueadaPelaHabilidadeDuelo(def, atq)) return true;
     return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === "psiquico" && aterradoDuelo(def)); // o golpe cancelado pelo terreno falha
   }
   // O 1º golpe com prioridade condicional (Coil Up, Sidewinder, Cutthroat, Edgelord: g.prioPrimeiro; On the Prowl: qualquer
@@ -3042,6 +3052,8 @@
     // Sorte na ordem.
     if ((x = f.match(/(\d+)% chance to move first/i))) ef.saque = parseInt(x[1], 10) / 100; // Quick Draw
     if (/Astonishes enemy priority users in fog/i.test(f) && climaOk("fog")) ef.barraPrioridade = true; // Surprise!
+    // Sand Guard e Sun Basking: "Blocks priority and reduces special damage by 1/2 in sand" - sob o clima, golpe com prioridade do outro lado falha.
+    if ((x = f.match(/^Blocks priority and reduces \w+ damage by 1\/2 in (sand|sun)/i)) && climaOk(x[1])) ef.bloqueiaPrioClima = CLIMA_DO_TEXTO_DUELO[x[1].toLowerCase()] === "areia" ? "areia" : "sol";
     // "Enraged" (código oficial do jogo, src/abilities.cc, lido em 2026-10-01): Madness
     // Enhancement enfurece na névoa; Berserk DNA, na entrada. O NextDex (versão dos nossos
     // dados) diz "halves damage when enraged" - o branch upcoming do código usa 0,8.

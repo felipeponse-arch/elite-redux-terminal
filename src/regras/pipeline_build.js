@@ -102,7 +102,7 @@
   // Espelha a leitura de prioridade de duelo.js (danoNoDuelo: prioAqui = g.prio; golpe.prioCheio = +1 no primeiro golpe).
   function pipelineAmeacasDePrioridade(unit, foe, nivel) {
     if (!CONSIDERA_PRIORIDADE_DO_ALVO) return [];
-    if (unit.ef.bloqueiaPrioLado && !foe.ef.quebraHabilidade) return [];
+    if (prioBloqueadaPelaHabilidadeDuelo(unit, foe)) return [];
     var lista = [];
     (foe.golpesProntos || []).forEach(function (gp) {
       if (!(gp.prio > 0) && !gp.prioCheio) return;
