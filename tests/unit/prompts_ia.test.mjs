@@ -87,11 +87,11 @@ test("prompt de plano: vazio quando não há golpe por liberar (não há o que p
 });
 
 test("resposta das Estratégias: só sets válidos e com nome; set ruim não derruba os bons", () => {
-  // Swampert: a curada dele é válida sem cap (fixture da sinergia Field Explorer).
-  const g = sp("SPECIES_SWAMPERT");
+  // Salamence: a curada dele é válida sem cap (fixture da sinergia Field Explorer).
+  const g = sp("SPECIES_SALAMENCE");
   R.state.settings.milestone = 9;
-  const cur = R.curadasDe("SPECIES_SWAMPERT")[0];
-  assert.ok(cur, "fixture: Swampert tem curada");
+  const cur = R.curadasDe("SPECIES_SALAMENCE")[0];
+  assert.ok(cur, "fixture: Salamence tem curada");
   const bom = { name: "Sweeper", ability: cur.ability, nature: cur.nature, item: "", moves: cur.moves.slice(), evs: [252, 252, 0, 0, 4, 0] };
   const ruim = { name: "Ruim", ability: "Inventada", nature: "Jolly", moves: ["A", "B", "C", "D"], evs: [0, 0, 0, 0, 0, 0] };
   const semNome = Object.assign({}, bom, { name: "  " });

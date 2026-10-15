@@ -96,7 +96,7 @@ test("planoSaneado: só formato (texto -> texto, golpe de agora na build)", () =
 });
 
 test("curadas: lista normalizada e escolha pelo estilo", () => {
-  const sn = Object.keys(R.BUILDS)[0];
+  const sn = Object.keys(R.BUILDS).find((k) => !Array.isArray(R.BUILDS[k]) && R.curadasDe(k).length === 1); // curada única, no formato de objeto
   const lista = R.curadasDe(sn);
   assert.equal(lista.length, 1, "objeto único vira lista de 1");
   const estilo = R.estiloDeEvs(lista[0].evs);

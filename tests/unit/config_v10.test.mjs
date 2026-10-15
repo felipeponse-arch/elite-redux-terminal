@@ -34,7 +34,7 @@ test("aprendizado pela config: 128 espécies mudam (level-up +105/-6, tutor +94/
 test("builds: nenhuma build de data/builds.json perdeu golpe por causa do aprendizado novo (a validação não acha golpe fora da espécie)", () => {
   const r = validarBuilds();
   assert.deepEqual(r.problemas, []);
-  assert.equal(r.pendentes.length, 259, "os 258 da v05 + Lanturn/Drizzle do v07; nenhum novo");
+  assert.equal(r.pendentes.length, 244, "pendentes herdadas (259 antes de saírem as 14 builds da curadoria do projeto); nenhuma nova");
 });
 
 test("aplicarPatch: retira e põe golpe de level-up e de tutor; cria a Mega a partir da base e aponta a evolução da base para ela", () => {

@@ -94,16 +94,16 @@ async function section15() {
   }
 
   // ---- aviso em build curada escrita pro modo permanente ----
-  var aero = T.getSpeciesBySname("SPECIES_AERODACTYL_MEGA");
-  var aeroBuild = T.BUILDS.SPECIES_AERODACTYL_MEGA;
-  if (aero && aeroBuild && aeroBuild.item !== "Aerodactylite") {
-    var notaTemp = comModo("temporaria", function () { return T.megaModeBuildNoteHtml(aero, aeroBuild); });
-    var notaPerm = comModo("permanente", function () { return T.megaModeBuildNoteHtml(aero, aeroBuild); });
+  var megaSp = T.getSpeciesBySname("SPECIES_CLEFABLE_MEGA");
+  var megaBuild = T.BUILDS.SPECIES_CLEFABLE_MEGA;
+  if (megaSp && megaBuild && megaBuild.item !== "Clefablite") {
+    var notaTemp = comModo("temporaria", function () { return T.megaModeBuildNoteHtml(megaSp, megaBuild); });
+    var notaPerm = comModo("permanente", function () { return T.megaModeBuildNoteHtml(megaSp, megaBuild); });
     check("temporária: build curada de mega sem a pedra ganha aviso explicando o modo",
-      notaTemp.indexOf("Aerodactylite") !== -1 && notaTemp.indexOf("permanente") !== -1, notaTemp.replace(/<[^>]+>/g, ""));
+      notaTemp.indexOf("Clefablite") !== -1 && notaTemp.indexOf("permanente") !== -1, notaTemp.replace(/<[^>]+>/g, ""));
     check("permanente: a mesma build não ganha aviso", notaPerm === "");
   } else {
-    check("fixture Mega Aerodactyl curada com item fora da pedra", false, JSON.stringify(aeroBuild));
+    check("fixture Mega Clefable curada com item fora da pedra", false, JSON.stringify(megaBuild));
   }
 
   // ---- rótulo de evolução por gênero (item D2, 2026-09-16) ----

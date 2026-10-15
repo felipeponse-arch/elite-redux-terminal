@@ -1,5 +1,22 @@
 [
   {
+    "date": "2026-10-15",
+    "items": [
+      "O app passa a seguir a versão mais nova do jogo (NextDex 2.65.4 mais a configuração oficial atualizada): espécies, habilidades, golpes e treinadores novos entram, e Arbok Mega sai",
+      "Motor calibrado pelo código do jogo: onde a calculadora e o código divergem, vale o código. Itens, prioridade de golpe e habilidades de tipo (Aerilate, Pixilate e parecidas: o golpe convertido ganha o STAB do novo tipo, sem x1,3 extra) foram conferidos um a um",
+      "Fim da dupla contagem: o bônus de golpe que o texto da habilidade já ensina não é somado de novo pela sinergia da espécie (Tough Claws e Nocturnal não valem mais 1,69x e 1,54x)",
+      "Habilidades que mudaram de efeito na versão nova: Friend Guard (25%), Justified, Jaws of Carnage, Perish Body, Poison Absorb, Lawnmower, Feathercoat, Best Offense, Magus Blades, Madness Enhancement e outras; Cute Charm, Yuki Onna e Attract não cortam mais a chance pela metade",
+      "38 habilidades novas funcionam no duelo (Familia Bond, Spicy Spray, Mana Coat, Hemorrhage, Third-Degree Burn, Photokinesis, Photon Burst e outras); Grimace e Blinking Flash aparecem como sem regra, com o motivo. Insect Eater, Lumberjack, Dragonslayer e parecidas valem pelo tipo de quem ataca",
+      "9 golpes novos (Eerie Laugh, Baneful Kick, Arc Blast, Scorching Ray e outros) com as espécies que os aprendem, e o aprendizado de golpes de 128 espécies segue a configuração nova",
+      "Sono e paralisia no estilo Pokémon Champions: paralisia faz perder o turno 12,5% das vezes (era 25%), o chefão paralisado no Hell sempre age, e o sono dura menos (perde 5/3 de turno em média)",
+      "Builds: como a base do jogo mudou, saíram as builds geradas pelo próprio app; ficam as da comunidade (Discord e vídeos) e as da estratégia da Dex do jogo, todas conferidas na versão nova",
+      "Pipeline de build na tela: o app mostra as sugestões do jogo (conjuntos de 4 golpes simulados contra o próximo chefão), a IA só escolhe entre elas e define item, natureza e EVs, e o card diz quem resolve o chefão (derruba em 1 golpe, em 2, ou não derruba)",
+      "Selo de confiança da build: 'Calculado pelo código do jogo' em toda build; 'estimada' só quando a habilidade ainda não tem regra no motor",
+      "Mega Bruxish e Mega Jellicent ficam escondidas até a configuração do jogo ter os números delas",
+      "O rank das espécies será recalculado com a versão nova numa atualização logo em seguida"
+    ]
+  },
+  {
     "date": "2026-10-10",
     "items": [
       "Ao sincronizar entre aparelhos, o app avisa antes de trocar um save com menos progresso (a run adiantada não é mais apagada)",

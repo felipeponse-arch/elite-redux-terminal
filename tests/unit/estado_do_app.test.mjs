@@ -164,10 +164,10 @@ test("runTemAlgoPraZerar: só há o que zerar quando a run tem algo", () => {
 
 // ---------------- build mostrada ----------------
 test("effectiveBuild: a do jogador vence a curada; sem nenhuma, a curada do estilo do time", () => {
-  const sw = sp("SPECIES_SWAMPERT");
+  const sw = sp("SPECIES_SALAMENCE");
   const cur = R.effectiveBuild(sw);
   assert.equal(cur.origem, "curada");
-  R.state.customBuilds.SPECIES_SWAMPERT = [build({ moves: ["Earthquake"], evs: [0, 252, 0, 0, 4, 252] })];
+  R.state.customBuilds.SPECIES_SALAMENCE = [build({ moves: ["Earthquake"], evs: [0, 252, 0, 0, 4, 252] })];
   const minha = R.effectiveBuild(sw);
   assert.equal(minha.origem, "manual");
   assert.equal(minha.moves.join(","), "Earthquake");
