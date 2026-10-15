@@ -80,8 +80,6 @@
       "After fainting uses 100 BP Explosion or Outburst."],
     ["Marvel Scale", "Ups Defense by 1.5x when statused.",
       "Ups Def by 1.5x when statused."],
-    ["Perish Body", "Uses Perish Song when hit by a contact move.",
-      "If hit, casts Perish Song."],
     ["Lead Coat", "Take 40% less phys. dmg, but Speed x0.9. Triple user's weight.",
       "Takes 40% less from Phys. moves. This Pokémon's Speed is 0.9x."],
     ["Freezing Point", "20% frostbite chance on contact, 30% chance on non-contact.",
@@ -92,8 +90,6 @@
       "Uses Speed as defense stat when hit by contact."],
     ["Determination", "Ups Special Attack by 50% if statused.",
       "Ups Special Attack by 50% if suffering."],
-    ["Jaws of Carnage", "KOs heal 1/4 of max HP, 1/2 if using a biting move.",
-      "Devours 1/2 of the foe when defeating it."],
     ["Chrome Coat", "Take 40% less spec. dmg, but Speed x0.9. Triple user's weight.",
       "Reduces special damage taken by 40%, but decreases Speed by 10%."],
     ["Pyro Shells", "Uses 50BP Explosion or Outburst after using Mega Launcher move.",
@@ -722,6 +718,8 @@
     if ((x = f.match(/Halves dmg taken by (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.resistTipo[tipoDoTextoDuelo(x[1])] = 0.5;
     // Flash Fire (abilities.cc:696-706, battle_util.c:4479): depois de absorver um golpe Fire, os Fire do dono saem x1,5 até ele sair
     // ("Powers up Fire-type moves by 1.5x if hit by a Fire-type move"). A imunidade em si vem da tabela de tipos.js.
+    // Justified (abilities.cc:2178): absorve Dark e sobe o MAIOR ataque (Atk ou SpAtk) +1 = x1,5 no golpe da categoria do maior ataque; a 2.65beta dizia só Atk.
+    if ((x = f.match(/^Boosts (highest )?attack instead of being hit by (\w+)-type moves/i)) && tipoDoTextoDuelo(x[2])) ef.absorveReforca = { tipo: tipoDoTextoDuelo(x[2]), mult: 1.5, categoria: x[1] ? "maior" : "F" };
     if ((x = f.match(/Powers up (\w+)-type moves by ([\d.]+)x if hit by a (\w+)-type move/i)) && tipoDoTextoDuelo(x[1]) && x[1] === x[3]) ef.absorveReforca = { tipo: tipoDoTextoDuelo(x[1]), mult: parseFloat(x[2]) };
     // Punk Rock (abilities.cc:3279-3289): golpe de som recebido x0,5 ("Takes -50% dmg from sound moves").
     if ((x = f.match(/Takes -(\d+)% dmg from sound moves/i))) ef.reducao.som *= 1 - parseInt(x[1], 10) / 100;
@@ -854,8 +852,10 @@
     }
     if (/^Field becomes Electric/i.test(f)) ef.armaTerreno = "eletrico";
     if (/sets Toxic Terrain on entry/i.test(f)) ef.armaTerreno = "toxico"; // Toxic Surge
+    if (/Heals in Toxic Terrain/i.test(f)) ef.noTerreno.push({ terreno: "toxico", stat: "cura", mult: 1 / 8 }); // Poison Absorb (abilities.cc:4421; script RainDish: 1/8 por turno)
     if ((x = f.match(/(\d+)% spdef boost under Toxic Terrain/i))) ef.noTerreno.push({ terreno: "toxico", stat: "spd", mult: 1 + parseInt(x[1], 10) / 100 }); // Biofilm
     if (/Removes terrain on switch-in|Destroys terrain|Eats terrain|Negates Weather, Rooms and Terrains/i.test(f)) ef.limpaTerreno = true;
+    if (/Removes Terrain on switch-in, then ups Def or Sp\. Def/i.test(f)) ef.lawnmower = true; // sobe o stat conforme o terreno limpo
     if (/Negates Weather, Rooms and Terrains/i.test(f)) ef.limpaSala = true;
     if ((x = f.match(/Sets up Trick Room on entry, lasts (\d+) turns/i))) ef.sala = parseInt(x[1], 10);
     if ((x = f.match(/Sets up Inverse Room on entry, lasts (\d+) turns/i))) ef.inversa = parseInt(x[1], 10);
@@ -1044,6 +1044,8 @@
     }
     if ((x = f.match(/Dealing a KO heals 1\/(\d+)/i)) || (x = f.match(/heals 1\/(\d+) HP when defeating an enemy/i))) ef.curaAoNocautear = 1 / parseInt(x[1], 10);
     if ((x = f.match(/Devours 1\/(\d+) of the foe when defeating it/i))) ef.devora = 1 / parseInt(x[1], 10);
+    // Jaws of Carnage (abilities.cc:5545): nocaute cura 1/4 do HP máximo, 1/2 se o golpe é de mordida (o texto da 2.65beta "devora 1/2 do alvo" era outra coisa).
+    if ((x = f.match(/KOs heal 1\/(\d+) of max HP, 1\/(\d+) if using a biting move/i))) { ef.curaNocaute = 1 / parseInt(x[1], 10); ef.curaNocauteMordida = 1 / parseInt(x[2], 10); }
     if ((x = f.match(/Fainted Pokemon increase your offenses and spdef by (\d+)%/i))) ef.porDesmaio = parseInt(x[1], 10) / 100;
     // Battle Bond: o texto diz só "transforma"; vale o da série (+1 Atk, SpAtk e Speed uma vez).
     if (/Transforms into Battle Bond form after dealing a KO/i.test(f)) { ["atk", "spa", "spe"].forEach(function (s) { ef.aoNocautear.push({ stat: s, n: 1, umaVez: true }); }); }
@@ -1054,6 +1056,7 @@
     if (/Sharply lowers attacker's Attack and SpAtk when fainting/i.test(f)) ef.aoDesmaiarQueda = 2;
     if (/Deletes the PP of the move that faints this Pokemon/i.test(f)) ef.aoDesmaiarTiraGolpe = true;
     if (/If hit, casts Perish Song/i.test(f)) ef.perecer = 3;
+    if (/Uses Perish Song when hit by a contact move/i.test(f)) { ef.perecer = 3; ef.perecerContato = true; } // versão nova: só com contato (abilities.cc:3444)
     // Hazards (do lado do outro): Stealth Rock, Spikes, Toxic Spikes, Sticky Web.
     if (/Deploys Stealth Rocks when hit by contact/i.test(f)) ef.hazards.push({ tipo: "rocha", quando: "contato" });
     if (/Sets a layer of Spikes when hit|When hit, set up spikes/i.test(f)) ef.hazards.push({ tipo: "espinho", quando: /contact/i.test(f) ? "contato" : "hit" });
@@ -1147,6 +1150,8 @@
         soma(chaves[maior], u.ef.maiorNaEntrada, false);
       }
       if (u.ef.maiorAtaqueNaEntrada && u.stats) soma(u.stats[1] >= u.stats[3] ? "atk" : "spa", u.ef.maiorAtaqueNaEntrada, false);
+      // Lawnmower: o terreno do outro lado (se o dono não arma o seu) é limpo e o dono sobe Def ou Sp. Def +1
+      if (u.ef.lawnmower && outro.ef.armaTerreno && !u.ef.armaTerreno) soma(estagioDoLawnmowerDuelo(outro.ef.armaTerreno), 1, false);
     }
     Object.keys(outro.ef.quedaNaEntrada).forEach(function (k) { soma(k, outro.ef.quedaNaEntrada[k], true); });
     // Malicious: -1 no maior ataque e na maior defesa de quem enfrenta.
@@ -1295,7 +1300,8 @@
     var falta = {};
     function soma(s, p, ignoraGenero) {
       if (!podeSofrerStatusDuelo(def, s)) return;
-      if (s === "paixao" && !ignoraGenero) p *= 0.5; // só gênero oposto: metade dos casos
+      // Paixão sem restrição de gênero (ticket versao-nova/06): CanInfatuate (battle_util.c:5159, igual em 28/03 e 14/10) não olha gênero e nenhum script do jogo usa
+      // jumpifoppositegenders; o changelog 2.65 Beta 2 diz "removing some old restrictions". Antes o motor cortava a chance pela metade.
       falta[s] = (falta[s] === undefined ? 1 : falta[s]) * (1 - Math.min(1, p));
     }
     // Status certo na entrada (Let's Dance: confunde o campo).
@@ -1430,12 +1436,12 @@
       campoResiduo: [], statusNaEntrada: {}, forcaUltimo: false, semStabOutros: false, recuoFrac: 1,
       seQuebra: false, venenoReduz: false, mudaTipoNoContato: null, telaNaEntrada: 0, imuneTipoNaEntrada: null,
       sincroniza: false, almaLigada: false, drenoCategoria: {},
-      armaTerreno: null, limpaTerreno: false, sala: 0, inversa: 0, vento: 0, gravidade: false, limpaSala: false,
+      armaTerreno: null, limpaTerreno: false, lawnmower: false, sala: 0, inversa: 0, vento: 0, gravidade: false, limpaSala: false,
       infiltra: false, limpaTelas: false, noTerreno: [], carregaNaEntrada: false,
       klutz: false, gostaDeBaga: false, bagaCedo: false, bagaCuraMin: 0, ripen: false, colheita: 0, rumina: false, unburden: false,
       desligaItem: false, roubaContato: false, roubaSemContato: false, seguraItem: false, nervoso: false,
-      aoNocautear: [], curaAoNocautear: 0, devora: 0, porDesmaio: 0, aoDesmaiarGolpe: 0, aoDesmaiarDevolve: false,
-      aoDesmaiarMaldicao: false, aoDesmaiarQueda: 0, aoDesmaiarTiraGolpe: false, perecer: 0, hazards: [], limpaHazards: false,
+      aoNocautear: [], curaAoNocautear: 0, curaNocaute: 0, curaNocauteMordida: 0, devora: 0, porDesmaio: 0, aoDesmaiarGolpe: 0, aoDesmaiarDevolve: false,
+      aoDesmaiarMaldicao: false, aoDesmaiarQueda: 0, aoDesmaiarTiraGolpe: false, perecer: 0, perecerContato: false, hazards: [], limpaHazards: false,
       regenera: 0, curaAoSair: false,
       aliadoDano: {}, aliadoReducao: 1, plusMinus: false, bloqueiaPrioLado: false, telepatia: false, hospitalidade: 0, aliadoPrecisao: 0,
       aliadoEspecial: 0, aliadoMaior: 0, reiDosRatos: null, aliadoImuneSom: false, aliadoImuneStatus: {}, protegeGrass: false,
@@ -2392,7 +2398,9 @@
       // só lança esse tipo se não tem outro golpe de dano (uma IA que sabe da habilidade evita o golpe absorvido, e o motor também);
       // Mold Breaker atravessa e não há absorção.
       var ar = u.ef.absorveReforca;
-      if (ar && g && g.tipo === ar.tipo && turnos > 0 && !outroU.ef.quebraHabilidade && rivalSoTemOTipoDuelo(outroU, ar.tipo)) f *= (1 + ar.mult * (turnos - 1)) / turnos;
+      // categoria: o reforço é do golpe da categoria (Justified: a do maior ataque), não de um tipo
+      var vale = ar && g && (ar.categoria ? g.cat === (ar.categoria === "maior" ? (u.stats[1] >= u.stats[3] ? "F" : "E") : ar.categoria) : g.tipo === ar.tipo);
+      if (ar && g && vale && turnos > 0 && !outroU.ef.quebraHabilidade && rivalSoTemOTipoDuelo(outroU, ar.tipo)) f *= (1 + ar.mult * (turnos - 1)) / turnos;
       if (u.ef.carregaAoApanhar && g && g.tipo === "Electric" && turnos > 0) f *= (2 * turnos - 1) / turnos; // Electromorphosis
       else if (u.ef.carregaNaEntrada && g && g.tipo === "Electric" && turnos > 0) f *= (turnos + 1) / turnos; // Generator: o 1º sai 2x
       // Power Outage: o 1º golpe Electric sai 2x, depois perde o tipo (e o STAB).
@@ -3794,6 +3802,20 @@
     if (ef.plusMinus) v += 0.05;
     return Math.min(0.5, v);
   }
+  // Cura do nocaute da Jaws of Carnage: 1/2 do HP máximo se o golpe que derruba é de mordida, senão 1/4. O golpe que derruba, no modelo, é o mais forte do dono.
+  function curaDoNocauteDuelo(u) {
+    if (!u.ef.curaNocaute) return 0;
+    var melhor = (u.golpesProntos || []).reduce(function (m, g) { return !m || g.forca > m.forca ? g : m; }, null);
+    return melhor && (melhor.cats || []).indexOf("mordida") !== -1 ? u.ef.curaNocauteMordida : u.ef.curaNocaute;
+  }
+  // Perish Body (abilities.cc:3444): só quando o atacante faz contato. Devolve os turnos da canção (0 = não toca) para o par a x b.
+  function perecimentoDuelo(a, b) {
+    var faz = function (u) { return (u.golpesProntos || []).some(function (g) { return g.contato; }); };
+    var t = function (dono, outro) { return dono.ef.perecer && (!dono.ef.perecerContato || faz(outro)) ? dono.ef.perecer : 0; };
+    return Math.max(t(a, b), t(b, a));
+  }
+  // Lawnmower (abilities.cc:7626): o stat que sobe é Sp. Def se o terreno limpo era Toxic, Psychic ou Misty; nos outros, Def.
+  function estagioDoLawnmowerDuelo(terreno) { return terreno === "toxico" || terreno === "psiquico" || terreno === "nevoa" ? "spd" : "def"; }
   // Nocaute na dupla: os mesmos bônus da luta inteira (Moxie, Predator...).
   function nocauteNaDupla(vence, cai, nivel) {
     var ef = vence.u.ef;
@@ -3802,7 +3824,7 @@
       else if (a.stat !== "maior") vence.bonus.estagios[a.stat] = (vence.bonus.estagios[a.stat] || 0) + a.n;
     });
     if (ef.porDesmaio) vence.bonus.mult *= 1 + ef.porDesmaio;
-    vence.frac = Math.min(1, vence.frac + ef.curaAoNocautear + ef.devora * cai.u.stats[0] / vence.u.stats[0]);
+    vence.frac = Math.min(1, vence.frac + ef.curaAoNocautear + curaDoNocauteDuelo(vence.u) + ef.devora * cai.u.stats[0] / vence.u.stats[0]);
     var d = cai.u.ef;
     if (d.aoDesmaiarQueda) { vence.bonus.estagios.atk = (vence.bonus.estagios.atk || 0) - d.aoDesmaiarQueda; vence.bonus.estagios.spa = (vence.bonus.estagios.spa || 0) - d.aoDesmaiarQueda; }
     if (d.aoDesmaiarMaldicao) vence.status.maldicao = 1;
@@ -4128,7 +4150,7 @@
       });
       if (ef.aoNocautear.some(function (a) { return a.umaVez; })) vence.bonus.usouUmaVez = true;
       if (ef.porDesmaio) vence.bonus.mult *= 1 + ef.porDesmaio;
-      vence.frac = Math.min(1, vence.frac + ef.curaAoNocautear + ef.devora * cai.u.stats[0] / vence.u.stats[0]);
+      vence.frac = Math.min(1, vence.frac + ef.curaAoNocautear + curaDoNocauteDuelo(vence.u) + ef.devora * cai.u.stats[0] / vence.u.stats[0]);
       var d = cai.u.ef;
       var golpeDele = danoNoDuelo(comoEstaDuelo(cai), comoEstaDuelo(vence), nivel).melhor;
       if (d.aoDesmaiarGolpe && golpeDele.golpe && golpeDele.golpe.poder > 0) vence.frac -= golpeDele.dano * d.aoDesmaiarGolpe / golpeDele.golpe.poder / vence.u.stats[0];
@@ -4220,7 +4242,7 @@
         }
       }
       // Perish Body: a canção derruba os dois depois de 3 turnos.
-      var perece = Math.max(atual.u.ef.perecer, f.u.ef.perecer);
+      var perece = perecimentoDuelo(atual.u, f.u);
       hazardsAoApanhar(atual, f, ladoDele);
       hazardsAoApanhar(f, atual, ladoMeu);
       log.push({ meu: atual.u.sp.n, contra: f.u.nome || f.u.sp.n, venceu: r.venceu, fracEu: r.fracEu, fracFoe: r.fracFoe, turnos: r.turnos, clima: !!cl && climaLigado && climaRestante > 0 });

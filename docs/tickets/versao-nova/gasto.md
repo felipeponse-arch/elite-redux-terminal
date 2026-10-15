@@ -13,3 +13,4 @@ o acumulado fica registrado para o Felipe comparar com o saldo que ele vê na co
 | 15/10 11:20 | fim do v01–v04 (amostra única; não medi por ticket) | 47,98 | 755.459 | 148.684 / 1.000.000 (depois de uma compactação) | não aparece; o Felipe informou ~US$ 44 de saldo à parte |
 | 15/10 11:30 | fim do v05 (parcial) | 48,2 (estimado; última leitura 47,98 às 11:19) | — | — | não aparece |
 | 15/10 12:35 | fim do v05 (troca do dado) | ver get_session (último valor lido: 47,98 às 11:19; o Felipe informa ~US$ 42 de saldo) | — | — | não aparece |
+| 15/10 12:20 | fim do v06 (leitura em get_session) | 57,32 (v05+v06 juntos desde 47,98: ≈9,3) | 941.878 | 492.520 / 1.000.000 | não aparece |

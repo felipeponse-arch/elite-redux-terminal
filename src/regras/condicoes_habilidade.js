@@ -62,9 +62,9 @@
     "chuva": /summons? rain|heavy rain/i,
     "sol": /summons? sun|intense sun/i,
     "areia": /summons? (a )?sand/i,
-    "granizo": /summons? hail|triggers hail/i,
-    "nevoa": /eerie fog on entry|set up eerie fog/i,
-    "terreno eletrico": /electric terrain on entry|set up electric terrain|field becomes electric/i,
+    "granizo": /summons? hail|triggers hail|sets hail/i,
+    "nevoa": /(eerie )?fog on entry|set up eerie fog|summons? fog|sets fog/i,
+    "terreno eletrico": /electric terrain on entry|set up electric terrain|field becomes electric|sets electric terrain/i,
     "terreno de grama": /grassy terrain on entry|sets grassy terrain/i,
     "terreno nevoento": /misty terrain on entry/i,
     "terreno toxico": /toxic terrain on entry/i
