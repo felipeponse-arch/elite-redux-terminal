@@ -393,13 +393,21 @@ test("habilidade que só funciona gastando o item: o rascunho leva a Berry e o c
   });
 });
 
-test("tempo: cada espécie leva bem menos de 2 s", () => {
-  AMOSTRA.forEach((nome) => {
-    const t = Date.now();
+// Orçamento relativo (15/10/2026): milissegundo absoluto falhava sob carga da máquina (sabotagem roda vários processos).
+// Agora cada espécie é medida no mesmo processo (melhor de 2 corridas, para descartar um tropeço do agendador) e
+// nenhuma pode passar de 8x a mediana da amostra (piso de 50 ms para a mediana não zerar o limite). Pega uma
+// regressão grande numa espécie (ex.: x10); carga uniforme da máquina escala todas juntas e não dispara.
+test("tempo: nenhuma espécie passa de 8x a mediana da amostra", () => {
+  const medir = (nome) => {
+    const t = performance.now();
     R.candidatosDeBuild(sp(nome), { alvo: { chefao: courtney } });
-    const ms = Date.now() - t;
-    assert.ok(ms < 2000, nome + ": " + ms + " ms");
-  });
+    return performance.now() - t;
+  };
+  const tempos = AMOSTRA.map((nome) => ({ nome, ms: Math.min(medir(nome), medir(nome)) }));
+  const ordenado = tempos.map((x) => x.ms).sort((a, b) => a - b);
+  const mediana = ordenado[Math.floor(ordenado.length / 2)];
+  const limite = 8 * Math.max(mediana, 50);
+  tempos.forEach(({ nome, ms }) => assert.ok(ms <= limite, nome + ": " + Math.round(ms) + " ms (limite " + Math.round(limite) + " ms, mediana " + Math.round(mediana) + " ms)"));
 });
 
 // ---------- rodada 2 do supervisor ----------
