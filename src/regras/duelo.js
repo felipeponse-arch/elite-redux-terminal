@@ -50,7 +50,10 @@
   // Código: Madness Enhancement abilities.cc:9939-9947 (.5 -> .8), Feathercoat 12377-12386 (.9/.8 -> .85/.7).
   var TEXTO_DA_VERSAO_NOVA_DUELO = {
     "Madness Enhancement": "Enrages in fog, reduces damage taken by 20% when enraged.",
-    "Feathercoat": "Takes 15% less damage from attacks, 30% if resisted." };
+    "Feathercoat": "Takes 15% less damage from attacks, 30% if resisted.",
+    // P2 do Felipe (15/10): Best Offense e Magus Blades pelo CÓDIGO (abilities.cc:10208-10214 e 10230-10237): corte vira especial, +20% da DEFESA física no ataque.
+    "Best Offense": "Keen Edge moves are special and use +20% Sp. Def.",
+    "Magus Blades": "Best Offense + Keen Edge moves hit twice for 60%." };
   // Redação nova x parser (ticket versao-nova/04, 15/10/2026). O parser do motor lê TEXTO, e a NextDex 2.65.4 (07/10) reescreveu o texto curto de
   // centenas de habilidades: com a redação nova, 43 habilidades em uso perdem o efeito inteiro (Guts, Marvel Scale, Rough Skin, Fluffy, Stamina...) e
   // 9 leem outro efeito. O código do jogo não mudou o efeito delas (`git diff 7d85acd..486026e` em abilities.cc e battle_util.c: só Madness Enhancement,
@@ -212,7 +215,7 @@
   TEXTO_LIDO_DA_VERSAO_NOVA_DUELO.forEach(function (t) { LIDO_PELO_TEXTO_NOVO_DUELO[t[1]] = t[2]; });
   function textoHabDuelo(id) { // pelo número: nomes repetidos (As One)
     var nome = nomeHabDuelo(id), novo = TEXTO_DA_VERSAO_NOVA_DUELO[nome];
-    if (novo !== undefined) return novo;
+    if (novo !== undefined) return expandirTextoDeHabilidade(novo, nome, 0);
     var lido = ABILITIES[id] ? LIDO_PELO_TEXTO_NOVO_DUELO[ABILITIES[id][1]] : undefined;
     return lido !== undefined ? expandirTextoDeHabilidade(lido, nome, 0) : descricaoDeHabilidadePorId(id);
   }
@@ -766,6 +769,10 @@
     if ((x = f.match(/^(Special |Physical )?[Mm]oves use (\d+)% of its (Speed|SpDef|Def) stat additionally/i))) {
       ef.ataqueExtra.push({ fonte: /speed/i.test(x[3]) ? "spe" : /spdef/i.test(x[3]) ? "spd" : "def", pct: parseInt(x[2], 10) / 100, cat: x[1] ? (/special/i.test(x[1]) ? "E" : "F") : undefined });
     }
+    // Best Offense / Magus Blades (versão nova): "Keen Edge moves are special and use +20% Sp. Def." - pelo código é a Defesa FÍSICA (abilities.cc:10208-10214).
+    if ((x = f.match(/^(\w+ ?\w*) moves are special and use \+(\d+)% (?:Sp\. Def|Def)/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) {
+      ef.categoriaEspecial[c] = true; ef.ataqueExtra.push({ fonte: "def", pct: parseInt(x[2], 10) / 100, categoria: c });
+    });
     if ((x = f.match(/use (\d+)% of (spdef|def|speed) during moves/i))) ef.ataqueExtra.push({ fonte: /speed/i.test(x[2]) ? "spe" : /spdef/i.test(x[2]) ? "spd" : "def", pct: parseInt(x[1], 10) / 100 });
     if ((x = f.match(/uses \+(\d+)% of its Speed when defending/i))) ef.defesaExtraVel = parseInt(x[1], 10) / 100;
     if (/Boosts Atk or SpAtk to match the higher value/i.test(f)) ef.equinox = true;
@@ -785,7 +792,7 @@
     if (/Kicks always hit\. Damages foes' weaker defenses/i.test(f)) ef.menorDefesaCategoria.chute = true;
     if (/Targets lowest defense vs statused foes/i.test(f)) ef.menorDefesaSeStatus = true;
     if ((x = f.match(/^(\w+) moves hit SpDef and get a ([\d.]+)x power boost/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.categoriaNaSpDef[c] = true; ef.bonusCategoria[c] = Math.max(ef.bonusCategoria[c] || 1, parseFloat(x[2])); });
-    if ((x = f.match(/^(\w+ ?\w*) moves hit twice for (\d+)% damage/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.categoriaExtra[c] = Math.max(ef.categoriaExtra[c] || 1, 2 * parseInt(x[2], 10) / 100); });
+    if ((x = f.match(/^(\w+ ?\w*) moves hit twice for (\d+)%(?: damage)?/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.categoriaExtra[c] = Math.max(ef.categoriaExtra[c] || 1, 2 * parseInt(x[2], 10) / 100); });
     if ((x = f.match(/^(Air-based|Wind) moves get a ([\d.]+)x boost/i))) ef.flagMult["Air/Wing Based"] = { mult: parseFloat(x[2]) };
     // Giant Wings (abilities.cc:4661-4666): golpe com a flag air x1,3 ("wing, wind or air-based moves").
     if ((x = f.match(/Boosts the power of wing, wind or air-based moves by ([\d.]+)x/i))) ef.flagMult["Air/Wing Based"] = { mult: parseFloat(x[1]) };
@@ -1556,13 +1563,14 @@
         if (/moves (?:use (?:Special Attack|SpAtk)|become special)/i.test(f)) cats.forEach(function (c) { ef.categoriaEspecial[c] = true; maxEm(ef.bonusCategoria, c, mult); });
         if (/moves target Special Defense/i.test(f)) cats.forEach(function (c) { ef.categoriaNaSpDef[c] = true; maxEm(ef.bonusCategoria, c, mult); });
         // Golpe duplo da categoria (10/10/2026): o total é a soma dos dois golpes. O texto vem em 4 formas:
-        // "2nd hit does 0.4x damage", "1st hit at 100% power, 2nd hit at 40%", "for 70% damage" (os dois a 70%)
+        // "2nd hit does 0.4x damage", "1st hit at 100% power, 2nd hit at 40%", "hit twice for 60%" (Magus Blades: só o 2º a 60%), "for 70% damage" (os dois a 70%)
         // e "both hits at 70% power". Antes só as duas primeiras de tamanho conhecido eram lidas e a Raging
         // Boxer caía no padrão x2, somado ao x1,4 de baixo: soco saía x2,8 (o jogo mostra o 1º golpe a 78%-93%).
         if (/moves hits? twice/i.test(f)) {
           var y2, total = 2;
           if ((y2 = f.match(/2nd hit does ([\d.]+)x damage/i))) total = 1 + parseFloat(y2[1]);
           else if ((y2 = f.match(/2nd hit at (\d+)%/i))) total = 1 + parseInt(y2[1], 10) / 100;
+          else if ((y2 = f.match(/hit twice for (\d+)%(?! damage)/i))) total = 1 + parseInt(y2[1], 10) / 100; // Magus Blades (battle_util.c:7508, REQUIRE(turn)): só o 2º golpe a 60%
           else if ((y2 = f.match(/for (\d+)% damage/i)) || (y2 = f.match(/both hits at (\d+)% power/i))) total = 2 * parseInt(y2[1], 10) / 100;
           cats.forEach(function (c) { maxEm(ef.categoriaExtra, c, total); });
         }
@@ -1955,6 +1963,7 @@
     atq.ef.ataqueExtra.forEach(function (r) {
       if (r.contato !== undefined && r.contato !== g.contato) return;
       if (r.cat && r.cat !== g.cat) return;
+      if (r.categoria && (g.cats || []).indexOf(r.categoria) === -1) return; // só nos golpes da categoria (Best Offense: corte)
       var fonte = r.fonte === "spe" ? atq.stats[5] : r.fonte === "def" ? atq.stats[2] : r.fonte === "spd" ? atq.stats[4] : (fisico ? atq.stats[2] : atq.stats[4]);
       A = r.troca ? fonte : A + fonte * r.pct;
     });

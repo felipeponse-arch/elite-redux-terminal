@@ -3543,4 +3543,33 @@ export const MUTACOES = [
     de: "\"n\":\"Fujiflap\",\"abi\":\"Hustle\"",
     para: "\"n\":\"Fujiflap\",\"abi\":\"Aerodynamics\"",
   },
+  // ---- ticket versao-nova/05, P2 do Felipe: Best Offense e Magus Blades pelo código da versão mais nova ----
+  {
+    id: "versao-bo-categoria-ignorada",
+    descricao: "a soma de 20% da Def da Best Offense passa a valer em TODO golpe, não só nos de corte",
+    arquivo: "duelo.js",
+    de: "      if (r.categoria && (g.cats || []).indexOf(r.categoria) === -1) return; // só nos golpes da categoria (Best Offense: corte)\n",
+    para: "",
+  },
+  {
+    id: "versao-bo-sem-especial",
+    descricao: "o golpe de corte deixa de virar especial com a Best Offense",
+    arquivo: "duelo.js",
+    de: "      ef.categoriaEspecial[c] = true; ef.ataqueExtra.push({ fonte: \"def\"",
+    para: "      ef.ataqueExtra.push({ fonte: \"def\"",
+  },
+  {
+    id: "versao-bo-usa-spdef",
+    descricao: "a Best Offense soma 20% da Sp. Def (o texto) em vez da Def (o código)",
+    arquivo: "duelo.js",
+    de: "ef.ataqueExtra.push({ fonte: \"def\", pct: parseInt(x[2], 10) / 100, categoria: c });",
+    para: "ef.ataqueExtra.push({ fonte: \"spd\", pct: parseInt(x[2], 10) / 100, categoria: c });",
+  },
+  {
+    id: "versao-magus-golpe-duplo-60-nos-dois",
+    descricao: "a Magus Blades volta a contar os dois golpes (x2) em vez de 100% + 60%",
+    arquivo: "duelo.js",
+    de: "          else if ((y2 = f.match(/hit twice for (\\d+)%(?! damage)/i))) total = 1 + parseInt(y2[1], 10) / 100;",
+    para: "          else if (false) total = 1;",
+  },
 ];
