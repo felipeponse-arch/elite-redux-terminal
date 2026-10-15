@@ -2797,7 +2797,7 @@ export const MUTACOES = [
     id: "categorias-arremesso-sem-palavra-no-texto",
     descricao: "o texto \"throwing moves\" das habilidades deixa de apontar para a categoria arremesso (Rocky Payload sem efeito)",
     arquivo: "duelo.js",
-    de: "{ nome: \"arremesso\", re: /throw/i }",
+    de: "{ nome: \"arremesso\", re: /\\bthrow/i }",
     para: "{ nome: \"arremesso\", re: /nunca-casa-nada/i }",
   },
 
