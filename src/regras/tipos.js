@@ -124,8 +124,11 @@
     // Redux, e o Alcremie com Well Baked Body apanhando de Fire). A varredura
     // de 2026-09-12 só pegou "Imune a golpes do tipo X". "Cura 25% ao ser
     // atingido por golpe X" segue o precedente do Earth Eater (450) acima.
-    // Flash Fire (18) fica de fora: o texto deste jogo não diz que é imune.
+    // Flash Fire (18) e Dry Skin (87): o texto curto não diz "imune", mas o código do jogo absorve (abilities.cc:696-706 e 1471-1472,
+    // `onAbsorb`; a er-config traz "complete immunity to Fire-type moves"). Entram em 15/10/2026 (ticket calibracao-04).
     10:  { immune: ["Electric"], healPct: 25 },            // Volt Absorb
+    18:  { immune: ["Fire"] },                           // Flash Fire (o x1,5 depois da absorção está em duelo.js)
+    87:  { immune: ["Water"], healPct: 25 },               // Dry Skin (Fire x1,25 e a cura do clima ficam no texto)
     11:  { immune: ["Water"], healPct: 25 },               // Water Absorb
     31:  { immune: ["Electric"] },                         // Lightning Rod ("Redireciona golpes Electric. Absorve-os")
     78:  { immune: ["Electric"] },                         // Motor Drive ("Velocidade em vez de ser atingido")
@@ -136,7 +139,7 @@
     344: { immune: ["Poison"], healPct: 25 },              // Poison Absorb
     379: { immune: ["Ice"] },                              // Ice Dew
     446: { immune: ["Fire"] },                             // Well Baked Body
-    665: { immune: ["Water"], healPct: 25 },               // Elemental Vortex (Flash Fire + Water Absorb)
+    665: { immune: ["Water", "Fire"], healPct: 25 },       // Elemental Vortex (Flash Fire + Water Absorb)
     746: { immune: ["Ground"], healPct: 25 },              // Desolate Sun (Desolate Land + Earth Eater)
     749: { immune: ["Water"] },                            // Reservoir (Water Absorb + Storm Drain)
     865: { immune: ["Fire"] },                             // Heat Sink

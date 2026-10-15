@@ -552,6 +552,9 @@
     if ((x = f.match(/Reduces damage taken by (\d+)%, but lowers speed by (\d+)%/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.speMult *= 1 - parseInt(x[2], 10) / 100; }
     if ((x = f.match(/Takes (\d+)% less damage from attacks, (\d+)% if resisted/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
     if ((x = f.match(/Halves dmg taken by (\w+) moves/i)) && tipoDoTextoDuelo(x[1])) ef.resistTipo[tipoDoTextoDuelo(x[1])] = 0.5;
+    // Flash Fire (abilities.cc:696-706, battle_util.c:4479): depois de absorver um golpe Fire, os Fire do dono saem x1,5 até ele sair
+    // ("Powers up Fire-type moves by 1.5x if hit by a Fire-type move"). A imunidade em si vem da tabela de tipos.js.
+    if ((x = f.match(/Powers up (\w+)-type moves by ([\d.]+)x if hit by a (\w+)-type move/i)) && tipoDoTextoDuelo(x[1]) && x[1] === x[3]) ef.absorveReforca = { tipo: tipoDoTextoDuelo(x[1]), mult: parseFloat(x[2]) };
     // Punk Rock (abilities.cc:3279-3289): golpe de som recebido x0,5 ("Takes -50% dmg from sound moves").
     if ((x = f.match(/Takes -(\d+)% dmg from sound moves/i))) ef.reducao.som *= 1 - parseInt(x[1], 10) / 100;
     // Water Bubble (abilities.cc:2706-2718): o Water do dono sai x2 ("Doubles Water dmg dealt").
@@ -1240,7 +1243,7 @@
       ataqueNaEntrada: 0, seguimentoCategoria: [], aoUsar: [], limpaBuffsNaEntrada: false, quedaNaEntrada: {},
       maiorNaEntrada: 0, maiorAtaqueNaEntrada: 0, shellSmashNaMetade: false, inverteIntimida: false, dobraQuedas: false,
       encadeiaStatus: {},
-      curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, danoAoContato: 0,
+      curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
       semRecuo: false, recuoMult: 1, custoPorAtaque: 0, custoTipo: {}, bloqueiaCura: false, liquidOoze: false,
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
       bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {},
@@ -1515,6 +1518,11 @@
     return conflito ? null : achado;
   }
 
+  // O rival só tem golpe de dano desse tipo (então é forçado a lançá-lo, mesmo contra uma absorção)?
+  function rivalSoTemOTipoDuelo(u, tipo) {
+    var dano = (u.golpesProntos || []).filter(function (g) { return g.forca > 0; });
+    return dano.length > 0 && dano.every(function (g) { return g.tipo === tipo; });
+  }
   // ---------- golpes prontos e dano ----------
   function temSomDuelo(m) { return (m[8] || []).some(function (i) { return DATA.flags[i] === "Sound Based"; }); }
   // Cada golpe guarda a força sem os bônus de habilidade (forcaBase) e com eles
@@ -2148,6 +2156,11 @@
       var itU = u.it || itemDoDuelo("", null), outroU = u === eu ? foe : eu, atv = itemAtivoDuelo(u, outroU);
       if (itU.metronomo && turnos > 0) f *= comItem(Math.min(2, 1 + 0.2 * (turnos - 1) / 2), atv); // Metronome: +20% por repetição
       if (itU.gema && g && g.tipo === itU.gema && turnos > 0) f *= comItem((itU.gemaMult + turnos - 1) / turnos, atv); // gema: 1,5x uma vez
+      // Flash Fire: o 1º golpe do tipo que o rival lançar é absorvido e dali em diante o tipo do dono sai x1,5 (sem acumular). O rival
+      // só lança esse tipo se não tem outro golpe de dano (uma IA que sabe da habilidade evita o golpe absorvido, e o motor também);
+      // Mold Breaker atravessa e não há absorção.
+      var ar = u.ef.absorveReforca;
+      if (ar && g && g.tipo === ar.tipo && turnos > 0 && !outroU.ef.quebraHabilidade && rivalSoTemOTipoDuelo(outroU, ar.tipo)) f *= (1 + ar.mult * (turnos - 1)) / turnos;
       if (u.ef.carregaAoApanhar && g && g.tipo === "Electric" && turnos > 0) f *= (2 * turnos - 1) / turnos; // Electromorphosis
       else if (u.ef.carregaNaEntrada && g && g.tipo === "Electric" && turnos > 0) f *= (turnos + 1) / turnos; // Generator: o 1º sai 2x
       // Power Outage: o 1º golpe Electric sai 2x, depois perde o tipo (e o STAB).

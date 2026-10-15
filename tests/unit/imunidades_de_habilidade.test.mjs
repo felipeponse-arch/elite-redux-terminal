@@ -27,8 +27,12 @@ test("combinadas herdam a imunidade da parte (Reservoir, Desolate Sun)", () => {
   assert.equal(R.abilityTypeModFor("Ground", ["Fire"], [id("Desolate Sun")]).mult, 0);
 });
 
-test("Flash Fire não vira imunidade: o texto deste jogo não diz que é imune", () => {
-  assert.equal(R.abilityTypeModFor("Fire", ["Grass"], [id("Flash Fire")]).mult, 2);
+// Revisto em 15/10/2026 (regra do usuário: vale o código do jogo; ticket calibracao-04). Em 28/09 a Flash Fire ficou de fora porque o
+// texto curto não diz que é imune, mas o código a absorve (abilities.cc:696-706, ABSORB_RESULT_FLASH_FIRE) e a er-config diz
+// "complete immunity to Fire-type moves". O Dry Skin também absorve Water (abilities.cc:1471).
+test("Flash Fire e Dry Skin são imunidades (o código do jogo absorve o golpe, mesmo o texto curto não dizendo)", () => {
+  assert.equal(R.abilityTypeModFor("Fire", ["Grass"], [id("Flash Fire")]).mult, 0);
+  assert.equal(R.abilityTypeModFor("Water", ["Fire"], [id("Dry Skin")]).mult, 0);
 });
 
 test("toda imunidade nova da tabela bate com o texto da própria habilidade", () => {
