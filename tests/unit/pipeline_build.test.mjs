@@ -105,10 +105,12 @@ test("hit-kill de 2 golpes: o Flame Burst do alvo derruba o atacante antes do 2�
   // Pidgeotto e Pidgeot saíram da premissa em 15/10/2026 (ticket calibracao-03): a Giant Wings, innate deles, passou a valer x1,3
   // nos golpes de ar (Air Cutter, Air Slash...), os sets mais fortes viram hit-kill de 1 golpe e já não sobra candidato de 2.
   // A propriedade segue valendo para o que sobrar de hit-kill de 2 neles (nenhum, hoje).
+  // O Nidorino saiu da premissa em 15/10/2026 (ticket pipeline-build/05): os hit-kill de 2 dele eram sets MISTOS (Sludge Bomb + Drill Run +
+  // Earthquake + Thunderbolt) com Modest num bicho de Atk 72 x SpA 55; com a natureza seguindo o split dos golpes sobram os Adamant (hit-kill de 1).
   ["Raticate", "Nidorino", "Pidgeotto", "Pidgeot"].forEach((nome) => {
     const r = R.candidatosDeBuild(sp(nome), { alvo: ninetales });
     const dois = r.candidatos.filter((x) => x.hitKill === 2);
-    if (nome === "Raticate" || nome === "Nidorino") assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
+    if (nome === "Raticate") assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
     dois.forEach((x) => {
       assert.equal(x.baterPrimeiro, false, nome + " " + x.golpes.join("/"));
       assert.equal(x.alvoAgeAntes, true, nome);

@@ -40,6 +40,19 @@
   // Golpes que falham se o atacante leva dano antes de agir (Focus Punch, prioridade -3): o motor lê só o poder e a
   // simulação não os modela, então ficam fora do kit em vez de prometer dano que o alvo impede.
   var GOLPES_QUE_FALHAM_SE_LEVAR_DANO = ['Focus Punch'];
+  // Rascunho coerente com a espécie (ticket pipeline-build-2026-10-14/05, revisão de metagame de 15/10/2026 sobre 17 builds do pipeline).
+  // Golpe sem tipo definido: o Hidden Power só ganha tipo no chefão (hpType do dado); numa build do jogador o motor lê Normal 80 sem STAB.
+  // Fora do kit e do preenchimento: o pipeline não propõe golpe que o motor não consegue medir direito. (Aspas simples: ver a nota acima.)
+  var GOLPES_SEM_TIPO_DEFINIDO = ['Hidden Power'];
+  // Speed base abaixo disto é espécie lenta: 252 em Speed não a faz passar ninguém, então os EVs vão para HP e defesa. Escolha: 60 é o
+  // piso da faixa "média" do jogo (abaixo dele a espécie quase nunca passa um oponente de run) e cobre as lentas do caso real (28 a 32).
+  var LIMIAR_VELOCIDADE_BAIXA_PIPELINE = 60;
+  // Atributo "fraco" = base abaixo de 60% do outro (Braviary Redux Atk 57 x SpA 100 = 57%; Roserade Mega do dado novo 83 x 145 = 57%).
+  // Conjunto cujo split usa o atributo fraco perde PENA_ATRIBUTO_FRACO_PIPELINE pontos de score (15 pontos = 15% do HP do alvo em dano médio):
+  // passa à frente só quem bate bem mais forte que a alternativa pelo atributo maior. Não é veto: Ledian (Atk 55 x SpA 97, Aerodynamics + Mega
+  // Punch) é um caso conferido na calculadora do jogo e continua físico.
+  var RAZAO_MIN_ATRIBUTO_PIPELINE = 0.6;
+  var PENA_ATRIBUTO_FRACO_PIPELINE = 15;
   // A rolagem média do motor é 0,925 (ROLAGEM_MEDIA_DUELO); a faixa do jogo vai de 85% a 100%.
   var FAIXA_DE_ROLAGEM_PIPELINE = { media: 0.925, min: 0.85, max: 1 };
 
@@ -377,10 +390,74 @@
   var ITEM_DE_RASCUNHO_PIPELINE = "Sitrus Berry";
   // Mega no modo de mega temporária só existe segurando a pedra (megaStoneRuleFor): sem item a validação recusa, então o rascunho
   // leva a pedra (a primeira, quando há duas) e o candidato avisa.
+  // ---- rascunho coerente (ticket 05) ----
+  // Split dos golpes de dano do conjunto: "F" ou "E" (maioria; empate = o maior atributo base; sem golpe de dano medido = null).
+  // Body Press e Foul Play (fonteAtk) não usam o atributo de ataque do usuário e não entram na conta (a mesma exceção de validacao_build_ia.js).
+  // Devolve { split, f, e } (f = golpes físicos, e = especiais).
+  function pipelineSplitDoConjunto(tabela, golpes, sp) {
+    var f = 0, e = 0;
+    golpes.forEach(function (n) {
+      var g = tabela[n] && tabela[n].g;
+      if (!g || g.fonteAtk) return;
+      if (g.cat === "F") f++; else if (g.cat === "E") e++;
+    });
+    return { f: f, e: e, split: !f && !e ? null : f > e ? "F" : e > f ? "E" : (sp.b[1] >= sp.b[3] ? "F" : "E") };
+  }
+  // A natureza (Adamant/Jolly = físico; Modest/Timid = especial) tem que ser a do split dos golpes escolhidos (regra dura).
+  function pipelineNaturezaServe(nat, s) {
+    return !s.split || (nat.evs[1] > 0 ? "F" : "E") === s.split;
+  }
+  // O split do conjunto usa o atributo fraco da espécie (menos de RAZAO_MIN_ATRIBUTO_PIPELINE do outro)? Só pesa no score.
+  function pipelineAtributoFraco(s, sp) {
+    return (s.split === "F" && sp.b[1] < RAZAO_MIN_ATRIBUTO_PIPELINE * sp.b[3]) || (s.split === "E" && sp.b[3] < RAZAO_MIN_ATRIBUTO_PIPELINE * sp.b[1]);
+  }
+  // Natureza e EVs do rascunho. Base: a da simulação (ataque 252 + Speed 252). Espécie lenta (Speed base < LIMIAR) cuja velocidade não
+  // decide "bate primeiro" nem alimenta golpe de poder por Velocidade (Electro Ball) troca a Speed por HP e defesa e
+  // a natureza que sobe a Velocidade (Jolly/Timid) pela que sobe o ataque (Adamant/Modest). O ataque fica em 252: o dano medido não muda.
+  function pipelineNaturezaEEvs(sp, nat, av, tabela, golpes) {
+    var base = { nome: nat.nome, evs: nat.evs.slice(), motivo: null };
+    var batePorVelocidade = av.baterPrimeiro && av.porQue === "velocidade";
+    // Electro Ball cresce com a Velocidade (o dano medido já conta os 252): tirar a Velocidade mudaria o número. O Gyro Ball cresce com a
+    // lentidão: a medida com Velocidade só subestima, então pode trocar.
+    var poderPorVelocidade = golpes.some(function (n) { return tabela[n] && tabela[n].g.poderVariavel === 'Electro Ball'; });
+    if (sp.b[5] >= LIMIAR_VELOCIDADE_BAIXA_PIPELINE || batePorVelocidade || poderPorVelocidade) return base;
+    var fisico = nat.evs[1] > 0, ataque = fisico ? 1 : 3, defesa = sp.b[2] <= sp.b[4] ? 2 : 4;
+    var evs = [252, 0, 0, 0, 0, 0];
+    evs[ataque] = 252; evs[defesa] = 4;
+    return { nome: fisico ? "Adamant" : "Modest", evs: evs,
+      motivo: "Velocidade base " + sp.b[5] + " (lenta): EVs em HP, " + (fisico ? "Atk" : "SpA") + " e " + (defesa === 2 ? "Def" : "SpD") + ", sem Velocidade; a velocidade não decide quem bate primeiro aqui." };
+  }
+  // Recuo (Head Smash, Double-Edge...) vem do dado do golpe (MOVE_CATEGORIAS.rc), não do motor: o motor zera o recuo de quem tem Rock Head.
+  function pipelineGolpesComRecuo(golpes) {
+    return golpes.filter(function (n) {
+      var id = MOVE_ID_BY_NAME[n], extra = id !== undefined && typeof MOVE_CATEGORIAS !== "undefined" ? MOVE_CATEGORIAS[id] : null;
+      return !!(extra && extra.rc);
+    });
+  }
+  // A habilidade escolhida (com as inatas) anula o recuo? E o anularia SEM ela (só as inatas)?
+  function pipelineSemRecuo(sp, hab, soInatas) {
+    var ids = (sp.inn || []).slice();
+    if (!soInatas) ids.push(ABILITY_ID_BY_NAME[hab]);
+    return !!efeitoDasHabilidadesNoDuelo(uniqueIds(ids), sp.sname, null).semRecuo;
+  }
+  // Item "por evolução pendente": Eviolite, se o jogo o dá até a Etapa atual (primeiroLugarDoItem) e a espécie ainda evolui (evoluiAinda: a
+  // mesma regra de validateAiBuild, sem Mega).
+  function pipelineEvioliteServe(sp) {
+    if (ITEMS.indexOf("Eviolite") === -1 || !evoluiAinda(sp)) return false;
+    var lugar = primeiroLugarDoItem("Eviolite");
+    return !!lugar && lugar.etapa <= state.settings.milestone;
+  }
   function pipelineValidarRascunho(sp, g) {
-    var bruto = { ability: g.hab, nature: g.nat.nome, item: "", evs: g.nat.evs.slice(), moves: g.av.golpes.slice() };
+    var bruto = { ability: g.hab, nature: g.fin.nome, item: "", evs: g.fin.evs.slice(), moves: g.av.golpes.slice() };
     var recusa = {}, v = validateAiBuild(sp, bruto, recusa, {});
-    if (v) return { v: v, itemDeRascunho: null };
+    if (v) {
+      // Espécie que ainda evolui leva Eviolite (o motor já usa Eviolite nesses casos, itemDoSetDuelo). Item recusado (limite do time) = fica sem item.
+      if (!v.item && pipelineEvioliteServe(sp)) {
+        var comEv = validateAiBuild(sp, Object.assign({}, bruto, { item: "Eviolite" }), {}, {});
+        if (comEv && comEv.item === "Eviolite") return { v: comEv, itemDeRascunho: "Eviolite", tipoDoItem: "eviolite" };
+      }
+      return { v: v, itemDeRascunho: null };
+    }
     var item = null, tipo = null, regra = megaStoneRuleFor(sp);
     if (/só funciona gastando o item/.test(recusa.txt || "") && ITEMS.indexOf(ITEM_DE_RASCUNHO_PIPELINE) !== -1) { item = ITEM_DE_RASCUNHO_PIPELINE; tipo = "gasta"; }
     else if (/precisa segurar a pedra/.test(recusa.txt || "") && regra && regra.stones.length) { item = regra.stones[0]; tipo = "pedra"; }
@@ -407,7 +484,7 @@
     if (!sp) { saida.aviso = saida.aviso || "espécie não encontrada"; saida.avisos.push("espécie não encontrada"); return saida; }
     try {
       var cap = getCurrentCap();
-      var liberados = availableMovesFor(sp).names;
+      var liberados = availableMovesFor(sp).names.filter(function (n) { return GOLPES_SEM_TIPO_DEFINIDO.indexOf(n) === -1; });
       var kit = golpesDeDueloAte(sp, cap).map(function (id) { return MOVES[id][0]; })
         .filter(function (n, i, a) { return a.indexOf(n) === i && liberados.indexOf(n) !== -1 && moveRoleOf(n) !== "dupla" && GOLPES_QUE_DEPENDEM_DE_ITEM.indexOf(n) === -1 && GOLPES_QUE_FALHAM_SE_LEVAR_DANO.indexOf(n) === -1; });
       if (!kit.length) { saida.aviso = saida.aviso || sp.n + " não tem golpe de dano liberado nesta Etapa"; saida.avisos.push(sp.n + " não tem golpe de dano liberado nesta Etapa"); return saida; }
@@ -429,16 +506,25 @@
             var conjunto = pipelineMontarConjunto(ancora, tabela, sinergias, modo, liberados, tiposStab);
             if (!conjunto) return;
             var chave = conjunto.slice().sort().join(","); // sem conjunto de golpes repetido (fica a melhor habilidade/natureza)
+            // A natureza segue o split dos golpes escolhidos (ticket 05): Adamant/Jolly só com maioria física, Modest/Timid só com maioria especial.
+            var splitDoConjunto = pipelineSplitDoConjunto(tabela, conjunto, sp); // { split, f, e }
+            if (!pipelineNaturezaServe(nat, splitDoConjunto)) return;
             var av = pipelineAvaliarConjunto(tabela, conjunto, sinergias, alvo);
             if (!av) return;
-            (geradas[chave] = geradas[chave] || []).push({ hab: hab, nat: nat, av: av, sinergias: sinergias, chave: chave });
+            // Atributo fraco da espécie (Braviary Redux, Atk 57 x SpA 100): o conjunto que bate por ele perde pontos, não é vetado.
+            if (pipelineAtributoFraco(splitDoConjunto, sp)) av.score -= PENA_ATRIBUTO_FRACO_PIPELINE;
+            // Preferência de recuo (ticket 05): conjunto com golpe de recuo (Head Smash) e habilidade que o anula (Rock Head) passa na frente.
+            var recuos = pipelineGolpesComRecuo(conjunto);
+            var protege = recuos.length > 0 && pipelineSemRecuo(sp, hab, false);
+            (geradas[chave] = geradas[chave] || []).push({ hab: hab, nat: nat, av: av, sinergias: sinergias, chave: chave,
+              fin: pipelineNaturezaEEvs(sp, nat, av, tabela, conjunto), recuos: recuos, protege: protege, protegePelaHab: protege && !pipelineSemRecuo(sp, hab, true) });
             });
           });
         });
       });
       // Por conjunto de golpes vale a melhor variante (habilidade + natureza) que passa na validação; a ordem é a do score.
       var ordenadas = Object.keys(geradas).map(function (k) {
-        return geradas[k].slice().sort(function (a, b) { return b.av.score - a.av.score || (a.hab + a.nat.nome < b.hab + b.nat.nome ? -1 : 1); });
+        return geradas[k].slice().sort(function (a, b) { return (b.protege ? 1 : 0) - (a.protege ? 1 : 0) || b.av.score - a.av.score || (a.hab + a.nat.nome < b.hab + b.nat.nome ? -1 : 1); });
       }).sort(function (a, b) { return b[0].av.score - a[0].av.score || (a[0].chave < b[0].chave ? -1 : a[0].chave > b[0].chave ? 1 : 0); });
       var validos = [], motivosDescartados = [];
       ordenadas.forEach(function (variantes) {
@@ -472,7 +558,8 @@
         if (fuga) motivosEstimada.push("fuga no Intimidate (o motor trata como empate)");
         var calibrada = !motivosEstimada.length;
         var avisos = [];
-        if (c.itemDeRascunho && c.tipoDoItem === "pedra") avisos.push("No modo de mega temporária " + sp.n + " precisa segurar a pedra: o rascunho leva " + c.itemDeRascunho + (c.pedras.length > 1 ? " (a IA escolhe entre " + c.pedras.join(" e ") + ")" : "") + "; a simulação não conta o item.");
+        if (c.itemDeRascunho && c.tipoDoItem === "eviolite") avisos.push(sp.n + " ainda evolui: o rascunho leva Eviolite (o motor também usa Eviolite nesses casos); a simulação não conta o item.");
+        else if (c.itemDeRascunho && c.tipoDoItem === "pedra") avisos.push("No modo de mega temporária " + sp.n + " precisa segurar a pedra: o rascunho leva " + c.itemDeRascunho + (c.pedras.length > 1 ? " (a IA escolhe entre " + c.pedras.join(" e ") + ")" : "") + "; a simulação não conta o item.");
         else if (c.itemDeRascunho) avisos.push("A habilidade escolhida só funciona gastando o item: o rascunho leva " + c.itemDeRascunho + " (a IA pode trocar); a simulação não conta o item.");
         if (av.linhas.some(function (l) { return l.foge; })) avisos.push("Um dos lados foge no Intimidate (Tactical Retreat): o motor trata a luta como empate; o dano aqui é o de quem ficasse em campo, só uma estimativa.");
         if (semRegra.length) avisos.push("O motor não simula " + semRegra.join(", ") + ": o número é uma estimativa.");
@@ -484,7 +571,8 @@
         saida.candidatos.push({
           sname: sp.sname,
           golpes: c.v.moves.slice(), habilidade: c.v.ability, inatas: innNomes.slice(),
-          motivos: pipelineMotivos(av, c.g.sinergias, c.g.hab, calibrada, alvo),
+          motivos: pipelineMotivos(av, c.g.sinergias, c.g.hab, calibrada, alvo).concat(c.g.fin.motivo ? [c.g.fin.motivo] : [],
+            c.g.protegePelaHab ? [c.g.hab + " (habilidade escolhida): anula o recuo de " + c.g.recuos.join(", ")] : []),
           hitKill: av.hitKill, garantido: !!av.garantido, baterPrimeiro: !!av.baterPrimeiro, porQue: av.porQue, alvoAgeAntes: !!av.alvoPrio,
           dano: { min: Math.round(av.fracMin * 1000) / 10, max: Math.round(av.fracMax * 1000) / 10 },
           rotulo: calibrada ? "calibrada" : "estimada", selo: calibrada ? SELO_CALIBRADO : "Estimado: " + motivosEstimada.join("; "), avisos: avisos,
