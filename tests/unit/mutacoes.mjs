@@ -3514,4 +3514,33 @@ export const MUTACOES = [
     de: "    [\"Guts\", \"Ups Attack by 1.5x if statused.\",\n      \"Ups Atk by 1.5x if suffering from a status condition.\"],\n",
     para: "",
   },
+  // ---- ticket versao-nova/05 (15/10/2026): chefões contra o TrainerList da versão mais nova (er-config d1a9a4c) ----
+  {
+    id: "versao-chefao-drake-volta-adamant",
+    descricao: "o Machamp Redux do Drake (Padrão, 6) volta à natureza Adamant (a config d1a9a4c diz Modest)",
+    arquivo: "bosses.json",
+    de: "\"item\":\"Machampite R\",\"nat\":\"Modest\"",
+    para: "\"item\":\"Machampite R\",\"nat\":\"Adamant\"",
+  },
+  {
+    id: "versao-chefao-archie-volta-speed-force",
+    descricao: "o Sharpedo do Archie Mt Pyre (Insane, 6) volta à habilidade Aerodynamics em vez de Rain Shroud",
+    arquivo: "bosses.json",
+    de: "\"n\":\"Sharpedo\",\"abi\":\"Rain Shroud\"",
+    para: "\"n\":\"Sharpedo\",\"abi\":\"Speed Force\"",
+  },
+  {
+    id: "versao-chefao-matt-sem-barbaracite",
+    descricao: "o Barbaracle do Matt (Padrão, 6) volta ao Choice Band em vez do Barbaracite",
+    arquivo: "bosses.json",
+    de: "\"item\":\"Barbaracite\"",
+    para: "\"item\":\"Choice Band\"",
+  },
+  {
+    id: "versao-chefao-drake-sem-hustle",
+    descricao: "o Fujiflap do Drake (Padrão, 2) volta à habilidade Aerodynamics em vez de Hustle",
+    arquivo: "bosses.json",
+    de: "\"n\":\"Fujiflap\",\"abi\":\"Hustle\"",
+    para: "\"n\":\"Fujiflap\",\"abi\":\"Aerodynamics\"",
+  },
 ];

@@ -6,8 +6,8 @@
 // Uso: node scripts/conferir_chefoes_config.mjs <TrainerList.textproto> [--categorias=regex] [--json] [--aplicar]
 // --aplicar preenche no bosses.json o item que a NextDex perdeu (ver preencherItensPerdidos).
 // A AbilityList.textproto da mesma versão tem que estar ao lado (mesmo nome, trocando TrainerList).
-// A config deve ser a da versão do nosso dado (2.65beta = commit 7be1617 de 14/03/2026),
-// não a da branch upcoming (versão em desenvolvimento).
+// Desde 15/10/2026 (ticket versao-nova/05, decisão do Felipe: o app mira a versão mais nova) a config é a MAIS NOVA (d1a9a4c, 14/10/2026);
+// o commit 7be1617 (14/03) era a versão do dado antigo. --aplicar-tudo troca no bosses.json os mons que a config diz diferentes.
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 // Parser mínimo do textproto: só o que a config de treinadores usa (blocos e "chave: valor").
@@ -113,6 +113,40 @@ export function preencherItensPerdidos(bosses, treinadores, nomeDoItem, filtro) 
   return feitos;
 }
 
+// Corrige no bosses.json o que a config diz diferente do app (ticket versao-nova/05, 15/10/2026: o app mira a versão mais nova, a config manda).
+// Troca o mon inteiro (espécie, habilidade, item, natureza, EVs, golpes) quando `compararMon` acusa qualquer diferença; mon igual não é tocado.
+// `ctx` traz as tabelas constante -> dado do app: { especie: {SPECIES_X: {x, n}}, golpe: {MOVE_X: "Nome"}, item: {ITEM_X: "Nome"},
+// natureza: {NATURE_X: "Nome"}, habilidade: {ABILITY_X: {abiId, abi}} }. Habilidade fora da lista da espécie = posição 0 (mesma regra da comparação).
+const ROTULO_EV = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
+export function corrigirTimes(bosses, treinadores, ctx, filtro) {
+  const feitos = [];
+  for (const b of bosses.filter((x) => filtro.test(x.cat))) {
+    const t = treinadores["TRAINER_" + constante(b.name)];
+    if (!t) continue;
+    for (const [chaveApp, chaveCfg] of [["party", "ace"], ["insane", "elite"]]) {
+      const app = b[chaveApp] || [], cfg = t.times[chaveCfg] || [];
+      for (let i = 0; i < Math.min(app.length, cfg.length); i++) {
+        const dif = compararMon(app[i], cfg[i]);
+        if (!dif.length) continue;
+        const c = cfg[i], esp = ctx.especie[c.species];
+        if (!esp) throw new Error("espécie da config sem par no dado do app: " + c.species);
+        const mv = c.moves.map((m) => { if (!ctx.golpe[m]) throw new Error("golpe da config sem par no dado do app: " + m); return ctx.golpe[m]; });
+        const lista = (ctx.habilidadesDaEspecie && ctx.habilidadesDaEspecie(esp.x)) || null;
+        const hab = lista && lista[0] && lista.indexOf(c.ability) === -1 ? lista[0] : c.ability;
+        const h = ctx.habilidade[hab];
+        if (!h) throw new Error("habilidade da config sem par no dado do app: " + hab);
+        const nome = c.item && c.item !== "ITEM_NONE" ? ctx.item[c.item] : "";
+        if (c.item && c.item !== "ITEM_NONE" && !nome) throw new Error("item da config sem par no dado do app: " + c.item);
+        const evs = c.evs.slice();
+        Object.assign(app[i], { x: esp.x, n: esp.n, abi: h.abi, abiId: h.abiId, item: nome, nat: ctx.natureza[c.nature || "NATURE_HARDY"], evsRaw: evs,
+          evs: evs.map((v, k) => (v ? v + " " + ROTULO_EV[k] : "")).filter(Boolean).join(" / "), mv });
+        feitos.push(b.name + " " + chaveApp + " " + (i + 1) + ": " + dif.join(" | "));
+      }
+    }
+  }
+  return feitos;
+}
+
 if ((process.argv[1] || "").endsWith("conferir_chefoes_config.mjs")) {
   const arq = process.argv[2];
   if (!arq) { console.error("uso: node scripts/conferir_chefoes_config.mjs <TrainerList.textproto>"); process.exit(2); }
@@ -125,6 +159,20 @@ if ((process.argv[1] || "").endsWith("conferir_chefoes_config.mjs")) {
   const abIds = existsSync(abArq) ? [...readFileSync(abArq, "utf8").matchAll(/^ {2}id: (\w+)/gm)].map((m) => m[1]) : [];
   usarMapas(mapasDoDado(gd, abIds));
   const treinadores = lerTreinadores(readFileSync(arq, "utf8"));
+  if (process.argv.includes("--aplicar-tudo")) {
+    const abNomes = existsSync(abArq) ? [...readFileSync(abArq, "utf8").matchAll(/^ {2}id: (\w+)\n {2}name: "([^"]*)"/gm)] : [];
+    const posDaHab = Object.fromEntries(abIds.map((id, i) => [id, i]));
+    const ctx = {
+      especie: Object.fromEntries(gd.species.map((e, x) => [e && e.NAME, e && { x, n: e.name }]).filter((p) => p[0])),
+      golpe: Object.fromEntries(gd.moves.filter(Boolean).map((m) => [m.NAME, m.name])),
+      item: Object.fromEntries(gd.items.filter(Boolean).map((m) => [m.NAME, m.name])),
+      natureza: Object.fromEntries(gd.natureT.map((n) => ["NATURE_" + constante(n), n])),
+      habilidade: Object.fromEntries(abNomes.map((m) => [m[1], { abiId: posDaHab[m[1]], abi: m[2] }])),
+      habilidadesDaEspecie: (x) => ((gd.species[x] || {}).stats || {}).abis ? gd.species[x].stats.abis.map((i) => abIds[i]) : null };
+    const mudados = corrigirTimes(bosses, treinadores, ctx, FILTRO);
+    writeFileSync(new URL("../data/bosses.json", import.meta.url), JSON.stringify(bosses));
+    for (const f of mudados) console.log("corrigido: " + f);
+  }
   if (process.argv.includes("--aplicar")) {
     const nomeDoItem = Object.fromEntries(gd.items.filter(Boolean).map((x) => [x.NAME, x.name]));
     const feitos = preencherItensPerdidos(bosses, treinadores, nomeDoItem, FILTRO);
