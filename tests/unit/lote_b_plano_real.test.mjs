@@ -130,3 +130,20 @@ test("estratégia de clima: Courtney (Meteor Falls) com elenco de chuva só decl
   // fizer o armador entrar, este caso deixa de provar a regra: ache outro com 'node tests/run_sabotage.mjs loteB-estrategia'.
   assert.ok(!res.estrategia, "estratégia declarada sem o armador em campo: " + (res.estrategia && res.estrategia.armador));
 });
+
+// Terceiro caso fixo (15/10/2026, ticket versao-nova/01): a correção da dupla contagem da sinergia mudou o dano do Ninetales e o caso da
+// Courtney passou a ser vencido pela luta simulada; a sabotagem passou a sobreviver. Elenco de granizo contra a Flannery 2 (marco 7):
+// sem a regra, a Abomasnow viraria "armador" da estratégia sem nunca entrar na luta simulada.
+test("estratégia de clima: Flannery 2 com elenco de granizo só declara armador que entra na luta (marco 7)", async () => {
+  const { carregarRegras: carregar } = await import("./carregar_regras.mjs");
+  const R7 = carregar({ milestone: 7, difficulty: "ace" });
+  const nomes = ["Abomasnow", "Ninetales", "Glaceon", "Weavile", "Clefable", "Azumarill", "Granbull", "Wigglytuff", "Pelipper", "Politoed"];
+  const cands = nomes.map((n) => R7.SPECIES.find((s) => s && s.n === n)).filter(Boolean).map((sp) => ({ sp, owned: sp.x }));
+  const flannery2 = R7.BOSSES.find((b) => b.name === "Flannery 2");
+  const res = R7.montarTimeContraChefao(cands, flannery2.party, 50, {});
+  assert.equal(res.escolhidos.length, 6);
+  // Hoje a Abomasnow (armadora) não entra na luta simulada, então NÃO pode haver estratégia de clima (asserção sem 'if'). Com a sabotagem
+  // a estratégia aparece com ela fora da luta. Se uma mudança do motor fizer o armador entrar, ache outro caso com
+  // 'node tests/run_sabotage.mjs loteB-estrategia'.
+  assert.ok(!res.estrategia, "estratégia declarada sem o armador em campo: " + (res.estrategia && res.estrategia.armador));
+});
