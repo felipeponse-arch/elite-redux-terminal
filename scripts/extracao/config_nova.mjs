@@ -170,7 +170,9 @@ export function gerarPatch(dex, habilidadesDaConfig, especiesDaConfig, commit, g
     const nomeAb = (e) => nomeDoEnum.get(e);
     especiesNovas.push({ sname: c.sname, base: c.megafrom, pedraEnum: c.megaitem, tipos: [c.tipo1, c.tipo2].filter(Boolean),
       b: ["hp", "atk", "def", "spatk", "spdef", "spe"].map((k, i) => (b[k] !== undefined ? b[k] : base.b[i])), // a config omite `spe` nas duas Megas: vale a da espécie base
-      speDaConfig: b.spe !== undefined, ab: c.ab.map(nomeAb), inn: c.inn.map(nomeAb), usaLearnset: c.usaLearnset || c.megafrom });
+      speDaConfig: b.spe !== undefined,
+      provisoria: ["hp", "atk", "def", "spatk", "spdef", "spe"].every((k) => b[k] !== undefined) ? undefined : "a config d1a9a4c não traz todos os atributos base (falta " + ["hp", "atk", "def", "spatk", "spdef", "spe"].filter((k) => b[k] === undefined).join(", ") + "); os que faltam valem os da base; fora da Dex, das builds, do pipeline e do rank até a config ter números reais (scripts/extracao/provisorias.mjs)",
+      ab: c.ab.map(nomeAb), inn: c.inn.map(nomeAb), usaLearnset: c.usaLearnset || c.megafrom });
   }
   return { fonte: "Elite-Redux/er-config AbilityList, SpeciesList e MoveList.textproto", commit, renomeadas, descricoes, novas, especies, golpes: golpesNovos, aprende, especiesNovas };
 }
@@ -238,6 +240,7 @@ export function aplicarPatch(dex, patch) {
     if (tipos.some((t) => t < 0)) throw new Error("tipo desconhecido em " + n.sname);
     dex.species.push({ x, i: base.i, n: base.n + " Mega", sname: n.sname, t: tipos, b: n.b.slice(), ab: ids(n.ab), inn: ids(n.inn), ev: [], lm: usa.lm.map((e) => e.slice()), tu: usa.tu.slice(),
       d: base.d, senc: [], wenc: null, frm: [], cab: base.cab });
+    if (n.provisoria) dex.species[x].provisoria = n.provisoria; // fora de SPECIES (src/regras/dados_base.js): não aparece na Dex, nas builds, no pipeline nem no rank
     const evo = base.ev.find((e) => e[1] === n.pedraEnum);
     if (evo) evo[2] = x;
     resumo.especiesNovas++;

@@ -3853,4 +3853,11 @@ export const MUTACOES = [
     de: "\"Bruxishite\":\"SPECIES_BRUXISH_MEGA\"",
     para: "\"Bruxishite\":\"SPECIES_BRUXISH\"",
   },
+  {
+    id: "versao-provisoria-aparece-na-dex",
+    descricao: "a marca provisoria deixa de esconder a espécie (volta a aparecer na Dex, nas builds, no pipeline e no rank)",
+    arquivo: "dados_base.js",
+    de: "return s && !s.provisoria; });",
+    para: "return s; });",
+  },
 ];

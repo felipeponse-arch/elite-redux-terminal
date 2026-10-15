@@ -19,3 +19,4 @@ o acumulado fica registrado para o Felipe comparar com o saldo que ele vê na co
 | 15/10 13:40 | fim do v08 (sem releitura; Felipe informou ~US$ 21) | — | — | — | ~21 (informado) |
 | 15/10 14:10 | fim do v09 (sem releitura; Felipe informou ~US$ 21 às 13:20) | — | — | — | — |
 | 15/10 14:50 | fim do v10 (sem releitura; Felipe informou ~US$ 21 às 13:20) | — | — | — | — |
+| 15/10 15:10 | fim do v10 (Felipe informou ~US$ 15) | — | — | — | ~15 (informado) |

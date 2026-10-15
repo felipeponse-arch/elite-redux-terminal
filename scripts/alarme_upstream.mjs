@@ -24,6 +24,8 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { validarDadoCru } from "./validar_dado_cru.mjs";
 
+import { conferirProvisorias, PRECISA_REVISAR } from "./extracao/provisorias.mjs";
+const URL_SPECIES_LIST = "https://raw.githubusercontent.com/Elite-Redux/er-config/main/SpeciesList.textproto";
 export const VERSAO_DEX = "2.65.4"; // NextDex 2.65.4 (07/10/2026), versão mais nova (decisão do Felipe de 15/10); VERSAO_JOGO segue a página oficial de download
 export const VERSAO_JOGO = "2.65.3b";
 const BASE_DEX = "https://raw.githubusercontent.com/ForwardFeed/ER-nextdex/main";
@@ -101,6 +103,12 @@ async function main() {
     try { problemas = validarDadoCru(JSON.parse(dadoBaixado.toString("utf8"))); } catch (err) { problemas = [`JSON ilegível: ${err.message}`]; }
     linhas.push({ item: "Formato do dado novo (validar_dado_cru)", esperado: "sem problemas", encontrado: problemas.length ? problemas.slice(0, 3).join("; ") : "sem problemas", estado: problemas.length ? "mudou" : "ok" });
   }
+  // Espécies provisórias (Mega Bruxish e Jellicent, sem números reais na config): avisa quando a config d1a9a4c/main passar a ter os atributos.
+  await conferir("Espécies provisórias x SpeciesList da config", "config ainda incompleta", async () => {
+    const dex = JSON.parse(readFileSync(path.join(raiz, "data", "dex_compact.json"), "utf8"));
+    const revisar = conferirProvisorias(dex, await baixar(URL_SPECIES_LIST)).filter((e) => PRECISA_REVISAR.has(e.estado));
+    return revisar.length ? revisar.map((e) => e.sname + ": " + e.estado).join("; ") : "config ainda incompleta";
+  });
   await conferir("Latest Version do site oficial", VERSAO_JOGO,
     async () => versaoDaPaginaDeDownload(await baixar(PAGINA_DOWNLOAD)));
 

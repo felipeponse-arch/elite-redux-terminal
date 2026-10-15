@@ -185,7 +185,7 @@ export function validarInvariantes() {
   const role = carregar("species_role.json");
   const rankPendente = new Set(carregar("rank_pendente_ate_10.json").novasSemRank);
   for (const sn of porSname.keys()) {
-    if (rankPendente.has(sn)) continue; // espécie nova do dado 2.65.4: o rank/papel dela sai no fechamento (dados-2654/10)
+    if (rankPendente.has(sn) || porSname.get(sn).provisoria) continue; // provisória: fora do rank até a config ter números reais // espécie nova do dado 2.65.4: o rank/papel dela sai no fechamento (dados-2654/10)
     if (!(sn in rank)) erro(`species_rank.json: falta a especie ${sn} (existe em dex_compact.json)`);
     if (!(sn in role)) erro(`species_role.json: falta a especie ${sn} (existe em dex_compact.json)`);
   }

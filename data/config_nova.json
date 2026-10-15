@@ -1771,6 +1771,7 @@
     92
    ],
    "speDaConfig": false,
+   "provisoria": "a config d1a9a4c não traz todos os atributos base (falta spe); os que faltam valem os da base; fora da Dex, das builds, do pipeline e do rank até a config ter números reais (scripts/extracao/provisorias.mjs)",
    "ab": [
     "Dazzling",
     "Defiant",
@@ -1800,6 +1801,7 @@
     60
    ],
    "speDaConfig": false,
+   "provisoria": "a config d1a9a4c não traz todos os atributos base (falta spe); os que faltam valem os da base; fora da Dex, das builds, do pipeline e do rank até a config ter números reais (scripts/extracao/provisorias.mjs)",
    "ab": [
     "Cursed Body",
     "Clear Body",

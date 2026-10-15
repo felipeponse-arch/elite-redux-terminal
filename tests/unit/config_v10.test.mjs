@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { carregarRegras } from "./carregar_regras.mjs";
 import { aplicarPatch } from "../../scripts/extracao/config_nova.mjs";
 import { validarBuilds } from "../../scripts/validar_dados.mjs";
+import { conferirProvisorias, PRECISA_REVISAR } from "../../scripts/extracao/provisorias.mjs";
 
 const R = carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" });
 const NIVEL = 55;
@@ -69,20 +70,41 @@ test("Lumberjack, Fae Hunter, Monster Hunter e Firefighter: x1,5 contra ALVO do 
   assert.equal(R.abilityTypeModFor("Grass", ["Normal"], [idHab("Lumberjack")]).mult, 1, "a tabela de tipos não conta mais o Lumberjack pelo tipo do golpe");
 });
 
-test("Mega Bruxish e Mega Jellicent entram a partir da config: tipos, atributos (a config omite a Speed: vale a da base), habilidades, aprendizado da base, pedra e etapa", () => {
+test("Mega Bruxish e Mega Jellicent: no dado (a partir da config) mas PROVISÓRIAS - fora da Dex, das builds, do pipeline, do duelo e do rank até a config ter números reais", () => {
   assert.equal(R.DATA.species.length, 1925);
-  const b = sp("Bruxish Mega"), j = sp("Jellicent Mega");
-  assert.equal(b.sname, "SPECIES_BRUXISH_MEGA"); assert.equal(j.sname, "SPECIES_JELLICENT_MEGA");
+  const b = R.DATA.species.find((s) => s && s.sname === "SPECIES_BRUXISH_MEGA"), j = R.DATA.species.find((s) => s && s.sname === "SPECIES_JELLICENT_MEGA");
+  assert.ok(b && j, "estão no dado");
+  assert.match(b.provisoria, /falta spe/); assert.match(j.provisoria, /falta spe/);
   assert.deepEqual([...b.t].map((i) => R.TYPES[i]), ["Water", "Psychic"]); assert.deepEqual([...j.t].map((i) => R.TYPES[i]), ["Water", "Ghost"]);
   assert.deepEqual([...b.b], [68, 105, 70, 70, 70, 92]); assert.deepEqual([...j.b], [120, 60, 70, 85, 105, 60]);
   assert.deepEqual([...b.ab, ...b.inn].map((i) => R.ABILITIES[i][0]), ["Dazzling", "Defiant", "Predator", "Strong Jaw", "Wonder Skin", "Psychic Mind"]);
-  assert.deepEqual([...j.ab, ...j.inn].map((i) => R.ABILITIES[i][0]), ["Cursed Body", "Clear Body", "Immunity", "Water Bubble", "Soul Eater", "Poison Touch"]);
   assert.deepEqual(b.lm, sp("Bruxish").lm); assert.deepEqual(j.tu, sp("Jellicent").tu);
-  assert.equal(R.MEGA_FORMS["Bruxishite"], "SPECIES_BRUXISH_MEGA"); assert.equal(R.MEGA_FORMS["Jellicentite"], "SPECIES_JELLICENT_MEGA");
-  assert.equal(sp("Bruxish").ev[0][2], b.x); assert.equal(sp("Jellicent").ev[0][2], j.x);
-  const rd = json("rank_disponibilidade.json");
-  assert.ok(Number.isInteger(rd.etapa["SPECIES_BRUXISH_MEGA"]));
-  assert.ok(Number.isInteger(rd.etapa["SPECIES_JELLICENT_MEGA"]));
-  const pend = json("rank_pendente_ate_10.json").novasSemRank;
-  assert.ok(pend.includes("SPECIES_BRUXISH_MEGA") && pend.includes("SPECIES_JELLICENT_MEGA"), "sem rank até o fechamento");
+  assert.equal(R.MEGA_FORMS["Bruxishite"], "SPECIES_BRUXISH_MEGA"); assert.equal(sp("Bruxish").ev[0][2], b.x);
+  // fora de tudo que lê SPECIES
+  assert.equal(R.SPECIES.length, 1922); // as 1925 do dado menos a posição vazia e as duas provisórias
+  assert.equal(sp("Bruxish Mega"), undefined); assert.equal(R.getSpeciesBySname("SPECIES_JELLICENT_MEGA"), null); assert.equal(R.getSpeciesByX(b.x), null);
+  const rank = json("species_rank.json"), role = json("species_role.json");
+  assert.ok(!("SPECIES_BRUXISH_MEGA" in rank) && !("SPECIES_JELLICENT_MEGA" in role));
+  assert.ok(!("SPECIES_BRUXISH_MEGA" in json("rank_disponibilidade.json").etapa));
+  assert.ok(!json("rank_pendente_ate_10.json").novasSemRank.includes("SPECIES_BRUXISH_MEGA"), "a marca provisoria já tira da lista de pendentes");
+  assert.ok(R.BUILDS && !Object.keys(R.BUILDS).some((k) => /BRUXISH_MEGA|JELLICENT_MEGA/.test(k)));
+});
+
+test("conferirProvisorias: avisa quando a config passa a ter os 6 atributos (ou sumir) e fica quieta enquanto está incompleta", () => {
+  const dex = json("dex_compact.json");
+  const bloco = (sname, stats) => "species {\n  id: " + sname + "\n" + stats + "  type: TYPE_WATER\n}\n";
+  const b = dex.species.find((s) => s && s.sname === "SPECIES_BRUXISH_MEGA").b;
+  const cheio = (b2) => ["hp", "atk", "def", "spatk", "spdef", "spe"].map((k, i) => "  " + k + ": " + b2[i] + "\n").join("");
+  const incompleto = bloco("SPECIES_BRUXISH_MEGA", cheio(b).replace(/ {2}spe: \d+\n/, "")) + bloco("SPECIES_JELLICENT_MEGA", cheio([1, 1, 1, 1, 1, 1]).replace(/ {2}spe: \d+\n/, ""));
+  const estado = (txt, sn) => conferirProvisorias(dex, txt).find((e) => e.sname === sn).estado;
+  assert.equal(estado(incompleto, "SPECIES_BRUXISH_MEGA"), "incompleta");
+  assert.ok(!conferirProvisorias(dex, incompleto).some((e) => PRECISA_REVISAR.has(e.estado)));
+  assert.equal(estado(bloco("SPECIES_BRUXISH_MEGA", cheio([68, 105, 70, 90, 70, 100])) + bloco("SPECIES_JELLICENT_MEGA", ""), "SPECIES_BRUXISH_MEGA"), "numeros-novos");
+  assert.equal(estado(bloco("SPECIES_BRUXISH_MEGA", cheio(b)) + bloco("SPECIES_JELLICENT_MEGA", ""), "SPECIES_BRUXISH_MEGA"), "completa-igual-ao-dado");
+  assert.equal(estado(bloco("SPECIES_BRUXISH_MEGA", cheio(b)), "SPECIES_JELLICENT_MEGA"), "sumiu-da-config");
+  // contra a config de verdade, se estiver à mão
+  try {
+    const real = readFileSync("/home/user/elite-redux/er-config/SpeciesList.textproto", "utf8");
+    assert.ok(!conferirProvisorias(dex, real).some((e) => PRECISA_REVISAR.has(e.estado)), "a config d1a9a4c segue incompleta para as duas");
+  } catch (e) { if (e.code !== "ENOENT") throw e; }
 });
