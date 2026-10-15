@@ -11,6 +11,8 @@
 //   1     | só tests/unit/                                         | check + unitários (+ sabotagem --mudados se mutacoes.mjs)
 //   2     | src/regras/, scripts/ da lista branca (checkpoint, encalhados...) | check + unitários + sabotagem (--mudados fora do master)
 //   3     | o resto: src/ui, css, template, build, e2e, data, configs, caminho desconhecido | tudo (+ build + navegador)
+//   Master: a sabotagem é INCREMENTAL (--desde o último master verde, gravado em <git-common-dir>/er-ultimo-master-verde)
+//   quando há registro válido; COMPLETA sem registro, com ER_VERIFICAR=completo e no prepare_publish.
 //   Sempre 3: branch master, ER_VERIFICAR=completo, nada em staging, execução MANUAL fora de um commit
 //   (GIT_INDEX_FILE ausente; --por-staging força a classificação por staging).
 //   ER_WIP=1 (npm run checkpoint) = nível 0, menos no master.
@@ -23,6 +25,7 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { segurarVaga } from "./vaga.mjs";
+import { lerVerde, gravarVerde, modoDaSabotagemNoMaster } from "./sabotagem_incremental.mjs";
 import { nivelDaMudanca, etapasDoNivel, ambienteDosFilhos, arquivosEmStaging, classificarPorStaging } from "./nivel_da_mudanca.mjs";
 
 const RAIZ = fileURLToPath(new URL("..", import.meta.url));
@@ -52,7 +55,10 @@ const manuais = ARGS.filter((a) => !a.startsWith("--"));
 // com --por-staging); execução manual fora do commit = lista vazia = nível 3. Lido ANTES de limpar o ambiente.
 const ARQUIVOS = modoNivel && manuais.length ? manuais : classificarPorStaging(process.env, ARGS) ? arquivosEmStaging(RAIZ) : [];
 const { nivel: NIVEL, motivo: MOTIVO } = nivelDaMudanca(ARQUIVOS, { branch: BRANCH, env: process.env });
-const ETAPAS = etapasDoNivel(NIVEL, { branch: BRANCH, arquivos: ARQUIVOS });
+// Master: sabotagem incremental desde o último master verde (se houver registro válido e sem ER_VERIFICAR=completo).
+const VERDE = BRANCH === "master" ? lerVerde(RAIZ) : null;
+const ETAPAS = etapasDoNivel(NIVEL, { branch: BRANCH, arquivos: ARQUIVOS, verde: VERDE, env: process.env });
+const SABOTAGEM_DO_MASTER = BRANCH === "master" && ETAPAS.some((e) => e.id === "sabotagem" && !e.comando.includes("--mudados"));
 console.log(`Nível ${NIVEL} (${MOTIVO}): ${ETAPAS.map((e) => e.id).join(", ")}`);
 if (modoNivel) process.exit(0);
 
@@ -78,5 +84,11 @@ for (const { titulo, comando, falha } of ETAPAS) {
     console.error("Pra pular de propósito (não recomendado): git commit --no-verify");
     process.exit(1);
   }
+}
+// Portão do master passou (check, unitários, sabotagem completa OU incremental, build, navegador): este HEAD vira o
+// "último master verde" - só com a árvore limpa (gravarVerde recusa se há mudança não commitada).
+if (SABOTAGEM_DO_MASTER && ETAPAS.some((e) => e.id === "navegador")) {
+  const g = gravarVerde(RAIZ);
+  if (g) console.log(`Último master verde gravado: ${g.slice(0, 7)} (sabotagem ${modoDaSabotagemNoMaster({ verde: VERDE, env: process.env }).modo})`);
 }
 console.log(`\nNível ${NIVEL}: ${ETAPAS.map((e) => e.id).join(" + ")} passaram em ${Math.round((Date.now() - inicio) / 1000)} s - liberado.`);

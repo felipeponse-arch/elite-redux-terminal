@@ -8,6 +8,8 @@
 //   1 testes        -> check + unitários (+ sabotagem --mudados se tests/unit/mutacoes.mjs mudou)
 //   2 regras        -> check + unitários + sabotagem (--mudados fora do master)
 //   3 tudo          -> check + unitários + sabotagem + build + navegador
+// Sabotagem no master: INCREMENTAL (--desde o último master verde) se há registro válido; completa sem registro,
+// com ER_VERIFICAR=completo e no prepare_publish (scripts/sabotagem_incremental.mjs).
 // scripts/: só a lista branca é nível 2; o resto sobe. Sempre nível 3: branch master (junção e publicação), ER_VERIFICAR=completo, lista vazia,
 // qualquer caminho desconhecido. ER_WIP=1 (npm run checkpoint) = nível 0, menos no master.
 
@@ -98,11 +100,17 @@ const ETAPA_UNITARIOS = { id: 'unitarios', titulo: 'testes unitários das regras
 const ETAPA_BUILD = { id: 'build', titulo: 'build (npm run build)', comando: 'npm run build --silent', falha: 'Build falhou' };
 const ETAPA_NAVEGADOR = { id: 'navegador', titulo: 'testes de navegador (Playwright, projeto funcional)', comando: 'npm run test:e2e --silent', falha: 'Teste de navegador falhou - detalhes: npm run test:relatorio' };
 
-function etapaSabotagem(master) {
+// No master: incremental (--desde o último master verde) só com `verde` válido e sem ER_VERIFICAR=completo;
+// senão o catálogo inteiro. Regra em scripts/sabotagem_incremental.mjs (modoDaSabotagemNoMaster).
+function etapaSabotagem(master, verde, env = {}) {
+  const incremental = master && Boolean(verde) && env.ER_VERIFICAR !== 'completo';
+  const titulo = !master ? 'só o que mudou desde o master'
+    : incremental ? `só o que mudou desde o último master verde ${String(verde).slice(0, 7)}` : 'catálogo inteiro';
   return {
     id: 'sabotagem',
-    titulo: 'sabotagem das regras (' + (master ? 'catálogo inteiro' : 'só o que mudou desde o master') + ')',
-    comando: master ? 'node tests/run_sabotage.mjs' : 'node tests/run_sabotage.mjs --mudados',
+    titulo: 'sabotagem das regras (' + titulo + ')',
+    comando: !master ? 'node tests/run_sabotage.mjs --mudados'
+      : incremental ? `node tests/run_sabotage.mjs --desde ${verde}` : 'node tests/run_sabotage.mjs',
     falha: 'Alguma sabotagem sobreviveu (ou o catálogo está desatualizado)',
   };
 }
@@ -110,8 +118,10 @@ function etapaSabotagem(master) {
 /**
  * Etapas a rodar, na ordem (da mais barata à mais cara).
  * No master (ou branch desconhecido) o nível sobe para 3 aqui também: defesa em profundidade.
+ * `verde` = sha do último master verde já validado (ou null): no master a sabotagem vira --desde <verde>
+ * (14/10/2026); sem verde ou com env.ER_VERIFICAR=completo continua o catálogo inteiro.
  */
-export function etapasDoNivel(nivel, { branch, arquivos = [] } = {}) {
+export function etapasDoNivel(nivel, { branch, arquivos = [], verde = null, env = {} } = {}) {
   const master = ehMaster(branch);
   const n = master || !(nivel >= 0 && nivel <= 2) ? 3 : nivel;
   const etapas = [ETAPA_CHECK];
@@ -119,10 +129,10 @@ export function etapasDoNivel(nivel, { branch, arquivos = [] } = {}) {
   etapas.push(ETAPA_UNITARIOS);
   if (n === 1) {
     const mexeuNoCatalogo = arquivos.some((a) => normalizar(a) === 'tests/unit/mutacoes.mjs');
-    if (mexeuNoCatalogo) etapas.push(etapaSabotagem(false));
+    if (mexeuNoCatalogo) etapas.push(etapaSabotagem(false, null, env));
     return etapas;
   }
-  etapas.push(etapaSabotagem(master));
+  etapas.push(etapaSabotagem(master, verde, env));
   if (n === 3) etapas.push(ETAPA_BUILD, ETAPA_NAVEGADOR);
   return etapas;
 }

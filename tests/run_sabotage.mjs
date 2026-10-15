@@ -5,6 +5,7 @@
 //   node tests/run_sabotage.mjs lote- clima-   (só as que começam com esses nomes)
 //   node tests/run_sabotage.mjs --completo     (ignora o cache: suíte inteira em cada uma)
 //   node tests/run_sabotage.mjs --mudados      (só as ligadas ao que mudou desde o master)
+//   node tests/run_sabotage.mjs --desde <sha>  (idem, desde um commit: o último master verde; sha inválido = completa)
 //
 // Mais rápido (Fase 3 da reunião de 30/09 - o usuário achou a rodada inteira
 // demorada, ~9 min pra 118): basta UM teste falhar pra sabotagem ser pega, então
@@ -18,6 +19,7 @@ import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { cpus } from "node:os";
 import { MUTACOES as TODAS } from "./unit/mutacoes.mjs";
 import { segurarVaga } from "../scripts/vaga.mjs";
+import { selecionarMutacoes } from "../scripts/sabotagem_incremental.mjs";
 
 // Vaga pesada (melhoria B): rodada direta espera na fila; dentro do gancho (ER_VAGA_DONO) não pede de novo.
 await segurarVaga("pesada");
@@ -25,7 +27,9 @@ await segurarVaga("pesada");
 const ARGS = process.argv.slice(2);
 const COMPLETO = ARGS.includes("--completo");
 const MUDADOS = ARGS.includes("--mudados");
-const FILTROS = ARGS.filter((a) => !a.startsWith("--"));
+const iDesde = ARGS.indexOf("--desde");
+const DESDE = iDesde >= 0 ? (ARGS[iDesde + 1] || "") : null;
+const FILTROS = ARGS.filter((a, i) => !a.startsWith("--") && !(iDesde >= 0 && i === iDesde + 1));
 let MUTACOES = FILTROS.length ? TODAS.filter((m) => FILTROS.some((f) => m.id.startsWith(f))) : TODAS;
 
 // Todo arquivo *.test.mjs da pasta, igual ao npm run test:unit - antes era uma
@@ -39,23 +43,30 @@ try { if (!COMPLETO && existsSync(CACHE)) cache = JSON.parse(readFileSync(CACHE,
 // tempo levaram 90+ min): no branch de um ticket roda só as sabotagens ligadas ao que
 // mudou desde o master - a regra sabotada, o arquivo de teste que costuma pegá-la, ou
 // sabotagem nova do catálogo. A suíte inteira continua rodando no master (merge e publicar).
-if (MUDADOS) {
+// --desde <sha> (14/10/2026): o mesmo filtro, mas a base é um commit (o último master verde). Commit inexistente
+// ou fora do histórico do HEAD = não filtra, roda o catálogo inteiro (na dúvida, completa).
+const gitStatus = (args) => spawnSync("git", args, { encoding: "utf8" }).status;
+const DESDE_VALIDO = DESDE !== null && /^[0-9a-f]{7,40}$/i.test(DESDE)
+  && gitStatus(["cat-file", "-e", DESDE + "^{commit}"]) === 0
+  && gitStatus(["merge-base", "--is-ancestor", DESDE, "HEAD"]) === 0;
+if (DESDE !== null && !DESDE_VALIDO) console.log(`--desde "${DESDE}": commit inválido ou fora do histórico -> sabotagem COMPLETA`);
+if (MUDADOS || DESDE_VALIDO) {
   const git = (args) => spawnSync("git", args, { encoding: "utf8" }).stdout || "";
   // worktree novo nasce sem cache: empresta o do checkout principal (senão tudo conta como "nova")
   if (!Object.keys(cache).length) {
     try { cache = JSON.parse(readFileSync(git(["rev-parse", "--path-format=absolute", "--git-common-dir"]).trim() + "/../" + CACHE, "utf8")); } catch { /* sem cache: roda todas */ }
   }
-  const base = git(["merge-base", "HEAD", "master"]).trim();
+  const base = DESDE_VALIDO ? DESDE : git(["merge-base", "HEAD", "master"]).trim();
+  const rotuloBase = DESDE_VALIDO ? "o último master verde (" + DESDE.slice(0, 7) + ")" : "o master";
   const mudados = new Set([
     ...git(["diff", "--name-only", base || "master"]).split("\n"),
     ...git(["ls-files", "--others", "--exclude-standard"]).split("\n"),
   ].filter(Boolean).map((f) => f.replace(/\\/g, "/")));
-  const nomes = new Set([...mudados].map((f) => f.split("/").pop()));
   // Sabotagem sem cache só entra se é NOVA nesta mudança (id nas linhas acrescentadas de mutacoes.mjs); sem
   // essa regra, as sem cache rodavam a suíte inteira cada uma e a rodada passava de 30 min (10/10).
   const novas = new Set([...git(["diff", base || "master", "--", "tests/unit/mutacoes.mjs"]).matchAll(/^\+.*\bid: "([^"]+)"/gm)].map((x) => x[1]));
-  MUTACOES = MUTACOES.filter((m) => nomes.has(m.arquivo) || mudados.has(cache[m.id]) || (!cache[m.id] && novas.has(m.id)));
-  console.log(`--mudados: ${mudados.size} arquivo(s) mudado(s) desde o master -> ${MUTACOES.length} sabotagem(ns)`);
+  MUTACOES = selecionarMutacoes(MUTACOES, { mudados, cache, novas });
+  console.log(`${DESDE_VALIDO ? "--desde" : "--mudados"}: ${mudados.size} arquivo(s) mudado(s) desde ${rotuloBase} -> ${MUTACOES.length} sabotagem(ns)`);
 }
 // Teto de processos (14/10/2026): antes, cada uma das AO_MESMO_TEMPO sabotagens deixava o node --test
 // paralelizar os arquivos em cpus-1 processos, e a máquina chegava a ~90 processos node (medido: pico 91
