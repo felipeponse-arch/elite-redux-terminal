@@ -14,7 +14,7 @@ Nada de rank recalculado. Nada publicado.
 | v05 dado | **Parcial** (`05-dado.md`): chefões contra o TrainerList `d1a9a4c` (6 mons corrigidos, `diferenças: 0`, `--aplicar-tudo`); flags de golpe e itens já estavam em `d1a9a4c`. **A troca do dado está bloqueada** (P3). |
 
 ## Portões (`npm run check` e suíte: verdes em cada branch; sabotagem `--mudados`: ver abaixo)
-- Suíte: v01 918 testes (917 + 1 `todo`), v02 923, v03 933-ish, v04 933, v05 938; 0 falhas em todas. `npm run check` limpo em todas (o erro de lint antigo foi corrigido no v01).
+- Suíte inteira rodada: v01 918 testes (917 + 1 `todo`), v02 923, v04 933, v05 938; 0 falhas. No v03 não rodei a suíte inteira isolada (rodei `pipeline_build`, `selo_do_pipeline` e `auditoria_do_motor`; o v04, que a contém, passou inteira). `npm run check` limpo em v01, v02, v04 e v05 (o erro de lint antigo foi corrigido no v01); no v03 não rodei.
 - **Sabotagem `--mudados` SÓ RODOU NO v01 e ainda não terminou**: com o cache vazio são 284 sabotagens e ~37 min por lote de 25 (12 lotes, ~7 h; log em `/tmp/claude-0/dc/portao_v01.log` neste ambiente). Lotes 0 e 1 prontos (1 sobrevivente no 0, já corrigido; 25/25 no 1); lote 2 em andamento. Os portões de v02 a v05 **não foram rodados** (as sabotagens novas de cada ticket foram todas verificadas direto contra os testes do ticket: v02 9/9, v03 12/12, v04 4/4, v05 4/4). O cache de "arquivo que pega" é gravado a cada lote, então as rodadas seguintes serão bem mais rápidas.
 - Recomendação: rodar a sabotagem completa no master depois de juntar (a regra da casa já manda).
 
