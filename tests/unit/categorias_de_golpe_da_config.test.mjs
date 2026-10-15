@@ -87,7 +87,7 @@ test("flag -> categoria: as 8 que reforçam habilidades mais arremesso, luz, lun
 });
 
 // ---------- o dado ----------
-test("move_categorias.json: o campo `c` de TODOS os 1032 golpes é exatamente o que as flags da config mandam", () => {
+test("move_categorias.json: o campo `c` de TODOS os 1041 golpes é exatamente o que as flags da config mandam", () => {
   assert.equal(flagsDaConfig.meta.golpesDoApp, dex.moves.filter(Boolean).length, "golpes_flags_config.json foi gerado para este dex_compact");
   let conferidos = 0;
   dex.moves.forEach((m, id) => {
@@ -96,7 +96,7 @@ test("move_categorias.json: o campo `c` de TODOS os 1032 golpes é exatamente o 
     assert.deepEqual((categorias[id] && categorias[id].c) || [], esperado, m[0]);
     conferidos++;
   });
-  assert.equal(conferidos, 1032);
+  assert.equal(conferidos, 1041);
 });
 
 test("os golpes que o relatório de calibração achou sem categoria (99 pares golpe+categoria) agora têm a categoria do jogo", () => {

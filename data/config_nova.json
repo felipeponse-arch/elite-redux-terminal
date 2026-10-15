@@ -1,5 +1,5 @@
 {
- "fonte": "Elite-Redux/er-config AbilityList.textproto e SpeciesList.textproto",
+ "fonte": "Elite-Redux/er-config AbilityList, SpeciesList e MoveList.textproto",
  "commit": "d1a9a4c",
  "renomeadas": [
   [
@@ -136,6 +136,638 @@
     "Run Away",
     "Water Absorb",
     "Hydration"
+   ]
+  }
+ },
+ "golpes": [
+  {
+   "enum": "MOVE_EERIE_LAUGH",
+   "nome": "Eerie Laugh",
+   "tipo": "DARK",
+   "split": "STATUS",
+   "poder": 0,
+   "precisao": 100,
+   "pp": 20,
+   "prio": 0,
+   "efeito": "Paralyze Ignore Type",
+   "chance": 0,
+   "light": false,
+   "flags": [
+    "Sound Based"
+   ]
+  },
+  {
+   "enum": "MOVE_BANEFUL_KICK",
+   "nome": "Baneful Kick",
+   "tipo": "POISON",
+   "split": "PHYSICAL",
+   "poder": 85,
+   "precisao": 100,
+   "pp": 10,
+   "prio": 0,
+   "efeito": "Poison Hit",
+   "chance": 10,
+   "light": false,
+   "flags": [
+    "Makes Contact",
+    "Kick Based"
+   ]
+  },
+  {
+   "enum": "MOVE_CHEAP_STAB",
+   "nome": "Cheap Stab",
+   "tipo": "DARK",
+   "split": "PHYSICAL",
+   "poder": 85,
+   "precisao": 100,
+   "pp": 0,
+   "prio": 0,
+   "efeito": "Hit",
+   "chance": 0,
+   "light": false,
+   "flags": [
+    "Makes Contact",
+    "Horn Based"
+   ]
+  },
+  {
+   "enum": "MOVE_ARC_BLAST",
+   "nome": "Arc Blast",
+   "tipo": "ELECTRIC",
+   "split": "SPECIAL",
+   "poder": 95,
+   "precisao": 95,
+   "pp": 0,
+   "prio": 0,
+   "efeito": "Special Defense Down Hit",
+   "chance": 20,
+   "light": true,
+   "flags": []
+  },
+  {
+   "enum": "MOVE_GHOULISH_GORE",
+   "nome": "Ghoulish Gore",
+   "tipo": "GHOST",
+   "split": "PHYSICAL",
+   "poder": 85,
+   "precisao": 100,
+   "pp": 0,
+   "prio": 0,
+   "efeito": "Hit",
+   "chance": 0,
+   "light": false,
+   "flags": [
+    "Makes Contact",
+    "Horn Based"
+   ]
+  },
+  {
+   "enum": "MOVE_GLITTER_BEAM",
+   "nome": "Glitter Beam",
+   "tipo": "FAIRY",
+   "split": "SPECIAL",
+   "poder": 85,
+   "precisao": 100,
+   "pp": 0,
+   "prio": 0,
+   "efeito": "Accuracy Down Hit",
+   "chance": 20,
+   "light": true,
+   "flags": []
+  },
+  {
+   "enum": "MOVE_LUSTER_GLOW",
+   "nome": "Luster Glow",
+   "tipo": "PSYCHIC",
+   "split": "SPECIAL",
+   "poder": 85,
+   "precisao": 90,
+   "pp": 0,
+   "prio": 0,
+   "efeito": "Attack Down Hit",
+   "chance": 40,
+   "light": true,
+   "flags": []
+  },
+  {
+   "enum": "MOVE_SPARKLING_BLAST",
+   "nome": "Sparkling Blast",
+   "tipo": "WATER",
+   "split": "SPECIAL",
+   "poder": 90,
+   "precisao": 100,
+   "pp": 0,
+   "prio": 0,
+   "efeito": "Hit",
+   "chance": 0,
+   "light": true,
+   "flags": []
+  },
+  {
+   "enum": "MOVE_SCORCHING_RAY",
+   "nome": "Scorching Ray",
+   "tipo": "FIRE",
+   "split": "SPECIAL",
+   "poder": 85,
+   "precisao": 100,
+   "pp": 0,
+   "prio": 0,
+   "efeito": "Burn Hit",
+   "chance": 20,
+   "light": true,
+   "flags": []
+  }
+ ],
+ "aprende": {
+  "SPECIES_ALAKAZAM": {
+   "lm": [
+    [
+     51,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_ELECTRODE": {
+   "lm": [
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_HITMONLEE": {
+   "lm": [
+    [
+     46,
+     "Baneful Kick"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_RHYHORN": {
+   "lm": [],
+   "tu": [
+    "Cheap Stab"
+   ]
+  },
+  "SPECIES_RHYDON": {
+   "lm": [],
+   "tu": [
+    "Cheap Stab"
+   ]
+  },
+  "SPECIES_CHINCHOU": {
+   "lm": [
+    [
+     51,
+     "Sparkling Blast"
+    ],
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_LANTURN": {
+   "lm": [
+    [
+     51,
+     "Sparkling Blast"
+    ],
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_NATU": {
+   "lm": [
+    [
+     56,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_XATU": {
+   "lm": [
+    [
+     56,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_AMPHAROS": {
+   "lm": [
+    [
+     46,
+     "Glitter Beam"
+    ],
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_RAIKOU": {
+   "lm": [
+    [
+     24,
+     "Sparkling Blast"
+    ],
+    [
+     37,
+     "Arc Blast"
+    ],
+    [
+     46,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_ELECTRIKE": {
+   "lm": [
+    [
+     37,
+     "Scorching Ray"
+    ],
+    [
+     46,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_MANECTRIC": {
+   "lm": [
+    [
+     37,
+     "Scorching Ray"
+    ],
+    [
+     46,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_SOLROCK": {
+   "lm": [
+    [
+     56,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_LATIAS": {
+   "lm": [
+    [
+     37,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_LATIOS": {
+   "lm": [
+    [
+     46,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_LUXIO": {
+   "lm": [
+    [
+     51,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_LUXRAY": {
+   "lm": [
+    [
+     51,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_BLITZLE": {
+   "lm": [
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_ZEBSTRIKA": {
+   "lm": [
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_SCRAFTY": {
+   "lm": [
+    [
+     51,
+     "Baneful Kick"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_MIENSHAO": {
+   "lm": [
+    [
+     46,
+     "Baneful Kick"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_INKAY": {
+   "lm": [
+    [
+     51,
+     "Luster Glow"
+    ]
+   ],
+   "tu": [
+    "Cheap Stab"
+   ]
+  },
+  "SPECIES_MALAMAR": {
+   "lm": [
+    [
+     51,
+     "Luster Glow"
+    ]
+   ],
+   "tu": [
+    "Cheap Stab"
+   ]
+  },
+  "SPECIES_HELIOPTILE": {
+   "lm": [
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_HELIOLISK": {
+   "lm": [
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_MINIOR": {
+   "lm": [
+    [
+     46,
+     "Glitter Beam"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_PHEROMOSA": {
+   "lm": [
+    [
+     36,
+     "Baneful Kick"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_XURKITREE": {
+   "lm": [
+    [
+     17,
+     "Glitter Beam"
+    ],
+    [
+     46,
+     "Arc Blast"
+    ],
+    [
+     46,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_MARSHADOW": {
+   "lm": [
+    [
+     17,
+     "Baneful Kick"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_DOTTLER": {
+   "lm": [
+    [
+     56,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_ORBEETLE": {
+   "lm": [
+    [
+     56,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_INDEEDEE": {
+   "lm": [
+    [
+     51,
+     "Ghoulish Gore"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_WYRDEER": {
+   "lm": [
+    [
+     56,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_OVERQWIL": {
+   "lm": [],
+   "tu": [
+    "Cheap Stab"
+   ]
+  },
+  "SPECIES_TING_LU": {
+   "lm": [],
+   "tu": [
+    "Cheap Stab"
+   ]
+  },
+  "SPECIES_HELIOSUNNY": {
+   "lm": [
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_QWILFISH_HISUIAN": {
+   "lm": [],
+   "tu": [
+    "Cheap Stab"
+   ]
+  },
+  "SPECIES_GROTOM_KICK": {
+   "lm": [
+    [
+     1,
+     "Baneful Kick"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_LITWICK_REDUX": {
+   "lm": [
+    [
+     37,
+     "Scorching Ray"
+    ],
+    [
+     46,
+     "Glitter Beam"
+    ],
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_LAMPENT_REDUX": {
+   "lm": [
+    [
+     37,
+     "Scorching Ray"
+    ],
+    [
+     46,
+     "Glitter Beam"
+    ],
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_CHANDELURE_REDUX": {
+   "lm": [
+    [
+     37,
+     "Scorching Ray"
+    ],
+    [
+     46,
+     "Glitter Beam"
+    ],
+    [
+     56,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_VOLBEEP": {
+   "lm": [
+    [
+     51,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_ASTROBEEP": {
+   "lm": [
+    [
+     51,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_ILLUMARS": {
+   "lm": [
+    [
+     37,
+     "Glitter Beam"
+    ],
+    [
+     51,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_ILLUMINAUT": {
+   "lm": [
+    [
+     37,
+     "Glitter Beam"
+    ],
+    [
+     51,
+     "Luster Glow"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_LUXZERO": {
+   "lm": [
+    [
+     51,
+     "Arc Blast"
+    ]
+   ],
+   "tu": []
+  },
+  "SPECIES_GARDEVOIR_REDUX": {
+   "lm": [
+    [
+     37,
+     "Ghoulish Gore"
+    ]
+   ],
+   "tu": [
+    "Cheap Stab"
    ]
   }
  }

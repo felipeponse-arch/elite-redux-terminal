@@ -3797,4 +3797,32 @@ export const MUTACOES = [
     de: "    foe.chefao = true;\n",
     para: "\n",
   },
+  {
+    id: "versao-arc-blast-sem-luz",
+    descricao: "o Arc Blast perde a categoria luz (Photokinesis não o reforça)",
+    arquivo: "move_categorias.json",
+    de: "\"1035\":{\"c\":[\"luz\"],\"ch\":20,\"ef\":\"Special Defense Down Hit\"}",
+    para: "\"1035\":{\"ch\":20,\"ef\":\"Special Defense Down Hit\"}",
+  },
+  {
+    id: "versao-eerie-laugh-sem-papel",
+    descricao: "o Eerie Laugh perde o papel de suporte",
+    arquivo: "move_roles.json",
+    de: "\"1032\":\"suporte\"",
+    para: "\"1032\":\"ataque\"",
+  },
+  {
+    id: "versao-eerie-laugh-sem-efeito",
+    descricao: "o Eerie Laugh perde o efeito de paralisar (vira golpe sem efeito)",
+    arquivo: "dex_compact.json",
+    de: "[\"Eerie Laugh\",11,2,0,100,20,\"\",0,[11],-1,0,\"Paralyze Ignore Type\"]",
+    para: "[\"Eerie Laugh\",11,2,0,100,20,\"\",0,[11],-1,0,\"Hit\"]",
+  },
+  {
+    id: "versao-hitmonlee-sem-baneful-kick",
+    descricao: "o Hitmonlee deixa de aprender o Baneful Kick no nível 46",
+    arquivo: "dex_compact.json",
+    de: "[[1,663],[1,280],[1,24],[1,26],[1,96],[1,1031],[17,739],[17,252],[17,23],[24,495],[24,299],[24,25],[24,266],[37,370],[37,932],[37,661],[46,136],[46,179],[46,1033],[51,387],[51,741],[51,167]]",
+    para: "[[1,663],[1,280],[1,24],[1,26],[1,96],[1,1031],[17,739],[17,252],[17,23],[24,495],[24,299],[24,25],[24,266],[37,370],[37,932],[37,661],[46,136],[46,179],[46,1],[51,387],[51,741],[51,167]]",
+  },
 ];

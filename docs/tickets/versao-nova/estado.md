@@ -1,6 +1,6 @@
 # Estado da fila v01–v09 (15/10/2026, atualizado ~13:15 UTC)
 
-Novo (13:40): v08 (`versao-08-sono-paralisia`) pronto. Segue v09 (golpes) e para.
+Novo (14:10): v08 (`versao-08-sono-paralisia`) e v09 (`versao-09-golpes`) prontos. A fila v06–v09 acabou; parei antes das builds (dados-2654/08, 09) e do fechamento (10).
 Antes (13:00): v06 (`versao-06-habilidades-mudadas`) e v07 (`versao-07-habilidades-novas`) prontos e enviados; segue v08 (sono e paralisia) e v09 (golpes). `NOME_DA_CATEGORIA` ganhou luz/arremesso/broca/lunar no v07.
 Antes (12:30): v05 fechado com a troca do dado; segue a fila v06 (habilidades mudadas), v07 (habilidades novas + delta do upcoming), v08 (sono e paralisia), v09 (golpes). Parar antes das builds (dados-2654/08, 09) e do fechamento (10).
 Achados do /code-review (calibração, ainda não tratados; não bloqueiam): `drill` mapeado para "chifre" no leitor de texto mas gravado como "broca" pela flag; `arremesso: /throw/i` sem âncora; `NOME_DA_CATEGORIA` sem arremesso/broca/luz/lunar; `categorias_pela_config.mjs` junta golpe por nome com `Map` (nome repetido sobrescreve).
