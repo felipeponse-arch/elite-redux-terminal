@@ -2233,13 +2233,6 @@ export const MUTACOES = [
     para: "",
   },
   {
-    id: "ate-empoderado-1-3",
-    descricao: "Aerilate e parecidas voltam a valer x1,1 no golpe convertido (o jogo mostra x1,3)",
-    arquivo: "duelo.js",
-    de: "var empoderado = new RegExp(x[1] + \" moves are empowered\", \"i\").test(t) ? 1.3 : 1.1;",
-    para: "var empoderado = 1.1;",
-  },
-  {
     id: "prioridade-1x1-bloqueio-some",
     descricao: "Queenly Majesty, Dazzling e Armor Tail deixam de bloquear golpe de prioridade no duelo 1x1",
     arquivo: "duelo.js",
