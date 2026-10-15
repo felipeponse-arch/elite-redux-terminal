@@ -128,7 +128,9 @@
     { nome: "soco", re: /punch|iron fist/i }, { nome: "mordida", re: /bit(?:e|ing)|fang|strong jaw/i },
     { nome: "corte", re: /slash|slicing|keen edge/i }, { nome: "pulso", re: /mega launcher|beam\/pump|cannon|pulse/i },
     { nome: "chifre", re: /horn|drill/i }, { nome: "chute", re: /kick/i },
-    { nome: "flecha", re: /arrow/i }, { nome: "martelo", re: /hammer|slamm/i }
+    { nome: "flecha", re: /arrow/i }, { nome: "martelo", re: /hammer|slamm/i },
+    // Rocky Payload e Devious Present: "Rock-type and throwing moves" (flag `throwing` do golpe na er-config).
+    { nome: "arremesso", re: /throw/i }
   ];
   function categoriasDoTextoDuelo(trecho) {
     return PALAVRAS_DE_CATEGORIA.filter(function (p) { return p.re.test(trecho); }).map(function (p) { return p.nome; });

@@ -1,0 +1,125 @@
+{
+ "fonte": "er-config 6a30b66 (28/03/2026) MoveList.textproto x data/move_categorias.json",
+ "faltamNoMotor": {
+  "corte": [
+   "Karate Chop",
+   "Metal Claw",
+   "Cross Chop",
+   "Stone Edge",
+   "Behemoth Blade",
+   "Breaking Swipe",
+   "Aqua Cutter",
+   "Bitter Blade",
+   "Flower Trick",
+   "Psyblade",
+   "Tachyon Cutter",
+   "Mighty Cleave",
+   "Ceaseless Edge",
+   "Saber Slashes"
+  ],
+  "martelo": [
+   "Slam",
+   "Crabhammer",
+   "Hammer Arm",
+   "Wood Hammer",
+   "Ice Hammer",
+   "Dragon Hammer",
+   "Brutal Swing",
+   "Gigaton Hammer",
+   "Smashin' Realities",
+   "Ivy Cudgel",
+   "Wild Swing",
+   "Femur Breaker",
+   "Squeaky Hammer",
+   "Primitive Strike",
+   "Smashing Pumpkins",
+   "Airborne Slam",
+   "Spine Breaker",
+   "Crackle Slam",
+   "Squall Hammer",
+   "Megaton Hammer",
+   "Battering Ram",
+   "Pitfall",
+   "Viral Strike",
+   "Shadow Hammer",
+   "Bonk",
+   "Molten Strike",
+   "Mirage Slam",
+   "Earthsplitter",
+   "Beetle Bash",
+   "Relentless Clobber",
+   "Tsunami Hammer"
+  ],
+  "pulso": [
+   "Rock Throw",
+   "Sludge Bomb",
+   "Nature Power",
+   "Hydro Cannon",
+   "Frenzy Plant",
+   "Rock Blast",
+   "Vacuum Wave",
+   "Mirror Shot",
+   "Rock Wrecker",
+   "Heal Pulse",
+   "Techno Blast",
+   "Parting Shot",
+   "Anchor Shot",
+   "Beak Blast",
+   "Dynamax Cannon",
+   "Tar Shot",
+   "Eternabeam",
+   "Meteor Beam",
+   "Shell Side Arm",
+   "Terrain Pulse",
+   "Scorchng Sands",
+   "Primal Beam",
+   "Black Magic",
+   "Electro Shot",
+   "Fickle Beam",
+   "Big Bang",
+   "Prism Blast"
+  ],
+  "soco": [
+   "Dizzy Punch",
+   "Dynamic Punch",
+   "Brick Break",
+   "Power-Up Punch",
+   "Darkest Lariat",
+   "Double Iron Bash",
+   "Surging Strikes",
+   "Seismic Fist",
+   "Jagged Punch"
+  ],
+  "mordida": [
+   "Super Fang",
+   "Crunch",
+   "Snap Trap",
+   "Kilobite",
+   "Rip and Tear",
+   "Terror Charge"
+  ],
+  "chifre": [
+   "Psycho Cut",
+   "Psyblade",
+   "Hyper Drill",
+   "Smolder Bash"
+  ],
+  "flecha": [
+   "Spirit Shackle",
+   "Lightning Strike",
+   "Triple Arrows",
+   "Sparkling Barrage",
+   "Blitz Arrow"
+  ],
+  "chute": [
+   "Pyro Ball",
+   "Triple Arrows",
+   "Triple Tremor"
+  ]
+ },
+ "sobramNoMotor": {
+  "soco": [
+   "Molten Strike"
+  ]
+ }
+}

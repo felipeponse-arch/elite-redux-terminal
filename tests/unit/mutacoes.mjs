@@ -2701,4 +2701,47 @@ export const MUTACOES = [
     de: "escolherProximoDoChefao",
     para: "return args[0].length ? args[0][0] : null;",
   },
+  // ---------- categorias de golpe pelas flags da er-config (ticket calibracao-2026-10-15/01, 15/10/2026) ----------
+  {
+    id: "categorias-flag-martelo-fora",
+    descricao: "a flag hammer da config deixa de virar a categoria martelo (31 golpes sem Super Slammer)",
+    arquivo: "categorias_pela_config.mjs",
+    de: "  hammer: \"martelo\",\n",
+    para: "",
+  },
+  {
+    id: "categorias-flag-strong-jaw-vira-corte",
+    descricao: "a flag strong_jaw vira a categoria errada (Crunch passa a ser golpe de corte)",
+    arquivo: "categorias_pela_config.mjs",
+    de: "strong_jaw: \"mordida\"",
+    para: "strong_jaw: \"corte\"",
+  },
+  {
+    id: "categorias-flag-arremesso-fora",
+    descricao: "a flag throwing deixa de virar a categoria arremesso (Rocky Payload e Devious Present sem golpe para reforçar)",
+    arquivo: "categorias_pela_config.mjs",
+    de: "  throwing: \"arremesso\",\n",
+    para: "",
+  },
+  {
+    id: "categorias-parser-le-flag-de-bloco-aninhado",
+    descricao: "o leitor do MoveList passa a ler flags de dentro de argument { } como se fossem do golpe",
+    arquivo: "categorias_pela_config.mjs",
+    de: "    if (profundidade !== 1) continue;\n",
+    para: "",
+  },
+  {
+    id: "categorias-dado-crunch-sem-mordida",
+    descricao: "o Crunch volta a ficar sem a categoria mordida em data/move_categorias.json (Strong Jaw não o reforça)",
+    arquivo: "move_categorias.json",
+    de: "\"242\":{\"c\":[\"mordida\"],\"ch\":20,\"ef\":\"Defense Down Hit\"}",
+    para: "\"242\":{\"ch\":20,\"ef\":\"Defense Down Hit\"}",
+  },
+  {
+    id: "categorias-arremesso-sem-palavra-no-texto",
+    descricao: "o texto \"throwing moves\" das habilidades deixa de apontar para a categoria arremesso (Rocky Payload sem efeito)",
+    arquivo: "duelo.js",
+    de: "{ nome: \"arremesso\", re: /throw/i }",
+    para: "{ nome: \"arremesso\", re: /nunca-casa-nada/i }",
+  },
 ];

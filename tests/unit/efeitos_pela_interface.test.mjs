@@ -64,16 +64,19 @@ test("Moxie: cada nocaute dá +1 de Ataque, então o 3º do chefão cai bem mais
 });
 
 // ---------- poder variável ----------
-test("Low Kick pelo peso do alvo: leve (Shuckle) rende pouco, médio (Ferrothorn) fica entre o Brick Break e o Close Combat", () => {
+test("Low Kick pelo peso do alvo: leve (Shuckle) rende pouco, médio (Ferrothorn) fica entre o Karate Chop e o Close Combat", () => {
   const shuckle = () => chefao("Shuckle", { hab: "Sturdy", golpes: ["Rock Slide"], evs: EV.tanqueF });
   const ferrothorn = () => chefao("Ferrothorn", { hab: "Iron Barbs", golpes: ["Power Whip"], evs: EV.tanqueF });
   const machamp = (golpe, alvo) => lutar(eu("Machamp", { golpes: [golpe] }), alvo());
   // Shuckle (20,5 kg) = 40 de poder, contra 75 do Brick Break: a luta dura ~75/40 vezes mais
   const turnos = (g) => machamp(g, shuckle).turnos;
-  entre(turnos("Low Kick") / turnos("Brick Break"), 1.6, 2.1, "turnos Low Kick / Brick Break no Shuckle");
-  // Ferrothorn (110 kg) = 100 de poder: entre o Brick Break (75) e o Close Combat (120)
+  // Desde 15/10/2026 (ticket calibracao-01) o Brick Break é soco pela flag iron_fist do jogo e o Machamp tem Iron Fist de innate: o Brick Break
+  // sai x1,3 (85 de poder x 1,3 = 110,5 contra 40: 2,76 vezes, 2,75 medido). Antes dava 85/40, entre 1,6 e 2,1.
+  entre(turnos("Low Kick") / turnos("Brick Break"), 2.2, 3, "turnos Low Kick / Brick Break no Shuckle");
+  // Ferrothorn (110 kg) = 100 de poder: entre o Karate Chop (90) e o Close Combat (120)
   const dano = (g) => 1 - machamp(g, ferrothorn).fracFoe;
-  assert.ok(dano("Brick Break") < dano("Low Kick") && dano("Low Kick") < dano("Close Combat"), [dano("Brick Break"), dano("Low Kick"), dano("Close Combat")].map((v) => v.toFixed(3)).join(" < "));
+  // (o Karate Chop, 90 de poder e sem bônus de innate do Machamp, no lugar do Brick Break, que agora é soco com Iron Fist e passa dos 100 do Low Kick)
+  assert.ok(dano("Karate Chop") < dano("Low Kick") && dano("Low Kick") < dano("Close Combat"), [dano("Karate Chop"), dano("Low Kick"), dano("Close Combat")].map((v) => v.toFixed(3)).join(" < "));
 });
 
 // ---------- IA do chefão ----------

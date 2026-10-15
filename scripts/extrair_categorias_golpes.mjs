@@ -1,9 +1,6 @@
-// Categorias de golpe, chance e efeito extra, direto do dado oficial do NextDex
-// (2026-09-29). O dex_compact.json só guarda as 18 marcações de `flagsT`; as
-// categorias que reforçam habilidades (soco, mordida, corte, canhão/pulso,
-// chifre, chute, flecha, martelo) estão escritas na descrição LONGA de cada
-// golpe ("... Iron Fist boost."), e a chance/tipo de efeito extra em `chance`
-// e `eff`. Sem isso o motor não sabia quais golpes o Iron Fist, o Strong Jaw
+// Categorias de golpe, chance e efeito extra. As categorias que reforçam habilidades (soco, mordida, corte,
+// canhão/pulso, chifre, chute, flecha, martelo, arremesso...) vêm das flags da er-config (15/10/2026, ver abaixo);
+// a chance/tipo de efeito extra vêm do NextDex (2026-09-29), em `chance` e `eff`. Sem isso o motor não sabia quais golpes o Iron Fist, o Strong Jaw
 // ou o Keen Edge reforçam, nem o que o Sheer Force troca.
 //
 // Fonte: https://eliteredux.net/full-documentation/ aponta o NextDex como o
@@ -17,22 +14,17 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { categoriasDasFlags } from "./categorias_pela_config.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dex = JSON.parse(readFileSync(join(RAIZ, "data", "dex_compact.json"), "utf8"));
 const versao = dex.meta && dex.meta.version;
 
-// Marcação na descrição longa -> categoria (com as grafias variantes do próprio dado).
-const CATEGORIAS = [
-  ["soco", /iron fist/i],
-  ["mordida", /strong jaw/i],
-  ["corte", /keen edge/i],
-  ["pulso", /mega launcher/i],
-  ["chifre", /might(?:y)? horn/i],
-  ["chute", /striker|\bstrike boost/i],
-  ["flecha", /archer|\barrow boost/i],
-  ["martelo", /super slammer/i]
-];
+// Categorias (campo `c`): vêm das FLAGS do golpe na er-config (data/golpes_flags_config.json, gerado por
+// scripts/categorias_pela_config.mjs), como o código do jogo as lê. O texto da descrição só citava a marcação em
+// parte dos golpes (ticket calibracao-2026-10-15/01: 98 golpes sem categoria). Chance, recuo, dreno, alvo e efeito
+// de status continuam vindo do NextDex.
+const FLAGS = JSON.parse(readFileSync(join(RAIZ, "data", "golpes_flags_config.json"), "utf8")).golpes;
 
 const caminho = process.argv[2];
 const raw = caminho
@@ -46,7 +38,7 @@ raw.moves.forEach((m, id) => {
   if (!m) return;
   if (dex.moves[id][0] !== m.name) throw new Error(`golpe ${id}: "${m.name}" no NextDex x "${dex.moves[id][0]}" no dex_compact`);
   const texto = m.lDesc || "";
-  const c = CATEGORIAS.filter(([, re]) => re.test(texto)).map(([nome]) => nome);
+  const c = categoriasDasFlags(FLAGS[m.name]);
   const e = { };
   if (c.length) { e.c = c; comCategoria++; }
   if (m.chance > 0) { e.ch = m.chance; e.ef = raw.effT[m.eff] || ""; comChance++; }
