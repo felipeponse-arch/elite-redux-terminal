@@ -57,11 +57,18 @@ if (MUDADOS) {
   MUTACOES = MUTACOES.filter((m) => nomes.has(m.arquivo) || mudados.has(cache[m.id]) || (!cache[m.id] && novas.has(m.id)));
   console.log(`--mudados: ${mudados.size} arquivo(s) mudado(s) desde o master -> ${MUTACOES.length} sabotagem(ns)`);
 }
-const AO_MESMO_TEMPO = Math.max(2, Math.floor(cpus().length / 2));
+// Teto de processos (14/10/2026): antes, cada uma das AO_MESMO_TEMPO sabotagens deixava o node --test
+// paralelizar os arquivos em cpus-1 processos, e a máquina chegava a ~90 processos node (medido: pico 91
+// com 12 núcleos). Agora o total de arquivos de teste ao mesmo tempo fica perto de núcleos:
+// AO_MESMO_TEMPO sabotagens x CONCORRENCIA_POR_PROCESSO arquivos = ~ cpus.
+// ER_SABOTAGEM_PARALELO ajusta quantas sabotagens rodam juntas (a concorrência por processo se recalcula).
+const CPUS = cpus().length;
+const AO_MESMO_TEMPO = Math.max(1, Number(process.env.ER_SABOTAGEM_PARALELO) || Math.max(2, Math.floor(CPUS / 2)));
+const CONCORRENCIA_POR_PROCESSO = Math.max(1, Math.floor(CPUS / AO_MESMO_TEMPO));
 
 function rodar(m, arquivos) {
   return new Promise((pronto) => {
-    const filho = spawn(process.execPath, ["--test", ...arquivos], {
+    const filho = spawn(process.execPath, ["--test", `--test-concurrency=${CONCORRENCIA_POR_PROCESSO}`, ...arquivos], {
       env: { ...process.env, MUTACAO_ARQUIVO: m.arquivo, MUTACAO_DE: m.de, MUTACAO_PARA: m.para },
     });
     let saida = "";
@@ -105,6 +112,7 @@ async function trabalhador() {
     resultados[i] = await avaliar(MUTACOES[i]);
   }
 }
+console.log(`paralelismo: ${Math.min(AO_MESMO_TEMPO, MUTACOES.length)} sabotagem(ns) x ${CONCORRENCIA_POR_PROCESSO} arquivo(s) de teste por vez (${CPUS} núcleos)`);
 await Promise.all(Array.from({ length: Math.min(AO_MESMO_TEMPO, MUTACOES.length) }, trabalhador));
 
 let sobreviveram = 0;

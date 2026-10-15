@@ -1,5 +1,11 @@
 // Testes do scripts/checar_paralelo.mjs (ticket 04, fluxo 14/10/2026).
 // Etapas falsas rodam com `node -e`; a lista real é comparada à cadeia antiga.
+//
+// Regra (revisão de 14/10/2026): nenhum teste prova paralelismo ou ordem pelo relógio. Paralelismo
+// é provado por BARREIRA: cada etapa grava a própria marca e só termina quando todas as marcas
+// existem. Em série, a primeira esperaria a guarda e falharia. Ordem é provada por EVENTOS entre
+// etapas (uma etapa só imprime depois que outra criou um arquivo), então a ordem de término é
+// forçada e não depende de quão carregada a máquina está. O limite de 10 s é só guarda.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, mkdtempSync, symlinkSync, rmSync } from "node:fs";
@@ -22,6 +28,14 @@ async function rodar(etapas, extra = {}) {
   return { ...r, saidas, erros };
 }
 
+// Caminho em barras normais e entre aspas simples (o código passa por separarArgumentos em alguns testes).
+const seg = (p) => p.replace(/\\/g, "/");
+// Marca "isto já aconteceu": cria o arquivo ARQ.
+const marca = (arq) => `require('fs').writeFileSync('${seg(arq)}','')`;
+// Espera o arquivo ARQ existir e então roda FIM. Guarda de 10 s: só evita travar, não mede nada.
+const aoArquivo = (arq, fim) =>
+  `(function e(t){if(require('fs').existsSync('${seg(arq)}')){${fim}}else if(Date.now()-t>10000){process.exit(9)}else{setTimeout(()=>e(t),10)}})(Date.now())`;
+
 test("tudo passa: código 0 e uma linha de resumo", async () => {
   const r = await rodar(["process.exit(0)", "console.log('a')"]);
   assert.equal(r.codigo, 0);
@@ -42,28 +56,44 @@ test("falha única: código 1, diagnóstico e nome da etapa no erro", async () =
   assert.match(r.erros[0], /falharam 1 de 2/);
 });
 
-test("falha dupla: as duas aparecem, na ordem da lista", async () => {
-  const r = await rodar([
-    "setTimeout(()=>{console.log('lenta');process.exit(1)},400)",
-    "console.log('rapida');process.exit(2)",
-  ]);
-  assert.equal(r.codigo, 1);
-  assert.deepEqual(r.saidas, ["lenta", "rapida"]);
-  assert.match(r.erros[0], /falharam 2 de 2/);
+test("falha dupla: as duas aparecem, na ordem da lista (mesmo quando a da frente termina por último)", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "paralelo-"));
+  try {
+    const m = join(dir, "rapida-terminou");
+    // "lenta" só termina depois que "rapida" criou a marca: a ordem de término é forçada
+    const r = await rodar([
+      aoArquivo(m, "console.log('lenta');process.exit(1)"),
+      `console.log('rapida');${marca(m)};process.exit(2)`,
+    ]);
+    assert.equal(r.codigo, 1);
+    assert.deepEqual(r.saidas, ["lenta", "rapida"]);
+    assert.match(r.erros[0], /falharam 2 de 2/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 test("ordem de saída segue a lista, não quem termina primeiro", async () => {
-  const r = await rodar([
-    "setTimeout(()=>console.log('1-lenta'),300)",
-    "console.log('2-rapida')",
-  ], { silencioso: true });
-  assert.deepEqual(r.saidas, ["1-lenta", "2-rapida"]);
+  const dir = mkdtempSync(join(tmpdir(), "paralelo-"));
+  try {
+    const m = join(dir, "2-terminou");
+    const r = await rodar([
+      aoArquivo(m, "console.log('1-lenta')"),
+      `console.log('2-rapida');${marca(m)}`,
+    ], { silencioso: true });
+    assert.deepEqual(r.saidas, ["1-lenta", "2-rapida"]);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
-test("etapas rodam de fato em paralelo", async () => {
-  const t0 = Date.now();
-  await rodar(Array(4).fill("setTimeout(()=>{},500)"));
-  assert.ok(Date.now() - t0 < 1500, "4 etapas de 500 ms deveriam levar bem menos que 2 s");
+test("etapas rodam de fato em paralelo: barreira de 4 etapas (em série, a primeira esgotaria a guarda)", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "paralelo-"));
+  try {
+    const D = seg(dir);
+    // Cada etapa marca a própria entrada e só termina quando as 4 entradas existem.
+    const barreira = (i) =>
+      `const fs=require('fs');fs.writeFileSync('${D}/inicio-${i}','');` +
+      `(function e(t){if(fs.readdirSync('${D}').filter(f=>f.startsWith('inicio-')).length>=4){process.exit(0)}else if(Date.now()-t>10000){process.exit(9)}else{setTimeout(()=>e(t),10)}})(Date.now())`;
+    const r = await rodar([barreira(1), barreira(2), barreira(3), barreira(4)]);
+    assert.equal(r.codigo, 0, r.erros.join("\n"));
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 test("stderr é preservado e a falha com stderr vira código 1", async () => {
@@ -124,16 +154,21 @@ function mainComoProcesso(etapas) {
   const prog = `import(${JSON.stringify(LIB)}).then(m=>m.main(${JSON.stringify(etapas)},["--silent"]))`;
   return spawnSync(process.execPath, ["-e", prog], { encoding: "utf8" });
 }
-// main usa resolverComando: "node -e codigo" vira node + args.
+// main usa resolverComando: "node -e codigo" vira node + args. O código NÃO pode ter aspas duplas.
 const E = (js) => `node -e "${js}"`;
 
 test("main real: código != 0 numa falha e a ordem da saída segue a lista", () => {
-  const r = mainComoProcesso([
-    E("setTimeout(()=>console.log('A-lenta'),300)"),
-    E("console.log('B');process.exit(3)"),
-  ]);
-  assert.notEqual(r.status, 0);
-  assert.ok(r.stdout.indexOf("A-lenta") < r.stdout.indexOf("B"));
+  const dir = mkdtempSync(join(tmpdir(), "paralelo-"));
+  try {
+    const m = join(dir, "b-terminou");
+    // A só imprime depois que B criou a marca: B termina antes de A, e a saída ainda sai na ordem da lista
+    const r = mainComoProcesso([
+      E(aoArquivo(m, "console.log('A-lenta')")),
+      E(`console.log('B');${marca(m)};process.exit(3)`),
+    ]);
+    assert.notEqual(r.status, 0);
+    assert.ok(r.stdout.indexOf("A-lenta") < r.stdout.indexOf("B"));
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 test("main real: falha dupla mostra as duas e sai com 1", () => {

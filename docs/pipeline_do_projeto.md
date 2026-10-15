@@ -85,3 +85,16 @@ As quatro melhorias estão no master, cada uma com teste e passada pelo supervis
 Como usar: `node scripts/verificar.mjs --nivel <arquivos>` mostra o nível sem rodar nada; `ER_VERIFICAR=completo` força tudo; antes de enviar o master ao GitHub, `node scripts/verificar.mjs` no worktree `publicar` (a junção fast-forward não dispara o gancho).
 Limites honestos: `npm run pesado` interpreta o comando pelo cmd.exe (usar comando simples, `node arquivo.js`); a vaga nova não enxerga a trava antiga (`elite-redux-verificar.lock`), então worktrees com o `verificar.mjs` antigo rodando junto podem disputar a porta 8101 do e2e (some depois que os worktrees forem atualizados); `ER_WIP=1` (checkpoint) roda só a checagem leve, e o master nunca aceita WIP.
 Pendente: aplicar o `encalhados` aos worktrees parados (`divida-05`, `divida-07b`, 40 arquivos em staging na pasta principal) com o usuário; a rota Gemini precisa de autorização explícita e delimitada; medir o consumo real de P/M/G para calibrar a política.
+
+## 10. Ajuste dos portões: superinscrição de processos (14/10/2026)
+Medido com `node tests/run_sabotage.mjs pipeline-` (31 sabotagens, 12 núcleos, sem cache), amostrando os `node` descendentes do orquestrador:
+| | Tempo | Pico de processos node | Média |
+|---|---|---|---|
+| Antes | 462 s | 91 | 37 |
+| Depois | 492 s | 39 | 17 |
+
+O que mudou: `tests/run_sabotage.mjs` passa `--test-concurrency` = cpus / sabotagens ao mesmo tempo (6 x 2 = 12 arquivos); `ER_SABOTAGEM_PARALELO` ajusta a quantidade de sabotagens. `npm run test:unit` agora passa pela vaga "pesada", então uma rodada avulsa não se sobrepõe a uma sabotagem de outra sessão (dentro do verificador é reentrante, sem deadlock). O tempo de parede não caiu: o ganho é de carga (menos pico, menos processos brigando por CPU).
+
+Testes frágeis por carga (`vaga.test.mjs`, `checar_paralelo.test.mjs`): ordem e paralelismo viraram eventos (log síncrono, barreira entre etapas, esperas por aviso e arquivo sentinela). Os limites de tempo ficaram só como guarda. Prova por mutação temporária: fila da vaga sem espera - 7 testes da vaga falham; paralelismo trocado por série - barreira e testes de ordem falham.
+
+Achado aberto (não resolvido aqui): `pipeline-prioridade-do-alvo-pelo-dado` é pega só às vezes, pelo `calibracao_calculadora_do_jogo.test.mjs` (pega em 2 de cerca de 11 rodadas completas, nas duas configurações; sozinho, 0 de 20). A causa é a interferência entre arquivos da suíte, não o teto de processos. Fica para o verificador investigar a fixture compartilhada antes de tratar a sabotagem como garantida.
