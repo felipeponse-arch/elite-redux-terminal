@@ -109,6 +109,9 @@ if (-not (Test-Path (Join-Path $dataDir "sprite_atlas.png"))) {
 } else {
     Write-Output "--- reusing existing sprite atlas (run build_sprite_atlas.ps1 to refresh) ---"
 }
+# 15/10/2026: o atlas é por espécie (sname); o número muda entre versões do jogo, então o índice número -> casa é refeito do dado atual.
+node (Join-Path $PSScriptRoot "remapear_sprite_index.mjs") (Join-Path $dataDir "dex_compact.json") (Join-Path $dataDir "sprite_index_por_nome.json") (Join-Path $dataDir "sprite_index.json")
+if ($LASTEXITCODE -ne 0) { throw "remapear_sprite_index.mjs falhou" }
 
 # Montagem (validacao dos dados, colagem de src/, dados, atlas e versao): em
 # Node desde a fase 8 da refatoracao (2026-09-24) - o mesmo script roda no CI
