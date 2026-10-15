@@ -15,11 +15,12 @@
 // verdade". E roda várias sabotagens ao mesmo tempo (processos separados: cada
 // uma sabota só a própria memória, nunca o arquivo).
 import { spawn, spawnSync } from "node:child_process";
-import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { cpus } from "node:os";
 import { MUTACOES as TODAS } from "./unit/mutacoes.mjs";
 import { segurarVaga } from "../scripts/vaga.mjs";
 import { selecionarMutacoes } from "../scripts/sabotagem_incremental.mjs";
+import { gravarCacheMesclando } from "../scripts/cache_sabotagem.mjs";
 
 // Vaga pesada (melhoria B): rodada direta espera na fila; dentro do gancho (ER_VAGA_DONO) não pede de novo.
 await segurarVaga("pesada");
@@ -37,6 +38,9 @@ let MUTACOES = FILTROS.length ? TODAS.filter((m) => FILTROS.some((f) => m.id.sta
 const ARQUIVOS_DE_TESTE = readdirSync("tests/unit").filter((f) => f.endsWith(".test.mjs")).map((f) => "tests/unit/" + f);
 const CACHE = "tests/.sabotagem_cache.json";
 let cache = {};
+// Atualizações desta rodada (id -> arquivo | null). O cache em memória só ESCOLHE o arquivo; quem grava é a
+// mescla com o disco (15/10/2026: gravar o cache inteiro da rodada apagava o resto e o portão levou 98 min).
+const atualizacoes = new Map();
 try { if (!COMPLETO && existsSync(CACHE)) cache = JSON.parse(readFileSync(CACHE, "utf8")); } catch { cache = {}; }
 
 // --mudados (regra do QA, 08/10/2026 - dois agentes rodando a suíte inteira ao mesmo
@@ -108,9 +112,14 @@ async function avaliar(m) {
   }
   const r = await rodar(m, ARQUIVOS_DE_TESTE);
   if (r.saida.includes("trecho da sabotagem não encontrado")) return { m, tipo: "quebrada" };
-  if (r.status === 0) return { m, tipo: "sobreviveu" };
+  if (r.status === 0) { if (lembrado) atualizacoes.set(m.id, null); return { m, tipo: "sobreviveu" }; }
+  // Só lembra arquivo que pega SOZINHO (rodada isolada): teste que falha só por estado compartilhado com outro
+  // arquivo daria "pega" falso no atalho (noite de 14/10: 3 buracos de cobertura passaram assim).
   const arq = arquivoQuePegou(r.saida);
-  if (arq) cache[m.id] = arq;
+  if (arq) {
+    const sozinho = await rodar(m, [arq]);
+    atualizacoes.set(m.id, sozinho.status !== 0 ? arq : null);
+  } else if (lembrado) atualizacoes.set(m.id, null);
   return { m, tipo: "pega", falhas: contarFalhas(r.saida), rapido: false };
 }
 
@@ -140,6 +149,6 @@ for (const r of resultados) {
     console.log(`pega      ${m.id}: ${m.descricao} (${r.falhas} teste(s) falharam${r.rapido ? ", no arquivo lembrado" : ""})`);
   }
 }
-try { writeFileSync(CACHE, JSON.stringify(cache, null, 1)); } catch { /* cache é só atalho */ }
+gravarCacheMesclando(CACHE, atualizacoes, cache);
 console.log(`\n=== sabotagem: ${MUTACOES.length - sobreviveram - quebradas}/${MUTACOES.length} pegas em ${Math.round((Date.now() - inicio) / 1000)} s ===`);
 if (sobreviveram || quebradas) process.exitCode = 1;
