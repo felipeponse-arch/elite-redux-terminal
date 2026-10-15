@@ -2234,10 +2234,10 @@ export const MUTACOES = [
   },
   {
     id: "ate-empoderado-1-3",
-    descricao: "Aerilate e parecidas voltam a valer x1,1 no golpe convertido (o jogo mostra x1,3)",
+    descricao: "Aerilate e parecidas deixam de dar STAB ao tipo novo do golpe convertido (código do jogo, abilities.cc:295-301; decisão de 15/10)",
     arquivo: "duelo.js",
-    de: "var empoderado = new RegExp(x[1] + \" moves are empowered\", \"i\").test(t) ? 1.3 : 1.1;",
-    para: "var empoderado = 1.1;",
+    de: "ef.stabExtra.push(tipoDoTextoDuelo(x[1]));",
+    para: "void 0;",
   },
   {
     id: "prioridade-1x1-bloqueio-some",
