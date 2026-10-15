@@ -1,6 +1,8 @@
 // Seções 25 a 29: time e caixa nunca compartilham o mesmo Pokémon, auditoria WCAG/eMAG, trava de level cap no gerador de build por IA, botão 'Gerar build com IA' no Meu Time e 'remover' banca pra caixa.
 // Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
 async function section10() {
+  // Estas checagens são do prompt de build do ZERO (o caminho de antes, que segue valendo sem alvo/candidato); a escolha entre candidatos é a seção 29.
+  if (window.__erTest && window.__erTest.definirEscolhaEntreCandidatos) window.__erTest.definirEscolhaEntreCandidatos(false);
   // --- 25. Time e caixa nunca compartilham o mesmo Pokémon (achado real em
   // revisão de código, 2026-09-12) - o botão "+ Caixa" na ficha da Dex só
   // desabilitava por `inBox`, nunca por `inTeam`: dava pra clicar
@@ -565,4 +567,5 @@ async function section10() {
         document.getElementById("reset-team-box-btn").disabled === true);
     }
   } else { check("Pikachu encontrado pro teste de 'Novo jogo'", false); }
+  if (window.__erTest && window.__erTest.definirEscolhaEntreCandidatos) window.__erTest.definirEscolhaEntreCandidatos(true);
 }

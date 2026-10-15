@@ -725,6 +725,7 @@
 /*@regras duelo.js*/
 /*@regras prompts_ia.js*/
 /*@regras pipeline_build.js*/
+/*@regras escolha_ia_candidatos.js*/
 /*@regras ferramentas_ia.js*/
 /*@regras lista_de_builds.js*/
 /*@regras gravacao_build_ia.js*/
@@ -923,6 +924,13 @@
     definirTempoLimiteIA: function (ms) { TEMPO_LIMITE_IA_MS = ms; },
     sampleErrorMessage: sampleErrorMessage,
     desligarRevisaoAutomatica: function (sim) { revisaoAutomaticaDesligada = !!sim; },
+    // Ticket 03 do pipeline: liga/desliga a IA que escolhe entre candidatos (desligada = o prompt de build do zero de antes).
+    definirEscolhaEntreCandidatos: function (sim) { escolhaEntreCandidatosLigada = !!sim; },
+    montarPromptEscolhaDeBuild: montarPromptEscolhaDeBuild,
+    montarPromptEscolhaDoTime: montarPromptEscolhaDoTime,
+    montarPromptBuildsDoTime: montarPromptBuildsDoTime,
+    gerarBuildsDoTimeComIA: gerarBuildsDoTimeComIA,
+    candidatosDeBuild: candidatosDeBuild,
     strategySetsHtml: strategySetsHtml,
     confrontoParaParty: confrontoParaParty,
     bossConfrontoHtml: bossConfrontoHtml,

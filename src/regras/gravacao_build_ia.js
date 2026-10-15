@@ -107,7 +107,9 @@
     ajustarBuildDaIa(sp, validated, opts, cap);
     var planoCheck = anexarPlanoDaIa(sp, validated, raw && raw.plano, cap,
       opts.modo === "ponte" && opts.alvo ? opts.alvo.moves : null);
-    validated.planoConsultado = true; // o prompt já pediu o plano - não pedir de novo
+    // O prompt já pediu o plano - não pedir de novo. Exceção: a IA que só ESCOLHE entre candidatos (opts.semPlano, ticket 03 do
+    // pipeline) não recebe o bloco de golpes futuros; a build sai marcada pedirPlano e, havendo golpe futuro, a revisão de plano de sempre cuida.
+    if (opts.semPlano) validated.pedirPlano = true; else validated.planoConsultado = true;
     // Chefão + variante do time (Padrão/Insane/Hell têm times diferentes - revisão de
     // 2026-09-30): clicar de novo no MESMO time e cap não regera à toa.
     if (opts.chefao) validated.feitaPara = { chefao: opts.chefao.chave || opts.chefao.boss.name, cap: cap || 0 };

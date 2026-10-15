@@ -7,6 +7,8 @@
 async function section16() {
   var T = window.__erTest;
   if (!T) { check("ponte de teste disponível", false); return; }
+  // Nova tentativa com o motivo é do prompt de build do ZERO (sem alvo/candidato, ou revisão/ponte); a escolha entre candidatos é a seção 29.
+  T.definirEscolhaEntreCandidatos(false);
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
