@@ -220,8 +220,8 @@ test("calibrada com um alvo conferido (Ninetales) e outro NÃO (Alakazam): só o
   dois.forEach((x) => assert.equal(x.rotulo, "estimada", "o Alakazam não foi conferido: " + x.golpes.join("/")));
 });
 
-test("garantido vale pela rolagem MÍNIMA: Pikachu x Ninetales derruba em 1 golpe na média (93% a 110%), mas não é garantido", () => {
-  const r = R.candidatosDeBuild(sp("Pikachu"), { alvo: ninetales });
+test("garantido vale pela rolagem MÍNIMA: Charmeleon x Ninetales derruba em 1 golpe na média (94% a 110%), mas não é garantido", () => {
+  const r = R.candidatosDeBuild(sp("Charmeleon"), { alvo: ninetales });
   const ambiguos = r.candidatos.filter((x) => x.hitKill === 1 && x.dano.min < 100 && x.dano.max >= 100);
   assert.ok(ambiguos.length > 0, r.candidatos.map((x) => x.hitKill + ":" + x.dano.min + "-" + x.dano.max).join(" ; "));
   ambiguos.forEach((x) => assert.equal(x.garantido, false, x.golpes.join("/") + " (" + x.dano.min + "% a " + x.dano.max + "%)"));

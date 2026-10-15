@@ -1,6 +1,6 @@
 # 03 — Perguntas para o Felipe (e para a Construção)
 
-Status: para-o-usuario. Nada aqui foi decidido nem mexido; é o que o ticket 03 achou no caminho.
+Status: pergunta 1 RESPONDIDA em 15/10/2026 (Felipe: aplicar; feito no ticket `docs/tickets/versao-nova/01-dupla-contagem.md`). As perguntas 2 e 3 seguem abertas. Nada aqui foi decidido nem mexido além disso; é o que o ticket 03 achou no caminho.
 
 ## 1. A sinergia por golpe da espécie soma por cima do texto em ~50 habilidades além das 15 do ticket (dupla contagem que já existia)
 

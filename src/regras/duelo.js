@@ -56,12 +56,11 @@
   var ACERTOS_PELO_TEXTO_DUELO = { "Twineedle": 2, "Cross Poison": 2, "Double Iron Bash": 2, "Rapid River": 2,
     "Chiller": 3, "Surging Strikes": 3, "Sparkling Barrage": 3,
     "Double Shock": 2 }; // hit_count: 2 na er-config (o efeito do dado é Burn Up; o texto "two strong shocks" não casava)
-  // Habilidades do ticket calibracao-03 cujo multiplicador de golpe passou a ser lido do texto (contato, flag air, tipo, categoria).
-  // Para elas a sinergia por golpe da espécie (species_ability_synergy.json) não soma de novo. As outras (Nocturnal, Levitate,
-  // Electrocytes, Overgrow...) já liam o texto E recebiam a sinergia: ver docs/tickets/calibracao-2026-10-15/03-perguntas.md.
-  var BONUS_DE_GOLPE_LIDO_DO_TEXTO_DUELO = { "Tough Claws": 1, "Big Pecks": 1, "Giant Wings": 1, "Steely Spirit": 1, "Airborne": 1, "Warmonger": 1,
-    "Deep Freeze": 1, "Devious Present": 1, "Imposing Wings": 1, "Lucky Wings": 1, "Apex Predator": 1, "Lead Claws": 1, "Ice Picks": 1,
-    "Bird of Prey": 1, "Reaper's Embarce": 1 };
+  // Dupla contagem (ticket versao-01, 15/10/2026): o código do jogo multiplica o bônus de golpe de uma habilidade UMA vez
+  // (abilities.cc, `onModifyDamage`). Se o texto da habilidade já virou bônus no motor (tipo, categoria, flag do golpe ou contato), a
+  // "sinergia por golpe" da espécie (species_ability_synergy.json -> bonusGolpes, a aproximação antiga) não soma de novo.
+  // Fica a sinergia só das habilidades cujo texto o motor NÃO lê (ex.: bônus de um golpe nomeado).
+  function bonusDeGolpeLidoDoTextoDuelo(ef) { return Object.keys(ef.bonusTipo).length > 0 || Object.keys(ef.bonusCategoria).length > 0 || Object.keys(ef.flagMult).length > 0 || ef.contatoMult !== 1; }
   function acertosDoGolpeDuelo(id) {
     var m = MOVES[id];
     if (!m) return 1;
@@ -1496,9 +1495,9 @@
     (ABILITY_SYNERGY[sname] || []).forEach(function (h) {
       var id = ids.filter(function (i) { return nomeHabDuelo(i) === h.name; })[0];
       if (id === undefined) return;
-      // Habilidade cujo bônus de golpe o texto agora ensina (ticket 03): a leitura do texto vale para todo golpe e a sinergia por golpe
-      // da espécie, que era a aproximação de antes, contaria o mesmo bônus duas vezes (Tough Claws x1,3 x 1,3 = 1,69).
-      if (BONUS_DE_GOLPE_LIDO_DO_TEXTO_DUELO[h.name]) return;
+      // Habilidade cujo bônus de golpe o texto já ensina: a leitura do texto vale para todo golpe e a sinergia por golpe da espécie
+      // contaria o mesmo bônus duas vezes (Tough Claws x1,3 x 1,3 = 1,69; Nocturnal x1,25 x 1,25 = 1,54).
+      if (bonusDeGolpeLidoDoTextoDuelo(efeitoDasHabilidadesNoDuelo([id], "solo#" + id, null))) return;
       var t = textoHabDuelo(id);
       var x = t.match(/(\d+(?:\.\d+)?)x/) || t.match(/(\d+)%/);
       var mult = x ? (/%$/.test(x[0]) ? 1 + parseInt(x[1], 10) / 100 : parseFloat(x[1])) : 1.3;

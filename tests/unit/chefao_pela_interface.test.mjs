@@ -11,7 +11,7 @@ import { R, EV, linha, meu, lutaInteira, lutaEmDupla, candidato, montar } from "
 const machamp = (o = {}) => linha("Machamp", { hab: "No Guard", golpes: ["Knock Off"], evs: EV.fisico, nat: "Adamant", ...o });
 const snorlax = (o = {}) => linha("Snorlax", { hab: "Thick Fat", golpes: ["Body Slam"], evs: [252, 252, 4, 0, 0, 0], nat: "Adamant", ...o });
 const garchomp = (o = {}) => linha("Garchomp", { hab: "Rough Skin", golpes: ["Outrage"], evs: EV.fisico, nat: "Jolly", ...o });
-const flamejante = (nome, o = {}) => linha(nome, { golpes: ["Flamethrower"], evs: EV.especial, nat: "Modest", ...o });
+const flamejante = (nome, o = {}) => linha(nome, { golpes: ["Fire Blast"], evs: EV.especial, nat: "Modest", ...o });
 const fracs = (s) => s.log.filter((l) => l.meu).map((l) => l.fracEu);
 const bossPorNome = (nome) => R.BOSSES.find((b) => b.name === nome);
 const nomesDe = (r) => r.escolhidos.map((e) => e.sp.n);

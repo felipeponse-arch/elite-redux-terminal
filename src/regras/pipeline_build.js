@@ -64,7 +64,7 @@
       saida.info = { chefao: null, indice: null, pokemon: [alvo.foe.nome], origem: "informado" };
       return saida;
     }
-    var boss = null, indice = null, origem = "informado";
+    var boss, indice = null, origem = "informado";
     if (alvo && alvo.chefao) {
       boss = typeof alvo.chefao === "string" ? BOSSES.filter(function (b) { return b.name === alvo.chefao; })[0] : alvo.chefao;
       indice = typeof alvo.indice === "number" ? alvo.indice : null;

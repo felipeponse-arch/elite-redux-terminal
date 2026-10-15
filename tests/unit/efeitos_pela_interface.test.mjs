@@ -42,7 +42,7 @@ test("Rock Head anula o recuo de Brave Bird: o mesmo golpe termina a luta com be
 });
 
 test("dreno: Giga Drain cura o que causa e vence o Snorlax; o Energy Ball (mais forte) não cura e perde", () => {
-  const luta = (golpe) => lutar(eu("Venusaur", { golpes: [golpe], evs: EV.especial, nat: "Modest" }), snorlax());
+  const luta = (golpe) => lutar(eu("Venusaur", { golpes: [golpe], evs: EV.especial, nat: "Modest", item: "Miracle Seed" }), snorlax());
   assert.equal(luta("Giga Drain").venceu, true);
   assert.equal(luta("Energy Ball").venceu, false);
 });

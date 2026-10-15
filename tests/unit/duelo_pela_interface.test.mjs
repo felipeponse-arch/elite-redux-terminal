@@ -171,7 +171,7 @@ test("itens de defesa: Assault Vest corta o dano especial; Leftovers e Rocky Hel
   const fisico = (item) => lutar(eu("Corviknight", { hab: "Chrome Coat", golpes: ["Iron Head"], evs: EV.tanqueF, item }), machamp());
   assert.ok(fisico("Leftovers").fracEu > fisico("").fracEu + 0.05, "Leftovers: sobra mais HP");
   assert.ok(fisico("Rocky Helmet").turnos < fisico("").turnos, "Rocky Helmet: o atacante por contato cai antes");
-  const fogo = (item) => lutar(eu("Corviknight", { hab: "Chrome Coat", golpes: ["Iron Head"], evs: EV.tanqueE, item }), chefao("Charizard", { hab: "Blaze", golpes: ["Flamethrower"], evs: EV.especial, nat: "Modest" }));
+  const fogo = (item) => lutar(eu("Corviknight", { hab: "Chrome Coat", golpes: ["Iron Head"], evs: EV.tanqueE, item }), chefao("Charizard", { hab: "Blaze", golpes: ["Fire Blast"], evs: EV.especial, nat: "Modest" }));
   assert.ok(fogo("Occa Berry").turnos > fogo("").turnos, "Occa Berry: aguenta um turno a mais");
 });
 
@@ -244,7 +244,7 @@ test("clima defensivo: areia dá +50% de Sp. Def ao Rock, granizo +50% de Def ao
   // Eerie Fog (15/10/2026, battle_util.c:7275-7277): o Atk de quem ataca um alvo Ghost sai x0,8; Psychic não entra.
   const mismagius = (clima) => lutar(eu("Mismagius", { hab: "Levitate", golpes: ["Shadow Ball"], evs: EV.tanqueE, nat: "Calm", clima }), alakazam(["Psychic"], { clima }));
   dentroDoEfeito(razao(mismagius("nevoa"), mismagius(null), sofrido), 0.8, "névoa no Mismagius (Ghost)");
-  const espeon = (clima) => lutar(eu("Espeon", { hab: "Soul-Heart", golpes: ["Psychic"], evs: EV.tanqueE, nat: "Calm", clima }), alakazam(["Psychic"], { clima }));
+  const espeon = (clima) => lutar(eu("Espeon", { hab: "Soul-Heart", golpes: ["Psychic"], evs: EV.tanqueE, nat: "Calm", clima }), alakazam(["Psychic"], { clima, item: "Life Orb" }));
   assert.equal(espeon(null).venceu, false, "pré-condição: sem névoa o Alakazam vence o Espeon");
   assert.equal(espeon("nevoa").venceu, false, "na névoa o Espeon (Psychic) segue perdendo: o corte de dano é só contra Ghost");
   // controle: o clima só mexe em quem tem o tipo (Corviknight não é Rock, Ice, Ghost nem Psychic)

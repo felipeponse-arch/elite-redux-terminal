@@ -3044,10 +3044,47 @@ export const MUTACOES = [
   },
   {
     id: "habilidades-sinergia-soma-de-novo",
-    descricao: "a sinergia por golpe da espécie volta a somar o bônus das habilidades que o texto agora ensina (Tough Claws x1,3 x 1,3 = 1,69)",
+    descricao: "a sinergia por golpe da espécie volta a somar o bônus das habilidades que o texto já ensina (Tough Claws x1,3 x 1,3 = 1,69; Nocturnal x1,25 x 1,25 = 1,54)",
     arquivo: "duelo.js",
-    de: "if (BONUS_DE_GOLPE_LIDO_DO_TEXTO_DUELO[h.name]) return;",
+    de: "if (bonusDeGolpeLidoDoTextoDuelo(efeitoDasHabilidadesNoDuelo([id], \"solo#\" + id, null))) return;",
     para: "",
+  },
+
+  // ---- ticket versao-nova/01 (15/10/2026): correção geral da dupla contagem da sinergia ----
+  {
+    id: "dupla-contagem-ignora-tipo",
+    descricao: "o bônus de tipo lido do texto (Nocturnal, Overgrow, Dragon's Maw...) deixa de contar como 'lido': a sinergia soma de novo",
+    arquivo: "duelo.js",
+    de: "return Object.keys(ef.bonusTipo).length > 0 || Object.keys(ef.bonusCategoria)",
+    para: "return Object.keys(ef.bonusCategoria)",
+  },
+  {
+    id: "dupla-contagem-ignora-categoria",
+    descricao: "o bônus de categoria lido do texto (Mega Launcher, Striker...) deixa de contar como 'lido': a sinergia soma de novo",
+    arquivo: "duelo.js",
+    de: "|| Object.keys(ef.bonusCategoria).length > 0 || Object.keys(ef.flagMult)",
+    para: "|| Object.keys(ef.flagMult)",
+  },
+  {
+    id: "dupla-contagem-ignora-flag",
+    descricao: "o bônus por flag do golpe lido do texto (Airborne, Iron Fist...) deixa de contar como 'lido': a sinergia soma de novo",
+    arquivo: "duelo.js",
+    de: "|| Object.keys(ef.flagMult).length > 0 || ef.contatoMult !== 1; }",
+    para: "|| ef.contatoMult !== 1; }",
+  },
+  {
+    id: "dupla-contagem-ignora-contato",
+    descricao: "o bônus de contato lido do texto (Tough Claws, Big Pecks) deixa de contar como 'lido': a sinergia soma de novo",
+    arquivo: "duelo.js",
+    de: "|| Object.keys(ef.flagMult).length > 0 || ef.contatoMult !== 1; }",
+    para: "|| Object.keys(ef.flagMult).length > 0; }",
+  },
+  {
+    id: "dupla-contagem-corta-tudo",
+    descricao: "a sinergia por golpe sai de TODA habilidade (inclusive a que o texto não ensina)",
+    arquivo: "duelo.js",
+    de: "function bonusDeGolpeLidoDoTextoDuelo(ef) { return Object.keys(ef.bonusTipo)",
+    para: "function bonusDeGolpeLidoDoTextoDuelo(ef) { return true || Object.keys(ef.bonusTipo)",
   },
 
   // ---- ticket calibracao-04 (15/10/2026): Flash Fire e Dry Skin absorvem o golpe ----
