@@ -37,11 +37,24 @@ test("dado gravado: cada habilidade deslocada da 2.65.4 tem o texto PT dela e n�
   assert.match(pt[id("Spectralize")], /Normal se tornam do tipo Ghost/);
   assert.match(pt[id("Thundercall")], /Smite/);
   assert.match(pt[id("Discipline")], /fúria/);
-  assert.equal(pt[id("Hardened Sheath")], undefined, "efeito mudou na 2.65.4 (ao acertar, não ao usar): cai no inglês");
+  assert.match(pt[id("Hardened Sheath")], /acertam/, "efeito mudou na 2.65.4 (ao acertar, não ao usar): vale a tradução nova por nome");
 });
 
 test("dado gravado: toda tradução aponta para um id que existe no dex e nenhuma habilidade de efeito mudado tem texto antigo", () => {
   const dex = ler("data/dex_compact.json"), pt = ler("data/ability_translations_pt.json");
   for (const k of Object.keys(pt)) assert.ok(dex.abilities[Number(k)], `tradução do id ${k} não tem habilidade`);
-  dex.abilities.forEach((a, i) => { if (EFEITO_MUDOU.has(a[0]) && !/\+/.test(a[1])) assert.equal(pt[i], undefined, `${a[0]} deveria estar sem tradução`); });
+  // as de efeito mudado que a tradução nova por nome cobre (nuvem, 15/10) têm o texto novo; as demais ficam sem texto (cai no inglês)
+  const porNome = { ...ler("data/traducoes_v07_por_nome.json"), ...ler("data/traducoes_novas_por_nome.json") };
+  dex.abilities.forEach((a, i) => {
+    if (!EFEITO_MUDOU.has(a[0]) || /\+/.test(a[1])) return;
+    if (porNome[a[0]]) assert.equal(pt[i], porNome[a[0]], `${a[0]} deveria ter a tradução nova por nome`);
+    else assert.equal(pt[i], undefined, `${a[0]} deveria estar sem tradução`);
+  });
+});
+
+test("realinhar com porNome: a tradução por nome vale para o id certo e tem precedência", () => {
+  const dex = { abilities: [["-", ""], ["A", "x"], ["B", "y"]] };
+  const r = realinhar(dex, { 1: "velho A", 2: "velho B" }, dex, {}, { B: "novo B" });
+  assert.equal(r.pt[1], "velho A");
+  assert.equal(r.pt[2], "novo B");
 });

@@ -47,7 +47,9 @@
   // reais). Nunca extraído/exibido até agora.
   var SENC_HOW = DATA.sencHow || [];
   var MAPS = DATA.maps || [];
-  var SPECIES = DATA.species.filter(function (s) { return s; });
+  // `provisoria` (ticket versao-nova/10): espécie que a config ainda não descreve por inteiro (Mega Bruxish e Mega Jellicent, sem Speed) fica no dado mas
+  // FORA de SPECIES: não aparece na Dex, nas builds, no pipeline, no duelo nem no rank até a config ter números reais (scripts/extracao/provisorias.mjs).
+  var SPECIES = DATA.species.filter(function (s) { return s && !s.provisoria; });
 
   // ---------------- species lookup & type/ability calculation ----------------
   // Banners de navegação, 2026-09-13 (Fase 1 do refactor de estrutura,

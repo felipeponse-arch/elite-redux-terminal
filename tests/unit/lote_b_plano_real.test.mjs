@@ -167,3 +167,30 @@ for (const [titulo, nomes, chefe] of [
     assert.ok(!res.estrategia, "estratégia declarada sem o armador em campo: " + (res.estrategia && res.estrategia.armador));
   });
 }
+
+// Sexto ao oitavo casos fixos (15/10/2026, junção com o dado do v10): os casos fixos de Flannery 1 e Winona 1 deixaram de provar a regra
+// (a sabotagem 'loteB-estrategia-sem-armador' voltou a sobreviver). Achados varrendo os chefões do marco 3 com os mesmos elencos
+// (granizo e sol) com a sabotagem ligada: sem a regra, o armador (Pelipper, Abomasnow, Ninetales) viraria "estratégia" sem nunca entrar na luta simulada.
+// Asserção da regra em si: se declara estratégia, o armador tem de ter entrado na luta. Se o motor mudar e estes casos deixarem de provar,
+// ache outros com 'node tests/run_sabotage.mjs loteB-estrategia'.
+const ELENCO_GRANIZO = ["Abomasnow", "Ninetales", "Glaceon", "Weavile", "Clefable", "Azumarill", "Granbull", "Wigglytuff", "Pelipper", "Politoed"];
+const ELENCO_SOL = ["Ninetales", "Torkoal", "Venusaur", "Charizard", "Clefable", "Azumarill", "Granbull", "Wigglytuff", "Pelipper", "Politoed"];
+for (const [titulo, nomes, chefe] of [
+  ["granizo contra a Wallace 2", ELENCO_GRANIZO, "Wallace 2"],
+  ["granizo contra a Wattson 5", ELENCO_GRANIZO, "Wattson 5"],
+  ["sol contra a Tabitha (Mt Chimney)", ELENCO_SOL, "Tabitha Mt Chimney"],
+]) {
+  test("estratégia de clima: " + titulo + " (marco 3) só declara armador que entra na luta", async () => {
+    const { carregarRegras: carregar } = await import("./carregar_regras.mjs");
+    const R3 = carregar({ milestone: 3, difficulty: "ace" });
+    const cands = nomes.map((n) => R3.SPECIES.find((s) => s && s.n === n)).filter(Boolean).map((sp) => ({ sp, owned: sp.x }));
+    const boss = R3.BOSSES.find((b) => b.name === chefe);
+    assert.ok(boss, "fixture: chefão " + chefe + " no dado");
+    const res = R3.montarTimeContraChefao(cands, boss.party, 50, {});
+    assert.equal(res.escolhidos.length, 6);
+    if (res.estrategia) {
+      const n = res.estrategia.armador;
+      assert.ok(res.simulacao.log.some((l) => l.meu === n || l.entra === n), "armador " + n + " declarado mas não entrou na luta");
+    }
+  });
+}

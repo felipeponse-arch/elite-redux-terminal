@@ -97,13 +97,11 @@
     // Lileep/Cradily, Tangrowth, Dhelmise) já são Grass, então a condição é
     // sempre satisfeita na prática; sem gate condicional extra no código.
     342: { resist: { Fire: 0.5 } },                         // Seaweed
-    442: { resist: { Fairy: 0.5 } },                        // Fae Hunter
-    445: { resist: { Grass: 0.5 } },                        // Lumberjack
-    526: { resist: { Dark: 0.5 } },                         // Monster Hunter
+    // Lumberjack (445), Fae Hunter (442), Monster Hunter (526) e Firefighter (804) saíram daqui no ticket versao-nova/10: abilities.cc:5752 vale pelo TIPO DE QUEM ATACA (e x1,5 contra alvo Grass), não pelo tipo do golpe;
+    // o motor lê o texto (resistDeAtacante e vsTipo em duelo.js), como Dragonslayer e Insect Eater.
     547: { resist: { Ghost: 0.5 } },                        // Purifying Salt
     754: { resist: { Fire: 2 } },                           // Puffy (fraqueza a Fire)
     764: { resist: { Fire: 0.5 } },                         // Deep Freeze
-    804: { resist: { Fire: 0.5 } },                         // Firefighter
     889: { resist: { Fire: 0.25, Ice: 0.25 } },             // Thick Blubber
     855: { resist: { Poison: 0.5 } },                       // Hyper Cleanse (abilities.cc:10317-10323: Poison x0,5; o resto do texto é imunidade a status)
     904: { resist: { Water: 0.5, Ground: 0.5 } },           // Strong Foundation
@@ -145,7 +143,9 @@
     865: { immune: ["Fire"] },                             // Heat Sink
     868: { immune: ["Electric"] },                         // Lightning Aspect
     869: { immune: ["Fire"] },                             // Fire Aspect
-    872: { immune: ["Rock"] }                              // Molten Core (Furnace + absorve Rock)
+    872: { immune: ["Rock"] },                             // Molten Core (Furnace + absorve Rock)
+    // Packed Ice (1057, ticket versao-nova/07; abilities.cc:12781-12790, onAbsorb: golpe Ice vira +2 de Defesa em vez de dano). O +2 não está no motor.
+    1057: { immune: ["Ice"] }
   };
 
   // Which of a species' abilities are safe to treat as ALWAYS active without

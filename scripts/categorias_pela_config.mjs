@@ -81,6 +81,8 @@ if ((process.argv[1] || "").endsWith("categorias_pela_config.mjs")) {
   const dex = JSON.parse(readFileSync(join(RAIZ, "data", "dex_compact.json"), "utf8"));
   const config = lerGolpesDaConfig(readFileSync(arq, "utf8"));
   const porNome = new Map(config.filter((g) => g.nome).map((g) => [g.nome, g]));
+  // O par é por nome: dois golpes com o mesmo nome na config trocariam as flags em silêncio.
+  if (porNome.size !== config.filter((g) => g.nome).length) { console.error("nome de golpe repetido na config: o par por nome deixou de valer"); process.exit(1); }
   const golpes = {}, recuos = {}, acertos = {}, semPar = [];
   for (const m of dex.moves) {
     if (!m) continue;

@@ -55,7 +55,8 @@ test("sync: mudar só a ordenação ou o filtro de tipo da Dex não é 'conteúd
 });
 
 // ---------------- travas que pegam o problema antes do jogador ----------------
-test("trava: dado derivado (dex_compact/bosses) bate com o bruto 2.65beta", () => {
+const CONFIG_NOVA = JSON.parse(readFileSync(join(raiz, "data", "config_nova.json"), "utf8"));
+test("trava: dado derivado (dex_compact/bosses) bate com o bruto 2.65.4 + o delta da config nova", () => {
   const bruto = JSON.parse(readFileSync(join(raiz, "data", "gameData_2654.json"), "utf8"));
   const dex = R.DATA;
   bruto.moves.forEach((m, i) => {
@@ -69,7 +70,9 @@ test("trava: dado derivado (dex_compact/bosses) bate com o bruto 2.65beta", () =
     if (!s || !s.name || s.name === "??????????") return;
     const d = dex.species[i];
     assert.equal(d.n, s.name);
-    assert.equal(d.b.join(","), s.stats.base.join(","), "stats de " + s.name);
+    // o delta da er-config d1a9a4c (data/config_nova.json) vale sobre o dado bruto: Morpekyll Hangry 97/104/78/62/74/121
+    const remendo = CONFIG_NOVA.especies[d.sname] && CONFIG_NOVA.especies[d.sname].b;
+    assert.equal(d.b.join(","), (remendo || s.stats.base).join(","), "stats de " + s.name);
     n++;
   });
   assert.ok(n > 1800);

@@ -1,5 +1,5 @@
 {
- "nota": "Builds curadas que o dado novo (NextDex 2.65.4, ticket versao-nova/05) deixou com problema: versao validada antiga (244) ou habilidade/golpe que a especie nao tem mais (14). NAO foram mexidas: o ticket dados-2654/08 revisa e esvazia esta lista (a Construcao revisa antes). Qualquer problema fora da lista continua derrubando a validacao.",
+ "nota": "Builds curadas que o dado novo (NextDex 2.65.4, ticket versao-nova/05) deixou com problema: versao validada antiga (244) ou habilidade/golpe que a especie nao tem mais (14, +1 do delta da er-config d1a9a4c: Lanturn/Drizzle, a especie ganhou Photon Burst - ticket versao-nova/07). NAO foram mexidas: o ticket dados-2654/08 revisa e esvazia esta lista (a Construcao revisa antes). Qualquer problema fora da lista continua derrubando a validacao.",
  "ate": "dados-2654/08",
  "problemas": [
   "SPECIES_AERODACTYL_MEGA : validada contra 2.65beta, mas o dado atual e 2.65.4 - revisar a build antes de atualizar o campo",
@@ -259,6 +259,7 @@
   "SPECIES_LUNATONE : validada contra 2.65beta, mas o dado atual e 2.65.4 - revisar a build antes de atualizar o campo",
   "SPECIES_SLOWBRO_MEGA : validada contra 2.65beta, mas o dado atual e 2.65.4 - revisar a build antes de atualizar o campo",
   "SPECIES_SWALOT_MEGA : validada contra 2.65beta, mas o dado atual e 2.65.4 - revisar a build antes de atualizar o campo",
-  "SPECIES_GARCHOMP_MEGA_Z : validada contra 2.65beta, mas o dado atual e 2.65.4 - revisar a build antes de atualizar o campo"
+  "SPECIES_GARCHOMP_MEGA_Z : validada contra 2.65beta, mas o dado atual e 2.65.4 - revisar a build antes de atualizar o campo",
+  "SPECIES_LANTURN : habilidade 'Drizzle' nao pertence a esta especie"
  ]
 }

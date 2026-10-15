@@ -9,6 +9,7 @@ import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extrairDex, ordenarUnicoComoPowerShell } from "../../scripts/extracao/transform.mjs";
+import { aplicarPatch } from "../../scripts/extracao/config_nova.mjs";
 import { expandirCompostas } from "../../scripts/extracao/expandir_compostas.mjs";
 import { extrairChefoes, extrairBuildsDeReferencia, formatarEvs } from "../../scripts/extracao/chefoes.mjs";
 import { lerPedrasDoAdoptionCenter } from "../../scripts/extracao/pedras_adoption_center.mjs";
@@ -18,11 +19,13 @@ const ler = (a) => readFileSync(join(RAIZ, a), "utf8");
 const bruto = JSON.parse(ler("data/gameData_2654.json"));
 const dexGravado = JSON.parse(ler("data/dex_compact.json"));
 
-test("dex_compact.json gravado == extração do dado bruto (2.65.4), byte a byte", () => {
+test("dex_compact.json gravado == extração do dado bruto (2.65.4) + o delta da config d1a9a4c (data/config_nova.json), byte a byte", () => {
   const dex = extrairDex(bruto, { versao: dexGravado.meta.version, gerado: dexGravado.meta.generated, traducoesDeGolpe: JSON.parse(ler("data/move_translations_pt.json")) });
+  aplicarPatch(dex, JSON.parse(ler("data/config_nova.json")));
   assert.equal(JSON.stringify(dex), ler("data/dex_compact.json"));
   assert.equal(dexGravado.meta.version, "2.65.4");
-  assert.equal(dexGravado.species.length, 1923, "2.65.4: 1923 entradas de espécie");
+  assert.equal(dexGravado.species.length, 1925, "2.65.4: 1923 entradas de espécie + as Mega Bruxish e Jellicent da config");
+  assert.equal(dexGravado.abilities.length, 1072, "1063 da NextDex + 9 da config nova");
 });
 
 test("ability_translations_pt.json gravado == compostas expandidas de novo (idempotente)", () => {

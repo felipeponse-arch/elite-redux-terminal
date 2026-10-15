@@ -1,0 +1,17 @@
+{
+ "Power Fists": "Golpes de soco visam o SpDef e ganham 1.3x de poder.",
+ "Sweeping Edge": "Golpes cortantes sempre acertam e atingem os dois oponentes.",
+ "Dual Wield": "Golpes afetados por Mega Launcher e Sharpness acertam duas vezes, causando 70% de dano cada.",
+ "Mystic Blades": "Golpes afetados por Sharpness se tornam especiais e causam 30% mais dano.",
+ "Blade's Essence": "Sharpness + Mystic Blades\n- Sharpness: Aumenta o poder de golpes cortantes em 1.3x.\n- Mystic Blades: Golpes afetados por Sharpness se tornam especiais e causam 30% mais dano.",
+ "Blademaster": "Sweeping Edge + Sharpness\n- Sweeping Edge: Golpes cortantes sempre acertam e atingem os dois oponentes.\n- Sharpness: Aumenta o poder de golpes cortantes em 1.3x.",
+ "Molten Blades": "Sharpness + golpes cortantes têm 20% de chance de queimar.",
+ "Power Edge": "Golpes cortantes visam o SpDef e ganham 1.3x de poder.",
+ "Best Offense": "Golpes cortantes se tornam especiais e somam 20% da Defesa física ao ataque.",
+ "Magus Blades": "Dual Wield + Best Offense\n- Dual Wield: Golpes afetados por Mega Launcher e Sharpness acertam duas vezes, causando 70% de dano cada.\n- Best Offense: Mystic Blades + soma 20% do SpDef ao usar golpes.",
+ "Edgelord": "O primeiro golpe cortante a cada entrada em campo ganha +1 de prioridade. Reseta ao ser nocauteado.",
+ "Lightsaber": "Adiciona o tipo Fire. Golpes cortantes têm 25% de chance de queimar ou paralisar.",
+ "Chainsaw": "Golpes cortantes reduzem a Defesa em -1.",
+ "Chestnut Axe": "Sharpness + golpes Grass passam a ser potencializados por Sharpness.",
+ "Sinister Claws": "Mystic Blades + golpes cortantes reduzem o SpDef."
+}

@@ -87,7 +87,7 @@ test("flag -> categoria: as 8 que reforçam habilidades mais arremesso, luz, lun
 });
 
 // ---------- o dado ----------
-test("move_categorias.json: o campo `c` de TODOS os 1032 golpes é exatamente o que as flags da config mandam", () => {
+test("move_categorias.json: o campo `c` de TODOS os 1041 golpes é exatamente o que as flags da config mandam", () => {
   assert.equal(flagsDaConfig.meta.golpesDoApp, dex.moves.filter(Boolean).length, "golpes_flags_config.json foi gerado para este dex_compact");
   let conferidos = 0;
   dex.moves.forEach((m, id) => {
@@ -96,7 +96,7 @@ test("move_categorias.json: o campo `c` de TODOS os 1032 golpes é exatamente o 
     assert.deepEqual((categorias[id] && categorias[id].c) || [], esperado, m[0]);
     conferidos++;
   });
-  assert.equal(conferidos, 1032);
+  assert.equal(conferidos, 1041);
 });
 
 test("os golpes que o relatório de calibração achou sem categoria (99 pares golpe+categoria) agora têm a categoria do jogo", () => {
@@ -122,7 +122,7 @@ const CASOS = [
   ["Archie Slateport", "Sharpedo", "Crunch", "Bite", "Strong Jaw"],
   ["Brawly 4", "Machamp", "Dynamic Punch", "Mach Punch", "Iron Fist"],
   ["Calvin E4", "Tinkaton", "Gigaton Hammer", "Berry Smash", "Super Slammer"],
-  ["Archie", "Garchomp Redux", "Metal Claw", "Slash", "Keen Edge"],
+  ["Archie", "Garchomp Redux", "Metal Claw", "Slash", "Sharpness"],
   ["Monochamp Ghost", "Decidueye", "Spirit Shackle", "Archer Shot", "Archer"]
 ];
 for (const [chefao, mon, novo, ref, habilidade] of CASOS) {
@@ -144,7 +144,7 @@ test("Brick Break e Stone Edge: soco e corte pelas flags (a Machamp de Brawly 4 
   const machamp = unidadeDoChefao("Brawly 4", "Machamp", "Dynamic Punch");
   perto(hab(machamp, "Brick Break"), hab(machamp, "Mach Punch"), "Brick Break x Mach Punch");
   const terrakion = unidadeDoChefao("Roxanne 3", "Terrakion", "Stone Edge");
-  assert.ok(terrakion.ids.includes(R.ABILITY_ID_BY_NAME["Keen Edge"]), "o Terrakion de Roxanne 3 tem Keen Edge");
+  assert.ok(terrakion.ids.includes(R.ABILITY_ID_BY_NAME["Sharpness"]), "o Terrakion de Roxanne 3 tem Sharpness (ex-Keen Edge)");
   perto(hab(terrakion, "Stone Edge"), hab(terrakion, "Slash"), "Stone Edge x Slash");
 });
 

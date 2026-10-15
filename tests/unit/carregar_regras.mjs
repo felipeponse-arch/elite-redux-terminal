@@ -9,7 +9,17 @@ import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const lerJson = (nome) => JSON.parse(readFileSync(join(root, "data", nome), "utf8"));
+// Sabotagem controlada também nos JSON de data/ (15/10/2026): MUTACAO_ARQUIVO igual ao nome do arquivo troca o trecho só nesta carga.
+// Sem isso, sabotagens de dado (dex_compact.json, move_roles.json, mega_forms.json...) sobreviviam em testes que só usam carregarRegras.
+const lerJson = (nome) => {
+  let texto = readFileSync(join(root, "data", nome), "utf8");
+  if (process.env.MUTACAO_ARQUIVO === nome) {
+    const normal = texto.replace(/\r\n/g, "\n");
+    if (normal.split(process.env.MUTACAO_DE).length !== 2) throw new Error("trecho da sabotagem não encontrado (ou repetido) em " + nome + ": " + process.env.MUTACAO_DE);
+    texto = normal.replace(process.env.MUTACAO_DE, () => process.env.MUTACAO_PARA || "");
+  }
+  return JSON.parse(texto);
+};
 
 // Mesma reindexação por sname que o artifact_template.html faz ao carregar (CONDITION_MOVE_SYNERGY):
 // as ferramentas da IA (src/regras/ferramentas_ia.js) leem esse índice.

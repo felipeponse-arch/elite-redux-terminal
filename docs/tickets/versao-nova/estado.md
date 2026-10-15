@@ -1,6 +1,9 @@
-# Estado da fila v01–v05 e seguintes (15/10/2026, atualizado ~12:30 UTC)
+# Estado da fila v01–v09 (15/10/2026, atualizado ~13:15 UTC)
 
-Novo (12:30): v05 fechado com a troca do dado; segue a fila v06 (habilidades mudadas), v07 (habilidades novas + delta do upcoming), v08 (sono e paralisia), v09 (golpes). Parar antes das builds (dados-2654/08, 09) e do fechamento (10).
+Novo (15:10): v10 (`versao-10-config`: aprendizado de todas as espécies, Lumberjack e família, Megas Bruxish/Jellicent PROVISÓRIAS e escondidas, com aviso no alarme semanal) pronto; fila parada (builds 08/09 e fechamento 10 são da Construção).
+Antes (14:10): v08 (`versao-08-sono-paralisia`) e v09 (`versao-09-golpes`) prontos. A fila v06–v09 acabou; parei antes das builds (dados-2654/08, 09) e do fechamento (10).
+Antes (13:00): v06 (`versao-06-habilidades-mudadas`) e v07 (`versao-07-habilidades-novas`) prontos e enviados; segue v08 (sono e paralisia) e v09 (golpes). `NOME_DA_CATEGORIA` ganhou luz/arremesso/broca/lunar no v07.
+Antes (12:30): v05 fechado com a troca do dado; segue a fila v06 (habilidades mudadas), v07 (habilidades novas + delta do upcoming), v08 (sono e paralisia), v09 (golpes). Parar antes das builds (dados-2654/08, 09) e do fechamento (10).
 Achados do /code-review (calibração, ainda não tratados; não bloqueiam): `drill` mapeado para "chifre" no leitor de texto mas gravado como "broca" pela flag; `arremesso: /throw/i` sem âncora; `NOME_DA_CATEGORIA` sem arremesso/broca/luz/lunar; `categorias_pela_config.mjs` junta golpe por nome com `Map` (nome repetido sobrescreve).
 
 Branches no GitHub, todas empilhadas a partir do master `cb8d1ce`, sem PR, sem master:
@@ -22,8 +25,8 @@ Nada de rank recalculado. Nada publicado.
 - Recomendação: rodar a sabotagem completa no master depois de juntar (a regra da casa já manda).
 
 ## O que falta
-1. **Troca do dado (v05, P3)**: portar a extração para Node ou rodar os `.ps1` no Windows; depois: NextDex 2.65.4 em `data/`, índices de espécie regerados (808 mudam), Eviolite (item 0), Arbok Mega fora, renomeações (Keen Edge -> Sharpness, Absorbant -> Absorbent, Menacing Situation -> Phobia, Apple Pie -> Apple Cake, Frosty Prescence -> Frosty Presence, Wings of Pestilence -> Malediction, Abominable Monster/Icicle Fist), "onde achar itens", rótulo do app "Dado: ...", alarme semanal. Antes: `node scripts/medir_texto_novo.mjs <gameData novo>` deve sair com código 0 (hoje só Best Offense some).
-2. `dados-2654/02` a `07` (habilidades com efeito mudado/prováveis, 29 novas em 3 lotes, sono e paralisia Champions): não começados.
+1. ~~Troca do dado (v05, P3)~~ **feita no v05** (NextDex 2.65.4; Arbok Mega fora; Eviolite). Os remendos do upcoming (Keen Edge -> Sharpness, Kirlia Redux, Morpekyll Hangry, as 9 habilidades) entraram no v07 pelo patch `data/config_nova.json`. As outras 5 renomeações (Absorbent, Phobia, Apple Cake, Frosty Presence, Malediction) já vieram com o dado do v05.
+2. `dados-2654/02` a `06` feitos nos v06 e v07; `07` (sono e paralisia Champions) foi o v08.
 3. **Delta do upcoming** (`d1a9a4c` sobre `7285071`): 9 habilidades e 9 golpes novos, Keen Edge -> Sharpness, 15 habilidades novas sem efeito lido, partes novas de compostas (Serpent Bind, Cotton Down, Grim Neigh...), chefões novos do TrainerList, Best Offense (P2), King of the Jungle.
 4. Builds `dados-2654/08` (revisar afetadas) e `09` (17 espécies novas).
 5. M10 (ordem do cálculo, multiplicador de habilidade depois do +2): não feito.

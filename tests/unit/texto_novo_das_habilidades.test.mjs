@@ -25,9 +25,9 @@ function efeitoComTexto(nome, texto, textoAtual) {
 }
 const base = JSON.stringify(R.efeitoDasHabilidadesNoDuelo([], "V04_BASE", null), semClimas);
 
-test("a tabela cobre as 71 habilidades cujo texto novo (NextDex 2.65.4) perdia ou trocava o efeito, cada texto novo uma vez", () => {
-  assert.equal(tabela.length, 71);
-  assert.equal(new Set(tabela.map((t) => t[1])).size, 71);
+test("a tabela cobre as 69 habilidades cujo texto novo (NextDex 2.65.4) perdia ou trocava o efeito, cada texto novo uma vez", () => {
+  assert.equal(tabela.length, 69);
+  assert.equal(new Set(tabela.map((t) => t[1])).size, 69);
   for (const [nome, novo, lido] of tabela) { assert.notEqual(R.ABILITY_ID_BY_NAME[nome], undefined, nome); assert.notEqual(novo, lido, nome); }
 });
 
@@ -35,7 +35,7 @@ test("o dado do app (NextDex 2.65.4, ticket versao-nova/05) já traz o texto nov
   for (const [nome, novo] of tabela) assert.ok(R.ABILITIES.some((a) => a && a[0] === nome && a[1] === novo), nome + ": o dado do app tem de ser o 2.65.4");
 });
 
-test("com o texto novo, cada uma das 71 mantém o efeito da 2.65beta (nenhuma perde efeito)", () => {
+test("com o texto novo, cada uma das 69 mantém o efeito da 2.65beta (nenhuma perde efeito)", () => {
   for (const [nome, novo, lido] of tabela) {
     const antes = efeitoComTexto(nome, lido, novo);
     const depois = efeitoComTexto(nome, novo, novo);
