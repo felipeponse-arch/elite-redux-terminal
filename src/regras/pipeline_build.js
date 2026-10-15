@@ -508,14 +508,32 @@
     opts = opts || {};
     var alvo = pipelineResolverAlvo(alvoPedido);
     if (!alvo.foes.length) return [];
-    var lista = [];
-    if (opts.especies && opts.especies.length) lista = opts.especies.map(pipelineEspecie).filter(Boolean);
-    else {
-      state.team.concat(state.box).filter(function (x, i, a) { return a.indexOf(x) === i; }).forEach(function (x) {
-        var dona = getSpeciesByX(x);
-        if (!dona) return;
-        battleUnitsOf(dona).forEach(function (u) { if (serveProMono(u.main)) lista.push(u.main); });
+    var lista = [], origem = {};
+    if (opts.especies && opts.especies.length) {
+      lista = opts.especies.map(pipelineEspecie).filter(Boolean);
+      lista.forEach(function (s) { if (!origem[s.sname]) origem[s.sname] = "informada"; });
+    } else {
+      var vistosX = {};
+      [["time", state.team], ["caixa", state.box]].forEach(function (grupo) {
+        grupo[1].forEach(function (x) {
+          if (vistosX[x]) return;
+          vistosX[x] = true;
+          var dona = getSpeciesByX(x);
+          if (!dona) return;
+          battleUnitsOf(dona).forEach(function (u) { if (serveProMono(u.main) && !origem[u.main.sname]) { origem[u.main.sname] = grupo[0]; lista.push(u.main); } });
+        });
       });
+      // Os demais (ticket 04): as N melhores do rank que já dá para pegar na Etapa, fora o time e a caixa. Simular o dex
+      // inteiro custa minutos, então a lista é cortada pelo rank antes de simular.
+      if (typeof opts.demais === "number" && opts.demais > 0) {
+        var etapa = state.settings.milestone;
+        SPECIES.filter(function (s) {
+          var rk = s && !origem[s.sname] ? rankDe(s.sname) : null;
+          return rk && typeof rk.etapa === "number" && rk.etapa <= etapa && serveProMono(s);
+        }).sort(function (a, b) {
+          return rankDe(b.sname).score - rankDe(a.sname).score || (a.sname < b.sname ? -1 : a.sname > b.sname ? 1 : 0);
+        }).slice(0, opts.demais).forEach(function (s) { origem[s.sname] = "outros"; lista.push(s); });
+      }
     }
     var vistos = {};
     lista = lista.filter(function (s) { if (vistos[s.sname]) return false; vistos[s.sname] = true; return true; });
@@ -523,15 +541,23 @@
     lista.forEach(function (s) {
       var r = pipelineCandidatos(s, alvo);
       var melhor = r.candidatos.filter(function (c) { return c.hitKill > 0; })[0];
-      if (melhor) achados.push({ sp: s, candidato: melhor });
+      if (melhor) achados.push({ sp: s, candidato: melhor, origem: origem[s.sname] });
     });
     achados.sort(function (a, b) {
-      // Os 3 níveis do usuário: 1 golpe e bate primeiro > 2 golpes e bate primeiro > o resto; dentro do nível, mais dano antes.
-      return pipelineTierDoCandidato(b.candidato) - pipelineTierDoCandidato(a.candidato) || a.candidato.hitKill - b.candidato.hitKill ||
+      // Time e caixa antes dos demais; depois os 3 níveis do usuário: 1 golpe e bate primeiro > 2 golpes e bate primeiro > o resto;
+      // dentro do nível, mais dano antes.
+      return (a.origem === "outros" ? 1 : 0) - (b.origem === "outros" ? 1 : 0) ||
+        pipelineTierDoCandidato(b.candidato) - pipelineTierDoCandidato(a.candidato) || a.candidato.hitKill - b.candidato.hitKill ||
         b.candidato.dano.max - a.candidato.dano.max || (a.sp.sname < b.sp.sname ? -1 : a.sp.sname > b.sp.sname ? 1 : 0);
     });
     var max = typeof opts.max === "number" && opts.max > 0 ? opts.max : 10;
-    return achados.slice(0, max);
+    var maxDemais = typeof opts.maxDemais === "number" && opts.maxDemais > 0 ? opts.maxDemais : max;
+    var dosOutros = 0;
+    return achados.filter(function (a) {
+      if (a.origem !== "outros") return true;
+      dosOutros++;
+      return dosOutros <= maxDemais;
+    }).filter(function (a, i, todos) { return a.origem === "outros" || todos.slice(0, i + 1).filter(function (b) { return b.origem !== "outros"; }).length <= max; });
   }
 
   // ---- 3. fechar a build (a IA escolhe EVs, item e natureza) ----

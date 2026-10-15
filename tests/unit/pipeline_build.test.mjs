@@ -580,6 +580,38 @@ test("especiesQueResolvem: opts.especies substitui a lista e opts.max corta", ()
   deepEqual(R.especiesQueResolvem(ninetales, { especies: [] }).length, 0);
 });
 
+test("especiesQueResolvem: opts.demais soma as melhores do rank da Etapa, depois do time e da caixa, com a origem de cada uma", () => {
+  const Rx = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+  const x = (s) => Rx.getSpeciesBySname(s).x;
+  const alvo = { chefao: Rx.BOSSES.find((b) => b.name === "Courtney Meteor Falls"), indice: 0 };
+  Rx.state.team = [x("SPECIES_LEDIAN")];
+  Rx.state.box = [x("SPECIES_STEELIX")];
+  const sem = Rx.especiesQueResolvem(alvo, {});
+  assert.ok(sem.length >= 1);
+  sem.forEach((e) => assert.ok(e.origem === "time" || e.origem === "caixa", "sem demais só time e caixa: " + e.origem));
+  const com = Rx.especiesQueResolvem(alvo, { demais: 12, max: 5, maxDemais: 3 });
+  const origens = com.map((e) => e.origem);
+  assert.ok(origens.indexOf("outros") !== -1, "ao menos um dos demais derruba: " + origens.join(","));
+  assert.ok(origens.filter((o) => o === "outros").length <= 3, "maxDemais corta só os demais");
+  assert.equal(origens.indexOf("time") !== -1 && origens.indexOf("time") < origens.indexOf("outros"), true, "time antes dos demais");
+  assert.equal(origens.lastIndexOf("caixa") < origens.indexOf("outros") || origens.indexOf("caixa") === -1, true, "caixa antes dos demais");
+  com.filter((e) => e.origem === "outros").forEach((e) => {
+    assert.notEqual(e.sp.sname, "SPECIES_LEDIAN");
+    assert.notEqual(e.sp.sname, "SPECIES_STEELIX");
+    assert.ok(Rx.rankDe(e.sp.sname).etapa <= 3, e.sp.n + " ainda não dá para pegar na Etapa 3");
+    assert.ok(e.candidato.hitKill > 0);
+  });
+  // os demais vêm do topo do rank: nenhum fica abaixo da 12ª melhor da Etapa
+  const topo = Rx.SPECIES.filter((s) => s && !["SPECIES_LEDIAN", "SPECIES_STEELIX"].includes(s.sname) && Rx.rankDe(s.sname) && Rx.rankDe(s.sname).etapa <= 3)
+    .sort((a, b) => Rx.rankDe(b.sname).score - Rx.rankDe(a.sname).score || (a.sname < b.sname ? -1 : 1)).slice(0, 12).map((s) => s.sname);
+  com.filter((e) => e.origem === "outros").forEach((e) => assert.ok(topo.includes(e.sp.sname), e.sp.n));
+  // Monotype: os demais respeitam o tipo
+  Rx.state.archetype.monotype = "Bug";
+  Rx.especiesQueResolvem(alvo, { demais: 12 }).forEach((e) => assert.ok(Rx.speciesTypeNames(e.sp).includes("Bug"), e.sp.n));
+  // opts.especies marca "informada"
+  assert.equal(R.especiesQueResolvem(ninetales, { especies: ["SPECIES_LEDIAN"] })[0].origem, "informada");
+});
+
 // ---------- 3. fechar a build ----------
 test("fecharBuild: com a escolha da IA devolve a build validada com os golpes e a habilidade do candidato", () => {
   const c = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales }).candidatos[0];
