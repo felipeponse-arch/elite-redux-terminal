@@ -178,3 +178,11 @@
   // tido acento pra começo de conversa).
   var ROLE_LABEL_PT = { Pivo: "Pivô", Tanque: "Tanque", Wallbreaker: "Wallbreaker", Sweeper: "Sweeper" };
   var SPLIT_LABEL_PT = { Fisico: "Físico", Especial: "Especial", Misto: "Misto" };
+
+  // Descrição da espécie na ficha (15/10/2026, decisão do usuário): o dado do jogo traz um texto de teste do desenvolvedor
+  // ("Hi i use this for implementing.") em ~41 espécies, 10 delas novas; esse texto não aparece.
+  var DESCRICAO_DE_TESTE_DO_JOGO = /^\s*hi i use this for implementing\.?\s*$/i;
+  function descricaoDaEspecie(sp) {
+    var d = sp && sp.d ? String(sp.d) : "";
+    return DESCRICAO_DE_TESTE_DO_JOGO.test(d) ? "" : d;
+  }

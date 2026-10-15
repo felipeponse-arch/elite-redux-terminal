@@ -559,7 +559,7 @@
       '</div></div>' +
       '<div class="detail-types">' + names.map(function (n) { return typePill(n); }).join("") + '</div>' +
       rankInfoLineHtml(sp) +
-      (sp.d ? '<p class="flavor">' + escapeHtml(sp.d) + '</p>' : "") +
+      (function () { var t = descricaoDaEspecie(sp); return t ? '<p class="flavor">' + escapeHtml(t) + '</p>' : ""; })() +
       (function () { var t = howToObtainText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })() +
       (function () { var t = compraDeInicialTexto(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })() +
       (function () { var t = whereToFindText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })();

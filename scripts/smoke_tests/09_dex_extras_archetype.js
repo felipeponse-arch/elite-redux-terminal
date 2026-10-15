@@ -220,6 +220,8 @@ async function section09() {
   // Rank v2 (02/10): Primal Kyogre saiu do rank (só no pós-jogo pelo código do jogo).
   // Âncora nova: Sandslash Mega, SS em Fácil/Ace e em Elite, obtível na etapa 4
   // (arma a própria tempestade de areia com Sand Stream).
+  // Versão nova do jogo (15/10): com os treinadores novos e o fim da dupla contagem, foi de SS 97 para S 94 sem
+  // mudar no dado; a âncora passa a ser "fica no topo" (S ou SS).
   setSearch("Sandslash Mega");
   await wait(120);
   const ancoraRow = [...document.querySelectorAll("#species-list .species-row")].find((r) => /Sandslash Mega/.test(r.textContent));
@@ -227,8 +229,8 @@ async function section09() {
     ancoraRow.click();
     await wait(30);
     const rankBadge = document.querySelector("#species-detail .rank-badge");
-    check("Sandslash Mega é SS (âncora de calibração do rank v2)",
-      !!rankBadge && rankBadge.textContent === "SS", rankBadge && rankBadge.textContent);
+    check("Sandslash Mega fica no topo, S ou SS (âncora de calibração do rank v2)",
+      !!rankBadge && /^S{1,2}$/.test(rankBadge.textContent), rankBadge && rankBadge.textContent);
     check("tooltip do rank badge explica o duelo simulado contra os chefões (não a fórmula antiga)",
       !!rankBadge && rankBadge.title.indexOf("Duelo simulado") !== -1 && rankBadge.title.indexOf("Sinal principal") === -1,
       rankBadge && rankBadge.title);

@@ -2,6 +2,9 @@
   {
     "date": "2026-10-15",
     "items": [
+      "Rank recalculado com a versão nova: os 17 Pokémon novos ganham nota, papel e concorrência, e todos os outros passam a ser medidos com os status, golpes e habilidades novos",
+      "Sprites corrigidos: a versão nova mudou o número das espécies e 807 Pokémon mostravam a imagem de outro; os 17 Pokémon novos ganham sprite",
+      "Descrição de teste do jogo (\"Hi i use this for implementing.\") não aparece mais na ficha; As One com Chilling Neigh volta a ganhar o efeito",
       "O app passa a seguir a versão mais nova do jogo (NextDex 2.65.4 mais a configuração oficial atualizada): espécies, habilidades, golpes e treinadores novos entram, e Arbok Mega sai",
       "Motor calibrado pelo código do jogo: onde a calculadora e o código divergem, vale o código. Itens, prioridade de golpe e habilidades de tipo (Aerilate, Pixilate e parecidas: o golpe convertido ganha o STAB do novo tipo, sem x1,3 extra) foram conferidos um a um",
       "Fim da dupla contagem: o bônus de golpe que o texto da habilidade já ensina não é somado de novo pela sinergia da espécie (Tough Claws e Nocturnal não valem mais 1,69x e 1,54x)",
