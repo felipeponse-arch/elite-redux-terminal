@@ -92,10 +92,15 @@ function rodar(m, arquivos) {
     filho.on("close", (status) => pronto({ status, saida }));
   });
 }
-// Qual arquivo pegou: o relatório do node --test cita "test at tests\unit\x.test.mjs:L:C".
-function arquivoQuePegou(saida) {
-  const m = saida.match(/test at (tests[\\/]unit[\\/][\w.-]+\.test\.mjs)/);
-  return m ? m[1].replace(/\\/g, "/") : null;
+// Quais arquivos falharam: o relatório do node --test cita "test at tests\unit\x.test.mjs:L:C". Todos, sem
+// repetir e na ordem: o primeiro pode ser um teste que só falhou junto de outro (estado compartilhado).
+function arquivosQueFalharam(saida) {
+  const vistos = [];
+  for (const m of saida.matchAll(/test at (tests[\\/]unit[\\/][\w.-]+\.test\.mjs)/g)) {
+    const arq = m[1].replace(/\\/g, "/");
+    if (!vistos.includes(arq)) vistos.push(arq);
+  }
+  return vistos;
 }
 function contarFalhas(saida) {
   // o node --test repete cada falha no resumo final - conta só antes dele
@@ -115,11 +120,12 @@ async function avaliar(m) {
   if (r.status === 0) { if (lembrado) atualizacoes.set(m.id, null); return { m, tipo: "sobreviveu" }; }
   // Só lembra arquivo que pega SOZINHO (rodada isolada): teste que falha só por estado compartilhado com outro
   // arquivo daria "pega" falso no atalho (noite de 14/10: 3 buracos de cobertura passaram assim).
-  const arq = arquivoQuePegou(r.saida);
-  if (arq) {
-    const sozinho = await rodar(m, [arq]);
-    atualizacoes.set(m.id, sozinho.status !== 0 ? arq : null);
-  } else if (lembrado) atualizacoes.set(m.id, null);
+  // Lembra o primeiro dos arquivos que falharam que também pega sozinho; nenhum pega sozinho = não lembra.
+  let lembrar = null;
+  for (const arq of arquivosQueFalharam(r.saida)) {
+    if ((await rodar(m, [arq])).status !== 0) { lembrar = arq; break; }
+  }
+  if (lembrar || lembrado) atualizacoes.set(m.id, lembrar);
   return { m, tipo: "pega", falhas: contarFalhas(r.saida), rapido: false };
 }
 
