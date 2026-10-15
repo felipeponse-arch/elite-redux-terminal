@@ -151,17 +151,20 @@ test("a explicação da IA entra na rationale (limite de 360 caracteres)", () =>
 
 // ---------- quando o caminho de escolha vale ----------
 
-test("candidatosParaAEscolhaDaIa: modo normal com alvo usa; revisão/ponte e sem alvo seguem o caminho antigo", () => {
+test("candidatosParaAEscolhaDaIa: modo normal usa; revisão/ponte seguem o caminho antigo; sem chefão adiante a IA escolhe entre os candidatos só por sinergia", () => {
   assert.ok(R.candidatosParaAEscolhaDaIa(ledian, {}).candidatos.length);
   assert.equal(R.candidatosParaAEscolhaDaIa(ledian, { modo: "revisao" }), null);
   assert.equal(R.candidatosParaAEscolhaDaIa(ledian, { modo: "ponte" }), null);
   const doChefao = R.candidatosParaAEscolhaDaIa(ledian, { chefao: { boss: courtney } });
   assert.equal(doChefao.alvo.chefao, "Courtney Meteor Falls", "no botão do chefão, o alvo é o chefão");
-  // fim do jogo: sem líder de ginásio adiante, o pipeline não tem alvo -> caminho antigo
+  // fim do jogo: sem líder de ginásio adiante o pipeline não tem alvo, mas traz candidatos por sinergia: a IA escolhe entre eles
   const Rfim = carregarRegras({ milestone: 99, difficulty: "ace", levelCapMode: "more" });
-  const semAlvo = Rfim.candidatosDeBuild(Rfim.SPECIES.find((s) => s && s.n === "Centiskorch"), {});
-  if (!semAlvo.alvo) assert.equal(Rfim.candidatosParaAEscolhaDaIa(Rfim.SPECIES.find((s) => s && s.n === "Centiskorch"), {}), null);
-  else assert.ok(Rfim.candidatosParaAEscolhaDaIa(Rfim.SPECIES.find((s) => s && s.n === "Centiskorch"), {}), "ainda há líder adiante: usa a escolha");
+  const centi = Rfim.SPECIES.find((x) => x && x.n === "Centiskorch");
+  const semAlvo = Rfim.candidatosParaAEscolhaDaIa(centi, {});
+  assert.ok(semAlvo && semAlvo.alvo === null && semAlvo.candidatos.length, "candidatos sem alvo");
+  const p = Rfim.montarPromptEscolhaDeBuild(centi, semAlvo, {});
+  assert.match(p, /so por sinergia: nao ha chefao adiante/);
+  assert.equal(Rfim.escolherCandidatoDaIa(centi, semAlvo, { escolha: 1, nature: "Adamant", item: "", evs: [0, 252, 0, 0, 0, 252] }, {}).origem, "ia");
 });
 
 test("a resposta do lote passa pela mesma conferência por espécie (cada um tem o seu fallback)", () => {
@@ -178,20 +181,62 @@ test("a resposta do lote passa pela mesma conferência por espécie (cada um tem
   assert.deepEqual(plain(b.build.moves), plain(rT.candidatos[0].golpes));
 });
 
-// ---------- gravação sem plano ----------
+// ---------- contexto do time, plano e falha do lote ----------
 
-test("gravação: a build da escolha sai marcada pedirPlano (a IA não viu os golpes futuros); a build do zero segue planoConsultado", () => {
+test("o prompt individual leva o time em uso (itens, golpes, papéis, fraquezas), o papel natural e o guia de papel", () => {
+  const p = R.montarPromptEscolhaDeBuild(ledian, rLedian, {});
+  assert.match(p, /Papel natural: /);
+  assert.match(p, /Golpes ja no time \(evite repetir sem motivo\): /);
+  assert.match(p, /Papeis ja cobertos: /);
+  assert.match(p, /Fraquezas que o time divide: /);
+  assert.match(p, /Papel guia natureza e EVs: /);
+  assert.ok(!p.includes("Papeis JA COBERTOS por outros membros"), "só a versão curta, sem o parágrafo longo");
+});
+
+test("o prompt do lote leva as fraquezas do time uma vez, o guia de papel uma vez e o papel natural de cada um", () => {
+  const itens = [ledian, sp("Typhlosion")].map((s) => ({ sp: s, r: R.candidatosDeBuild(s, {}) }));
+  const p = R.montarPromptEscolhaDoTime(itens, {});
+  assert.equal(p.split("Papel guia natureza e EVs").length, 2);
+  assert.equal(p.split("Fraquezas que o time divide").length, 2);
+  assert.ok(p.split("Papel natural: ").length >= 2, "o papel natural entra por espécie");
+});
+
+test("chefão: o prompt diz a quem o Pokémon responde e o golpe-chave provado (individual e lote)", () => {
+  const provado = { habilidade: "Aerodynamics", set: "x", golpes: ["Mega Punch"], chave: { Ninetales: "Mega Punch" } };
+  const opts = { chefao: { boss: courtney, responde: ["Ninetales"], provado } };
+  assert.match(R.montarPromptEscolhaDeBuild(ledian, rLedian, opts), /responde a: Ninetales[\s\S]*SIMULADOR PROVOU/);
+  const lote = R.montarPromptEscolhaDoTime([{ sp: ledian, r: rLedian }], { chefao: opts.chefao, responde: { [ledian.sname]: ["Ninetales"] }, provado: { [ledian.sname]: provado } });
+  assert.match(lote, /responde a: Ninetales[\s\S]*SIMULADOR PROVOU/);
+});
+
+test("plano: o bloco compacto aparece SÓ na espécie com golpe futuro de dano/pivô, e a resposta com plano chega à build", () => {
+  const comPlano = sp("Scizor");
+  const rS = R.candidatosDeBuild(comPlano, {});
+  assert.match(R.montarPromptEscolhaDeBuild(comPlano, rS, {}), /PLANO \(opcional\) - golpes que so liberam depois: nivel \d+/);
+  assert.ok(!R.montarPromptEscolhaDeBuild(ledian, rLedian, {}).includes("PLANO (opcional)"), "Ledian não tem golpe futuro relevante: sem bloco");
+  const lote = R.montarPromptEscolhaDoTime([{ sp: ledian, r: rLedian }, { sp: comPlano, r: rS }], {});
+  assert.equal(lote.split("PLANO (opcional)").length, 2, "só uma espécie leva o bloco, e o lote segue uma consulta só");
+  // a gravação aceita o plano que veio na resposta (a mesma anexarPlanoDaIa de sempre)
+  const futuro = R.golpesFuturosDe(comPlano, R.getCurrentCap()).filter((f) => ["dano", "pivo"].includes(R.moveRoleOf(f.nome)))[0];
+  const escolhida = R.escolherCandidatoDaIa(comPlano, rS, { escolha: 1, nature: rS.candidatos[0].build.nature, item: "", evs: rS.candidatos[0].build.evs.slice() }, {}).build;
+  R.state.customBuilds = {}; R.state.team = [comPlano.x];
   const saida = { agir: (m) => m(), aviso: () => {}, toast: () => {} };
-  R.state.customBuilds = {};
-  R.state.team = [ledian.x];
-  const cap = R.getCurrentCap();
-  const escolhida = R.escolherCandidatoDaIa(ledian, rLedian, respostaDe(0), {}).build;
-  const ok = R.gravarRespostaValidadaDaIa(ledian, escolhida, null, { semPlano: true, silencioso: true }, cap, saida);
-  assert.equal(ok, true);
-  assert.equal(escolhida.pedirPlano, true);
-  assert.notEqual(escolhida.planoConsultado, true);
-  const outra = R.escolherCandidatoDaIa(ledian, rLedian, respostaDe(1), {}).build;
-  R.gravarRespostaValidadaDaIa(ledian, outra, null, { silencioso: true }, cap, saida);
-  assert.equal(outra.planoConsultado, true);
-  assert.notEqual(outra.pedirPlano, true);
+  const alvoDaTroca = escolhida.moves[0];
+  assert.equal(R.gravarRespostaValidadaDaIa(comPlano, escolhida, { plano: { [alvoDaTroca]: futuro.nome } }, { silencioso: true }, R.getCurrentCap(), saida), true);
+  assert.equal(escolhida.planoConsultado, true);
+});
+
+test("o lote inteiro falhou (a IA não respondeu): cada um vai ao melhor candidato do motor, dizendo isso, sem outra chamada", () => {
+  const typhlosion = sp("Typhlosion");
+  [[ledian, rLedian], [typhlosion, R.candidatosDeBuild(typhlosion, {})]].forEach(([s, r]) => {
+    const e = R.escolherCandidatoDaIa(s, r, undefined, {}, true);
+    assert.equal(e.origem, "motor");
+    assert.equal(e.indice, 0);
+    assert.deepEqual(plain(e.build.moves), plain(r.candidatos[0].golpes));
+    assert.match(e.build.rationale, /Melhor candidato do jogo \(a IA nao respondeu\)/);
+  });
+  // sem nenhum candidato válido segue sem build (aí sim o caminho individual)
+  const quebrado = copia(rLedian);
+  quebrado.candidatos.forEach((c) => { c.habilidade = "Habilidade Inexistente"; });
+  assert.equal(R.escolherCandidatoDaIa(ledian, quebrado, undefined, {}, true).build, null);
 });

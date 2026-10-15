@@ -3,7 +3,13 @@
 // + Builds (uma por membro) + Guia de uso + Validação, sem o jogador
 // precisar visitar cada Pokémon manualmente. A IA é simulada por completo
 // (window.claude); toda validação/filtro de Monotype/persistência é real.
+// Esta seção testa as ETAPAS do pipeline com o prompt de build do ZERO (a escolha entre candidatos é a seção 29): a chave fica desligada só aqui dentro.
 async function section20() {
+  var T0 = window.__erTest;
+  if (T0 && T0.definirEscolhaEntreCandidatos) T0.definirEscolhaEntreCandidatos(false);
+  try { await section20Corpo(); } finally { if (T0 && T0.definirEscolhaEntreCandidatos) T0.definirEscolhaEntreCandidatos(true); }
+}
+async function section20Corpo() {
   await prepararRunPadrao();
   var T = window.__erTest;
   if (!T) { check("ponte de teste disponível", false); return; }

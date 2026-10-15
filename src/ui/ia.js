@@ -244,10 +244,16 @@
       aviso("");
       comCand.forEach(function (it) {
         var sp = it.sp;
-        var esc = respC.ok ? escolherCandidatoDaIa(sp, it.r, respC.valor[sp.sname] || respC.valor[sp.n], optsDe(sp)) : { build: null };
-        var r = esc.build ? gravarBuildValidadaDaIa(sp, esc.build, null, Object.assign({}, optsDe(sp), { semPlano: true }), cap, aviso) : false;
-        if (r === false) falhouNaEscolha.push(sp); // pedido sozinho, pelo caminho individual
-        else { resultado[sp.sname] = r; concluirBuildDoLote(sp.x); }
+        // Chamada do lote falhou: o melhor candidato do motor, sem pedir de novo (economia). Só quem fica sem NENHUM candidato válido vai ao caminho individual.
+        var bruto = respC.ok ? (respC.valor[sp.sname] || respC.valor[sp.n]) : null;
+        var esc = escolherCandidatoDaIa(sp, it.r, bruto, optsDe(sp), !respC.ok);
+        if (!esc.build) { falhouNaEscolha.push(sp); return; }
+        var r = gravarBuildValidadaDaIa(sp, esc.build, esc.origem === "motor" ? null : bruto, optsDe(sp), cap, aviso);
+        if (r === false) { // lista cheia: pedir de novo não adianta
+          resultado[sp.sname] = false;
+          resultado.ultimoMotivo = textoDeLimiteDeBuilds(sp, optsDe(sp));
+        } else resultado[sp.sname] = r;
+        concluirBuildDoLote(sp.x);
       });
     }
     // O caminho antigo (uma consulta do zero) só para quem não tem candidato.
@@ -322,7 +328,6 @@
       var cands = candidatosParaAEscolhaDaIa(sp, opts);
       if (cands) {
         aviso("Consultando o Claude…");
-        var optsEscolha = Object.assign({}, opts, { semPlano: true });
         var respE = await pedirIA({
           prompt: montarPromptEscolhaDeBuild(sp, cands, opts),
           provedor: "omniroute",
@@ -335,7 +340,7 @@
         if (!respE.ok) { aviso(respE.mensagem); return false; }
         if (respE.valor.build) {
           aviso("");
-          return gravarBuildValidadaDaIa(sp, respE.valor.build, null, optsEscolha, cap, aviso);
+          return gravarBuildValidadaDaIa(sp, respE.valor.build, respE.valor.origem === "motor" ? null : respE.bruto, opts, cap, aviso);
         }
         // Nenhum candidato passou na validação (ex.: a do chefão): caminho antigo.
       }

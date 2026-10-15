@@ -9,6 +9,7 @@
 
   var ORIGEM_ESCOLHA_IA = "ia";               // escolha e ajustes da IA, tudo conferido
   var ORIGEM_ESCOLHA_IA_RASCUNHO = "ia-escolha"; // o candidato é o que a IA escolheu; natureza, item e EVs são os do rascunho do motor
+  var MOTIVO_SEM_RESPOSTA = "a IA nao respondeu";
   var ORIGEM_ESCOLHA_MOTOR = "motor";         // a resposta da IA não valeu: melhor candidato do motor
   // Chave geral (a suíte de navegador desliga para testar o caminho antigo; também reverte o recurso numa linha).
   var escolhaEntreCandidatosLigada = true;
@@ -32,7 +33,7 @@
   function blocoDeCandidatosParaIA(sp, r) {
     var lista = r.candidatos.slice(0, MAX_CANDIDATOS_NO_PROMPT);
     return "Tipo: " + speciesTypeNames(sp).join("/") + " | status base (HP/Atk/Def/SpA/SpD/Spe): " + sp.b.join("/") + "\n" +
-      "CANDIDATOS (do melhor para o pior, calculados pelo app contra " + dadoExterno((r.alvo && r.alvo.pokemon || []).join(" e ")) + "):\n" +
+      "CANDIDATOS (do melhor para o pior, " + (r.alvo ? "calculados pelo app contra " + dadoExterno((r.alvo.pokemon || []).join(" e ")) : "so por sinergia: nao ha chefao adiante e nada foi simulado") + "):\n" +
       "<dados_do_jogo>\n" + lista.map(function (c, i) { return textoDeCandidatoParaIA(c, i); }).join("\n") + "\n</dados_do_jogo>\n";
   }
   var FORMATO_ESCOLHA_IA = '{"escolha":N,"nature":"Nome","item":"Nome","evs":[hp,atk,def,spa,spd,spe],"rationale":"texto"}';
@@ -40,6 +41,41 @@
     return "REGRAS: escolha UM candidato pelo numero (escolha) - habilidade e golpes sao os dele, nao escreva outros. Voce so decide natureza (real: Adamant, Modest, Jolly, Timid etc.), " +
       "item (UM dos listados, ou \"\" para nenhum) e EVs (6 inteiros de 0 a 252, soma ate 510). Prefira quem derruba o alvo e bate primeiro; use o rascunho do motor como base e mude so com motivo. " +
       "rationale: 1-2 frases em portugues dizendo por que este candidato e esta natureza/item/EVs (cite o alvo). ";
+  }
+  // Contexto CURTO do time (item 4 da rodada 1 do supervisor): o essencial de blocoTimeEmUsoIA/blocoPapelIA sem os parágrafos.
+  var GUIA_DE_PAPEL_CURTO = "Papel guia natureza e EVs: Tanque = HP e defesa, pouca Spe; Pivo = bulk + Spe moderada; Wallbreaker = 252 no ataque; Sweeper = 252 ataque + 252 Spe (natureza que nao reduz Spe).";
+  function linhaDePapelNaturalIA(sp) {
+    var n = SPECIES_ROLE[sp.sname];
+    return n && n.roles && n.roles.length ? "Papel natural: " + n.roles.map(nomePapel).join(" / ") + ", ataque " + (n.split || "?") + ".\n" : "";
+  }
+  function linhaDeFraquezasDoTimeIA(membros) {
+    var riscos = membros.length ? computeSharedRisks(membros) : [];
+    return riscos.length ? "Fraquezas que o time divide: " + riscos.map(function (r) { return r.t + " (" + r.n + ")"; }).join(", ") + " - resistir/cobrir isso vale mais.\n" : "";
+  }
+  function blocoTimeCurtoIA(sp) {
+    var itens = itensEmUsoComQuem(sp.x), nomes = Object.keys(itens);
+    var esg = nomes.filter(function (i) { return itens[i].length >= MAX_MESMO_ITEM_NO_TIME; });
+    var golpes = teamMovesInUse(sp.x), papeis = teamRolesInUse(sp.x);
+    var membros = state.team.map(getSpeciesByX).filter(function (m) { return m && m.x !== sp.x; });
+    return linhaDePapelNaturalIA(sp) +
+      (nomes.length ? "Itens em uso no time: " + nomes.map(function (i) { return dadoExterno(i) + " (" + itens[i].map(dadoExterno).join(", ") + ")"; }).join("; ") + "." +
+        (esg.length ? " ESGOTADOS (qualquer outro igual e REJEITADO): " + esg.map(dadoExterno).join(", ") + "." : "") + "\n" : "") +
+      (golpes.length ? "Golpes ja no time (evite repetir sem motivo): " + golpes.join(", ") + ".\n" : "") +
+      (papeis.length ? "Papeis ja cobertos: " + papeis.map(nomePapel).join(", ") + ".\n" : "") +
+      linhaDeFraquezasDoTimeIA(membros);
+  }
+  // O que o chefão pede a ESTE Pokémon (quem ele responde e o golpe-chave que o simulador provou).
+  function linhaDoChefaoPorEspecieIA(sp, resp, provado) {
+    return (resp && resp.length ? "Este Pokemon responde a: " + resp.map(dadoExterno).join(", ") + ".\n" : "") + (provado ? linhaProvadoIA(provado) + "\n" : "");
+  }
+  // Plano de trocas (item 3): compacto e SÓ para a espécie que tem golpe futuro relevante (de dano ou pivô).
+  function blocoPlanoCurtoIA(sp) {
+    var futuros = golpesFuturosDe(sp, getCurrentCap()).filter(function (f) { var p = moveRoleOf(f.nome); return p === "dano" || p === "pivo"; }).slice(0, 6);
+    if (!futuros.length) return "";
+    return "PLANO (opcional) - golpes que so liberam depois: " + futuros.map(function (f) {
+      var mv = MOVES[f.id];
+      return "nivel " + f.nivel + " " + dadoExterno(f.nome) + " [" + (TYPES[mv[1]] || "?") + " " + (SIGLA_CATEGORIA[DATA.splits[mv[2]]] || "") + (mv[3] ? " " + mv[3] : "") + "]";
+    }).join("; ") + ". Se um deles for claramente melhor que um golpe do candidato PARA O MESMO PAPEL, aponte em \"plano\" {\"golpe de agora\":\"golpe futuro\"}; senao omita o campo.\n";
   }
   function objetivoDaEscolhaIA(opts) {
     var c = opts && opts.chefao;
@@ -57,7 +93,10 @@
       blocoItensIA(sp, false) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (arq.length ? arq.join("\n") + "\n" : "") +
+      blocoTimeCurtoIA(sp) + GUIA_DE_PAPEL_CURTO + "\n" +
       objetivoDaEscolhaIA(opts) +
+      (opts.chefao ? linhaDoChefaoPorEspecieIA(sp, opts.chefao.responde, opts.chefao.provado) : "") +
+      blocoPlanoCurtoIA(sp) +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " + FORMATO_ESCOLHA_IA + ". " + regrasDaEscolhaIA();
   }
   // Prompt do lote: `itens` = [{ sp, r }] (só quem tem candidatos). O que vale pro time todo vai UMA vez.
@@ -67,7 +106,8 @@
     var arq = archetypeBuildGuidance();
     var pokes = itens.map(function (it, i) {
       return "=== POKEMON " + (i + 1) + " de " + itens.length + ": " + it.sp.n + " (chave \"" + it.sp.sname + "\") ===\n" +
-        blocoDeCandidatosParaIA(it.sp, it.r) + blocoItensDaEspecieIA(it.sp);
+        blocoDeCandidatosParaIA(it.sp, it.r) + linhaDePapelNaturalIA(it.sp) + blocoItensDaEspecieIA(it.sp) +
+        linhaDoChefaoPorEspecieIA(it.sp, opts.responde && opts.responde[it.sp.sname], opts.provado && opts.provado[it.sp.sname]) + blocoPlanoCurtoIA(it.sp);
     }).join("");
     return cabecalhoIA() +
       "ESCOLHA a build de CADA um dos " + itens.length + " Pokemon deste time (build " + versaoDosDados() + ") ENTRE os candidatos de cada um, que o app ja calculou e validou. " +
@@ -75,6 +115,7 @@
       blocoItensComunsIA(true, "") +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (arq.length ? arq.join("\n") + "\n" : "") +
+      linhaDeFraquezasDoTimeIA(state.team.map(getSpeciesByX).filter(Boolean)) + GUIA_DE_PAPEL_CURTO + "\n" +
       objetivoDaEscolhaIA(opts) +
       pokes +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
@@ -110,7 +151,7 @@
     var txt = bruto && typeof bruto.rationale === "string" ? bruto.rationale.trim() : "";
     if (origem === ORIGEM_ESCOLHA_IA) return txt;
     var porque = origem === ORIGEM_ESCOLHA_MOTOR
-      ? "Melhor candidato do jogo (a resposta da IA nao valeu: " + motivo + ")."
+      ? "Melhor candidato do jogo (" + (motivo === MOTIVO_SEM_RESPOSTA ? motivo : "a resposta da IA nao valeu: " + motivo) + ")."
       : "Candidato escolhido pela IA; natureza, item e EVs do rascunho do jogo (" + motivo + ").";
     return (porque + " " + txt + (txt ? " " : "") + (c.motivos && c.motivos[0] ? dadoExterno(c.motivos[0]) : "")).trim();
   }
@@ -123,12 +164,14 @@
   //   { build, origem, indice, motivo }  build = pronta para gravar (validada), origem = "ia" | "ia-escolha" | "motor";
   //   { build: null, motivo }            nenhum candidato serve (ex.: a validação do chefão recusou todos): quem chamou usa o caminho antigo.
   // Nunca lança. `opts` = as opções da build (chefao/timeNovo), para a validação estratégica.
-  function escolherCandidatoDaIa(sp, r, bruto, opts) {
+  // `semResposta` = a chamada à IA falhou (o lote inteiro): vai direto ao melhor do motor, dizendo isso na explicação.
+  function escolherCandidatoDaIa(sp, r, bruto, opts, semResposta) {
     var cands = (r && r.candidatos || []).slice(0, MAX_CANDIDATOS_NO_PROMPT);
     if (!cands.length) return { build: null, indice: null, origem: null, motivo: "sem candidatos" };
     var motivo = null, idx = null;
     try {
-      if (!bruto || typeof bruto !== "object") motivo = "a resposta nao veio como objeto";
+      if (semResposta) motivo = MOTIVO_SEM_RESPOSTA;
+      else if (!bruto || typeof bruto !== "object") motivo = "a resposta nao veio como objeto";
       else {
         idx = indiceDaEscolhaIA(bruto, cands.length);
         if (idx === null) motivo = "a escolha nao e um dos " + cands.length + " candidatos";
@@ -161,5 +204,6 @@
     if (opts.modo) return null;
     var alvo = opts.chefao && opts.chefao.boss ? { chefao: opts.chefao.boss } : undefined;
     var r = candidatosDeBuild(sp, alvo ? { alvo: alvo } : {});
-    return r && r.alvo && r.candidatos && r.candidatos.length ? r : null;
+    // Sem chefão adiante o pipeline ainda traz candidatos só por sinergia (selo Estimado): a IA escolhe entre eles também (decisão do usuário, 15/10).
+    return r && r.candidatos && r.candidatos.length ? r : null;
   }

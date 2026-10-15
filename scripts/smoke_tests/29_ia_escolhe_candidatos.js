@@ -55,7 +55,6 @@ async function section29() {
       check("a build salva é o candidato 2 (habilidade e golpes dele), com a natureza e a explicação da IA",
         b1.ability === cands[1].habilidade && b1.moves.slice().sort().join("|") === cands[1].golpes.slice().sort().join("|") && b1.nature === "Jolly" && /teste escolha entre candidatos/.test(b1.rationale),
         JSON.stringify(b1).slice(0, 220));
-      check("a build sai marcada pra revisão de plano (a IA não viu os golpes futuros)", b1.planoConsultado !== true);
     }
 
     // ---- 2) ficha: resposta fora dos candidatos cai no melhor do motor, sem outra chamada ----
@@ -94,12 +93,28 @@ async function section29() {
     var candC = T.candidatosDeBuild(centi, {}).candidatos[0];
     check("o Centiskorch ficou com o candidato 1 (Coil Up) escolhido pela IA", !!bc && bc.ability === candC.habilidade && /lote ok/.test(bc.rationale), bc && JSON.stringify(bc).slice(0, 160));
 
-    // ---- 4) sem chefão adiante: segue o caminho antigo (prompt da build do zero) ----
+    // ---- 4) o lote inteiro falha: cada um vai ao melhor candidato do motor, sem pedir de novo ----
+    S.customBuilds = {};
+    var chamadas = 0;
+    window.claude = { use: async function (n) { return n === "sample" ? { json: async function () { chamadas++; throw new Error("falha de teste"); } } : null; } };
+    var resultadoFalha = await T.gerarBuildsDoTimeComIA(membros, "sem-status", function () { return { timeNovo: true }; }, {}, function () {});
+    check("lote que falha por inteiro: UMA chamada só (nada de uma por membro)", chamadas === 1, chamadas);
+    check("os 3 ganharam o melhor candidato do motor, com a explicação de que a IA não respondeu",
+      membros.every(function (x) {
+        var b = salvas(x)[0];
+        var c0 = T.candidatosDeBuild(x, {}).candidatos[0];
+        return !!b && b.moves.slice().sort().join("|") === c0.golpes.slice().sort().join("|") && /a IA nao respondeu/.test(b.rationale);
+      }), membros.map(function (x) { return x.n + ":" + (salvas(x)[0] ? salvas(x)[0].rationale.slice(0, 50) : "sem build"); }));
+    check("o resultado do lote marca os 3 como gravados", membros.every(function (x) { return resultadoFalha[x.sname] === true; }), JSON.stringify(resultadoFalha));
+
+    // ---- 5) sem chefão adiante: a IA também escolhe entre os candidatos (só por sinergia) ----
     S.customBuilds = {};
     S.settings.milestone = 9;
-    ia(function () { return { ability: "Nada", moves: [] }; });
+    ia(function () { return { escolha: 1, nature: "Adamant", item: "", evs: [0, 252, 0, 0, 0, 252], rationale: "sem chefao" }; });
     await T.generateBuildWithAI(ledian, "sem-status", {});
-    check("sem chefão adiante, o botão usa o prompt da build do zero", /Movepool real/.test(prompts[0] || "") && !/ENTRE os candidatos/.test(prompts[0] || ""), (prompts[0] || "").slice(0, 120));
+    check("sem chefão adiante, o prompt traz os candidatos por sinergia (e não o movepool inteiro)",
+      /so por sinergia: nao ha chefao adiante/.test(prompts[0] || "") && !/Movepool real/.test(prompts[0] || ""), (prompts[0] || "").slice(0, 120));
+    check("a build sem chefão adiante é salva (candidato 1 escolhido)", salvas(ledian).length === 1 && /sem chefao/.test(salvas(ledian)[0].rationale), JSON.stringify(salvas(ledian)).slice(0, 160));
   } finally {
     T.definirEscolhaEntreCandidatos(true);
     T.definirPausasIA([4000, 10000]);

@@ -42,7 +42,12 @@ O botão "Gerar builds do time com IA" (aba Chefões e time novo) e o "Gerar bui
 - 13 sabotagens `escolha-ia-*` em `tests/unit/mutacoes.mjs`, todas pegas.
 - Navegador: seção nova `scripts/smoke_tests/29_ia_escolhe_candidatos.js` (ficha com escolha válida, ficha com resposta fora, lote do time, sem chefão adiante). A IA é simulada por `window.claude`. As seções 10, 16 e 27 testam o caminho antigo e desligam a chave no começo (`definirEscolhaEntreCandidatos(false)`) e religam no fim.
 
+## Rodada 1 do supervisor (15/10, REFAZER): o que mudou
+1. Seções 10, 16 e 20 do navegador desligam a chave só dentro de try/finally (religa mesmo com return antecipado). Seções 17-29 rodam com a chave LIGADA (a 20 desliga localmente: testa as etapas do pipeline com o prompt do zero).
+2. Lote que falha por inteiro: cada membro grava o MELHOR candidato do motor, sem pedir de novo ("Melhor candidato do jogo (a IA nao respondeu)"). Caminho individual só para quem não tem candidato válido. Lista cheia: não pede de novo, avisa o limite.
+3. O plano de trocas voltou ao PRÓPRIO prompt de escolha, compacto e só na espécie com golpe futuro de dano/pivô (até 6). Sai o `semPlano`/`pedirPlano`: a gravação é a de antes.
+4. Contexto do time de volta, curto: papel natural, itens em uso/esgotados, golpes já no time, papéis cobertos, fraquezas do time, guia de papel e, no chefão, a quem o Pokémon responde e o golpe-chave provado (individual e lote).
+Respostas do usuário: origem segue "ia" com a explicação; sem chefão adiante a IA também escolhe entre os candidatos por sinergia (selo Estimado).
+
 ## Comentários / perguntas ao usuário
-1. A build que cai no motor (resposta da IA não valeu) é gravada com origem "ia" (a mesma etiqueta do botão); a explicação diz "Melhor candidato do jogo (a resposta da IA nao valeu: ...)". Quer uma etiqueta própria? Exigiria um valor novo em `BUILD_SOURCES` (save/chip).
-2. Sem chefão adiante o `candidatosDeBuild` ainda devolve candidatos só por sinergia (selo "Estimado"). Aqui esse caso usa o comportamento antigo (a IA monta do zero), lendo "sem chefão adiante" do pedido como "sem candidato". Se preferir que a IA escolha também entre os candidatos de sinergia, é trocar uma condição em `candidatosParaAEscolhaDaIa`.
-3. O plano de trocas futuras já não vai no prompt: a build sai com `pedirPlano` e a revisão de plano automática pede o plano depois (uma chamada curta, só quando há golpe futuro). Se preferir manter o plano no mesmo prompt, o bloco volta ao prompt (+ alguns milhares de caracteres nas espécies com muitos golpes futuros).
+(Perguntas 1 a 3 respondidas pelo usuário em 15/10: ver acima.)
