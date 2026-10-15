@@ -30,7 +30,8 @@ Problema: um commit só de documento roda tudo (~6 min). Proposta: o gancho clas
 | Só `tests/` (sem `src/`) | `check` + unitários (+ sabotagem do que mudou, se `mutacoes.mjs` mudou) |
 | `src/regras/`, `data/` regras | `check` + unitários + sabotagem (`--mudados` fora do master) |
 | `src/ui/`, `artifact_template.html`, CSS, `scripts/build*`, `data/` do app | tudo (+ build + navegador) |
-| Branch `master` (junção e publicação) | SEMPRE tudo, inclusive sabotagem completa |
+| Branch `master` (junção) | Tudo; a sabotagem é INCREMENTAL (abaixo). Publicação (`prepare_publish`) = tudo com sabotagem COMPLETA |
+**Sabotagem no master (decisão do usuário, 14/10/2026):** roda só as mutações ligadas ao que mudou desde o ÚLTIMO MASTER VERDE (`run_sabotage.mjs --desde <sha>`, mesma lógica do `--mudados`: entra a mutação cujo arquivo mudou, cujo teste-pegador mudou, nova no catálogo, ou `@comportamento` se algo de `src/regras/` mudou). O verde é o sha gravado em `<git-common-dir>/er-ultimo-master-verde` (o `.git` principal: vale para todos os worktrees e não suja o repositório) quando o portão do master passa com a árvore limpa; só vale se for antepassado do HEAD. Sem registro, registro inválido, `ER_VERIFICAR=completo` ou `prepare_publish` (que seta o completo) = sabotagem COMPLETA. Código: `scripts/sabotagem_incremental.mjs`.
 Regras: caminho desconhecido = nível mais alto; variável `ER_VERIFICAR=completo` força tudo; o classificador é uma função pura com teste de unidade (tabela de caminhos → nível).
 Lacuna encontrada: **a junção fast-forward não dispara o gancho**. O portão do master hoje só existe no `prepare_publish`. Proposta: o procedimento de junção roda `ER_VERIFICAR=completo node scripts/verificar.mjs` no worktree do master ANTES de enviar ao GitHub (feito à mão em 14/10 com o `pipeline-build`).
 

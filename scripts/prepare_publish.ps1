@@ -46,6 +46,8 @@ Write-Output "--- 3/4 build + suite completa ---"
 # aviso do Node no servidor que o Playwright sobe, fase 6) virava erro fatal
 # aqui no PowerShell 5.1 - mesmo com todos os testes passando.
 $ErrorActionPreference = "Continue"
+# Publicar = sabotagem COMPLETA (o master so faz a incremental fora daqui; 14/10/2026).
+$env:ER_VERIFICAR = "completo"
 & node (Join-Path $PSScriptRoot "verificar.mjs") 2>&1 | ForEach-Object { "$_" }
 $saidaTestes = $LASTEXITCODE
 $ErrorActionPreference = "Stop"
