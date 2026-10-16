@@ -2,6 +2,8 @@
 
 Decisão de arquitetura (13/10/2026): padronização da **Agent Factory** para o Elite Redux Terminal. Os agentes não são estáticos; possuem especialidades estritas, são recomendados pelo Gerente (Orquestrador) e delegados pela sessão principal (coordenador) e aprendem continuamente com as correções e regras descobertas no projeto.
 
+Práticas de trabalho que valem para todos (16/10/2026): [praticas-de-trabalho.md](praticas-de-trabalho.md) (alternativas lado a lado em decisão, ler antes de propor, entrega com evidência, aprofundar em vez de aumentar).
+
 ---
 
 ## 1. Papéis na Factory
