@@ -307,6 +307,20 @@
     return cx;
   }
 
+  // Lutas da run e a etapa (índice de levelcaps.json) em que acontecem: a régua do rank v2 (scripts/calcular_rank_v2.mjs lê daqui)
+  // e do "melhor time no geral" da tela do time (pipeline com alvo { campo: true }, 16/10/2026). Ginásios: ordem do Emerald
+  // confirmada no dado. Equipes: ordem da história do Emerald. "Courtney Sunhollow" (região nova) fica de fora: sem etapa.
+  // Revanches, Frontier, Cynthia/Leaf e o campeão monotype ficam de fora (pós-jogo/opcional).
+  var LUTAS_DA_RUN = [
+    ["Roxanne 1", 0], ["Brawly 1", 1], ["Archie Slateport", 2], ["Wattson 1", 2],
+    ["Courtney Meteor Falls", 3], ["Tabitha Mt Chimney", 3], ["Maxie Mt Chimney", 3], ["Flannery 1", 3],
+    ["Norman 1", 4], ["Shelly Weather Institute", 5], ["Winona 1", 5],
+    ["Matt Mt Pyre", 6], ["Archie Mt Pyre", 6], ["Tabitha Magma Hideout", 6], ["Courtney Magma Hideout", 6], ["Maxie Magma Hideout", 6],
+    ["Tabitha Mossdeep", 6], ["Courtney Mossdeep", 6], ["Maxie Mossdeep", 6], ["Tate And Liza 1", 6],
+    ["Matt", 7], ["Shelly Seafloor Cavern", 7], ["Archie", 7], ["Juan 1", 7],
+    ["Sidney", 8], ["Phoebe", 8], ["Glacia", 8], ["Drake", 8], ["Steven", 8]
+  ];
+
   // Linha do resumo da Dex: só a próxima luta que falta (trava do usuário,
   // RN11), usando o time que o jogador tem agora.
   // Time que o chefão usa na dificuldade escolhida (mesma regra do resto do app).

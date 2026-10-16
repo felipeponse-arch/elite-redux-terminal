@@ -25,18 +25,9 @@ const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const R = carregarRegras({ milestone: 9 });
 const CAPS = JSON.parse(readFileSync(join(RAIZ, "data", "levelcaps.json"), "utf8")).rows;
 
-// Lutas da run e a etapa (índice de levelcaps.json) em que acontecem. Ginásios: ordem do
-// Emerald confirmada no dado (chefoes.js). Equipes: ordem da história do Emerald, pelos
-// nomes dos locais no dado. "Courtney Sunhollow" (região nova) fica de fora: sem etapa.
-const LUTAS_DA_RUN = [
-  ["Roxanne 1", 0], ["Brawly 1", 1], ["Archie Slateport", 2], ["Wattson 1", 2],
-  ["Courtney Meteor Falls", 3], ["Tabitha Mt Chimney", 3], ["Maxie Mt Chimney", 3], ["Flannery 1", 3],
-  ["Norman 1", 4], ["Shelly Weather Institute", 5], ["Winona 1", 5],
-  ["Matt Mt Pyre", 6], ["Archie Mt Pyre", 6], ["Tabitha Magma Hideout", 6], ["Courtney Magma Hideout", 6], ["Maxie Magma Hideout", 6],
-  ["Tabitha Mossdeep", 6], ["Courtney Mossdeep", 6], ["Maxie Mossdeep", 6], ["Tate And Liza 1", 6],
-  ["Matt", 7], ["Shelly Seafloor Cavern", 7], ["Archie", 7], ["Juan 1", 7],
-  ["Sidney", 8], ["Phoebe", 8], ["Glacia", 8], ["Drake", 8], ["Steven", 8]
-];
+// Lutas da run e a etapa em que acontecem: a lista mora em src/regras/chefoes.js (LUTAS_DA_RUN), a mesma régua do
+// "melhor time no geral" da tela do time (16/10/2026).
+const LUTAS_DA_RUN = R.LUTAS_DA_RUN;
 const DIFICULDADES = [{ chave: "party", caps: "more" }, { chave: "insane", caps: "elite" }];
 const capDe = (etapa, modo) => CAPS[etapa][modo] || CAPS[etapa].more || 100;
 

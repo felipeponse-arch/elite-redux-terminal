@@ -335,7 +335,7 @@
           return false;
         });
       }
-      await gerarBuildsDoTimeComIA(paraIA, "archetype-status", function () { return { timeNovo: true }; }, {},
+      await gerarBuildsDoTimeComIA(paraIA, "archetype-status", function () { return { timeNovo: true, campo: true }; }, {},
         function (texto) { setStatus("Etapa 2/4 - " + texto.charAt(0).toLowerCase() + texto.slice(1)); });
     } finally {
       encerrarLoteDeBuilds();

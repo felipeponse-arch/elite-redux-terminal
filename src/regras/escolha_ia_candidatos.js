@@ -33,7 +33,7 @@
   function blocoDeCandidatosParaIA(sp, r) {
     var lista = r.candidatos.slice(0, MAX_CANDIDATOS_NO_PROMPT);
     return "Tipo: " + speciesTypeNames(sp).join("/") + " | status base (HP/Atk/Def/SpA/SpD/Spe): " + sp.b.join("/") + "\n" +
-      "CANDIDATOS (do melhor para o pior, " + (r.alvo ? "calculados pelo app contra " + dadoExterno((r.alvo.pokemon || []).join(" e ")) : "so por sinergia: nao ha chefao adiante e nada foi simulado") + "):\n" +
+      "CANDIDATOS (do melhor para o pior, " + (r.alvo && r.alvo.origem === "campo" ? "calculados pelo app contra o campo inteiro da run, sem focar em nenhum chefao: o as de cada uma das " + r.alvo.lutas + " lutas (vale o melhor no geral)" : r.alvo ? "calculados pelo app contra " + dadoExterno((r.alvo.pokemon || []).join(" e ")) : "so por sinergia: nao ha chefao adiante e nada foi simulado") + "):\n" +
       "<dados_do_jogo>\n" + lista.map(function (c, i) { return textoDeCandidatoParaIA(c, i); }).join("\n") + "\n</dados_do_jogo>\n";
   }
   var FORMATO_ESCOLHA_IA = '{"escolha":N,"nature":"Nome","item":"Nome","evs":[hp,atk,def,spa,spd,spe],"rationale":"texto"}';
@@ -202,7 +202,8 @@
     opts = opts || {};
     if (!escolhaEntreCandidatosLigada) return null;
     if (opts.modo) return null;
-    var alvo = opts.chefao && opts.chefao.boss ? { chefao: opts.chefao.boss } : undefined;
+    // Tela do time (16/10/2026): melhor no geral, contra o campo inteiro da run, nunca o próximo líder.
+    var alvo = opts.chefao && opts.chefao.boss ? { chefao: opts.chefao.boss } : opts.campo ? { campo: true } : undefined;
     var r = candidatosDeBuild(sp, alvo ? { alvo: alvo } : {});
     // Sem chefão adiante o pipeline ainda traz candidatos só por sinergia (selo Estimado): a IA escolhe entre eles também (decisão do usuário, 15/10).
     return r && r.candidatos && r.candidatos.length ? r : null;

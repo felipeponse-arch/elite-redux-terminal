@@ -74,6 +74,21 @@
       saida.info = { chefao: null, indice: null, pokemon: [alvo.foe.nome], origem: "informado" };
       return saida;
     }
+    // Melhor no geral (tela do time, decisão do usuário 16/10/2026): sem focar em nenhum chefão, contra o campo inteiro da run, a mesma
+    // régua do rank v2 (LUTAS_DA_RUN). Um Pokémon por luta, o ás (último do time), para caber no navegador (~25 ms por alvo).
+    if (alvo && alvo.campo) {
+      LUTAS_DA_RUN.forEach(function (luta) {
+        var b = BOSSES.filter(function (x) { return x.name === luta[0]; })[0];
+        var party = b ? (bossPartyPorDificuldade(b) || []) : [];
+        for (var k = party.length - 1; k >= 0; k--) {
+          var f = foeDeDuelo(party[k], nivel, null);
+          if (f) { saida.foes.push(f); return; }
+        }
+      });
+      if (!saida.foes.length) { saida.aviso = "sem chefão no dado para o campo da run"; return saida; }
+      saida.info = { chefao: null, indice: null, pokemon: saida.foes.map(function (f) { return f.nome; }), origem: "campo", lutas: saida.foes.length };
+      return saida;
+    }
     var boss, indice = null, origem = "informado";
     if (alvo && alvo.chefao) {
       boss = typeof alvo.chefao === "string" ? BOSSES.filter(function (b) { return b.name === alvo.chefao; })[0] : alvo.chefao;
