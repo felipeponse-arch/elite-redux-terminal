@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { cpus } from "node:os";
+import { cpus, setPriority, constants as osConst } from "node:os";
 import { Worker, isMainThread, parentPort, workerData } from "node:worker_threads";
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 import { melhoresPelaSoma, notaDosEixos, escolherPelaNotaFinal } from "./rank_escolha.mjs";
@@ -133,6 +133,8 @@ if (!isMainThread) {
   process.exit(0);
 }
 
+// Prioridade abaixo do normal (16/10/2026): o cálculo usa todos os núcleos e travava o PC; assim o resto da máquina vem primeiro.
+try { setPriority(osConst.priority.PRIORITY_BELOW_NORMAL); } catch (e) { /* sem permissão: segue na prioridade normal */ }
 const t0 = Date.now();
 const amostra = parseInt((process.argv.find((x) => x.startsWith("--amostra=")) || "").split("=")[1], 10) || 1;
 const todas = R.SPECIES.filter((sp) => sp && sp.sname).map((sp) => sp.sname).filter((_, i) => i % amostra === 0);
@@ -144,6 +146,24 @@ const respostas = await Promise.all(partes.map((snames) => new Promise((ok, erro
   w.once("message", ok); w.once("error", erro);
 })));
 respostas.forEach((p) => Object.assign(res, p));
+// --por-luta=<arquivo> (estudo todas-as-lutas/02): a média do Battle Rating de cada espécie em cada luta, nos 2 eixos e nas 2
+// dificuldades, para testar divisões de peso sem refazer a simulação (scripts/estudo/fatias_de_peso.mjs).
+if (ARG("--por-luta")) {
+  const r3 = (v) => Math.round(v * 1000) / 1000;
+  const indice = Object.fromEntries(DIFICULDADES.map((d) => [d.chave, Object.fromEntries(lutas[d.chave].map((l, i) => [l.nome, i]))]));
+  const porEsp = {};
+  for (const s of Object.keys(res)) {
+    if (!res[s]) continue;
+    porEsp[s] = { etapa: res[s].etapa };
+    for (const d of DIFICULDADES) {
+      const r = res[s][d.chave];
+      if (!r) { porEsp[s][d.chave] = null; continue; }
+      porEsp[s][d.chave] = { set: r.set, ab: r.ab, golpes: r.golpes };
+      for (const eixo of ["potencial", "viabilidade"]) porEsp[s][d.chave][eixo] = r.eixos[eixo].map((e) => [indice[d.chave][e.luta], r3(e.brs.reduce((a, v) => a + v, 0) / e.brs.length)]);
+    }
+  }
+  writeFileSync(ARG("--por-luta"), JSON.stringify({ lutas: Object.fromEntries(DIFICULDADES.map((d) => [d.chave, lutas[d.chave].map((l) => ({ nome: l.nome, comum: !!l.comum, etapa: l.etapa }))])), res: porEsp }));
+}
 const validos = Object.keys(res).filter((s) => res[s]);
 
 // Peso por ameaça (PvPoke): a luta que mais derruba as espécies pesa mais; iterado com as
