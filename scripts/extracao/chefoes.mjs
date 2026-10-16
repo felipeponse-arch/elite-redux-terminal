@@ -12,7 +12,8 @@ export const formatarEvs = (arr) => (arr || []).slice(0, 6).map((v, i) => (v > 0
 // Quirk do PowerShell (função que devolve array): vazio vira null e de 1 elemento vira o próprio elemento.
 const desembrulhar = (l) => (l.length === 0 ? null : l.length === 1 ? l[0] : l);
 
-export function extrairChefoes(data) {
+// Pokémon de um time de treinador no formato de data/bosses.json (também usado pelo estudo de todas as lutas, 16/10/2026).
+export function timeDoTreinador(data, bruto) {
   // O item 0 da lista é um item real na 2.65.4 (Eviolite); no dado antigo era o espaço vazio. O PowerShell tratava 0 como "sem item".
   const itemValido = (i) => i !== undefined && i !== null && data.items[i] && (i !== 0 || (data.items[0].name && data.items[0].name !== "????????"));
   const resolverAbilidade = (sp, idx) => {
@@ -30,6 +31,11 @@ export function extrairChefoes(data) {
       nat: data.natureT[mon.nature] ? data.natureT[mon.nature] : "", evs: formatarEvs(mon.evs), evsRaw: mon.evs, ivsRaw: mon.ivs, mv: golpes, abiId: h.id,
       hpt: usaHp ? data.typeT[mon.hpType] : "" };
   }));
+  return time(bruto);
+}
+
+export function extrairChefoes(data) {
+  const time = (bruto) => timeDoTreinador(data, bruto);
   const bosses = [];
   for (const t of data.trainers) {
     const opcional = OPCIONAIS.includes(t.name);

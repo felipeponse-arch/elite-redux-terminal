@@ -49,6 +49,22 @@ for (const d of DIFICULDADES) {
     return { nome, etapa, nivel, foes: party.map((m) => foe(m, nivel)).filter(Boolean) };
   }).filter((l) => l && l.foes.length);
 }
+// Estudo "todas as lutas" (ticket todas-as-lutas/01, 16/10/2026): --lutas-extra=<arquivo de scripts/estudo/lutas_comuns.mjs> soma os
+// treinadores comuns da run às lutas de chefão, com o MESMO método; só com --saida=<arquivo>, nunca com --gravar.
+const ARG = (k) => (process.argv.find((x) => x.startsWith(k + "=")) || "").slice(k.length + 1) || null;
+const LUTAS_EXTRA = ARG("--lutas-extra");
+if (LUTAS_EXTRA && process.argv.includes("--gravar")) throw new Error("--lutas-extra é só para estudo: use --saida, nunca --gravar");
+if (LUTAS_EXTRA) {
+  const extra = JSON.parse(readFileSync(LUTAS_EXTRA, "utf8")).lutas;
+  for (const d of DIFICULDADES) {
+    for (const l of extra) {
+      const party = (l[d.chave] && l[d.chave].length ? l[d.chave] : l.party) || [];
+      const nivel = capDe(l.etapa, d.caps);
+      const foes = party.map((m) => foe(m, nivel)).filter(Boolean);
+      if (foes.length) lutas[d.chave].push({ nome: l.nome, etapa: l.etapa, nivel, foes, comum: true });
+    }
+  }
+}
 const dispPath = join(RAIZ, "data", "rank_disponibilidade.json");
 const DISP = existsSync(dispPath) ? JSON.parse(readFileSync(dispPath, "utf8")) : null;
 const etapaDe = (sname) => (DISP ? DISP.etapa[sname] : 0);
@@ -124,7 +140,7 @@ const nucleos = Math.max(1, Math.min(cpus().length - 2, 10));
 const partes = Array.from({ length: nucleos }, (_, i) => todas.filter((_, j) => j % nucleos === i));
 const res = {};
 const respostas = await Promise.all(partes.map((snames) => new Promise((ok, erro) => {
-  const w = new Worker(new URL(import.meta.url), { workerData: { snames } });
+  const w = new Worker(new URL(import.meta.url), { workerData: { snames }, argv: process.argv.slice(2).filter((x) => x !== "--gravar") }) // os núcleos precisam das opções (--lutas-extra);
   w.once("message", ok); w.once("error", erro);
 })));
 respostas.forEach((p) => Object.assign(res, p));
@@ -191,7 +207,8 @@ for (const d of DIFICULDADES) {
     console.log(`${String(i + 1).padStart(2)}. ${R.getSpeciesBySname(s).n.padEnd(24)} ${f.tier} pot ${f.potencial.tier} via ${f.viabilidade.tier} (etapa ${final[s].etapa}, ${f.set}/${f.habilidade})`);
   });
 }
-writeFileSync(join(RAIZ, "..", "rank_v2_saida.json"), JSON.stringify(final));
+writeFileSync(ARG("--saida") || join(RAIZ, "..", "rank_v2_saida.json"), JSON.stringify(final));
+if (ARG("--relatorio")) writeFileSync(ARG("--relatorio"), JSON.stringify(Object.fromEntries(DIFICULDADES.map((x) => [x.chave, { pesoLuta: relatorio[x.chave].pesoLuta, comuns: lutas[x.chave].filter((l) => l.comum).map((l) => l.nome) }]))));
 // --gravar (só com o rank completo, sem --amostra): data/species_rank.json no formato que o app
 // lê. tier/score/monoRanks do topo = Fácil/Ace (party); src/regras/rank_da_run.js troca pela
 // dificuldade da run. Fora do rank vira { foraDoRank: motivo }. Validação aprovada em 02/10
