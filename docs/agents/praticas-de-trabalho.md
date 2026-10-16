@@ -23,10 +23,9 @@ Ideia: pedir uma versão **mais aprofundada** da tarefa, não uma versão **maio
 | 3 (ler antes de propor) | Começo de ticket: ler o ticket, `estado.md`/`perguntas.md` da funcionalidade, `docs/decisoes_mecanicas.md`, a memória e o cofre (`resumo/`) antes de propor. | `issue-tracker.md`, memória "Consultar memória e cofre primeiro" |
 | 4 (instruções escritas pelo Claude) | Tarefa que se repetiu 2 vezes vira skill ou script do projeto, escrita pelo Claude. | Skills `publicar-versao`, `atualizar-dados-do-jogo`, `importar-builds-discord`, `fim-de-sessao-obsidian`; receita do rank em `resumo/convencoes.md` (candidata a skill) |
 | 5 (ver funcionando) | Entrega com evidência: portão verde (inclui o navegador) e, se a mudança é visual, captura da tela alterada mostrada ao Felipe. | Pré-commit nível 3, `scripts/smoke_tests` |
-| 6 (não ser babá) | Ir até o fim sem parar no meio; só parar no arriscado (apagar, publicar fora do fluxo, gastar acima do limite). | Estilo Proativo da sessão; permissões ficam com o Felipe (ver pendências) |
-| 7 (fiscalizar o que ninguém olha) | Varredura do que entrou sem revisão (branches da nuvem, master) junto do alarme semanal do upstream. | **Pendente:** tarefa agendada nova depende de aprovação do Felipe |
+| 6 (não ser babá) | Ir até o fim sem parar no meio; só parar no arriscado (apagar, publicar fora do fluxo, gastar acima do limite). | Estilo Proativo; comandos de rotina liberados em `teste/.claude/settings.local.json` (16/10, autorizado pelo Felipe); push, apagar, desfazer e publicar continuam pedindo permissão |
+| 7 (fiscalizar o que ninguém olha) | Varredura do que entrou sem revisão (branches da nuvem, master) junto do alarme semanal do upstream. | Preparada, NÃO ativa: [fiscalizacao-agendada.md](fiscalizacao-agendada.md) |
 | B (aprofundar, não aumentar) | Ao escrever pedido de ticket ou prompt de agente: (1) o que um especialista faria que não foi pedido; (2) a matéria-prima, que aqui é o código do jogo e a config (`abilities.cc`, `er-config`), não as análises já feitas; (3) os métodos concretos (TDD com dado real, sabotagem, `validar_dados`, `medir_texto_novo`); (4) o que prova que está certo além do autor (calculadora do jogo, sabotagem que pega, supervisor). | `docs/agents/loops-e-grafos.md` (prompt do nó) |
 
 ## D. Depende do Felipe
-- **6:** liberar comandos de rotina sem pergunta (allowlist em `.claude/settings.local.json`). Só ele muda permissão.
-- **7:** criar a tarefa agendada de fiscalização (com custo de uso semanal).
+- **7:** ativar a fiscalização agendada (pronta em fiscalizacao-agendada.md; gasta do limite semanal).
