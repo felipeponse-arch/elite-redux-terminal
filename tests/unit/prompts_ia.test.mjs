@@ -121,14 +121,12 @@ test("roster pra IA: Mega antes da 4ª insígnia conta como a base, sem duplicar
   assert.ok(soDragao.every((sn) => R.speciesTypeNames(R.getSpeciesBySname(sn)).includes("Dragon")));
 });
 
-test("guia: sname inventado não vira integrante; conferência de chefão real citado", () => {
+test("guia: sname inventado não vira integrante; Meu Time sem exigência de chefão no guia", () => {
   const g = sp("SPECIES_GARCHOMP");
   const guia = R.guiaDaResposta({ concept: "c", threats: "Cuidado com Roxanne", threatMemberSname: "SPECIES_INVENTADA" }, [g]);
   assert.equal(guia.threatMemberX, null);
   assert.equal(R.guiaDaResposta({ threatMemberSname: "SPECIES_GARCHOMP" }, [g]).threatMemberX, g.x);
-  assert.equal(R.guiaCitaChefaoReal(guia, ["Roxanne 1", "Roxanne"]), true);
-  assert.equal(R.guiaCitaChefaoReal(guia, ["Brawly"]), false);
-  assert.equal(R.guiaCitaChefaoReal(guia, []), true, "nada mais falta: não há o que exigir");
+  assert.equal(typeof R.guiaCitaChefaoReal, "undefined", "a exigência de citar chefão saiu (17/10/2026)");
   assert.equal(R.guiaDaResposta(null, [g]), null);
 });
 

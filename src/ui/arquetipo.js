@@ -274,18 +274,6 @@
         return null;
       }
       var guide = resp.valor;
-      // Confere se "threats" citou mesmo um chefão/líder real: 1 nova tentativa,
-      // só desse campo (mais barato que refazer o guia inteiro). Se falhar, fica
-      // com o original.
-      var remainingNames = aiTool_getRemainingBosses().remainingBossNames;
-      if (!guiaCitaChefaoReal(guide, remainingNames)) {
-        var ameacas = await pedirIA({ prompt: montarPromptAmeacas(members, remainingNames), tentativas: 1 });
-        if (ameacas.ok && ameacas.bruto && typeof ameacas.bruto.threats === "string") {
-          var corrigido = guiaDaResposta({ threats: ameacas.bruto.threats, threatMemberSname: ameacas.bruto.threatMemberSname }, members);
-          guide.threats = corrigido.threats;
-          guide.threatMemberX = corrigido.threatMemberX;
-        }
-      }
       return guide;
     } catch (e) {
       // Erro no app (não da IA - esses o pedirIA já trata) ao aplicar a resposta.

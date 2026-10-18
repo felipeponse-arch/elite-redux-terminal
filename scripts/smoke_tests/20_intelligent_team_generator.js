@@ -141,12 +141,10 @@ async function section20Corpo() {
   check("no lote, as regras de item vão UMA vez (não uma por Pokémon)",
     estagios[1] && estagios[1].split("Itens de batalha reais disponiveis").length === 2, estagios[1] && estagios[1].split("Itens de batalha reais disponiveis").length - 1);
 
-  // ---- referência do Smogon (thread de sample teams, 2026-09-18): o
-  // "threats" do guia agora exige citar um CHEFÃO REAL (getRemainingBosses),
-  // não só "tipo X genérico" - mesma lição da descrição de time de lá
-  // (nomeia a ameaça de verdade, não uma categoria vaga). ----
-  check("o prompt do guia de uso agora exige citar um chefão/líder REAL (getRemainingBosses), não só 'tipo genérico'",
-    estagios[2].indexOf("chefão ou líder de ginásio REAL") !== -1 && estagios[2].indexOf("getRemainingBosses") !== -1,
+  // Meu Time = melhor time no geral (17/10/2026, decisão do Felipe): o "threats" do guia fala das ameaças da run
+  // em geral (getTeamWeaknesses), sem exigir nem focar num chefão.
+  check("o guia do Meu Time não exige chefão: ameaças da run em geral (getTeamWeaknesses)",
+    estagios[2].indexOf("REAL que ainda falta enfrentar") === -1 && estagios[2].indexOf("getRemainingBosses") === -1 && estagios[2].indexOf("ameaças da run em geral") !== -1,
     estagios[2].slice(0, 400));
 
   var saveDepois = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");

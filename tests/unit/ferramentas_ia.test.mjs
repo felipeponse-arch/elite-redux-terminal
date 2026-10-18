@@ -253,7 +253,8 @@ test("todo nome de ferramenta citado nos prompts existe em buildStandardAiTools"
       for (const m of lit.matchAll(/\bget(?:TeamWeaknesses|SpeciesRank|RemainingBosses|PriorityMoveOptions|AbilityMovepoolSynergy|ConditionMoveSynergy|NextBossRoster|BoxCandidatesForBoss|ItemInfo|SpeedBenchmark|[A-Z][A-Za-z]*(?:Boss|Synergy|Rank|Weaknesses|Roster|Benchmark|Options|Info|Candidates)[A-Za-z]*)\b/g)) citados.add(m[0]);
     }
   }
-  assert.ok(citados.size >= 4, "o prompt do guia cita ferramentas pelo nome");
+  // 3 desde 17/10/2026: o guia do Meu Time deixou de citar getRemainingBosses (melhor time no geral, sem chefão).
+  assert.ok(citados.size >= 3, "o prompt do guia cita ferramentas pelo nome");
   for (const c of citados) assert.ok(nomes.has(c), "o prompt cita " + c + ", que não existe entre as ferramentas");
 });
 

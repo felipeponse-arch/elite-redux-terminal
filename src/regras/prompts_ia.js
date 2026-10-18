@@ -888,7 +888,7 @@
       versaoDosDados() + ", formato 1x1.\n" +
       "Acabou de ser montado este time (foco: " + focusDesc + "):\n" + teamList + "\n\n" +
       "Escreva um guia PRÁTICO de como jogar ESTE time especificamente, usando as builds reais listadas " +
-      "acima - nunca um texto genérico sobre o arquétipo. Use getTeamWeaknesses, getRemainingBosses e, pra " +
+      "acima - nunca um texto genérico sobre o arquétipo. Use getTeamWeaknesses e, pra " +
       "membros específicos, getSpeciesRank/getPriorityMoveOptions antes de responder, em vez de chutar.\n" +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
       '{"concept":"...","opening":"...","development":"...","winCondition":"...","threats":"...","threatMemberSname":"..."}' +
@@ -896,28 +896,12 @@
       "do time e como ele costuma vencer. opening: 2-3 frases, quem tende a abrir a partida e o que observar " +
       "nos primeiros turnos. development: 2-3 frases, como posicionar, quando trocar, quando usar suporte, " +
       "como preservar recursos importantes. winCondition: 1-2 frases, qual Pokémon ou combinação costuma " +
-      "fechar a partida e o que preservar pra isso. threats: 2-3 frases - cite PELO MENOS UM chefão ou líder " +
-      "de ginásio REAL que ainda falta enfrentar (nome exato de getRemainingBosses) que é particularmente " +
-      "perigoso pra este time, dizendo qual integrante segura ele e por quê (tipo, golpe ou stat real dele, " +
-      "nunca chutado) - nomeie o adversário de verdade, não fique só em 'ameaças do tipo X' genérico. " +
-      "threatMemberSname: o sname EXATO (dos listados acima, ex: SPECIES_CHARIZARD) do integrante que você citou " +
-      "em threats como quem segura a ameaça - vazio se threats não citar nenhum chefão real. Se getRemainingBosses " +
-      "vier vazio (nada mais falta no jogo), aí sim fale em termos gerais de tipo/estratégia em threats e deixe " +
-      "threatMemberSname vazio. Não invente golpe/habilidade/item fora do que foi listado acima - se não tiver " +
+      "fechar a partida e o que preservar pra isso. threats: 2-3 frases sobre as ameaças da run em geral para este time (Meu Time monta o melhor time no geral, sem focar em " +
+      "nenhum chefão): os tipos, papéis ou estratégias de adversário que mais castigam o time (use getTeamWeaknesses), dizendo qual " +
+      "integrante segura cada uma e por quê (tipo, golpe ou stat real dele, nunca chutado). Pode citar um chefão como exemplo, sem " +
+      "focar nele. threatMemberSname: o sname EXATO (dos listados acima, ex: SPECIES_CHARIZARD) do integrante que mais segura essas " +
+      "ameaças - vazio se nenhum segura. Não invente golpe/habilidade/item fora do que foi listado acima - se não tiver " +
       "certeza de algo, seja mais genérico em vez de arriscar.";
-  }
-  // Nova tentativa só do campo "threats" quando ele não citou nenhum chefão real
-  // (auditoria de 2026-09-18: o prompt exigia, mas nunca era conferido).
-  function montarPromptAmeacas(members, remainingNames) {
-    var teamList = descricaoTimeParaGuia(members);
-    return "Você escreveu um guia de uso pra este time do Pokemon Elite Redux, mas o campo 'threats' não citou " +
-            "nenhum chefão/líder real da lista abaixo, e a regra que você recebeu exigia isso.\n" +
-            "Chefões/líderes que ainda faltam enfrentar: " + remainingNames.join(", ") + "\n" +
-            "Time:\n" + teamList + "\n" +
-            "Reescreva SÓ os campos threats e threatMemberSname (threats: 2-3 frases em português, cite pelo " +
-            "menos um desses nomes exatos e diga qual integrante do time segura ele e por quê - tipo, golpe ou " +
-            "stat real dele; threatMemberSname: o sname EXATO desse integrante). " +
-            "Responda SOMENTE com {\"threats\":\"...\",\"threatMemberSname\":\"...\"}, sem texto ao redor.";
   }
   // Resposta do guia -> campos de texto limitados; threatMemberX só se o sname
   // for de um integrante REAL desta equipe (nunca confia no que a IA escreveu).
@@ -932,7 +916,4 @@
       threatMemberX: (typeof raw.threatMemberSname === "string" && snameParaX.hasOwnProperty(raw.threatMemberSname))
         ? snameParaX[raw.threatMemberSname] : null
     };
-  }
-  function guiaCitaChefaoReal(guia, remainingNames) {
-    return !remainingNames.length || remainingNames.some(function (n) { return guia.threats.indexOf(n) !== -1; });
   }
