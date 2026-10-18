@@ -29,3 +29,16 @@ Ideia: pedir uma versão **mais aprofundada** da tarefa, não uma versão **maio
 
 ## D. Depende do Felipe
 - **7:** ativar a fiscalização agendada (pronta em fiscalizacao-agendada.md; gasta do limite semanal).
+
+## E. Ferramentas do toolkit: padrão de uso (adotado em 17/10/2026)
+Instaladas pelo setup do vibe-coding-toolkit (`docs/setup.md`). Padrão do projeto, decidido pelo Felipe:
+| Ferramenta | Quando usar | Quando não usar |
+|---|---|---|
+| Ponytail | sempre, nível `full`; `ultra` quando o pedido for vago | — |
+| Caveman | conversa do dia a dia | documentos, commits e explicação de decisão importante (texto normal) |
+| Context7 | dúvida de biblioteca: ESLint, Playwright, Node, PowerShell | mecânica do jogo: a fonte é o código do jogo (`docs/decisoes_mecanicas.md`) |
+| Graphify | antes de mexer em função usada em muitos lugares; regerar depois de mudança grande | chamadas entre arquivos (o app não usa `import`): conferir com grep |
+| Revisão de segurança (`docs/prompts/revisao-de-seguranca.md`) | antes de publicar versão grande, pelo agente `seguranca` | — |
+| Avaliação dos agentes (prompt 14) | depois de mudar agentes, ganchos ou regras de trabalho | — |
+| `max-lines` 350 | arquivo novo nasce abaixo de 350 linhas | — |
+| Subagentes | sempre pelo papel (`subagent_type`), nunca pelo nome do modelo | — |
