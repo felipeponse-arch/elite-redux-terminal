@@ -32,8 +32,12 @@ const raw = caminho
   ? JSON.parse(readFileSync(caminho, "utf8"))
   : await (await fetch(`https://raw.githubusercontent.com/ForwardFeed/ER-nextdex/main/static/js/data/gameDataV${versao}.json`)).json();
 
-if (raw.moves.length !== dex.moves.length) throw new Error(`golpes: ${raw.moves.length} no NextDex x ${dex.moves.length} no dex_compact - versões diferentes`);
+// A versão nova acrescenta golpes pela config do jogo (scripts/extracao/golpes_novos.mjs, ticket v09) depois dos do NextDex: o dado bruto
+// pode ter MENOS golpes que o dex_compact, e esses golpes do fim mantêm a entrada que o golpes_novos gravou (17/10/2026).
+if (raw.moves.length > dex.moves.length) throw new Error(`golpes: ${raw.moves.length} no NextDex x ${dex.moves.length} no dex_compact - versões diferentes`);
+const ANTES = JSON.parse(readFileSync(join(RAIZ, "data", "move_categorias.json"), "utf8"));
 const out = {};
+for (let id = raw.moves.length; id < dex.moves.length; id++) if (ANTES[id]) out[id] = ANTES[id];
 let comCategoria = 0, comChance = 0, comRecuo = 0, comDreno = 0, comArea = 0, comStatus = 0;
 raw.moves.forEach((m, id) => {
   if (!m) return;
