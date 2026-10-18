@@ -1,0 +1,15 @@
+# Graphify (16/10/2026, setup do vibe-coding-toolkit): só o código. Dado do jogo, build, testes gerados e caches ficam fora.
+.git/
+node_modules/
+graphify-out/
+.claude/
+artifact_final.html
+data/
+test-results*/
+playwright-report*/
+tests/visual_baselines/
+types/
+*.log
+package-lock.json
+.env
+.env.*

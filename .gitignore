@@ -31,3 +31,6 @@ tests/.sabotagem_cache.json
 .claude/worktrees/
 # Memória própria dos agentes do Claude Code (não é código do app).
 .claude/agent-memory/
+
+# Grafo do código do Graphify (setup do toolkit, 17/10/2026): gerado por comando, não é fonte.
+graphify-out/

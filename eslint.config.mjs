@@ -159,4 +159,10 @@ export default [
     files: ["tests/e2e/**/*.mjs"],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
+  {
+    // Tamanho de arquivo (setup do vibe-coding-toolkit, 17/10/2026): referência de 350 linhas, como AVISO. Na adoção eram 14
+    // arquivos acima (duelo.js 4455); o plano de redução está em docs/tickets/arquivos-grandes/01. Não vira erro antes do plano.
+    files: ["src/**/*.js"],
+    rules: { "max-lines": ["warn", { max: 350 }] },
+  },
 ];
