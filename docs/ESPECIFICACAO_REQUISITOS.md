@@ -748,7 +748,7 @@ nova entra no motor sem consultar e registrar lá.
   sinergias da espécie com `motivos`, usado nos prompts e na reconciliação da Build. Não existe ainda:
   `src/regras/pipeline_build.js`, a ligação do botão e do lote e o motivo e o selo na tela. Decisões do
   usuário de 10/10 e 14/10.
-- RF117 — **Proposta inicial por ponte OmniRoute opcional** [estende RF114 e RNF13] (**implementado, no
+- RF117 — **REMOVIDO em 17/10/2026** (decisão do Felipe: o projeto não usa mais o OmniRoute; a IA do app é sempre o Claude). Texto original: **Proposta inicial por ponte OmniRoute opcional** [estende RF114 e RNF13] (**implementado, no
   master, ainda não publicado; inerte sem host**, commits 842d6bd e 753f0cb): o cliente de IA só usa uma
   ponte alternativa quando o host injeta `window.__ER_OMNIROUTE_BRIDGE__` com o modelo exatamente
   `antigravity/gemini-3.1-pro-high` (`src/ui/ia.js`); o Artifact não contém chave, segredo nem rota fixa; se
