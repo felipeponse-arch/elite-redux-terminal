@@ -7,16 +7,16 @@ Esforço = nível de raciocínio. A tabela é proposta; o usuário confirma e po
 
 | Tarefa | Modelo | Esforço | Quem decide |
 |---|---|---|---|
-| Nível 0: ler, varrer, extrair (só leitura) | Haiku 5.5, ou Gemini via OmniRoute (`antigravity/gemini-3.1-pro-high`, custo 0) | baixo | Orquestrador (Gemini só com autorização, ver §2a) |
+| Nível 0: ler, varrer, extrair (só leitura) | Haiku 5.5 | baixo | Orquestrador |
 | Nível 1: implementar com TDD no worktree | Sonnet 5.5 | médio | Orquestrador |
 | Mecânica do motor, pipeline, calibração | Sonnet 5.5 | alto | Orquestrador; mecânica nova segue `docs/decisoes_mecanicas.md` |
 | Supervisor (Gauntlet) e revisão de segurança | Sonnet 5.5 | médio | Orquestrador |
-| Orquestração e decisão | COMBO-1 (encaminha para o Opus 5 na assinatura); Sonnet 5.5 se o limite estiver apertado | médio | Usuário, pela escolha do modelo da sessão |
+| Orquestração e decisão | Opus 5.5 (direto na assinatura); Sonnet 5.5 se o limite estiver apertado | médio | Usuário, pela escolha do modelo da sessão |
 
 ## 2. Restrições reais já vividas
-a) **Gemini e o classificador de segurança.** Em 10/10/2026 o classificador barrou o envio de contexto do projeto ao Gemini. Essa rota só vale com autorização explícita e delimitada do usuário: quais arquivos, nunca chaves nem saves. Sem isso, a leitura pesada fica no Haiku ou no Sonnet.
-b) **Modelo de subagente.** Por regra do usuário, todo subagente roda no Sonnet 5.5. NÃO passar o parâmetro `model: "sonnet"` na chamada de `Agent`: o apelido aponta para um modelo que dá 404. Os agentes de `.claude/agents/` já trazem o modelo certo no cabeçalho; chamar sem o parâmetro.
-c) **COMBO-1 não é cota extra.** Ele encaminha para a própria assinatura do claude.ai e gasta o mesmo limite semanal. Só as outras conexões do OmniRoute (por exemplo `antigravity`) têm cota separada.
+a) **Gemini e o classificador de segurança (histórico; a rota pelo OmniRoute foi desligada em 17/10/2026).** Em 10/10/2026 o classificador barrou o envio de contexto do projeto ao Gemini. Essa rota só vale com autorização explícita e delimitada do usuário: quais arquivos, nunca chaves nem saves. Sem isso, a leitura pesada fica no Haiku ou no Sonnet.
+b) **Modelo de subagente.** Por regra do usuário, todo subagente roda no Sonnet 5.5. NÃO passar o parâmetro `model: "sonnet"` na chamada de `Agent`: o apelido apontava para um modelo que dava 404 (era o mapeamento do OmniRoute, tirado em 17/10/2026). Os agentes de `.claude/agents/` já trazem o modelo certo no cabeçalho; chamar sem o parâmetro.
+c) **OmniRoute fora (17/10/2026).** O Claude Code não passa mais pelo OmniRoute (decisão do Felipe): sem COMBO-1 e sem a rota Gemini/antigravity.
 
 ## 3. Orçamento por limite semanal
 Tamanhos de ticket: **P** (pequeno), **M** (médio), **G** (grande), como marcados no ticket em `docs/tickets/`. No começo da sessão, o orquestrador lê o uso semanal (`get_usage`) e aplica:
