@@ -5,7 +5,7 @@
   temporária fora do projeto. Pedido do Felipe: executar o prompt 12 (projeto existente) inteiro, com o semanal em 88%.
 - Cliente: Claude Code 2.1.296 (app desktop, Windows 10, PowerShell 5.1 + Git Bash). Modelo principal: Opus 5.5 (mantido).
 - Política de subagentes: a do projeto (`docs/agents/politica-de-modelo.md`, modelo por papel no cabeçalho de cada agente).
-  **Achado:** pedir o modelo pelo nome (`model: "sonnet"`) no Agent falha neste cliente (404, `cc/claude-sonnet-5` não existe);
+  **Achado:** pedir o modelo pelo nome (`model: "sonnet"`) no Agent falhava (404, `cc/claude-sonnet-5`): era o mapeamento do OmniRoute em `~/.claude/settings.json`, tirado em 17/10 a pedido do Felipe;
   chamar o agente pelo papel (`subagent_type` sem `model`) funciona. Regra mantida: nunca passar `model`.
 - Decisões do Felipe nesta adoção: instalar Ponytail e Caveman (depois de revisar o código); arquivos grandes = medir e
   planejar, sem refatorar; Graphify com exceção à regra do Python, só para ele.
@@ -31,7 +31,7 @@
 | RTK 0.50.0 | reaproveitado: ativo pelo cliente (`rtk gain`: 2045 comandos), sem hook; hook global NÃO instalado para não executar duas vezes | usuário | validado sem hook; `rtk init -g` só com autorização e teste de duplicidade |
 | Ponytail 5.3.2 | instalado (plugin, `--scope project`); código revisado: ganchos só Node + `git ls-files`; quadro de tarefas em CSV local; webhook vazio, `sendNames` falso | projeto | instalado e descoberto (skills `ponytail:*` na sessão) |
 | Caveman 4.0.1 | instalado (plugin, `--scope project`); ganchos só Node, estatística local; sem rede | projeto | instalado e descoberto (skills `caveman:*` e agentes `cavecrew`) |
-| Context7 1.0.4 | instalado (plugin/MCP, `--scope project`) | projeto | autenticado (17/10, Felipe pelo `/mcp`); `claude mcp list` = `plugin:context7:context7 ✔ Connected`. Consulta real pendente: as ferramentas só carregam em sessão nova do app; o `claude -p` do terminal passa pelo OmniRoute (COMBO-1) sem login e não serve de teste |
+| Context7 1.0.4 | instalado (plugin/MCP, `--scope project`) | projeto | autenticado (17/10, Felipe pelo `/mcp`); `claude mcp list` = `plugin:context7:context7 ✔ Connected`. Consulta real pendente: as ferramentas só carregam em sessão nova do app; o OmniRoute foi tirado do Claude Code em 17/10 (o terminal precisa de `/login`) |
 | Graphify | instalado em venv isolado `teste/ferramentas/graphify` (Python 3.14 por caminho completo; o gancho segue bloqueando `python`/`py`); `.graphifyignore`; saída `graphify-out/` ignorada no git; sem hook de git, sem LLM | projeto (fora do repo) | validado: `extract . --code-only --no-cluster` = 294 arquivos, 2401 nós, 4888 arestas; `affected "pipelineResolverAlvo"` respondeu. Limite: o app junta arquivos sem `import`, chamadas entre arquivos não aparecem |
 | ESLint/qualidade | reaproveitado (ESLint 10, stylelint, tsc, checagens próprias, sabotagens); regra nova `max-lines` 350 como aviso em `src/` | projeto | validado: 14 avisos, 0 erros; `npm run check` verde. Plano: `docs/tickets/arquivos-grandes/01` |
 | Lint tipado (no-floating-promises) | não se aplica: JS com `checkJs`, sem TypeScript-ESLint; o `tsc` já roda | — | decisão registrada |
