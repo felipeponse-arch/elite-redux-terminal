@@ -121,6 +121,7 @@
   function motorBuildDoCandidato(ctx, sp, base, travado, avisos) {
     var cache = ctx.cache, chaveCtx = motorChaveDoContexto(ctx);
     var salva = travado && sp.x === base.x ? getActiveBuild(sp.sname) : null;
+    if (salva && salva.source === "sugestao") salva = null; // sugestão do próprio app não é build do jogador: recalcula (F5, 21/10)
     var origem, build;
     if (salva) { build = salva; origem = "build-salva"; }
     else {

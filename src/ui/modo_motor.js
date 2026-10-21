@@ -92,7 +92,7 @@
       motorAquecidoPara = chaveCtx; // a montagem calculou todas as builds do elenco
       var res = r.value;
       res.tempoTelaMs = Date.now() - t0;
-      motorTela = { res: res, chaveCtx: chaveCtx, aplicada: null, favoritos: favoritos };
+      motorTela = { res: res, chaveCtx: chaveCtx, aplicada: null, favoritos: favoritos, confirmando: null, gravacao: "" };
       renderTeamStrategy(state.team.map(getSpeciesByX).filter(Boolean)); // redesenha o painel inteiro: o status vem depois
       status("Time montado em " + modoMotorSegundos(res.tempoTelaMs) + ", sem consultar a IA.");
       var card = document.getElementById("motor-resultado");
@@ -107,14 +107,37 @@
     }
   }
 
-  // "Usar esta variante": só troca o time (a mesma regra de "Usar este time" da IA: o resto vai para a caixa). Builds não são gravadas.
-  function modoMotorUsarVariante(chave) {
-    if (!motorTela) return;
-    var v = motorTela.res.variantes.filter(function (x) { return x.chave === chave; })[0];
+  // "Ficar com este time" (F5, 21/10): troca o time (a mesma regra de "Usar este time" da IA: o resto vai para a caixa) E grava as builds
+  // desses Pokémon com a origem "Sugestão do app" (src/regras/sugestao_do_motor.js). Se a sugestão passaria por cima de uma build que o
+  // jogador montou, pede confirmação na tela antes (modoMotorConfirmando); a build dele nunca é apagada: fica como variante.
+  function modoMotorVarianteDe(chave) { return motorTela && motorTela.res.variantes.filter(function (x) { return x.chave === chave; })[0]; }
+  function modoMotorFicarComVariante(chave, gravarBuilds) {
+    var v = modoMotorVarianteDe(chave);
     if (!v) return;
-    teamRecommendation = { snames: v.membros.map(function (m) { return m.sname; }), reasoning: "Montado pelo Modo Motor (" + v.objetivo.nome + "), sem IA." };
-    if (!applyRecommendedTeam()) return;
+    if (gravarBuilds === undefined) {
+      var conflito = planoDeGravarSugestoes(v.membros).filter(function (p) { return p.confirmar; });
+      if (conflito.length) {
+        motorTela.confirmando = { chave: chave, nomes: conflito.map(function (p) { return p.nome; }) };
+        renderTeamStrategy(state.team.map(getSpeciesByX).filter(Boolean));
+        var titulo = document.getElementById("motor-confirma-titulo");
+        if (titulo) titulo.focus();
+        return;
+      }
+      gravarBuilds = true;
+    }
+    motorTela.confirmando = null;
+    teamRecommendation = { snames: v.membros.map(function (m) { return m.sname; }), reasoning: "Montado pelo app (" + v.objetivo.nome + "), sem IA." };
+    if (!applyRecommendedTeam()) { renderTeamStrategy(state.team.map(getSpeciesByX).filter(Boolean)); return; }
+    var r = { gravadas: 0, semVaga: [] };
+    if (gravarBuilds) {
+      acao(["builds", "resumo", "time", "chefao"].concat(v.membros.map(function (m) { return "ficha:" + m.sname; })), function () {
+        r = gravarSugestoesDoMotor(v.membros);
+        return r.gravadas > 0;
+      });
+    }
     motorTela.aplicada = chave;
+    motorTela.gravacao = !gravarBuilds ? "Só o time foi trocado; nenhuma build foi gravada."
+      : r.gravadas + " build(s) gravada(s) como \"" + SUGESTAO_ROTULO + "\"." + (r.semVaga.length ? " Sem vaga (já têm 3 builds suas): " + r.semVaga.join(", ") + "." : "");
     renderTeamStrategy(state.team.map(getSpeciesByX).filter(Boolean));
     var botao = document.querySelector('[data-motor-usar="' + chave + '"]');
     if (botao) botao.focus();
@@ -157,6 +180,21 @@
           ' <span class="motor-origem">(' + escapeHtml(MOTOR_ORIGEM_ROTULO[m.origem] || m.origem) + ')</span></div>' +
         '<div class="motor-papeis">' + papeis + '</div></div></li>';
   }
+  function modoMotorRodapeHtml(v, aplicada) {
+    var c = motorTela.confirmando;
+    if (c && c.chave === v.chave) {
+      return '<div class="motor-confirma" role="group" aria-labelledby="motor-confirma-titulo">' +
+        '<h5 id="motor-confirma-titulo" tabindex="-1">Você já tem build própria: ' + c.nomes.map(escapeHtml).join(", ") + '</h5>' +
+        '<p class="mybuild-hint">Se gravar, a sugestão do app vira a build ativa desses Pokémon. A sua build não é apagada: continua guardada como variante e dá para voltar a ela nos botões da build na ficha.</p>' +
+        '<div class="plano-rodape"><button type="button" class="add-team-btn" data-motor-confirmar="gravar">Ficar com o time e gravar as builds</button>' +
+        '<button type="button" class="add-team-btn" data-motor-confirmar="so-time">Ficar só com o time</button>' +
+        '<button type="button" class="add-team-btn" data-motor-confirmar="cancelar">Cancelar</button></div></div>';
+    }
+    return '<div class="plano-rodape"><button type="button" class="add-team-btn" data-motor-usar="' + v.chave + '"' + (aplicada ? " disabled" : "") + '>' +
+      (aplicada ? "Time em uso" : "Ficar com este time") + '</button>' +
+      '<span class="mybuild-hint">' + (aplicada && motorTela.gravacao ? escapeHtml(motorTela.gravacao)
+        : 'Troca o time e grava a build de cada um como "' + SUGESTAO_ROTULO + '"; a build que você montou nunca é apagada.') + '</span></div>';
+  }
   function modoMotorVarianteHtml(v) {
     var rest = v.metricas.restantes, aplicada = motorTela.aplicada === v.chave;
     var tags = (v.tags || []).map(function (g) {
@@ -182,9 +220,7 @@
       (v.avisos.length ? '<ul class="motor-avisos">' + v.avisos.map(function (a) { return '<li>' + escapeHtml(a) + '</li>'; }).join("") + '</ul>' : "") +
       '<details class="motor-explicacao" data-chave="' + v.chave + '"' + (motorExplicacaoAberta[v.chave] ? " open" : "") + '><summary>Por que este time</summary><ul>' +
         v.explicacao.map(function (t) { return '<li>' + escapeHtml(t) + '</li>'; }).join("") + '</ul></details>' +
-      '<div class="plano-rodape"><button type="button" class="add-team-btn" data-motor-usar="' + v.chave + '"' + (aplicada ? " disabled" : "") + '>' +
-        (aplicada ? "Time em uso" : "Usar esta variante") + '</button>' +
-        '<span class="mybuild-hint">Troca só o time; o Motor não grava builds (veja "Ver sugestões do jogo" na ficha de cada um).</span></div>' +
+      modoMotorRodapeHtml(v, aplicada) +
     '</section>';
   }
   function modoMotorResultadoHtml() {
@@ -224,6 +260,15 @@
         if (de) de.focus();
         return;
       }
-      if (alvo.dataset.motorUsar) modoMotorUsarVariante(alvo.dataset.motorUsar);
+      if (alvo.dataset.motorUsar) { modoMotorFicarComVariante(alvo.dataset.motorUsar); return; }
+      if (alvo.dataset.motorConfirmar && motorTela && motorTela.confirmando) {
+        var chave = motorTela.confirmando.chave, o = alvo.dataset.motorConfirmar;
+        if (o === "cancelar") {
+          motorTela.confirmando = null;
+          redesenhar();
+          var voltar = document.querySelector('[data-motor-usar="' + chave + '"]');
+          if (voltar) voltar.focus();
+        } else modoMotorFicarComVariante(chave, o === "gravar");
+      }
     });
   })();

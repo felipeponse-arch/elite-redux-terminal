@@ -4113,4 +4113,32 @@ export const MUTACOES = [
     de: "function motorTemGolpeDeLado(ctx, c) { return ",
     para: "function motorTemGolpeDeLado(ctx, c) { claude.use(\"sample\"); return ",
   },
+  {
+    id: "sugestao-apaga-build-do-jogador",
+    descricao: "'Ficar com este time' derruba uma build manual ou de IA do jogador para abrir vaga na lista cheia",
+    arquivo: "sugestao_do_motor.js",
+    de: "return !o.e.active && !ehBuildDoJogador(o.e);",
+    para: "return !o.e.active;",
+  },
+  {
+    id: "sugestao-sem-confirmacao",
+    descricao: "'Ficar com este time' passa por cima da build ativa do jogador sem pedir confirmação",
+    arquivo: "sugestao_do_motor.js",
+    de: "confirmar: ehBuildDoJogador(ativa) && ",
+    para: "confirmar: false && ",
+  },
+  {
+    id: "sugestao-pede-plano-a-ia",
+    descricao: "a build gravada pela sugestão fica marcada para revisão automática, que consultaria a IA em segundo plano",
+    arquivo: "sugestao_do_motor.js",
+    de: "planoConsultado: true",
+    para: "planoConsultado: false",
+  },
+  {
+    id: "motor-sugestao-vira-build-salva",
+    descricao: "o Motor trata a 'Sugestão do app' gravada como se fosse build salva do jogador",
+    arquivo: "time_pelo_motor.js",
+    de: "if (salva && salva.source === \"sugestao\") salva = null;",
+    para: "",
+  },
 ];

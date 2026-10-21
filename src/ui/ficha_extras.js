@@ -171,6 +171,7 @@
     if (!build) return "";
     if (build.origem === "ia") return "Build gerada por IA";
     if (build.origem === "manual") return "Meu build";
+    if (build.origem === "sugestao") return SUGESTAO_ROTULO;
     if (build.origem === "curada") return ESTILO_ROTULO[build.estilo] ? "Build curada (" + ESTILO_ROTULO[build.estilo] + ")" : "Build curada";
     if (build.origem === "base") return "Build da forma base";
     return "Build (formato Showdown)";

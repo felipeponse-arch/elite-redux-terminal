@@ -212,7 +212,7 @@
   function buildChipsHtml(list) {
     if (!list.length) return "";
     return '<div class="mybuild-chips">' + list.map(function (b, i) {
-      var label = (b.source === "ia" ? "IA" : "Manual") + " " + (i + 1);
+      var label = (b.source === "ia" ? "IA" : b.source === "sugestao" ? SUGESTAO_ROTULO : "Manual") + " " + (i + 1);
       // A que ficou de reserva quando a criatura evoluiu (2026-09-27).
       var titulo = "";
       if (b.antesDeEvoluir) { label = "Antes de evoluir"; titulo = ' title="Build de ' + escapeHtml(b.antesDeEvoluir) + ', de antes da evolução"'; }
@@ -307,7 +307,7 @@
       // build manual, ou uma da IA sem essa parte da resposta, não mostra
       // nada aqui). Visualmente separado do bloco Showdown de baixo (que é
       // só o set em si) - isso é o "porquê", não o "o quê".
-      (hasBuild && b.source === "ia" && b.rationale
+      (hasBuild && (b.source === "ia" || b.source === "sugestao") && b.rationale
         ? '<div class="mybuild-rationale"><strong>Por que essa escolha:</strong> ' + escapeHtml(b.rationale) + '</div>'
         : '') +
       (hasBuild ? '<pre class="showdown-block">' + escapeHtml(preview) + '</pre><button id="mybuild-copy" class="text-action-btn" type="button">Copiar</button>' : '') +

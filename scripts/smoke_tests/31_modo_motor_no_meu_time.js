@@ -76,12 +76,17 @@ async function section31() {
     // ---- usar uma variante troca o time ----
     var nomesDasVariantes = [].map.call(varas, function (v) { return [].map.call(v.querySelectorAll(".motor-membro-nome .goto-species"), function (e) { return e.textContent; }).join("|"); });
     var usarSeguro = card.querySelector('[data-motor-usar="seguro"]');
-    if (!achou("botão 'Usar esta variante' do seguro", usarSeguro)) return;
+    if (!achou("botão 'Ficar com este time' do seguro", usarSeguro)) return;
     usarSeguro.click();
     await wait(60);
     var doTime = S.team.map(function (x) { return T.getSpeciesByX(x).n; }).sort().join("|");
-    check("'Usar esta variante' troca o time para os Pokémon da variante e marca 'Time em uso'",
+    check("'Ficar com este time' troca o time para os Pokémon da variante e marca 'Time em uso'",
       doTime === nomesDasVariantes[1].split("|").sort().join("|") && document.querySelector('[data-motor-usar="seguro"]').disabled && /Time em uso/.test(document.querySelector('[data-motor-usar="seguro"]').textContent), doTime + " x " + nomesDasVariantes[1]);
+
+    var snamesDoTime = S.team.map(function (x) { return T.getSpeciesByX(x).sname; });
+    var gravadas = snamesDoTime.filter(function (s) { var l = S.customBuilds[s] || []; return l.length === 1 && l[0].source === "sugestao" && l[0].active && !l[0].revisar; });
+    check("'Ficar com este time' também grava a build de cada um como 'Sugestão do app' (ativa, sem pedir plano à IA)", gravadas.length === snamesDoTime.length, snamesDoTime.map(function (s) { return s + ":" + ((S.customBuilds[s] || [{}])[0].source); }));
+    check("o botão diz quantas builds foram gravadas e com qual nome", document.querySelector('[data-motor-usar="seguro"]').parentNode.textContent.indexOf("gravada(s) como \"Sugestão do app\"") !== -1, document.querySelector('[data-motor-usar="seguro"]').parentNode.textContent);
 
     // ---- mesma entrada, mesmo resultado (e bem mais rápido, com o cache) ----
     var t1 = Date.now();
@@ -91,6 +96,36 @@ async function section31() {
     var nomes2 = [].map.call(document.querySelectorAll("#motor-resultado .motor-variante"), function (v) { return [].map.call(v.querySelectorAll(".motor-membro-nome .goto-species"), function (e) { return e.textContent; }).join("|"); });
     check("montar de novo com a mesma entrada dá as mesmas variantes", JSON.stringify(nomes2) === JSON.stringify(nomesDasVariantes), nomes2);
     window.__tempoMotorRepetidoMs = Date.now() - t1;
+
+    // ---- build que o jogador montou: avisa e pede confirmação; nunca apaga ----
+    var alvoS = snamesDoTime.filter(function (s) { return s !== "SPECIES_TOGEKISS"; })[0], minha = JSON.parse(JSON.stringify(S.customBuilds[alvoS][0]));
+    minha.source = "manual"; minha.nature = minha.nature === "Bold" ? "Calm" : "Bold"; minha.active = true;
+    S.customBuilds[alvoS] = [minha];
+    var antesJson = JSON.stringify(S.customBuilds[alvoS]);
+    document.getElementById("motor-montar").click();
+    await wait(30);
+    await pollUntil(function () { return /Time montado em/.test(document.getElementById("archetype-status").textContent) && !document.getElementById("motor-montar").disabled; }, 90000);
+    var usar2 = document.querySelector('[data-motor-usar="seguro"]');
+    if (!achou("botão 'Ficar com este time' do seguro (2ª vez)", usar2)) return;
+    usar2.click();
+    await wait(40);
+    var conf = document.getElementById("motor-confirma-titulo");
+    check("com build própria ativa, 'Ficar com este time' pede confirmação na tela (foco no aviso) e não mexe na build",
+      !!conf && document.activeElement === conf && JSON.stringify(S.customBuilds[alvoS]) === antesJson && document.querySelectorAll("[data-motor-confirmar]").length === 3, conf && conf.textContent);
+    if (!achou("botão Cancelar do aviso", document.querySelector('[data-motor-confirmar="cancelar"]'))) return;
+    document.querySelector('[data-motor-confirmar="cancelar"]').click();
+    await wait(40);
+    check("Cancelar fecha o aviso, devolve o foco ao botão e deixa a build do jogador intacta",
+      !document.getElementById("motor-confirma-titulo") && document.activeElement && document.activeElement.dataset.motorUsar === "seguro" && JSON.stringify(S.customBuilds[alvoS]) === antesJson);
+    if (!achou("botão 'Ficar com este time' depois de cancelar", document.querySelector('[data-motor-usar="seguro"]'))) return;
+    document.querySelector('[data-motor-usar="seguro"]').click();
+    await wait(40);
+    if (!achou("botão de confirmar a gravação", document.querySelector('[data-motor-confirmar="gravar"]'))) return;
+    document.querySelector('[data-motor-confirmar="gravar"]').click();
+    await wait(60);
+    var listaS = S.customBuilds[alvoS] || [];
+    check("confirmando, a sugestão entra como variante ativa e a build do jogador continua guardada",
+      listaS.length === 2 && listaS[0].source === "manual" && listaS[0].nature === minha.nature && listaS[1].source === "sugestao" && listaS[1].active && !listaS[0].active, listaS.map(function (b) { return b.source + ":" + b.active; }));
 
     // ---- a troca para a IA ----
     document.getElementById("modo-montagem-ia").click();
