@@ -150,26 +150,36 @@
     return { build: build, origem: origem };
   }
   // Lista de candidatos já filtrada e com build. `favoritos`: snames travados.
-  function motorCandidatos(ctx, favoritos, avisos) {
+  // Gerador (Fase F): cede a vez (yield) depois de cada build calculada, para a tela respirar. As builds ficam no cache do ctx: rodar isto
+  // antes (aquecer) deixa a montagem do time só com a busca. motorCandidatos (síncrono) é o mesmo caminho, drenado de uma vez.
+  function motorSecar(gerador) { var r; while (!(r = gerador.next()).done); return r.value; }
+  function* motorCandidatosEmPassos(ctx, favoritos, avisos) {
     var out = [], semFavorito = favoritos.slice();
     var xs = ctx.pool.filter(function (x, i, arr) { return arr.indexOf(x) === i; });
-    xs.forEach(function (x) {
-      var base = getSpeciesByX(x);
-      if (!base) return;
+    for (var ix = 0; ix < xs.length; ix++) {
+      var x = xs[ix], base = getSpeciesByX(x);
+      if (!base) continue;
       var travado = favoritos.indexOf(base.sname) !== -1;
       var unidades = battleUnitsOf(base).filter(function (u) { return serveProMono(u.main); });
-      if (!unidades.length) { if (travado) avisos.push(base.n + " é favorito mas não serve nesta run (Monotype ou forma indisponível)."); return; }
+      if (!unidades.length) { if (travado) avisos.push(base.n + " é favorito mas não serve nesta run (Monotype ou forma indisponível)."); continue; }
       if (travado) semFavorito.splice(semFavorito.indexOf(base.sname), 1);
-      unidades.forEach(function (u) {
-        var sp = u.main, b = motorBuildDoCandidato(ctx, sp, base, travado, avisos);
-        if (!b) return;
+      for (var iu = 0; iu < unidades.length; iu++) {
+        var sp = unidades[iu].main, b = motorBuildDoCandidato(ctx, sp, base, travado, avisos);
+        yield "build";
+        if (!b) continue;
         out.push({ sp: sp, x: x, base: base, sname: sp.sname, nome: sp.n, linha: motorRaizDaLinha(base.x), travado: travado, origem: b.origem, build: b.build,
           chaveBuild: sp.sname + "|" + motorChaveDaBuild(b.build), suporte: false });
-      });
-    });
+      }
+    }
     semFavorito.forEach(function (s) { avisos.push("Favorito " + s + " não está no time nem na caixa."); });
     out.sort(function (a, b) { return a.sname < b.sname ? -1 : a.sname > b.sname ? 1 : a.x - b.x; });
     return out;
+  }
+  function motorCandidatos(ctx, favoritos, avisos) { return motorSecar(motorCandidatosEmPassos(ctx, favoritos, avisos)); }
+  // Aquecimento: calcula e guarda as builds top-1 do pool no cache, sem montar nada. Idempotente (o que já está no cache não recalcula).
+  function* motorAquecerBuildsEmPassos(ctx) {
+    if (!ctx.cache) ctx.cache = criarCacheDoMotor();
+    yield* motorCandidatosEmPassos(ctx, [], []);
   }
 
   // ---- simulação com cache ----
@@ -215,7 +225,8 @@
 
   // ---- a busca ----
   function motorTemGolpeDeLado(ctx, c) { return semGolpesDeLadoDuelo(motorUnidade(ctx, c, ctx.lutas.amostra[0].nivel)) !== null; }
-  function motorBuscar(ctx, cands, favoritos, objetivo, agora) {
+  function motorBuscar(ctx, cands, favoritos, objetivo, agora) { return motorSecar(motorBuscarEmPassos(ctx, cands, favoritos, objetivo, agora)); }
+  function* motorBuscarEmPassos(ctx, cands, favoritos, objetivo, agora) {
     var amostra = ctx.lutas.amostra, vagas = [], tamanho = Math.min(MOTOR_TAMANHO_DO_TIME, cands.length);
     var avaliacoes = 0, estouro = false;
     var valorDe = function (time) { avaliacoes++; return objetivo.valor(motorAvaliar(ctx, time, amostra), time.length, time, ctx); };
@@ -230,7 +241,8 @@
     var nLivres = Math.max(0, tamanho - vagas.length);
     for (var k = 0; k < nLivres; k++) vagas.push({ trava: null, opcoes: null, atual: null });
     // Lista curta das vagas livres: o desempenho sozinho (objetivo com 1 membro) + os melhores suportes de lado.
-    var solo = cands.map(function (c) { return { c: c, v: valorDe([c]) }; });
+    var solo = [];
+    for (var ic = 0; ic < cands.length; ic++) { solo.push({ c: cands[ic], v: valorDe([cands[ic]]) }); yield "solo"; }
     solo.sort(function (a, b) { return b.v - a.v || (a.c.sname < b.c.sname ? -1 : 1); });
     var curta = solo.slice(0, MOTOR_POR_VAGA).map(function (s) { return s.c; });
     solo.slice(MOTOR_POR_VAGA).filter(function (s) { return motorTemGolpeDeLado(ctx, s.c); }).slice(0, MOTOR_SUPORTES_POR_VAGA).forEach(function (s) { curta.push(s.c); });
@@ -240,7 +252,7 @@
       return vagas.some(function (v, i) { return i !== exceto && v.atual && (v.atual.x === c.x || v.atual.linha === c.linha); });
     };
     var timeSem = function (i, c) { return vagas.map(function (v, j) { return j === i ? c : v.atual; }).filter(Boolean); };
-    function escolher(i, passada) {
+    function* escolher(i, passada) {
       var v = vagas[i], base = v.opcoes || curta, opcoes = base.filter(function (c) { return !usadoPor(c, i); });
       if (v.atual && opcoes.indexOf(v.atual) === -1) opcoes.push(v.atual);
       if (!v.opcoes && passada === 1) {
@@ -249,17 +261,19 @@
       }
       if (opcoes.length === 1 && !v.atual) { v.atual = opcoes[0]; return; }
       var melhor = v.atual, melhorV = v.atual ? valorDe(timeSem(i, v.atual)) : -Infinity;
-      opcoes.forEach(function (c) {
-        if (c === v.atual || excedeu()) return;
+      for (var io = 0; io < opcoes.length; io++) {
+        var c = opcoes[io];
+        if (c === v.atual || excedeu()) continue;
         var val = valorDe(timeSem(i, c));
+        yield "vaga";
         if (val > melhorV + 1e-9) { melhor = c; melhorV = val; }
-      });
+      }
       if (!melhor) melhor = opcoes[0];
       v.atual = melhor;
     }
     // Passada 1 (monta, favoritos primeiro) e passada 2 (refaz cada vaga com as outras fixas).
-    for (var i = 0; i < vagas.length; i++) escolher(i, 1);
-    for (var j = 0; j < vagas.length && !excedeu(); j++) escolher(j, 2);
+    for (var i = 0; i < vagas.length; i++) yield* escolher(i, 1);
+    for (var j = 0; j < vagas.length && !excedeu(); j++) yield* escolher(j, 2);
     var time = vagas.map(function (v) { return v.atual; }).filter(Boolean);
     return { time: time, vagas: vagas, curta: curta, solo: solo, soloDe: soloDe, avaliacoes: avaliacoes, estouro: estouro };
   }
@@ -298,7 +312,9 @@
   // ---- a função pública ----
   // ctx: ver contextoDoMotor. pedido: { favoritos: [sname] (0 a 6, travados), variantes: ["ofensivo", "seguro"] (padrão: todas as definidas) }.
   // Devolve { variantes: [{ chave, objetivo, membros, metricas, planoB, melhorTentativa, explicacao, avisos, tempoMs }], avisos, tempoMs, cache }.
-  function montarTimePeloMotor(ctx, pedido) {
+  function montarTimePeloMotor(ctx, pedido) { return motorSecar(montarTimePeloMotorEmPassos(ctx, pedido)); }
+  // Mesma coisa em gerador (Fase F): quem chama (a tela) devolve a vez ao navegador a cada yield; o valor do yield é só o nome do passo.
+  function* montarTimePeloMotorEmPassos(ctx, pedido) {
     ctx = ctx || contextoDoMotor();
     pedido = pedido || {};
     if (!ctx.cache) ctx.cache = criarCacheDoMotor();
@@ -306,11 +322,13 @@
     var favoritos = (pedido.favoritos || []).filter(function (s, i, a) { return a.indexOf(s) === i; }).slice(0, MOTOR_TAMANHO_DO_TIME);
     var chaves = (pedido.variantes && pedido.variantes.length ? pedido.variantes : Object.keys(MOTOR_OBJETIVOS)).filter(function (k) { return MOTOR_OBJETIVOS[k]; });
     var avisos = [];
-    var cands = motorCandidatos(ctx, favoritos, avisos);
+    var cands = yield* motorCandidatosEmPassos(ctx, favoritos, avisos);
     var tCands = relogio() - t0;
-    var variantes = chaves.map(function (chave) {
-      var tv = relogio(), obj = MOTOR_OBJETIVOS[chave];
-      var busca = motorBuscar(ctx, cands, favoritos, obj, function () { return relogio() - t0; });
+    var variantes = [];
+    for (var ik = 0; ik < chaves.length; ik++) {
+      var chave = chaves[ik], tv = relogio(), obj = MOTOR_OBJETIVOS[chave];
+      var busca = yield* motorBuscarEmPassos(ctx, cands, favoritos, obj, function () { return relogio() - t0; });
+      yield "conferencia";
       var rsAmostra = motorAvaliar(ctx, busca.time, ctx.lutas.amostra), rsTodas = motorAvaliar(ctx, busca.time, ctx.lutas.todas);
       var idxRest = ctx.lutas.todas.map(function (l, i) { return l.etapa >= ctx.etapa ? i : -1; }).filter(function (i) { return i >= 0; });
       var rsRest = idxRest.map(function (i) { return rsTodas[i]; }), lutasRest = idxRest.map(function (i) { return ctx.lutas.todas[i]; });
@@ -330,7 +348,9 @@
       });
       if (busca.time.length < MOTOR_TAMANHO_DO_TIME) v.avisos.push("só há " + busca.time.length + " Pokémon possíveis nesta run: o time ficou com " + busca.time.length + ".");
       if (busca.estouro) v.avisos.push("o orçamento de tempo acabou antes da segunda passada: a busca parou no melhor time achado até ali.");
+      yield "plano-b";
       v.planoB = motorPlanoB(ctx, busca, rsTodas);
+      yield "papeis";
       // Fase D: papéis por build, contribuições, tags e estilo (paralelo ao papel legado da espécie, que não é tocado).
       var tc = relogio(), cl = motorClassificar(ctx, busca.time);
       v.membros.forEach(function (m, i) { m.papeis = cl.membros[i].papeis; m.abstencao = cl.membros[i].abstencao; m.contribuicoes = cl.membros[i].contribuicoes; });
@@ -338,8 +358,9 @@
       v.tempoClassificacaoMs = relogio() - tc;
       v.explicacao = motorTextos(v);
       v.tempoMs = relogio() - tv;
-      return v;
-    });
+      variantes.push(v);
+      yield "variante";
+    }
     // Objetivos diferentes podem chegar no mesmo time (elenco pequeno, busca gulosa): dizer, em vez de vender como se fossem opções.
     variantes.forEach(function (v, i) {
       var conj = function (x) { return x.membros.map(function (m) { return m.sname; }).sort().join(","); };

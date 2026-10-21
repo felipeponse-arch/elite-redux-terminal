@@ -229,3 +229,20 @@ test("orçamento de tempo: estourar não quebra, devolve o melhor time achado e 
   assert.ok(v.membros.length >= 1);
   assert.ok(v.avisos.some((a) => /orçamento/.test(a)));
 });
+
+// ---- Fase F1: em passos e aquecido (a tela não trava; o tempo do caso comum fica abaixo de 10 s) ----
+test("F1: o gerador cede a vez várias vezes, termina no mesmo time do síncrono e o aquecimento tira as builds da conta", () => {
+  const { R, ctx } = run({ nomes: ELENCO });
+  const aq = R.motorAquecerBuildsEmPassos(ctx);
+  let passosAq = 0, r;
+  while (!(r = aq.next()).done) passosAq++;
+  assert.ok(passosAq >= 10, "uma cedida de vez por build calculada (pool de 10): " + passosAq);
+  const falhasBuilds = Object.keys(ctx.cache.build).length;
+  assert.ok(falhasBuilds >= 10, "as builds top-1 ficaram no cache");
+  const g = R.montarTimePeloMotorEmPassos(ctx, {});
+  let passos = 0, nomesPassos = {};
+  while (!(r = g.next()).done) { passos++; nomesPassos[r.value] = true; }
+  assert.ok(passos >= 40 && nomesPassos.vaga && nomesPassos.solo && nomesPassos.variante, "cede entre as avaliações da busca: " + passos);
+  assert.equal(Object.keys(ctx.cache.build).length, falhasBuilds, "aquecido: a montagem não calcula nenhuma build nova");
+  igual(r.value.variantes.map(nomesDe), rodada.variantes.map(nomesDe), "mesmo resultado do caminho síncrono");
+});
