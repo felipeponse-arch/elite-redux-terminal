@@ -332,3 +332,10 @@ O ticket só deve ser considerado pronto quando:
 - [ ] papéis legados continuam funcionando até a migração completa;
 - [ ] portão nível 3, changelog e publicação seguem o fluxo existente;
 - [ ] o responsável do projeto aprovou o Motor como padrão.
+
+## 8. Decisões do usuário (20/10/2026, depois da Fase A)
+
+- **Juiz:** juiz novo do time, ao lado do `pontos` (luta completa com e sem o membro). O `pontos` fica como está: rank e testes atuais não mudam.
+- **Golpes sem favoritos:** top-1 do pipeline de build (a build que aparece na ficha), não a cobertura do `comQuatroGolpes`.
+- **Tempo do campo inteiro:** cache de simulações + amostra fixa de lutas na busca; o time final é conferido nas 29 lutas.
+- Fase A: `fase-a-auditoria.md`; evidência da Fase B: `fase-b-evidencia.md` (aprovadas pelo supervisor, rodada 1).
