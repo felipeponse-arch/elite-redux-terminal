@@ -350,3 +350,8 @@ O ticket só deve ser considerado pronto quando:
 - **Dois iguais (21/10):** o usuário quer dois Pokémon iguais quando de fato capturou dois, mas o app guarda uma por espécie; virou o
   ticket `dois-iguais/01` (para depois). O Modo Motor nasce com uma espécie por linha evolutiva.
 - **Dívida 20 juntada (21/10):** o caso Fire Fang de `docs/pipeline_de_build.md` vira teste de aceite da Fase C.
+- **Fase C aprovada (21/10, rodada 2):** 9521265 + eeb6a22, `src/regras/time_pelo_motor.js` (15 testes). Duas variantes (ofensivo e
+  seguro). Decisões do usuário: a 3ª variante (sinergia) vai para a Fase D, com o objetivo "dois membros com benefício medido";
+  quando ofensivo e seguro chegam nos mesmos Pokémon (elenco pequeno), aceitar com o aviso. Tempo: pool de 12 = 8,5 s, pool de 20 =
+  16,8 s (12,2 s nas builds top-1); o alvo < 10 s fica para a Fase F (builds pré-aquecidas). O adaptador da Fase F troca `ctx.cap` e
+  o state juntos.
