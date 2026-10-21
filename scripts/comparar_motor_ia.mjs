@@ -187,6 +187,16 @@ function comparar() {
   L.push("", "Tempo da IA: não medido pelo script (vem do agente, fora do Node).", "", "## Falhas conhecidas", "",
     ...falhas.map((c) => `- ${c.caso.id}: resposta da IA inválida (${c.ia.falha}).`),
     ...comIA.filter((c) => c.ia.semBuild || c.ia.descartados).map((c) => `- ${c.caso.id}: IA com ${c.ia.descartados} espécie(s) descartadas pela validação e ${c.ia.semBuild} sem build avaliável.`));
+  L.push("", "## Limitações", "",
+    "- O prompt da IA do app não tem favoritos: o c06 trava Scizor só para o Motor.",
+    "- O agente respondeu só pelo prompt, sem as ferramentas `buildStandardAiTools` que a IA do app usa, e sem conferir os snames; a validação do app é que decide (nada foi corrigido).",
+    "- Os dois lados usam as mesmas builds top-1 do pipeline contra o campo (a IA do app escolheria builds depois, em outra chamada).",
+    "- O tempo da IA não foi medido. O Motor busca nas mesmas lutas em que é julgado (amostra de 10 na busca, conferência nas 29): a IA não vê o juiz, então parte da vantagem do Motor é otimizar a própria régua. Amostra de 12 casos, um elenco por caso, uma resposta da IA por caso (o ruído da própria IA não foi medido).", "");
+  if (comIA.length) {
+    const dif = comIA.map((c) => c.motor[c.casada].completo.pontosMedios - c.ia.completo.pontosMedios), m = media(dif), ep = desvio(dif) / Math.sqrt(dif.length);
+    const veredito = m - 2 * ep > 0 ? "SUPERA a IA além do ruído medido" : m + 2 * ep < 0 ? "PERDE da IA além do ruído medido" : "EMPATA com a IA dentro do ruído medido";
+    L.push("## Conclusão", "", `Com a variante do estilo, o Motor ${veredito}: diferença média de ${f1(m)} pontos por luta (erro padrão ${f1(ep)}, n=${dif.length}), melhor em ${dif.filter((d) => d > 0).length} de ${dif.length} casos. Vale só para esta amostra e estas limitações. O Motor NÃO vira padrão sem aprovação do usuário.`, "");
+  }
   writeFileSync(RELATORIO, L.join("\n") + "\n", "utf8");
   console.log("escrito", RELATORIO);
 }
