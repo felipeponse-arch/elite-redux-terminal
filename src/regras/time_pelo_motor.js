@@ -13,6 +13,8 @@
   // Limitação da busca gulosa (documentada, ticket §2.8): troca uma peça por vez com as outras fixas, então a sinergia que só
   // aparece quando DUAS peças entram juntas pode não ser achada. A lista curta de cada vaga sai do desempenho sozinho do candidato
   // (mais os melhores suportes de lado), então quem só vale em dupla com outro pode ficar fora da lista.
+  // Limite da Fase C: `ctx.cap` entra na chave do cache e no liberadoNaRun, mas o pipeline (pipelineCandidatos) lê o level cap do
+  // state; trocar `ctx.cap` sem trocar o state dá chave de cache nova com build do cap antigo. A Fase F faz o adaptador trocar os dois juntos.
   // Sem `Date` na decisão: só o orçamento de tempo (opcional) olha o relógio; sem orçamento o resultado é reproduzível.
   var MOTOR_VERSAO = 1; // sobe quando uma regra do simulador muda: entra na chave do cache
   var MOTOR_TAMANHO_DO_TIME = 6;
@@ -315,6 +317,14 @@
         membros: busca.time.map(function (c) { return { sname: c.sname, nome: c.nome, x: c.x, base: c.base.sname, travado: c.travado, origem: c.origem, build: c.build }; }),
         metricas: metricas, avisos: [], avaliacoes: busca.avaliacoes };
       v.melhorTentativa = metricas.restantes.lutas > 0 && metricas.restantes.vence < metricas.restantes.lutas / 2;
+      // Favorito nunca some em silêncio: ou está em `membros` ou há um aviso dizendo por quê (linha evolutiva repetida, sem build...).
+      favoritos.forEach(function (s) {
+        if (v.membros.some(function (m) { return m.base === s; })) return;
+        var sp = SPECIES.filter(function (x) { return x && x.sname === s; })[0], nome = sp ? sp.n : s;
+        var rival = sp && v.membros.filter(function (m) { return motorRaizDaLinha(m.x) === motorRaizDaLinha(sp.x); })[0];
+        v.avisos.push(rival ? nome + " é favorito mas divide a linha evolutiva com " + rival.nome + ", que entrou no lugar; só um por linha."
+          : nome + " é favorito mas não entrou no time: " + (avisos.join(" ").indexOf(nome) !== -1 ? "veja os avisos gerais" : "sem build válida ou sem vaga") + ".");
+      });
       if (busca.time.length < MOTOR_TAMANHO_DO_TIME) v.avisos.push("só há " + busca.time.length + " Pokémon possíveis nesta run: o time ficou com " + busca.time.length + ".");
       if (busca.estouro) v.avisos.push("o orçamento de tempo acabou antes da segunda passada: a busca parou no melhor time achado até ali.");
       v.planoB = motorPlanoB(ctx, busca, rsTodas);

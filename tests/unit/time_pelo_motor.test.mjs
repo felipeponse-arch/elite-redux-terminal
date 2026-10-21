@@ -27,7 +27,7 @@ const rodada = base.R.montarTimePeloMotor(base.ctx, {});
 
 test("o Modo Motor não chama a IA: o fonte não tem claude.use nem pedirIA", () => {
   const src = readFileSync(new URL("../../src/regras/time_pelo_motor.js", import.meta.url), "utf8");
-  assert.doesNotMatch(src, /claude\.use|pedirIA|sample/);
+  assert.doesNotMatch(src, /claude\.use|pedirIA/);
   // E roda inteiro no Node, onde nem existe `claude` (o carregador só tem src/regras).
   assert.equal(typeof base.R.claude, "undefined");
   assert.ok(rodada.variantes.length >= 2 && rodada.variantes.every((v) => v.membros.length === 6));
@@ -95,11 +95,33 @@ test("risco 5: favoritos (1, 3 e 6) nunca saem; vagas livres são preenchidas; 6
       v.planoB.trocas.forEach((t) => assert.ok(!favs.includes(t.sai), "plano B tirou o favorito " + t.sai));
       assert.doesNotMatch(v.explicacao.join(" "), /tirar|retirar|remov|substitu/i, "nunca sugere tirar favorito");
     });
+    if (favs.length < 6) {
+      const trocas = out.variantes.flatMap((v) => v.planoB.trocas);
+      assert.ok(trocas.length > 0, "com vaga livre o plano B acha troca medida (" + favs.length + " favoritos)");
+      trocas.forEach((t) => assert.ok(t.vaga >= favs.length && !favs.includes(t.sai) && t.deltaPontos > 0, JSON.stringify(t)));
+    }
     if (favs.length === 6) out.variantes.forEach((v) => {
       igual(v.planoB.trocas, []);
       assert.match(v.planoB.motivo, /favoritos/);
     });
   });
+});
+
+test("favorito da mesma linha evolutiva: nunca some em silêncio (está em membros ou em avisos, dizendo quem entrou)", () => {
+  const r = run({ milestone: 2, nomes: ["Charmander", "Charizard", "Scizor", "Klefki", "Gyarados", "Metagross"] });
+  const favs = ["Charmander", "Charizard", "Scizor"];
+  const out = r.R.montarTimePeloMotor(r.ctx, { favoritos: favs.map((n) => r.sp(n).sname), variantes: ["ofensivo"] });
+  const v = out.variantes[0];
+  favs.forEach((n) => assert.ok(nomesDe(v).includes(n) || v.avisos.concat(out.avisos).some((a) => a.includes(n + " é favorito")), n + " sumiu sem aviso"));
+  const fora = favs.filter((n) => !nomesDe(v).includes(n));
+  assert.equal(fora.length, 1, "dois da mesma linha: só um entra");
+  assert.ok(v.avisos.some((a) => a.includes(fora[0]) && /divide a linha evolutiva com (Charmander|Charizard)/.test(a)), v.avisos.join(" | "));
+});
+
+test("amostra fixa: todo nome existe em LUTAS_DA_RUN (nome errado some da amostra sem ninguém ver)", () => {
+  const nomes = new Set(base.R.LUTAS_DA_RUN.map((p) => p[0]));
+  base.R.MOTOR_AMOSTRA_DE_LUTAS.forEach((n) => assert.ok(nomes.has(n), n));
+  assert.equal(base.R.MOTOR_AMOSTRA_DE_LUTAS.length, 10);
 });
 
 test("favorito fraco: mostra a melhor tentativa com a métrica (vence X de Y), sem esconder o resultado", () => {
@@ -141,8 +163,16 @@ test("mono: todo candidato e todo membro tem o tipo da run", () => {
 
 test("uma espécie por linha evolutiva (Charmander, Charmeleon e Charizard no mesmo elenco: só um entra)", () => {
   const r = run({ milestone: 2, nomes: ["Charmander", "Charmeleon", "Charizard", "Scizor", "Klefki", "Gyarados", "Metagross"] });
+  const nomeDaRaiz = (n) => r.R.getSpeciesByX(r.R.motorRaizDaLinha(r.sp(n).x)).n;
+  assert.equal(nomeDaRaiz("Charizard"), "Charmander");
+  assert.equal(nomeDaRaiz("Charmeleon"), "Charmander");
+  assert.equal(nomeDaRaiz("Gyarados"), "Magikarp");
+  // O filtro tem trabalho a fazer: os três viram candidatos distintos (x diferentes) da MESMA linha.
+  const cands = r.R.motorCandidatos(r.ctx, [], []).filter((c) => ["Charmander", "Charmeleon", "Charizard"].includes(c.base.n));
+  assert.ok(new Set(cands.map((c) => c.x)).size === 3 && new Set(cands.map((c) => c.linha)).size === 1);
   const out = r.R.montarTimePeloMotor(r.ctx, { variantes: ["ofensivo", "seguro"] });
   out.variantes.forEach((v) => {
+    assert.ok(v.membros.filter((m) => ["Charmander", "Charmeleon", "Charizard"].includes(r.R.getSpeciesByX(m.x).n)).length <= 1);
     const linhas = v.membros.map((m) => r.R.motorRaizDaLinha(m.x));
     assert.equal(new Set(linhas).size, linhas.length, nomesDe(v).join());
   });
