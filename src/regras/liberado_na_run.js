@@ -27,3 +27,10 @@
     if (alvo.golpe !== undefined) return alvo.golpe === null || levelCap === null || levelCap === undefined || alvo.golpe <= levelCap;
     return true;
   }
+
+  // Lista de Pokémon do jogador (time + caixa, sem repetir, time primeiro): UM lugar só. Prompt da IA,
+  // montagem contra o chefão, arquétipo e a Fase C do time-pelo-motor leem daqui (ticket 05, 21/10/2026).
+  // Lê o state por dentro (ADR-004); devolve xs.
+  function xsDoJogador() {
+    return state.team.concat(state.box).filter(function (x, i, arr) { return arr.indexOf(x) === i; });
+  }

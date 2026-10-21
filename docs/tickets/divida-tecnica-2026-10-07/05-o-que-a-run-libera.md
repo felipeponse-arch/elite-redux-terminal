@@ -1,6 +1,6 @@
 # 05 — Contexto da run: o que a run libera
 
-Status: parcial (branch divida-04-05, commit "função pura liberadoNaRun"): feita a função pura src/regras/liberado_na_run.js `liberadoNaRun(etapa, levelCap, alvo)` com aviso, prompt, pipeline, formas mega e golpes usando; faltam a validação da IA conferir a Etapa do item (conflita com a decisão de 08/10 "pode usar com motivo claro", perguntar) e a lista de Pokémon do jogador num lugar só
+Status: resolvido (branch divida-04-05, commits "liberadoNaRun" e "lista única do jogador"): função pura liberadoNaRun(etapa, levelCap, alvo) em src/regras/liberado_na_run.js e xsDoJogador(). Validação da IA (opção C, usuário 21/10): continua só avisando; o Modo Motor nunca usa item não liberado, aplicado na Fase C do time-pelo-motor com liberadoNaRun
 Bloqueado por: 04
 
 ## O que entrega
@@ -8,8 +8,8 @@ Aviso de build, validação da build da IA e prompt da IA perguntam ao mesmo mó
 
 ## Critérios de aceite
 - [x] Etapa da pedra mega calculada num lugar só (etapaDaPedra).
-- [ ] Validação da build da IA passa a conferir a Etapa do item.
-- [ ] Lista de Pokémon do jogador (time e caixa) vem de um lugar só.
+- [x] Validação da build da IA: decisão 21/10, opção C (IA só avisa; Fase C aplica o filtro com liberadoNaRun).
+- [x] Lista de Pokémon do jogador (time e caixa) vem de um lugar só.
 - [x] Teste de concordância: o mesmo caso dá o mesmo veredito no aviso, na validação e no prompt.
 - [ ] Respeita a ADR-004: o módulo lê o estado por dentro; nada de documento ou janela nas regras.
 

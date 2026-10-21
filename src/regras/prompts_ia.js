@@ -775,7 +775,7 @@
   // filtrado - Mega conta como a base antes da 4ª insígnia, Monotype é REGRA
   // (filtra antes de ir pro prompt). Devolve { roster, validSnames }.
   function rosterParaTimeIA(monotype) {
-    var rosterXs = state.team.concat(state.box).filter(function (x, i, arr) { return arr.indexOf(x) === i; });
+    var rosterXs = xsDoJogador();
     var roster = rosterXs.map(getSpeciesByX).filter(Boolean);
     // Antes da 4ª insígnia uma forma Mega já no time/caixa conta como a base
     // dela (achado do usuário, 2026-09-24: "Altaria Mega" na caixa entrava na
@@ -811,7 +811,7 @@
   }
   function viramDoTipoPrompt(tipo) {
     var vistos = {};
-    var viram = state.team.concat(state.box).map(getSpeciesByX).filter(function (sp) {
+    var viram = xsDoJogador().map(getSpeciesByX).filter(function (sp) {
       if (!sp || vistos[sp.x]) return false;
       vistos[sp.x] = true;
       var m = mudancaDeTipo(sp, tipo);

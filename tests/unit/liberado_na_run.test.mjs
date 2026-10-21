@@ -42,3 +42,10 @@ test("concordância: aviso de build e prompt dão o mesmo veredito da função",
   const a2 = R.avisosDaBuild(s, { moves: [], item: pedra }).some((a) => a.tipo === "item-tardio");
   assert.equal(a2, !R.liberadoNaRun(3, R.getCurrentCap(), { pedra }));
 });
+
+test("lista do jogador: time + caixa, sem repetir, time primeiro", () => {
+  const R2 = carregarRegras({ milestone: 3 });
+  R2.state.team = [1, 2];
+  R2.state.box = [2, 3];
+  assert.deepEqual(R2.xsDoJogador(), [1, 2, 3]);
+});

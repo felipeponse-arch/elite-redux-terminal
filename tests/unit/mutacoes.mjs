@@ -828,6 +828,13 @@ export const MUTACOES = [
     para: "return c === null || c === undefined ? 50 : c;",
   },
   {
+    id: "lista-do-jogador-sem-caixa",
+    descricao: "a lista de Pokémon do jogador esquece a caixa",
+    arquivo: "liberado_na_run.js",
+    de: "return state.team.concat(state.box).filter(",
+    para: "return state.team.filter(",
+  },
+  {
     id: "pedra-em-qualquer-modo",
     descricao: "pedra obrigatória também no modo permanente",
     arquivo: "validacao_build_ia.js",

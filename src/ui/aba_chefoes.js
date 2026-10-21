@@ -246,7 +246,7 @@
   //  4. o plano da luta (quem responde a quem) sai do mesmo simulador.
   var montagemContraChefaoRodando = false;
   function candidatosDoJogador() {
-    var owned = state.team.concat(state.box).filter(function (x, i, a) { return a.indexOf(x) === i; });
+    var owned = xsDoJogador();
     var out = [];
     owned.forEach(function (x) {
       var sp = getSpeciesByX(x);
