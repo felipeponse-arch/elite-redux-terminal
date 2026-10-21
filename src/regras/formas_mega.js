@@ -150,7 +150,7 @@
   // Etapa em que esta forma Mega fica disponível: a da pedra, se for tardia.
   function etapaDaMega(megaSp) {
     return stonesOf(megaSp).reduce(function (et, pedra) {
-      return Math.max(et, MEGA_PEDRAS_TARDIAS[pedra] || MEGA_UNLOCK_MILESTONE);
+      return Math.max(et, etapaDaPedra(pedra));
     }, MEGA_UNLOCK_MILESTONE);
   }
   function megaFormLiberada(f) { return !isMegaForm(f) || state.settings.milestone >= etapaDaMega(f); }

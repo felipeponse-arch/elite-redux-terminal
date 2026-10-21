@@ -459,8 +459,8 @@
   // mesma regra de validateAiBuild, sem Mega).
   function pipelineEvioliteServe(sp) {
     if (ITEMS.indexOf("Eviolite") === -1 || !evoluiAinda(sp)) return false;
-    var lugar = primeiroLugarDoItem("Eviolite");
-    return !!lugar && lugar.etapa <= state.settings.milestone;
+    // Eviolite sem local com etapa no jogo (etapaDoItem null) não conta como disponível aqui.
+    return etapaDoItem("Eviolite") !== null && liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: "Eviolite" });
   }
   function pipelineValidarRascunho(sp, g) {
     var bruto = { ability: g.hab, nature: g.fin.nome, item: "", evs: g.fin.evs.slice(), moves: g.av.golpes.slice() };

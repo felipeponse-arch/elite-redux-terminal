@@ -59,8 +59,7 @@
   // uma vez (2026-09-12: a validação ficou sem o filtro que o editor tinha).
   function availableMovesFor(sp) {
     var cap = getCurrentCap();
-    var semCap = cap === null || cap === undefined;
-    var allowedLm = sp.lm.filter(function (pair) { return semCap || pair[0] <= cap; });
+    var allowedLm = sp.lm.filter(function (pair) { return liberadoNaRun(state.settings.milestone, cap, { golpe: pair[0] }); });
     var ids = uniqueIds(allowedLm.map(function (pair) { return pair[1]; }).concat(sp.tu));
     return {
       cap: cap,
@@ -84,7 +83,7 @@
       if (id === undefined || sp.tu.indexOf(id) !== -1) return;
       var menor = null;
       sp.lm.forEach(function (p) { if (p[1] === id && (menor === null || p[0] < menor)) menor = p[0]; });
-      if (menor === null || menor > cap) out.push({ nome: nome, nivel: menor });
+      if (menor === null || !liberadoNaRun(state.settings.milestone, cap, { golpe: menor })) out.push({ nome: nome, nivel: menor });
     });
     return out;
   }

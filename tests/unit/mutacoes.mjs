@@ -262,8 +262,8 @@ export const MUTACOES = [
     id: "golpe-travado-nivel-errado",
     descricao: "golpe liberado exatamente no nível do cap aparece como travado",
     arquivo: "level_cap.js",
-    de: "if (menor === null || menor > cap) out.push",
-    para: "if (menor === null || menor >= cap) out.push",
+    de: "{ golpe: menor })) out.push",
+    para: "{ golpe: menor + 1 })) out.push",
   },
   // ---- prompts e respostas da IA (fase 4, 2026-09-24) ----
   {
@@ -796,8 +796,22 @@ export const MUTACOES = [
     id: "cap-ignorado",
     descricao: "golpes liberados ignoram o level cap",
     arquivo: "level_cap.js",
-    de: "return semCap || pair[0] <= cap;",
+    de: "return liberadoNaRun(state.settings.milestone, cap, { golpe: pair[0] });",
     para: "return true;",
+  },
+  {
+    id: "liberado-pedra-sempre",
+    descricao: "liberadoNaRun libera pedra mega em qualquer Etapa",
+    arquivo: "liberado_na_run.js",
+    de: "return etapa >= etapaDaPedra(alvo.pedra);",
+    para: "return true;",
+  },
+  {
+    id: "liberado-golpe-sempre",
+    descricao: "liberadoNaRun libera golpe acima do level cap",
+    arquivo: "liberado_na_run.js",
+    de: "|| alvo.golpe <= levelCap;",
+    para: "|| true;",
   },
   {
     id: "pedra-em-qualquer-modo",
@@ -1566,7 +1580,7 @@ export const MUTACOES = [
     id: "aviso-build-pedra-sempre-liberada",
     descricao: "a pedra Mega tardia deixa de ser avisada antes da insígnia",
     arquivo: "avisos_build.js",
-    de: "if (state.settings.milestone < etapa) {",
+    de: "if (!liberadoNaRun(state.settings.milestone, cap, { pedra: build.item })) {",
     para: "if (false) {",
   },
   {
@@ -1643,7 +1657,7 @@ export const MUTACOES = [
     id: "item-tardio-so-mega",
     descricao: "o aviso de item que só sai depois volta a valer só para pedra Mega",
     arquivo: "avisos_build.js",
-    de: "if (achar && state.settings.milestone < achar.etapa) {",
+    de: "if (achar && !liberadoNaRun(state.settings.milestone, cap, { item: build.item })) {",
     para: "if (false) {",
   },
   {
@@ -2134,7 +2148,7 @@ export const MUTACOES = [
     id: "d11-itens-tardios-sumem-do-prompt",
     descricao: "o prompt da IA deixa de dizer quais itens ainda não estão disponíveis",
     arquivo: "prompts_ia.js",
-    de: ".filter(function (x) { return x.p && x.p.etapa > state.settings.milestone; })",
+    de: ".filter(function (x) { return x.p && !liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: x.n }); })",
     para: ".filter(function () { return false; })",
   },
   {
@@ -4026,8 +4040,8 @@ export const MUTACOES = [
     id: "pipeline-rascunho-eviolite-sem-olhar-a-etapa",
     descricao: "o rascunho leva Eviolite mesmo antes da Etapa em que o jogador consegue o item",
     arquivo: "pipeline_build.js",
-    de: "return !!lugar && lugar.etapa <= state.settings.milestone;",
-    para: "return !!lugar;",
+    de: "return etapaDoItem(\"Eviolite\") !== null && liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: \"Eviolite\" });",
+    para: "return etapaDoItem(\"Eviolite\") !== null;",
   },
   {
     id: "pipeline-rascunho-lenta-mantem-velocidade",

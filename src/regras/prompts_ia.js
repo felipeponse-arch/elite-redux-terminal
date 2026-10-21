@@ -381,7 +381,7 @@
   // mas pode usar com motivo claro. Vem de ONDE_ACHAR_ITENS (código oficial do jogo).
   function itensAindaIndisponiveisParaIA() {
     return AI_ITEM_POOL.map(function (n) { return { n: n, p: primeiroLugarDoItem(n) }; })
-      .filter(function (x) { return x.p && x.p.etapa > state.settings.milestone; })
+      .filter(function (x) { return x.p && !liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: x.n }); })
       .sort(function (a, b) { return a.p.etapa - b.p.etapa; });
   }
   function blocoItensAindaIndisponiveisIA() {
