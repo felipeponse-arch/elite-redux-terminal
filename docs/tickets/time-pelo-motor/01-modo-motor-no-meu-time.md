@@ -339,3 +339,8 @@ O ticket só deve ser considerado pronto quando:
 - **Golpes sem favoritos:** top-1 do pipeline de build (a build que aparece na ficha), não a cobertura do `comQuatroGolpes`.
 - **Tempo do campo inteiro:** cache de simulações + amostra fixa de lutas na busca; o time final é conferido nas 29 lutas.
 - Fase A: `fase-a-auditoria.md`; evidência da Fase B: `fase-b-evidencia.md` (aprovadas pelo supervisor, rodada 1).
+- **Decisões de 21/10 (depois do preparo da Fase C, `teste/relatorios/time_pelo_motor_faseC_preparo_2026-10-21.md`):** build de
+  cada candidato = top-1 do pipeline **contra o campo** (`candidatosDeBuild(sp,{alvo:{campo:true}})`), não a da ficha (que mira o
+  próximo líder); **uma espécie por linha evolutiva**; favorito sem build salva usa o top-1 do pipeline.
+- **Light Wield (21/10):** fica como está (3 turnos pela descrição); anotar em `decisoes_mecanicas.md` que não há código no
+  er-repo `upcoming` 217dd0f e reconferir quando sair.
