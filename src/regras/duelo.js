@@ -225,7 +225,9 @@
   // Aerodynamics (abilities.cc:3750, onAbsorb Flying -> Velocidade), Motor Drive (Electric -> Velocidade), Well Baked Body (Fire -> Defesa),
   // Justified (Dark -> maior atributo de ataque) e Inflatable (onDefender). A "sinergia por golpe" da espécie as tratava como bônus x1,3
   // nos golpes de ar/asa etc.; o simulador do jogo (2.65.3b) mostra o Aerial Ace do Ledian sem esse x1,3 (calibracao-simulador/01, 21/10/2026).
-  var SINERGIA_SEM_BONUS_DE_DANO_DUELO = { "Aerodynamics": 1, "Motor Drive": 1, "Well Baked Body": 1, "Justified": 1, "Inflatable": 1 };
+  // Flash Fire e Elemental Vortex (B4, 21/10): o x1,5 em Fire só liga depois de absorver um golpe Fire (abilities.cc:695-706 e 8262-8264); o gatilho já
+  // é modelado em danoComStatusNoDuelo (`absorveReforca`), então a sinergia sempre ligada contava o bônus duas vezes.
+  var SINERGIA_SEM_BONUS_DE_DANO_DUELO = { "Aerodynamics": 1, "Motor Drive": 1, "Well Baked Body": 1, "Justified": 1, "Inflatable": 1, "Flash Fire": 1, "Elemental Vortex": 1 };
   function bonusDeGolpeLidoDoTextoDuelo(ef) { return Object.keys(ef.bonusTipo).length > 0 || Object.keys(ef.bonusCategoria).length > 0 || Object.keys(ef.flagMult).length > 0 || ef.contatoMult !== 1; }
   function acertosDoGolpeDuelo(id) {
     var m = MOVES[id];
@@ -4200,7 +4202,19 @@
     });
   }
   // `inicio` (opcional, buffs do ginásio): hazards já no meu lado e status nos últimos N.
+  // Decisão do usuário de 21/10 (Fase B4): quem põe tela, Aurora Veil ou Tailwind só usa o golpe quando a luta do time NÃO é vencida sem eles,
+  // do mesmo jeito que o Trick Room (Klefki x Brawly 1 nv55: as telas faziam o time perder uma luta que ele vencia atacando). A conta é da
+  // luta inteira (o benefício é do time, não de quem usa): refaz a luta sem esses golpes e só fica com eles se ela não vence.
+  function ehGolpeDeTelaOuVentoDuelo(id) { var p = planoDoGolpeStatus(id); return !!p && (p.tipo === "tela" || p.tipo === "vento"); }
   function simularLutaContraChefao(meus, foes, nivel, inicio) {
+    if (meus.some(function (u) { return (u.statusIds || []).some(ehGolpeDeTelaOuVentoDuelo); })) {
+      var semEles = meus.map(function (u) { return Object.assign({}, u, { statusIds: (u.statusIds || []).filter(function (id) { return !ehGolpeDeTelaOuVentoDuelo(id); }) }); });
+      var r = simularLutaDeVerdadeContraChefao(semEles, foes, nivel, inicio);
+      if (r.venceu) return r;
+    }
+    return simularLutaDeVerdadeContraChefao(meus, foes, nivel, inicio);
+  }
+  function simularLutaDeVerdadeContraChefao(meus, foes, nivel, inicio) {
     var time = meus.map(participanteDuelo), deles = foes.map(participanteDuelo);
     var ladoMeu = inicio ? Object.assign(novoLadoDuelo(), inicio.lado) : novoLadoDuelo(), ladoDele = inicio && inicio.ladoDele ? Object.assign(novoLadoDuelo(), inicio.ladoDele) : novoLadoDuelo();
     if (inicio) aplicarStatusNoFimDuelo(time, inicio.statusNoFim);

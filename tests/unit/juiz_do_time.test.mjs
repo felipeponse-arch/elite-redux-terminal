@@ -42,6 +42,17 @@ test("suporte útil: Reflect e Light Screen do Klefki seguram um nocaute a mais 
   assert.ok(k.contribuicaoSuporte >= 1, "as telas valem pelo menos um nocaute: " + k.contribuicaoSuporte);
 });
 
+// B4 (decisão do Felipe, 21/10): tela, Aurora Veil e Tailwind só entram quando a luta NÃO é vencida sem eles, como o Trick Room.
+// Antes, as telas do Klefki gastavam o turno e o time perdia uma luta que ele vencia atacando (contribuição de suporte -9,2).
+test("suporte que atrapalha não é usado: as telas do Klefki contra o Brawly 1 (nível 55) deixam de fazer o time perder", () => {
+  const atk = () => [meu(55, "Metagross", ["Meteor Mash", "Earthquake"], { evs: EV.fisico, nat: "Adamant" }), meu(55, "Conkeldurr", ["Mach Punch", "Drain Punch"], { evs: EV.fisico, nat: "Adamant" })];
+  const klefki = () => meu(55, "Klefki", ["Reflect", "Light Screen", "Dazzling Gleam"], { evs: EV.tanqueF });
+  assert.equal(juiz(atk(), "Brawly 1", 55).venceu, false, "fixture: a base sozinha não vence");
+  const r = juiz([klefki(), ...atk()], "Brawly 1", 55);
+  assert.equal(r.venceu, true, "com o Klefki atacando a luta é vencida");
+  assert.ok(membro(r, "Klefki").contribuicaoSuporte >= 0, "as telas não podem custar a luta: " + membro(r, "Klefki").contribuicaoSuporte);
+});
+
 test("suporte inútil: o Tailwind que não muda a ordem (atacantes já mais rápidos que o chefão) fica em ~0", () => {
   const rapidos = () => [meu(NV, "Garchomp", ["Earthquake", "Dragon Claw"], { evs: EV.fisico, nat: "Jolly" }), meu(NV, "Dragonite", ["Extreme Speed", "Dragon Claw"], { evs: EV.fisico, nat: "Adamant" })];
   const time = [pidgeot(), ...rapidos()];

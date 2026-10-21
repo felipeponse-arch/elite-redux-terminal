@@ -129,6 +129,6 @@ Dentro da tolerância: **80 de 80** (maior diferença +3,1% e -4,0%, ambas em da
 4. Diferença pequena sem causa de regra: Dual Wingbeat do S2 (-4,0%, 44,2 contra 46 de média) e Rock Slide do S19 (+3,1%): arredondamento por etapa do jogo em dano baixo.
 
 ## Perguntas / o que ficou de fora
-- A sinergia por golpe continua somando para as demais habilidades mantidas de 15/10. No código, Flash Fire e Elemental Vortex só ganham o x1,5 depois de absorver Fire (condicional); a sinergia soma sempre. O simulador não mostra esse estado no preenchimento simples. Quer que eu trate (opção A: tirar o bônus de golpe delas da sinergia e modelar só o gatilho; opção B: deixar como está, que é o que o motor faz hoje)?
+- Flash Fire e Elemental Vortex: resolvido na Fase B4 (21/10): saíram da sinergia e o x1,5 só liga pelo gatilho da absorção de Fire.
 - O simulador é 2.65.3b; o app segue a upcoming. Onde o código mudou entre as duas versões (ex.: golpes novos), o simulador não vale como régua. Nesta rodada só usei golpes e habilidades que existem nas duas.
 - Mudei o motor, então o rank precisa ser refeito no fim (regra "rank só no fim"); não recalculei.

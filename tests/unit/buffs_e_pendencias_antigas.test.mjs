@@ -64,8 +64,8 @@ test("Last Stand só existe com 6 dele; Sem Protect tira o Protect dos meus", ()
 test("com todos os buffs da Flannery ativos, a mesma luta rende menos que sem nenhum", () => {
   const todos = R.GYM_SKILLS.leaders.Flannery.buffs.map((b) => b.id);
   const sem = R.montarTimeContraChefao(candidatos(), party, 50);
-  // O time escolhido inteiro (6): com poucos membros os pontos empatam no teto (3 piores: 12,59 x 12,59 depois que a Aerodynamics saiu da sinergia, 21/10/2026).
-  const time = sem.escolhidos.map((e) => e.unidade);
+  // Os 3 primeiros do time escolhido: com o time inteiro (ou os 3 piores) os pontos empatam no teto, e o time muda com a sinergia da habilidade (21/10/2026: Aerodynamics, Flash Fire).
+  const time = sem.escolhidos.slice(0, 3).map((e) => e.unidade);
   const fs = foes();
   const semBuff = R.simularLutaContraChefao(time, fs, 50);
   const comBuff = R.simularLutaContraChefao(time.map((u) => R.meuComBuffsDoGinasio(u, todos)),

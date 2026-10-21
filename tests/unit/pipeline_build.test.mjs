@@ -64,27 +64,29 @@ test("caso A: sem chefão adiante, os candidatos saem só por sinergia (hit-kill
 // 15/10/2026 (calibracao-2026-10-15/01): o MoveList da er-config marca o Seismic Fist (Ground, poder 85) como golpe de soco, então
 // Iron Fist e Raging Boxer o reforçam; com isso ele passa a ser o melhor golpe do Ledian contra o Ninetales (138% a 162% do HP) e
 // o KO é garantido. O Mega Punch segue no kit (ver a lista de casos conferidos mais abaixo).
-test("caso B: Ledian derruba o Ninetales (agora com Seismic Fist, soco pela flag do jogo), mas NÃO bate primeiro: o Flame Burst do alvo (+1) o derruba antes (decisão P1, 14/10)", () => {
+// B4 (21/10/2026): o Flame Burst do Ninetales (+1) tira ~92% do HP do Ledian mas NÃO o derruba; antes "derrubava" porque a sinergia somava o x1,5 do
+// Flash Fire sempre ligado (o gatilho só liga depois de absorver um golpe Fire, abilities.cc:695-706). O simulador 2.65.3b confirma: Flame Burst no Ledian 58% a 70% no sol, sem item.
+// Com isso o Ledian bate primeiro por velocidade (172 x 166) e a prioridade do alvo vira só aviso.
+test("caso B: Ledian derruba o Ninetales (Seismic Fist, soco pela flag do jogo) e bate primeiro por velocidade: o Flame Burst do alvo (+1) o deixa vivo (B4, 21/10)", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales });
   const c = r.candidatos.find((x) => x.golpes.includes("Mega Punch") && x.habilidade === "Aerodynamics");
   assert.ok(c, "nenhum candidato com Mega Punch: " + r.candidatos.map((x) => x.golpes.join("/")).join(" ; "));
   assert.equal(c.hitKill, 1);
-  // "Bate primeiro" = dá o KO primeiro na ordem real: o Ledian é mais rápido (189 x 166), mas o Flame Burst (+1) vence a Velocidade.
-  assert.equal(c.baterPrimeiro, false);
-  assert.equal(c.porQue, null);
-  assert.equal(tier(c), 1, "cai para o resto do ranking");
+  // "Bate primeiro" = dá o KO primeiro na ordem real: o Flame Burst (+1) passa na frente, mas não derruba o Ledian, que então faz o KO.
+  assert.equal(c.baterPrimeiro, true);
+  assert.equal(c.porQue, "velocidade");
+  assert.equal(tier(c), 3, "1 golpe e bate primeiro");
   assert.equal(c.alvoAgeAntes, true);
   assert.equal(c.rotulo, "calibrada", "versao-nova/03: a prioridade do alvo vira aviso, não tira o selo");
-  assert.match(c.avisos.join(" | "), /O alvo age antes com Flame Burst \(\+1 de prioridade\) e derruba Ledian antes de ele agir/);
-  assert.match(c.motivos.join(" | "), /o alvo age antes/);
+  assert.match(c.avisos.join(" | "), /O alvo age antes com Flame Burst \(\+1 de prioridade\) e tira \d+% do HP de Ledian/);
   assert.equal(c.garantido, true, "o Seismic Fist tira no mínimo 138%: o KO em 1 golpe é garantido, só a ordem não");
   assert.doesNotMatch(c.motivos.join(" | "), /derruba no turno 1/);
   assert.match(c.motivos.join(" | "), /Provável derrubar o Ninetales em 1 golpe \(Seismic Fist\)/);
   assert.match(c.motivos.join(" | "), /Tira 138% a 162% do HP dele por golpe/);
   deepEqual(r.alvo, { chefao: "Courtney Meteor Falls", indice: 0, pokemon: ["Ninetales"], origem: "informado" });
   assert.ok(r.avisos.includes("Simulação 1x1: luta em dupla e Fake Out não são simulados."));
-  // Nenhum candidato do Ledian "bate primeiro" contra este Ninetales (todo golpe dele é mais lento que o Flame Burst).
-  r.candidatos.filter((x) => x.hitKill > 0 && x.alvoAgeAntes).forEach((x) => assert.equal(x.baterPrimeiro, false, x.golpes.join("/")));
+  // Todo candidato do Ledian com hit-kill bate primeiro: o Flame Burst do alvo não o derruba.
+  r.candidatos.filter((x) => x.hitKill > 0 && x.alvoAgeAntes).forEach((x) => assert.equal(x.baterPrimeiro, true, x.golpes.join("/")));
 });
 
 test("a prioridade do alvo só tira o 'bate primeiro' se o golpe dele DERRUBA o atacante: Quick Attack (+2) que não derruba não muda a ordem do KO", () => {
@@ -100,7 +102,8 @@ test("a prioridade do alvo só tira o 'bate primeiro' se o golpe dele DERRUBA o 
   assert.match(c.avisos.join(" | "), /O alvo age antes com Quick Attack \(\+2 de prioridade\) e tira \d+% do HP de Ledian/);
 });
 
-test("hit-kill de 2 golpes: o Flame Burst do alvo derruba o atacante antes do 2º golpe, então Raticate/Nidorino/Pidgeotto/Pidgeot x Ninetales NÃO batem primeiro", () => {
+test("hit-kill de 2 golpes x Ninetales: o alvo age antes com o Flame Burst (+1) e o nível segue a ordem real (Raticate/Pidgeotto, mais lentos, não batem primeiro)", () => {
+  // B4 (21/10): sem o x1,5 sempre ligado do Flash Fire o Flame Burst não derruba mais o atacante; só a Velocidade decide (o Pidgeot de Dust Cloud sobe a nível 2).
   // Pidgeotto e Pidgeot saíram da premissa em 15/10/2026 (ticket calibracao-03): a Giant Wings, innate deles, passou a valer x1,3
   // nos golpes de ar (Air Cutter, Air Slash...), os sets mais fortes viram hit-kill de 1 golpe e já não sobra candidato de 2.
   // A propriedade segue valendo para o que sobrar de hit-kill de 2 neles (nenhum, hoje).
@@ -111,9 +114,9 @@ test("hit-kill de 2 golpes: o Flame Burst do alvo derruba o atacante antes do 2�
     const dois = r.candidatos.filter((x) => x.hitKill === 2);
     if (nome === "Raticate") assert.ok(dois.length > 0, nome + ": premissa, algum candidato com hit-kill de 2 golpes");
     dois.forEach((x) => {
-      assert.equal(x.baterPrimeiro, false, nome + " " + x.golpes.join("/"));
       assert.equal(x.alvoAgeAntes, true, nome);
-      assert.equal(tier(x), 1, nome);
+      assert.equal(tier(x), x.baterPrimeiro ? 2 : 1, nome);
+      if (nome === "Raticate" || nome === "Pidgeotto") assert.equal(x.baterPrimeiro, false, nome + " " + x.golpes.join("/"));
     });
   });
 });
@@ -148,9 +151,9 @@ test("Sturdy do atacante (Glalie, inato) x Ninetales: o Flame Burst o derrubaria
   assert.equal(c.alvoAgeAntes, true, "o aviso segue: o alvo age antes com prioridade");
 });
 
-test("ranking do caso B: contra o Flame Burst do Ninetales nenhum candidato do Ledian é nível 3 ou 2 (cai no resto do ranking)", () => {
+test("ranking do caso B: contra o Flame Burst do Ninetales (que não derruba) todo candidato do Ledian é nível 3 (B4, 21/10)", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales });
-  assert.ok(r.candidatos.every((x) => tier(x) === 1), "contra o Flame Burst do Ninetales nenhum Ledian é nível 3 ou 2");
+  assert.ok(r.candidatos.every((x) => tier(x) === 3), "o Flame Burst não derruba o Ledian: ele bate primeiro por velocidade");
 });
 
 // Ninetales da Meteor Falls sem o Flame Burst e com Def menor (Mild): o caso conferido na calculadora, sem prioridade do alvo.
@@ -560,11 +563,11 @@ test("especiesQueResolvem: time e caixa, só quem derruba (hitKill > 0), 1 golpe
     assert.ok(ta > tb || (ta === tb && (a.hitKill <= b.hitKill || a.hitKill === 0 || b.hitKill === 0)), "os 3 níveis do usuário: 1 golpe e bate primeiro > 2 golpes e bate primeiro > resto");
     if (ta === tb && a.hitKill === b.hitKill) assert.ok(a.dano.max >= b.dano.max, "dentro do nível, mais dano antes");
   }
-  // Contra o Ninetales do jogo (Flame Burst +1) ninguém bate primeiro: todos caem no resto e a ordem é por dano (o Ledian não sobe mais).
+  // Contra o Ninetales do jogo (Flame Burst +1, que não derruba o Ledian) o Ledian bate primeiro por velocidade e sobe acima do Steelix (B4, 21/10).
   const nomes = lista.map((e) => e.sp.n);
   assert.ok(nomes.indexOf("Ledian") !== -1 && nomes.indexOf("Steelix") !== -1);
-  lista.forEach((e) => assert.equal(tier(e.candidato), 1, e.sp.n));
-  assert.ok(nomes.indexOf("Steelix") < nomes.indexOf("Ledian"), "mais dano antes dentro do mesmo nível");
+  assert.equal(tier(lista.find((e) => e.sp.n === "Ledian").candidato), 3, "Ledian: 1 golpe e bate primeiro");
+  assert.ok(nomes.indexOf("Ledian") < nomes.indexOf("Steelix"), "quem bate primeiro vem antes");
   // Sem o Flame Burst (Ninetales sem prioridade), o Ledian volta a bater primeiro por velocidade e sobe acima do Steelix.
   const semBurst = Rx.foeDeDuelo(Object.assign({}, Rx.BOSSES.find((b) => b.name === "Courtney Meteor Falls").party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Shadow Ball"], nat: "Mild" }), 55, null);
   const lista2 = Rx.especiesQueResolvem({ foe: semBurst }, {}).map((e) => e.sp.n);

@@ -220,10 +220,12 @@ test("Soul Dew (Latios do Monochamp Dragon): +50% no golpe especial; como alvo, 
 test("Fire Gem (Ninetales de Courtney): o 1º golpe Fire sai x1,5 (era 1,3) e o efeito se dilui nos turnos seguintes", () => {
   const p = pokemonDoChefao("Courtney Mossdeep", "Ninetales");
   assert.equal(p.item, "Fire Gem");
-  const com = R.foeDeDuelo(p, NIVEL, null), sem = R.foeDeDuelo(Object.assign({}, p, { item: "" }), NIVEL, null), al = alvo();
+  // Só o golpe Fire dos dois lados (B4, 21/10: sem o x1,5 do Flash Fire na sinergia o melhor golpe de quem está sem a gema deixa de ser o Fire).
+  const soFire = (x) => Object.assign({}, x, { golpesProntos: x.golpesProntos.filter((g) => g.tipo === "Fire") });
+  const com = soFire(R.foeDeDuelo(p, NIVEL, null)), sem = soFire(R.foeDeDuelo(Object.assign({}, p, { item: "" }), NIVEL, null)), al = alvo();
   const meu = (x, turnos) => R.danoComStatusNoDuelo(x, al, R.danoNoDuelo(x, al, NIVEL), R.danoNoDuelo(al, x, NIVEL), turnos, true).meu;
   assert.equal(R.danoNoDuelo(com, al, NIVEL).melhor.golpe.tipo, "Fire");
-  perto(meu(com, 1) / meu(sem, 1), 1.5, 0.05, "1 turno");
+  perto(meu(com, 1) / meu(sem, 1), 1.5, 0.08, "1 turno"); // 0,08: o dano de queimadura da Pyromancy entra nos dois lados e dilui a razão agora que o Flash Fire não infla o dano
   perto(meu(com, 3) / meu(sem, 3), (1.5 + 2) / 3, 0.03, "3 turnos: a gema só vale uma vez");
 });
 

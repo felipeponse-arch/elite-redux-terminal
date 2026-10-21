@@ -234,11 +234,11 @@ test("Opportunist em luta PERDIDA: o motor não dá a prioridade do golpe que de
   const golbat = unidade("Golbat", "Opportunist", ["Crunch"]);
   assert.equal(golbat.ef.prioNoFinal, true);
   assert.ok(golbat.stats[5] < ninetales.stats[5], "premissa: o Golbat é mais lento");
-  const r = lutar(golbat, ninetalesSemQueenly, 1);
+  const r = lutar(golbat, ninetalesSemQueenly, 1, 0.5); // B4 (21/10): sem o x1,5 sempre ligado do Flash Fire na sinergia, o Ninetales só derruba o Golbat de 1 golpe se ele chega com metade da vida
   assert.equal(r.venceu, false);
   assert.equal(r.turnos, 1, "o Ninetales derruba o Golbat no 1º turno");
   assert.equal(r.fracFoe, 1, "o Golbat não ganha um golpe a mais: no turno 1 o alvo está com HP cheio e não há prioridade");
-  assert.equal(forma(r), forma(lutar(comEf(golbat, { prioNoFinal: false }), ninetalesSemQueenly, 1)), "luta perdida igual à de quem não tem Opportunist");
+  assert.equal(forma(r), forma(lutar(comEf(golbat, { prioNoFinal: false }), ninetalesSemQueenly, 1, 0.5)), "luta perdida igual à de quem não tem Opportunist");
 });
 
 test("Coil Up do chefão contra a Queenly Majesty de quem o enfrenta: o 1º Bite falha e custa o turno do chefão (nenhum dano em mim), enquanto sem a habilidade ele bate no 1º turno", () => {
@@ -246,18 +246,19 @@ test("Coil Up do chefão contra a Queenly Majesty de quem o enfrenta: o 1º Bite
   const meuSem = comEf(meu, { bloqueiaPrioLado: false });
   const chefao = unidade("Centiskorch", "Coil Up", ["Bite"]);
   assert.ok(chefao.stats[5] < meu.stats[5], "premissa: o meu Ninetales é mais rápido");
-  const luta = (eu) => R.resultadoDoDuelo(eu, chefao, NIVEL, { detalhe: true, fracEu: 1 });
+  const luta = (eu) => R.resultadoDoDuelo(eu, chefao, NIVEL, { detalhe: true, fracEu: 1, fracFoe: 0.6 }); // fracFoe 0,6: o Heat Wave do Ninetales derruba o Centiskorch de 1 golpe (B4, 21/10: sem o x1,5 do Flash Fire na sinergia)
   assert.ok(luta(meuSem).fracEu < 1, "controle: sem a Queenly Majesty o Bite do chefão acerta com prioridade");
   assert.equal(luta(meu).venceu, true);
   assert.equal(luta(meu).fracEu, 1, "o Bite falhou e foi o turno do chefão: eu venci sem levar dano");
 });
 
+// B4 (21/10): sem o x1,5 sempre ligado do Flash Fire do Ninetales na sinergia, o Heat Wave não derruba o Drapion com metade da vida; o chefão chega com 35%.
 test("Opportunist do chefão olha quem ele enfrenta: contra a minha Queenly Majesty ele não passa na frente e eu derrubo o Drapion no 1º golpe sem levar dano", () => {
   const meu = unidade("Ninetales", "Queenly Majesty", ["Heat Wave"], [252, 0, 252, 0, 4, 0], null, "Modest");
   const meuSem = comEf(meu, { bloqueiaPrioLado: false });
   const chefao = drapion("Crunch");
   assert.ok(meu.stats[5] < chefao.stats[5], "premissa: o Drapion é mais rápido");
-  const luta = (eu) => R.resultadoDoDuelo(eu, chefao, NIVEL, { detalhe: true, fracEu: 1, fracFoe: 0.5 });
+  const luta = (eu) => R.resultadoDoDuelo(eu, chefao, NIVEL, { detalhe: true, fracEu: 1, fracFoe: 0.35 });
   assert.ok(luta(meuSem).fracEu < 1, "controle: sem a Queenly Majesty o Drapion age primeiro e me acerta");
   assert.equal(luta(meu).venceu, true);
   assert.equal(luta(meu).fracEu, 1, "com a Queenly Majesty o golpe do chefão falha: ele não me tira HP");

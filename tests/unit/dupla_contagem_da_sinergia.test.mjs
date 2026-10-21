@@ -58,12 +58,12 @@ test("em todas as entradas do species_ability_synergy.json: habilidade com texto
     const leu = Object.keys(solo.bonusTipo).length > 0 || Object.keys(solo.bonusCategoria).length > 0 || Object.keys(solo.flagMult).length > 0 || solo.contatoMult !== 1;
     const ef = R.efeitoDasHabilidadesNoDuelo([id], sname, null);
     if (leu) { assert.deepEqual(Object.keys(ef.bonusGolpes), [], sname + " / " + h.name + ": o texto já deu o bônus"); lidas++; }
-    // 21/10/2026 (calibracao-simulador/01): estas cinco só absorvem/reagem no código do jogo, sem bônus de dano (abilities.cc); a sinergia saiu.
-    else if (["Aerodynamics", "Motor Drive", "Well Baked Body", "Justified", "Inflatable"].includes(h.name)) assert.deepEqual(Object.keys(ef.bonusGolpes), [], sname + " / " + h.name + ": o jogo não dá bônus de dano");
+    // 21/10/2026 (calibracao-simulador/01): as cinco primeiras só absorvem/reagem no código do jogo, sem bônus de dano; Flash Fire e Elemental Vortex (B4) têm o gatilho modelado à parte; a sinergia saiu.
+    else if (["Aerodynamics", "Motor Drive", "Well Baked Body", "Justified", "Inflatable", "Flash Fire", "Elemental Vortex"].includes(h.name)) assert.deepEqual(Object.keys(ef.bonusGolpes), [], sname + " / " + h.name + ": o jogo não dá bônus de dano");
     else { assert.ok(Object.keys(ef.bonusGolpes).length > 0, sname + " / " + h.name + ": sem leitura do texto, a sinergia segue"); mantidas++; }
   }
   assert.ok(lidas >= 1000, "entradas com texto lido: " + lidas);
-  assert.ok(mantidas >= 100, "entradas que mantêm a sinergia: " + mantidas);
+  assert.ok(mantidas >= 65, "entradas que mantêm a sinergia: " + mantidas);
 });
 
 test("a lista fixa de 15 habilidades do ticket calibracao-03 acabou: a regra geral cobre as 15 e mais", () => {

@@ -56,7 +56,8 @@ test("hazard de habilidade do chefão (Loose Rocks): quem entra depois fere na e
 
 test("hazard posto por golpe meu (Stealth Rock): o chefão que entra depois leva a tabela de Rock; Boots dele ignora", () => {
   const moltres = (item = "") => linha("Moltres", { golpes: ["Flamethrower"], evs: EV.especial, nat: "Modest", item });
-  const luta = (golpes, item) => lutaInteira([meu("Tyranitar", golpes, { evs: EV.tanqueF })], [flamejante("Charizard"), moltres(item), flamejante("Charizard")]);
+  // Life Orb no Moltres: sem o x1,5 sempre ligado da sinergia do Flash Fire (B4, 21/10) ele não mata o Tyranitar antes de levar dano; o item dá a força que a fixture precisa.
+  const luta = (golpes, item = "Life Orb") => lutaInteira([meu("Tyranitar", golpes, { evs: EV.tanqueF })], [flamejante("Charizard"), moltres(item), flamejante("Charizard")]);
   const com = luta(["Stealth Rock", "Crunch"]), sem = luta(["Crunch"]), botas = luta(["Stealth Rock", "Crunch"], "Heavy-Duty Boots");
   const vsMoltres = (s) => s.log.find((l) => l.contra === "Moltres").fracFoe;
   assert.equal(vsMoltres(sem), 1, "controle: sem Stealth Rock o Moltres entra com a vida toda");
@@ -139,12 +140,13 @@ test("botão: contra o time real do Sidney 1 monta 6 diferentes, vence e dá um 
   assert.ok(r.plano.every((p) => p.respostas.length > 0 && p.respostas[0].golpe), "cada Pokémon do chefão tem resposta com golpe");
 });
 
-test("botão: contra um time só de Fire escolhe quem resiste e bate de volta e deixa de fora quem não ajuda", () => {
+test("botão: contra um time só de Fire escolhe quem resiste Fire e bate de volta (Rock e Water)", () => {
   const fogo = [flamejante("Charizard"), flamejante("Houndoom"), flamejante("Arcanine"), flamejante("Ninetales")];
   const r = montar(["Blastoise", "Rhyperior", "Garchomp", "Starmie", "Dragonite", "Venusaur", "Gengar", "Machamp"].map((n) => candidato(n)), fogo);
   const nomes = nomesDe(r);
   assert.ok(nomes.includes("Rhyperior"), "quem resiste Fire e bate com Rock entra: " + nomes);
-  assert.ok(!nomes.includes("Machamp"), "Fighting não faz nada contra o time e fica de fora: " + nomes);
+  // B4 (21/10): sem o x1,5 sempre ligado do Flash Fire dos Fire (Ninetales), o 6º lugar fica entre Machamp, Gengar e Garchomp e o otimizador pode trazer o Machamp; vale quem resiste a Fire: Water e Rock.
+  assert.ok(nomes.includes("Blastoise"), "quem resiste Fire com Water entra: " + nomes);
   assert.equal(r.simulacao.venceu, true);
 });
 

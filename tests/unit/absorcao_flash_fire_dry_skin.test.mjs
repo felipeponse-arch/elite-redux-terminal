@@ -124,3 +124,22 @@ test("Flash Fire: sem absorção não há bônus (rival com outro golpe de dano,
   const soFire = rival([golpe("Fire")]);
   perto(meu(eu([golpe("Normal")]), soFire, 3) / meu(sem([golpe("Normal")]), soFire, 3), 1, 1e-9, "golpe do dono Normal");
 });
+
+// B4 (decisão do Felipe, 21/10/2026): o x1,5 em Fire do Flash Fire e do Elemental Vortex só liga DEPOIS de absorver um golpe Fire
+// (abilities.cc:695-706 e 8262-8264, `onOffensiveMultiplier` com RESOURCE_FLAG_FLASH_FIRE). A "sinergia por golpe" da espécie
+// (species_ability_synergy.json) somava o x1,5 sempre ligado por cima do gatilho; ela saiu (SINERGIA_SEM_BONUS_DE_DANO_DUELO).
+// Dado real: Ninetales (Flash Fire de innate) com o Flamethrower contra um Garchomp que só tem Fire ou só tem Normal.
+test("Flash Fire na sinergia da espécie: sem golpe Fire do rival o Ninetales não ganha o x1,5; com ele, o bônus entra pelo gatilho", () => {
+  const nine = R.unidadeDaBuild(sp("Ninetales"), { ability: "Flaming Soul", nature: "Modest", evs: [0, 0, 0, 252, 0, 252], item: "", moves: ["Flamethrower"] }, NIVEL, null);
+  assert.ok(nine.ids.includes(idHab("Flash Fire")), "fixture: o Ninetales tem Flash Fire");
+  const g = nine.golpesProntos.find((x) => x.nome === "Flamethrower");
+  perto(g.forca, g.poder * 1.5, 1e-9, "força do Flamethrower: poder x STAB, sem o x1,5 sempre ligado da sinergia");
+  const rival = (golpe) => R.unidadeDaBuild(sp("Garchomp"), { ability: "Sand Veil", nature: "Adamant", evs: [0, 252, 0, 0, 0, 252], item: "", moves: [golpe] }, NIVEL, null);
+  const dele = (mon, rv, turnos) => R.danoComStatusNoDuelo(mon, rv, R.danoNoDuelo(mon, rv, NIVEL), R.danoNoDuelo(rv, mon, NIVEL), turnos, true).meu;
+  const semGatilho = Object.assign({}, nine, { ef: Object.assign({}, nine.ef, { absorveReforca: null }) }); // o mesmo Ninetales sem o gatilho do Flash Fire
+  const semAbsorcao = rival("Earthquake"), comAbsorcao = rival("Flamethrower");
+  assert.equal(R.danoNoDuelo(comAbsorcao, nine, NIVEL).melhor.dano, 0, "fixture: o Fire do rival é absorvido");
+  perto(dele(nine, semAbsorcao, 3) / dele(semGatilho, semAbsorcao, 3), 1, 1e-9, "rival sem golpe Fire: nada é absorvido, sem bônus");
+  const ganho = dele(nine, comAbsorcao, 3) / dele(semGatilho, comAbsorcao, 3);
+  assert.ok(ganho > 1.2 && ganho <= 1.5, "rival só com Fire: o bônus entra pelo gatilho (3 turnos: até x1,33): " + ganho);
+});

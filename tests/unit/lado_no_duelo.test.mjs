@@ -102,7 +102,8 @@ test("a tela só cobre os turnos que restam: 1 turno de tela num duelo de 2 não
 
 // ---------------------------------------------------------------- Aurora Veil só no granizo
 test("Aurora Veil por golpe só entra no granizo ou com Aurora Borealis, e Light Clay vale 8 (battle_script_commands.c:7776-7788)", () => {
-  const foes = () => [foeDe("Wattson 5", "Rotom Wash", 80)];
+  // Darkrai do Sidney 4: a Regice só vence com o Aurora Veil (B4, 21/10: sem precisar, o golpe de tela não é usado); o Rotom Wash do Wattson 5 ela vence atacando.
+  const foes = () => [foeDe("Sidney 4", "Darkrai", 80)];
   const regice = (clima, hab = "") => [meu(80, "Regice", ["Aurora Veil", "Surf"], { evs: EV.tanqueE, item: "Light Clay", clima, hab })];
   assert.equal(luta(regice("granizo"), foes(), 80).log[0].lados.meu.veu, 8, "no granizo, com Light Clay");
   assert.equal(luta(regice(null), foes(), 80).log[0].lados.meu.veu, 0, "sem granizo o golpe falha");
