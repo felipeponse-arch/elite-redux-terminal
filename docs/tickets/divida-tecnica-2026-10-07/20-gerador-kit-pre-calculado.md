@@ -1,6 +1,6 @@
 # 20 — Gerador de builds: redesenho do caminho espécie → kit → build
 
-Status: a-avaliar
+Status: juntado ao time-pelo-motor/01 (usuário, 21/10: o caso Fire Fang vira teste de aceite da Fase C)
 Bloqueado por: 17, 19
 
 ## O que entrega

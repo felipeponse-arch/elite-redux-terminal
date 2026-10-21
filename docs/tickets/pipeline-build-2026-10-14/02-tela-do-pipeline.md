@@ -1,6 +1,6 @@
 # 02 - Pipeline de build na tela (botão da ficha e lote do time)
 
-Status: pronto-para-revisao (branch `pipeline-tela`, sem merge e sem publicação)
+Status: resolvido (no master: merge dc103a7; marcado em 21/10)
 Bloqueado por: 01 (módulo, já no master)
 Desbloqueia: 03 (a decidir: IA escolhe entre os candidatos, `fecharBuild`)
 

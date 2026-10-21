@@ -1,6 +1,6 @@
 # v10 — O resto da config d1a9a4c: aprendizado, tipo de quem ataca, Megas novas
 
-Status: pronto-para-revisao (branch `versao-10-config`, empilhada em `versao-09-golpes`, sem merge, sem PR). Pedido da Construção depois da revisão do v06–v09. Regra do Felipe: código/config da versão nova primeiro.
+Status: resolvido (no master: c341fea, 1345f29, 2dd611a, 379b9fa; publicado na v178/v179; marcado em 21/10)
 Tamanho: M
 
 ## 1. Golpes aprendidos de TODAS as espécies (patch reprodutível)

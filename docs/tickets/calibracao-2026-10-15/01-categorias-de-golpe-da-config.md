@@ -1,6 +1,6 @@
 # 01 — Categorias de golpe vindas da config do jogo
 
-Status: pronto-para-revisao (branch `calibracao-01`, sem merge, sem PR)
+Status: resolvido (no master: 470d17f a 3e000e5, merge cf65535; marcado em 21/10)
 Tamanho: G
 Bloqueado por: nenhum
 Divergências: A7, N3 (detalhe em `docs/calibracao/divergencias.json`)

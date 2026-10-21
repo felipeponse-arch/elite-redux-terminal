@@ -1,6 +1,6 @@
 # 04 - Quem resolve o chefão (caso B na aba Chefões)
 
-Status: pronto-para-revisao (branch `pipeline-quem-resolve`, a partir de `pipeline-ia-escolhe` d5f7f83; sem merge e sem publicação)
+Status: resolvido (no master: merge dc103a7; marcado em 21/10)
 Bloqueado por: 01 (módulo) e 02 (cartão de candidato)
 Desbloqueia: nada
 

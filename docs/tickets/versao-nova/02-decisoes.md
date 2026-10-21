@@ -1,6 +1,6 @@
 # v02 — Decisões do Felipe de 15/10: versão mais nova, M9 pelo código, M8 e B1
 
-Status: pronto-para-revisao (branch `versao-02-decisoes`, empilhada em `versao-01-dupla-contagem`, sem merge, sem PR)
+Status: resolvido (no master: c341fea, 1345f29, 2dd611a, 379b9fa; publicado na v178/v179; marcado em 21/10)
 Tamanho: M
 Bloqueado por: v01
 Autorização: Felipe, 15/10/2026 (decisões 1, 2 e 4 da fila v01–v05, em `docs/tickets/versao-nova-plano.md`; M8 e B1 são o ticket 07 da calibração, branch `calibracao-varredura`)

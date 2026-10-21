@@ -1,6 +1,6 @@
 # 05 — Primeiro golpe com HP cheio e Booster Energy
 
-Status: pronto-para-revisao (branch `calibracao-05`, empilhada em `calibracao-04`, sem merge, sem PR)
+Status: resolvido (no master: 470d17f a 3e000e5, merge cf65535; marcado em 21/10)
 Tamanho: M
 Bloqueado por: 03
 Divergências: A5, A6 (detalhe em `docs/calibracao/divergencias.json`)

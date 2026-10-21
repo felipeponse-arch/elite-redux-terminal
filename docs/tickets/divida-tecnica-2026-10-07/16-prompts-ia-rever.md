@@ -1,6 +1,6 @@
 # 16 — Prompts da IA: rever os blocos rasos
 
-Status: a-avaliar
+Status: adiado (usuário, 21/10: até o veredito do Modo Motor, time-pelo-motor/01)
 Bloqueado por: 05
 
 ## O que entrega

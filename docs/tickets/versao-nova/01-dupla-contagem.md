@@ -1,6 +1,6 @@
 # v01 — Dupla contagem da sinergia por golpe
 
-Status: pronto-para-revisao (branch `versao-01-dupla-contagem`, a partir do master `cb8d1ce`, sem merge, sem PR)
+Status: resolvido (no master: c341fea, 1345f29, 2dd611a, 379b9fa; publicado na v178/v179; marcado em 21/10)
 Tamanho: M
 Bloqueado por: nada
 Autorização: Felipe, 15/10/2026 (decisão 3 da fila v01–v05): aplicar a correção geral, antes do rank. Pergunta 1 de `docs/tickets/calibracao-2026-10-15/03-perguntas.md`.

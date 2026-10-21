@@ -1,6 +1,6 @@
 # 01 — Estudo: rank com todas as lutas do jogo (não só chefões)
 
-Status: pronto-para-agente (começar DEPOIS do reset do limite semanal, terça 21/10/2026 às 23h)
+Status: resolvido (estudo.md; o usuário escolheu 60/40 em 16/10; marcado em 21/10)
 Pedido: Felipe, 16/10/2026 — "a gente tinha que pensar em todas as lutas, não só na luta contra os boss".
 Decisão dele: primeiro um ESTUDO (relatório), mudar o rank e o Meu Time só depois de ver.
 

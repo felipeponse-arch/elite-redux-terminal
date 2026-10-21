@@ -1,6 +1,6 @@
 # 05 — Rascunho de build coerente com a espécie
 
-Status: pronto-para-revisao (branch `pipeline-rascunho`, sobre `pipeline-quem-resolve` 6446f3b; sem merge e sem publicação)
+Status: resolvido (no master: merge dc103a7; marcado em 21/10)
 Bloqueado por: nenhum
 Origem: revisão de metagame de 15/10/2026 sobre as 17 builds geradas pelo pipeline (`origin/versao-12-builds-novas`, `docs/tickets/versao-nova/12-builds-novas.md`).
 

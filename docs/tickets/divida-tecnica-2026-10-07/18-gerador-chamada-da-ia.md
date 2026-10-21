@@ -1,6 +1,6 @@
 # 18 — Gerador de builds: chamada da IA (cache, saída estruturada, modelo)
 
-Status: pronto-para-agente
+Status: adiado (usuário, 21/10: até o veredito do Modo Motor, time-pelo-motor/01)
 Bloqueado por: 06
 
 ## O que entrega

@@ -1,6 +1,6 @@
 # 02 — Parâmetros de item pelo código do jogo
 
-Status: pronto-para-revisao (branch `calibracao-02`, empilhada em `calibracao-01`, sem merge, sem PR)
+Status: resolvido (no master: 470d17f a 3e000e5, merge cf65535; marcado em 21/10)
 Tamanho: M
 Bloqueado por: nenhum
 Divergências: A8, N5 (detalhe em `docs/calibracao/divergencias.json`)

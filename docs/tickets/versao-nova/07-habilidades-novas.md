@@ -1,6 +1,6 @@
 # v07 — Habilidades novas (dados-2654/04, 05, 06 + delta do upcoming)
 
-Status: pronto-para-revisao (branch `versao-07-habilidades-novas`, empilhada em `versao-06-habilidades-mudadas`, sem merge, sem PR).
+Status: resolvido (no master: c341fea, 1345f29, 2dd611a, 379b9fa; publicado na v178/v179; marcado em 21/10)
 Tamanho: G
 Autorização: Felipe, 15/10/2026 (fila v06–v09 repassada pelo "Elite Redux - Construção"). Regra do Felipe: quando as fontes divergem vale o CÓDIGO do jogo; o app mira a versão mais nova (er-config `d1a9a4c` + código `486026e`).
 Peça P1 respeitada: nenhuma regra foi gerada do `abilities.cc`; cada regra foi escrita à mão, lida do código, e o texto da habilidade continua sendo o que o motor lê.

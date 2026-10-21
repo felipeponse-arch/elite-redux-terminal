@@ -1,6 +1,6 @@
 # 06 — Prioridade e campo pelo código
 
-Status: pronto-para-revisao (branch `calibracao-06`, empilhada em `calibracao-05`, sem merge, sem PR)
+Status: resolvido (no master: 470d17f a 3e000e5, merge cf65535; marcado em 21/10)
 Tamanho: M
 Bloqueado por: 05
 Divergências: M3, M4, M7, N4 (detalhe em `docs/calibracao/divergencias.json`)
