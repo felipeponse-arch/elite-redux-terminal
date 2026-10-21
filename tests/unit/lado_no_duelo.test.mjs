@@ -171,13 +171,7 @@ test("Trick Room permanente do chefão (Tate & Liza) segue valendo mesmo sem est
 // ---------------------------------------------------------------- remoção: Brick Break, Defog, Screen Cleaner
 const comTelaDoChefao = { statusNoFim: [], ladoDele: { reflect: 8, luz: 8 } }; // as 8 voltas de Reflect/Light Screen do Tapu Koko (Wattson 5, Light Clay)
 
-test("Brick Break derruba Reflect e Light Screen do rival (battle_script_commands.c:12428-12431)", () => {
-  const zekrom = () => [foeDe("Wattson 5", "Zekrom", 80)];
-  const quebra = luta([meu(80, "Medicham", ["Brick Break"], { evs: EV.fisico, nat: "Adamant" })], zekrom(), 80, comTelaDoChefao).log[0].lados.dele;
-  const sem = luta([meu(80, "Mewtwo", ["Psychic"])], zekrom(), 80, comTelaDoChefao).log[0].lados.dele;
-  assert.deepEqual([quebra.reflect, quebra.luz, quebra.veu], [0, 0, 0]);
-  assert.deepEqual([sem.reflect, sem.luz], [8, 8], "controle: sem Brick Break as telas do chefão ficam");
-});
+// Brick Break: desde a B2 (21/10) só derruba a tela quando acerta e gasta o turno; testes em juiz_do_time.test.mjs.
 
 test("Defog tira as telas do rival (battle_script_commands.c:6534-6537), gastando o turno", () => {
   const rotom = () => [foeDe("Wattson 5", "Rotom Wash", 80)];

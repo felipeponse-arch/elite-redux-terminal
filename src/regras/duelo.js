@@ -3229,7 +3229,7 @@
     if (se === "Haze") return { tipo: "haze" };
     if (se === "Disable" || se === "Encore" || se === "Torment") return { tipo: "disable" };
     if (se === "Tailwind") return { tipo: "vento" };
-    if (/^Defog$/.test(se)) return { tipo: "defog" }; // só limpa as telas do rival na luta contra o time (poeEfeitoDeLadoComGolpe); no 1x1 não muda nada
+    if (se === "Defog") return { tipo: "defog" }; // só limpa as telas do rival na luta contra o time (poeEfeitoDeLadoComGolpe); no 1x1 não muda nada
     if (se === "Trick Room") return { tipo: "sala" };
     if (se === "Protect") return { tipo: "protege" };
     if (se === "Stealth Rock" || se === "Spikes" || se === "Toxic Spikes" || se === "Sticky Web") return { tipo: "hazard", hazard: { "Stealth Rock": "rocha", "Spikes": "espinho", "Toxic Spikes": "toxico", "Sticky Web": "teia" }[se] };
@@ -4361,10 +4361,20 @@
         quem.frac = copia.frac; Object.assign(lq, nlq); Object.assign(lc, nlc); campo.sala = nsala;
       });
     }
-    // Brick Break derruba Reflect, Light Screen e Aurora Veil do rival ao acertar (battle_script_commands.c:12428-12431).
-    // Atalho: vale como golpe usado desde o começo do duelo quando está entre os golpes de quem ataca.
-    function quebraTelasComGolpe(quem, lc) {
-      if (temTelaDuelo(lc) && (quem.u.golpesProntos || []).some(function (g) { return g.nome === "Brick Break"; })) limpaTelasDoLadoDuelo(lc);
+    // Brick Break derruba Reflect, Light Screen e Aurora Veil do rival quando é usado e acerta (battle_script_commands.c:12428-12431),
+    // então respeita a imunidade de tipo (Ghost) e gasta o turno como os outros golpes de lado: quem o usa leva o golpe do
+    // rival e só derruba a tela se, mesmo assim, vence, e se sem derrubar a luta não era vencida. shortcut: Scrappy e
+    // golpes que acertam Ghost por habilidade não entram na imunidade; upgrade quando uma build do jogo usar.
+    function quebraTelasComGolpe(quem, contra, lq, lc) {
+      if (!temTelaDuelo(lc) || !(quem.u.golpesProntos || []).some(function (g) { return g.nome === "Brick Break"; })) return;
+      if (typeMultiplier("Fighting", contra.u.tipos) === 0) return;
+      var golpe = danoNoDuelo(comoEstaDuelo(contra), comoEstaDuelo(quem), nivel).melhor.dano / quem.u.stats[0];
+      var copia = participanteDuelo(quem.u); copia.frac = quem.frac - golpe; copia.status = quem.status; copia.bonus = quem.bonus;
+      if (copia.frac <= 0) return;
+      var nlc = Object.assign({}, lc); limpaTelasDoLadoDuelo(nlc);
+      var vence = function (c, b) { return resultadoDoDuelo(comoEstaDuelo(c), comoEstaDuelo(contra), nivel, { fracEu: c.frac, fracFoe: contra.frac, detalhe: true, lados: { eu: lq, foe: b }, sala: campo.sala }).venceu === true; };
+      if (!vence(copia, nlc) || vence(quem, lc)) return;
+      quem.frac = copia.frac; limpaTelasDoLadoDuelo(lc);
     }
     if (deles.length) entraDele(deles[0]);
     while (i < deles.length && time.some(function (c) { return c.vivo; }) && voltas++ < 60) {
@@ -4396,7 +4406,7 @@
       poeHazardComGolpe(atual, f, ladoDele);
       poeHazardComGolpe(f, atual, ladoMeu);
       if (!atual.vivo) continue;
-      quebraTelasComGolpe(atual, ladoDele); quebraTelasComGolpe(f, ladoMeu);
+      quebraTelasComGolpe(atual, f, ladoMeu, ladoDele); quebraTelasComGolpe(f, atual, ladoDele, ladoMeu);
       poeEfeitoDeLadoComGolpe(atual, f, ladoMeu, ladoDele);
       poeEfeitoDeLadoComGolpe(f, atual, ladoDele, ladoMeu);
       if (!atual.vivo) continue;
@@ -4562,6 +4572,39 @@
     var passos = montarTimeContraChefaoEmPassos(candidatos, party, nivel, opcoes), r;
     while (!(r = passos.next()).done) { /* tudo de uma vez */ }
     return r.value;
+  }
+  // Juiz do time pela LUTA COMPLETA (ticket time-pelo-motor/01, Fase B2), ao lado do `pontos` (que não muda).
+  // avaliarTimePelaLutaCompleta(meus, party, nivel, opcoes): `meus` são unidades (R.unidadeDaBuild) na ordem do time,
+  // `party` a linha do chefão em bosses.json. opcoes: { buffs, campo, dupla, clima } como o montarTimeContraChefao
+  // (buffs do líder = buffsAtivosDoChefao(nome); clima padrão = o do time do chefão).
+  // Devolve { nota, venceu, derrubados, total, membros: [{ nome, contribuicao, contribuicaoSuporte }] }.
+  //  - nota: os `pontos` da luta completa do time inteiro contra o time do chefão (efeitos de lado da B1 incluídos).
+  //  - contribuicao: nota - nota do time SEM o membro (a luta inteira refeita). Mede atacante e suporte juntos.
+  //  - contribuicaoSuporte: nota - nota do time com o membro SEM os golpes de lado (tela, Tailwind, Trick Room, Defog);
+  //    isola só o efeito do suporte, sem o dano do próprio membro. null quando ele não tem golpe de lado.
+  // Custo: 1 + membros + suportes simulações da luta completa.
+  var TIPOS_DE_GOLPE_DE_LADO_DUELO = ["tela", "vento", "sala", "defog"];
+  function semGolpesDeLadoDuelo(u) {
+    var fica = (u.statusIds || []).filter(function (id) { var p = planoDoGolpeStatus(id); return !(p && TIPOS_DE_GOLPE_DE_LADO_DUELO.indexOf(p.tipo) !== -1); });
+    return fica.length === (u.statusIds || []).length ? null : Object.assign({}, u, { statusIds: fica });
+  }
+  function avaliarTimePelaLutaCompleta(meus, party, nivel, opcoes) {
+    var buffs = (opcoes && opcoes.buffs) || [], campo = (opcoes && opcoes.campo) || null, dupla = !!(opcoes && opcoes.dupla);
+    var clima = opcoes && opcoes.clima !== undefined ? opcoes.clima : climaDoTimeDoChefao(party);
+    var inicio = buffs.length ? inicioDaLutaComBuffs(buffs) : null;
+    var foes = foesComRegraDeCampo(foesComBuffsDoGinasio(party.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean), buffs, dupla ? 2 : 1), campo);
+    var luta = function (us) {
+      if (!us.length) return { pontos: 0, venceu: false, derrubados: 0, total: foes.length };
+      return (dupla ? simularDuplaContraChefao : simularLutaContraChefao)(us.map(function (u) { return buffs.length ? meuComBuffsDoGinasio(u, buffs) : u; }), foes, nivel, inicio);
+    };
+    var cheio = luta(meus);
+    return { nota: cheio.pontos, venceu: cheio.venceu, derrubados: cheio.derrubados, total: cheio.total,
+      membros: meus.map(function (u, k) {
+        var sem = semGolpesDeLadoDuelo(u);
+        return { nome: u.sp.n,
+          contribuicao: cheio.pontos - luta(meus.filter(function (_, j) { return j !== k; })).pontos,
+          contribuicaoSuporte: sem ? cheio.pontos - luta(meus.map(function (x, j) { return j === k ? sem : x; })).pontos : null };
+      }) };
   }
   // Quantos candidatos o simulador avalia (pro progresso "12 de 44" do botão).
   function totalDePassosContraChefao(candidatos) { return candidatos.length * (1 + armadoresDeClima(candidatos).length); }
