@@ -202,10 +202,13 @@ test("amostra: só lutas da Etapa atual em diante, no mínimo 3, e função só 
   assert.equal(base.ctx.lutas.todas.length, 29);
 });
 
-test("risco 8: sem papel e sem tag ainda (Fase D): nada no resultado afirma papel que ninguém mediu", () => {
+test("risco 8 (Fase D): todo papel e toda tag carregam a prova medida; quem não prova nada fica com a abstenção", () => {
   rodada.variantes.forEach((v) => {
-    v.membros.forEach((m) => assert.ok(!("papel" in m) && !("tags" in m)));
-    assert.doesNotMatch(v.explicacao.join(" "), /wallbreaker|sweeper|pivô|tanque|armador|chuva|Rain|Hyper Offense|Stall/i);
+    v.membros.forEach((m) => {
+      m.papeis.forEach((p) => assert.ok(p.prova && Object.keys(p.prova).length > 0, m.nome + " " + p.papel));
+      assert.equal(m.papeis.length === 0, typeof m.abstencao === "string", m.nome);
+    });
+    v.tags.filter((t) => t.armador).forEach((t) => assert.ok(t.beneficiarios.length >= 2 && t.ganhoDoTime > 0, v.chave + " " + t.tag));
   });
 });
 

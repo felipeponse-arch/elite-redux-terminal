@@ -38,16 +38,24 @@
         var f = rs.map(function (r) { return r.v ? 0.5 + 0.5 * r.vi / n : 0.5 * r.d / r.t; });
         var piores = f.slice().sort(function (x, y) { return x - y; }).slice(0, Math.max(1, Math.ceil(f.length / 3)));
         return 0.5 * motorMedia(f) + 0.5 * motorMedia(piores);
-      } }
-    // "Sinergia" ainda sem objetivo fechado: o ticket (§2.2) descreve o que premiar mas não a conta (pergunta devolvida ao coordenador).
+      } },
+    // Sinergia (decisão do usuário, 21/10): "dois membros com benefício medido". Base = Battle Rating médio (a mesma escala do seguro) mais
+    // um bônus (MOTOR_PROVA_SINERGIA_PESO) pela condição que um membro arma (clima, Tailwind, Trick Room, tela) e dois outros aproveitam,
+    // com o benefício medido por duelo 1x1 (motorGanhoDaCondicao). Um beneficiário vale metade, dois valem o bônus cheio.
+    sinergia: { nome: "Sinergia", descricao: "premia dois membros com benefício medido de uma condição que um terceiro arma (clima, Tailwind, Trick Room, tela), sem largar o Battle Rating",
+      valor: function (rs, n, time, ctx) {
+        var f = rs.map(function (r) { return r.v ? 0.5 + 0.5 * r.vi / n : 0.5 * r.d / r.t; });
+        return motorMedia(f) + (time && ctx ? MOTOR_PROVA_SINERGIA_PESO * motorSinergia(ctx, time).score : 0);
+      },
+      extras: function (ctx, cands) { return motorExtrasDeSinergia(ctx, cands); } }
   };
   function motorMedia(v) { return v.length ? v.reduce(function (a, b) { return a + b; }, 0) / v.length : 0; }
   function motorArred(n, casas) { var f = Math.pow(10, casas); return Math.round(n * f) / f; }
 
   // ---- cache (parâmetro; limite simples: ao passar do máximo, esvazia) ----
-  function criarCacheDoMotor() { return { sim: Object.create(null), unid: Object.create(null), build: Object.create(null), tam: 0, acertos: 0, falhas: 0 }; }
+  function criarCacheDoMotor() { return { sim: Object.create(null), unid: Object.create(null), build: Object.create(null), aux: Object.create(null), tam: 0, acertos: 0, falhas: 0 }; }
   function motorGuardar(cache, grupo, chave, valor) {
-    if (cache.tam >= MOTOR_CACHE_MAXIMO) { cache.sim = Object.create(null); cache.unid = Object.create(null); cache.tam = 0; }
+    if (cache.tam >= MOTOR_CACHE_MAXIMO) { cache.sim = Object.create(null); cache.unid = Object.create(null); cache.aux = Object.create(null); cache.tam = 0; }
     cache[grupo][chave] = valor; cache.tam++;
     return valor;
   }
@@ -58,14 +66,15 @@
     return (l && (l[levelCapMode()] || l.more)) || 100;
   }
   // Luta da run pronta para simular: mesma montagem do juiz (avaliarTimePelaLutaCompleta), com o nível do level cap da etapa da luta.
-  function motorMontarLuta(nome, etapa) {
+  // `climaForcado` (Fase D): refaz a luta com o clima do jogador ligado, só para medir o benefício de um armador (o clima do chefão, se houver, vale sempre).
+  function motorMontarLuta(nome, etapa, climaForcado) {
     var b = BOSSES.filter(function (x) { return x.name === nome; })[0];
     if (!b) return null;
-    var party = bossPartyPorDificuldade(b) || [], nivel = motorNivelDaEtapa(etapa), clima = climaDoTimeDoChefao(party), dupla = !!b.db;
+    var party = bossPartyPorDificuldade(b) || [], nivel = motorNivelDaEtapa(etapa), climaDoChefao = climaDoTimeDoChefao(party), clima = climaForcado || climaDoChefao, dupla = !!b.db;
     var buffs = buffsAtivosDoChefao(nome), campo = regraDeCampoDoChefao(nome);
     var foes = foesComRegraDeCampo(foesComBuffsDoGinasio(party.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean), buffs, dupla ? 2 : 1), campo);
     if (!foes.length) return null;
-    return { nome: nome, etapa: etapa, nivel: nivel, dupla: dupla, foes: foes, inicio: buffs.length ? inicioDaLutaComBuffs(buffs) : null, buffs: buffs,
+    return { nome: nome, etapa: etapa, nivel: nivel, dupla: dupla, clima: climaDoChefao, foes: foes, inicio: buffs.length ? inicioDaLutaComBuffs(buffs) : null, buffs: buffs,
       chave: [nome, nivel, DIFF_TO_BOSSKEY[state.settings.difficulty] || "party", dupla ? "d" : "s", buffs.slice().sort().join(","), JSON.stringify(campo), clima].join("|") };
   }
   // As lutas do contexto: todas as 29 (conferência final) e a amostra fixa (busca), função só da etapa.
@@ -108,8 +117,9 @@
   function motorChaveDaBuild(b) { return [b.ability, (b.moves || []).join(","), b.item || "", b.nature || "", (b.evs || []).join(",")].join("|"); }
   // Build do candidato. Favorito com build salva (só na forma base, como a tela) usa a salva; senão o top-1 do pipeline contra o campo;
   // sem nenhum, o melhor set pelo motor (origem "fallback") - só para favorito, o resto sai da lista com aviso.
+  function motorChaveDoContexto(ctx) { return [MOTOR_VERSAO, ctx.etapa, ctx.cap, levelCapMode(), state.settings.difficulty, megaMode()].join("|"); }
   function motorBuildDoCandidato(ctx, sp, base, travado, avisos) {
-    var cache = ctx.cache, chaveCtx = [MOTOR_VERSAO, ctx.etapa, ctx.cap, levelCapMode(), state.settings.difficulty, megaMode()].join("|");
+    var cache = ctx.cache, chaveCtx = motorChaveDoContexto(ctx);
     var salva = travado && sp.x === base.x ? getActiveBuild(sp.sname) : null;
     var origem, build;
     if (salva) { build = salva; origem = "build-salva"; }
@@ -118,7 +128,7 @@
       if (c === undefined) {
         ctx.alvoCampo = ctx.alvoCampo || pipelineResolverAlvo({ campo: true });
         var r = pipelineCandidatos(sp, ctx.alvoCampo), top = r.candidatos[0] || null;
-        c = motorGuardar(cache, "build", ck, top ? { build: top.build, aviso: top.avisos || [] } : { build: null, aviso: [r.aviso || "sem build"] });
+        c = motorGuardar(cache, "build", ck, top ? { build: top.build, aviso: top.avisos || [], todos: r.candidatos } : { build: null, aviso: [r.aviso || "sem build"], todos: [] });
       }
       if (c.build) { build = c.build; origem = "pipeline"; }
       else if (travado) {
@@ -166,7 +176,12 @@
   function motorUnidade(ctx, c, nivel) {
     var ck = c.chaveBuild + "@" + nivel + "|" + MOTOR_VERSAO;
     var u = ctx.cache.unid[ck];
-    if (u === undefined) u = motorGuardar(ctx.cache, "unid", ck, unidadeDaBuild(c.sp, c.build, nivel, null));
+    if (u === undefined) {
+      u = unidadeDaBuild(c.sp, c.build, nivel, null);
+      // Contrafactual da Fase D: a mesma build sem os golpes de um tipo (setup, tela, vento, sala...); a chave da build já muda.
+      if (c.semTipos) u = Object.assign({}, u, { statusIds: (u.statusIds || []).filter(function (id) { var p = planoDoGolpeStatus(id); return !(p && c.semTipos.indexOf(p.tipo) !== -1); }) });
+      motorGuardar(ctx.cache, "unid", ck, u);
+    }
     return u;
   }
   // A luta completa do time (na ordem dada) contra uma luta da run; devolve o resumo medido.
@@ -203,11 +218,13 @@
   function motorBuscar(ctx, cands, favoritos, objetivo, agora) {
     var amostra = ctx.lutas.amostra, vagas = [], tamanho = Math.min(MOTOR_TAMANHO_DO_TIME, cands.length);
     var avaliacoes = 0, estouro = false;
-    var valorDe = function (time) { avaliacoes++; return objetivo.valor(motorAvaliar(ctx, time, amostra), time.length); };
+    var valorDe = function (time) { avaliacoes++; return objetivo.valor(motorAvaliar(ctx, time, amostra), time.length, time, ctx); };
     var excedeu = function () { if (ctx.orcamentoMs && agora() > ctx.orcamentoMs) estouro = true; return estouro; };
-    // Vagas dos favoritos (opções = as formas dele) e vagas livres.
+    // Peças extras do objetivo (sinergia: a build que arma a condição de uma espécie cuja build top-1 não a arma).
+    var extras = objetivo.extras ? objetivo.extras(ctx, cands) : [];
+    // Vagas dos favoritos (opções = as formas dele, e as builds extras dele) e vagas livres.
     favoritos.forEach(function (s) {
-      var op = cands.filter(function (c) { return c.base.sname === s; });
+      var op = cands.concat(extras).filter(function (c, i, a) { return c.base.sname === s && a.indexOf(c) === i; });
       if (op.length) vagas.push({ trava: s, opcoes: op, atual: null });
     });
     var nLivres = Math.max(0, tamanho - vagas.length);
@@ -217,6 +234,7 @@
     solo.sort(function (a, b) { return b.v - a.v || (a.c.sname < b.c.sname ? -1 : 1); });
     var curta = solo.slice(0, MOTOR_POR_VAGA).map(function (s) { return s.c; });
     solo.slice(MOTOR_POR_VAGA).filter(function (s) { return motorTemGolpeDeLado(ctx, s.c); }).slice(0, MOTOR_SUPORTES_POR_VAGA).forEach(function (s) { curta.push(s.c); });
+    extras.forEach(function (c) { if (!c.travado && curta.indexOf(c) === -1) curta.push(c); });
     var soloDe = function (c) { return solo.filter(function (s) { return s.c === c; })[0].v; };
     var usadoPor = function (c, exceto) {
       return vagas.some(function (v, i) { return i !== exceto && v.atual && (v.atual.x === c.x || v.atual.linha === c.linha); });
@@ -277,21 +295,6 @@
       motivo: trocas.length ? null : "nenhuma troca em vaga livre melhora a luta mais difícil (" + luta.nome + ") na simulação" };
   }
 
-  // ---- texto: templates determinísticos sobre os números medidos (nada inventado) ----
-  function motorTextos(v) {
-    var m = v.metricas, rest = m.restantes, t = [];
-    t.push(v.objetivo.nome + " (" + v.objetivo.descricao + ").");
-    t.push("Na amostra de " + m.amostra.lutas + " lutas o time vence " + m.amostra.vence + " (pontos médios " + m.amostra.pontosMedios + "); nas " + m.completo.lutas +
-      " lutas da run vence " + m.completo.vence + "; daqui para frente (" + rest.lutas + " lutas) vence " + rest.vence + ", derrubando em média " + rest.derrubadosMedios + " Pokémon por luta.");
-    if (rest.perdidas.length) t.push("Não vence: " + rest.perdidas.slice(0, 5).join(", ") + (rest.perdidas.length > 5 ? " e mais " + (rest.perdidas.length - 5) : "") + ".");
-    if (v.melhorTentativa) t.push("Melhor tentativa com o que há no time e na caixa: vence " + rest.vence + " de " + rest.lutas + " lutas simuladas.");
-    var b = v.planoB;
-    if (b.trocas && b.trocas.length) t.push("Plano B (luta mais difícil: " + b.luta + (b.ameaca ? ", ameaça: " + b.ameaca : "") + "): " + b.trocas.map(function (x) {
-      return "trocar " + x.sai + " por " + x.entra + " (+" + x.deltaPontos + " pontos" + (x.venceAgora && !x.venciaAntes ? ", passa a vencer" : "") + ")"; }).join("; ") + ".");
-    else if (b.motivo) t.push("Plano B: " + b.motivo + ".");
-    return t;
-  }
-
   // ---- a função pública ----
   // ctx: ver contextoDoMotor. pedido: { favoritos: [sname] (0 a 6, travados), variantes: ["ofensivo", "seguro"] (padrão: todas as definidas) }.
   // Devolve { variantes: [{ chave, objetivo, membros, metricas, planoB, melhorTentativa, explicacao, avisos, tempoMs }], avisos, tempoMs, cache }.
@@ -311,10 +314,10 @@
       var rsAmostra = motorAvaliar(ctx, busca.time, ctx.lutas.amostra), rsTodas = motorAvaliar(ctx, busca.time, ctx.lutas.todas);
       var idxRest = ctx.lutas.todas.map(function (l, i) { return l.etapa >= ctx.etapa ? i : -1; }).filter(function (i) { return i >= 0; });
       var rsRest = idxRest.map(function (i) { return rsTodas[i]; }), lutasRest = idxRest.map(function (i) { return ctx.lutas.todas[i]; });
-      var metricas = { objetivo: motorArred(obj.valor(rsAmostra, busca.time.length), 4), amostra: motorMetricas(rsAmostra, ctx.lutas.amostra),
+      var metricas = { objetivo: motorArred(obj.valor(rsAmostra, busca.time.length, busca.time, ctx), 4), amostra: motorMetricas(rsAmostra, ctx.lutas.amostra),
         completo: motorMetricas(rsTodas, ctx.lutas.todas), restantes: motorMetricas(rsRest, lutasRest) };
       var v = { chave: chave, objetivo: { nome: obj.nome, descricao: obj.descricao },
-        membros: busca.time.map(function (c) { return { sname: c.sname, nome: c.nome, x: c.x, base: c.base.sname, travado: c.travado, origem: c.origem, build: c.build }; }),
+        membros: busca.time.map(function (c) { return { sname: c.sname, nome: c.nome, x: c.x, base: c.base.sname, travado: c.travado, origem: c.origem, build: c.build, papeis: [], abstencao: null, contribuicoes: [] }; }),
         metricas: metricas, avisos: [], avaliacoes: busca.avaliacoes };
       v.melhorTentativa = metricas.restantes.lutas > 0 && metricas.restantes.vence < metricas.restantes.lutas / 2;
       // Favorito nunca some em silêncio: ou está em `membros` ou há um aviso dizendo por quê (linha evolutiva repetida, sem build...).
@@ -328,6 +331,11 @@
       if (busca.time.length < MOTOR_TAMANHO_DO_TIME) v.avisos.push("só há " + busca.time.length + " Pokémon possíveis nesta run: o time ficou com " + busca.time.length + ".");
       if (busca.estouro) v.avisos.push("o orçamento de tempo acabou antes da segunda passada: a busca parou no melhor time achado até ali.");
       v.planoB = motorPlanoB(ctx, busca, rsTodas);
+      // Fase D: papéis por build, contribuições, tags e estilo (paralelo ao papel legado da espécie, que não é tocado).
+      var tc = relogio(), cl = motorClassificar(ctx, busca.time);
+      v.membros.forEach(function (m, i) { m.papeis = cl.membros[i].papeis; m.abstencao = cl.membros[i].abstencao; m.contribuicoes = cl.membros[i].contribuicoes; });
+      v.estilo = cl.estilo; v.estiloProva = cl.estiloProva; v.tags = cl.tags; v.condicaoDeVitoria = cl.condicaoDeVitoria; v.naoMedidos = cl.naoMedidos;
+      v.tempoClassificacaoMs = relogio() - tc;
       v.explicacao = motorTextos(v);
       v.tempoMs = relogio() - tv;
       return v;
