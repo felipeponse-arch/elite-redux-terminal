@@ -27,3 +27,4 @@
 .motor-confirma { margin: var(--space-2) 0; padding: var(--space-2) var(--space-3); border: 1px solid var(--aviso); border-radius: var(--radius-sm); }
 .motor-confirma h5 { margin: 0 0 var(--space-1); font-size: var(--fs-base); }
 .motor-confirma h5:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.motor-fav-caixa { font-size: var(--fs-micro); opacity: 0.8; }

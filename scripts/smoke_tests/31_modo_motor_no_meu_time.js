@@ -41,6 +41,12 @@ async function section31() {
     check("com o modo Motor, o card mostra 'Montar meu melhor time' e não mostra 'Gerar time completo'",
       !!document.getElementById("motor-montar") && !document.getElementById("archetype-build-complete") &&
       document.getElementById("modo-montagem-motor").getAttribute("aria-pressed") === "true" && document.getElementById("modo-montagem-ia").getAttribute("aria-pressed") === "false");
+    // Favorito da CAIXA: Klefki só está na caixa e, marcado, entra travado.
+    var favCaixa = document.querySelector('[data-motor-fav="SPECIES_KLEFKI"]');
+    if (!achou("chip de favorito do Klefki (que está só na caixa)", favCaixa)) return;
+    check("o chip do favorito da caixa avisa que ele está na caixa (texto e dica)", /caixa/.test(favCaixa.textContent) && /na caixa/.test(favCaixa.title), favCaixa.textContent);
+    favCaixa.click();
+    await wait(20);
     // Favorito: Togekiss nunca sai.
     var fav = document.querySelector('[data-motor-fav="SPECIES_TOGEKISS"]');
     if (!achou("chip de favorito do Togekiss", fav)) return;
@@ -63,6 +69,9 @@ async function section31() {
     var varas = card.querySelectorAll(".motor-variante");
     check("o resultado traz as três variantes (ofensivo, seguro, sinergia), cada uma com 6 Pokémon", varas.length === 3 &&
       [].every.call(varas, function (v) { return v.querySelectorAll(".motor-membro").length === 6; }), [].map.call(varas, function (v) { return v.querySelector("h4").textContent; }));
+    check("o favorito da caixa (Klefki) está nas três variantes, marcado como favorito e com o chip ainda marcado",
+      document.querySelector('[data-motor-fav="SPECIES_KLEFKI"]').getAttribute("aria-pressed") === "true" &&
+      [].every.call(varas, function (v) { return [].some.call(v.querySelectorAll(".motor-membro"), function (m) { return /Klefki/.test(m.textContent) && /favorito/.test(m.textContent); }); }));
     check("o favorito (Togekiss) está nas três variantes, marcado como favorito",
       [].every.call(varas, function (v) { return [].some.call(v.querySelectorAll(".motor-membro"), function (m) { return /Togekiss/.test(m.textContent) && /favorito/.test(m.textContent); }); }));
     check("cada Pokémon mostra a build e o papel provado ou o motivo de não ter papel",
@@ -98,7 +107,7 @@ async function section31() {
     window.__tempoMotorRepetidoMs = Date.now() - t1;
 
     // ---- build que o jogador montou: avisa e pede confirmação; nunca apaga ----
-    var alvoS = snamesDoTime.filter(function (s) { return s !== "SPECIES_TOGEKISS"; })[0], minha = JSON.parse(JSON.stringify(S.customBuilds[alvoS][0]));
+    var alvoS = snamesDoTime.filter(function (s) { return s !== "SPECIES_TOGEKISS" && s !== "SPECIES_KLEFKI"; })[0], minha = JSON.parse(JSON.stringify(S.customBuilds[alvoS][0]));
     minha.source = "manual"; minha.nature = minha.nature === "Bold" ? "Calm" : "Bold"; minha.active = true;
     S.customBuilds[alvoS] = [minha];
     var antesJson = JSON.stringify(S.customBuilds[alvoS]);

@@ -23,9 +23,15 @@
     return [state.settings.milestone, capOuPadrao(), state.settings.difficulty, levelCapMode(), megaMode(), state.archetype.monotype || "",
       xsDoJogador().slice().sort(function (a, b) { return a - b; }).join(",")].join("|");
   }
+  // Favorito pode ser qualquer Pokémon capturado: do time OU da caixa (usuário, 21/10). Devolve os snames, sem repetir, time primeiro.
+  function modoMotorCapturados() {
+    var vistos = {};
+    return xsDoJogador().map(function (x) { return { sp: getSpeciesByX(x), noTime: state.team.indexOf(x) !== -1 }; })
+      .filter(function (c) { if (!c.sp || vistos[c.sp.sname]) return false; vistos[c.sp.sname] = true; return true; });
+  }
   function modoMotorFavoritosValidos() {
-    var doTime = state.team.map(getSpeciesByX).filter(Boolean).map(function (sp) { return sp.sname; });
-    return motorFavoritos.filter(function (s) { return doTime.indexOf(s) !== -1; });
+    var meus = modoMotorCapturados().map(function (c) { return c.sp.sname; });
+    return motorFavoritos.filter(function (s) { return meus.indexOf(s) !== -1; });
   }
   function modoMotorSegundos(ms) { return (Math.round(ms / 100) / 10).toFixed(1).replace(".", ",") + " s"; }
   function modoMotorEsperar() { return new Promise(function (ok) { setTimeout(ok, 0); }); }
@@ -152,15 +158,17 @@
         '<button type="button" class="modo-chip' + (!motor ? " active" : "") + '" id="modo-montagem-ia" data-modo="ia" aria-pressed="' + !motor + '" title="Pede a composição, as builds e o guia ao Claude">IA (Claude)</button>' +
       '</div></div>';
   }
-  function modoMotorFavoritosHtml(members) {
-    if (!members.length) return "";
+  function modoMotorFavoritosHtml() {
+    var capturados = modoMotorCapturados();
+    if (!capturados.length) return "";
     var fav = modoMotorFavoritosValidos();
     return '<div class="archetype-axis"><span class="archetype-axis-label" id="motor-fav-rotulo">Manter no time (opcional)</span>' +
-      '<div class="archetype-chips" role="group" aria-labelledby="motor-fav-rotulo">' + members.map(function (sp) {
-        var on = fav.indexOf(sp.sname) !== -1;
-        return '<button type="button" class="modo-chip' + (on ? " active" : "") + '" data-motor-fav="' + escapeHtml(sp.sname) + '" aria-pressed="' + on + '">' + escapeHtml(sp.n) + '</button>';
+      '<div class="archetype-chips" role="group" aria-labelledby="motor-fav-rotulo">' + capturados.map(function (c) {
+        var on = fav.indexOf(c.sp.sname) !== -1, onde = c.noTime ? "no time" : "na caixa";
+        return '<button type="button" class="modo-chip' + (on ? " active" : "") + '" data-motor-fav="' + escapeHtml(c.sp.sname) + '" aria-pressed="' + on + '" title="' + escapeHtml(c.sp.n) + ' está ' + onde + '">' +
+          escapeHtml(c.sp.n) + (c.noTime ? "" : ' <span class="motor-fav-caixa">(caixa)</span>') + '</button>';
       }).join("") + '</div>' +
-      '<p class="mybuild-hint motor-fav-dica">Quem você marca nunca sai; o app só escolhe a forma (base ou Mega) e completa as outras vagas.</p></div>';
+      '<p class="mybuild-hint motor-fav-dica">Vale para qualquer Pokémon que você capturou, do time ou da caixa. Quem você marca nunca sai; o app só escolhe a forma (base ou Mega) e completa as outras vagas.</p></div>';
   }
   function modoMotorBotaoHtml() {
     return '<button id="motor-montar" class="add-team-btn" type="button" title="Monta o melhor time pelo simulador de duelo do app, sem consultar a IA">Montar meu melhor time</button>';

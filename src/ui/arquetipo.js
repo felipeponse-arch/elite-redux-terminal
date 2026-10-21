@@ -95,7 +95,7 @@
       '<div class="archetype-axis"><span class="archetype-axis-label">Clima e campo</span>' + archetypeChipsHtml("weather", WEATHER_ARCHETYPES, state.archetype.weather || "", false) + '</div>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Tática</span>' + archetypeChipsHtml("tatica", TATICA_ARCHETYPES, state.archetype.tatica || "", false) + '</div>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Monotype</span>' + archetypeChipsHtml("monotype", MONOTYPE_ARCHETYPES, state.archetype.monotype || "", true) + '</div>' +
-      (motor ? modoMotorFavoritosHtml(members) : "") +
+      (motor ? modoMotorFavoritosHtml() : "") +
     '</details>' +
     // Botão e status FORA do <details> recolhido: o jogador monta o time sem abrir "Ajustar" (pedido do usuário, 21/10).
     '<div class="archetype-row arquetipo-acao">' +
