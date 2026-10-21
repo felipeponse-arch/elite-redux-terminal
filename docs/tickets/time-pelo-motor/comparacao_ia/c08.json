@@ -1,0 +1,323 @@
+{
+ "id": "c08",
+ "etapa": 5,
+ "cap": 70,
+ "nivelDoCap": 70,
+ "dificuldade": "ace",
+ "levelCapMode": "more",
+ "megaMode": "temporaria",
+ "megaLiberada": true,
+ "estilo": {
+  "pace": "Stall",
+  "weather": null,
+  "tatica": "Telas",
+  "monotype": null
+ },
+ "favoritos": [],
+ "favoritoNaIA": false,
+ "elenco": {
+  "time": [
+   "Garchomp",
+   "Metagross",
+   "Grimmsnarl",
+   "Togekiss",
+   "Klefki",
+   "Gardevoir"
+  ],
+  "caixa": [
+   "Ledian",
+   "Gyarados",
+   "Tyranitar",
+   "Excadrill",
+   "Pelipper",
+   "Ferrothorn",
+   "Blissey"
+  ]
+ },
+ "rosterDoPrompt": [
+  "SPECIES_GARCHOMP",
+  "SPECIES_METAGROSS",
+  "SPECIES_GRIMMSNARL",
+  "SPECIES_TOGEKISS",
+  "SPECIES_KLEFKI",
+  "SPECIES_GARDEVOIR",
+  "SPECIES_LEDIAN",
+  "SPECIES_GYARADOS",
+  "SPECIES_TYRANITAR",
+  "SPECIES_EXCADRILL",
+  "SPECIES_PELIPPER",
+  "SPECIES_FERROTHORN",
+  "SPECIES_BLISSEY"
+ ],
+ "validSnames": [
+  "SPECIES_GARCHOMP",
+  "SPECIES_GARCHOMP_MEGA",
+  "SPECIES_GARCHOMP_MEGA_Z",
+  "SPECIES_METAGROSS",
+  "SPECIES_METAGROSS_MEGA",
+  "SPECIES_GRIMMSNARL",
+  "SPECIES_GRIMMSNARL_MEGA",
+  "SPECIES_TOGEKISS",
+  "SPECIES_KLEFKI",
+  "SPECIES_GARDEVOIR",
+  "SPECIES_LEDIAN",
+  "SPECIES_GYARADOS",
+  "SPECIES_GYARADOS_MEGA",
+  "SPECIES_TYRANITAR",
+  "SPECIES_TYRANITAR_MEGA",
+  "SPECIES_EXCADRILL",
+  "SPECIES_EXCADRILL_MEGA",
+  "SPECIES_PELIPPER",
+  "SPECIES_FERROTHORN",
+  "SPECIES_BLISSEY"
+ ],
+ "lutas": [
+  {
+   "luta": "Roxanne 1",
+   "etapa": 0,
+   "nivel": 18,
+   "dupla": false,
+   "buffs": [
+    "roxanne_laststand",
+    "roxanne_hazard_bleed",
+    "roxanne_defense"
+   ]
+  },
+  {
+   "luta": "Brawly 1",
+   "etapa": 1,
+   "nivel": 25,
+   "dupla": false,
+   "buffs": [
+    "brawly_foresight",
+    "brawly_paralysis",
+    "brawly_spikes",
+    "brawly_matblock",
+    "brawly_attack"
+   ]
+  },
+  {
+   "luta": "Archie Slateport",
+   "etapa": 2,
+   "nivel": 40,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Wattson 1",
+   "etapa": 2,
+   "nivel": 40,
+   "dupla": false,
+   "buffs": [
+    "wattson_burn",
+    "wattson_stickyweb",
+    "wattson_speed",
+    "wattson_magnetrise_spdef"
+   ]
+  },
+  {
+   "luta": "Courtney Meteor Falls",
+   "etapa": 3,
+   "nivel": 50,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Tabitha Mt Chimney",
+   "etapa": 3,
+   "nivel": 50,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Maxie Mt Chimney",
+   "etapa": 3,
+   "nivel": 50,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Flannery 1",
+   "etapa": 3,
+   "nivel": 50,
+   "dupla": false,
+   "buffs": [
+    "flannery_spatk_steady",
+    "flannery_toxic",
+    "flannery_healblock",
+    "flannery_accuracy",
+    "flannery_burn",
+    "flannery_defense",
+    "flannery_copystats",
+    "flannery_spatk_posture"
+   ]
+  },
+  {
+   "luta": "Norman 1",
+   "etapa": 4,
+   "nivel": 55,
+   "dupla": false,
+   "buffs": [
+    "norman_speed",
+    "norman_accuracy_laststand",
+    "norman_spikes",
+    "norman_defense",
+    "norman_leechseed",
+    "norman_attack",
+    "norman_substitute"
+   ]
+  },
+  {
+   "luta": "Shelly Weather Institute",
+   "etapa": 5,
+   "nivel": 70,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Winona 1",
+   "etapa": 5,
+   "nivel": 70,
+   "dupla": false,
+   "buffs": [
+    "winona_spdef",
+    "winona_frostbite",
+    "winona_embargo",
+    "winona_defense"
+   ]
+  },
+  {
+   "luta": "Matt Mt Pyre",
+   "etapa": 6,
+   "nivel": 85,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Archie Mt Pyre",
+   "etapa": 6,
+   "nivel": 85,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Tabitha Magma Hideout",
+   "etapa": 6,
+   "nivel": 85,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Courtney Magma Hideout",
+   "etapa": 6,
+   "nivel": 85,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Maxie Magma Hideout",
+   "etapa": 6,
+   "nivel": 85,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Tabitha Mossdeep",
+   "etapa": 6,
+   "nivel": 85,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Courtney Mossdeep",
+   "etapa": 6,
+   "nivel": 85,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Maxie Mossdeep",
+   "etapa": 6,
+   "nivel": 85,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Tate And Liza 1",
+   "etapa": 6,
+   "nivel": 85,
+   "dupla": true,
+   "buffs": [
+    "tateliza_lightscreen",
+    "tateliza_reflect",
+    "tateliza_luckychant",
+    "tateliza_wideguard",
+    "tateliza_sleep",
+    "tateliza_noprotect"
+   ]
+  },
+  {
+   "luta": "Matt",
+   "etapa": 7,
+   "nivel": 92,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Shelly Seafloor Cavern",
+   "etapa": 7,
+   "nivel": 92,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Archie",
+   "etapa": 7,
+   "nivel": 92,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Juan 1",
+   "etapa": 7,
+   "nivel": 92,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Sidney",
+   "etapa": 8,
+   "nivel": 95,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Phoebe",
+   "etapa": 8,
+   "nivel": 95,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Glacia",
+   "etapa": 8,
+   "nivel": 95,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Drake",
+   "etapa": 8,
+   "nivel": 95,
+   "dupla": false,
+   "buffs": []
+  },
+  {
+   "luta": "Steven",
+   "etapa": 8,
+   "nivel": 95,
+   "dupla": false,
+   "buffs": []
+  }
+ ]
+}

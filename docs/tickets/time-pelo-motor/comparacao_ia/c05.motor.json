@@ -1,0 +1,1482 @@
+{
+ "tempoMs": 11665,
+ "variantes": [
+  {
+   "chave": "ofensivo",
+   "objetivo": {
+    "nome": "Mais ofensivo",
+    "descricao": "premia o progresso medido: quantos Pokémon do chefão caem, em média, em cada luta"
+   },
+   "membros": [
+    {
+     "sname": "SPECIES_FERROTHORN",
+     "nome": "Ferrothorn",
+     "x": 598,
+     "base": "SPECIES_FERROTHORN",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Fort Knox",
+      "moves": [
+       "Power Whip",
+       "Frustration",
+       "Hard Press",
+       "Pin Missile"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       252,
+       252,
+       0,
+       0,
+       4,
+       0
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Wishiwashi",
+          "turnos": 2
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Phione",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Sharpedo",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_PELIPPER",
+     "nome": "Pelipper",
+     "x": 279,
+     "base": "SPECIES_PELIPPER",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Air Blower",
+      "moves": [
+       "Chatter",
+       "Hydro Pump",
+       "Blizzard",
+       "Dual Wingbeat"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       252,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 7 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": [
+      {
+       "tipo": "protege",
+       "ameacasDerrubadas": 2,
+       "exemplos": [
+        {
+         "luta": "Flannery 1",
+         "ameaca": "Tortemple"
+        },
+        {
+         "luta": "Drake",
+         "ameaca": "Regidrago"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_HYDREIGON",
+     "nome": "Hydreigon",
+     "x": 635,
+     "base": "SPECIES_HYDREIGON",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Mega Launcher",
+      "moves": [
+       "Crunch",
+       "Air Slash",
+       "Dark Pulse",
+       "Fire Blast"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       252,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Bronzong",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Crobat",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Dreadnaut",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": [
+      {
+       "tipo": "fecha",
+       "vitoriasFechadas": 2,
+       "de": 5
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_CENTISKORCH",
+     "nome": "Centiskorch",
+     "x": 851,
+     "base": "SPECIES_CENTISKORCH",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Coil Up",
+      "moves": [
+       "Leech Life",
+       "Raging Fury",
+       "Power Whip",
+       "Scald"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       0,
+       252,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Basculegion F",
+          "turnos": 2
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Lanturn",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Kyurem Black",
+          "turnos": 2
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Fujiflap",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_BLISSEY",
+     "nome": "Blissey",
+     "x": 242,
+     "base": "SPECIES_BLISSEY",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Super Luck",
+      "moves": [
+       "Present",
+       "Draining Kiss",
+       "Fire Punch",
+       "Double-Edge"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       252,
+       0,
+       4,
+       252,
+       0,
+       0
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 3,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie",
+          "alvo": "Kilowattrel",
+          "turnos": 3
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Walking Wake",
+          "turnos": 3
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Machamp Redux",
+          "turnos": 2
+         }
+        ]
+       }
+      },
+      {
+       "papel": "tanque",
+       "prova": {
+        "confrontos": 4,
+        "exemplos": [
+         {
+          "luta": "Norman 1",
+          "alvo": "Tauros",
+          "turnos": 4,
+          "hpFinal": 0.83
+         },
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Rotom Frost",
+          "turnos": 4,
+          "hpFinal": 0.43
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Kilowattrel",
+          "turnos": 3,
+          "hpFinal": 0.61
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_EXCADRILL",
+     "nome": "Excadrill",
+     "x": 530,
+     "base": "SPECIES_EXCADRILL",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Mold Breaker",
+      "moves": [
+       "Earthquake",
+       "Return",
+       "X-Scissor",
+       "Strength"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       0,
+       252,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 3,
+        "nocautes": 4,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Archaludon",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": [
+      {
+       "tipo": "fecha",
+       "vitoriasFechadas": 2,
+       "de": 5
+      }
+     ]
+    }
+   ],
+   "metricas": {
+    "objetivo": 0.881,
+    "amostra": {
+     "lutas": 7,
+     "vence": 5,
+     "cobertura": 0.714,
+     "pontosMedios": 12.47,
+     "derrubadosMedios": 5.29,
+     "perdidas": [
+      "Norman 1",
+      "Tate And Liza 1"
+     ]
+    },
+    "completo": {
+     "lutas": 29,
+     "vence": 26,
+     "cobertura": 0.897,
+     "pontosMedios": 14.28,
+     "derrubadosMedios": 4.9,
+     "perdidas": [
+      "Norman 1",
+      "Maxie Magma Hideout",
+      "Tate And Liza 1"
+     ]
+    },
+    "restantes": {
+     "lutas": 25,
+     "vence": 22,
+     "cobertura": 0.88,
+     "pontosMedios": 14.03,
+     "derrubadosMedios": 4.88,
+     "perdidas": [
+      "Norman 1",
+      "Maxie Magma Hideout",
+      "Tate And Liza 1"
+     ]
+    }
+   },
+   "avisos": [],
+   "avaliacoes": 42,
+   "melhorTentativa": false,
+   "planoB": {
+    "luta": "Maxie Magma Hideout",
+    "ameaca": "Brontonana",
+    "pontosAntes": 2,
+    "vencia": false,
+    "travadas": 0,
+    "trocas": [],
+    "motivo": "nenhuma troca em vaga livre melhora a luta mais difícil (Maxie Magma Hideout) na simulação"
+   },
+   "estilo": "Bulky Offense",
+   "estiloProva": {
+    "ofensivos": 5,
+    "tanques": 1,
+    "apoio": 0,
+    "membros": 6
+   },
+   "tags": [],
+   "condicaoDeVitoria": {
+    "vitoriasNaAmostra": 5,
+    "lutas": 7,
+    "fecham": [
+     {
+      "nome": "Excadrill",
+      "n": 2
+     },
+     {
+      "nome": "Hydreigon",
+      "n": 2
+     },
+     {
+      "nome": "Pelipper",
+      "n": 1
+     }
+    ],
+    "ameacaPrincipal": {
+     "nome": "Azumarill",
+     "lutas": 1
+    }
+   },
+   "naoMedidos": [
+    "pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel",
+    "terreno e hazards como tag: ainda não implementados"
+   ],
+   "tempoClassificacaoMs": 104,
+   "explicacao": [
+    "Mais ofensivo (premia o progresso medido: quantos Pokémon do chefão caem, em média, em cada luta).",
+    "Na amostra de 7 lutas o time vence 5 (pontos médios 12.47); nas 29 lutas da run vence 26; daqui para frente (25 lutas) vence 22, derrubando em média 4.88 Pokémon por luta.",
+    "Não vence: Norman 1, Maxie Magma Hideout, Tate And Liza 1.",
+    "Plano B: nenhuma troca em vaga livre melhora a luta mais difícil (Maxie Magma Hideout) na simulação.",
+    "Estilo: Bulky Offense (5 membros ofensivos provados, 1 tanque(s) e 0 de apoio, de 6).",
+    "Sem tag de clima ou tática: nenhuma condição armada teve dois beneficiários medidos e ganho do time.",
+    "Ferrothorn: wallbreaker (4 dos 5 nocautes foram em rivais robustos).",
+    "Pelipper: sem papel provado (nenhuma prova fechou nas 7 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Hydreigon: wallbreaker (4 dos 5 nocautes foram em rivais robustos).",
+    "Centiskorch: wallbreaker (4 dos 5 nocautes foram em rivais robustos).",
+    "Blissey: wallbreaker (3 dos 5 nocautes foram em rivais robustos); tanque (4 confrontos de 3+ turnos vencidos com pelo menos 40% do HP).",
+    "Excadrill: wallbreaker (3 dos 4 nocautes foram em rivais robustos).",
+    "Condição de vitória: o time vence 5 das 7 lutas da amostra; quem dá o último nocaute: Excadrill (2), Hydreigon (2), Pelipper (1); a ameaça que mais derruba o time é Azumarill (em 1 luta).",
+    "Não medido: pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel; terreno e hazards como tag: ainda não implementados."
+   ],
+   "tempoMs": 2582
+  },
+  {
+   "chave": "seguro",
+   "objetivo": {
+    "nome": "Mais seguro",
+    "descricao": "premia vencer com gente viva e segurar o pior caso: a média das lutas e o pior terço delas, pelo Battle Rating"
+   },
+   "membros": [
+    {
+     "sname": "SPECIES_FERROTHORN",
+     "nome": "Ferrothorn",
+     "x": 598,
+     "base": "SPECIES_FERROTHORN",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Fort Knox",
+      "moves": [
+       "Power Whip",
+       "Frustration",
+       "Hard Press",
+       "Pin Missile"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       252,
+       252,
+       0,
+       0,
+       4,
+       0
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Wishiwashi",
+          "turnos": 2
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Phione",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Sharpedo",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_PELIPPER",
+     "nome": "Pelipper",
+     "x": 279,
+     "base": "SPECIES_PELIPPER",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Air Blower",
+      "moves": [
+       "Chatter",
+       "Hydro Pump",
+       "Blizzard",
+       "Dual Wingbeat"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       252,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 7 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": [
+      {
+       "tipo": "protege",
+       "ameacasDerrubadas": 2,
+       "exemplos": [
+        {
+         "luta": "Flannery 1",
+         "ameaca": "Tortemple"
+        },
+        {
+         "luta": "Drake",
+         "ameaca": "Regidrago"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_HYDREIGON",
+     "nome": "Hydreigon",
+     "x": 635,
+     "base": "SPECIES_HYDREIGON",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Mega Launcher",
+      "moves": [
+       "Crunch",
+       "Air Slash",
+       "Dark Pulse",
+       "Fire Blast"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       252,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Bronzong",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Crobat",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Dreadnaut",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": [
+      {
+       "tipo": "fecha",
+       "vitoriasFechadas": 2,
+       "de": 5
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_CENTISKORCH",
+     "nome": "Centiskorch",
+     "x": 851,
+     "base": "SPECIES_CENTISKORCH",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Coil Up",
+      "moves": [
+       "Leech Life",
+       "Raging Fury",
+       "Power Whip",
+       "Scald"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       0,
+       252,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Basculegion F",
+          "turnos": 2
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Lanturn",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Kyurem Black",
+          "turnos": 2
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Fujiflap",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_BLISSEY",
+     "nome": "Blissey",
+     "x": 242,
+     "base": "SPECIES_BLISSEY",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Super Luck",
+      "moves": [
+       "Present",
+       "Draining Kiss",
+       "Fire Punch",
+       "Double-Edge"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       252,
+       0,
+       4,
+       252,
+       0,
+       0
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 3,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie",
+          "alvo": "Kilowattrel",
+          "turnos": 3
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Walking Wake",
+          "turnos": 3
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Machamp Redux",
+          "turnos": 2
+         }
+        ]
+       }
+      },
+      {
+       "papel": "tanque",
+       "prova": {
+        "confrontos": 4,
+        "exemplos": [
+         {
+          "luta": "Norman 1",
+          "alvo": "Tauros",
+          "turnos": 4,
+          "hpFinal": 0.83
+         },
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Rotom Frost",
+          "turnos": 4,
+          "hpFinal": 0.43
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Kilowattrel",
+          "turnos": 3,
+          "hpFinal": 0.61
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_EXCADRILL",
+     "nome": "Excadrill",
+     "x": 530,
+     "base": "SPECIES_EXCADRILL",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Mold Breaker",
+      "moves": [
+       "Earthquake",
+       "Return",
+       "X-Scissor",
+       "Strength"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       0,
+       252,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 3,
+        "nocautes": 4,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Archaludon",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": [
+      {
+       "tipo": "fecha",
+       "vitoriasFechadas": 2,
+       "de": 5
+      }
+     ]
+    }
+   ],
+   "metricas": {
+    "objetivo": 0.5794,
+    "amostra": {
+     "lutas": 7,
+     "vence": 5,
+     "cobertura": 0.714,
+     "pontosMedios": 12.47,
+     "derrubadosMedios": 5.29,
+     "perdidas": [
+      "Norman 1",
+      "Tate And Liza 1"
+     ]
+    },
+    "completo": {
+     "lutas": 29,
+     "vence": 26,
+     "cobertura": 0.897,
+     "pontosMedios": 14.28,
+     "derrubadosMedios": 4.9,
+     "perdidas": [
+      "Norman 1",
+      "Maxie Magma Hideout",
+      "Tate And Liza 1"
+     ]
+    },
+    "restantes": {
+     "lutas": 25,
+     "vence": 22,
+     "cobertura": 0.88,
+     "pontosMedios": 14.03,
+     "derrubadosMedios": 4.88,
+     "perdidas": [
+      "Norman 1",
+      "Maxie Magma Hideout",
+      "Tate And Liza 1"
+     ]
+    }
+   },
+   "avisos": [
+    "chegou nos mesmos Pokémon da variante \"Mais ofensivo\": com este elenco os dois objetivos concordam."
+   ],
+   "avaliacoes": 42,
+   "melhorTentativa": false,
+   "planoB": {
+    "luta": "Maxie Magma Hideout",
+    "ameaca": "Brontonana",
+    "pontosAntes": 2,
+    "vencia": false,
+    "travadas": 0,
+    "trocas": [],
+    "motivo": "nenhuma troca em vaga livre melhora a luta mais difícil (Maxie Magma Hideout) na simulação"
+   },
+   "estilo": "Bulky Offense",
+   "estiloProva": {
+    "ofensivos": 5,
+    "tanques": 1,
+    "apoio": 0,
+    "membros": 6
+   },
+   "tags": [],
+   "condicaoDeVitoria": {
+    "vitoriasNaAmostra": 5,
+    "lutas": 7,
+    "fecham": [
+     {
+      "nome": "Excadrill",
+      "n": 2
+     },
+     {
+      "nome": "Hydreigon",
+      "n": 2
+     },
+     {
+      "nome": "Pelipper",
+      "n": 1
+     }
+    ],
+    "ameacaPrincipal": {
+     "nome": "Azumarill",
+     "lutas": 1
+    }
+   },
+   "naoMedidos": [
+    "pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel",
+    "terreno e hazards como tag: ainda não implementados"
+   ],
+   "tempoClassificacaoMs": 102,
+   "explicacao": [
+    "Mais seguro (premia vencer com gente viva e segurar o pior caso: a média das lutas e o pior terço delas, pelo Battle Rating).",
+    "Na amostra de 7 lutas o time vence 5 (pontos médios 12.47); nas 29 lutas da run vence 26; daqui para frente (25 lutas) vence 22, derrubando em média 4.88 Pokémon por luta.",
+    "Não vence: Norman 1, Maxie Magma Hideout, Tate And Liza 1.",
+    "Plano B: nenhuma troca em vaga livre melhora a luta mais difícil (Maxie Magma Hideout) na simulação.",
+    "Estilo: Bulky Offense (5 membros ofensivos provados, 1 tanque(s) e 0 de apoio, de 6).",
+    "Sem tag de clima ou tática: nenhuma condição armada teve dois beneficiários medidos e ganho do time.",
+    "Ferrothorn: wallbreaker (4 dos 5 nocautes foram em rivais robustos).",
+    "Pelipper: sem papel provado (nenhuma prova fechou nas 7 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Hydreigon: wallbreaker (4 dos 5 nocautes foram em rivais robustos).",
+    "Centiskorch: wallbreaker (4 dos 5 nocautes foram em rivais robustos).",
+    "Blissey: wallbreaker (3 dos 5 nocautes foram em rivais robustos); tanque (4 confrontos de 3+ turnos vencidos com pelo menos 40% do HP).",
+    "Excadrill: wallbreaker (3 dos 4 nocautes foram em rivais robustos).",
+    "Condição de vitória: o time vence 5 das 7 lutas da amostra; quem dá o último nocaute: Excadrill (2), Hydreigon (2), Pelipper (1); a ameaça que mais derruba o time é Azumarill (em 1 luta).",
+    "Não medido: pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel; terreno e hazards como tag: ainda não implementados."
+   ],
+   "tempoMs": 102
+  },
+  {
+   "chave": "sinergia",
+   "objetivo": {
+    "nome": "Sinergia",
+    "descricao": "premia dois membros com benefício medido de uma condição que um terceiro arma (clima, Tailwind, Trick Room, tela), sem largar o Battle Rating"
+   },
+   "membros": [
+    {
+     "sname": "SPECIES_FERROTHORN",
+     "nome": "Ferrothorn",
+     "x": 598,
+     "base": "SPECIES_FERROTHORN",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Fort Knox",
+      "moves": [
+       "Power Whip",
+       "Frustration",
+       "Hard Press",
+       "Pin Missile"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       252,
+       252,
+       0,
+       0,
+       4,
+       0
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Wishiwashi",
+          "turnos": 2
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Phione",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Sharpedo",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_PELIPPER",
+     "nome": "Pelipper",
+     "x": 279,
+     "base": "SPECIES_PELIPPER",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Air Blower",
+      "moves": [
+       "Chatter",
+       "Hydro Pump",
+       "Blizzard",
+       "Dual Wingbeat"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       252,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 7 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": [
+      {
+       "tipo": "abusa",
+       "tag": "clima: chuva",
+       "ganhoPorDuelo": 0.057,
+       "armador": "Politoed"
+      },
+      {
+       "tipo": "protege",
+       "ameacasDerrubadas": 2,
+       "exemplos": [
+        {
+         "luta": "Flannery 1",
+         "ameaca": "Tortemple"
+        },
+        {
+         "luta": "Shelly Weather Institute",
+         "ameaca": "Meowscarada"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_POLITOED",
+     "nome": "Politoed",
+     "x": 186,
+     "base": "SPECIES_POLITOED",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Hydrate",
+      "moves": [
+       "Energy Wave",
+       "Blizzard",
+       "Return",
+       "Torrent Fist"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       252,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 7 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": [
+      {
+       "tipo": "habilita",
+       "tag": "clima: chuva",
+       "ganhoDoTime": 0.06,
+       "beneficiarios": 2
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_EXCADRILL",
+     "nome": "Excadrill",
+     "x": 530,
+     "base": "SPECIES_EXCADRILL",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Mold Breaker",
+      "moves": [
+       "Earthquake",
+       "Return",
+       "X-Scissor",
+       "Strength"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       0,
+       252,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 4,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Lanturn",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Fujiflap",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": [
+      {
+       "tipo": "abusa",
+       "tag": "clima: chuva",
+       "ganhoPorDuelo": 0.091,
+       "armador": "Politoed"
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_BLISSEY",
+     "nome": "Blissey",
+     "x": 242,
+     "base": "SPECIES_BLISSEY",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Super Luck",
+      "moves": [
+       "Present",
+       "Draining Kiss",
+       "Fire Punch",
+       "Double-Edge"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       252,
+       0,
+       4,
+       252,
+       0,
+       0
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 3,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie",
+          "alvo": "Kilowattrel",
+          "turnos": 3
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Walking Wake",
+          "turnos": 3
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Machamp Redux",
+          "turnos": 2
+         }
+        ]
+       }
+      },
+      {
+       "papel": "tanque",
+       "prova": {
+        "confrontos": 4,
+        "exemplos": [
+         {
+          "luta": "Norman 1",
+          "alvo": "Tauros",
+          "turnos": 4,
+          "hpFinal": 0.83
+         },
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Rotom Frost",
+          "turnos": 4,
+          "hpFinal": 0.43
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Kilowattrel",
+          "turnos": 3,
+          "hpFinal": 0.61
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_HYDREIGON",
+     "nome": "Hydreigon",
+     "x": 635,
+     "base": "SPECIES_HYDREIGON",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Mega Launcher",
+      "moves": [
+       "Crunch",
+       "Air Slash",
+       "Dark Pulse",
+       "Fire Blast"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       252,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 5,
+        "nocautes": 6,
+        "alvos": [
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Basculegion F",
+          "turnos": 2
+         },
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Bronzong",
+          "turnos": 2
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Crobat",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": [
+      {
+       "tipo": "fecha",
+       "vitoriasFechadas": 2,
+       "de": 4
+      }
+     ]
+    }
+   ],
+   "metricas": {
+    "objetivo": 0.781,
+    "amostra": {
+     "lutas": 7,
+     "vence": 4,
+     "cobertura": 0.571,
+     "pontosMedios": 10.75,
+     "derrubadosMedios": 4.86,
+     "perdidas": [
+      "Norman 1",
+      "Tate And Liza 1",
+      "Drake"
+     ]
+    },
+    "completo": {
+     "lutas": 29,
+     "vence": 24,
+     "cobertura": 0.828,
+     "pontosMedios": 13.38,
+     "derrubadosMedios": 4.76,
+     "perdidas": [
+      "Norman 1",
+      "Matt Mt Pyre",
+      "Maxie Magma Hideout",
+      "Tate And Liza 1",
+      "Drake"
+     ]
+    },
+    "restantes": {
+     "lutas": 25,
+     "vence": 20,
+     "cobertura": 0.8,
+     "pontosMedios": 13,
+     "derrubadosMedios": 4.72,
+     "perdidas": [
+      "Norman 1",
+      "Matt Mt Pyre",
+      "Maxie Magma Hideout",
+      "Tate And Liza 1",
+      "Drake"
+     ]
+    }
+   },
+   "avisos": [],
+   "avaliacoes": 60,
+   "melhorTentativa": false,
+   "planoB": {
+    "luta": "Maxie Magma Hideout",
+    "ameaca": "Brontonana",
+    "pontosAntes": 2,
+    "vencia": false,
+    "travadas": 0,
+    "trocas": [
+     {
+      "vaga": 1,
+      "sai": "Pelipper",
+      "entra": "Gengar",
+      "deltaPontos": 2,
+      "venceAgora": false,
+      "venciaAntes": false
+     }
+    ],
+    "motivo": null
+   },
+   "estilo": "Bulky Offense",
+   "estiloProva": {
+    "ofensivos": 4,
+    "tanques": 1,
+    "apoio": 0,
+    "membros": 6
+   },
+   "tags": [
+    {
+     "tag": "clima: chuva",
+     "armador": "Politoed",
+     "via": "Drizzle",
+     "ganhoDoTime": 0.06,
+     "lutasMedidas": 3,
+     "beneficiarios": [
+      {
+       "nome": "Excadrill",
+       "ganhoPorDuelo": 0.091
+      },
+      {
+       "nome": "Pelipper",
+       "ganhoPorDuelo": 0.057
+      }
+     ]
+    }
+   ],
+   "condicaoDeVitoria": {
+    "vitoriasNaAmostra": 4,
+    "lutas": 7,
+    "fecham": [
+     {
+      "nome": "Hydreigon",
+      "n": 2
+     },
+     {
+      "nome": "Excadrill",
+      "n": 1
+     },
+     {
+      "nome": "Pelipper",
+      "n": 1
+     }
+    ],
+    "ameacaPrincipal": {
+     "nome": "Azumarill",
+     "lutas": 1
+    }
+   },
+   "naoMedidos": [
+    "pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel",
+    "terreno e hazards como tag: ainda não implementados"
+   ],
+   "tempoClassificacaoMs": 188,
+   "explicacao": [
+    "Sinergia (premia dois membros com benefício medido de uma condição que um terceiro arma (clima, Tailwind, Trick Room, tela), sem largar o Battle Rating).",
+    "Na amostra de 7 lutas o time vence 4 (pontos médios 10.75); nas 29 lutas da run vence 24; daqui para frente (25 lutas) vence 20, derrubando em média 4.72 Pokémon por luta.",
+    "Não vence: Norman 1, Matt Mt Pyre, Maxie Magma Hideout, Tate And Liza 1, Drake.",
+    "Plano B (luta mais difícil: Maxie Magma Hideout, ameaça: Brontonana): trocar Pelipper por Gengar (+2 pontos).",
+    "Estilo: Bulky Offense (4 membros ofensivos provados, 1 tanque(s) e 0 de apoio, de 6).",
+    "Tag clima: chuva: Politoed arma (Drizzle); Excadrill (+0.091 de nota por duelo) e Pelipper (+0.057 de nota por duelo) ganham; o time faz +0.06 pontos nas 3 lutas medidas.",
+    "Ferrothorn: wallbreaker (4 dos 5 nocautes foram em rivais robustos).",
+    "Pelipper: sem papel provado (nenhuma prova fechou nas 7 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Politoed: sem papel provado (nenhuma prova fechou nas 7 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Excadrill: wallbreaker (4 dos 4 nocautes foram em rivais robustos).",
+    "Blissey: wallbreaker (3 dos 5 nocautes foram em rivais robustos); tanque (4 confrontos de 3+ turnos vencidos com pelo menos 40% do HP).",
+    "Hydreigon: wallbreaker (5 dos 6 nocautes foram em rivais robustos).",
+    "Condição de vitória: o time vence 4 das 7 lutas da amostra; quem dá o último nocaute: Hydreigon (2), Excadrill (1), Pelipper (1); a ameaça que mais derruba o time é Azumarill (em 1 luta).",
+    "Não medido: pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel; terreno e hazards como tag: ainda não implementados."
+   ],
+   "tempoMs": 4461
+  }
+ ],
+ "avisos": [],
+ "candidatos": 12
+}
