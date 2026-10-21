@@ -1,6 +1,6 @@
 # 01 — Calibrar o motor contra o simulador do jogo compilado (WebAssembly)
 
-Status: pronto-para-agente (depois do reset semanal de terça 21/10/2026, 23h)
+Status: feito em 21/10/2026 (comparação em comparacao.md; Aerodynamics corrigida; Insect Impact explicado). Falta só o rank no fim da fila.
 Pedido: Felipe, 18/10/2026 — "tem a calculadora que precisamos entender pra nosso app".
 
 ## Fonte
@@ -25,7 +25,7 @@ Pedido: Felipe, 18/10/2026 — "tem a calculadora que precisamos entender pra no
 4. Rank só no fim, uma vez, se o motor mudar (regra "rank só no fim").
 
 ## Critérios de aceite
-- [ ] Tabela motor x simulador com pelo menos 20 casos, dentro da faixa ou com a causa da diferença explicada.
-- [ ] Insect Impact (~10% acima da calculadora) resolvido ou explicado.
-- [ ] Nada copiado do site; só valores observados e anotados.
-- [ ] Portão verde; changelog se o motor mudar.
+- [x] Tabela motor x simulador com pelo menos 20 casos, dentro da faixa ou com a causa da diferença explicada.
+- [x] Insect Impact (~10% acima da calculadora) resolvido ou explicado.
+- [x] Nada copiado do site; só valores observados e anotados.
+- [ ] Portão verde (o verificador roda a suíte completa); changelog junto do rank, que é refeito no fim.

@@ -35,8 +35,11 @@ test("código do jogo: Mega Punch do Ledian no Ninetales com Aerilate = STAB x1,
   dentro(primeiroGolpe("Mega Punch", "Life Orb"), 0.96, 1.0, "com Life Orb");
 });
 
-test("código do jogo: Aerial Ace do Ledian (não é Flying) ganha o STAB da Aerilate em todo golpe Flying (calculadora dizia 58% a 69%; motor 92%)", () => {
-  dentro(primeiroGolpe("Aerial Ace", "Life Orb"), 0.89, 0.95, "com Life Orb");
+// 21/10/2026 (calibracao-simulador/01): o simulador do jogo (2.65.3b) dá 65,4% a 78,4% neste mesmo Ledian x Ninetales (106-127 de 162 HP,
+// com o crítico garantido do Aerial Ace); o motor dava 92% porque a "sinergia por golpe" tratava a Aerodynamics como bônus x1,3 em golpe de
+// asa. No código ela só absorve Flying e sobe a Velocidade (abilities.cc:3750); a sinergia dela saiu (SINERGIA_SEM_BONUS_DE_DANO_DUELO).
+test("código do jogo: Aerial Ace do Ledian (não é Flying) ganha o STAB da Aerilate, sem bônus da Aerodynamics (calculadora dizia 58% a 69%; simulador 65% a 78%; motor 72%)", () => {
+  dentro(primeiroGolpe("Aerial Ace", "Life Orb"), 0.65, 0.79, "com Life Orb");
 });
 
 // Atacante Garchomp (Dragon/Ground, sem STAB nos tipos abaixo) contra um Magikarp sem EV (Water: neutro para Flying, Fairy e Bug).
@@ -72,9 +75,9 @@ test("'Normal vira X': Body Slam vira o tipo novo com STAB x1,5; com Adaptabilit
   perto(razaoAte(["Aerilate", "Adaptability"], "Body Slam", ["Adaptability"]), 2, 0.05, "Aerilate + Adaptability / Body Slam");
 });
 
-// Ainda sem explicação: a calculadora mostra 16% a 19% e o motor dá ~21% (cerca de 10% acima do teto). O poder
-// (80), a chance de 30%, o contato e o 'Iron Fist boost' do jogo conferem com o dado do app (tela do golpe, 10/10).
-// Fica como pendência, sem derrubar a suíte.
-test("calculadora do jogo: Insect Impact do Ledian no Ninetales = 16% a 19%", { todo: "Insect Impact ~10% acima da calculadora do jogo; BP 80 confere, causa ainda desconhecida" }, () => {
-  dentro(primeiroGolpe("Insect Impact", "Life Orb"), 0.16, 0.19, "com Life Orb");
+// Insect Impact (21/10/2026, calibracao-simulador/01): a calculadora do jogo (10/10) mostrava 16% a 19% e o motor dá ~21%. O simulador
+// 2.65.3b (motor nativo do jogo compilado) dá 18,5% a 22,2% (30-36 de 162 HP) nesta mesma luta: o motor cai dentro dele. A diferença é
+// da calculadora do jogo de 10/10 contra o motor 2.65.3b (não do app); o motor segue o código e o simulador. Explicado, sem mudar peso.
+test("simulador 2.65.3b: Insect Impact do Ledian no Ninetales = 18,5% a 22,2% (a calculadora do jogo de 10/10 dizia 16% a 19%)", () => {
+  dentro(primeiroGolpe("Insect Impact", "Life Orb"), 0.18, 0.225, "com Life Orb");
 });

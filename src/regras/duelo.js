@@ -221,6 +221,11 @@
   // (abilities.cc, `onModifyDamage`). Se o texto da habilidade já virou bônus no motor (tipo, categoria, flag do golpe ou contato), a
   // "sinergia por golpe" da espécie (species_ability_synergy.json -> bonusGolpes, a aproximação antiga) não soma de novo.
   // Fica a sinergia só das habilidades cujo texto o motor NÃO lê (ex.: bônus de um golpe nomeado).
+  // Habilidades que NÃO dão bônus de dano no código do jogo (só absorvem o golpe e sobem um atributo, ou reagem ao ser atingido):
+  // Aerodynamics (abilities.cc:3750, onAbsorb Flying -> Velocidade), Motor Drive (Electric -> Velocidade), Well Baked Body (Fire -> Defesa),
+  // Justified (Dark -> maior atributo de ataque) e Inflatable (onDefender). A "sinergia por golpe" da espécie as tratava como bônus x1,3
+  // nos golpes de ar/asa etc.; o simulador do jogo (2.65.3b) mostra o Aerial Ace do Ledian sem esse x1,3 (calibracao-simulador/01, 21/10/2026).
+  var SINERGIA_SEM_BONUS_DE_DANO_DUELO = { "Aerodynamics": 1, "Motor Drive": 1, "Well Baked Body": 1, "Justified": 1, "Inflatable": 1 };
   function bonusDeGolpeLidoDoTextoDuelo(ef) { return Object.keys(ef.bonusTipo).length > 0 || Object.keys(ef.bonusCategoria).length > 0 || Object.keys(ef.flagMult).length > 0 || ef.contatoMult !== 1; }
   function acertosDoGolpeDuelo(id) {
     var m = MOVES[id];
@@ -1718,6 +1723,7 @@
     (ABILITY_SYNERGY[sname] || []).forEach(function (h) {
       var id = ids.filter(function (i) { return nomeHabDuelo(i) === h.name; })[0];
       if (id === undefined) return;
+      if (SINERGIA_SEM_BONUS_DE_DANO_DUELO[h.name]) return; // o jogo não dá bônus de dano a ela (lista acima de bonusDeGolpeLidoDoTextoDuelo)
       // Habilidade cujo bônus de golpe o texto já ensina: a leitura do texto vale para todo golpe e a sinergia por golpe da espécie
       // contaria o mesmo bônus duas vezes (Tough Claws x1,3 x 1,3 = 1,69; Nocturnal x1,25 x 1,25 = 1,54).
       if (bonusDeGolpeLidoDoTextoDuelo(efeitoDasHabilidadesNoDuelo([id], "solo#" + id, null))) return;
