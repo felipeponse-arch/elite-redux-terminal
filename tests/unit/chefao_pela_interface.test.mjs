@@ -6,7 +6,7 @@
 // cenarios_do_duelo.mjs (linha, meu, lutaInteira, lutaEmDupla, candidato, montar).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { R, EV, linha, meu, lutaInteira, lutaEmDupla, candidato, montar } from "./cenarios_do_duelo.mjs";
+import { R, EV, NIVEL, linha, meu, lutaInteira, lutaEmDupla, candidato, montar } from "./cenarios_do_duelo.mjs";
 
 const machamp = (o = {}) => linha("Machamp", { hab: "No Guard", golpes: ["Knock Off"], evs: EV.fisico, nat: "Adamant", ...o });
 const snorlax = (o = {}) => linha("Snorlax", { hab: "Thick Fat", golpes: ["Body Slam"], evs: [252, 252, 4, 0, 0, 0], nat: "Adamant", ...o });
@@ -140,13 +140,18 @@ test("botão: contra o time real do Sidney 1 monta 6 diferentes, vence e dá um 
   assert.ok(r.plano.every((p) => p.respostas.length > 0 && p.respostas[0].golpe), "cada Pokémon do chefão tem resposta com golpe");
 });
 
-test("botão: contra um time só de Fire escolhe quem resiste Fire e bate de volta (Rock e Water)", () => {
+test("botão: contra um time só de Fire escolhe quem resiste e bate de volta e só põe no time quem ajuda na luta completa", () => {
   const fogo = [flamejante("Charizard"), flamejante("Houndoom"), flamejante("Arcanine"), flamejante("Ninetales")];
   const r = montar(["Blastoise", "Rhyperior", "Garchomp", "Starmie", "Dragonite", "Venusaur", "Gengar", "Machamp"].map((n) => candidato(n)), fogo);
   const nomes = nomesDe(r);
   assert.ok(nomes.includes("Rhyperior"), "quem resiste Fire e bate com Rock entra: " + nomes);
-  // B4 (21/10): sem o x1,5 sempre ligado do Flash Fire dos Fire (Ninetales), o 6º lugar fica entre Machamp, Gengar e Garchomp e o otimizador pode trazer o Machamp; vale quem resiste a Fire: Water e Rock.
   assert.ok(nomes.includes("Blastoise"), "quem resiste Fire com Water entra: " + nomes);
+  // B4 (21/10): sem o x1,5 sempre ligado do Flash Fire do Ninetales o Machamp (Fighting) entra no time. Antes era "não ajuda" e ficava de fora;
+  // medido no juiz da luta completa ele ajuda: tirar o Machamp custa 1,00 ponto, igual ao Blastoise e ao Rhyperior (Houndoom é Dark/Fire: Fighting é super efetivo).
+  // Quem entra tem de render na luta completa; o Machamp, se entra, tem de contribuir.
+  const juiz = R.avaliarTimePelaLutaCompleta(r.escolhidos.map((e) => e.unidade), fogo, NIVEL, {});
+  juiz.membros.forEach((m) => assert.ok(m.contribuicao > 0.5, m.nome + " entra no time sem contribuir: " + m.contribuicao));
+  if (nomes.includes("Machamp")) assert.ok(juiz.membros.find((m) => m.nome === "Machamp").contribuicao >= 0.99, "Machamp contribui ~1,00 ponto");
   assert.equal(r.simulacao.venceu, true);
 });
 

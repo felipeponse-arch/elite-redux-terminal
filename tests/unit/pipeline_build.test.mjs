@@ -67,6 +67,11 @@ test("caso A: sem chefão adiante, os candidatos saem só por sinergia (hit-kill
 // B4 (21/10/2026): o Flame Burst do Ninetales (+1) tira ~92% do HP do Ledian mas NÃO o derruba; antes "derrubava" porque a sinergia somava o x1,5 do
 // Flash Fire sempre ligado (o gatilho só liga depois de absorver um golpe Fire, abilities.cc:695-706). O simulador 2.65.3b confirma: Flame Burst no Ledian 58% a 70% no sol, sem item.
 // Com isso o Ledian bate primeiro por velocidade (172 x 166) e a prioridade do alvo vira só aviso.
+// Contas: o motor já inclui o Charcoal (o Ninetales da Meteor Falls o segura; x1,3 em Fire na config). O aviso diz 92% do HP do Ledian na rolagem média,
+// que já traz o crítico esperado (x1,0208 = 1 + 1/24 x 0,5): sem crítico a média é 90%, o máximo da rolagem (média/0,925) é 97% e só o crítico (1 em 24) passaria de 100%.
+// Margem: ~3% sobre o DANO MÁXIMO sem crítico (estável: não depende do crítico esperado nem da rolagem média). Simulador 2.65.3b, mesmo Ledian de 154 HP, sol, sem item
+// (o Charcoal não pegou na calculadora): 90-108 = 58% a 70%; com o Charcoal x1,2 seria 70% a 84% e x1,3 75% a 91%; o motor dá 118-138 = 77% a 90% (com o Charcoal x1,3).
+// Nos dois o Flame Burst não derruba o Ledian de 154 HP. Se uma mudança futura passar o máximo de 100% o teste volta a falhar.
 test("caso B: Ledian derruba o Ninetales (Seismic Fist, soco pela flag do jogo) e bate primeiro por velocidade: o Flame Burst do alvo (+1) o deixa vivo (B4, 21/10)", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales });
   const c = r.candidatos.find((x) => x.golpes.includes("Mega Punch") && x.habilidade === "Aerodynamics");

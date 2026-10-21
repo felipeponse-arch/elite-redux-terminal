@@ -63,7 +63,7 @@ test("em todas as entradas do species_ability_synergy.json: habilidade com texto
     else { assert.ok(Object.keys(ef.bonusGolpes).length > 0, sname + " / " + h.name + ": sem leitura do texto, a sinergia segue"); mantidas++; }
   }
   assert.ok(lidas >= 1000, "entradas com texto lido: " + lidas);
-  assert.ok(mantidas >= 65, "entradas que mantêm a sinergia: " + mantidas);
+  assert.ok(mantidas >= 70, "entradas que mantêm a sinergia: " + mantidas);
 });
 
 test("a lista fixa de 15 habilidades do ticket calibracao-03 acabou: a regra geral cobre as 15 e mais", () => {
