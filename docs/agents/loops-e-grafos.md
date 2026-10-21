@@ -66,3 +66,7 @@ Nos próximos tickets: uso (janela e semanal) antes e depois, voltas de revisão
 `memory_list` (namespace `medicao-nos`). O % do limite semanal continua lido à mão (`get_usage`): o Ruflo não vê o
 limite. Testado em 20/10: grava em `teste/.swarm/memory.db` e persiste. `hooks_model-outcome` NÃO serve: o
 `hooks_model-stats` não conta esses registros e corta o texto da tarefa.
+
+**Se as ferramentas MCP do Ruflo caírem (21/10):** grave pela linha de comando, no mesmo banco:
+`node C:/Users/Ponse/Documents/Claude/teste/ferramentas/ruflo/node_modules/ruflo/bin/ruflo.js memory store --namespace medicao-nos --key <chave> --value <json>`
+(e `memory list --namespace medicao-nos`). O servidor MCP usa essa instalação fixa (3.59.8, em `teste/ferramentas/ruflo`), não `npx ruflo@latest`: o Ruflo publica várias versões por dia e o `npx` baixava a nova a cada início, derrubando a conexão. Atualizar só de propósito: `npm install --save-exact ruflo@<versão>` nessa pasta.
