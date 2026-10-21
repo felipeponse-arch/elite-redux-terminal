@@ -49,3 +49,12 @@ test("lista do jogador: time + caixa, sem repetir, time primeiro", () => {
   R2.state.box = [2, 3];
   assert.deepEqual(R2.xsDoJogador(), [1, 2, 3]);
 });
+
+test("entradas do jogador: duas iguais (time + caixa) aparecem as duas; uma só aparece uma", () => {
+  const R2 = carregarRegras({ milestone: 3 });
+  R2.state.team = [1, 2];
+  R2.state.box = [2, 3];
+  assert.deepEqual(R2.entradasDoJogador(), [1, 2, 2, 3]);
+  R2.state.box = [3];
+  assert.deepEqual(R2.entradasDoJogador(), [1, 2, 3]);
+});

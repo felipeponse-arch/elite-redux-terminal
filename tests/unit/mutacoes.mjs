@@ -831,8 +831,8 @@ export const MUTACOES = [
     id: "lista-do-jogador-sem-caixa",
     descricao: "a lista de Pokémon do jogador esquece a caixa",
     arquivo: "liberado_na_run.js",
-    de: "return state.team.concat(state.box).filter(",
-    para: "return state.team.filter(",
+    de: "function entradasDoJogador() { return state.team.concat(state.box); }",
+    para: "function entradasDoJogador() { return state.team.slice(); }",
   },
   {
     id: "pedra-em-qualquer-modo",

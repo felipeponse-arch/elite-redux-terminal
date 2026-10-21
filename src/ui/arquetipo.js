@@ -199,7 +199,7 @@
   // "benching" que rosterMove() já usa em trocas individuais).
   function applyRecommendedTeam() {
     if (!teamRecommendation) return;
-    var ownedXs = xsDoJogador();
+    var ownedXs = entradasDoJogador();
     var xs = [];
     // Quem do roster foi "usado" por cada escolha - a IA pode escolher a forma
     // mega de alguém que está como base (ou o contrário): é a MESMA criatura,
@@ -509,7 +509,7 @@
     var tipo = state.archetype.monotype;
     if (!tipo || !MONO_DISP) return "";
     var etapa = state.settings.milestone || 0;
-    var d = monoDisponibilidade(tipo, etapa, xsDoJogador());
+    var d = monoDisponibilidade(tipo, etapa, entradasDoJogador());
     if (!d.novos.length && !d.antes.length && !d.proxima.length) return "";
     function nomeHtml(i) {
       return '<button type="button" class="mono-nome" data-x="' + i.sp.x + '" title="Abrir a ficha na Dex">' + escapeHtml(i.sp.n) + '</button>';
