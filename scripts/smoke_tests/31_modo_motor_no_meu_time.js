@@ -28,10 +28,17 @@ async function section31() {
 
     // ---- o botão do Motor ----
     var chipMotor = document.getElementById("modo-montagem-motor");
-    if (!achou("chip 'Motor (padrão, sem IA)'", chipMotor)) return;
+    if (!achou("chip 'Automático (sem IA)'", chipMotor)) return;
     chipMotor.click();
     await wait(30);
-    check("com o modo Motor, o card mostra 'Montar time pelo Motor' e não mostra 'Gerar time completo'",
+    detalhes = document.querySelector("#team-strategy details.arquetipo");
+    detalhes.open = false; // outra seção pode tê-lo deixado aberto (o app lembra)
+    await wait(30);
+    detalhes = document.querySelector("#team-strategy details.arquetipo");
+    check("com o card de arquétipo recolhido, 'Montar meu melhor time' já está visível (fora do card)", !detalhes.open && !!document.getElementById("motor-montar") && !detalhes.contains(document.getElementById("motor-montar")) && document.getElementById("motor-montar").offsetParent !== null,
+      { aberto: detalhes.open, botao: !!document.getElementById("motor-montar"), dentro: !!document.getElementById("motor-montar") && detalhes.contains(document.getElementById("motor-montar")), visivel: !!document.getElementById("motor-montar") && document.getElementById("motor-montar").offsetParent !== null });
+    if (!detalhes.open) { detalhes.querySelector("summary").click(); await wait(40); }
+    check("com o modo Motor, o card mostra 'Montar meu melhor time' e não mostra 'Gerar time completo'",
       !!document.getElementById("motor-montar") && !document.getElementById("archetype-build-complete") &&
       document.getElementById("modo-montagem-motor").getAttribute("aria-pressed") === "true" && document.getElementById("modo-montagem-ia").getAttribute("aria-pressed") === "false");
     // Favorito: Togekiss nunca sai.
@@ -51,7 +58,7 @@ async function section31() {
     var tempoTela = Date.now() - t0;
     batendo = false;
     window.__tempoMotorMs = tempoTela; // lido pelo relatório do teste
-    if (!achou("cartão 'Time pelo Motor'", pronto && document.getElementById("motor-resultado"))) return;
+    if (!achou("cartão 'Seu melhor time'", pronto && document.getElementById("motor-resultado"))) return;
     var card = document.getElementById("motor-resultado");
     var varas = card.querySelectorAll(".motor-variante");
     check("o resultado traz as três variantes (ofensivo, seguro, sinergia), cada uma com 6 Pokémon", varas.length === 3 &&
@@ -80,7 +87,7 @@ async function section31() {
     var t1 = Date.now();
     document.getElementById("motor-montar").click();
     await wait(30);
-    await pollUntil(function () { return /Time montado pelo Motor/.test(document.getElementById("archetype-status").textContent) && !document.getElementById("motor-montar").disabled; }, 90000);
+    await pollUntil(function () { return /Time montado em/.test(document.getElementById("archetype-status").textContent) && !document.getElementById("motor-montar").disabled; }, 90000);
     var nomes2 = [].map.call(document.querySelectorAll("#motor-resultado .motor-variante"), function (v) { return [].map.call(v.querySelectorAll(".motor-membro-nome .goto-species"), function (e) { return e.textContent; }).join("|"); });
     check("montar de novo com a mesma entrada dá as mesmas variantes", JSON.stringify(nomes2) === JSON.stringify(nomesDasVariantes), nomes2);
     window.__tempoMotorRepetidoMs = Date.now() - t1;

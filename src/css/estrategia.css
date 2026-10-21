@@ -35,7 +35,7 @@
 .arquetipo[open] > summary { border-bottom: 1px solid var(--border); }
 .arquetipo > :not(summary) { margin-left: 18px; margin-right: 18px; }
 .arquetipo > .mybuild-hint { margin-top: 14px; }
-.arquetipo > #archetype-status { display: block; margin-bottom: 14px; }
+
 /* Monotype usa a cor real do tipo (mesma fonte que typePill/.type-check
    já usam), não o gradiente de marca - a cor JÁ É a informação aqui. */
 .arch-chip-type.active { background: var(--chip-color); border-color: transparent; color: var(--chip-ink); }

@@ -256,7 +256,7 @@ async function section09() {
   // time vem primeiro na tela), com o que está escolhido no resumo.
   const archCard = document.querySelector("#team-strategy details.arquetipo");
   check("card de arquétipo é o primeiro item da #team-strategy (não tem mais Leitura estratégica abaixo)",
-    !!archCard && document.getElementById("team-strategy").firstElementChild === archCard);
+    !!archCard && document.getElementById("team-strategy").firstElementChild === archCard.parentElement && archCard.parentElement.firstElementChild === archCard);
   check("arquétipo começa recolhido, com as escolhas no resumo",
     !!archCard && !archCard.open && /Estilo:\s*nenhum/.test(archCard.querySelector("summary").textContent),
     archCard && archCard.querySelector("summary").textContent);
@@ -270,9 +270,9 @@ async function section09() {
     !document.querySelector(".archetype-warning"));
   check("botão avulso 'Montar melhor time' foi removido (achado de UX, 2026-09-18)",
     !document.getElementById("archetype-build"));
-  check("o Meu Time abre no Modo Motor (padrão): botão 'Montar time pelo Motor' e chip Motor marcado",
+  check("o Meu Time abre no Modo Motor (padrão): botão 'Montar meu melhor time' e chip Automático marcado",
     !!document.getElementById("motor-montar") && document.getElementById("modo-montagem-motor").getAttribute("aria-pressed") === "true");
-  await usarModoIA(); // o padrão é o Modo Motor (botão 'Montar time pelo Motor'); a IA é o outro chip
+  await usarModoIA(); // o padrão é o Modo Motor (botão 'Montar meu melhor time'); a IA é o outro chip
   check("só resta o botão 'Gerar time completo' no card de arquétipo (modo IA)",
     !!document.getElementById("archetype-build-complete"));
   check("card 'Leitura estratégica' foi removido (redundante com 'Gerar time completo')",

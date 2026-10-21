@@ -76,7 +76,7 @@
     var botao = document.getElementById("motor-montar");
     if (botao) { botao.disabled = true; botao.setAttribute("aria-busy", "true"); }
     try {
-      status("Motor: começando…");
+      status("Montando o seu melhor time…");
       await modoMotorEsperar(); // deixa o texto aparecer antes da conta
       var chaveCtx = modoMotorChave(), ctx = contextoDoMotor(), favoritos = modoMotorFavoritosValidos(), t0 = Date.now();
       ctx.cache = modoMotorCache();
@@ -84,7 +84,7 @@
       while (!(r = passos.next()).done) {
         if (r.value === "variante") nVariantes++;
         if (Date.now() - inicio >= FATIA_DO_MOTOR_MS) {
-          status("Motor (sem IA): " + (MOTOR_ROTULO_DO_PASSO[r.value] || "trabalhando") + ", variante " + Math.min(nVariantes + 1, 3) + " de 3… " + modoMotorSegundos(Date.now() - t0));
+          status("Montando sem IA: " + (MOTOR_ROTULO_DO_PASSO[r.value] || "trabalhando") + ", variante " + Math.min(nVariantes + 1, 3) + " de 3… " + modoMotorSegundos(Date.now() - t0));
           await modoMotorEsperar();
           inicio = Date.now();
         }
@@ -94,12 +94,12 @@
       res.tempoTelaMs = Date.now() - t0;
       motorTela = { res: res, chaveCtx: chaveCtx, aplicada: null, favoritos: favoritos };
       renderTeamStrategy(state.team.map(getSpeciesByX).filter(Boolean)); // redesenha o painel inteiro: o status vem depois
-      status("Time montado pelo Motor em " + modoMotorSegundos(res.tempoTelaMs) + ", sem consultar a IA.");
+      status("Time montado em " + modoMotorSegundos(res.tempoTelaMs) + ", sem consultar a IA.");
       var card = document.getElementById("motor-resultado");
       if (card) { card.scrollIntoView({ block: "nearest" }); var h = card.querySelector("h3"); if (h) h.focus(); }
     } catch (e) {
       if (typeof console !== "undefined") console.error(e);
-      status("Não consegui montar o time pelo Motor agora - tente de novo.");
+      status("Não consegui montar o time agora - tente de novo.");
     } finally {
       motorRodando = false;
       var b2 = document.getElementById("motor-montar");
@@ -125,7 +125,7 @@
     var motor = modoDeMontagem === "motor";
     return '<div class="archetype-axis"><span class="archetype-axis-label" id="modo-montagem-rotulo">Como montar o time</span>' +
       '<div class="archetype-chips" role="group" aria-labelledby="modo-montagem-rotulo">' +
-        '<button type="button" class="modo-chip' + (motor ? " active" : "") + '" id="modo-montagem-motor" data-modo="motor" aria-pressed="' + motor + '" title="Monta pelo simulador de duelo do app, sem gastar a sua conta de IA">Motor (padrão, sem IA)</button>' +
+        '<button type="button" class="modo-chip' + (motor ? " active" : "") + '" id="modo-montagem-motor" data-modo="motor" aria-pressed="' + motor + '" title="Monta pelo simulador de duelo do app, sem gastar a sua conta de IA">Automático (sem IA)</button>' +
         '<button type="button" class="modo-chip' + (!motor ? " active" : "") + '" id="modo-montagem-ia" data-modo="ia" aria-pressed="' + !motor + '" title="Pede a composição, as builds e o guia ao Claude">IA (Claude)</button>' +
       '</div></div>';
   }
@@ -137,13 +137,13 @@
         var on = fav.indexOf(sp.sname) !== -1;
         return '<button type="button" class="modo-chip' + (on ? " active" : "") + '" data-motor-fav="' + escapeHtml(sp.sname) + '" aria-pressed="' + on + '">' + escapeHtml(sp.n) + '</button>';
       }).join("") + '</div>' +
-      '<p class="mybuild-hint motor-fav-dica">Quem você marca nunca sai; o Motor só escolhe a forma (base ou Mega) e completa as outras vagas.</p></div>';
+      '<p class="mybuild-hint motor-fav-dica">Quem você marca nunca sai; o app só escolhe a forma (base ou Mega) e completa as outras vagas.</p></div>';
   }
   function modoMotorBotaoHtml() {
-    return '<button id="motor-montar" class="add-team-btn" type="button" title="Monta o time pelo simulador do app, sem consultar a IA">Montar time pelo Motor</button>';
+    return '<button id="motor-montar" class="add-team-btn" type="button" title="Monta o melhor time pelo simulador de duelo do app, sem consultar a IA">Montar meu melhor time</button>';
   }
 
-  var MOTOR_ORIGEM_ROTULO = { pipeline: "build sugerida pelo jogo", "build-salva": "sua build salva", fallback: "melhor set do Motor" };
+  var MOTOR_ORIGEM_ROTULO = { pipeline: "build sugerida pelo jogo", "build-salva": "sua build salva", fallback: "melhor set do simulador" };
   function modoMotorMembroHtml(m) {
     var papeis = m.papeis.length
       ? m.papeis.map(function (p) { return '<span class="plano-chip">' + escapeHtml(p.papel) + '</span>'; }).join(" ") +
@@ -190,7 +190,7 @@
   function modoMotorResultadoHtml() {
     if (!motorTela || motorTela.chaveCtx !== modoMotorChave()) return "";
     var res = motorTela.res;
-    return '<div class="card ts-generated-team motor-resultado" id="motor-resultado"><h3 tabindex="-1">Time pelo Motor <span class="plano-chip">sem IA</span></h3>' +
+    return '<div class="card ts-generated-team motor-resultado" id="motor-resultado"><h3 tabindex="-1">Seu melhor time <span class="plano-chip">sem IA</span></h3>' +
       '<p class="mybuild-hint">Montado pelo simulador de duelo do app (o mesmo do rank) em ' + modoMotorSegundos(res.tempoTelaMs) + '. A mesma entrada dá sempre o mesmo resultado. ' +
         'São três variantes com objetivos diferentes, medidas na mesma régua; escolha a que combina com a sua run.</p>' +
       (res.avisos.length ? '<ul class="motor-avisos">' + res.avisos.map(function (a) { return '<li>' + escapeHtml(a) + '</li>'; }).join("") + '</ul>' : "") +
