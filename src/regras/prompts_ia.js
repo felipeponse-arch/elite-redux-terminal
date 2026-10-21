@@ -292,7 +292,7 @@
       "Innates SEMPRE ativas (nao escolhiveis, mas contam na sinergia - a build deve aproveitar o maximo delas):\n" +
       "<dados_do_jogo>\n" + uniqueIds(sp.inn).map(function (id) {
         // Elite: a innate que o nível do cap ainda não liberou (level_cap.js) vai marcada.
-        var travada = innatesTravadasNoNivel(sp, getCurrentCap() || 100).indexOf(id) !== -1;
+        var travada = innatesTravadasNoNivel(sp, nivelDeCalculo()).indexOf(id) !== -1;
         return linhaHabilidadeIA(id) + (travada ? " [TRAVADA no Elite ate o Pokemon chegar ao nivel " + NIVEL_DA_INNATE_ELITE[(sp.inn || []).indexOf(id)] + " - nao conte com ela agora]" : "");
       }).join("\n") + "\n</dados_do_jogo>\n";
   }

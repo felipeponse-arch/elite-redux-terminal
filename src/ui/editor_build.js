@@ -225,7 +225,7 @@
     // #mybuild-level abaixo é escrito aqui, direto no innerHTML - só
     // resincronizar depois, dentro de wireMyBuildEditor(), não adianta:
     // essa função já roda depois do innerHTML ter sido inserido no DOM).
-    if (!myBuildLevelIsCustom) myBuildLevel = getCurrentCap() || 50;
+    if (!myBuildLevelIsCustom) myBuildLevel = nivelDeCalculo();
     var list = getBuildList(sp.sname);
     var b = getActiveBuild(sp.sname) || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
     var abiIds = uniqueIds(sp.ab);
@@ -294,7 +294,7 @@
         '<div class="mybuild-ev-bar-track"><div class="mybuild-ev-bar-fill" id="mybuild-ev-bar"></div></div>' +
       '</div>' +
       '<div class="boss-level-row"><label for="mybuild-level">Status calculados pro nível (level cap atual' + (mbCap ? ": " + mbCap : "") + ')</label>' +
-        '<input type="number" inputmode="numeric" id="mybuild-level" class="campo campo-numero" min="1" max="100" value="' + (myBuildLevel || mbCap || 50) + '"></div>' +
+        '<input type="number" inputmode="numeric" id="mybuild-level" class="campo campo-numero" min="1" max="100" value="' + (myBuildLevel || nivelDeCalculo()) + '"></div>' +
       '<div id="mybuild-status-preview"></div>' +
       '<p class="mybuild-hint" style="margin:2px 0 12px;">Preenchido a partir do level cap configurado em Progresso - pode digitar outro valor pra simular, mas volta a seguir o cap sempre que ele mudar. Poder de golpe considera STAB e Life Orb quando presente - não é uma calculadora de dano (sem efetividade de tipo, sem status de campo, sem outras habilidades de golpe).</p>' +
       '<div class="notes-actions"><button id="mybuild-save" class="text-action-btn" type="button">Salvar build</button>' +
@@ -363,7 +363,7 @@
     var out = document.getElementById("mybuild-status-preview");
     if (!out) return;
     var levelEl = document.getElementById("mybuild-level");
-    var level = levelEl ? clampInt(levelEl.value, 1, 100, myBuildLevel || 50) : (myBuildLevel || 50);
+    var level = levelEl ? clampInt(levelEl.value, 1, 100, myBuildLevel || nivelDeCalculo()) : (myBuildLevel || nivelDeCalculo());
     var nature = document.getElementById("mybuild-nature").value;
     var item = document.getElementById("mybuild-item").value.trim();
     var ivs = [], evs = [];
@@ -431,7 +431,7 @@
   // validateAiBuild() que "Meu build" usa - nenhuma garantia a menos.
   function strategySetsHtml(sp) {
     var cached = state.strategySets[sp.sname];
-    var strategyLevel = getCurrentCap() || 50;
+    var strategyLevel = nivelDeCalculo();
     var cardsHtml = cached ? cached.sets.map(function (set, idx) {
       // showdownSet() quer EVs já formatado ("252 Atk / 4 SpD"), não o
       // array cru que validateAiBuild devolve - mesma conversão que
@@ -467,7 +467,7 @@
     // são tratados por ouvintes únicos no painel da ficha (logo abaixo, fase 5
     // da refatoração) - antes eram ~20 ouvintes religados a cada abertura.
     var b = getActiveBuild(sp.sname) || { ability: "", nature: "", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0] };
-    if (!myBuildLevelIsCustom) myBuildLevel = getCurrentCap() || 50;
+    if (!myBuildLevelIsCustom) myBuildLevel = nivelDeCalculo();
     var abiEl = document.getElementById("mybuild-ability");
     if (abiEl) abiEl.value = b.ability || "";
     var natEl = document.getElementById("mybuild-nature");

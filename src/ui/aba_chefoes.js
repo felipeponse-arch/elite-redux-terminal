@@ -351,7 +351,7 @@
     try {
       statusChefao("Simulando os duelos contra " + boss.name + "…");
       await new Promise(function (ok) { setTimeout(ok, 0); }); // deixa o texto aparecer antes da conta
-      var nivel = getCurrentCap() || 100;
+      var nivel = nivelDeCalculo();
       // Chefão em dupla (db no dado): a luta é simulada 2 contra 2.
       var r = await simularSemTravarATela(cands, party, nivel, { dupla: !!boss.db, buffs: buffsAtivosDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name) }, function (feitos, total) {
         statusChefao("Simulando os duelos contra " + boss.name + "… " + Math.min(feitos, total) + " de " + total);
@@ -380,7 +380,7 @@
       TELAS.time();
       // Economia de IA (2026-09-30): quem já tem build ativa feita pra ESTE chefão
       // neste level cap fica com ela - clicar de novo não pede as mesmas builds.
-      var capAgora = getCurrentCap() || 0;
+      var capAgora = capOuPadrao();
       var chaveDoTime = boss.name + "|" + diffKey; // o mesmo chefão tem 3 times (Padrão/Insane/Hell)
       var jaFeitas = members.filter(function (sp) {
         var b = getActiveBuild(sp.sname);
@@ -593,7 +593,7 @@
     var party = boss[diffKey];
     if (!party || !party.length) { diffKey = "party"; party = boss.party; bossState.diff = "party"; }
 
-    if (bossState.level === null) bossState.level = getCurrentCap() || 50;
+    if (bossState.level === null) bossState.level = nivelDeCalculo();
 
     var availableDiffs = ["party", "insane", "hell"].filter(function (k) { return boss[k] && boss[k].length; });
     var diffBtns = availableDiffs.length > 1 ? availableDiffs.map(function (k) {

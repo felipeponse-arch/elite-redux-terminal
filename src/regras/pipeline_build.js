@@ -66,7 +66,7 @@
   // Devolve { info, foes, clima, nivel } ou { info: null, foes: [] } (com o motivo em `aviso`).
   // `foes` são os Pokémon medidos: o que foi pedido, ou o primeiro e o ás (o último) do chefão.
   function pipelineResolverAlvo(alvo) {
-    var nivel = getCurrentCap() || 100;
+    var nivel = nivelDeCalculo();
     var saida = { info: null, foes: [], clima: null, nivel: nivel, aviso: null };
     if (alvo && alvo.foe) {
       saida.foes = [alvo.foe];

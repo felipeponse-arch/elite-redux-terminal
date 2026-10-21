@@ -814,6 +814,20 @@ export const MUTACOES = [
     para: "|| true;",
   },
   {
+    id: "sem-cap-nivel-50",
+    descricao: "sem Level cap o nível de cálculo volta a ser 50 em vez de 100",
+    arquivo: "level_cap.js",
+    de: "var NIVEL_DE_CALCULO_SEM_CAP = 100;",
+    para: "var NIVEL_DE_CALCULO_SEM_CAP = 50;",
+  },
+  {
+    id: "sem-cap-padrao-nao-zero",
+    descricao: "sem Level cap o padrão deixa de ser 0 (sem limite)",
+    arquivo: "level_cap.js",
+    de: "return c === null || c === undefined ? 0 : c;",
+    para: "return c === null || c === undefined ? 50 : c;",
+  },
+  {
     id: "pedra-em-qualquer-modo",
     descricao: "pedra obrigatória também no modo permanente",
     arquivo: "validacao_build_ia.js",

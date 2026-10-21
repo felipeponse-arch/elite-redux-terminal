@@ -50,6 +50,17 @@
     if (!LEVELCAPS || !LEVELCAPS.rows[state.settings.milestone]) return null;
     return LEVELCAPS.rows[state.settings.milestone][levelCapMode()];
   }
+  // Padrão ÚNICO quando não há Level cap (Champion/sem tabela) - ticket divida-tecnica 04, usuário 21/10/2026:
+  // sem cap = 0 (sem limite). Quem precisa de um NÍVEL pra calcular (stats, velocidade, simulação, EVs) usa
+  // nivelDeCalculo(): 0 vira 100, o nível máximo. Nenhum chamador escolhe o próprio padrão (teste de varredura
+  // em tests/unit/level_cap_padrao_unico.test.mjs). Com cap definido, os três tipos (Easy/More/Elite) seguem
+  // os valores do código do jogo, sem mudança.
+  var NIVEL_DE_CALCULO_SEM_CAP = 100;
+  function capOuPadrao() {
+    var c = getCurrentCap();
+    return c === null || c === undefined ? 0 : c;
+  }
+  function nivelDeCalculo() { return capOuPadrao() || NIVEL_DE_CALCULO_SEM_CAP; }
 
   // Golpes que o jogador pode usar AGORA (item D3 da pauta técnica,
   // 2026-09-16): nível até o level cap atual + todo golpe de tutor (tutor não

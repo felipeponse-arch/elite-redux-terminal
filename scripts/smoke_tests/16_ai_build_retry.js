@@ -76,10 +76,10 @@ async function section16Corpo() {
   var buildSalva = salvo.filter(function (b) { return b.source === "ia" && b.rationale === "teste retry"; })[0];
   if (achou("build da tentativa 2 está mesmo salva, pra checar os EVs", buildSalva)) {
     var semDesperdicio = buildSalva.evs.every(function (ev, i) {
-      return T.minEvSameStat(fx.sp.b[i], 31, ev, cap || 50, i, buildSalva.nature, buildSalva.item, fx.sp.n) === ev;
+      return T.minEvSameStat(fx.sp.b[i], 31, ev, T.nivelDeCalculo(), i, buildSalva.nature, buildSalva.item, fx.sp.n) === ev;
     });
     check("os EVs da build por IA já saem sem desperdício de breakpoint (corrigido em validateAiBuild, não só avisado depois)",
-      semDesperdicio, buildSalva.evs.join("/") + " no nível " + (cap || 50));
+      semDesperdicio, buildSalva.evs.join("/") + " no nível " + (T.nivelDeCalculo()));
   }
 
   // ---- S3: texto de fonte externa vai como dado, não como instrução ----

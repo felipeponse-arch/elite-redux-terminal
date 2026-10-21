@@ -462,7 +462,7 @@
     // "100% ofensiva" e escapando da checagem de Roost-em-build-ofensiva -
     // a classificação tem que julgar a INTENÇÃO original da IA, só o número
     // final salvo é otimizado).
-    evs = trimAndReallocateEvs(sp, evs, getCurrentCap() || 50, raw.nature, item);
+    evs = trimAndReallocateEvs(sp, evs, nivelDeCalculo(), raw.nature, item);
     // Trick Room (2026-09-28): quem é mais lento age primeiro, então a build
     // lenta de propósito (0 EV em Velocidade, nature que reduz Velocidade)
     // também zera o IV - o jogo tem o item pra isso, Iron Pill: "Sets Speed

@@ -9,7 +9,14 @@
 // varredura real (não chuta valores "redondos" e espera que deem
 // desperdício - o tamanho de cada platô depende do nível/stat base real),
 // depois confirma a integração ao vivo em "Meu build".
+// Sem Level cap o nível de cálculo é 100 (ticket 04) e não há platô de EV; a seção roda no marco 3 (cap 50, "more"), o nível que ela sempre usou.
 async function section23() {
+  var T0 = window.__erTest;
+  var msOriginal = T0 && T0.state.settings.milestone;
+  if (T0) T0.state.settings.milestone = 3;
+  try { await section23Corpo(); } finally { if (T0) T0.state.settings.milestone = msOriginal; }
+}
+async function section23Corpo() {
   var T = window.__erTest;
   if (!T) { check("ponte de teste disponível", false); return; }
   if (!achou("evBreakpointNote exposta na ponte de teste", typeof T.evBreakpointNote === "function")) return;
@@ -20,9 +27,10 @@ async function section23() {
   var STAT_LABELS_SHORT = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
 
   await prepararRunPadrao();
+  T.state.settings.milestone = 3; // cap 50 (ver o comentário da seção); o wrapper restaura o marco
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
-  var cap = T.getCurrentCap() || 50;
+  var cap = T.nivelDeCalculo();
 
   var fx = null;
   T.SPECIES.some(function (sp) {
