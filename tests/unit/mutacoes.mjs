@@ -4106,4 +4106,11 @@ export const MUTACOES = [
     de: "(b.protege ? 1 : 0) - (a.protege ? 1 : 0) ||",
     para: "0 ||",
   },
+  {
+    id: "motor-chama-a-ia",
+    descricao: "o Modo Motor passa a consultar a IA (claude.use) no meio da montagem",
+    arquivo: "time_pelo_motor.js",
+    de: "function motorTemGolpeDeLado(ctx, c) { return ",
+    para: "function motorTemGolpeDeLado(ctx, c) { claude.use(\"sample\"); return ",
+  },
 ];
