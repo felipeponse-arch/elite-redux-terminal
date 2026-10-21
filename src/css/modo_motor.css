@@ -1,0 +1,22 @@
+/* Modo Motor no Meu Time (ticket time-pelo-motor/01, Fase F2, 21/10/2026): resultado das variantes. Os chips de modo/favorito
+   reaproveitam o estilo de .arch-chip (estrategia.css). */
+.modo-chip:focus-visible, .motor-resultado h3:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.modo-chip { min-height: 36px; }
+.motor-fav-dica { margin: 6px 0 0; }
+.motor-resultado h3 { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.motor-variante { padding: var(--space-3) 0; border-top: 1px solid var(--border); }
+.motor-variante h4 { margin: 0 0 var(--space-1); font-size: var(--fs-destaque); }
+.motor-chips { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); margin: var(--space-2) 0; }
+.motor-membros { list-style: none; margin: var(--space-2) 0; padding: 0; display: grid; gap: var(--space-2); }
+.motor-membro { display: flex; gap: var(--space-2); align-items: flex-start; }
+.motor-membro-corpo { min-width: 0; flex: 1; }
+.motor-membro-nome { font-weight: 700; }
+.motor-membro-nome .goto-species { color: var(--badge-accent2); text-decoration: underline; text-decoration-style: dotted; cursor: pointer; }
+.motor-build, .motor-prova { font-size: var(--fs-pequeno); color: var(--text-dim); overflow-wrap: anywhere; }
+.motor-origem { font-style: italic; }
+.motor-papeis { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); }
+.motor-tags, .motor-avisos { margin: var(--space-2) 0; padding-left: 1.2em; font-size: var(--fs-pequeno); }
+.motor-avisos { color: var(--aviso); font-weight: 600; }
+.motor-explicacao { margin: var(--space-2) 0; }
+.motor-explicacao summary { cursor: pointer; font-weight: 600; color: var(--badge-accent2); }
+.motor-explicacao ul { margin: var(--space-2) 0 0; padding-left: 1.2em; font-size: var(--fs-pequeno); color: var(--text-dim); }

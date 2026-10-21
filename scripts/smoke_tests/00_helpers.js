@@ -13,6 +13,7 @@ var results = [];
 // aqui o estado é montado à mão por cada seção, então ela fica desligada pra
 // suíte inteira. A seção 24 testa a fila chamando as funções direto.
 if (window.__erTest && window.__erTest.desligarRevisaoAutomatica) window.__erTest.desligarRevisaoAutomatica(true);
+if (window.__erTest && window.__erTest.desligarAquecimentoDoMotor) window.__erTest.desligarAquecimentoDoMotor(true);
 function check(name, cond, detail) {
   results.push({ name, pass: !!cond, detail: detail || "" });
 }
@@ -131,6 +132,12 @@ function selecionarArquetipo(axis, value) {
   var chip = document.querySelector(sel);
   if (chip) chip.click();
   return chip;
+}
+// Desde 21/10/2026 o Meu Time abre no Modo Motor (padrão); as seções que testam o caminho da IA ("Gerar time completo") passam antes por este
+// helper, que clica o chip "IA (Claude)" como o jogador faria.
+async function usarModoIA() {
+  var chip = document.getElementById("modo-montagem-ia");
+  if (chip && chip.getAttribute("aria-pressed") !== "true") { chip.click(); await wait(30); }
 }
 async function addByName(name, toBox) {
   setSearch(name);

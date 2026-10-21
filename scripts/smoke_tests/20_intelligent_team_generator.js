@@ -110,6 +110,7 @@ async function section20Corpo() {
     }
   };
 
+  await usarModoIA(); // o padrão é o Modo Motor; aqui se testa o caminho da IA
   var buildBtnCompleto = document.getElementById("archetype-build-complete");
   if (!achou("botão \"Gerar time completo\"", buildBtnCompleto)) return;
 
