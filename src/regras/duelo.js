@@ -873,6 +873,7 @@
   var TERRENO_DO_TEXTO_DUELO = { electric: "eletrico", grassy: "grama", psychic: "psiquico", misty: "nevoa", toxic: "toxico" };
   var TIPO_DO_TERRENO_DUELO = { eletrico: "Electric", grama: "Grass", psiquico: "Psychic", nevoa: "Fairy", toxico: "Poison" };
   var REFORCO_DO_TERRENO_DUELO = 1.3;
+  var SALA_PERMANENTE_DUELO = 10; // battle_script_commands.c:11908: timer > 10 não é desligado pelo golpe (Tate & Liza, battle_util.c:4275-4278)
   var CAMPO_DUELO = null; // contexto do duelo em andamento (resultadoDoDuelo liga e desliga)
   function lerCampoDaFraseDuelo(f, ef) {
     var x;
@@ -892,6 +893,7 @@
     if (/Sets Gravity on entry/i.test(f)) ef.gravidade = true;
     if (/bypass Substitutes and damage reduction screens/i.test(f)) ef.infiltra = true;
     if (/Clears screens from both sides on entry/i.test(f)) ef.limpaTelas = true;
+    if (/Can reset screens/i.test(f)) ef.telaRepete = true; // Screen Cleaner: pode pôr a tela de novo com ela ativa (battle_script_commands.c:9345, 10278, 7776-7777 @217dd0f)
     if ((x = f.match(/(\d+)% more damage to (\w+)-types/i)) && tipoDoTextoDuelo(x[2])) ef.vsTipo[tipoDoTextoDuelo(x[2])] = 1 + parseInt(x[1], 10) / 100;
     if ((x = f.match(/deals ([\d.]+)x more damage to (\w+)-types/i)) && tipoDoTextoDuelo(x[2])) ef.vsTipo[tipoDoTextoDuelo(x[2])] = parseFloat(x[1]);
     // Habilidade que depende do terreno.
@@ -1471,7 +1473,7 @@
       seQuebra: false, venenoReduz: false, mudaTipoNoContato: null, telaNaEntrada: 0, imuneTipoNaEntrada: null,
       sincroniza: false, almaLigada: false, drenoCategoria: {},
       armaTerreno: null, limpaTerreno: false, lawnmower: false, sala: 0, inversa: 0, vento: 0, gravidade: false, limpaSala: false,
-      infiltra: false, limpaTelas: false, noTerreno: [], carregaNaEntrada: false,
+      infiltra: false, limpaTelas: false, telaRepete: false, auroraBoreal: false, noTerreno: [], carregaNaEntrada: false,
       klutz: false, gostaDeBaga: false, bagaCedo: false, bagaCuraMin: 0, ripen: false, colheita: 0, rumina: false, unburden: false,
       desligaItem: false, roubaContato: false, roubaSemContato: false, seguraItem: false, nervoso: false,
       aoNocautear: [], curaAoNocautear: 0, curaNocaute: 0, curaNocauteMordida: 0, devora: 0, porDesmaio: 0, aoDesmaiarGolpe: 0, aoDesmaiarDevolve: false,
@@ -2425,11 +2427,13 @@
     if (foe.ef.venenoReduz) estagioMeu *= 1 - envenenado(nMim.pres) / 3;
     var semTelas = eu.ef.limpaTelas || foe.ef.limpaTelas;
     // Reflect/Light Screen do buff de ginásio (telaF/telaE): só a categoria da tela.
-    function tela(u, atq, g) {
+    function tela(u, atq, g, melhor) {
+      var L = CAMPO_DUELO && CAMPO_DUELO.lados;
+      if (L) return telaDoLadoDuelo(L[u === eu ? "eu" : "foe"], u, atq, melhor, turnos, semTelas);
       var t = Math.max(u.ef.telaNaEntrada || 0, g && g.cat === "F" ? u.ef.telaF || 0 : 0, g && g.cat === "E" ? u.ef.telaE || 0 : 0);
       return t && turnos > 0 && !semTelas && !atq.ef.infiltra ? 1 - 0.5 * Math.min(t, turnos) / turnos : 1;
     }
-    estagioMeu *= tela(foe, eu, meu.melhor.golpe); estagioDele *= tela(eu, foe, dele.melhor.golpe);
+    estagioMeu *= tela(foe, eu, meu.melhor.golpe, meu.melhor); estagioDele *= tela(eu, foe, dele.melhor.golpe, dele.melhor);
     // Baga de resistência (Occa...): o 1º golpe do tipo (super efetivo) sai pela metade - um quarto com Ripen.
     function bagaResiste(def, atq, melhor) {
       var b = def.it && def.it.bagaResiste, g = melhor.golpe;
@@ -2563,7 +2567,7 @@
   // no fim do 1º turno, então vale quando a luta passa dele).
   // + estágio de Velocidade NO turno que decide (Speed Boost, Weak Armor, Gooey...):
   // estagiosMediosDuelo com 2n-1 turnos dá (n-1) acúmulos, o estado do n-ésimo.
-  function velocidadeNoDuelo(u, turnos, outro, gU, gOutro) {
+  function velocidadeNoDuelo(u, turnos, outro, gU, gOutro, ventoDoLado) {
     var v = u.stats[5] * u.ef.speMult * noTerrenoDuelo(u, "spe"), orbe = ORBE_DE_STATUS_DUELO[u.item];
     var maiorVel = maiorAtributoDuelo(u);
     if (maiorVel && maiorVel.atributo === 5) v *= maiorVel.mult; // Protosynthesis/Quark Drive com a Speed no topo: x1,5
@@ -2573,7 +2577,10 @@
       if (u.it.lento && atv > 0) v *= 0.001; // Lagging Tail: age por último
       if (u.ef.unburden && u.it.consumivel && turnos >= 2 && atv > 0) v *= 2; // Unburden: item gasto, velocidade dobrada
     }
-    if (u.ef.vento && turnos <= u.ef.vento) v *= 2; // Tailwind (Air Blower): dobra enquanto dura
+    // Tailwind: Speed x2 (battle_main.c:4214 @217dd0f). Na luta contra o chefão o lado manda (ventoDoLado = turnos
+    // restantes); fora dela vale o da habilidade, para o duelo todo.
+    var vento = ventoDoLado === undefined ? u.ef.vento : ventoDoLado;
+    if (vento && turnos <= vento) v *= 2;
     if (outro && outro.ef.pantano && turnos <= 4) v *= 0.25; // Swamp Pledge (Swamp Thing)
     if (outro && turnos >= 1) v *= multDoEstagio(estagiosMediosDuelo(u, outro, gU, gOutro, 2 * turnos - 1).spe);
     if (orbe && turnos >= 2 && podeSofrerStatusDuelo(u, orbe)) {
@@ -2709,6 +2716,14 @@
     if ((eu.ef.anulaClima || foe.ef.anulaClima) && (eu.clima || foe.clima)) { eu = semClimaDuelo(eu); foe = semClimaDuelo(foe); }
     var antes = CAMPO_DUELO;
     CAMPO_DUELO = campoDoDuelo(eu, foe);
+    // Efeitos de lado com turnos (Fase B1): a luta contra o time do chefão passa o estado dos dois lados
+    // (ini.lados = { eu, foe }) e o da sala (ini.sala = turnos restantes). A sala de habilidade de entrada
+    // vive no estado do campo; de ef.sala só segue a permanente (> 10, regra do chefão).
+    if (ini && ini.lados) {
+      CAMPO_DUELO.lados = ini.lados;
+      if (CAMPO_DUELO.sala <= SALA_PERMANENTE_DUELO) CAMPO_DUELO.sala = 0;
+      if (!(eu.ef.limpaSala || foe.ef.limpaSala)) CAMPO_DUELO.sala = Math.max(CAMPO_DUELO.sala, ini.sala || 0);
+    }
     try { return resultadoNoCampoDuelo(eu, foe, nivel, ini || {}); } finally { CAMPO_DUELO = antes; }
   }
   function semClimaDuelo(u) {
@@ -2771,7 +2786,8 @@
       // entre as duas escolhas (revisão de 07/10).
       dele = { melhor: Object.assign({}, fr >= 0.5 ? deleInv.melhor : dele.melhor, { dano: deleInv.melhor.dano * fr + dele.melhor.dano * (1 - fr) }), melhorPrio: dele.melhorPrio, segundo: dele.segundo, ia: null };
     }
-    var v1 = velocidadeNoDuelo(eu, turnos, foe, meu.melhor.golpe, dele.melhor.golpe), v2 = velocidadeNoDuelo(foe, turnos, eu, dele.melhor.golpe, meu.melhor.golpe);
+    var Ls = CAMPO_DUELO.lados;
+    var v1 = velocidadeNoDuelo(eu, turnos, foe, meu.melhor.golpe, dele.melhor.golpe, Ls ? Ls.eu.vento : undefined), v2 = velocidadeNoDuelo(foe, turnos, eu, dele.melhor.golpe, meu.melhor.golpe, Ls ? Ls.foe.vento : undefined);
     // Trick Room (Twist. Dimension): enquanto dura, o mais lento age primeiro.
     if (CAMPO_DUELO.sala && turnos <= CAMPO_DUELO.sala) { v1 = -v1; v2 = -v2; }
     // Drench (ticket 17): encharcado no turno que decide (chance de 50% ou mais) age por último.
@@ -3213,6 +3229,7 @@
     if (se === "Haze") return { tipo: "haze" };
     if (se === "Disable" || se === "Encore" || se === "Torment") return { tipo: "disable" };
     if (se === "Tailwind") return { tipo: "vento" };
+    if (/^Defog$/.test(se)) return { tipo: "defog" }; // só limpa as telas do rival na luta contra o time (poeEfeitoDeLadoComGolpe); no 1x1 não muda nada
     if (se === "Trick Room") return { tipo: "sala" };
     if (se === "Protect") return { tipo: "protege" };
     if (se === "Stealth Rock" || se === "Spikes" || se === "Toxic Spikes" || se === "Sticky Web") return { tipo: "hazard", hazard: { "Stealth Rock": "rocha", "Spikes": "espinho", "Toxic Spikes": "toxico", "Sticky Web": "teia" }[se] };
@@ -3238,6 +3255,7 @@
     // Aurora Borealis: "Moves always benefit from hail" - o changelog 2.65.3b confirma o
     // efeito: Blizzard e Sheer Cold com a precisão do granizo (não erram).
     if (/Moves always benefit from hail/i.test(f)) { ef.precisaoGolpe.Blizzard = 1; ef.precisaoGolpe["Sheer Cold"] = 1; }
+    if (/Moves always benefit from hail/i.test(f)) ef.auroraBoreal = true; // Aurora Veil por golpe vale sem granizo (battle_script_commands.c:7776-7777)
     if (/Moves that have a healing effect gain \+3 priority/i.test(f)) ef.triage = true;
     // Golpe de status que a habilidade usa sozinha ao entrar.
     if (/Uses String Shot on switch-in/i.test(f)) ef.quedaNaEntrada.spe = (ef.quedaNaEntrada.spe || 0) - 2;
@@ -3561,6 +3579,9 @@
       if (!r.sustenta) return null;
       return r;
     }
+    // Luta contra o time do chefão (CAMPO_DUELO.lados): tela, Tailwind e Trick Room são estado do LADO, postos por
+    // poeEfeitoDeLadoDuelo (Fase B1), não benefício do 1x1 de quem usou.
+    if (CAMPO_DUELO && CAMPO_DUELO.lados && (p.tipo === "tela" || p.tipo === "vento" || p.tipo === "sala")) return null;
     if (p.tipo === "tela") {
       if (!gY) return null;
       if (p.cat === "todos" || p.cat === gY.cat) r.multY = x.ef.infiltra ? 1 : (y.ef.infiltra ? 1 : 0.5);
@@ -3895,7 +3916,63 @@
   // O HP passa de uma luta pra outra; nocaute dá bônus (Moxie, Predator...),
   // desmaio tem efeito (Aftermath, Guilt Trip...), hazards ferem quem entra.
   var HAZARD_ESPINHO_DUELO = [0, 1 / 8, 1 / 6, 1 / 4];
-  function novoLadoDuelo() { return { rocha: false, espinho: 0, toxico: 0, teia: false }; }
+  // Efeitos de lado com turnos (Fase B1, ticket time-pelo-motor/01). O lado leva os hazards e, agora, Reflect (reflect),
+  // Light Screen (luz), Aurora Veil (veu) e Tailwind (vento), cada um com os turnos que ainda restam (0 = desligado).
+  // Trick Room é do CAMPO (gFieldTimers), não do lado: o estado fica em `campo.sala` na luta contra o chefão.
+  // Fonte: er-repo, ramo upcoming, commit 217dd0f (pacote docs/tickets/time-pelo-motor/fase-b-evidencia.md).
+  var DURACAO_LADO_DUELO = {
+    sala: 5, // include/battle_util.h:56 (TRICK_ROOM_DURATION)
+    tela: 5, // :63 (SCREEN_DURATION)
+    telaLightClay: 8, // :64 (SCREEN_DURATION_EXTENDED); battle_script_commands.c:9353, 10286, 7786
+    vento: 3 // :66 (TAILWIND_DURATION); battle_script_commands.c:10994
+  };
+  function novoLadoDuelo() { return { rocha: false, espinho: 0, toxico: 0, teia: false, reflect: 0, luz: 0, veu: 0, vento: 0 }; }
+  var TIMERS_DO_LADO_DUELO = ["reflect", "luz", "veu", "vento"];
+  // Defog na entrada limpa os hazards do lado e deixa as telas e o Tailwind dele como estão.
+  function ladoSemHazardsDuelo(velho) {
+    var novo = novoLadoDuelo();
+    TIMERS_DO_LADO_DUELO.forEach(function (k) { novo[k] = velho[k]; });
+    return novo;
+  }
+  // Trick Room: usar de novo desliga (HandleRoomMove, battle_script_commands.c:11891); com timer > 10 (permanente) o golpe
+  // nem alterna (:11908). Devolve os turnos que restam depois do golpe.
+  function alternaSalaDuelo(sala, permanente) {
+    if (sala > 0) return permanente ? sala : 0;
+    return DURACAO_LADO_DUELO.sala;
+  }
+  function duracaoTelaDuelo(u) { return u.item === "Light Clay" ? DURACAO_LADO_DUELO.telaLightClay : DURACAO_LADO_DUELO.tela; }
+  function temTelaDuelo(l) { return l.reflect > 0 || l.luz > 0 || l.veu > 0; }
+  function limpaTelasDoLadoDuelo(l) { l.reflect = 0; l.luz = 0; l.veu = 0; }
+  // Fim do turno: cada timer cai 1 (battle_util.c:1799, 1930, 2053). O turno do uso não conta (`started`,
+  // battle_main.c:4603-4605): quem usa gasta esse turno fora da conta e só os turnos seguintes descontam.
+  function desgastaLadoDuelo(l, turnos) {
+    TIMERS_DO_LADO_DUELO.forEach(function (k) { l[k] = Math.max(0, l[k] - turnos); });
+  }
+  // Fator do dano que o lado de `u` (o defensor) recebe por causa das telas, sobre o melhor golpe de `atq`.
+  // x0,5 em 1x1 (battle_util.c:7653-7655); não vale em crítico nem com Infiltrator (:7649-7651). Reflect cobre o
+  // físico, Light Screen o especial, Aurora Veil os dois (:7648-7649). `semTelas` só afeta o que veio do
+  // buff de ginásio (telaF/telaE): as telas do lado são estado, e só Screen Cleaner/Defog/golpes as tiram.
+  function telaDoLadoDuelo(lado, u, atq, melhor, turnos, semTelas) {
+    var g = melhor && melhor.golpe;
+    if (!g || turnos <= 0 || atq.ef.infiltra) return 1;
+    var t = Math.max(g.cat === "F" ? lado.reflect : lado.luz, lado.veu);
+    if (!semTelas) t = Math.max(t, g.cat === "F" ? u.ef.telaF || 0 : u.ef.telaE || 0);
+    if (!t) return 1;
+    var c = melhor.crit, p = c && c.certo > 1 ? (c.fator - 1) / (c.certo - 1) : 0, mult = c ? c.certo : 1;
+    var comTela = (0.5 * (1 - p) + mult * p) / ((1 - p) + mult * p); // só o golpe que não é crítico leva a tela
+    return 1 - Math.min(t, turnos) / turnos * (1 - comTela);
+  }
+  // O que a habilidade faz no lado quando o Pokémon entra: Screen Cleaner limpa os dois lados (battle_util.c:8390-8413),
+  // Defog tira só as telas do rival (battle_script_commands.c:6534-6537); Air Blower/Harukaze (Tailwind de 3 turnos),
+  // North Wind (Aurora Veil: 3 turnos, 5 com Light Clay, abilities.cc:4462-4464) e Twisted Dimension (Trick Room de 3
+  // turnos, abilities.cc:4437). Trick Room de habilidade só liga se nada estiver ligado (a fonte não diz se desliga).
+  function entradaDeLadoDuelo(u, ladoDono, ladoOutro, campo, salaPermanente) {
+    var ef = u.ef;
+    if (ef.limpaTelas) { limpaTelasDoLadoDuelo(ladoOutro); if (ef.telaRepete) limpaTelasDoLadoDuelo(ladoDono); }
+    if (ef.vento && !ladoDono.vento) ladoDono.vento = ef.vento;
+    if (ef.telaNaEntrada) ladoDono.veu = Math.max(ladoDono.veu, u.item === "Light Clay" ? DURACAO_LADO_DUELO.tela : ef.telaNaEntrada);
+    if (ef.sala && !campo.sala && !salaPermanente) campo.sala = ef.sala;
+  }
   function poeHazardDuelo(lado, tipo) {
     if (tipo === "rocha") lado.rocha = true;
     else if (tipo === "espinho") lado.espinho = Math.min(3, lado.espinho + 1);
@@ -4119,9 +4196,12 @@
   // `inicio` (opcional, buffs do ginásio): hazards já no meu lado e status nos últimos N.
   function simularLutaContraChefao(meus, foes, nivel, inicio) {
     var time = meus.map(participanteDuelo), deles = foes.map(participanteDuelo);
-    var ladoMeu = inicio ? Object.assign(novoLadoDuelo(), inicio.lado) : novoLadoDuelo(), ladoDele = novoLadoDuelo();
+    var ladoMeu = inicio ? Object.assign(novoLadoDuelo(), inicio.lado) : novoLadoDuelo(), ladoDele = inicio && inicio.ladoDele ? Object.assign(novoLadoDuelo(), inicio.ladoDele) : novoLadoDuelo();
     if (inicio) aplicarStatusNoFimDuelo(time, inicio.statusNoFim);
     var log = [], atual = null, i = 0, voltas = 0;
+    // Trick Room é do campo, não de um lado (battle_util.c:4605 gFieldTimers); os outros ficam em ladoMeu/ladoDele.
+    var campo = { sala: 0 };
+    function salaPermanente() { return time.concat(deles).some(function (c) { return c.u.ef.sala > SALA_PERMANENTE_DUELO; }); }
     // Clima com duração (lote B, 2026-10-02; NextDex 2.65beta "Lasts 8 turns"): `inicio.clima`
     // traz as unidades sem clima. O do chefão vale desde o início; o do jogador só depois que
     // o armador ENTRA - antes a estratégia valia a luta toda mesmo sem o armador em campo.
@@ -4137,8 +4217,15 @@
     aplicarClima();
     function luta(c, f) {
       var semReserva = function (lado, quem) { return !lado.some(function (x) { return x !== quem && x.vivo; }); }; // troca forçada (ticket 18)
+      var lm = ladoMeu, ld = ladoDele, sala = campo.sala;
+      if (c !== atual) { // quem ainda não entrou: a luta já conta o que a habilidade dele põe no lado ao entrar
+        lm = Object.assign({}, ladoMeu); ld = Object.assign({}, ladoDele);
+        var cp = { sala: campo.sala };
+        entradaDeLadoDuelo(c.u, lm, ld, cp, salaPermanente());
+        sala = cp.sala;
+      }
       return resultadoDoDuelo(comoEstaDuelo(c), comoEstaDuelo(f), nivel, { fracEu: c.frac, fracFoe: f.frac, detalhe: true,
-        semReservaEu: semReserva(time, c), semReservaFoe: semReserva(deles, f) });
+        semReservaEu: semReserva(time, c), semReservaFoe: semReserva(deles, f), lados: { eu: lm, foe: ld }, sala: sala });
     }
     // Setup levado de um duelo anterior (ticket 05) contra quem tem golpe que tira setup (ticket 18):
     // Clear Smog/Freezy Frost e a troca forçada zeram tudo (a troca só com outro vivo no time de quem
@@ -4167,7 +4254,8 @@
       if (cl && cl.armadorIdx !== null && c === time[cl.armadorIdx]) { climaLigado = true; climaRestante = cl.duracao; aplicarClima(); }
       if (c.u.ef.curaTimeNaEntrada) time.forEach(function (x) { x.status = {}; }); // Soothing Aroma
       if (c.u.ef.brasas) ladoDele.brasas = true; // Hot Coals: queima o próximo que entrar do lado dele
-      if (c.u.ef.limpaHazards) ladoMeu = novoLadoDuelo();
+      if (c.u.ef.limpaHazards) ladoMeu = ladoSemHazardsDuelo(ladoMeu);
+      entradaDeLadoDuelo(c.u, ladoMeu, ladoDele, campo, salaPermanente());
       entrarNoLadoDuelo(c, ladoMeu);
       c.u.ef.hazards.forEach(function (h) { if (h.quando === "entrada") poeHazardDuelo(ladoDele, h.tipo); });
       if (c.frac <= 0) { c.vivo = false; c.frac = 0; }
@@ -4177,7 +4265,8 @@
       if (ladoDele.brasas && podeSofrerStatusDuelo(f.u, "queimar")) { f.status.queimar = 1; ladoDele.brasas = false; }
       // Stakeout: quem já está em campo bate 2x no que acabou de entrar (1º golpe).
       if (atual && atual.vivo && atual.u.ef.tocaia) atual.bonus.primeiroGolpe = atual.u.ef.tocaia;
-      if (f.u.ef.limpaHazards) ladoDele = novoLadoDuelo();
+      if (f.u.ef.limpaHazards) ladoDele = ladoSemHazardsDuelo(ladoDele);
+      entradaDeLadoDuelo(f.u, ladoDele, ladoMeu, campo, salaPermanente());
       entrarNoLadoDuelo(f, ladoDele);
       f.u.ef.hazards.forEach(function (h) { if (h.quando === "entrada") poeHazardDuelo(ladoMeu, h.tipo); });
       if (f.frac <= 0) { f.vivo = false; f.frac = 0; }
@@ -4236,6 +4325,47 @@
         if (ok) { quem.frac = copia.frac; poeHazardDuelo(lado, p.hazard); }
       });
     }
+    // Tela, Tailwind e Trick Room por golpe de status (Fase B1), no molde do hazard: quem gasta o turno e ainda vence
+    // põe o efeito no lado, com os turnos da fonte (o turno do uso não conta), e o time inteiro aproveita depois.
+    // Desligar o Trick Room (usar de novo, battle_script_commands.c:11891) só vale se sem isso a luta não é vencida;
+    // com ele permanente (> 10, Tate & Liza) o golpe não faz nada (:11908). Defog tira as telas do rival (:6534-6537).
+    function poeEfeitoDeLadoComGolpe(quem, contra, lq, lc) {
+      (quem.u.statusIds || []).forEach(function (id) {
+        var p = planoDoGolpeStatus(id);
+        var nlq = Object.assign({}, lq), nlc = Object.assign({}, lc), nsala = campo.sala, soSePrecisa = false;
+        if (p && p.tipo === "tela") {
+          var k = p.cat === "F" ? "reflect" : p.cat === "E" ? "luz" : "veu";
+          if (lq[k] > 0 && !quem.u.ef.telaRepete) return; // com a tela ativa o golpe falha, menos com Screen Cleaner (:9345)
+          // Aurora Veil só com granizo ou Aurora Borealis (battle_script_commands.c:7776-7777)
+          if (k === "veu" && climaNoCampoDuelo(quem.u, contra.u) !== "granizo" && !quem.u.ef.auroraBoreal) return;
+          nlq[k] = duracaoTelaDuelo(quem.u);
+        } else if (p && p.tipo === "vento") {
+          if (lq.vento > 0) return; // Tailwind ativo: falha (battle_script_commands.c:10986-10996)
+          nlq.vento = DURACAO_LADO_DUELO.vento;
+        } else if (p && p.tipo === "sala") {
+          nsala = alternaSalaDuelo(campo.sala, salaPermanente());
+          if (nsala === campo.sala) return;
+          soSePrecisa = campo.sala > 0;
+        } else if (p && p.tipo === "defog") {
+          if (!temTelaDuelo(lc)) return;
+          limpaTelasDoLadoDuelo(nlc);
+        } else return;
+        var golpe = danoNoDuelo(comoEstaDuelo(contra), comoEstaDuelo(quem), nivel).melhor.dano / quem.u.stats[0];
+        var copia = participanteDuelo(quem.u); copia.frac = quem.frac - golpe; copia.status = quem.status; copia.bonus = quem.bonus;
+        if (copia.frac <= 0) return;
+        var vence = function (c, a, b, sala) {
+          return resultadoDoDuelo(comoEstaDuelo(c), comoEstaDuelo(contra), nivel, { fracEu: c.frac, fracFoe: contra.frac, detalhe: true, lados: { eu: a, foe: b }, sala: sala }).venceu === true;
+        };
+        if (!vence(copia, nlq, nlc, nsala)) return;
+        if (soSePrecisa && vence(quem, lq, lc, campo.sala)) return;
+        quem.frac = copia.frac; Object.assign(lq, nlq); Object.assign(lc, nlc); campo.sala = nsala;
+      });
+    }
+    // Brick Break derruba Reflect, Light Screen e Aurora Veil do rival ao acertar (battle_script_commands.c:12428-12431).
+    // Atalho: vale como golpe usado desde o começo do duelo quando está entre os golpes de quem ataca.
+    function quebraTelasComGolpe(quem, lc) {
+      if (temTelaDuelo(lc) && (quem.u.golpesProntos || []).some(function (g) { return g.nome === "Brick Break"; })) limpaTelasDoLadoDuelo(lc);
+    }
     if (deles.length) entraDele(deles[0]);
     while (i < deles.length && time.some(function (c) { return c.vivo; }) && voltas++ < 60) {
       var f = deles[i];
@@ -4265,6 +4395,10 @@
       }
       poeHazardComGolpe(atual, f, ladoDele);
       poeHazardComGolpe(f, atual, ladoMeu);
+      if (!atual.vivo) continue;
+      quebraTelasComGolpe(atual, ladoDele); quebraTelasComGolpe(f, ladoMeu);
+      poeEfeitoDeLadoComGolpe(atual, f, ladoMeu, ladoDele);
+      poeEfeitoDeLadoComGolpe(f, atual, ladoDele, ladoMeu);
       if (!atual.vivo) continue;
       if (f.u.ef.futuro && !f.futuroLancado) {
         f.futuroLancado = true;
@@ -4302,8 +4436,10 @@
       var perece = perecimentoDuelo(atual.u, f.u);
       hazardsAoApanhar(atual, f, ladoDele);
       hazardsAoApanhar(f, atual, ladoMeu);
-      log.push({ meu: atual.u.sp.n, contra: f.u.nome || f.u.sp.n, venceu: r.venceu, fracEu: r.fracEu, fracFoe: r.fracFoe, turnos: r.turnos, clima: !!cl && climaLigado && climaRestante > 0 });
+      log.push({ meu: atual.u.sp.n, contra: f.u.nome || f.u.sp.n, venceu: r.venceu, fracEu: r.fracEu, fracFoe: r.fracFoe, turnos: r.turnos, clima: !!cl && climaLigado && climaRestante > 0,
+        lados: { meu: Object.assign({}, ladoMeu), dele: Object.assign({}, ladoDele), sala: campo.sala } }); // o que a luta viu (antes de o duelo gastar os turnos)
       if (cl && climaLigado) { climaRestante -= r.turnos || 1; aplicarClima(); }
+      desgastaLadoDuelo(ladoMeu, r.turnos || 1); desgastaLadoDuelo(ladoDele, r.turnos || 1); campo.sala = Math.max(0, campo.sala - (r.turnos || 1));
       atual.bonus.primeiroGolpe = 0; // Stakeout/Avenger: só o 1º golpe depois de entrar
       atual.itemGasto = true; f.itemGasto = true; // consumível usado nesta luta
       if (perece && r.turnos > perece + 1) { atual.vivo = false; atual.frac = 0; f.vivo = false; f.frac = 0; }
