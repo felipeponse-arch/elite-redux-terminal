@@ -115,8 +115,9 @@ test("wallbreaker e tanque com prova (Etapa 2, elenco do pipeline) e abstenção
   assert.equal(m("Mandibuzz").papeis.length, 0);
   assert.match(m("Mandibuzz").abstencao, /nenhuma prova/);
   assert.ok(v.explicacao.some((t) => t.startsWith("Mandibuzz: sem papel provado")));
-  // Multirrótulo: o mesmo membro pode ter mais de um papel, cada um com a sua prova.
-  assert.ok(v.membros.some((x) => x.papeis.length >= 2) || v.membros.some((x) => x.papeis.length === 1), "papéis são lista");
+  // Multirrótulo: a Blissey tem DOIS papéis no mesmo time, cada um com a sua prova.
+  const blis = m("Blissey").papeis.map((p) => p.papel).sort();
+  assert.deepEqual([...blis], ["tanque", "wallbreaker"]);
   v.membros.forEach((x) => x.papeis.forEach((p) => assert.ok(p.prova && Object.keys(p.prova).length > 0, x.nome + " " + p.papel + " sem prova")));
 });
 
@@ -198,6 +199,20 @@ test("elenco pequeno: as três variantes chegam nos mesmos Pokémon e as duas ú
   assert.equal(out.variantes[0].avisos.filter((a) => /chegou nos mesmos/.test(a)).length, 0);
 });
 
+test("tag tática com prova (elenco construído, sem caso real positivo): Tailwind do Whimsicott + dois beneficiários + ganho do time", () => {
+  const r = run({ milestone: 4, nomes: ["Whimsicott", "Blissey", "Dragonite", "Garchomp", "Gyarados", "Hatterene"], builds: { Whimsicott: SUPORTES.Whimsicott } });
+  const time = r.cand(["Whimsicott"]).filter((c) => c.sp.x === c.base.x);
+  assert.equal(time.length, 6);
+  const cl = r.R.motorClassificar(r.ctx, time);
+  const tag = cl.tags.find((t) => /tática/.test(t.tag));
+  assert.ok(tag, JSON.stringify(cl.tags));
+  assert.equal(tag.tag, "tática: Tailwind");
+  assert.equal(tag.armador, "Whimsicott");
+  assert.ok(tag.beneficiarios.length >= 2 && tag.beneficiarios.every((b) => b.ganhoPorDuelo >= r.R.MOTOR_PROVA_BENEFICIO));
+  assert.ok(tag.ganhoDoTime > 0);
+  assert.ok(cl.membros.find((m) => m.nome === "Whimsicott").contribuicoes.some((c) => c.tipo === "habilita"));
+});
+
 // ---------- explicação, legado e tempo ----------
 test("explicação por template: estilo, tags, papéis, condição de vitória e o que não foi medido; só os números da estrutura", () => {
   const v = porChave("sinergia"), txt = v.explicacao.join("\n");
@@ -236,9 +251,10 @@ test("risco 9: o papel legado da espécie (SPECIES_ROLE, ficha, builds, prompt) 
   assert.ok(Array.isArray(R.SPECIES_ROLE[sn].roles) && R.SPECIES_ROLE[sn].roles.length > 0);
 });
 
-test("tempo: a classificação custa uma fração do tempo da busca (medido, por variante)", () => {
+test("tempo: a classificação tem teto de 3 s por variante (medido: 0,1 a 0,4 s) e cabe no tempo da variante", () => {
   tresVariantes.variantes.forEach((v) => {
     assert.ok(Number.isFinite(v.tempoClassificacaoMs) && v.tempoClassificacaoMs >= 0, v.chave);
+    assert.ok(v.tempoClassificacaoMs <= 3000, v.chave + " classificação " + v.tempoClassificacaoMs + " ms");
     assert.ok(v.tempoClassificacaoMs <= v.tempoMs, v.chave);
   });
   console.log("# tempo (ms): " + tresVariantes.variantes.map((v) => v.chave + " total " + v.tempoMs + ", classificação " + v.tempoClassificacaoMs).join(" | ") + " | tudo " + tresVariantes.tempoMs);

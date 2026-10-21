@@ -209,6 +209,15 @@ test("risco 8 (Fase D): todo papel e toda tag carregam a prova medida; quem não
       assert.equal(m.papeis.length === 0, typeof m.abstencao === "string", m.nome);
     });
     v.tags.filter((t) => t.armador).forEach((t) => assert.ok(t.beneficiarios.length >= 2 && t.ganhoDoTime > 0, v.chave + " " + t.tag));
+    // Proteção da Fase C: o texto nunca afirma papel nem tag sem o correspondente medido.
+    const PAPEIS = ["wallbreaker", "sweeper", "revenge killer", "tanque", "armador", "suporte", "pivô"];
+    v.membros.forEach((m) => {
+      const linha = v.explicacao.find((x) => x.startsWith(m.nome + ":")) || "";
+      const citados = PAPEIS.filter((p) => new RegExp("(^|[ ;(])" + p + " \\(").test(linha));
+      assert.equal(JSON.stringify(citados.sort()), JSON.stringify(m.papeis.map((p) => p.papel).sort()), v.chave + " " + m.nome);
+    });
+    const tagsNoTexto = v.explicacao.filter((x) => /^Tag /.test(x)).map((x) => x.slice(4, x.indexOf(":", x.indexOf(":") + 1)));
+    assert.equal(JSON.stringify(tagsNoTexto), JSON.stringify(v.tags.map((g) => g.tag)), v.chave);
   });
 });
 
