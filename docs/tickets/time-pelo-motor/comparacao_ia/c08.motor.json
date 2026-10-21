@@ -1,0 +1,1148 @@
+{
+ "tempoMs": 13400,
+ "variantes": [
+  {
+   "chave": "ofensivo",
+   "objetivo": {
+    "nome": "Mais ofensivo",
+    "descricao": "premia o progresso medido: quantos Pokémon do chefão caem, em média, em cada luta"
+   },
+   "membros": [
+    {
+     "sname": "SPECIES_GARCHOMP_MEGA_Z",
+     "nome": "Garchomp Mega Z",
+     "x": 445,
+     "base": "SPECIES_GARCHOMP",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Sinister Claws",
+      "moves": [
+       "Seismic Blade",
+       "Air Cutter",
+       "Fire Blast",
+       "Draco Meteor"
+      ],
+      "item": "Garchompite Z",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       252,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 3,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie",
+          "alvo": "Phione",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Walking Wake",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Regidrago",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_TYRANITAR_MEGA",
+     "nome": "Tyranitar Mega",
+     "x": 248,
+     "base": "SPECIES_TYRANITAR",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Sheer Force",
+      "moves": [
+       "Crunch",
+       "Iron Tail",
+       "Blizzard",
+       "Fire Blast"
+      ],
+      "item": "Tyranitarite",
+      "nature": "Adamant",
+      "evs": [
+       0,
+       252,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_GRIMMSNARL_MEGA",
+     "nome": "Grimmsnarl Mega",
+     "x": 861,
+     "base": "SPECIES_GRIMMSNARL",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Fearmonger",
+      "moves": [
+       "Axe Kick",
+       "Mega Kick",
+       "Black Magic",
+       "Sucker Punch"
+      ],
+      "item": "Grimmsnarlite",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 6,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Dreadnaut",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Machamp Redux",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_FERROTHORN",
+     "nome": "Ferrothorn",
+     "x": 598,
+     "base": "SPECIES_FERROTHORN",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Fort Knox",
+      "moves": [
+       "Wood Hammer",
+       "Frustration",
+       "Snap Trap",
+       "Pin Missile"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       252,
+       252,
+       0,
+       4,
+       0,
+       0
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_EXCADRILL_MEGA",
+     "nome": "Excadrill Mega",
+     "x": 530,
+     "base": "SPECIES_EXCADRILL",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Mold Breaker",
+      "moves": [
+       "Drill Run",
+       "Fury Swipes",
+       "Megahorn",
+       "Strength"
+      ],
+      "item": "Excadrite",
+      "nature": "Adamant",
+      "evs": [
+       4,
+       248,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Archaludon",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Fujiflap",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_GYARADOS",
+     "nome": "Gyarados",
+     "x": 130,
+     "base": "SPECIES_GYARADOS",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Moxie",
+      "moves": [
+       "Wave Crash",
+       "Thrash",
+       "Dragon Ascent",
+       "Rip and Tear"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       4,
+       248,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    }
+   ],
+   "metricas": {
+    "objetivo": 1,
+    "amostra": {
+     "lutas": 5,
+     "vence": 5,
+     "cobertura": 1,
+     "pontosMedios": 15.39,
+     "derrubadosMedios": 6,
+     "perdidas": []
+    },
+    "completo": {
+     "lutas": 29,
+     "vence": 29,
+     "cobertura": 1,
+     "pontosMedios": 15.93,
+     "derrubadosMedios": 5.21,
+     "perdidas": []
+    },
+    "restantes": {
+     "lutas": 20,
+     "vence": 20,
+     "cobertura": 1,
+     "pontosMedios": 15.79,
+     "derrubadosMedios": 5.2,
+     "perdidas": []
+    }
+   },
+   "avisos": [],
+   "avaliacoes": 56,
+   "melhorTentativa": false,
+   "planoB": {
+    "luta": "Shelly Weather Institute",
+    "ameaca": null,
+    "pontosAntes": 16.33,
+    "vencia": true,
+    "travadas": 0,
+    "trocas": [
+     {
+      "vaga": 0,
+      "sai": "Garchomp Mega Z",
+      "entra": "Blissey",
+      "deltaPontos": 0.64,
+      "venceAgora": true,
+      "venciaAntes": true
+     }
+    ],
+    "motivo": null
+   },
+   "estilo": "Balance",
+   "estiloProva": {
+    "ofensivos": 3,
+    "tanques": 0,
+    "apoio": 0,
+    "membros": 6
+   },
+   "tags": [],
+   "condicaoDeVitoria": {
+    "vitoriasNaAmostra": 5,
+    "lutas": 5,
+    "fecham": [
+     {
+      "nome": "Excadrill Mega",
+      "n": 1
+     },
+     {
+      "nome": "Ferrothorn",
+      "n": 1
+     },
+     {
+      "nome": "Grimmsnarl Mega",
+      "n": 1
+     }
+    ],
+    "ameacaPrincipal": {
+     "nome": "Kyurem Black",
+     "lutas": 1
+    }
+   },
+   "naoMedidos": [
+    "pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel",
+    "terreno e hazards como tag: ainda não implementados"
+   ],
+   "tempoClassificacaoMs": 97,
+   "explicacao": [
+    "Mais ofensivo (premia o progresso medido: quantos Pokémon do chefão caem, em média, em cada luta).",
+    "Na amostra de 5 lutas o time vence 5 (pontos médios 15.39); nas 29 lutas da run vence 29; daqui para frente (20 lutas) vence 20, derrubando em média 5.2 Pokémon por luta.",
+    "Plano B (luta mais difícil: Shelly Weather Institute): trocar Garchomp Mega Z por Blissey (+0.64 pontos).",
+    "Estilo: Balance (3 membros ofensivos provados, 0 tanque(s) e 0 de apoio, de 6).",
+    "Sem tag de clima ou tática: nenhuma condição armada teve dois beneficiários medidos e ganho do time.",
+    "Garchomp Mega Z: wallbreaker (3 dos 5 nocautes foram em rivais robustos).",
+    "Tyranitar Mega: sem papel provado (nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Grimmsnarl Mega: wallbreaker (4 dos 6 nocautes foram em rivais robustos).",
+    "Ferrothorn: sem papel provado (nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Excadrill Mega: wallbreaker (4 dos 5 nocautes foram em rivais robustos).",
+    "Gyarados: sem papel provado (nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Condição de vitória: o time vence 5 das 5 lutas da amostra; quem dá o último nocaute: Excadrill Mega (1), Ferrothorn (1), Grimmsnarl Mega (1); a ameaça que mais derruba o time é Kyurem Black (em 1 luta).",
+    "Não medido: pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel; terreno e hazards como tag: ainda não implementados."
+   ],
+   "tempoMs": 2472
+  },
+  {
+   "chave": "seguro",
+   "objetivo": {
+    "nome": "Mais seguro",
+    "descricao": "premia vencer com gente viva e segurar o pior caso: a média das lutas e o pior terço delas, pelo Battle Rating"
+   },
+   "membros": [
+    {
+     "sname": "SPECIES_GARCHOMP_MEGA_Z",
+     "nome": "Garchomp Mega Z",
+     "x": 445,
+     "base": "SPECIES_GARCHOMP",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Sinister Claws",
+      "moves": [
+       "Seismic Blade",
+       "Air Cutter",
+       "Fire Blast",
+       "Draco Meteor"
+      ],
+      "item": "Garchompite Z",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       252,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 3,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie",
+          "alvo": "Phione",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Walking Wake",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Regidrago",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_TYRANITAR_MEGA",
+     "nome": "Tyranitar Mega",
+     "x": 248,
+     "base": "SPECIES_TYRANITAR",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Sheer Force",
+      "moves": [
+       "Crunch",
+       "Iron Tail",
+       "Blizzard",
+       "Fire Blast"
+      ],
+      "item": "Tyranitarite",
+      "nature": "Adamant",
+      "evs": [
+       0,
+       252,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_EXCADRILL_MEGA",
+     "nome": "Excadrill Mega",
+     "x": 530,
+     "base": "SPECIES_EXCADRILL",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Mold Breaker",
+      "moves": [
+       "Drill Run",
+       "Fury Swipes",
+       "Megahorn",
+       "Strength"
+      ],
+      "item": "Excadrite",
+      "nature": "Adamant",
+      "evs": [
+       4,
+       248,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Archaludon",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Fujiflap",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_GRIMMSNARL_MEGA",
+     "nome": "Grimmsnarl Mega",
+     "x": 861,
+     "base": "SPECIES_GRIMMSNARL",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Fearmonger",
+      "moves": [
+       "Axe Kick",
+       "Mega Kick",
+       "Black Magic",
+       "Sucker Punch"
+      ],
+      "item": "Grimmsnarlite",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 6,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Dreadnaut",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Machamp Redux",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_FERROTHORN",
+     "nome": "Ferrothorn",
+     "x": 598,
+     "base": "SPECIES_FERROTHORN",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Fort Knox",
+      "moves": [
+       "Wood Hammer",
+       "Frustration",
+       "Snap Trap",
+       "Pin Missile"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       252,
+       252,
+       0,
+       4,
+       0,
+       0
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_GYARADOS",
+     "nome": "Gyarados",
+     "x": 130,
+     "base": "SPECIES_GYARADOS",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Moxie",
+      "moves": [
+       "Wave Crash",
+       "Thrash",
+       "Dragon Ascent",
+       "Rip and Tear"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       4,
+       248,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    }
+   ],
+   "metricas": {
+    "objetivo": 0.7792,
+    "amostra": {
+     "lutas": 5,
+     "vence": 5,
+     "cobertura": 1,
+     "pontosMedios": 15.39,
+     "derrubadosMedios": 6,
+     "perdidas": []
+    },
+    "completo": {
+     "lutas": 29,
+     "vence": 29,
+     "cobertura": 1,
+     "pontosMedios": 15.96,
+     "derrubadosMedios": 5.21,
+     "perdidas": []
+    },
+    "restantes": {
+     "lutas": 20,
+     "vence": 20,
+     "cobertura": 1,
+     "pontosMedios": 15.79,
+     "derrubadosMedios": 5.2,
+     "perdidas": []
+    }
+   },
+   "avisos": [
+    "chegou nos mesmos Pokémon da variante \"Mais ofensivo\": com este elenco os dois objetivos concordam."
+   ],
+   "avaliacoes": 57,
+   "melhorTentativa": false,
+   "planoB": {
+    "luta": "Shelly Weather Institute",
+    "ameaca": null,
+    "pontosAntes": 16.33,
+    "vencia": true,
+    "travadas": 0,
+    "trocas": [
+     {
+      "vaga": 0,
+      "sai": "Garchomp Mega Z",
+      "entra": "Blissey",
+      "deltaPontos": 0.64,
+      "venceAgora": true,
+      "venciaAntes": true
+     }
+    ],
+    "motivo": null
+   },
+   "estilo": "Balance",
+   "estiloProva": {
+    "ofensivos": 3,
+    "tanques": 0,
+    "apoio": 0,
+    "membros": 6
+   },
+   "tags": [],
+   "condicaoDeVitoria": {
+    "vitoriasNaAmostra": 5,
+    "lutas": 5,
+    "fecham": [
+     {
+      "nome": "Excadrill Mega",
+      "n": 1
+     },
+     {
+      "nome": "Ferrothorn",
+      "n": 1
+     },
+     {
+      "nome": "Grimmsnarl Mega",
+      "n": 1
+     }
+    ],
+    "ameacaPrincipal": {
+     "nome": "Kyurem Black",
+     "lutas": 1
+    }
+   },
+   "naoMedidos": [
+    "pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel",
+    "terreno e hazards como tag: ainda não implementados"
+   ],
+   "tempoClassificacaoMs": 84,
+   "explicacao": [
+    "Mais seguro (premia vencer com gente viva e segurar o pior caso: a média das lutas e o pior terço delas, pelo Battle Rating).",
+    "Na amostra de 5 lutas o time vence 5 (pontos médios 15.39); nas 29 lutas da run vence 29; daqui para frente (20 lutas) vence 20, derrubando em média 5.2 Pokémon por luta.",
+    "Plano B (luta mais difícil: Shelly Weather Institute): trocar Garchomp Mega Z por Blissey (+0.64 pontos).",
+    "Estilo: Balance (3 membros ofensivos provados, 0 tanque(s) e 0 de apoio, de 6).",
+    "Sem tag de clima ou tática: nenhuma condição armada teve dois beneficiários medidos e ganho do time.",
+    "Garchomp Mega Z: wallbreaker (3 dos 5 nocautes foram em rivais robustos).",
+    "Tyranitar Mega: sem papel provado (nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Excadrill Mega: wallbreaker (4 dos 5 nocautes foram em rivais robustos).",
+    "Grimmsnarl Mega: wallbreaker (4 dos 6 nocautes foram em rivais robustos).",
+    "Ferrothorn: sem papel provado (nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Gyarados: sem papel provado (nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Condição de vitória: o time vence 5 das 5 lutas da amostra; quem dá o último nocaute: Excadrill Mega (1), Ferrothorn (1), Grimmsnarl Mega (1); a ameaça que mais derruba o time é Kyurem Black (em 1 luta).",
+    "Não medido: pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel; terreno e hazards como tag: ainda não implementados."
+   ],
+   "tempoMs": 2167
+  },
+  {
+   "chave": "sinergia",
+   "objetivo": {
+    "nome": "Sinergia",
+    "descricao": "premia dois membros com benefício medido de uma condição que um terceiro arma (clima, Tailwind, Trick Room, tela), sem largar o Battle Rating"
+   },
+   "membros": [
+    {
+     "sname": "SPECIES_GARCHOMP_MEGA_Z",
+     "nome": "Garchomp Mega Z",
+     "x": 445,
+     "base": "SPECIES_GARCHOMP",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Sinister Claws",
+      "moves": [
+       "Seismic Blade",
+       "Air Cutter",
+       "Fire Blast",
+       "Draco Meteor"
+      ],
+      "item": "Garchompite Z",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       252,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 3,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie",
+          "alvo": "Phione",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Walking Wake",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Regidrago",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_TYRANITAR_MEGA",
+     "nome": "Tyranitar Mega",
+     "x": 248,
+     "base": "SPECIES_TYRANITAR",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Sheer Force",
+      "moves": [
+       "Crunch",
+       "Iron Tail",
+       "Blizzard",
+       "Fire Blast"
+      ],
+      "item": "Tyranitarite",
+      "nature": "Adamant",
+      "evs": [
+       0,
+       252,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 4,
+        "nocautes": 5,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Lanturn",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Goodra Hisuian",
+          "turnos": 2
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Dreadnaut",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Fujiflap",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_GRIMMSNARL_MEGA",
+     "nome": "Grimmsnarl Mega",
+     "x": 861,
+     "base": "SPECIES_GRIMMSNARL",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Fearmonger",
+      "moves": [
+       "Axe Kick",
+       "Mega Kick",
+       "Black Magic",
+       "Sucker Punch"
+      ],
+      "item": "Grimmsnarlite",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 3,
+        "nocautes": 6,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie",
+          "alvo": "Garchomp Redux",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Machamp Redux",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_EXCADRILL",
+     "nome": "Excadrill",
+     "x": 530,
+     "base": "SPECIES_EXCADRILL",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Mold Breaker",
+      "moves": [
+       "Headlong Rush",
+       "Return",
+       "Megahorn",
+       "Strength"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       4,
+       248,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 2,
+        "nocautes": 4,
+        "alvos": [
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Goodra Hisuian",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Archaludon",
+          "turnos": 1
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": [
+      {
+       "tipo": "fecha",
+       "vitoriasFechadas": 2,
+       "de": 4
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_FERROTHORN",
+     "nome": "Ferrothorn",
+     "x": 598,
+     "base": "SPECIES_FERROTHORN",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Fort Knox",
+      "moves": [
+       "Wood Hammer",
+       "Frustration",
+       "Snap Trap",
+       "Pin Missile"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       252,
+       252,
+       0,
+       4,
+       0,
+       0
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_GYARADOS_MEGA",
+     "nome": "Gyarados Mega X",
+     "x": 130,
+     "base": "SPECIES_GYARADOS",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Hyper Aggressive",
+      "moves": [
+       "Wave Crash",
+       "Dragon Ascent",
+       "Rip and Tear",
+       "Ice Fang"
+      ],
+      "item": "Gyaradosite",
+      "nature": "Adamant",
+      "evs": [
+       4,
+       248,
+       0,
+       0,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    }
+   ],
+   "metricas": {
+    "objetivo": 0.8917,
+    "amostra": {
+     "lutas": 5,
+     "vence": 4,
+     "cobertura": 0.8,
+     "pontosMedios": 13.85,
+     "derrubadosMedios": 5.8,
+     "perdidas": [
+      "Tate And Liza 1"
+     ]
+    },
+    "completo": {
+     "lutas": 29,
+     "vence": 27,
+     "cobertura": 0.931,
+     "pontosMedios": 15.29,
+     "derrubadosMedios": 5.14,
+     "perdidas": [
+      "Norman 1",
+      "Tate And Liza 1"
+     ]
+    },
+    "restantes": {
+     "lutas": 20,
+     "vence": 19,
+     "cobertura": 0.95,
+     "pontosMedios": 15.32,
+     "derrubadosMedios": 5.15,
+     "perdidas": [
+      "Tate And Liza 1"
+     ]
+    }
+   },
+   "avisos": [],
+   "avaliacoes": 60,
+   "melhorTentativa": false,
+   "planoB": {
+    "luta": "Tate And Liza 1",
+    "ameaca": "Oranguru",
+    "pontosAntes": 5.26,
+    "vencia": false,
+    "travadas": 0,
+    "trocas": [],
+    "motivo": "nenhuma troca em vaga livre melhora a luta mais difícil (Tate And Liza 1) na simulação"
+   },
+   "estilo": "Hyper Offense",
+   "estiloProva": {
+    "ofensivos": 4,
+    "tanques": 0,
+    "apoio": 0,
+    "membros": 6
+   },
+   "tags": [],
+   "condicaoDeVitoria": {
+    "vitoriasNaAmostra": 4,
+    "lutas": 5,
+    "fecham": [
+     {
+      "nome": "Excadrill",
+      "n": 2
+     },
+     {
+      "nome": "Ferrothorn",
+      "n": 1
+     },
+     {
+      "nome": "Tyranitar Mega",
+      "n": 1
+     }
+    ],
+    "ameacaPrincipal": {
+     "nome": "Kyurem Black",
+     "lutas": 1
+    }
+   },
+   "naoMedidos": [
+    "pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel",
+    "terreno e hazards como tag: ainda não implementados"
+   ],
+   "tempoClassificacaoMs": 67,
+   "explicacao": [
+    "Sinergia (premia dois membros com benefício medido de uma condição que um terceiro arma (clima, Tailwind, Trick Room, tela), sem largar o Battle Rating).",
+    "Na amostra de 5 lutas o time vence 4 (pontos médios 13.85); nas 29 lutas da run vence 27; daqui para frente (20 lutas) vence 19, derrubando em média 5.15 Pokémon por luta.",
+    "Não vence: Tate And Liza 1.",
+    "Plano B: nenhuma troca em vaga livre melhora a luta mais difícil (Tate And Liza 1) na simulação.",
+    "Estilo: Hyper Offense (4 membros ofensivos provados, 0 tanque(s) e 0 de apoio, de 6).",
+    "Sem tag de clima ou tática: nenhuma condição armada teve dois beneficiários medidos e ganho do time.",
+    "Garchomp Mega Z: wallbreaker (3 dos 5 nocautes foram em rivais robustos).",
+    "Tyranitar Mega: wallbreaker (4 dos 5 nocautes foram em rivais robustos).",
+    "Grimmsnarl Mega: wallbreaker (3 dos 6 nocautes foram em rivais robustos).",
+    "Excadrill: wallbreaker (2 dos 4 nocautes foram em rivais robustos).",
+    "Ferrothorn: sem papel provado (nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Gyarados Mega X: sem papel provado (nenhuma prova fechou nas 5 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Condição de vitória: o time vence 4 das 5 lutas da amostra; quem dá o último nocaute: Excadrill (2), Ferrothorn (1), Tyranitar Mega (1); a ameaça que mais derruba o time é Kyurem Black (em 1 luta).",
+    "Não medido: pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel; terreno e hazards como tag: ainda não implementados."
+   ],
+   "tempoMs": 1840
+  }
+ ],
+ "avisos": [],
+ "candidatos": 20
+}

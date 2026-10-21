@@ -38,6 +38,7 @@
   /*@css estrategia.css*/
   /*@css pipeline_tela.css*/
   /*@css quem_resolve.css*/
+  /*@css modo_motor.css*/
   /*@css insignias.css*/
   /*@css tipos_e_rodape.css*/
   /*@css responsivo.css*/
@@ -727,6 +728,9 @@
 /*@regras duelo.js*/
 /*@regras prompts_ia.js*/
 /*@regras pipeline_build.js*/
+/*@regras time_pelo_motor.js*/
+/*@regras time_pelo_motor_papeis.js*/
+/*@regras sugestao_do_motor.js*/
 /*@regras escolha_ia_candidatos.js*/
 /*@regras ferramentas_ia.js*/
 /*@regras lista_de_builds.js*/
@@ -853,6 +857,8 @@
 
 /*@ui arquetipo.js*/
 
+/*@ui modo_motor.js*/
+
 /*@ui aba_chefoes.js*/
 
 /*@ui progresso.js*/
@@ -928,6 +934,9 @@
     definirTempoLimiteIA: function (ms) { TEMPO_LIMITE_IA_MS = ms; },
     sampleErrorMessage: sampleErrorMessage,
     desligarRevisaoAutomatica: function (sim) { revisaoAutomaticaDesligada = !!sim; },
+    // O aquecimento do Modo Motor (builds calculadas em segundo plano) só atrapalharia as seções, que montam o estado à mão.
+    desligarAquecimentoDoMotor: function (sim) { motorAquecimentoDesligado = !!sim; },
+    modoMotor: { estado: function () { return { modo: modoDeMontagem, favoritos: motorFavoritos.slice(), tela: motorTela, aquecidoPara: motorAquecidoPara }; } },
     // Ticket 03 do pipeline: liga/desliga a IA que escolhe entre candidatos (desligada = o prompt de build do zero de antes).
     definirEscolhaEntreCandidatos: function (sim) { escolhaEntreCandidatosLigada = !!sim; },
     montarPromptEscolhaDeBuild: montarPromptEscolhaDeBuild,

@@ -1,6 +1,7 @@
 # Ticket 01 — Modo Motor no Meu Time
 
-Status: pronto-para-agente — **PRIORIDADE ALTA** (Felipe, 17/10/2026). Começar depois do reset semanal de terça 20/10, 23h.
+Status: em-andamento — Fases A-F feitas (F2-F4 em 21/10/2026); falta o supervisor e a publicação (pelo fluxo de release do projeto). **PRIORIDADE ALTA** (Felipe, 17/10/2026).
+Começar depois do reset semanal de terça 20/10/2026, 23h (20/10/2026 é terça; 21/10/2026 é quarta).
 Tamanho: G. Relaciona: todas-as-lutas/02 (mesma régua 60/40 de lutas), time-melhor-no-geral (v180).
 
 **Objetivo:** montar equipes e explicar suas decisões sem consumir a conta de IA do jogador, mantendo efetividade comparável à
@@ -319,7 +320,7 @@ publique sem o critério de efetividade aprovado e sem usar o fluxo de publicaç
 
 O ticket só deve ser considerado pronto quando:
 
-- [ ] o Motor não chama `claude.use` em nenhum caminho executado;
+- [x] o Motor não chama `claude.use` em nenhum caminho executado (F3: `tests/unit/modo_motor_sem_ia.test.mjs` + seção 31 do smoke);
 - [ ] disponibilidade, Mega, mono, favoritos e buffs são respeitados;
 - [ ] timers/efeitos de campo são testados e corretos;
 - [ ] o juiz mede contribuição de suporte na batalha completa;
@@ -328,10 +329,10 @@ O ticket só deve ser considerado pronto quando:
 - [ ] as três variantes têm objetivos reais e usam a mesma régua de avaliação;
 - [ ] plano B não remove favoritos e mostra melhora medida;
 - [ ] Motor × IA foi comparado e os números estão documentados;
-- [ ] alvo de performance foi medido no navegador;
+- [x] alvo de performance foi medido no navegador (Fase F, abaixo: 6,0 s a frio com 16 Pokémon, 4,9 s aquecido com 20);
 - [ ] papéis legados continuam funcionando até a migração completa;
 - [ ] portão nível 3, changelog e publicação seguem o fluxo existente;
-- [ ] o responsável do projeto aprovou o Motor como padrão.
+- [x] o responsável do projeto aprovou o Motor como padrão (explícito, 21/10/2026).
 
 ## 8. Decisões do usuário (20/10/2026, depois da Fase A)
 
@@ -350,3 +351,16 @@ O ticket só deve ser considerado pronto quando:
 - **Dois iguais (21/10):** o usuário quer dois Pokémon iguais quando de fato capturou dois, mas o app guarda uma por espécie; virou o
   ticket `dois-iguais/01` (para depois). O Modo Motor nasce com uma espécie por linha evolutiva.
 - **Dívida 20 juntada (21/10):** o caso Fire Fang de `docs/pipeline_de_build.md` vira teste de aceite da Fase C.
+- **Fase C aprovada (21/10, rodada 2):** 9521265 + eeb6a22, `src/regras/time_pelo_motor.js` (15 testes). Duas variantes (ofensivo e
+  seguro). Decisões do usuário: a 3ª variante (sinergia) vai para a Fase D, com o objetivo "dois membros com benefício medido";
+  quando ofensivo e seguro chegam nos mesmos Pokémon (elenco pequeno), aceitar com o aviso. Tempo: pool de 12 = 8,5 s, pool de 20 =
+  16,8 s (12,2 s nas builds top-1); o alvo < 10 s fica para a Fase F (builds pré-aquecidas). O adaptador da Fase F troca `ctx.cap` e
+  o state juntos.
+- **Fase F (21/10): F1 f3551fe, F2 320ac3e, F3 1d27c27, F4 junto do changelog.** O Modo Motor é o padrão do Meu Time (chip "Motor (padrão,
+  sem IA)"; a IA é o chip "IA (Claude)" e o botão antigo "Gerar time completo" fica igual). A tela (`src/ui/modo_motor.js`) usa a montagem em
+  passos de 40 ms com progresso e aquece as builds em segundo plano (aborta se o contexto muda). Estado só de tela: o modo, os favoritos
+  (marcados entre os membros do time) e o resultado não vão para o save. O adaptador não troca `ctx.cap`: a tela só usa o cap real da run
+  (`contextoDoMotor()`), então `ctx.cap` e o state andam juntos; o limite da Fase C só importaria se a tela oferecesse um cap à parte.
+  **Tempo medido no navegador (Chromium, pelo clique real):** 16 Pokémon a frio 6,0 s (maior trava de uma fatia 0,19 s); 20 Pokémon com o
+  aquecimento pronto 4,9 s (o aquecimento levou 1,7 s em segundo plano). Menos de 10 s nos dois casos. Fica de fora (decisão do produto): o
+  Motor não grava as builds no save; "Usar esta variante" troca só o time.

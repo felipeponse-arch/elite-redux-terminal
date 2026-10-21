@@ -14,7 +14,7 @@
   // the list-based storage underneath.
   // Único lugar que monta a entrada salva de uma build (antes eram 2 cópias
   // campo a campo, e um campo novo - o plano de golpes - sumia numa delas).
-  var BUILD_SOURCES = ["ia", "manual", "curada"];
+  var BUILD_SOURCES = ["ia", "manual", "curada", "sugestao"]; // "sugestao" = "Sugestão do app" (Meu Time, 21/10/2026)
 
   // Plano de golpes: o que veio com a build; senão, o da build que ela substitui
   // (editar a build à mão mantém as trocas dos golpes que continuam nela). Build

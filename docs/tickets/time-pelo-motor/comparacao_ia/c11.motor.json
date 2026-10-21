@@ -1,0 +1,1292 @@
+{
+ "tempoMs": 10606,
+ "variantes": [
+  {
+   "chave": "ofensivo",
+   "objetivo": {
+    "nome": "Mais ofensivo",
+    "descricao": "premia o progresso medido: quantos Pokémon do chefão caem, em média, em cada luta"
+   },
+   "membros": [
+    {
+     "sname": "SPECIES_CENTISKORCH",
+     "nome": "Centiskorch",
+     "x": 851,
+     "base": "SPECIES_CENTISKORCH",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Coil Up",
+      "moves": [
+       "Jaw Lock",
+       "Fire Lash",
+       "Power Whip",
+       "Leech Life"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_RAPIDASH",
+     "nome": "Rapidash",
+     "x": 78,
+     "base": "SPECIES_RAPIDASH",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Striker",
+      "moves": [
+       "High Horsepower",
+       "Flare Blitz",
+       "Play Rough",
+       "Smart Strike"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 2,
+        "nocautes": 3,
+        "alvos": [
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Basculegion F",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Wishiwashi",
+          "turnos": 1
+         }
+        ]
+       }
+      },
+      {
+       "papel": "revenge killer",
+       "prova": {
+        "vezes": 3,
+        "exemplos": [
+         {
+          "luta": "Flannery 1",
+          "alvo": "Ceruledge",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Basculegion F",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Wishiwashi",
+          "turnos": 1,
+          "por": "velocidade"
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_TYPHLOSION",
+     "nome": "Typhlosion",
+     "x": 157,
+     "base": "SPECIES_TYPHLOSION",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Earthbound",
+      "moves": [
+       "Earth Power",
+       "Flare Blitz",
+       "Aerial Ace",
+       "Overheat"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       4,
+       4,
+       0,
+       248,
+       0,
+       248
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_ARCANINE",
+     "nome": "Arcanine",
+     "x": 59,
+     "base": "SPECIES_ARCANINE",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Immolate",
+      "moves": [
+       "Crunch",
+       "Return",
+       "Play Rough",
+       "Iron Head"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "revenge killer",
+       "prova": {
+        "vezes": 2,
+        "exemplos": [
+         {
+          "luta": "Wattson 1",
+          "alvo": "Exploud Redux",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Machamp Redux",
+          "turnos": 1,
+          "por": "velocidade"
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_HEATRAN",
+     "nome": "Heatran",
+     "x": 485,
+     "base": "SPECIES_HEATRAN",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Turboblaze",
+      "moves": [
+       "Burn Up",
+       "Flash Cannon",
+       "Power Gem",
+       "Crunch"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       248,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_CHARIZARD",
+     "nome": "Charizard",
+     "x": 6,
+     "base": "SPECIES_CHARIZARD",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Molten Down",
+      "moves": [
+       "Fire Blast",
+       "Hurricane",
+       "Metal Claw",
+       "Flare Blitz"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       4,
+       4,
+       4,
+       244,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "revenge killer",
+       "prova": {
+        "vezes": 2,
+        "exemplos": [
+         {
+          "luta": "Norman 1",
+          "alvo": "Talonflame",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Regidrago",
+          "turnos": 1,
+          "por": "velocidade"
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    }
+   ],
+   "metricas": {
+    "objetivo": 0.5625,
+    "amostra": {
+     "lutas": 8,
+     "vence": 1,
+     "cobertura": 0.125,
+     "pontosMedios": 4.5,
+     "derrubadosMedios": 3.38,
+     "perdidas": [
+      "Flannery 1",
+      "Norman 1",
+      "Shelly Weather Institute",
+      "Archie Mt Pyre",
+      "Tate And Liza 1",
+      "Archie",
+      "Drake"
+     ]
+    },
+    "completo": {
+     "lutas": 29,
+     "vence": 18,
+     "cobertura": 0.621,
+     "pontosMedios": 9.81,
+     "derrubadosMedios": 3.93,
+     "perdidas": [
+      "Flannery 1",
+      "Norman 1",
+      "Shelly Weather Institute",
+      "Archie Mt Pyre",
+      "Tabitha Magma Hideout",
+      "Maxie Magma Hideout",
+      "Tabitha Mossdeep",
+      "Tate And Liza 1",
+      "Shelly Seafloor Cavern",
+      "Archie",
+      "Drake"
+     ]
+    },
+    "restantes": {
+     "lutas": 27,
+     "vence": 16,
+     "cobertura": 0.593,
+     "pontosMedios": 9.48,
+     "derrubadosMedios": 3.85,
+     "perdidas": [
+      "Flannery 1",
+      "Norman 1",
+      "Shelly Weather Institute",
+      "Archie Mt Pyre",
+      "Tabitha Magma Hideout",
+      "Maxie Magma Hideout",
+      "Tabitha Mossdeep",
+      "Tate And Liza 1",
+      "Shelly Seafloor Cavern",
+      "Archie",
+      "Drake"
+     ]
+    }
+   },
+   "avisos": [],
+   "avaliacoes": 42,
+   "melhorTentativa": false,
+   "planoB": {
+    "luta": "Archie",
+    "ameaca": "Phione",
+    "pontosAntes": 0.28,
+    "vencia": false,
+    "travadas": 0,
+    "trocas": [],
+    "motivo": "nenhuma troca em vaga livre melhora a luta mais difícil (Archie) na simulação"
+   },
+   "estilo": "Balance",
+   "estiloProva": {
+    "ofensivos": 3,
+    "tanques": 0,
+    "apoio": 0,
+    "membros": 6
+   },
+   "tags": [
+    {
+     "tag": "mono Fire",
+     "armador": null,
+     "via": "regra da run",
+     "ganhoDoTime": null,
+     "lutasMedidas": 0,
+     "beneficiarios": []
+    }
+   ],
+   "condicaoDeVitoria": {
+    "vitoriasNaAmostra": 1,
+    "lutas": 8,
+    "fecham": [
+     {
+      "nome": "Arcanine",
+      "n": 1
+     }
+    ],
+    "ameacaPrincipal": {
+     "nome": "Exploud Redux",
+     "lutas": 1
+    }
+   },
+   "naoMedidos": [
+    "pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel",
+    "terreno e hazards como tag: ainda não implementados"
+   ],
+   "tempoClassificacaoMs": 124,
+   "explicacao": [
+    "Mais ofensivo (premia o progresso medido: quantos Pokémon do chefão caem, em média, em cada luta).",
+    "Na amostra de 8 lutas o time vence 1 (pontos médios 4.5); nas 29 lutas da run vence 18; daqui para frente (27 lutas) vence 16, derrubando em média 3.85 Pokémon por luta.",
+    "Não vence: Flannery 1, Norman 1, Shelly Weather Institute, Archie Mt Pyre, Tabitha Magma Hideout e mais 6.",
+    "Plano B: nenhuma troca em vaga livre melhora a luta mais difícil (Archie) na simulação.",
+    "Estilo: Balance (3 membros ofensivos provados, 0 tanque(s) e 0 de apoio, de 6).",
+    "Tag mono Fire: todos os membros têm o tipo da run.",
+    "Centiskorch: sem papel provado (nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Rapidash: wallbreaker (2 dos 3 nocautes foram em rivais robustos); revenge killer (3 vezes entrou depois de um colega cair, agiu antes e derrubou em até 2 turnos).",
+    "Typhlosion: sem papel provado (nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Arcanine: revenge killer (2 vezes entrou depois de um colega cair, agiu antes e derrubou em até 2 turnos).",
+    "Heatran: sem papel provado (nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Charizard: revenge killer (2 vezes entrou depois de um colega cair, agiu antes e derrubou em até 2 turnos).",
+    "Condição de vitória: o time vence 1 das 8 lutas da amostra; quem dá o último nocaute: Arcanine (1); a ameaça que mais derruba o time é Exploud Redux (em 1 luta).",
+    "Não medido: pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel; terreno e hazards como tag: ainda não implementados."
+   ],
+   "tempoMs": 2486
+  },
+  {
+   "chave": "seguro",
+   "objetivo": {
+    "nome": "Mais seguro",
+    "descricao": "premia vencer com gente viva e segurar o pior caso: a média das lutas e o pior terço delas, pelo Battle Rating"
+   },
+   "membros": [
+    {
+     "sname": "SPECIES_CENTISKORCH",
+     "nome": "Centiskorch",
+     "x": 851,
+     "base": "SPECIES_CENTISKORCH",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Coil Up",
+      "moves": [
+       "Jaw Lock",
+       "Fire Lash",
+       "Power Whip",
+       "Leech Life"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_RAPIDASH",
+     "nome": "Rapidash",
+     "x": 78,
+     "base": "SPECIES_RAPIDASH",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Striker",
+      "moves": [
+       "High Horsepower",
+       "Flare Blitz",
+       "Play Rough",
+       "Smart Strike"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 2,
+        "nocautes": 3,
+        "alvos": [
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Basculegion F",
+          "turnos": 1
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Wishiwashi",
+          "turnos": 1
+         }
+        ]
+       }
+      },
+      {
+       "papel": "revenge killer",
+       "prova": {
+        "vezes": 3,
+        "exemplos": [
+         {
+          "luta": "Flannery 1",
+          "alvo": "Ceruledge",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Basculegion F",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Archie Mt Pyre",
+          "alvo": "Wishiwashi",
+          "turnos": 1,
+          "por": "velocidade"
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_TYPHLOSION",
+     "nome": "Typhlosion",
+     "x": 157,
+     "base": "SPECIES_TYPHLOSION",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Earthbound",
+      "moves": [
+       "Earth Power",
+       "Flare Blitz",
+       "Aerial Ace",
+       "Overheat"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       4,
+       4,
+       0,
+       248,
+       0,
+       248
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_ARCANINE",
+     "nome": "Arcanine",
+     "x": 59,
+     "base": "SPECIES_ARCANINE",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Immolate",
+      "moves": [
+       "Crunch",
+       "Return",
+       "Play Rough",
+       "Iron Head"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "revenge killer",
+       "prova": {
+        "vezes": 2,
+        "exemplos": [
+         {
+          "luta": "Wattson 1",
+          "alvo": "Exploud Redux",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Machamp Redux",
+          "turnos": 1,
+          "por": "velocidade"
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_HEATRAN",
+     "nome": "Heatran",
+     "x": 485,
+     "base": "SPECIES_HEATRAN",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Turboblaze",
+      "moves": [
+       "Burn Up",
+       "Flash Cannon",
+       "Power Gem",
+       "Crunch"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       248,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": []
+    },
+    {
+     "sname": "SPECIES_CHARIZARD",
+     "nome": "Charizard",
+     "x": 6,
+     "base": "SPECIES_CHARIZARD",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Molten Down",
+      "moves": [
+       "Fire Blast",
+       "Hurricane",
+       "Metal Claw",
+       "Flare Blitz"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       4,
+       4,
+       4,
+       244,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "revenge killer",
+       "prova": {
+        "vezes": 2,
+        "exemplos": [
+         {
+          "luta": "Norman 1",
+          "alvo": "Talonflame",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Regidrago",
+          "turnos": 1,
+          "por": "velocidade"
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": []
+    }
+   ],
+   "metricas": {
+    "objetivo": 0.2066,
+    "amostra": {
+     "lutas": 8,
+     "vence": 1,
+     "cobertura": 0.125,
+     "pontosMedios": 4.5,
+     "derrubadosMedios": 3.38,
+     "perdidas": [
+      "Flannery 1",
+      "Norman 1",
+      "Shelly Weather Institute",
+      "Archie Mt Pyre",
+      "Tate And Liza 1",
+      "Archie",
+      "Drake"
+     ]
+    },
+    "completo": {
+     "lutas": 29,
+     "vence": 18,
+     "cobertura": 0.621,
+     "pontosMedios": 9.81,
+     "derrubadosMedios": 3.93,
+     "perdidas": [
+      "Flannery 1",
+      "Norman 1",
+      "Shelly Weather Institute",
+      "Archie Mt Pyre",
+      "Tabitha Magma Hideout",
+      "Maxie Magma Hideout",
+      "Tabitha Mossdeep",
+      "Tate And Liza 1",
+      "Shelly Seafloor Cavern",
+      "Archie",
+      "Drake"
+     ]
+    },
+    "restantes": {
+     "lutas": 27,
+     "vence": 16,
+     "cobertura": 0.593,
+     "pontosMedios": 9.48,
+     "derrubadosMedios": 3.85,
+     "perdidas": [
+      "Flannery 1",
+      "Norman 1",
+      "Shelly Weather Institute",
+      "Archie Mt Pyre",
+      "Tabitha Magma Hideout",
+      "Maxie Magma Hideout",
+      "Tabitha Mossdeep",
+      "Tate And Liza 1",
+      "Shelly Seafloor Cavern",
+      "Archie",
+      "Drake"
+     ]
+    }
+   },
+   "avisos": [
+    "chegou nos mesmos Pokémon da variante \"Mais ofensivo\": com este elenco os dois objetivos concordam."
+   ],
+   "avaliacoes": 42,
+   "melhorTentativa": false,
+   "planoB": {
+    "luta": "Archie",
+    "ameaca": "Phione",
+    "pontosAntes": 0.28,
+    "vencia": false,
+    "travadas": 0,
+    "trocas": [],
+    "motivo": "nenhuma troca em vaga livre melhora a luta mais difícil (Archie) na simulação"
+   },
+   "estilo": "Balance",
+   "estiloProva": {
+    "ofensivos": 3,
+    "tanques": 0,
+    "apoio": 0,
+    "membros": 6
+   },
+   "tags": [
+    {
+     "tag": "mono Fire",
+     "armador": null,
+     "via": "regra da run",
+     "ganhoDoTime": null,
+     "lutasMedidas": 0,
+     "beneficiarios": []
+    }
+   ],
+   "condicaoDeVitoria": {
+    "vitoriasNaAmostra": 1,
+    "lutas": 8,
+    "fecham": [
+     {
+      "nome": "Arcanine",
+      "n": 1
+     }
+    ],
+    "ameacaPrincipal": {
+     "nome": "Exploud Redux",
+     "lutas": 1
+    }
+   },
+   "naoMedidos": [
+    "pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel",
+    "terreno e hazards como tag: ainda não implementados"
+   ],
+   "tempoClassificacaoMs": 123,
+   "explicacao": [
+    "Mais seguro (premia vencer com gente viva e segurar o pior caso: a média das lutas e o pior terço delas, pelo Battle Rating).",
+    "Na amostra de 8 lutas o time vence 1 (pontos médios 4.5); nas 29 lutas da run vence 18; daqui para frente (27 lutas) vence 16, derrubando em média 3.85 Pokémon por luta.",
+    "Não vence: Flannery 1, Norman 1, Shelly Weather Institute, Archie Mt Pyre, Tabitha Magma Hideout e mais 6.",
+    "Plano B: nenhuma troca em vaga livre melhora a luta mais difícil (Archie) na simulação.",
+    "Estilo: Balance (3 membros ofensivos provados, 0 tanque(s) e 0 de apoio, de 6).",
+    "Tag mono Fire: todos os membros têm o tipo da run.",
+    "Centiskorch: sem papel provado (nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Rapidash: wallbreaker (2 dos 3 nocautes foram em rivais robustos); revenge killer (3 vezes entrou depois de um colega cair, agiu antes e derrubou em até 2 turnos).",
+    "Typhlosion: sem papel provado (nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Arcanine: revenge killer (2 vezes entrou depois de um colega cair, agiu antes e derrubou em até 2 turnos).",
+    "Heatran: sem papel provado (nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Charizard: revenge killer (2 vezes entrou depois de um colega cair, agiu antes e derrubou em até 2 turnos).",
+    "Condição de vitória: o time vence 1 das 8 lutas da amostra; quem dá o último nocaute: Arcanine (1); a ameaça que mais derruba o time é Exploud Redux (em 1 luta).",
+    "Não medido: pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel; terreno e hazards como tag: ainda não implementados."
+   ],
+   "tempoMs": 124
+  },
+  {
+   "chave": "sinergia",
+   "objetivo": {
+    "nome": "Sinergia",
+    "descricao": "premia dois membros com benefício medido de uma condição que um terceiro arma (clima, Tailwind, Trick Room, tela), sem largar o Battle Rating"
+   },
+   "membros": [
+    {
+     "sname": "SPECIES_CENTISKORCH",
+     "nome": "Centiskorch",
+     "x": 851,
+     "base": "SPECIES_CENTISKORCH",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Coil Up",
+      "moves": [
+       "Jaw Lock",
+       "Fire Lash",
+       "Power Whip",
+       "Leech Life"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "revenge killer",
+       "prova": {
+        "vezes": 2,
+        "exemplos": [
+         {
+          "luta": "Norman 1",
+          "alvo": "Azumarill",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Shelly Weather Institute",
+          "alvo": "Basculegion F",
+          "turnos": 2,
+          "por": "velocidade"
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": [
+      {
+       "tipo": "abusa",
+       "tag": "clima: sol",
+       "ganhoPorDuelo": 0.153,
+       "armador": "Ninetales"
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_NINETALES",
+     "nome": "Ninetales",
+     "x": 38,
+     "base": "SPECIES_NINETALES",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Drought",
+      "moves": [
+       "Fire Blast",
+       "Moonblast",
+       "Draining Kiss",
+       "Temper Flare"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       4,
+       0,
+       0,
+       248,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "revenge killer",
+       "prova": {
+        "vezes": 5,
+        "exemplos": [
+         {
+          "luta": "Wattson 1",
+          "alvo": "Exploud Redux",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Flannery 1",
+          "alvo": "Exeggutor Alolan",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Norman 1",
+          "alvo": "Talonflame",
+          "turnos": 2,
+          "por": "velocidade"
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": [
+      {
+       "tipo": "habilita",
+       "tag": "clima: sol",
+       "ganhoDoTime": 0.12,
+       "beneficiarios": 5
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_ARCANINE",
+     "nome": "Arcanine",
+     "x": 59,
+     "base": "SPECIES_ARCANINE",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Immolate",
+      "moves": [
+       "Crunch",
+       "Return",
+       "Play Rough",
+       "Iron Head"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": [
+      {
+       "tipo": "abusa",
+       "tag": "clima: sol",
+       "ganhoPorDuelo": 0.206,
+       "armador": "Ninetales"
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_TYPHLOSION",
+     "nome": "Typhlosion",
+     "x": 157,
+     "base": "SPECIES_TYPHLOSION",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Earthbound",
+      "moves": [
+       "Earth Power",
+       "Flare Blitz",
+       "Aerial Ace",
+       "Overheat"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       4,
+       4,
+       0,
+       248,
+       0,
+       248
+      ]
+     },
+     "papeis": [
+      {
+       "papel": "wallbreaker",
+       "prova": {
+        "nocautesEmRobustos": 3,
+        "nocautes": 6,
+        "alvos": [
+         {
+          "luta": "Norman 1",
+          "alvo": "Tauros",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Regidrago",
+          "turnos": 1
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Fujiflap",
+          "turnos": 1
+         }
+        ]
+       }
+      },
+      {
+       "papel": "revenge killer",
+       "prova": {
+        "vezes": 2,
+        "exemplos": [
+         {
+          "luta": "Flannery 1",
+          "alvo": "Ceruledge",
+          "turnos": 1,
+          "por": "velocidade"
+         },
+         {
+          "luta": "Drake",
+          "alvo": "Regidrago",
+          "turnos": 1,
+          "por": "velocidade"
+         }
+        ]
+       }
+      }
+     ],
+     "abstencao": null,
+     "contribuicoes": [
+      {
+       "tipo": "abusa",
+       "tag": "clima: sol",
+       "ganhoPorDuelo": 0.09,
+       "armador": "Ninetales"
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_RAPIDASH",
+     "nome": "Rapidash",
+     "x": 78,
+     "base": "SPECIES_RAPIDASH",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Striker",
+      "moves": [
+       "High Horsepower",
+       "Flare Blitz",
+       "Play Rough",
+       "Smart Strike"
+      ],
+      "item": "",
+      "nature": "Adamant",
+      "evs": [
+       8,
+       248,
+       0,
+       0,
+       0,
+       248
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": [
+      {
+       "tipo": "abusa",
+       "tag": "clima: sol",
+       "ganhoPorDuelo": 0.16,
+       "armador": "Ninetales"
+      }
+     ]
+    },
+    {
+     "sname": "SPECIES_HEATRAN",
+     "nome": "Heatran",
+     "x": 485,
+     "base": "SPECIES_HEATRAN",
+     "travado": false,
+     "origem": "pipeline",
+     "build": {
+      "ability": "Turboblaze",
+      "moves": [
+       "Burn Up",
+       "Flash Cannon",
+       "Power Gem",
+       "Crunch"
+      ],
+      "item": "",
+      "nature": "Modest",
+      "evs": [
+       0,
+       0,
+       0,
+       248,
+       0,
+       252
+      ]
+     },
+     "papeis": [],
+     "abstencao": "nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)",
+     "contribuicoes": [
+      {
+       "tipo": "abusa",
+       "tag": "clima: sol",
+       "ganhoPorDuelo": 0.114,
+       "armador": "Ninetales"
+      }
+     ]
+    }
+   ],
+   "metricas": {
+    "objetivo": 0.4833,
+    "amostra": {
+     "lutas": 8,
+     "vence": 2,
+     "cobertura": 0.25,
+     "pontosMedios": 5.56,
+     "derrubadosMedios": 3.5,
+     "perdidas": [
+      "Norman 1",
+      "Shelly Weather Institute",
+      "Archie Mt Pyre",
+      "Tate And Liza 1",
+      "Archie",
+      "Drake"
+     ]
+    },
+    "completo": {
+     "lutas": 29,
+     "vence": 18,
+     "cobertura": 0.621,
+     "pontosMedios": 9.8,
+     "derrubadosMedios": 3.93,
+     "perdidas": [
+      "Archie Slateport",
+      "Norman 1",
+      "Shelly Weather Institute",
+      "Archie Mt Pyre",
+      "Maxie Magma Hideout",
+      "Tabitha Mossdeep",
+      "Tate And Liza 1",
+      "Shelly Seafloor Cavern",
+      "Archie",
+      "Sidney",
+      "Drake"
+     ]
+    },
+    "restantes": {
+     "lutas": 27,
+     "vence": 16,
+     "cobertura": 0.593,
+     "pontosMedios": 9.5,
+     "derrubadosMedios": 3.85,
+     "perdidas": [
+      "Archie Slateport",
+      "Norman 1",
+      "Shelly Weather Institute",
+      "Archie Mt Pyre",
+      "Maxie Magma Hideout",
+      "Tabitha Mossdeep",
+      "Tate And Liza 1",
+      "Shelly Seafloor Cavern",
+      "Archie",
+      "Sidney",
+      "Drake"
+     ]
+    }
+   },
+   "avisos": [],
+   "avaliacoes": 60,
+   "melhorTentativa": false,
+   "planoB": {
+    "luta": "Archie",
+    "ameaca": "Phione",
+    "pontosAntes": 0.28,
+    "vencia": false,
+    "travadas": 0,
+    "trocas": [],
+    "motivo": "nenhuma troca em vaga livre melhora a luta mais difícil (Archie) na simulação"
+   },
+   "estilo": "Balance",
+   "estiloProva": {
+    "ofensivos": 3,
+    "tanques": 0,
+    "apoio": 0,
+    "membros": 6
+   },
+   "tags": [
+    {
+     "tag": "clima: sol",
+     "armador": "Ninetales",
+     "via": "Drought",
+     "ganhoDoTime": 0.12,
+     "lutasMedidas": 4,
+     "beneficiarios": [
+      {
+       "nome": "Arcanine",
+       "ganhoPorDuelo": 0.206
+      },
+      {
+       "nome": "Rapidash",
+       "ganhoPorDuelo": 0.16
+      },
+      {
+       "nome": "Centiskorch",
+       "ganhoPorDuelo": 0.153
+      },
+      {
+       "nome": "Heatran",
+       "ganhoPorDuelo": 0.114
+      },
+      {
+       "nome": "Typhlosion",
+       "ganhoPorDuelo": 0.09
+      }
+     ]
+    },
+    {
+     "tag": "mono Fire",
+     "armador": null,
+     "via": "regra da run",
+     "ganhoDoTime": null,
+     "lutasMedidas": 0,
+     "beneficiarios": []
+    }
+   ],
+   "condicaoDeVitoria": {
+    "vitoriasNaAmostra": 2,
+    "lutas": 8,
+    "fecham": [
+     {
+      "nome": "Ninetales",
+      "n": 1
+     },
+     {
+      "nome": "Typhlosion",
+      "n": 1
+     }
+    ],
+    "ameacaPrincipal": {
+     "nome": "Arcanine Redux",
+     "lutas": 1
+    }
+   },
+   "naoMedidos": [
+    "pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel",
+    "terreno e hazards como tag: ainda não implementados"
+   ],
+   "tempoClassificacaoMs": 230,
+   "explicacao": [
+    "Sinergia (premia dois membros com benefício medido de uma condição que um terceiro arma (clima, Tailwind, Trick Room, tela), sem largar o Battle Rating).",
+    "Na amostra de 8 lutas o time vence 2 (pontos médios 5.56); nas 29 lutas da run vence 18; daqui para frente (27 lutas) vence 16, derrubando em média 3.85 Pokémon por luta.",
+    "Não vence: Archie Slateport, Norman 1, Shelly Weather Institute, Archie Mt Pyre, Maxie Magma Hideout e mais 6.",
+    "Plano B: nenhuma troca em vaga livre melhora a luta mais difícil (Archie) na simulação.",
+    "Estilo: Balance (3 membros ofensivos provados, 0 tanque(s) e 0 de apoio, de 6).",
+    "Tag clima: sol: Ninetales arma (Drought); Arcanine (+0.206 de nota por duelo) e Rapidash (+0.16 de nota por duelo) e Centiskorch (+0.153 de nota por duelo) e Heatran (+0.114 de nota por duelo) e Typhlosion (+0.09 de nota por duelo) ganham; o time faz +0.12 pontos nas 4 lutas medidas.",
+    "Tag mono Fire: todos os membros têm o tipo da run.",
+    "Centiskorch: revenge killer (2 vezes entrou depois de um colega cair, agiu antes e derrubou em até 2 turnos).",
+    "Ninetales: revenge killer (5 vezes entrou depois de um colega cair, agiu antes e derrubou em até 2 turnos).",
+    "Arcanine: sem papel provado (nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Typhlosion: wallbreaker (3 dos 6 nocautes foram em rivais robustos); revenge killer (2 vezes entrou depois de um colega cair, agiu antes e derrubou em até 2 turnos).",
+    "Rapidash: sem papel provado (nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Heatran: sem papel provado (nenhuma prova fechou nas 8 lutas da amostra (o rótulo só sai com prova medida)).",
+    "Condição de vitória: o time vence 2 das 8 lutas da amostra; quem dá o último nocaute: Ninetales (1), Typhlosion (1); a ameaça que mais derruba o time é Arcanine Redux (em 1 luta).",
+    "Não medido: pivô: o simulador não executa golpe de troca (U-turn, Volt Switch e parecidos), então não há prova medida para esse papel; terreno e hazards como tag: ainda não implementados."
+   ],
+   "tempoMs": 3964
+  }
+ ],
+ "avisos": [],
+ "candidatos": 12
+}

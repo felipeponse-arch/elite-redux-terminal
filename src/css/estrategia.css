@@ -6,17 +6,17 @@
   text-transform: uppercase; letter-spacing: .03em; margin-bottom: 6px;
 }
 .archetype-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.arch-chip {
+.arch-chip, .modo-chip {
   border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
   padding: 6px 12px; border-radius: var(--radius-pill); font-size: var(--fs-pequeno); font-weight: 600;
   cursor: pointer; font-family: inherit;
 }
-.arch-chip:hover { border-color: var(--accent-2); }
+.arch-chip:hover, .modo-chip:hover { border-color: var(--accent-2); }
 /* Escolhido = tinta leve do acento, não o gradiente cheio (redesenho
    2026-09-24): o magenta forte fica reservado pra ação principal da tela.
    "Nenhum" escolhido é o estado neutro - não pode ser o elemento mais
    chamativo da tela, como era. */
-.arch-chip.active {
+.arch-chip.active, .modo-chip.active {
   background: color-mix(in srgb, var(--accent) 14%, var(--surface));
   border-color: var(--accent); color: var(--badge-accent);
 }
@@ -35,7 +35,7 @@
 .arquetipo[open] > summary { border-bottom: 1px solid var(--border); }
 .arquetipo > :not(summary) { margin-left: 18px; margin-right: 18px; }
 .arquetipo > .mybuild-hint { margin-top: 14px; }
-.arquetipo > #archetype-status { display: block; margin-bottom: 14px; }
+
 /* Monotype usa a cor real do tipo (mesma fonte que typePill/.type-check
    já usam), não o gradiente de marca - a cor JÁ É a informação aqui. */
 .arch-chip-type.active { background: var(--chip-color); border-color: transparent; color: var(--chip-ink); }
