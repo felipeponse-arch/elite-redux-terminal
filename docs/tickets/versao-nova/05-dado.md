@@ -1,6 +1,6 @@
 # v05 — Dado da versão mais nova (NextDex 2.65.4 + config d1a9a4c)
 
-Status: pronto-para-revisao, com ressalvas (APROVADO na revisão da Construção, 15/10) (branch `versao-05-dado`, empilhada em `versao-04-parser`, sem merge, sem PR). Rank NÃO recalculado; builds NÃO revisadas.
+Status: resolvido (no master: c341fea, 1345f29, 2dd611a, 379b9fa; publicado na v178/v179; marcado em 21/10)
 Tamanho: G
 Autorização: Felipe, 15/10/2026 (fila v01–v05; `docs/tickets/dados-2654/01` com o limite da versão nova).
 

@@ -1,6 +1,6 @@
 # 01 — Trocar para o Dado do jogo 2.65.4
 
-Status: pronto-para-agente
+Status: resolvido (substituído por versao-nova/05-08, no master; marcado em 21/10)
 Bloqueado por: nenhum (mas só começar depois de fechar o 01 da dívida técnica e o 08 das pendências, que mexem nos mesmos arquivos)
 
 ## O que entrega

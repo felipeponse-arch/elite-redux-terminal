@@ -1,6 +1,6 @@
 # 05 — Habilidades novas, lote 2 (10)
 
-Status: pronto-para-agente
+Status: resolvido (substituído por versao-nova/05-08, no master; marcado em 21/10)
 Bloqueado por: 01, 04 (a divisão dos lotes é escrita no 04)
 
 ## O que entrega

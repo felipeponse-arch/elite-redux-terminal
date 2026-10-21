@@ -1,6 +1,6 @@
 # 04 — Flash Fire e Dry Skin absorvem o golpe
 
-Status: pronto-para-revisao (branch `calibracao-04`, empilhada em `calibracao-03`, sem merge, sem PR)
+Status: resolvido (no master: 470d17f a 3e000e5, merge cf65535; marcado em 21/10)
 Tamanho: P
 Bloqueado por: 03
 Divergências: A4, M2 (detalhe em `docs/calibracao/divergencias.json`)

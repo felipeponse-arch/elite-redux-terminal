@@ -1,6 +1,6 @@
 # 01 — Estudo: o que do projeto pode rodar na GPU (ou ficar mais leve no processador)
 
-Status: a-avaliar (estudo; nada muda no app)
+Status: descartado como GPU (usuário, 21/10); virou "perfil + cache de simulação", coberto pelo time-pelo-motor/01
 Pedido: Felipe, 16/10/2026 — "ver dentro do projeto o que pode ser rodado dentro da GPU pra não comer tanto o processador".
 
 ## Contexto

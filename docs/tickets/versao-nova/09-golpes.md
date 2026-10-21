@@ -1,6 +1,6 @@
 # v09 — Golpes novos e alterados (upcoming d1a9a4c)
 
-Status: pronto-para-revisao (branch `versao-09-golpes`, empilhada em `versao-08-sono-paralisia`, sem merge, sem PR).
+Status: resolvido (no master: c341fea, 1345f29, 2dd611a, 379b9fa; publicado na v178/v179; marcado em 21/10)
 Tamanho: M
 Autorização: Felipe, 15/10/2026 (fila v06–v09). Fonte: `MoveList.textproto` e `SpeciesList.textproto` da er-config `d1a9a4c`.
 

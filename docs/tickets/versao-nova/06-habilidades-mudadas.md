@@ -1,6 +1,6 @@
 # v06 — Habilidades mudadas (dados-2654/02 e 03, com o número da versão nova)
 
-Status: pronto-para-revisao (branch `versao-06-habilidades-mudadas`, empilhada em `versao-05-dado`, sem merge, sem PR).
+Status: resolvido (no master: c341fea, 1345f29, 2dd611a, 379b9fa; publicado na v178/v179; marcado em 21/10)
 Tamanho: M
 Autorização: Felipe, 15/10/2026 (fila v06–v09 repassada pelo "Elite Redux - Construção"). Regra do Felipe: quando as fontes divergem vale o CÓDIGO do jogo.
 

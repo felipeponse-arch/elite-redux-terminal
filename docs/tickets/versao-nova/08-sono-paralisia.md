@@ -1,6 +1,6 @@
 # v08 — Sono e paralisia estilo Pokémon Champions (dados-2654/07)
 
-Status: pronto-para-revisao (branch `versao-08-sono-paralisia`, empilhada em `versao-07-habilidades-novas`, sem merge, sem PR).
+Status: resolvido (no master: c341fea, 1345f29, 2dd611a, 379b9fa; publicado na v178/v179; marcado em 21/10)
 Tamanho: P
 Autorização: Felipe, 15/10/2026 (fila v06–v09). Vale o código mais novo (`486026e`, upcoming).
 

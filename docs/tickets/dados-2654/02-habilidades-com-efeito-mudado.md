@@ -1,6 +1,6 @@
 # 02 — Habilidades com efeito mudado (10 confirmadas)
 
-Status: pronto-para-agente
+Status: resolvido (substituído por versao-nova/05-08, no master; marcado em 21/10)
 Bloqueado por: 01
 
 ## O que entrega

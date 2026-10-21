@@ -1,6 +1,6 @@
 # 10 — Fechamento: rank, histórico e publicação
 
-Status: pronto-para-agente
+Status: pronto-para-agente (reescrito em 21/10: o fechamento antigo saiu na v178/v179; agora = recalcular o rank depois do 08 e 09)
 Bloqueado por: 08, 09
 
 ## O que entrega

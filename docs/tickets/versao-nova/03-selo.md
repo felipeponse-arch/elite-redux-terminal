@@ -1,6 +1,6 @@
 # v03 — Selo do pipeline: "calculado pelo código do jogo"
 
-Status: pronto-para-revisao (branch `versao-03-selo`, empilhada em `versao-02-decisoes`, sem merge, sem PR)
+Status: resolvido (no master: c341fea, 1345f29, 2dd611a, 379b9fa; publicado na v178/v179; marcado em 21/10)
 Tamanho: M
 Bloqueado por: v02
 Autorização: Felipe, 15/10/2026 (decisão 5 da fila v01–v05): o motor é "calibrado pelo código do jogo"; toda build sai com esse selo; só fica "estimada" o que o motor não simula (habilidade sem regra). Nada depende de medida do Felipe.

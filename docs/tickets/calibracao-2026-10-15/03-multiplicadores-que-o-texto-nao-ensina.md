@@ -1,6 +1,6 @@
 # 03 — Multiplicadores de habilidade que o texto não ensina ao motor
 
-Status: pronto-para-revisao (branch `calibracao-03`, empilhada em `calibracao-02`, sem merge, sem PR); perguntas em `03-perguntas.md`
+Status: resolvido (no master: 470d17f a 3e000e5, merge cf65535; marcado em 21/10)
 Tamanho: M
 Bloqueado por: 02
 Divergências: A1, A2, A3, M1, M5, M6, N1, N2, B2, B3, B5 (detalhe em `docs/calibracao/divergencias.json`)

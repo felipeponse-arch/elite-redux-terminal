@@ -1,6 +1,6 @@
 # 01 — Módulo do pipeline de build com intenção
 
-Status: pronto-para-revisao (branch `pipeline-modulo`, sem merge e sem publicação)
+Status: resolvido (no master: merge dc103a7; marcado em 21/10)
 Bloqueado por: nenhum
 Desbloqueia: 02 (ligar o botão e o lote), 03 (motivo e selo na tela)
 

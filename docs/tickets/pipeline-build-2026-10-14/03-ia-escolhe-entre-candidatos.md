@@ -1,6 +1,6 @@
 # 03 - A IA escolhe entre os candidatos do pipeline
 
-Status: pronto-para-revisao (branch `pipeline-ia-escolhe`, a partir de `pipeline-tela` 1fbc125; sem merge e sem publicação)
+Status: resolvido (no master: merge dc103a7; marcado em 21/10)
 Bloqueado por: 01 (módulo), 02 (tela)
 Desbloqueia: nenhum
 

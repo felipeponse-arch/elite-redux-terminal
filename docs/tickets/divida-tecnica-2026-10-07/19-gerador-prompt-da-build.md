@@ -1,6 +1,6 @@
 # 19 — Gerador de builds: revisar o prompt da build
 
-Status: pronto-para-agente
+Status: adiado (usuário, 21/10: até o veredito do Modo Motor, time-pelo-motor/01)
 Bloqueado por: 05, 18
 
 ## O que entrega

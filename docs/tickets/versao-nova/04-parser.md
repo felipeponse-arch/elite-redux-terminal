@@ -1,6 +1,6 @@
 # v04 — Parser: o motor entende a redação nova das habilidades
 
-Status: pronto-para-revisao (branch `versao-04-parser`, empilhada em `versao-03-selo`, sem merge, sem PR) — **com um desvio do pedido, ver "O que não foi feito como pedido"**
+Status: resolvido (no master: c341fea, 1345f29, 2dd611a, 379b9fa; publicado na v178/v179; marcado em 21/10)
 Tamanho: M
 Bloqueado por: v03
 Autorização: Felipe, 15/10/2026 (fila v01–v05, 1º item do ticket 08 da calibração): "nenhuma das 59 pode perder efeito".
