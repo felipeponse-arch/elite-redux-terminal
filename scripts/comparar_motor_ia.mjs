@@ -88,8 +88,12 @@ export function metricasDoTime(R, ctx, time) {
   const rs = R.motorAvaliar(ctx, time, ctx.lutas.todas);
   const porLuta = ctx.lutas.todas.map((l, i) => ({ luta: l.nome, etapa: l.etapa, p: rs[i].p, v: !!rs[i].v }));
   const rest = porLuta.filter((l) => l.etapa >= ctx.etapa);
+  // "dentro" = lutas da amostra em que o Motor busca; "fora" = as outras (a IA não vê nenhuma das duas, o Motor só otimiza a de dentro)
+  const amostra = new Set(ctx.lutas.amostra.map((l) => l.nome));
+  const grupo = (ls) => ({ lutas: ls.length, vence: ls.filter((l) => l.v).length, pontosMedios: media(ls.map((l) => l.p)) });
   return { membros: time.map((c) => c.nome), porLuta,
     completo: { lutas: porLuta.length, vence: porLuta.filter((l) => l.v).length, pontosMedios: media(porLuta.map((l) => l.p)), desvio: desvio(porLuta.map((l) => l.p)) },
+    dentro: grupo(porLuta.filter((l) => amostra.has(l.luta))), fora: grupo(porLuta.filter((l) => !amostra.has(l.luta))),
     restantes: { lutas: rest.length, vence: rest.filter((l) => l.v).length, pontosMedios: media(rest.map((l) => l.p)), desvio: desvio(rest.map((l) => l.p)) },
     perdidas: porLuta.filter((l) => !l.v).map((l) => l.luta) };
 }
@@ -168,13 +172,14 @@ function comparar() {
   if (comIA.length) {
     const lado = { IA: (c) => c.ia, "Motor (estilo)": (c) => c.motor[c.casada], "Motor (melhor)": (c) => c.motor[c.melhor] };
     const medidas = { "vitórias nas 29": (m) => m.completo.vence, "pontos médios por luta (29)": (m) => m.completo.pontosMedios,
-      "dispersão dos pontos entre as lutas (29)": (m) => m.completo.desvio, "cobertura nas lutas que faltam (%)": (m) => 100 * m.restantes.vence / Math.max(1, m.restantes.lutas) };
+      "dispersão dos pontos entre as lutas (29)": (m) => m.completo.desvio, "pontos médios nas lutas DENTRO da amostra de busca": (m) => m.dentro.pontosMedios, "pontos médios nas lutas FORA da amostra de busca": (m) => m.fora.pontosMedios,
+      "cobertura nas lutas que faltam (%)": (m) => 100 * m.restantes.vence / Math.max(1, m.restantes.lutas) };
     L.push("| Medida | " + Object.keys(lado).join(" | ") + " |", "|---|---|---|---|");
     Object.entries(medidas).forEach(([nome, g]) => L.push(`| ${nome} | ${Object.values(lado).map((p) => { const v = comIA.map((c) => g(p(c))); return `${f1(media(v))} ± ${f1(desvio(v))}`; }).join(" | ")} |`));
     const zero = media(casosOk.filter((c) => c.ia).map((c) => (c.ia.falha ? 0 : c.ia.completo.vence)));
-    const dif = comIA.map((c) => c.motor[c.casada].completo.pontosMedios - c.ia.completo.pontosMedios);
+    const difDe = (g) => comIA.map((c) => g(c.motor[c.casada]) - g(c.ia));
     L.push("", `Contando resposta inválida como zero vitória: IA ${f1(zero)} vitórias médias nas 29 (só os ${casosOk.filter((c) => c.ia).length} casos com resposta).`, "",
-      `Diferença Motor(estilo) - IA em pontos médios: média ${f1(media(dif))}, desvio ${f1(desvio(dif))} entre casos (o ruído da comparação). Motor melhor em ${dif.filter((d) => d > 0).length}, igual em ${dif.filter((d) => d === 0).length}, pior em ${dif.filter((d) => d < 0).length}.`, "",
+      `Diferença Motor(estilo) - IA em pontos médios por luta (média, erro padrão entre casos, casos melhor/igual/pior): ${[["29 lutas", (m) => m.completo.pontosMedios], ["dentro da amostra de busca", (m) => m.dentro.pontosMedios], ["FORA da amostra de busca", (m) => m.fora.pontosMedios]].map(([n, g]) => { const d = difDe(g); return `${n}: ${f1(media(d))} (ep ${f1(desvio(d) / Math.sqrt(d.length))}; ${d.filter((x) => x > 0).length}/${d.filter((x) => x === 0).length}/${d.filter((x) => x < 0).length})`; }).join("; ")}.`, "",
       "## Cobertura de ameaças (lutas perdidas e em quantos casos)", "");
     const cont = (g) => { const o = {}; comIA.forEach((c) => g(c).perdidas.forEach((l) => { o[l] = (o[l] || 0) + 1; })); return Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([l, n]) => `${l} (${n})`).join(", ") || "nenhuma"; };
     L.push(`- IA: ${cont(lado.IA)}`, `- Motor (estilo): ${cont(lado["Motor (estilo)"])}`, "");
@@ -188,14 +193,15 @@ function comparar() {
     ...falhas.map((c) => `- ${c.caso.id}: resposta da IA inválida (${c.ia.falha}).`),
     ...comIA.filter((c) => c.ia.semBuild || c.ia.descartados).map((c) => `- ${c.caso.id}: IA com ${c.ia.descartados} espécie(s) descartadas pela validação e ${c.ia.semBuild} sem build avaliável.`));
   L.push("", "## Limitações", "",
-    "- O prompt da IA do app não tem favoritos: o c06 trava Scizor só para o Motor.",
+    "- O prompt da IA do app não tem favoritos: o c06 trava Scizor só para o Motor. No c08 (Tática Telas) e no c05 (clima) o Motor também recebe um insumo (sinergia medida) que o prompt da IA não tem.",
     "- O agente respondeu só pelo prompt, sem as ferramentas `buildStandardAiTools` que a IA do app usa, e sem conferir os snames; a validação do app é que decide (nada foi corrigido).",
-    "- Os dois lados usam as mesmas builds top-1 do pipeline contra o campo (a IA do app escolheria builds depois, em outra chamada).",
-    "- O tempo da IA não foi medido. O Motor busca nas mesmas lutas em que é julgado (amostra de 10 na busca, conferência nas 29): a IA não vê o juiz, então parte da vantagem do Motor é otimizar a própria régua. Amostra de 12 casos, um elenco por caso, uma resposta da IA por caso (o ruído da própria IA não foi medido).", "");
+    "- Os dois lados usam as mesmas builds top-1 do pipeline contra o campo: isso favorece a IA, que no app teria builds salvas ou curadas, sem essa garantia.",
+    "- O agente é um Sonnet em chat; o modelo do `claude.use` do app pode ser outro.",
+    "- O tempo da IA não foi medido. O Motor busca em uma amostra de 3 a 10 lutas, julgada junto com as outras (por isso a conclusão usa só as lutas FORA da amostra): a IA não vê o juiz, então parte da vantagem do Motor é otimizar a própria régua. Amostra de 12 casos, um elenco por caso, uma resposta da IA por caso (o ruído da própria IA não foi medido).", "");
   if (comIA.length) {
-    const dif = comIA.map((c) => c.motor[c.casada].completo.pontosMedios - c.ia.completo.pontosMedios), m = media(dif), ep = desvio(dif) / Math.sqrt(dif.length);
-    const veredito = m - 2 * ep > 0 ? "SUPERA a IA além do ruído medido" : m + 2 * ep < 0 ? "PERDE da IA além do ruído medido" : "EMPATA com a IA dentro do ruído medido";
-    L.push("## Conclusão", "", `Com a variante do estilo, o Motor ${veredito}: diferença média de ${f1(m)} pontos por luta (erro padrão ${f1(ep)}, n=${dif.length}), melhor em ${dif.filter((d) => d > 0).length} de ${dif.length} casos. Vale só para esta amostra e estas limitações. O Motor NÃO vira padrão sem aprovação do usuário.`, "");
+    const dif = comIA.map((c) => c.motor[c.casada].fora.pontosMedios - c.ia.fora.pontosMedios), m = media(dif), ep = desvio(dif) / Math.sqrt(dif.length);
+    const veredito = m - 2 * ep > 0 ? "supera o desvio entre casos" : m + 2 * ep < 0 ? "fica abaixo da IA além do desvio entre casos" : "empata com a IA dentro do desvio entre casos";
+    L.push("## Conclusão", "", `Nas lutas FORA da amostra de busca, com a variante do estilo, o Motor ${veredito}, com 1 resposta da IA por caso: diferença média de ${f1(m)} pontos por luta (erro padrão ${f1(ep)}, n=${dif.length}), melhor em ${dif.filter((d) => d > 0).length}, pior em ${dif.filter((d) => d < 0).length}. O ruído da própria IA (respostas repetidas) não foi medido. Vale só para esta amostra e estas limitações. O Motor NÃO vira padrão sem aprovação do usuário.`, "");
   }
   writeFileSync(RELATORIO, L.join("\n") + "\n", "utf8");
   console.log("escrito", RELATORIO);

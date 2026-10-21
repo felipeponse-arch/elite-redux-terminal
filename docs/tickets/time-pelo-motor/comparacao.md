@@ -47,11 +47,13 @@ Favorito: só o Motor recebe (o prompt da IA do app não tem favoritos). Ferrame
 | vitórias nas 29 | 19.0 ± 3.8 | 23.3 ± 3.3 | 23.8 ± 3.7 |
 | pontos médios por luta (29) | 10.8 ± 1.9 | 13.0 ± 1.8 | 13.2 ± 1.9 |
 | dispersão dos pontos entre as lutas (29) | 5.4 ± 0.6 | 4.5 ± 0.8 | 4.3 ± 1.1 |
+| pontos médios nas lutas DENTRO da amostra de busca | 5.7 ± 3.0 | 10.8 ± 3.0 | 11.4 ± 3.0 |
+| pontos médios nas lutas FORA da amostra de busca | 12.3 ± 1.9 | 13.8 ± 1.4 | 13.9 ± 1.5 |
 | cobertura nas lutas que faltam (%) | 64.6 ± 12.5 | 80.7 ± 13.5 | 82.7 ± 14.2 |
 
 Contando resposta inválida como zero vitória: IA 19.0 vitórias médias nas 29 (só os 12 casos com resposta).
 
-Diferença Motor(estilo) - IA em pontos médios: média 2.2, desvio 2.0 entre casos (o ruído da comparação). Motor melhor em 10, igual em 0, pior em 2.
+Diferença Motor(estilo) - IA em pontos médios por luta (média, erro padrão entre casos, casos melhor/igual/pior): 29 lutas: 2.2 (ep 0.6; 10/0/2); dentro da amostra de busca: 5.0 (ep 1.1; 11/0/1); FORA da amostra de busca: 1.5 (ep 0.6; 9/0/3).
 
 ## Cobertura de ameaças (lutas perdidas e em quantos casos)
 
@@ -83,18 +85,18 @@ A IA do app não oferece plano B. O Motor oferece (troca medida na luta mais dif
 
 | Caso | Motor, 1ª rodada (ms) | Motor, 2ª rodada (ms) |
 |---|---|---|
-| c01 | 9149 | 9682 |
-| c02 | 7410 | 7569 |
-| c03 | 12226 | 12224 |
-| c04 | 8234 | 8288 |
-| c05 | 11665 | 11641 |
-| c06 | 10604 | 10716 |
-| c07 | 12792 | 12933 |
-| c08 | 13400 | 13511 |
-| c09 | 12828 | 12621 |
-| c10 | 11713 | 11355 |
-| c11 | 10606 | 10373 |
-| c12 | 12218 | 11514 |
+| c01 | 9149 | 9051 |
+| c02 | 7410 | 7385 |
+| c03 | 12226 | 12146 |
+| c04 | 8234 | 8246 |
+| c05 | 11665 | 11725 |
+| c06 | 10604 | 10545 |
+| c07 | 12792 | 12673 |
+| c08 | 13400 | 13235 |
+| c09 | 12828 | 12521 |
+| c10 | 11713 | 11297 |
+| c11 | 10606 | 10161 |
+| c12 | 12218 | 11429 |
 
 Tempo da IA: não medido pelo script (vem do agente, fora do Node).
 
@@ -103,12 +105,13 @@ Tempo da IA: não medido pelo script (vem do agente, fora do Node).
 
 ## Limitações
 
-- O prompt da IA do app não tem favoritos: o c06 trava Scizor só para o Motor.
+- O prompt da IA do app não tem favoritos: o c06 trava Scizor só para o Motor. No c08 (Tática Telas) e no c05 (clima) o Motor também recebe um insumo (sinergia medida) que o prompt da IA não tem.
 - O agente respondeu só pelo prompt, sem as ferramentas `buildStandardAiTools` que a IA do app usa, e sem conferir os snames; a validação do app é que decide (nada foi corrigido).
-- Os dois lados usam as mesmas builds top-1 do pipeline contra o campo (a IA do app escolheria builds depois, em outra chamada).
-- O tempo da IA não foi medido. O Motor busca nas mesmas lutas em que é julgado (amostra de 10 na busca, conferência nas 29): a IA não vê o juiz, então parte da vantagem do Motor é otimizar a própria régua. Amostra de 12 casos, um elenco por caso, uma resposta da IA por caso (o ruído da própria IA não foi medido).
+- Os dois lados usam as mesmas builds top-1 do pipeline contra o campo: isso favorece a IA, que no app teria builds salvas ou curadas, sem essa garantia.
+- O agente é um Sonnet em chat; o modelo do `claude.use` do app pode ser outro.
+- O tempo da IA não foi medido. O Motor busca em uma amostra de 3 a 10 lutas, julgada junto com as outras (por isso a conclusão usa só as lutas FORA da amostra): a IA não vê o juiz, então parte da vantagem do Motor é otimizar a própria régua. Amostra de 12 casos, um elenco por caso, uma resposta da IA por caso (o ruído da própria IA não foi medido).
 
 ## Conclusão
 
-Com a variante do estilo, o Motor SUPERA a IA além do ruído medido: diferença média de 2.2 pontos por luta (erro padrão 0.6, n=12), melhor em 10 de 12 casos. Vale só para esta amostra e estas limitações. O Motor NÃO vira padrão sem aprovação do usuário.
+Nas lutas FORA da amostra de busca, com a variante do estilo, o Motor supera o desvio entre casos, com 1 resposta da IA por caso: diferença média de 1.5 pontos por luta (erro padrão 0.6, n=12), melhor em 9, pior em 3. O ruído da própria IA (respostas repetidas) não foi medido. Vale só para esta amostra e estas limitações. O Motor NÃO vira padrão sem aprovação do usuário.
 
