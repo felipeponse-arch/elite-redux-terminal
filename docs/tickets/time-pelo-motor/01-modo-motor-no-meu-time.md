@@ -344,3 +344,9 @@ O ticket só deve ser considerado pronto quando:
   próximo líder); **uma espécie por linha evolutiva**; favorito sem build salva usa o top-1 do pipeline.
 - **Light Wield (21/10):** fica como está (3 turnos pela descrição); anotar em `decisoes_mecanicas.md` que não há código no
   er-repo `upcoming` 217dd0f e reconferir quando sair.
+- **Fase B fechada (21/10):** B1 f0d116c, B2 55f154e, B3 fff533e (calibracao-simulador/01: 80 casos dentro de 4%), B4 e8c7ebe
+  (suporte só quando a luta não é vencida sem ele; Flash Fire/Elemental Vortex só pelo gatilho). Dívida 04/05 juntada (6ab9e05):
+  usar `liberadoNaRun`, `xsDoJogador`/`entradasDoJogador`, `capOuPadrao`/`nivelDeCalculo`.
+- **Dois iguais (21/10):** o usuário quer dois Pokémon iguais quando de fato capturou dois, mas o app guarda uma por espécie; virou o
+  ticket `dois-iguais/01` (para depois). O Modo Motor nasce com uma espécie por linha evolutiva.
+- **Dívida 20 juntada (21/10):** o caso Fire Fang de `docs/pipeline_de_build.md` vira teste de aceite da Fase C.
