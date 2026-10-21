@@ -1,5 +1,7 @@
 # Construtor de Builds: proposta via OmniRoute e fallback local
 
+> **OBSOLETO desde 17/10/2026.** O OmniRoute saiu do Claude Code e não há rota Gemini. O agente agora se chama `construtor-de-builds` e roda só no Claude (Sonnet 5.5). Texto mantido como histórico.
+
 Decisão de arquitetura (13/10/2026): a proposta inicial de build pode usar um bridge OmniRoute opcional, mas o Artifact não recebe chave, endpoint privado ou credencial. Claude continua sendo o caminho oficial e o fallback seguro quando o bridge não existe ou falha. O objetivo é reduzir consumo da licença sem transferir a autoridade do motor.
 
 ---

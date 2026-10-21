@@ -11,10 +11,10 @@ concorrentes e testes frágeis, não do modelo.
 | Papel | Modelo | Por quê |
 |---|---|---|
 | Orquestrador (sessão principal) | Opus 5.5 | Monta o grafo, revisão final de G e mecânica, junção e GitHub |
-| Executores: qa-processo, construtor-de-builds-haiku, arquiteta-de-dados, engenheira-frontend, meta-pokemon, ux-acessibilidade, seguranca, playtester-de-build | Sonnet 5.5 | Acertar de primeira custa menos que várias voltas |
+| Executores: qa-processo, construtor-de-builds, engenheira-do-motor, arquiteta-de-dados, engenheira-frontend, meta-pokemon, ux-acessibilidade, seguranca, playtester-de-build | Sonnet 5.5 | Acertar de primeira custa menos que várias voltas |
 | supervisor (revisor em contexto separado) | Sonnet 5.5 | É quem segura a qualidade |
 | pesquisador-de-mecanica, verificador, varreduras, gerente (triagem) | Haiku 5.5 | Ler, extrair, rodar portão: tarefa mecânica e verificável |
-`supervisor-opus` ficou obsoleto: G e mecânica têm revisão final do orquestrador.
+`supervisor-opus` foi aposentado em 20/10/2026 (cópia em `teste/salvaguarda/antes_ruflo_2026-10-20/`): G e mecânica têm revisão final do orquestrador.
 
 ## 2. O grafo (por demanda)
 O orquestrador quebra a demanda em nós (DAG). Cada nó tem dono, entrada, **saída verificável** (commit, teste que
@@ -39,7 +39,8 @@ orquestrador: revisão final (G e mecânica) → junção → portão completo �
    defeito volta direto ao executor, SEM gastar o supervisor.
 3. **Revisar**: com VERDE, o `supervisor` julga contra o pedido. REFAZER volta ao executor.
 4. **Limite**: 3 voltas. Estourou → orquestrador julga ou leva ao usuário.
-5. **Aprender**: erro que custou uma volta vira linha no `aprendizados.md` do agente.
+5. **Aprender**: erro que custou uma volta vira linha no `aprendizados.md` do agente; se o agente não escreveu, o orquestrador escreve (`agent-factory.md` §3, rede de segurança).
+6. **Registrar**: o orquestrador grava o resultado do nó no Ruflo (§5).
 
 ## 4. Regras que economizam voltas e tokens
 - Prompt de nó fechado: nó do grafo, entrada, critério de aceite, caso de dado real, arquivos permitidos, "relatório curto e pare".
@@ -58,3 +59,10 @@ padrão ReAct (pensar, agir, observar).
 ## 5. Medir
 Nos próximos tickets: uso (janela e semanal) antes e depois, voltas de revisão e tempo, numa tabela em
 `docs/agents/politica-de-modelo.md`. A tabela da §1 muda só com esse dado.
+
+**Registro por nó no Ruflo (usuário, 20/10/2026).** No fim de cada nó, o orquestrador chama `memory_store` com
+`namespace: "medicao-nos"`, chave `<data>_<nó>_<executor>` e valor JSON
+`{data, no, executor, modelo, tamanho, voltas, aprovado, revisor, motivo_refazer}`. A tabela sai de
+`memory_list` (namespace `medicao-nos`). O % do limite semanal continua lido à mão (`get_usage`): o Ruflo não vê o
+limite. Testado em 20/10: grava em `teste/.swarm/memory.db` e persiste. `hooks_model-outcome` NÃO serve: o
+`hooks_model-stats` não conta esses registros e corta o texto da tarefa.

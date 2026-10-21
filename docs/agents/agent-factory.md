@@ -1,6 +1,6 @@
 # Agent Factory: Estrutura, Orquestração e Auto-Aprendizado
 
-Decisão de arquitetura (13/10/2026): padronização da **Agent Factory** para o Elite Redux Terminal. Os agentes não são estáticos; possuem especialidades estritas, são recomendados pelo Gerente (Orquestrador) e delegados pela sessão principal (coordenador) e aprendem continuamente com as correções e regras descobertas no projeto.
+Decisão de arquitetura (13/10/2026): padronização da **Agent Factory** para o Elite Redux Terminal. Os agentes não são estáticos; possuem especialidades estritas, são delegados pela sessão principal (orquestrador), com triagem do Gerente quando ajudar, e aprendem continuamente com as correções e regras descobertas no projeto.
 
 Práticas de trabalho que valem para todos (16/10/2026): [praticas-de-trabalho.md](praticas-de-trabalho.md) (alternativas lado a lado em decisão, ler antes de propor, entrega com evidência, aprofundar em vez de aumentar).
 
@@ -8,24 +8,28 @@ Práticas de trabalho que valem para todos (16/10/2026): [praticas-de-trabalho.m
 
 ## 1. Papéis na Factory
 
-1. **Orquestrador (Gerente):**
-   - Ponto de contato e triagem inicial de qualquer demanda do usuário.
-   - Classifica o domínio e recomenda o agente executor; a sessão principal (coordenador) delega e leva o resultado ao supervisor.
-   - Recomenda a esteira (Fluxo Direto vs Gauntlet Loop).
+1. **Orquestrador (sessão principal, Opus 5.5)** (alinhado com `loops-e-grafos.md` em 20/10/2026):
+   - Fala com o usuário, monta o grafo, delega, leva a entrega ao supervisor e faz a revisão final de G e mecânica.
+   - Junção no master, GitHub e publicação.
+
+2. **Gerente (triagem + guardião do aprendizado, Haiku 5.5):**
+   - Classifica o domínio e recomenda o agente executor e a esteira (Fluxo Direto vs Gauntlet Loop).
+   - Aplica o aprendizado nos agentes (autonomia de 14/10, `.claude/agents/gerente.md`).
    - Faz a ponte com o Obsidian (Second Brain) usando busca em duas camadas para economia de tokens.
 
-2. **Especialistas de Domínio (Trabalhadores da Factory):**
+3. **Especialistas de Domínio (Trabalhadores da Factory):**
    - Cada um atua estritamente em sua fronteira:
      - `arquiteta-de-dados`: pipeline, `data/*.json`, saves e integridade de dados.
      - `engenheira-frontend`: CSS, interface, tokens, renderização e layout.
      - `meta-pokemon`: metagame de Elite Redux, Smogon AAA, tiers e validação de estratégias.
      - `playtester-de-build`: aferição de viabilidade prática em runs 1x1 e level caps.
-     - `construtor-de-builds-haiku`: geração de builds em lote com economia de tokens (com suporte a fallback).
+     - `construtor-de-builds`: geração de builds (sinergia de habilidade + inata, prioridade, hit-kill).
+     - `engenheira-do-motor`: motor de duelo (`src/regras/duelo.js`), rank pelo duelo, calibração com a calculadora e o simulador do jogo, time pelo motor (criada em 20/10/2026).
      - `qa-processo`: testes unitários, testes de mutação/sabotagem e esteiras de verificação.
      - `seguranca`: dependências, sanitização e fronteiras locais/artifacts.
      - `ux-acessibilidade`: WCAG, clareza de textos e mensagens em PT-BR.
 
-3. **Validador de Entrega (`supervisor`, juiz único do Gauntlet Loop):**
+4. **Validador de Entrega (`supervisor`, juiz único do Gauntlet Loop):**
    - Nada vai ao usuário sem validação prévia.
    - Avalia conformidade com o pedido original, integridade mecânica, testes e padrão do projeto.
    - Se o supervisor não puder rodar (cota, erro), a entrega para e o usuário decide com opções. O autor nunca se auto-aprova.
@@ -39,7 +43,7 @@ Práticas de trabalho que valem para todos (16/10/2026): [praticas-de-trabalho.m
 [Usuário]
    │
    ▼
-[Sessão principal / Coordenador] ──► consulta o [Gerente]: classifica domínio e esteira e RECOMENDA
+[Sessão principal / Orquestrador] ──► consulta o [Gerente]: classifica domínio e esteira e RECOMENDA
    │                                  (Obsidian: Camada 1 = ESTADO ATUAL, se precisar de contexto)
    │ delega
    ▼
@@ -73,6 +77,7 @@ Para que os agentes evoluam sozinhos sem necessidade de reescrever constantement
    - Uma entrega for rejeitada pelo Validador/Supervisor e depois corrigida.
    - Um teste de unidade ou sabotagem quebrar revelando uma regra oculta do jogo.
    - O usuário corrigir uma dedução ou preferência.
+   - **Rede de segurança (usuário, 20/10/2026):** o agente continua escrevendo o próprio aprendizado; no fim do loop, se houve REFAZER e a volta seguinte passou, o orquestrador confere e escreve a linha que faltar. Uma cópia vai para a memória do Ruflo (`memory_store`, namespace `aprendizados`, chave `<data>_<agente>_<assunto>`) para busca por significado entre agentes; a fonte da verdade continua o `.md`.
 3. **Formato Obrigatório do Aprendizado:**
    ```markdown
    ### [Data] - [Assunto / Mecânica / Componente]
