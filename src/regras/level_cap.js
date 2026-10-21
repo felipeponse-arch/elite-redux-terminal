@@ -50,6 +50,17 @@
     if (!LEVELCAPS || !LEVELCAPS.rows[state.settings.milestone]) return null;
     return LEVELCAPS.rows[state.settings.milestone][levelCapMode()];
   }
+  // Padrão ÚNICO quando não há Level cap (Champion/sem tabela) - ticket divida-tecnica 04, usuário 21/10/2026:
+  // sem cap = 0 (sem limite). Quem precisa de um NÍVEL pra calcular (stats, velocidade, simulação, EVs) usa
+  // nivelDeCalculo(): 0 vira 100, o nível máximo. Nenhum chamador escolhe o próprio padrão (teste de varredura
+  // em tests/unit/level_cap_padrao_unico.test.mjs). Com cap definido, os três tipos (Easy/More/Elite) seguem
+  // os valores do código do jogo, sem mudança.
+  var NIVEL_DE_CALCULO_SEM_CAP = 100;
+  function capOuPadrao() {
+    var c = getCurrentCap();
+    return c === null || c === undefined ? 0 : c;
+  }
+  function nivelDeCalculo() { return capOuPadrao() || NIVEL_DE_CALCULO_SEM_CAP; }
 
   // Golpes que o jogador pode usar AGORA (item D3 da pauta técnica,
   // 2026-09-16): nível até o level cap atual + todo golpe de tutor (tutor não
@@ -59,8 +70,7 @@
   // uma vez (2026-09-12: a validação ficou sem o filtro que o editor tinha).
   function availableMovesFor(sp) {
     var cap = getCurrentCap();
-    var semCap = cap === null || cap === undefined;
-    var allowedLm = sp.lm.filter(function (pair) { return semCap || pair[0] <= cap; });
+    var allowedLm = sp.lm.filter(function (pair) { return liberadoNaRun(state.settings.milestone, cap, { golpe: pair[0] }); });
     var ids = uniqueIds(allowedLm.map(function (pair) { return pair[1]; }).concat(sp.tu));
     return {
       cap: cap,
@@ -84,7 +94,7 @@
       if (id === undefined || sp.tu.indexOf(id) !== -1) return;
       var menor = null;
       sp.lm.forEach(function (p) { if (p[1] === id && (menor === null || p[0] < menor)) menor = p[0]; });
-      if (menor === null || menor > cap) out.push({ nome: nome, nivel: menor });
+      if (menor === null || !liberadoNaRun(state.settings.milestone, cap, { golpe: menor })) out.push({ nome: nome, nivel: menor });
     });
     return out;
   }

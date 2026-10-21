@@ -66,7 +66,7 @@
   // Devolve { info, foes, clima, nivel } ou { info: null, foes: [] } (com o motivo em `aviso`).
   // `foes` são os Pokémon medidos: o que foi pedido, ou o primeiro e o ás (o último) do chefão.
   function pipelineResolverAlvo(alvo) {
-    var nivel = getCurrentCap() || 100;
+    var nivel = nivelDeCalculo();
     var saida = { info: null, foes: [], clima: null, nivel: nivel, aviso: null };
     if (alvo && alvo.foe) {
       saida.foes = [alvo.foe];
@@ -459,8 +459,8 @@
   // mesma regra de validateAiBuild, sem Mega).
   function pipelineEvioliteServe(sp) {
     if (ITEMS.indexOf("Eviolite") === -1 || !evoluiAinda(sp)) return false;
-    var lugar = primeiroLugarDoItem("Eviolite");
-    return !!lugar && lugar.etapa <= state.settings.milestone;
+    // Eviolite sem local com etapa no jogo (etapaDoItem null) não conta como disponível aqui.
+    return etapaDoItem("Eviolite") !== null && liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: "Eviolite" });
   }
   function pipelineValidarRascunho(sp, g) {
     var bruto = { ability: g.hab, nature: g.fin.nome, item: "", evs: g.fin.evs.slice(), moves: g.av.golpes.slice() };

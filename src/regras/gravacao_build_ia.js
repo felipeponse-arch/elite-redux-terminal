@@ -110,7 +110,7 @@
     validated.planoConsultado = true; // o prompt já pediu o plano - não pedir de novo
     // Chefão + variante do time (Padrão/Insane/Hell têm times diferentes - revisão de
     // 2026-09-30): clicar de novo no MESMO time e cap não regera à toa.
-    if (opts.chefao) validated.feitaPara = { chefao: opts.chefao.chave || opts.chefao.boss.name, cap: cap || 0 };
+    if (opts.chefao) validated.feitaPara = { chefao: opts.chefao.chave || opts.chefao.boss.name, cap: capOuPadrao() };
     var ok = saida.agir(function () { return gravarBuildDaIaNaLista(sp, validated, opts, cap); });
     if (!ok) {
       saida.aviso(textoDeLimiteDeBuilds(sp, opts));

@@ -17,15 +17,15 @@
     if (isMegaForm(sp) && !megaFormLiberada(sp)) {
       out.push({ tipo: "mega", texto: "Esta Mega só a partir da " + rotuloEtapaDaMega(sp) + "; até lá a criatura luta como a forma base." });
     } else if (build.item && MEGA_FORMS[build.item] !== undefined) {
-      var etapa = MEGA_PEDRAS_TARDIAS[build.item] || MEGA_UNLOCK_MILESTONE;
-      if (state.settings.milestone < etapa) {
+      if (!liberadoNaRun(state.settings.milestone, cap, { pedra: build.item })) {
+        var etapa = etapaDaPedra(build.item);
         out.push({ tipo: "item-tardio", texto: build.item + " só sai a partir da " + (ROTULO_ETAPA_MEGA[etapa] || "etapa " + etapa) + "." });
       }
     } else if (build.item) {
       // Qualquer outro item (ticket 07): a etapa mais cedo em que o código do jogo o entrega. Sem local
       // conhecido na run (só Battle Frontier, Pickup, troca...) não avisa: o dado não basta para afirmar.
       var achar = primeiroLugarDoItem(build.item);
-      if (achar && state.settings.milestone < achar.etapa) {
+      if (achar && !liberadoNaRun(state.settings.milestone, cap, { item: build.item })) {
         out.push({ tipo: "item-tardio", texto: build.item + " só aparece a partir da " + rotuloDaEtapaDoItem(achar.etapa) + " (" + achar.local + ", " + achar.como + ")." });
       }
     }

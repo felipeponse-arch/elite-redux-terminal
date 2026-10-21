@@ -493,7 +493,7 @@
   var SPEEDTIER_NATURE = "Jolly";
 
   function computeSpeedTiers(query) {
-    var level = getCurrentCap() || 50;
+    var level = nivelDeCalculo();
     var q = (query || "").trim().toLowerCase();
     var rows = SPECIES.filter(function (sp) {
       return !q || sp.n.toLowerCase().indexOf(q) !== -1;

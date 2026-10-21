@@ -292,7 +292,7 @@
       "Innates SEMPRE ativas (nao escolhiveis, mas contam na sinergia - a build deve aproveitar o maximo delas):\n" +
       "<dados_do_jogo>\n" + uniqueIds(sp.inn).map(function (id) {
         // Elite: a innate que o nível do cap ainda não liberou (level_cap.js) vai marcada.
-        var travada = innatesTravadasNoNivel(sp, getCurrentCap() || 100).indexOf(id) !== -1;
+        var travada = innatesTravadasNoNivel(sp, nivelDeCalculo()).indexOf(id) !== -1;
         return linhaHabilidadeIA(id) + (travada ? " [TRAVADA no Elite ate o Pokemon chegar ao nivel " + NIVEL_DA_INNATE_ELITE[(sp.inn || []).indexOf(id)] + " - nao conte com ela agora]" : "");
       }).join("\n") + "\n</dados_do_jogo>\n";
   }
@@ -381,7 +381,7 @@
   // mas pode usar com motivo claro. Vem de ONDE_ACHAR_ITENS (código oficial do jogo).
   function itensAindaIndisponiveisParaIA() {
     return AI_ITEM_POOL.map(function (n) { return { n: n, p: primeiroLugarDoItem(n) }; })
-      .filter(function (x) { return x.p && x.p.etapa > state.settings.milestone; })
+      .filter(function (x) { return x.p && !liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: x.n }); })
       .sort(function (a, b) { return a.p.etapa - b.p.etapa; });
   }
   function blocoItensAindaIndisponiveisIA() {
@@ -775,7 +775,7 @@
   // filtrado - Mega conta como a base antes da 4ª insígnia, Monotype é REGRA
   // (filtra antes de ir pro prompt). Devolve { roster, validSnames }.
   function rosterParaTimeIA(monotype) {
-    var rosterXs = state.team.concat(state.box).filter(function (x, i, arr) { return arr.indexOf(x) === i; });
+    var rosterXs = xsDoJogador();
     var roster = rosterXs.map(getSpeciesByX).filter(Boolean);
     // Antes da 4ª insígnia uma forma Mega já no time/caixa conta como a base
     // dela (achado do usuário, 2026-09-24: "Altaria Mega" na caixa entrava na
@@ -811,7 +811,7 @@
   }
   function viramDoTipoPrompt(tipo) {
     var vistos = {};
-    var viram = state.team.concat(state.box).map(getSpeciesByX).filter(function (sp) {
+    var viram = xsDoJogador().map(getSpeciesByX).filter(function (sp) {
       if (!sp || vistos[sp.x]) return false;
       vistos[sp.x] = true;
       var m = mudancaDeTipo(sp, tipo);

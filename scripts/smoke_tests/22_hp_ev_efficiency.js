@@ -5,7 +5,14 @@
 // project_elite_redux_frontend_next_phase). hpEvEfficiencyNote() é função
 // pura; testa ela direto pra uma faixa inteira de EVs de uma espécie real,
 // depois confirma a integração ao vivo em "Meu build".
+// Sem Level cap o nível de cálculo é 100 (ticket 04) e não há platô de EV; a seção roda no marco 3 (cap 50, "more"), o nível que ela sempre usou.
 async function section22() {
+  var T0 = window.__erTest;
+  var msOriginal = T0 && T0.state.settings.milestone;
+  if (T0) T0.state.settings.milestone = 3;
+  try { await section22Corpo(); } finally { if (T0) T0.state.settings.milestone = msOriginal; }
+}
+async function section22Corpo() {
   var T = window.__erTest;
   if (!T) { check("ponte de teste disponível", false); return; }
   if (!achou("hpEvEfficiencyNote exposta na ponte de teste", typeof T.hpEvEfficiencyNote === "function")) return;
@@ -16,10 +23,11 @@ async function section22() {
   // o estado real em que esta feature é usada (sempre com cap já
   // configurado em Progresso).
   await prepararRunPadrao();
+  T.state.settings.milestone = 3; // cap 50 (ver o comentário da seção); o wrapper restaura o marco
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
 
-  var cap = T.getCurrentCap() || 50;
+  var cap = T.nivelDeCalculo();
   // Fixture: espécie sem forma múltipla (mantém o teste simples) cujo HP
   // base gere EV=0 com resto != 1 - senão o teste não exercitaria o
   // caminho "mostra a nota" de jeito nenhum.
