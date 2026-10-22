@@ -1,6 +1,6 @@
 # 01 — Mapa mental do código (para não ler o código todo a cada tarefa)
 
-Status: pronto-para-agente
+Status: resolvido (aprovado r2; master 52ef4a3, 22/10/2026; Graphify MCP no teste/.mcp.json)
 Tamanho: M.
 Pedido do usuário (22/10/2026): fazer um "mapping" do projeto, um mapa mental que a IA e os agentes leem antes de
 mexer, em vez de reler arquivos grandes (duelo.js etc.) toda vez. Economia de token. Ele lembra de um repositório no

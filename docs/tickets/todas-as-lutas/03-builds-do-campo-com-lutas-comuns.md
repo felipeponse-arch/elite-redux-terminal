@@ -1,6 +1,6 @@
 # 03 — Builds para o campo da run contam as lutas comuns (mesma régua do rank)
 
-Status: resolvido-no-branch
+Status: resolvido (aprovado r2; portão verde; master, 22/10/2026)
 Tamanho: P.
 Dono sugerido: engenheira-do-motor (depois do motor-item/01, mesma área).
 

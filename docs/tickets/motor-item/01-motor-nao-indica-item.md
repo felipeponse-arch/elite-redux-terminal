@@ -1,6 +1,6 @@
 # Ticket 01 — Modo Motor não indica item na build
 
-Status: resolvido-no-branch (motor-item-01; falta junção no master pelo verificador)
+Status: resolvido (aprovado r2; master 52ef4a3, 22/10/2026)
 Tamanho: M. Relaciona: time-pelo-motor/01 (Fase C), divida-tecnica 05 (liberado_na_run), pipeline-build-2026-10-14.
 
 ## Sintoma
