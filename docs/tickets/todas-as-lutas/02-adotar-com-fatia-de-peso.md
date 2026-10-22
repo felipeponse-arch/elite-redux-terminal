@@ -1,6 +1,6 @@
 # 02 — Adotar todas as lutas no rank e no Meu Time, com fatia fixa de peso
 
-Status: pronto-para-agente (DEPOIS do reset semanal de terça 21/10/2026, 23h)
+Status: resolvido (aprovado r2; master 19f2d0a, 22/10/2026). Falta só o rank final com --gravar, que é o dados-2654/10
 Bloqueado por: nada (o desempenho-calculo/01 deixou de bloquear: o resultado por luta já está calculado)
 Decisão do Felipe (16/10/2026), depois do [estudo](estudo.md): adotar com fatia de peso.
 

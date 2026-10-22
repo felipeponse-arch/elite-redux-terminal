@@ -1,6 +1,6 @@
 # 08 e 09 — Lista para o usuário aprovar (etapa 1, só leitura)
 
-Status: para-o-usuario
+Status: resolvido (usuário respondeu em 22/10/2026: playtester revisou as 14; Scovillain Mega o playtester decide; 19 sets subiram para 2.65.4)
 Gerado em 21/10/2026. Nada em `data/builds.json` foi alterado. Rank não recalculado.
 
 ## Como foi medido

@@ -1,6 +1,6 @@
 # 09 — Builds das 17 espécies novas
 
-Status: pronto-para-agente
+Status: resolvido (aprovado r1; master 19f2d0a, 22/10/2026)
 Bloqueado por: 04, 05, 06
 
 ## O que entrega

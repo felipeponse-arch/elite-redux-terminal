@@ -1,6 +1,6 @@
 # 08 — Revisão das builds afetadas
 
-Status: pronto-para-agente
+Status: resolvido (aprovado r1; 19 sets em 2.65.4; master 19f2d0a, 22/10/2026)
 Bloqueado por: 02, 03, 04, 05, 06, 07
 
 ## O que entrega
