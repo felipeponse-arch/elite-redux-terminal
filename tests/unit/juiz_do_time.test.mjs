@@ -24,14 +24,10 @@ const NV = 45;
 const lentos = () => [meu(NV, "Metagross", ["Meteor Mash", "Earthquake"], { evs: EV.fisico, nat: "Adamant" }), meu(NV, "Conkeldurr", ["Mach Punch", "Drain Punch"], { evs: EV.fisico, nat: "Adamant" })];
 const pidgeot = () => meu(NV, "Pidgeot", ["Tailwind", "Hurricane"], { evs: EV.tanqueE });
 
-// Conkeldurr tem Long Reach (203): seus socos não fazem contato, então perdem o Juggernaut (+Def no ataque) e as reações do chefão não o pegam
-// (efd6962, IsMoveMakingContact). Resultado fiel ao jogo: sozinho com o Metagross ele já não vira a luta, então o terceiro lento é o Machamp.
-const lentosTres = () => [...lentos(), meu(NV, "Machamp", ["Close Combat", "Bullet Punch"], { evs: EV.fisico, nat: "Adamant" })];
-
 test("suporte útil: o Tailwind que vira a luta recebe contribuição positiva clara (Archie de Slateport)", () => {
-  const base = juiz(lentosTres(), "Archie Slateport", NV);
-  assert.equal(base.venceu, false, "fixture: os três atacantes lentos NÃO vencem sozinhos");
-  const time = juiz([pidgeot(), ...lentosTres()], "Archie Slateport", NV);
+  const base = juiz(lentos(), "Archie Slateport", NV);
+  assert.equal(base.venceu, false, "fixture: os dois atacantes lentos NÃO vencem sozinhos");
+  const time = juiz([pidgeot(), ...lentos()], "Archie Slateport", NV);
   assert.equal(time.venceu, true, "com o Tailwind do Pidgeot os lentos passam na frente e a luta vira");
   const p = membro(time, "Pidgeot");
   assert.ok(p.contribuicaoSuporte > 5, "o efeito do Tailwind vale a luta: " + p.contribuicaoSuporte);

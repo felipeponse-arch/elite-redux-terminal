@@ -60,3 +60,15 @@ test("Punching Glove: soco sai sem contato e não sofre as reações; golpe que 
   }
   assert.equal(iso("Garchomp", [], ["Mach Punch"]).golpesProntos[0].contato, true, "o mesmo soco sem a luva faz contato");
 });
+
+// Juggernaut lê o campo cru do golpe (abilities.cc:4144, gBattleMoves[move].contact), não IsMoveMakingContact: Long Reach não tira o bônus.
+test("Long Reach + Juggernaut: mantém o +20% Def em Mach Punch, mas não sofre Rough Skin", () => {
+  const rough = iso("Magikarp", ["Rough Skin"], ["Tackle"]);
+  const lrJ = iso("Conkeldurr", ["Long Reach", "Juggernaut"], ["Mach Punch"]);
+  const lr = iso("Conkeldurr", ["Long Reach"], ["Mach Punch"]);
+  const g = lrJ.golpesProntos[0];
+  assert.equal(g.contato, false, "reações: sem contato");
+  assert.equal(g.contatoBruto, true, "campo cru do golpe segue verdadeiro");
+  assert.ok(R.danoNoDuelo(lrJ, rough, NIVEL).melhor.dano > R.danoNoDuelo(lr, rough, NIVEL).melhor.dano, "Juggernaut soma Def mesmo com Long Reach");
+  assert.notDeepEqual(duelo(forcar(lrJ, true), rough), duelo(lrJ, rough), "sem Long Reach o Rough Skin cobraria");
+});

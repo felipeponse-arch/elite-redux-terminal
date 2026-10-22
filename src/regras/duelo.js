@@ -1933,7 +1933,7 @@
       if (contato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
-      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: contato, corte: cats.indexOf("corte") !== -1, som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
+      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: contato, contatoBruto: temContatoDuelo(m), corte: cats.indexOf("corte") !== -1, som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
         prioPrimeiro: cats.some(function (c) { return u.ef.prioPrimeiroCategoria[c]; }), // 1º uso (Coil Up...): o estado é gasto no fim do turno
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
           cats.some(function (c) { return u.ef.prioCheioCategoria[c] || u.ef.prioPrimeiroCategoria[c]; }),
@@ -2039,7 +2039,7 @@
     var maiorAtq = maiorAtributoDuelo(atq);
     if (maiorAtq && maiorAtq.atributo === (fisico ? 1 : 3)) A *= maiorAtq.mult;
     atq.ef.ataqueExtra.forEach(function (r) {
-      if (r.contato !== undefined && r.contato !== g.contato) return;
+      if (r.contato !== undefined && r.contato !== g.contatoBruto) return;
       if (r.cat && r.cat !== g.cat) return;
       if (r.categoria && (g.cats || []).indexOf(r.categoria) === -1) return; // só nos golpes da categoria (Best Offense: corte)
       var fonte = r.fonte === "spe" ? atq.stats[5] : r.fonte === "def" ? atq.stats[2] : r.fonte === "spd" ? atq.stats[4] : (fisico ? atq.stats[2] : atq.stats[4]);
@@ -4436,6 +4436,7 @@
     // Pinnacle Blade: o golpe Keen Edge que acerta derruba as telas do lado do alvo (onAttacker); o próprio golpe já ignora a tela (tela()).
     function quebraTelasPinaculo(quem, contra, lc) {
       if (!quem.u.ef.pinaculo || !temTelaDuelo(lc)) return;
+      // shortcut: no jogo a quebra só ocorre se o alvo sobreviveu (IsBattlerAlive); o motor não sabe aqui se o golpe nocauteou, quebra sempre. Evoluir quando o turno expuser o KO.
       var golpe = danoNoDuelo(comoEstaDuelo(quem), comoEstaDuelo(contra), nivel).melhor.golpe;
       if (golpe && golpe.corte) limpaTelasDoLadoDuelo(lc);
     }
