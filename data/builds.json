@@ -77,7 +77,7 @@
       "Solar Beam",
       "Shock Wave"
     ],
-    "note": "Drought põe sol sozinho ao entrar em campo, o que ativa Solar Power (1.5x no SpAtk) e libera Solar Beam sem turno de carga. Shiny Lightning garante +20% de acerto e faz o Thunder NUNCA errar — some com a única inconsistência real do set. Electrocytes ainda potencializa os golpes elétricos em 1.25x. Não precisa de Life Orb/Choice Specs: o SpAtk já é altíssimo com sol + Solar Power, e Focus Sash garante pelo menos 1 turno de ataque mesmo se for pego de surpresa. Fonte: comunidade oficial (Discord, canal #movesets, post de Sagi) — as 3 innates e a ability conferidas contra o dado real do jogo.",
+    "note": "Drought põe sol sozinho ao entrar em campo, o que ativa Solar Power (1.5x no SpAtk) e libera Solar Beam sem turno de carga. Shiny Lightning garante +20% de acerto e faz o Thunder NUNCA errar — some com a única inconsistência real do set. Electrocytes ainda potencializa os golpes elétricos em 1.25x. Não precisa de Life Orb/Choice Specs: o SpAtk já é altíssimo com sol + Solar Power, e Focus Sash garante pelo menos 1 turno de ataque mesmo se for pego de surpresa. Fonte: comunidade oficial (Discord, canal #movesets, post de Sagi) — as 3 innates e a ability conferidas contra o dado real do jogo. Aviso: piorou na versão nova (Spe 120→119, inata Solar Power virou Sun Basking, Fire Blast 30→20% de queimar). Nenhum golpe melhor medido; set mantido.",
     "fonte": "discord-movesets",
     "versao": "2.65beta"
   },
@@ -268,11 +268,11 @@
     "item": "Eviolite",
     "moves": [
       "Hydro Pump",
-      "Nasty Plot",
+      "Gust",
       "Hurricane",
       "Thunder"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Revisada na 2.65.4: o HP base caiu de 120 para 90 e o set piorou; Nasty Plot trocado por Gust (motor 1x1, pontos médios 1,32 → 1,87).",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -524,10 +524,10 @@
     "moves": [
       "Poison Fang",
       "Crunch",
-      "Poison Sting",
+      "Jaw Lock",
       "Dragon Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Black Sludge / Shell Bell.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Black Sludge / Shell Bell. Revisada na 2.65.4: stats base caíram (90/105/84/65/84/80 → 60/95/69/65/79/80); Poison Sting trocado por Jaw Lock (mordida: Coil Up dá prioridade; motor 1x1, 0,41 → 0,49).",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -662,7 +662,7 @@
       "Ice Fang",
       "Shadow Sneak"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Aviso: piorou na versão nova (inata Bad Luck virou Bad Omen). Nenhum golpe melhor medido; set mantido.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -2447,11 +2447,11 @@
     "item": "Shell Bell",
     "moves": [
       "Giga Drain",
-      "Energy Wave",
+      "Psychic",
       "Calm Mind",
       "Speed Swap"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Revisada na 2.65.4: Sp. Atk base 130→120 e Spe 30→40 deixaram o set pior; Energy Wave trocado por Psychic (motor 1x1, 1,20 → 1,52).",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
