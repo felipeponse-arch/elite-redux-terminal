@@ -34,7 +34,7 @@ test("aprendizado pela config: 128 espécies mudam (level-up +105/-6, tutor +94/
 test("builds: nenhuma build de data/builds.json perdeu golpe por causa do aprendizado novo (a validação não acha golpe fora da espécie)", () => {
   const r = validarBuilds();
   assert.deepEqual(r.problemas, []);
-  assert.equal(r.pendentes.length, 230, "pendentes herdadas (259 antes de saírem as 14 builds da curadoria do projeto; 244 até dados-2654/08 aplicar as 14 da tabela A, que saíram de 244 para 230); nenhuma nova");
+  assert.equal(r.pendentes.length, 211, "pendentes herdadas: 259 antes de saírem as 14 builds da curadoria do projeto; 244 depois; 230 quando dados-2654/08 corrigiu as 14 da tabela A; 211 quando os 19 sets revisados (14 + Breezing, Exeggutor Redux, Arbok, Heliosunny, Victreebel Redux) passaram a versão 2.65.4; nenhuma nova");
 });
 
 test("aplicarPatch: retira e põe golpe de level-up e de tutor; cria a Mega a partir da base e aponta a evolução da base para ela", () => {
