@@ -269,16 +269,24 @@ test("tempo: a classificação tem teto de 3 s por variante (medido: 0,1 a 0,4 s
   console.log("# tempo (ms): " + tresVariantes.variantes.map((v) => v.chave + " total " + v.tempoMs + ", classificação " + v.tempoClassificacaoMs).join(" | ") + " | tudo " + tresVariantes.tempoMs);
 });
 
-test("com a fatia 60/40 o juiz escolhe outro time, mas a sinergia de sol continua com a prova medida (armador + dois beneficiários + ganho do time)", () => {
-  const r = run({ milestone: 3, nomes: POOL_CLIMA, comFatia: true });
-  assert.ok(r.ctx.lutas.comuns.amostra.length > 0, "o juiz com a fatia precisa ter comuns na amostra");
-  const v = r.R.montarTimePeloMotor(r.ctx, { variantes: ["sinergia"] }).variantes[0];
-  const tag = v.tags.find((x) => x.tag === "clima: sol");
-  assert.ok(tag, JSON.stringify(v.tags));
-  assert.equal(tag.armador, "Torkoal");
-  assert.ok(tag.beneficiarios.length >= 2 && tag.beneficiarios.every((b) => b.ganhoPorDuelo >= r.R.MOTOR_PROVA_BENEFICIO), JSON.stringify(tag.beneficiarios));
-  assert.ok(tag.ganhoDoTime > 0 && tag.lutasMedidas >= 1);
-  assert.ok(v.metricas.comuns && v.metricas.comuns.lutas > 0, "a conferência das comuns vem junto");
+// Sol e chuva são a mesma sinergia, medida da mesma forma, cada uma no pool do seu tipo de beneficiário (regra do usuário, 22/10/2026):
+// nadadores de chuva perdem no sol e poluem a medida do sol, e vice-versa. Com a fatia, as duas precisam sair com prova medida.
+const SOL_POOL = ["Torkoal", "Lilligant", "Venusaur", "Charizard", "Togekiss", "Scizor"];
+const CHUVA_POOL = ["Politoed", "Pelipper", "Kingdra", "Floatzel", "Ludicolo", "Swampert", "Gyarados", "Scizor"];
+// Lutas de prova: no máximo 5 (teste rápido); escolhidas onde o clima muda o resultado do time (medido 22/10: sol Norman 1 4 vs 3, Archie 13,7 vs 5; chuva Wattson 1 5,23 vs 4, Glacia 1,46 vs 0,44).
+[["clima: sol", "Torkoal", SOL_POOL, ["Norman 1", "Archie"]], ["clima: chuva", "Politoed", CHUVA_POOL, ["Wattson 1", "Glacia"]]].forEach(([nomeTag, armador, pool, lutas]) => {
+  test("com a fatia 60/40 a sinergia de " + nomeTag + " continua com a prova medida (armador + dois beneficiários + ganho do time)", () => {
+    const r = run({ milestone: 3, nomes: pool, comFatia: true });
+    r.usaLutas(...lutas);
+    assert.ok(r.ctx.lutas.comuns.amostra.length > 0, "o juiz com a fatia precisa ter comuns na amostra");
+    const v = r.R.montarTimePeloMotor(r.ctx, { variantes: ["sinergia"] }).variantes[0];
+    const tag = v.tags.find((x) => x.tag === nomeTag);
+    assert.ok(tag, JSON.stringify(v.membros.map((m) => m.nome)) + JSON.stringify(v.tags));
+    assert.equal(tag.armador, armador);
+    assert.ok(tag.beneficiarios.length >= 2 && tag.beneficiarios.every((b) => b.ganhoPorDuelo >= r.R.MOTOR_PROVA_BENEFICIO), JSON.stringify(tag.beneficiarios));
+    assert.ok(tag.ganhoDoTime > 0 && tag.lutasMedidas >= 1 && tag.lutasMedidas <= 5);
+    assert.ok(v.metricas.comuns && v.metricas.comuns.lutas > 0, "a conferência das comuns vem junto");
+  });
 });
 
 // Os 3 casos que o juiz com a fatia mudou (21/10): os papéis são da BUILD e da ordem do time na luta, não do juiz. Com a fatia, Ferrothorn,
