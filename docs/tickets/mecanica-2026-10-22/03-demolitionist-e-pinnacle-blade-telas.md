@@ -1,6 +1,6 @@
 # 03 — Demolitionist e Pinnacle Blade: quebrar telas, substituto e Protect
 
-Status: resolvido-no-branch (Demolitionist 4f125f7+204ae87 aprovado r2; Pinnacle 5991a6f aprovado; substituto e alvo vivo = limites registrados)
+Status: resolvido no master (22/10/2026; portão verde: 1204 unit, 303/303 sabotagens, 112 e2e). (Demolitionist 4f125f7+204ae87 aprovado r2; Pinnacle 5991a6f aprovado; substituto e alvo vivo = limites registrados)
 Tamanho: M (cada). Pode ficar para depois do rank.
 Evidência: relatorios/evidencia_simples_2026-10-22.md (pesquisador-de-mecanica, 22/10/2026). Regra: código do jogo (er-repo upcoming 217dd0f) vence.
 

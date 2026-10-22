@@ -1,6 +1,6 @@
 # 02 — Long Reach e Punching Glove tiram o contato também das reações
 
-Status: resolvido-no-branch (efd6962 + 55be57d contato cru x reações; aprovado r2)
+Status: resolvido no master (22/10/2026; portão verde: 1204 unit, 303/303 sabotagens, 112 e2e). (efd6962 + 55be57d contato cru x reações; aprovado r2)
 Tamanho: M. Antes do rank final se der tempo.
 Evidência: relatorios/evidencia_simples_2026-10-22.md (pesquisador-de-mecanica, 22/10/2026). Regra: código do jogo (er-repo upcoming 217dd0f) vence.
 
