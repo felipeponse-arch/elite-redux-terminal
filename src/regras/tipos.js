@@ -144,7 +144,7 @@
     868: { immune: ["Electric"] },                         // Lightning Aspect
     869: { immune: ["Fire"] },                             // Fire Aspect
     872: { immune: ["Rock"] },                             // Molten Core (Furnace + absorve Rock)
-    // Packed Ice (1057, ticket versao-nova/07; abilities.cc:12781-12790, onAbsorb: golpe Ice vira +2 de Defesa em vez de dano). O +2 não está no motor.
+    // Packed Ice (1057): imunidade a Ice aqui; o +2 de Defesa (sem código no upcoming 217dd0f, pela descrição) está em duelo.js (aoApanhar).
     1057: { immune: ["Ice"] }
   };
 
