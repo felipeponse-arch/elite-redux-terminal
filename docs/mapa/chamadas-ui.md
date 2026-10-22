@@ -165,7 +165,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - setActiveBuildIndex:103 - chama: getBuildList (evolucao.js:14)
 - setOrReplaceActiveBuild:93 - chama: trocarBuildAtivaNaLista (lista_de_builds.js:11) | chamado por: initBosses (aba_chefoes.js:33), aplicarCuradaNoTimeNovo (ia.js:153), processarRevisoes (revisao_automatica.js:72)
 - showStorageBanner:165 - chamado por: remotoComSomaErrada (sync.js:88)
-- state:8 - chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:200), itensEmUsoComQuem (builds.js:151), teamItemsInUse (builds.js:90), teamMovesInUse (builds.js:123), +113
+- state:8 - chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:200), itensEmUsoComQuem (builds.js:151), teamItemsInUse (builds.js:90), teamMovesInUse (builds.js:123), +114
 - telasDeBuild:236 - chamado por: aplicarCuradaNoTimeNovo (ia.js:153), gerarPlanoParaBuild (ia.js:342), gravarBuildValidadaDaIa (ia.js:141), processarRevisoes (revisao_automatica.js:72)
 
 ## ui/pipeline_tela.js
@@ -174,7 +174,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - pipelineDesenharFicha:113 - chamado por: wireMyBuildEditor (editor_build.js:465)
 - pipelineDesenharTime:125 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8) | chamado por: renderTeam (time.js:8)
 - pipelineGolpeHtml:71 - chama: MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9)
-- pipelineResultado:14 - chama: getCurrentCap (level_cap.js:49), candidatosDeBuild (pipeline_build.js:489), state (nucleo.js:8)
+- pipelineResultado:14 - chama: getCurrentCap (level_cap.js:49), candidatosDeBuild (pipeline_build.js:515), state (nucleo.js:8)
 - pipelineSeletorDeAlvoHtml:32 - chama: getRemainingBossEntries (chefoes.js:51)
 
 ## ui/progresso.js
@@ -185,7 +185,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderRunStatus:9 - chama: state (nucleo.js:8)
 
 ## ui/quem_resolve.js
-- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:610)
+- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:636)
 - quemResolveCardHtml:83 - chama: DIFF_TO_BOSSKEY (chefoes.js:19), DIFF_LABELS (aba_chefoes.js:233), state (nucleo.js:8) | chamado por: renderBossDetail (aba_chefoes.js:589)
 - quemResolveChave:17 - chama: getCurrentCap (level_cap.js:49), state (nucleo.js:8)
 - quemResolveItemHtml:43 - chama: pipelineCandidatoHtml (pipeline_tela.js:77)

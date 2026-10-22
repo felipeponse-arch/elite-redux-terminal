@@ -1,6 +1,6 @@
 # 03 — Builds para o campo da run contam as lutas comuns (mesma régua do rank)
 
-Status: pronto-para-agente
+Status: resolvido-no-branch
 Tamanho: P.
 Dono sugerido: engenheira-do-motor (depois do motor-item/01, mesma área).
 

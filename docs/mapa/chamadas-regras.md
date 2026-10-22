@@ -36,15 +36,15 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - trimAndReallocateEvs:195 - chamado por: validateAiBuild (validacao_build_ia.js:214)
 
 ## regras/chefoes.js
-- DIFF_TO_BOSSKEY:19 - chamado por: motorLutasComunsDoContexto (time_pelo_motor.js:108), motorMontarLuta (time_pelo_motor.js:79), quemResolveCardHtml (quem_resolve.js:83)
-- LUTAS_DA_RUN:314 - chamado por: pipelineResolverAlvo (pipeline_build.js:68), motorLutasDoContexto (time_pelo_motor.js:123)
+- DIFF_TO_BOSSKEY:19 - chamado por: pipelineResolverAlvo (pipeline_build.js:69), motorLutasComunsDoContexto (time_pelo_motor.js:108), motorMontarLuta (time_pelo_motor.js:79), quemResolveCardHtml (quem_resolve.js:83)
+- LUTAS_DA_RUN:314 - chamado por: pipelineResolverAlvo (pipeline_build.js:69), motorLutasDoContexto (time_pelo_motor.js:123)
 - SPEEDTIER_NATURE:493 - chamado por: renderSpeedTiers (tipos.js:35)
 - bestBoxCandidateForBoss:183 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:219), unitTypeMult (formas_mega.js:235), serveProMono (mono_run.js:75), rankDe (rank_da_run.js:28), +1 | chamado por: aiTool_getBoxCandidatesForBoss (ferramentas_ia.js:182), linhasProximaLutaIA (prompts_ia.js:506), nextFightDetailHtml (resumo_luta.js:215)
 - bestRankForm:333 - chama: battleUnitsOf (formas_mega.js:219), rankDe (rank_da_run.js:28) | chamado por: nextFightDetailHtml (resumo_luta.js:215)
-- bossPartyPorDificuldade:327 - chama: state (nucleo.js:8) | chamado por: aiTool_getNextBossRoster (ferramentas_ia.js:120), avisoProximoLider (mono_run.js:159), pipelineResolverAlvo (pipeline_build.js:68), linhasProximaLutaIA (prompts_ia.js:506), motorMontarLuta (time_pelo_motor.js:79), +2
+- bossPartyPorDificuldade:327 - chama: state (nucleo.js:8) | chamado por: aiTool_getNextBossRoster (ferramentas_ia.js:120), avisoProximoLider (mono_run.js:159), pipelineResolverAlvo (pipeline_build.js:69), linhasProximaLutaIA (prompts_ia.js:506), motorMontarLuta (time_pelo_motor.js:79), +2
 - bossSafetyScore:171 - chama: unitTypeMult (formas_mega.js:235)
 - bossSpeedSummary:132 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8) | chamado por: nextFightDetailHtml (resumo_luta.js:215)
-- buffsAtivosDoChefao:482 - chamado por: pipelineResolverAlvo (pipeline_build.js:68), motorMontarLuta (time_pelo_motor.js:79), contextoDeValidacao (validacao_build_ia.js:197), montarTimeContraEsteChefao (aba_chefoes.js:337)
+- buffsAtivosDoChefao:482 - chamado por: pipelineResolverAlvo (pipeline_build.js:69), motorMontarLuta (time_pelo_motor.js:79), contextoDeValidacao (validacao_build_ia.js:197), montarTimeContraEsteChefao (aba_chefoes.js:337)
 - buffsParaMostrarDoChefao:473 - chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), buffsMudaram (arquetipo.js:383)
 - comportamentoDaIADoChefao:433 - chamado por: iaDoChefaoHtml (aba_chefoes.js:190)
 - computeBossAttackTypes:147 - chama: MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9), moveRoleOf (golpes.js:53), state (nucleo.js:8)
@@ -57,11 +57,11 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - confrontoUnidadesDaCaixa:289 - chama: getSpeciesByX (dados_base.js:78), serveProMono (mono_run.js:75), state (nucleo.js:8)
 - confrontoUnitOf:233 - chama: effectiveBuild (builds.js:200), ABILITY_ID_BY_NAME (confronto.js:17), availableMovesFor (level_cap.js:71), alwaysActiveAbilities (tipos.js:160), speciesTypeNames (tipos.js:250)
 - ehRevancheDeLider:454 - chamado por: linhasProximaLutaIA (prompts_ia.js:506), renderGymSkillsCardHtml (aba_chefoes.js:456)
-- getRemainingBossEntries:51 - chama: state (nucleo.js:8) | chamado por: aiTool_getBoxCandidatesForBoss (ferramentas_ia.js:182), aiTool_getNextBossRoster (ferramentas_ia.js:120), aiTool_getRemainingBosses (ferramentas_ia.js:159), avisoProximoLider (mono_run.js:159), pipelineResolverAlvo (pipeline_build.js:68), +7
+- getRemainingBossEntries:51 - chama: state (nucleo.js:8) | chamado por: aiTool_getBoxCandidatesForBoss (ferramentas_ia.js:182), aiTool_getNextBossRoster (ferramentas_ia.js:120), aiTool_getRemainingBosses (ferramentas_ia.js:159), avisoProximoLider (mono_run.js:159), pipelineResolverAlvo (pipeline_build.js:69), +7
 - gymLeaderBaseName:45 - chamado por: avisoProximoLider (mono_run.js:159), linhasProximaLutaIA (prompts_ia.js:506), renderGymSkillsCardHtml (aba_chefoes.js:456)
 - gymSkillsSummaryFor:367 - chama: state (nucleo.js:8) | chamado por: linhasProximaLutaIA (prompts_ia.js:506), renderGymSkillsCardHtml (aba_chefoes.js:456)
 - nextFightCx:351 - chamado por: renderDashboard (resumo_luta.js:183), renderNextFightCard (resumo_luta.js:257)
-- regraDeCampoDoChefao:416 - chamado por: pipelineResolverAlvo (pipeline_build.js:68), linhasProximaLutaIA (prompts_ia.js:506), motorMontarLuta (time_pelo_motor.js:79), campoDoChefaoHtml (aba_chefoes.js:178), montarTimeContraEsteChefao (aba_chefoes.js:337)
+- regraDeCampoDoChefao:416 - chamado por: pipelineResolverAlvo (pipeline_build.js:69), linhasProximaLutaIA (prompts_ia.js:506), motorMontarLuta (time_pelo_motor.js:79), campoDoChefaoHtml (aba_chefoes.js:178), montarTimeContraEsteChefao (aba_chefoes.js:337)
 - regrasDoHell:447 - chamado por: hellDoChefaoHtml (aba_chefoes.js:199)
 - varianteDoChefao:358 - chama: state (nucleo.js:8) | chamado por: selectBoss (aba_chefoes.js:437), initProgress (progresso.js:105)
 
@@ -95,14 +95,14 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## regras/dados_base.js
 - ABILITIES:10 - chamado por: descricaoDeHabilidade (condicoes_habilidade.js:89), descricaoDeHabilidadePorId (condicoes_habilidade.js:100), expandirTextoDeHabilidade (condicoes_habilidade.js:111), nomesDeHabilidades (condicoes_habilidade.js:128), efeitoDasHabilidadesNoDuelo (duelo.js:1457), +23
-- ALL_NATURES:101 - chamado por: fecharBuild (pipeline_build.js:669), validateAiBuild (validacao_build_ia.js:214), myBuildEditorHtml (editor_build.js:223)
+- ALL_NATURES:101 - chamado por: fecharBuild (pipeline_build.js:695), validateAiBuild (validacao_build_ia.js:214), myBuildEditorHtml (editor_build.js:223)
 - EVOKINDS:13 - chamado por: evolveChainByX (evolucao.js:66), isMegaEvoKind (formas_mega.js:22), nivelDeEvolucaoDaForma (plano_build.js:68), evoConditionText (dex_ficha.js:88)
 - EVO_LEVEL:30 - chamado por: evolveChainByX (evolucao.js:66), nivelDeEvolucaoDaForma (plano_build.js:68)
 - EVO_LEVEL_FEMALE:32 - chamado por: evoConditionText (dex_ficha.js:88)
 - EVO_LEVEL_MALE:31 - chamado por: evoConditionText (dex_ficha.js:88)
 - EVO_MEGA_KINDS:34 - chamado por: isMegaEvoKind (formas_mega.js:22), evoConditionText (dex_ficha.js:88)
 - EVO_PRIMAL:33 - chamado por: isMegaEvoKind (formas_mega.js:22), evoConditionText (dex_ficha.js:88)
-- ITEMS:12 - chamado por: comoGarantir (condicoes_habilidade.js:172), garantiaDaCondicao (condicoes_habilidade.js:156), orientacaoMono (mono_run.js:145), pipelineEvioliteServe (pipeline_build.js:460), pipelineValidarRascunho (pipeline_build.js:465), +7
+- ITEMS:12 - chamado por: comoGarantir (condicoes_habilidade.js:172), garantiaDaCondicao (condicoes_habilidade.js:156), orientacaoMono (mono_run.js:145), pipelineEvioliteServe (pipeline_build.js:486), pipelineValidarRascunho (pipeline_build.js:491), +7
 - MAPS:49 - chamado por: howToObtainText (dex_ficha.js:245), whereToFindText (dex_ficha.js:275)
 - MONOTYPE_ARCHETYPES:154 - chamado por: applySave (save.js:43), archetypeCardHtml (arquetipo.js:85)
 - MOVES:11 - chamado por: golpesFuturosDe (builds.js:177), acertosDoGolpeDuelo (duelo.js:232), efeitoDoPlanoDuelo (duelo.js:3534), escolherProximoDoChefao (duelo.js:4065), golpeUtilNoDuelo (duelo.js:237), +22
@@ -111,7 +111,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - NATURE_MODS:90 - chamado por: calcFinalStat (calc_stat.js:119), conflitoDeNature (validacao_build_ia.js:119), validateAiBuild (validacao_build_ia.js:214)
 - PACE_ARCHETYPES:142 - chamado por: applySave (save.js:43), archetypeCardHtml (arquetipo.js:85)
 - ROLE_LABEL_PT:179 - chamado por: aiTool_getSpeciesRank (ferramentas_ia.js:24), blocoTimeEmUsoIA (prompts_ia.js:423), descricaoTimeParaGuia (prompts_ia.js:875), montarPromptTimeArquetipo (prompts_ia.js:823), nomePapel (prompts_ia.js:311), +2
-- SPECIES:52 - chamado por: computeSpeedTiers (chefoes.js:495), especieDaFormaDuelo (duelo.js:3486), buildStandardAiTools (ferramentas_ia.js:249), especiesQueResolvem (pipeline_build.js:610), montarTimePeloMotorEmPassos (time_pelo_motor.js:435), +3
+- SPECIES:52 - chamado por: computeSpeedTiers (chefoes.js:495), especieDaFormaDuelo (duelo.js:3486), buildStandardAiTools (ferramentas_ia.js:249), especiesQueResolvem (pipeline_build.js:636), montarTimePeloMotorEmPassos (time_pelo_motor.js:435), +3
 - SPECIES_BY_SNAME:72 - chamado por: snamesToXs (save.js:15)
 - SPLIT_LABEL_PT:180 - chamado por: aiTool_getSpeciesRank (ferramentas_ia.js:24), roleTagsHtml (dex_ficha.js:224)
 - SPLIT_STATUS:29 - chamado por: moveRoleOf (golpes.js:53), conflitoDeItem (validacao_build_ia.js:136), updateMyBuildStatus (editor_build.js:362)
@@ -131,31 +131,31 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - LIDO_PELO_TEXTO_NOVO_DUELO:201 - chamado por: expandirTextoDeHabilidade (condicoes_habilidade.js:111)
 - TEXTO_DA_VERSAO_NOVA_DUELO:50 - chamado por: expandirTextoDeHabilidade (condicoes_habilidade.js:111)
 - acertosDoGolpeDuelo:232 - chama: MOVES (dados_base.js:11)
-- aguentaUmGolpe:2246 - chamado por: pipelineAmeacasDePrioridade (pipeline_build.js:128), pipelineLinhaDoGolpe (pipeline_build.js:165)
+- aguentaUmGolpe:2246 - chamado por: pipelineAmeacasDePrioridade (pipeline_build.js:145), pipelineLinhaDoGolpe (pipeline_build.js:182)
 - armadoresDeClima:3206 - chama: habilidadeArma (condicoes_habilidade.js:125), uniqueIds (dados_base.js:118) | chamado por: motorCondicoes (time_pelo_motor_papeis.js:33)
 - aterradoDuelo:932 - chama: abilityTypeModFor (tipos.js:192)
-- bloqueiosNoDuelo:2716 - chamado por: pipelineLinhaDoGolpe (pipeline_build.js:165)
-- climaDoTimeDoChefao:3037 - chama: habilidadeArma (condicoes_habilidade.js:125), ABILITY_ID_BY_NAME (confronto.js:17), getSpeciesByX (dados_base.js:78), uniqueIds (dados_base.js:118) | chamado por: pipelineResolverAlvo (pipeline_build.js:68), motorMontarLuta (time_pelo_motor.js:79), motorMontarLutaComum (time_pelo_motor.js:90)
+- bloqueiosNoDuelo:2716 - chamado por: pipelineLinhaDoGolpe (pipeline_build.js:182)
+- climaDoTimeDoChefao:3037 - chama: habilidadeArma (condicoes_habilidade.js:125), ABILITY_ID_BY_NAME (confronto.js:17), getSpeciesByX (dados_base.js:78), uniqueIds (dados_base.js:118) | chamado por: pipelineResolverAlvo (pipeline_build.js:69), motorMontarLuta (time_pelo_motor.js:79), motorMontarLutaComum (time_pelo_motor.js:90)
 - comHabilidadesDuelo:3441 - chama: uniqueIds (dados_base.js:118)
 - conferirTimeComBuilds:3132 - chama: getActiveBuild (evolucao.js:16) | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337)
 - danoDoFuturoDuelo:2728 - chama: MOVE_ID_BY_NAME (dados_base.js:87)
 - danoNoDuelo:2043 - chama: CLIMA_OFICIAL (mono_run.js:133) | chamado por: motorProvasDosMembros (time_pelo_motor_papeis.js:157)
-- efeitoDasHabilidadesNoDuelo:1457 - chama: habilidadeArma (condicoes_habilidade.js:125), ABILITIES (dados_base.js:10), TYPES (dados_base.js:9), getSpeciesBySname (dados_base.js:79) | chamado por: pipelineSemRecuo (pipeline_build.js:453), pipelineTiposExtraDeStab (pipeline_build.js:397), validateAiBuild (validacao_build_ia.js:214)
+- efeitoDasHabilidadesNoDuelo:1457 - chama: habilidadeArma (condicoes_habilidade.js:125), ABILITIES (dados_base.js:10), TYPES (dados_base.js:9), getSpeciesBySname (dados_base.js:79) | chamado por: pipelineSemRecuo (pipeline_build.js:479), pipelineTiposExtraDeStab (pipeline_build.js:423), validateAiBuild (validacao_build_ia.js:214)
 - efeitoDoPlanoDuelo:3534 - chama: MOVES (dados_base.js:11)
 - efetividadeNoDuelo:1992 - chama: TYPE_MOD_ABILITIES (tipos.js:71), abilityTypeModFor (tipos.js:192), typeMultiplier (tipos.js:240)
 - entrarNoLadoDuelo:4013 - chama: typeMultiplier (tipos.js:240)
 - escolherProximoDoChefao:4065 - chama: MOVES (dados_base.js:11), TYPES (dados_base.js:9)
 - especieDaFormaDuelo:3486 - chama: SPECIES (dados_base.js:52)
-- foeDeDuelo:3012 - chama: calcFinalStat (calc_stat.js:119), ABILITY_ID_BY_NAME (confronto.js:17), MOVE_ID_BY_NAME (dados_base.js:87), getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), +1 | chamado por: pipelineResolverAlvo (pipeline_build.js:68), motorMontarLuta (time_pelo_motor.js:79), motorMontarLutaComum (time_pelo_motor.js:90)
-- foesComBuffsDoGinasio:4151 - chamado por: pipelineResolverAlvo (pipeline_build.js:68), motorMontarLuta (time_pelo_motor.js:79)
-- foesComRegraDeCampo:4175 - chamado por: pipelineResolverAlvo (pipeline_build.js:68), motorMontarLuta (time_pelo_motor.js:79)
+- foeDeDuelo:3012 - chama: calcFinalStat (calc_stat.js:119), ABILITY_ID_BY_NAME (confronto.js:17), MOVE_ID_BY_NAME (dados_base.js:87), getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), +1 | chamado por: pipelineResolverAlvo (pipeline_build.js:69), motorMontarLuta (time_pelo_motor.js:79), motorMontarLutaComum (time_pelo_motor.js:90)
+- foesComBuffsDoGinasio:4151 - chamado por: pipelineResolverAlvo (pipeline_build.js:69), motorMontarLuta (time_pelo_motor.js:79)
+- foesComRegraDeCampo:4175 - chamado por: pipelineResolverAlvo (pipeline_build.js:69), motorMontarLuta (time_pelo_motor.js:79)
 - golpeUtilNoDuelo:237 - chama: MOVES (dados_base.js:11)
-- golpesDeDueloAte:265 - chama: uniqueIds (dados_base.js:118) | chamado por: pipelineCandidatos (pipeline_build.js:493)
+- golpesDeDueloAte:265 - chama: uniqueIds (dados_base.js:118) | chamado por: pipelineCandidatos (pipeline_build.js:519)
 - golpesDeRecargaAte:258 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:118)
 - golpesDeStatusAte:271 - chama: uniqueIds (dados_base.js:118)
-- golpesNecessariosComPrimeiroDuelo:2238 - chamado por: pipelineAvaliarConjunto (pipeline_build.js:258), pipelineLinhaDoGolpe (pipeline_build.js:165)
-- golpesNecessariosDuelo:2236 - chamado por: pipelineAmeacasDePrioridade (pipeline_build.js:128)
-- habilidadeSemRegraNoDuelo:1764 - chama: habilidadeArma (condicoes_habilidade.js:125), ABILITIES (dados_base.js:10), TYPE_MOD_ABILITIES (tipos.js:71) | chamado por: pipelineHabilidadesSemRegra (pipeline_build.js:353)
+- golpesNecessariosComPrimeiroDuelo:2238 - chamado por: pipelineAvaliarConjunto (pipeline_build.js:276), pipelineLinhaDoGolpe (pipeline_build.js:182)
+- golpesNecessariosDuelo:2236 - chamado por: pipelineAmeacasDePrioridade (pipeline_build.js:145)
+- habilidadeSemRegraNoDuelo:1764 - chama: habilidadeArma (condicoes_habilidade.js:125), ABILITIES (dados_base.js:10), TYPE_MOD_ABILITIES (tipos.js:71) | chamado por: pipelineHabilidadesSemRegra (pipeline_build.js:379)
 - inicioDaLutaComBuffs:4196 - chamado por: motorMontarLuta (time_pelo_motor.js:79)
 - itemDoDuelo:978 - chama: isMegaEvoKind (formas_mega.js:22), speciesTypeNames (tipos.js:250)
 - itemDoSetDuelo:1060 - chama: isMegaEvoKind (formas_mega.js:22), speciesTypeNames (tipos.js:250)
@@ -166,28 +166,28 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - modoHellDuelo:340 - chama: state (nucleo.js:8)
 - montarTimeContraChefaoEmPassos:4650 - chamado por: simularSemTravarATela (aba_chefoes.js:324)
 - montarTimeNoClimaEmPassos:4518 - chama: ABILITY_ID_BY_NAME (confronto.js:17), CLIMA_OFICIAL (mono_run.js:133)
-- nomeHabDuelo:46 - chama: ABILITIES (dados_base.js:10) | chamado por: pipelineCandidatos (pipeline_build.js:493), pipelineHabilidadesSemRegra (pipeline_build.js:353)
+- nomeHabDuelo:46 - chama: ABILITIES (dados_base.js:10) | chamado por: pipelineCandidatos (pipeline_build.js:519), pipelineHabilidadesSemRegra (pipeline_build.js:379)
 - novoLadoDuelo:3956 - chamado por: motorGanhoDaCondicao (time_pelo_motor_papeis.js:56), motorSimularComClima (time_pelo_motor_papeis.js:143)
 - planoDoGolpeStatus:3238 - chamado por: motorUnidade (time_pelo_motor.js:236), motorCondicoes (time_pelo_motor_papeis.js:33), motorTemTipo (time_pelo_motor_papeis.js:202)
 - planosUteisDuelo:3305 - chama: MOVES (dados_base.js:11), TYPES (dados_base.js:9)
 - poderDoDadoDuelo:2224 - chama: MOVES (dados_base.js:11), MOVE_ID_BY_NAME (dados_base.js:87)
 - poderDoGolpeDuelo:567 - chama: MOVES (dados_base.js:11), MOVE_ID_BY_NAME (dados_base.js:87)
 - prepararGolpesDuelo:1826 - chama: MOVES (dados_base.js:11), TYPES (dados_base.js:9), CLIMA_OFICIAL (mono_run.js:133)
-- prioBloqueadaPelaHabilidadeDuelo:1812 - chamado por: pipelineAmeacasDePrioridade (pipeline_build.js:128)
+- prioBloqueadaPelaHabilidadeDuelo:1812 - chamado por: pipelineAmeacasDePrioridade (pipeline_build.js:145)
 - quatroGolpesDeDano:3095 - chama: MOVE_ID_BY_NAME (dados_base.js:87)
-- resultadoDoDuelo:2741 - chamado por: pipelineDuelo (pipeline_build.js:155), motorGanhoDaCondicao (time_pelo_motor_papeis.js:56)
+- resultadoDoDuelo:2741 - chamado por: pipelineDuelo (pipeline_build.js:172), motorGanhoDaCondicao (time_pelo_motor_papeis.js:56)
 - resumoProvadoPeloSimulador:3117 - chama: MOVES (dados_base.js:11) | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337)
 - semGolpesDeLadoDuelo:4626 - chamado por: motorTemGolpeDeLado (time_pelo_motor.js:277)
 - simularDuplaContraChefao:3744 - chamado por: motorSimular (time_pelo_motor.js:248)
 - simularLutaContraChefao:4228 - chamado por: motorSimular (time_pelo_motor.js:248), motorLutaDetalhada (time_pelo_motor_papeis.js:136), motorSimularComClima (time_pelo_motor_papeis.js:143)
 - simularLutaDeVerdadeContraChefao:4236 - chama: typeMultiplier (tipos.js:240)
-- sinergiasDaEspecie:1406 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:118) | chamado por: aiTool_getAbilityMovepoolSynergy (ferramentas_ia.js:75), pipelineSinergiasAtivas (pipeline_build.js:214), linhasContextoDaEspecieIA (prompts_ia.js:552), habilidadeSubstitutaPara (reconciliar_build.js:26), validateAiBuild (validacao_build_ia.js:214), +2
-- temPrioridadeNoCampoDuelo:2292 - chamado por: pipelineLinhaDoGolpe (pipeline_build.js:165)
+- sinergiasDaEspecie:1406 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:118) | chamado por: aiTool_getAbilityMovepoolSynergy (ferramentas_ia.js:75), pipelineSinergiasAtivas (pipeline_build.js:231), linhasContextoDaEspecieIA (prompts_ia.js:552), habilidadeSubstitutaPara (reconciliar_build.js:26), validateAiBuild (validacao_build_ia.js:214), +2
+- temPrioridadeNoCampoDuelo:2292 - chamado por: pipelineLinhaDoGolpe (pipeline_build.js:182)
 - textoHabDuelo:203 - chama: descricaoDeHabilidadePorId (condicoes_habilidade.js:100), expandirTextoDeHabilidade (condicoes_habilidade.js:111), ABILITIES (dados_base.js:10)
 - tipoDoTextoDuelo:292 - chama: TYPES (dados_base.js:9)
 - tiposNaBatalha:3008 - chama: speciesTypeNames (tipos.js:250)
 - totalDePassosContraChefao:4649 - chamado por: simularSemTravarATela (aba_chefoes.js:324)
-- unidadeDaBuild:3145 - chama: ABILITY_ID_BY_NAME (confronto.js:17), MOVE_ID_BY_NAME (dados_base.js:87) | chamado por: pipelineTabela (pipeline_build.js:228), motorUnidade (time_pelo_motor.js:236), motorGanhoDaCondicao (time_pelo_motor_papeis.js:56), motorSimularComClima (time_pelo_motor_papeis.js:143)
+- unidadeDaBuild:3145 - chama: ABILITY_ID_BY_NAME (confronto.js:17), MOVE_ID_BY_NAME (dados_base.js:87) | chamado por: pipelineTabela (pipeline_build.js:245), motorUnidade (time_pelo_motor.js:236), motorGanhoDaCondicao (time_pelo_motor_papeis.js:56), motorSimularComClima (time_pelo_motor_papeis.js:143)
 - unidadeDeDuelo:3048 - chama: calcFinalStat (calc_stat.js:119), uniqueIds (dados_base.js:118), innatesAtivasNoNivel (level_cap.js:34) | chamado por: motorItensCandidatos (time_pelo_motor.js:371)
 - unidadeSemClima:3158 - chamado por: motorSimularComClima (time_pelo_motor_papeis.js:143)
 
@@ -195,9 +195,9 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - blocoDeCandidatosParaIA:33 - chama: dadoExterno (golpes.js:19), speciesTypeNames (tipos.js:250)
 - blocoPlanoCurtoIA:72 - chama: golpesFuturosDe (builds.js:177), MOVES (dados_base.js:11), TYPES (dados_base.js:9), SIGLA_CATEGORIA (golpes.js:27), dadoExterno (golpes.js:19), +2
 - blocoTimeCurtoIA:55 - chama: MAX_MESMO_ITEM_NO_TIME (builds.js:150), itensEmUsoComQuem (builds.js:151), teamMovesInUse (builds.js:123), teamRolesInUse (builds.js:163), getSpeciesByX (dados_base.js:78), +3
-- candidatosParaAEscolhaDaIa:201 - chama: candidatosDeBuild (pipeline_build.js:489) | chamado por: generateBuildWithAI (ia.js:278), gerarBuildsDoTimeComIA (ia.js:176)
+- candidatosParaAEscolhaDaIa:201 - chama: candidatosDeBuild (pipeline_build.js:515) | chamado por: generateBuildWithAI (ia.js:278), gerarBuildsDoTimeComIA (ia.js:176)
 - escolherCandidatoDaIa:168 - chamado por: generateBuildWithAI (ia.js:278), gerarBuildsDoTimeComIA (ia.js:176)
-- fecharCandidatoDaEscolha:142 - chama: validarRespostaDeBuildDaIa (gravacao_build_ia.js:26), fecharBuild (pipeline_build.js:669)
+- fecharCandidatoDaEscolha:142 - chama: validarRespostaDeBuildDaIa (gravacao_build_ia.js:26), fecharBuild (pipeline_build.js:695)
 - linhaDeFraquezasDoTimeIA:51 - chama: computeSharedRisks (chefoes.js:109)
 - linhaDePapelNaturalIA:47 - chama: nomePapel (prompts_ia.js:311)
 - linhaDoChefaoPorEspecieIA:68 - chama: dadoExterno (golpes.js:19), linhaProvadoIA (prompts_ia.js:600)
@@ -241,7 +241,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - MEGA_UNLOCK_MILESTONE:87 - chamado por: etapaDaPedra (liberado_na_run.js:16)
 - ROTULO_ETAPA_MEGA:149 - chamado por: avisosDaBuild (avisos_build.js:8)
 - battleFamilyOf:175 - chamado por: rosterParaTimeIA (prompts_ia.js:777)
-- battleUnitsOf:219 - chamado por: bestBoxCandidateForBoss (chefoes.js:183), bestRankForm (chefoes.js:333), confrontoMelhorUnidade (chefoes.js:269), especiesQueResolvem (pipeline_build.js:610), motorCandidatosEmPassos (time_pelo_motor.js:206), +3
+- battleUnitsOf:219 - chamado por: bestBoxCandidateForBoss (chefoes.js:183), bestRankForm (chefoes.js:333), confrontoMelhorUnidade (chefoes.js:269), especiesQueResolvem (pipeline_build.js:636), motorCandidatosEmPassos (time_pelo_motor.js:206), +3
 - etapaDaMega:151 - chama: etapaDaPedra (liberado_na_run.js:16)
 - formFamilyOf:58 - chama: getSpeciesByX (dados_base.js:78) | chamado por: mudancaDeTipo (mono_run.js:96), applyRecommendedTeam (arquetipo.js:207), otherFormsHtml (ficha_extras.js:206)
 - formFamilyPromptNote:39 - chama: ABILITIES (dados_base.js:10), uniqueIds (dados_base.js:118), rankDe (rank_da_run.js:28), speciesTypeNames (tipos.js:250) | chamado por: blocoMegaIA (prompts_ia.js:354), descricaoTimeParaGuia (prompts_ia.js:875), montarPromptTimeArquetipo (prompts_ia.js:823)
@@ -276,28 +276,28 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - respostaDaIaObsoleta:55 - chama: getActiveBuild (evolucao.js:16), state (nucleo.js:8)
 - textoDaRetentativaDeBuild:35 - chamado por: generateBuildWithAI (ia.js:278)
 - textoDeLimiteDeBuilds:61 - chamado por: gerarBuildsDoTimeComIA (ia.js:176)
-- validarRespostaDeBuildDaIa:26 - chama: contextoDeValidacao (validacao_build_ia.js:197), validateAiBuild (validacao_build_ia.js:214) | chamado por: fecharCandidatoDaEscolha (escolha_ia_candidatos.js:142), fecharBuild (pipeline_build.js:669), generateBuildWithAI (ia.js:278)
+- validarRespostaDeBuildDaIa:26 - chama: contextoDeValidacao (validacao_build_ia.js:197), validateAiBuild (validacao_build_ia.js:214) | chamado por: fecharCandidatoDaEscolha (escolha_ia_candidatos.js:142), fecharBuild (pipeline_build.js:695), generateBuildWithAI (ia.js:278)
 - validarRespostaDoLoteDeBuilds:40 - chamado por: gerarBuildsDoTimeComIA (ia.js:176)
 
 ## regras/level_cap.js
 - LEVEL_CAP_MODES:15 - chamado por: applySave (save.js:43), initProgress (progresso.js:105)
 - NIVEL_DA_INNATE_ELITE:33 - chamado por: blocoEspecieIA (prompts_ia.js:285)
-- availableMovesFor:71 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:118), liberadoNaRun (liberado_na_run.js:23), state (nucleo.js:8) | chamado por: confrontoUnitOf (chefoes.js:233), comoGarantir (condicoes_habilidade.js:172), precisaDeSetter (condicoes_habilidade.js:214), aiTool_getPriorityMoveOptions (ferramentas_ia.js:51), pipelineCandidatos (pipeline_build.js:493), +5
+- availableMovesFor:71 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:118), liberadoNaRun (liberado_na_run.js:23), state (nucleo.js:8) | chamado por: confrontoUnitOf (chefoes.js:233), comoGarantir (condicoes_habilidade.js:172), precisaDeSetter (condicoes_habilidade.js:214), aiTool_getPriorityMoveOptions (ferramentas_ia.js:51), pipelineCandidatos (pipeline_build.js:519), +5
 - capOuPadrao:59 - chamado por: gravarRespostaValidadaDaIa (gravacao_build_ia.js:105), contextoDoMotor (time_pelo_motor.js:141), montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorChave (modo_motor.js:22)
 - getCurrentCap:49 - chama: state (nucleo.js:8) | chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:200), entradaDeBuild (builds.js:23), blocoPlanoCurtoIA (escolha_ia_candidatos.js:72), montarPromptEscolhaDeBuild (escolha_ia_candidatos.js:86), +23
 - golpesTravadosNoCap:88 - chama: MOVE_ID_BY_NAME (dados_base.js:87), liberadoNaRun (liberado_na_run.js:23), state (nucleo.js:8) | chamado por: avisosDaBuild (avisos_build.js:8), contextoDoModoPrompt (prompts_ia.js:168), entradaDaCuradaParaTimeNovo (validacao_build_ia.js:517), processarRevisoes (revisao_automatica.js:72), tarefaDeRevisao (revisao_automatica.js:24)
-- innatesAtivasNoNivel:34 - chama: state (nucleo.js:8) | chamado por: unidadeDeDuelo (duelo.js:3048), pipelineCandidatos (pipeline_build.js:493)
+- innatesAtivasNoNivel:34 - chama: state (nucleo.js:8) | chamado por: unidadeDeDuelo (duelo.js:3048), pipelineCandidatos (pipeline_build.js:519)
 - innatesTravadasNoNivel:44 - chamado por: blocoEspecieIA (prompts_ia.js:285)
 - levelCapMode:16 - chama: state (nucleo.js:8) | chamado por: motorChaveDoContexto (time_pelo_motor.js:169), motorNivelDaEtapa (time_pelo_motor.js:73), modoMotorChave (modo_motor.js:22), initProgress (progresso.js:105)
 - levelCapModeFromDifficulty:22 - chamado por: applySave (save.js:43)
 - nivelDaHabilidadeNoElite:40 - chama: nomesDeHabilidades (condicoes_habilidade.js:128) | chamado por: marcasDoRankHtml (dex_ficha.js:297)
-- nivelDeCalculo:63 - chamado por: computeSpeedTiers (chefoes.js:495), pipelineResolverAlvo (pipeline_build.js:68), blocoEspecieIA (prompts_ia.js:285), validateAiBuild (validacao_build_ia.js:214), montarTimeContraEsteChefao (aba_chefoes.js:337), +5
+- nivelDeCalculo:63 - chamado por: computeSpeedTiers (chefoes.js:495), pipelineResolverAlvo (pipeline_build.js:69), blocoEspecieIA (prompts_ia.js:285), validateAiBuild (validacao_build_ia.js:214), montarTimeContraEsteChefao (aba_chefoes.js:337), +5
 
 ## regras/liberado_na_run.js
 - entradasDoJogador:34 - chama: state (nucleo.js:8) | chamado por: applyRecommendedTeam (arquetipo.js:207), monoRunCardHtml (arquetipo.js:516)
 - etapaDaPedra:16 - chama: MEGA_PEDRAS_TARDIAS (formas_mega.js:103), MEGA_UNLOCK_MILESTONE (formas_mega.js:87) | chamado por: avisosDaBuild (avisos_build.js:8), etapaDaMega (formas_mega.js:151)
-- etapaDoItem:18 - chama: primeiroLugarDoItem (avisos_build.js:94) | chamado por: pipelineEvioliteServe (pipeline_build.js:460)
-- liberadoNaRun:23 - chamado por: avisosDaBuild (avisos_build.js:8), availableMovesFor (level_cap.js:71), golpesTravadosNoCap (level_cap.js:88), pipelineEvioliteServe (pipeline_build.js:460), itensAindaIndisponiveisParaIA (prompts_ia.js:382), +3
+- etapaDoItem:18 - chama: primeiroLugarDoItem (avisos_build.js:94) | chamado por: pipelineEvioliteServe (pipeline_build.js:486)
+- liberadoNaRun:23 - chamado por: avisosDaBuild (avisos_build.js:8), availableMovesFor (level_cap.js:71), golpesTravadosNoCap (level_cap.js:88), pipelineEvioliteServe (pipeline_build.js:486), itensAindaIndisponiveisParaIA (prompts_ia.js:382), +3
 - xsDoJogador:38 - chamado por: rosterParaTimeIA (prompts_ia.js:777), viramDoTipoPrompt (prompts_ia.js:812), contextoDoMotor (time_pelo_motor.js:141), candidatosDoJogador (aba_chefoes.js:248), modoMotorCapturados (modo_motor.js:27), +2
 
 ## regras/lista_de_builds.js
@@ -321,28 +321,28 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - mudancaDeTipo:96 - chama: formFamilyOf (formas_mega.js:58), isMegaForm (formas_mega.js:64), speciesTypeNames (tipos.js:250) | chamado por: notaMonoDoCandidato (prompts_ia.js:806), viramDoTipoPrompt (prompts_ia.js:812)
 - orientacaoMono:145 - chama: ITEMS (dados_base.js:12) | chamado por: archetypeBuildGuidance (prompts_ia.js:141), montarPromptTimeArquetipo (prompts_ia.js:823)
 - resistemAoTipo:84 - chama: USABLE_TYPES (dados_base.js:128), typeMultiplier (tipos.js:240)
-- serveProMono:75 - chama: speciesTypeNames (tipos.js:250) | chamado por: bestBoxCandidateForBoss (chefoes.js:183), confrontoUnidadesDaCaixa (chefoes.js:289), especiesQueResolvem (pipeline_build.js:610), motorCandidatosEmPassos (time_pelo_motor.js:206), motorClassificar (time_pelo_motor_papeis.js:207), +2
+- serveProMono:75 - chama: speciesTypeNames (tipos.js:250) | chamado por: bestBoxCandidateForBoss (chefoes.js:183), confrontoUnidadesDaCaixa (chefoes.js:289), especiesQueResolvem (pipeline_build.js:636), motorCandidatosEmPassos (time_pelo_motor.js:206), motorClassificar (time_pelo_motor_papeis.js:207), +2
 
 ## regras/pipeline_build.js
-- candidatosDeBuild:489 - chamado por: candidatosParaAEscolhaDaIa (escolha_ia_candidatos.js:201), pipelineResultado (pipeline_tela.js:14)
-- especiesQueResolvem:610 - chama: SPECIES (dados_base.js:52), getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:219), serveProMono (mono_run.js:75), rankDe (rank_da_run.js:28), +1 | chamado por: quemResolveCalcular (quem_resolve.js:22)
-- fecharBuild:669 - chama: ALL_NATURES (dados_base.js:101), getSpeciesBySname (dados_base.js:79), validarRespostaDeBuildDaIa (gravacao_build_ia.js:26), megaStoneRuleFor (validacao_build_ia.js:14) | chamado por: fecharCandidatoDaEscolha (escolha_ia_candidatos.js:142)
-- pipelineAmeacasDePrioridade:128 - chama: aguentaUmGolpe (duelo.js:2246), golpesNecessariosDuelo (duelo.js:2236), prioBloqueadaPelaHabilidadeDuelo (duelo.js:1812)
-- pipelineAvaliarConjunto:258 - chama: golpesNecessariosComPrimeiroDuelo (duelo.js:2238)
-- pipelineCandidatos:493 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:118), golpesDeDueloAte (duelo.js:265), nomeHabDuelo (duelo.js:46), moveRoleOf (golpes.js:53), +4 | chamado por: motorBuildDoCandidato (time_pelo_motor.js:170)
-- pipelineDuelo:155 - chama: resultadoDoDuelo (duelo.js:2741)
+- candidatosDeBuild:515 - chamado por: candidatosParaAEscolhaDaIa (escolha_ia_candidatos.js:201), pipelineResultado (pipeline_tela.js:14)
+- especiesQueResolvem:636 - chama: SPECIES (dados_base.js:52), getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:219), serveProMono (mono_run.js:75), rankDe (rank_da_run.js:28), +1 | chamado por: quemResolveCalcular (quem_resolve.js:22)
+- fecharBuild:695 - chama: ALL_NATURES (dados_base.js:101), getSpeciesBySname (dados_base.js:79), validarRespostaDeBuildDaIa (gravacao_build_ia.js:26), megaStoneRuleFor (validacao_build_ia.js:14) | chamado por: fecharCandidatoDaEscolha (escolha_ia_candidatos.js:142)
+- pipelineAmeacasDePrioridade:145 - chama: aguentaUmGolpe (duelo.js:2246), golpesNecessariosDuelo (duelo.js:2236), prioBloqueadaPelaHabilidadeDuelo (duelo.js:1812)
+- pipelineAvaliarConjunto:276 - chama: golpesNecessariosComPrimeiroDuelo (duelo.js:2238)
+- pipelineCandidatos:519 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:118), golpesDeDueloAte (duelo.js:265), nomeHabDuelo (duelo.js:46), moveRoleOf (golpes.js:53), +4 | chamado por: motorBuildDoCandidato (time_pelo_motor.js:170)
+- pipelineDuelo:172 - chama: resultadoDoDuelo (duelo.js:2741)
 - pipelineEspecie:59 - chama: getSpeciesBySname (dados_base.js:79)
-- pipelineEvioliteServe:460 - chama: ITEMS (dados_base.js:12), getCurrentCap (level_cap.js:49), etapaDoItem (liberado_na_run.js:18), liberadoNaRun (liberado_na_run.js:23), evoluiAinda (validacao_build_ia.js:108), +1
-- pipelineGolpesComRecuo:446 - chama: MOVE_ID_BY_NAME (dados_base.js:87)
-- pipelineHabilidadesSemRegra:353 - chama: ABILITY_ID_BY_NAME (confronto.js:17), habilidadeSemRegraNoDuelo (duelo.js:1764), nomeHabDuelo (duelo.js:46)
-- pipelineLinhaDoGolpe:165 - chama: aguentaUmGolpe (duelo.js:2246), bloqueiosNoDuelo (duelo.js:2716), golpesNecessariosComPrimeiroDuelo (duelo.js:2238), temPrioridadeNoCampoDuelo (duelo.js:2292)
-- pipelineMontarConjunto:300 - chama: moveRoleOf (golpes.js:53)
-- pipelineResolverAlvo:68 - chama: LUTAS_DA_RUN (chefoes.js:314), bossPartyPorDificuldade (chefoes.js:327), buffsAtivosDoChefao (chefoes.js:482), getRemainingBossEntries (chefoes.js:51), regraDeCampoDoChefao (chefoes.js:416), +5 | chamado por: motorBuildDoCandidato (time_pelo_motor.js:170)
-- pipelineSemRecuo:453 - chama: ABILITY_ID_BY_NAME (confronto.js:17), uniqueIds (dados_base.js:118), efeitoDasHabilidadesNoDuelo (duelo.js:1457)
-- pipelineSinergiasAtivas:214 - chama: sinergiasDaEspecie (duelo.js:1406)
-- pipelineTabela:228 - chama: unidadeDaBuild (duelo.js:3145)
-- pipelineTiposExtraDeStab:397 - chama: ABILITY_ID_BY_NAME (confronto.js:17), uniqueIds (dados_base.js:118), efeitoDasHabilidadesNoDuelo (duelo.js:1457)
-- pipelineValidarRascunho:465 - chama: ITEMS (dados_base.js:12), megaStoneRuleFor (validacao_build_ia.js:14), validateAiBuild (validacao_build_ia.js:214)
+- pipelineEvioliteServe:486 - chama: ITEMS (dados_base.js:12), getCurrentCap (level_cap.js:49), etapaDoItem (liberado_na_run.js:18), liberadoNaRun (liberado_na_run.js:23), evoluiAinda (validacao_build_ia.js:108), +1
+- pipelineGolpesComRecuo:472 - chama: MOVE_ID_BY_NAME (dados_base.js:87)
+- pipelineHabilidadesSemRegra:379 - chama: ABILITY_ID_BY_NAME (confronto.js:17), habilidadeSemRegraNoDuelo (duelo.js:1764), nomeHabDuelo (duelo.js:46)
+- pipelineLinhaDoGolpe:182 - chama: aguentaUmGolpe (duelo.js:2246), bloqueiosNoDuelo (duelo.js:2716), golpesNecessariosComPrimeiroDuelo (duelo.js:2238), temPrioridadeNoCampoDuelo (duelo.js:2292)
+- pipelineMontarConjunto:326 - chama: moveRoleOf (golpes.js:53)
+- pipelineResolverAlvo:69 - chama: DIFF_TO_BOSSKEY (chefoes.js:19), LUTAS_DA_RUN (chefoes.js:314), bossPartyPorDificuldade (chefoes.js:327), buffsAtivosDoChefao (chefoes.js:482), getRemainingBossEntries (chefoes.js:51), +7 | chamado por: motorBuildDoCandidato (time_pelo_motor.js:170)
+- pipelineSemRecuo:479 - chama: ABILITY_ID_BY_NAME (confronto.js:17), uniqueIds (dados_base.js:118), efeitoDasHabilidadesNoDuelo (duelo.js:1457)
+- pipelineSinergiasAtivas:231 - chama: sinergiasDaEspecie (duelo.js:1406)
+- pipelineTabela:245 - chama: unidadeDaBuild (duelo.js:3145)
+- pipelineTiposExtraDeStab:423 - chama: ABILITY_ID_BY_NAME (confronto.js:17), uniqueIds (dados_base.js:118), efeitoDasHabilidadesNoDuelo (duelo.js:1457)
+- pipelineValidarRascunho:491 - chama: ITEMS (dados_base.js:12), megaStoneRuleFor (validacao_build_ia.js:14), validateAiBuild (validacao_build_ia.js:214)
 
 ## regras/plano_build.js
 - ESTILO_ROTULO:20 - chamado por: rotuloDaBuild (ficha_extras.js:170)
@@ -491,10 +491,10 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - conflitoDeNature:119 - chama: MOVE_BY_NAME (dados_base.js:86), NATURE_MODS (dados_base.js:90), moveRoleOf (golpes.js:53), state (nucleo.js:8)
 - contextoDeValidacao:197 - chama: buffsAtivosDoChefao (chefoes.js:482), ABILITIES (dados_base.js:10), uniqueIds (dados_base.js:118) | chamado por: buildDoLoteDeBuilds (gravacao_build_ia.js:45), validarRespostaDeBuildDaIa (gravacao_build_ia.js:26)
 - entradaDaCuradaParaTimeNovo:517 - chama: MAX_MESMO_ITEM_NO_TIME (builds.js:150), itensEmUsoComQuem (builds.js:151), stripNote (builds.js:49), ABILITIES (dados_base.js:10), uniqueIds (dados_base.js:118), +2 | chamado por: aplicarCuradaNoTimeNovo (ia.js:153)
-- evoluiAinda:108 - chamado por: pipelineEvioliteServe (pipeline_build.js:460), blocoPapelIA (prompts_ia.js:312)
+- evoluiAinda:108 - chamado por: pipelineEvioliteServe (pipeline_build.js:486), blocoPapelIA (prompts_ia.js:312)
 - limitarEvsAoJogo:169 - chama: clampInt (dados_base.js:103)
-- megaStoneRuleFor:14 - chama: isMegaForm (formas_mega.js:64), megaMode (formas_mega.js:75), stonesOf (formas_mega.js:209) | chamado por: avisosDaBuild (avisos_build.js:8), comoGarantir (condicoes_habilidade.js:172), fecharBuild (pipeline_build.js:669), pipelineValidarRascunho (pipeline_build.js:465), blocoMegaIA (prompts_ia.js:354), +1
+- megaStoneRuleFor:14 - chama: isMegaForm (formas_mega.js:64), megaMode (formas_mega.js:75), stonesOf (formas_mega.js:209) | chamado por: avisosDaBuild (avisos_build.js:8), comoGarantir (condicoes_habilidade.js:172), fecharBuild (pipeline_build.js:695), pipelineValidarRascunho (pipeline_build.js:491), blocoMegaIA (prompts_ia.js:354), +1
 - regraItemConsumivelPara:47 - chama: ABILITIES (dados_base.js:10), uniqueIds (dados_base.js:118)
 - regraItemConsumivelPrompt:57 - chama: ABILITIES (dados_base.js:10), uniqueIds (dados_base.js:118) | chamado por: blocoItensDaEspecieIA (prompts_ia.js:370)
 - setsValidosDaResposta:482 - chamado por: generateStrategySets (revisao_automatica.js:182)
-- validateAiBuild:214 - chama: MAX_MESMO_ITEM_NO_TIME (builds.js:150), itensEmUsoComQuem (builds.js:151), trimAndReallocateEvs (calc_stat.js:195), condicaoDaBuild (condicoes_habilidade.js:191), ABILITY_ID_BY_NAME (confronto.js:17), +20 | chamado por: buildDoLoteDeBuilds (gravacao_build_ia.js:45), validarRespostaDeBuildDaIa (gravacao_build_ia.js:26), pipelineValidarRascunho (pipeline_build.js:465)
+- validateAiBuild:214 - chama: MAX_MESMO_ITEM_NO_TIME (builds.js:150), itensEmUsoComQuem (builds.js:151), trimAndReallocateEvs (calc_stat.js:195), condicaoDaBuild (condicoes_habilidade.js:191), ABILITY_ID_BY_NAME (confronto.js:17), +20 | chamado por: buildDoLoteDeBuilds (gravacao_build_ia.js:45), validarRespostaDeBuildDaIa (gravacao_build_ia.js:26), pipelineValidarRascunho (pipeline_build.js:491)
