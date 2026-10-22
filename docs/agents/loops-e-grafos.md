@@ -43,6 +43,7 @@ orquestrador: revisão final (G e mecânica) → junção → portão completo �
 6. **Registrar**: o orquestrador grava o resultado do nó no Ruflo (§5).
 
 ## 4. Regras que economizam voltas e tokens
+- **Portão pesado só na junção (usuário, 22/10/2026):** o executor commita no branch com `ER_WIP=1 git commit` (o gancho roda só o nível 0; nunca --no-verify) e o `verificador` roda sabotagem + navegador UMA vez antes da junção no master. Correção de REFAZER vai para um agente novo com resumo curto quando o contexto do executor estiver grande.
 - Prompt de nó fechado: nó do grafo, entrada, critério de aceite, caso de dado real, arquivos permitidos, "relatório curto e pare".
 - Executor não roda suíte nem sabotagem completas: só os testes do que mudou; o resto é do `verificador`.
 - Agente da equipe: chamar pelo `subagent_type` SEM `model` (o cabeçalho manda); agente genérico: `model: "haiku"` ou `"sonnet"`.
