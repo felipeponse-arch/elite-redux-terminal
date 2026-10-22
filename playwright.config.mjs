@@ -58,6 +58,7 @@ export default defineConfig({
     command: `node scripts/servidor_estatico.mjs ${PORTA}`,
     url: `http://127.0.0.1:${PORTA}/artifact_final.html`,
     reuseExistingServer: !noCI,
-    timeout: 30_000,
+    // 120 s: no runner do GitHub o servidor estático passou dos 30 s em 21/10/2026.
+    timeout: 120_000,
   },
 });

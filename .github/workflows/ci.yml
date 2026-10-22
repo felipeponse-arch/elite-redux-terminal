@@ -105,8 +105,11 @@ jobs:
         run: npm run test:visual
 
       # Relatório HTML + prints, traces e diferenças visuais de cada falha.
+      # Só quando algo falha, por 3 dias e sem derrubar o job: a cota de armazenamento
+      # de artefatos do GitHub esgotou em 21/10/2026 e o upload passou a falhar o CI.
       - name: Guarda o relatório dos testes
-        if: ${{ !cancelled() }}
+        if: ${{ failure() }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: relatorio-playwright
@@ -116,4 +119,4 @@ jobs:
             test-results/
             test-results-visual/
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 3
