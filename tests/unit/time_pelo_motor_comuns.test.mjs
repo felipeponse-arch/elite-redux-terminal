@@ -95,7 +95,7 @@ test("sem o arquivo das comuns o juiz é só dos chefões (como antes), e a mont
   const v = r.variantes[0];
   assert.equal(v.membros.length, 6);
   assert.ok(v.metricas.comuns && v.metricas.comuns.lutas >= 10 && v.metricas.comuns.vence <= v.metricas.comuns.lutas, JSON.stringify(v.metricas.comuns));
-  const time6 = v.membros.map((m) => base.R.motorCandidatos(base.ctx, [], []).find((c) => c.sname === m.sname));
+  const time6 = v.membros.map((m) => { const c = base.R.motorCandidatos(base.ctx, [], []).find((c) => c.sname === m.sname); return m.build.item && !c.build.item ? base.R.motorComItem(c, m.build.item) : c; }); // item fechado pelo motor entra na conta
   assert.ok(Math.abs(v.metricas.objetivo - Math.round(base.R.motorValorDoObjetivo(base.ctx, base.R.MOTOR_OBJETIVOS.seguro, time6) * 1e4) / 1e4) < 1e-9,
     "a métrica do objetivo é a da fatia");
 });

@@ -1,6 +1,6 @@
 # Ticket 01 — Modo Motor não indica item na build
 
-Status: a-avaliar
+Status: resolvido-no-branch (motor-item-01; falta junção no master pelo verificador)
 Tamanho: M. Relaciona: time-pelo-motor/01 (Fase C), divida-tecnica 05 (liberado_na_run), pipeline-build-2026-10-14.
 
 ## Sintoma
@@ -36,3 +36,11 @@ Recomendo A com B como degrau. Regra nova de item no pipeline/simulação muda n
 - Mesmo item em "Ficar com este time" gravado no save (origem `sugestao`) e na tela.
 - Etapa 2 sem item caro não liberado (sem aviso falso).
 - Determinismo (mesma entrada, mesmo resultado) e cache mantidos; rank/baselines revisados só com aprovação.
+
+## Decisões (usuário, 22/10/2026)
+1. Opção A: o motor fecha o item. Depois da busca, cada membro sem item (origem pipeline/fallback; build salva do jogador nunca é mexida) testa itens liberados na Etapa (liberadoNaRun) que o motor simula e fica com o que mais sobe a nota na luta completa (o juiz da busca). Exceções que já existiam (pedra da Mega temporária, Eviolite, Berry de habilidade) seguem. Item não liberado nunca.
+2. Antes do rank final: o rank (scripts/calcular_rank_v2.mjs) NÃO usa este caminho (escolhe o set por melhorUnidadeContra, que já usa itemDoSetDuelo); nada muda nele. Rank não foi rodado.
+
+## Implementação (src/regras/time_pelo_motor.js, motorFecharItens)
+Candidatos (lista pequena e determinística; só o que o motor simula): o palpite do motor (itemDoSetDuelo) primeiro, Life Orb, Leftovers, Assault Vest, Expert Belt, Sitrus Berry, Muscle Band (se há golpe físico), Wise Glasses (se há especial) e o item de tipo de cada tipo de golpe de dano (config do jogo, TYPE_POWER). Fora: Choice (a trava de golpe não é simulada: prometeria dano sem o custo), Focus Sash, gemas e bagas de gatilho (efeito só parcial). Triagem barata: cada item sozinho (cache) e só o palpite + os 2 melhores vão ao time inteiro. Empate = ordem da lista (estável). Escolha em cache (ctx.cache.aux) por time+membro. Máximo de 2 do mesmo item no time. A variante traz itensFechados e tempoItensMs.
+Teste: tests/unit/motor_item.test.mjs.
