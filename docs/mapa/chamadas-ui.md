@@ -174,7 +174,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - pipelineDesenharFicha:113 - chamado por: wireMyBuildEditor (editor_build.js:465)
 - pipelineDesenharTime:125 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8) | chamado por: renderTeam (time.js:8)
 - pipelineGolpeHtml:71 - chama: MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9)
-- pipelineResultado:14 - chama: getCurrentCap (level_cap.js:49), candidatosDeBuild (pipeline_build.js:515), state (nucleo.js:8)
+- pipelineResultado:14 - chama: getCurrentCap (level_cap.js:49), candidatosDeBuild (pipeline_build.js:517), state (nucleo.js:8)
 - pipelineSeletorDeAlvoHtml:32 - chama: getRemainingBossEntries (chefoes.js:51)
 
 ## ui/progresso.js
@@ -185,7 +185,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderRunStatus:9 - chama: state (nucleo.js:8)
 
 ## ui/quem_resolve.js
-- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:636)
+- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:638)
 - quemResolveCardHtml:83 - chama: DIFF_TO_BOSSKEY (chefoes.js:19), DIFF_LABELS (aba_chefoes.js:233), state (nucleo.js:8) | chamado por: renderBossDetail (aba_chefoes.js:589)
 - quemResolveChave:17 - chama: getCurrentCap (level_cap.js:49), state (nucleo.js:8)
 - quemResolveItemHtml:43 - chama: pipelineCandidatoHtml (pipeline_tela.js:77)

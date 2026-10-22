@@ -62,7 +62,9 @@
     return x && x.sname ? x : null;
   }
 
-  var PIPELINE_COMUNS_POR_ETAPA = 1; // quantas comuns por etapa entram no campo (custo ~25 ms por alvo por candidato)
+  // APROXIMAÇÃO declarada do rank (decisão do usuário, 22/10/2026): o rank mede todas as comuns (~30 por etapa) com o time inteiro; aqui entram só as 3 mais
+  // perigosas de cada etapa (peso de ameaça), e a parte dos chefões é o PIOR chefão, não a média ponderada do rank. Custo ~25 ms por alvo por candidato.
+  var PIPELINE_COMUNS_POR_ETAPA = 3;
   // ---- alvo ----
   // Devolve { info, foes, clima, nivel } ou { info: null, foes: [] } (com o motivo em `aviso`).
   // `foes` são os Pokémon medidos: o que foi pedido, ou o primeiro e o ás (o último) do chefão.
