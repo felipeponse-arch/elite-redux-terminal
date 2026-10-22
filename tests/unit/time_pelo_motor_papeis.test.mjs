@@ -26,6 +26,7 @@ function run({ milestone = 2, nomes, builds = {}, comFatia = false }) {
   });
   const ctx = R.contextoDoMotor();
   ctx.cache = R.criarCacheDoMotor();
+  ctx.fecharItens = false; // motor-item/01: o fechamento de item muda o time escolhido; estes casos fixam o papel no time SEM item (aprendizados 21/10); com item: motor_item.test.mjs
   const cand = (travados) => R.motorCandidatos(ctx, travados.map((n) => sp(n).sname), []);
   const usaLutas = (...nomesDasLutas) => {
     ctx.lutas = Object.assign({}, ctx.lutas, { amostra: nomesDasLutas.map((n) => ctx.lutas.todas.find((l) => l.nome === n)) });

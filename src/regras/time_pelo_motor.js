@@ -359,6 +359,74 @@
       motivo: trocas.length ? null : "nenhuma troca em vaga livre melhora a luta mais difícil (" + luta.nome + ") na simulação" };
   }
 
+  // ---- item fechado pelo motor (ticket motor-item/01, decisão A do usuário, 22/10/2026) ----
+  // O pipeline entrega a build SEM item (de propósito: a referência é conservadora). Depois que a busca fechou o time, cada membro sem item
+  // testa uma lista pequena de itens que o motor SIMULA e a Etapa LIBERA, na luta completa (o mesmo juiz da busca), e fica com o que mais
+  // sobe a nota. Lista: o palpite do próprio motor (itemDoSetDuelo: o que a habilidade pede, Eviolite, Leftovers/Life Orb), Life Orb,
+  // Leftovers, Assault Vest, Expert Belt, Sitrus Berry, Muscle Band (se há golpe físico), Wise Glasses (se há especial) e o item de tipo de
+  // cada tipo de golpe de dano. Fora de propósito: Choice (a trava de golpe não é simulada: prometeria dano sem o custo) e Focus Sash,
+  // gemas e bagas de gatilho (efeito só parcial no motor). Empate = o primeiro da lista (palpite do motor primeiro): estável.
+  var MOTOR_ITENS_NA_FINAL = 2;
+  var MOTOR_ITENS_FIXOS = ["Life Orb", "Leftovers", "Assault Vest", "Expert Belt", "Sitrus Berry"];
+  function motorItensCandidatos(ctx, c) {
+    var u = motorUnidade(ctx, c, ctx.lutas.amostra[0].nivel), r = u.receita, lista = [];
+    var palpite = unidadeDeDuelo(c.sp, r.set, r.abId, r.nivel, r.golpes, null, undefined).item;
+    var fis = false, esp = false, tipos = [];
+    r.golpes.forEach(function (id) {
+      var s = DATA.splits[MOVES[id][2]], t = DATA.types[MOVES[id][1]];
+      if (s === "PHYSICAL") fis = true; else if (s === "SPECIAL") esp = true;
+      if (t && tipos.indexOf(t) === -1) tipos.push(t);
+    });
+    var doTipo = tipos.map(function (t) {
+      return Object.keys(ITENS_CONFIG.itens).filter(function (n) { var x = ITENS_CONFIG.itens[n]; return x.e === "TYPE_POWER" && x.t === t; }).sort()[0];
+    });
+    [palpite].concat(MOTOR_ITENS_FIXOS, fis ? ["Muscle Band"] : [], esp ? ["Wise Glasses"] : [], doTipo).forEach(function (n) {
+      // Mesmas travas da build da IA (conflitoDeItem): Assault Vest com golpe de status, Eviolite sem evolução... (supervisor, 22/10).
+      if (n && lista.indexOf(n) === -1 && ITEMS.indexOf(n) !== -1 && liberadoNaRun(ctx.etapa, ctx.cap, { item: n }) &&
+        !conflitoDeItem(n, (c.build && c.build.moves) || [], c.sp)) lista.push(n);
+    });
+    return lista;
+  }
+  function motorComItem(c, item) {
+    var b = Object.assign({}, c.build, { item: item });
+    return Object.assign({}, c, { build: b, chaveBuild: c.sname + "|" + motorChaveDaBuild(b) });
+  }
+  // Troca, no lugar, os membros sem item (origem pipeline/fallback: build salva do jogador nunca é mexida). Um membro por vez, os outros como
+  // estão; devolve a escolha de cada um (para o teste e a explicação).
+  function* motorFecharItens(ctx, obj, busca) {
+    var escolhas = [];
+    if (ctx.fecharItens === false) return escolhas; // opção explícita (testes que fixam o time sem item)
+    for (var i = 0; i < busca.time.length; i++) {
+      var c = busca.time[i];
+      if (c.origem === "build-salva" || c.build.item) continue;
+      var ck = MOTOR_VERSAO + "|" + motorChaveDoContexto(ctx) + "|" + c.chaveBuild + "|" + busca.time.map(function (m) { return m.chaveBuild; }).join("#"), cache = ctx.cache.aux["item|" + ck];
+      if (cache === undefined) {
+        var todos = motorItensCandidatos(ctx, c), melhor = null, melhorV = -Infinity;
+        // Triagem barata: cada item sozinho (1 membro, no cache) fica com o palpite do motor + os MOTOR_ITENS_NA_FINAL melhores; só esses vão ao time inteiro.
+        var solo = [];
+        for (var kk = 0; kk < todos.length; kk++) { solo.push({ n: todos[kk], i: kk, v: motorValorDoObjetivo(ctx, obj, [motorComItem(c, todos[kk])]) }); yield "item"; }
+        solo.sort(function (x, y) { return y.v - x.v || x.i - y.i; });
+        var itens = todos.filter(function (n, kk) { return kk === 0 || solo.slice(0, MOTOR_ITENS_NA_FINAL).some(function (z) { return z.n === n; }); });
+        for (var k = 0; k < itens.length; k++) {
+          var cand = motorComItem(c, itens[k]);
+          // Mesmo item no time: no máximo MAX_MESMO_ITEM_NO_TIME (a regra do app).
+          if (busca.time.filter(function (m, j) { return j !== i && m.build.item === itens[k]; }).length >= MAX_MESMO_ITEM_NO_TIME) continue;
+          var v = motorValorDoObjetivo(ctx, obj, busca.time.map(function (m, j) { return j === i ? cand : m; }));
+          yield "item";
+          if (v > melhorV + 1e-9) { melhorV = v; melhor = itens[k]; }
+        }
+        cache = motorGuardar(ctx.cache, "aux", "item|" + ck, { item: melhor || "" });
+      }
+      if (cache.item) {
+        var novo = motorComItem(c, cache.item), antes = busca.time[i];
+        busca.time[i] = novo;
+        busca.vagas.forEach(function (v) { if (v.atual === antes) v.atual = novo; });
+        escolhas.push({ sname: c.sname, item: cache.item });
+      }
+    }
+    return escolhas;
+  }
+
   // ---- a função pública ----
   // ctx: ver contextoDoMotor. pedido: { favoritos: [sname] (0 a 6, travados), variantes: ["ofensivo", "seguro"] (padrão: todas as definidas) }.
   // Devolve { variantes: [{ chave, objetivo, membros, metricas, planoB, melhorTentativa, explicacao, avisos, tempoMs }], avisos, tempoMs, cache }.
@@ -378,6 +446,8 @@
     for (var ik = 0; ik < chaves.length; ik++) {
       var chave = chaves[ik], tv = relogio(), obj = MOTOR_OBJETIVOS[chave];
       var busca = yield* motorBuscarEmPassos(ctx, cands, favoritos, obj, function () { return relogio() - t0; });
+      var ti = relogio();
+      var itensFechados = yield* motorFecharItens(ctx, obj, busca), tItensMs = relogio() - ti;
       yield "conferencia";
       var rsAmostra = motorAvaliar(ctx, busca.time, ctx.lutas.amostra), rsTodas = motorAvaliar(ctx, busca.time, ctx.lutas.todas);
       var idxRest = ctx.lutas.todas.map(function (l, i) { return l.etapa >= ctx.etapa ? i : -1; }).filter(function (i) { return i >= 0; });
@@ -389,7 +459,7 @@
       if (comunsRest.length) metricas.comuns = motorMetricas(motorAvaliar(ctx, busca.time, comunsRest), comunsRest);
       var v = { chave: chave, objetivo: { nome: obj.nome, descricao: obj.descricao },
         membros: busca.time.map(function (c) { return { sname: c.sname, nome: c.nome, x: c.x, base: c.base.sname, travado: c.travado, origem: c.origem, build: c.build, papeis: [], abstencao: null, contribuicoes: [] }; }),
-        metricas: metricas, avisos: [], avaliacoes: busca.avaliacoes };
+        metricas: metricas, avisos: [], avaliacoes: busca.avaliacoes, itensFechados: itensFechados, tempoItensMs: tItensMs };
       v.melhorTentativa = metricas.restantes.lutas > 0 && metricas.restantes.vence < metricas.restantes.lutas / 2;
       // Favorito nunca some em silêncio: ou está em `membros` ou há um aviso dizendo por quê (linha evolutiva repetida, sem build...).
       favoritos.forEach(function (s) {
