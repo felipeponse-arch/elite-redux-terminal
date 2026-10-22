@@ -57,3 +57,17 @@ test("ctx.fecharItens = false mantém o comportamento antigo (sem item além das
   assert.equal(v.itensFechados.length, 0);
   v.membros.forEach((m) => assert.ok(!m.build.item || /ite( [XYZ])?$|Eviolite|Berry/.test(m.build.item), m.nome + ": " + m.build.item));
 });
+
+test("Assault Vest nunca é candidato para quem tem golpe de status (o jogo impede usar; mesma trava da IA)", () => {
+  const R = carregarRegras({ milestone: 8 });
+  const sp = (n) => R.SPECIES.find((s) => s && s.n === n);
+  R.state.team = ELENCO.slice(0, 6).map((n) => sp(n).x);
+  R.state.box = ELENCO.slice(6).map((n) => sp(n).x);
+  const ctx = R.contextoDoMotor();
+  ctx.cache = R.criarCacheDoMotor();
+  const klefki = sp("Klefki");
+  const comStatus = { sp: klefki, sname: klefki.x, build: { ability: klefki.abilities ? undefined : undefined, moves: ["Draining Kiss", "Foul Play", "Thunder Wave", "Spikes"] }, chaveBuild: "teste-vest-status" };
+  const semStatus = Object.assign({}, comStatus, { build: { moves: ["Draining Kiss", "Foul Play", "Light Of Ruin", "Return"] }, chaveBuild: "teste-vest-dano" });
+  assert.ok(R.motorItensCandidatos(ctx, semStatus).includes("Assault Vest"), "sem golpe de status o Vest segue na lista");
+  assert.ok(!R.motorItensCandidatos(ctx, comStatus).includes("Assault Vest"), "com Thunder Wave/Spikes o Vest sai da lista");
+});

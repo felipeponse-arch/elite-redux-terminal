@@ -381,7 +381,9 @@
       return Object.keys(ITENS_CONFIG.itens).filter(function (n) { var x = ITENS_CONFIG.itens[n]; return x.e === "TYPE_POWER" && x.t === t; }).sort()[0];
     });
     [palpite].concat(MOTOR_ITENS_FIXOS, fis ? ["Muscle Band"] : [], esp ? ["Wise Glasses"] : [], doTipo).forEach(function (n) {
-      if (n && lista.indexOf(n) === -1 && ITEMS.indexOf(n) !== -1 && liberadoNaRun(ctx.etapa, ctx.cap, { item: n })) lista.push(n);
+      // Mesmas travas da build da IA (conflitoDeItem): Assault Vest com golpe de status, Eviolite sem evolução... (supervisor, 22/10).
+      if (n && lista.indexOf(n) === -1 && ITEMS.indexOf(n) !== -1 && liberadoNaRun(ctx.etapa, ctx.cap, { item: n }) &&
+        !conflitoDeItem(n, (c.build && c.build.moves) || [], c.sp)) lista.push(n);
     });
     return lista;
   }
