@@ -61,6 +61,8 @@ const ARG = (k) => (process.argv.find((x) => x.startsWith(k + "=")) || "").slice
 const LUTAS_EXTRA = ARG("--lutas-extra");
 const SO_CHEFOES = process.argv.includes("--so-chefoes");
 const FATIA = ARG("--fatia") ? Number(ARG("--fatia")) : FATIA_DOS_CHEFOES;
+// A fatia 60/40 é decisão do usuário (16/10/2026): o rank GRAVADO não aceita outra fatia nem outra lista de lutas.
+if (process.argv.includes("--gravar") && (FATIA !== FATIA_DOS_CHEFOES || LUTAS_EXTRA || SO_CHEFOES)) throw new Error("--gravar exige a fatia " + FATIA_DOS_CHEFOES + " e a lista oficial de lutas (sem --fatia diferente, --lutas-extra ou --so-chefoes)");
 if (!SO_CHEFOES) {
   const extra = LUTAS_EXTRA ? JSON.parse(readFileSync(LUTAS_EXTRA, "utf8")).lutas : lutasComunsDaRun(RAIZ).lutas;
   for (const d of DIFICULDADES) {

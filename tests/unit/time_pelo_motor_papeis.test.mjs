@@ -276,3 +276,30 @@ test("com a fatia 60/40 o juiz escolhe outro time, mas a sinergia de sol continu
   assert.ok(tag.ganhoDoTime > 0 && tag.lutasMedidas >= 1);
   assert.ok(v.metricas.comuns && v.metricas.comuns.lutas > 0, "a conferência das comuns vem junto");
 });
+
+// Os 3 casos que o juiz com a fatia mudou (21/10): os papéis são da BUILD e da ordem do time na luta, não do juiz. Com a fatia, Ferrothorn,
+// Blissey e Clefable seguem com os mesmos papéis e provas; só a Mandibuzz mudou (de abstenção para "revenge killer") porque o time saiu em
+// outra ordem (o juiz escolhe a ordem) e a prova de revenge killer depende de quem entra depois do nocaute. O invariante abaixo vale nos dois juízes.
+test("com a fatia: wallbreaker e tanque seguem com prova; quem não tem papel segue com abstenção e motivo", () => {
+  const r = run({ milestone: 2, nomes: ["Blissey", "Ferrothorn", "Clefable", "Dragonite", "Corviknight", "Mandibuzz"], comFatia: true });
+  const v = r.R.montarTimePeloMotor(r.ctx, { variantes: ["ofensivo"] }).variantes[0];
+  const m = (n) => v.membros.find((x) => x.nome === n);
+  const wall = m("Ferrothorn").papeis.find((p) => p.papel === "wallbreaker");
+  assert.ok(wall && wall.prova.nocautesEmRobustos >= 2 && wall.prova.nocautesEmRobustos * 2 >= wall.prova.nocautes, JSON.stringify(m("Ferrothorn").papeis));
+  assert.deepEqual([...m("Blissey").papeis.map((p) => p.papel).sort()], ["tanque", "wallbreaker"]);
+  v.membros.forEach((x) => {
+    x.papeis.forEach((p) => assert.ok(p.prova && Object.keys(p.prova).length > 0, x.nome + " " + p.papel + " sem prova"));
+    assert.ok(x.papeis.length > 0 || /nenhuma prova/.test(x.abstencao), x.nome + ": sem papel e sem abstenção com motivo");
+  });
+});
+
+test("com a fatia: nenhuma tag de armador nasce com menos de dois beneficiários medidos, em nenhuma variante", () => {
+  const r = run({ milestone: 3, nomes: POOL_CLIMA, comFatia: true });
+  const out = r.R.montarTimePeloMotor(r.ctx, { variantes: ["ofensivo", "seguro", "sinergia"] });
+  let tagsDeArmador = 0;
+  out.variantes.forEach((v) => v.tags.filter((x) => x.armador).forEach((x) => {
+    tagsDeArmador++;
+    assert.ok(x.beneficiarios.length >= 2 && x.ganhoDoTime > 0, v.chave + " " + JSON.stringify(x));
+  }));
+  assert.ok(tagsDeArmador >= 1, "o caso real precisa gerar ao menos uma tag para a checagem provar algo");
+});

@@ -13,6 +13,7 @@ import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validarBuilds, validarInvariantes } from "./validar_dados.mjs";
+import { problemaDasLutasComuns } from "./guarda_lutas_comuns.mjs";
 
 const RAIZ = fileURLToPath(new URL("..", import.meta.url));
 const DADOS = join(RAIZ, "data");
@@ -62,6 +63,12 @@ for (const nome of Object.values(ARQUIVOS_DE_DADOS)) {
 }
 const atlas = join(DADOS, "sprite_atlas.png");
 if (!existsSync(atlas)) falhar("falta data/sprite_atlas.png - gere com scripts/build_sprite_atlas.ps1 (baixa ~1900 sprites).");
+
+// Publicar (ER_PUBLICAR=1, posto por prepare_publish.ps1): o dado das lutas comuns do Meu Time tem que vir do rank completo.
+if (process.env.ER_PUBLICAR === "1") {
+  const p = problemaDasLutasComuns(JSON.parse(ler(join(DADOS, "lutas_comuns_run.json"))));
+  if (p) falhar(p);
+}
 
 // ---- travas de dado ----
 console.log("--- validando dados ---");
