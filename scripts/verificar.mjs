@@ -24,6 +24,8 @@
 //      node scripts/verificar.mjs --nivel [arquivos...]   só imprime o nível e as etapas (não roda nada)
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { gerarMapa } from "./mapa_do_codigo.mjs";
+import { writeFileSync } from "node:fs";
 import { segurarVaga } from "./vaga.mjs";
 import { lerVerde, gravarVerde, modoDaSabotagemNoMaster } from "./sabotagem_incremental.mjs";
 import { nivelDaMudanca, etapasDoNivel, ambienteDosFilhos, arquivosEmStaging, classificarPorStaging, precisaDaVagaPesada } from "./nivel_da_mudanca.mjs";
@@ -61,6 +63,13 @@ const ETAPAS = etapasDoNivel(NIVEL, { branch: BRANCH, arquivos: ARQUIVOS, verde:
 const SABOTAGEM_DO_MASTER = BRANCH === "master" && ETAPAS.some((e) => e.id === "sabotagem" && !e.comando.includes("--mudados"));
 console.log(`Nível ${NIVEL} (${MOTIVO}): ${ETAPAS.map((e) => e.id).join(", ")}`);
 if (modoNivel) process.exit(0);
+
+// Mapa do código sempre atualizado (ticket mapa-do-codigo/01): código em staging regenera docs/mapa-do-codigo.md
+// e entra no mesmo commit. Só a parte local (sem Graphify): ~0,1 s.
+if (ARQUIVOS.some((a) => /^(src|scripts)\//.test(a))) {
+  writeFileSync(new URL("../docs/mapa-do-codigo.md", import.meta.url), gerarMapa(RAIZ));
+  spawnSync("git", ["add", "docs/mapa-do-codigo.md"], { cwd: RAIZ, stdio: "inherit" });
+}
 
 // Vaga de sessão (ADR-001 em docs/decisoes_arquitetura.md, 2026-10-02; melhoria B, 2026-10-13):
 // duas sessões verificando ao mesmo tempo (mesma pasta OU worktrees diferentes) se atropelam -

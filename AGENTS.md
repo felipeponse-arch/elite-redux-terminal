@@ -37,7 +37,8 @@ framework), publicado como Artifact no claude.ai. Tudo em português do Brasil, 
 - **Context7** (plugin/MCP): documentação atual de bibliotecas (ESLint, Playwright, Node). Uma pergunta por conceito; nunca
   enviar código privado ou segredo.
 - **RTK**: resume a saída dos comandos (já ativo pelo cliente; `rtk proxy <cmd>` para a saída original).
-- **Graphify**: grafo do código em `graphify-out/` (não versionado). Gerar/atualizar:
-  `GRAPHIFY_NO_AUTO_REFRESH=1 <teste>/ferramentas/graphify/Scripts/graphify.exe extract . --code-only --no-cluster`.
-  Limite: o app junta os arquivos sem `import`, então chamadas entre arquivos não aparecem no grafo.
+- **Mapa do código**: leia `docs/mapa-do-codigo.md` ANTES de abrir código (arquivo, responsabilidade, funções com linha);
+  abra só o trecho que precisa (offset/limit). Atualiza sozinho: o pré-commit regenera e inclui o mapa quando há `src/` ou
+  `scripts/` em staging; à mão, `npm run mapa` (também roda o Graphify; `-- --rapido` só o mapa). Conflito de junção
+  nele: regenerar. Graphify (`graphify-out/`, fora do git) segue disponível; não vê chamadas entre arquivos.
 - **Agentes e modelos**: os papéis ficam em `teste/.claude/agents` e `docs/agents/` (modelo por papel, loops e grafos).
