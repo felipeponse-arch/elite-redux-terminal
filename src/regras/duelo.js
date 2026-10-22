@@ -821,6 +821,9 @@
     // Nunca erra / menor defesa por categoria.
     if ((x = f.match(/^(\w+)(?: & (\w+))? moves never miss/i))) [x[1], x[2]].filter(Boolean).forEach(function (w) { categoriasDoTextoDuelo(w).forEach(function (c) { ef.semErrarCategoria[c] = true; }); });
     if (/Kicks always hit/i.test(f)) ef.semErrarCategoria.chute = true;
+    // Artillery (abilities.cc Impl<ABILITY_ARTILLERY>, onAccuracy só se IsMegaLauncherBoosted) e Sweeping Edge (onAccuracy só em Keen Edge; o texto diz "Slashing ... and hit both foes"):
+    // sempre acerta só nesse grupo de golpes. Pinnacle Blade diz "Slashing moves always hit", mas o código (abilities.cc:8661-8692) não tem onAccuracy: não entra.
+    if ((x = f.match(/^(Mega Launcher|Keen Edge|Slashing) moves always hit and hit both foes/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.semErrarCategoria[c] = true; });
     if (/Kicks always hit\. Damages foes' weaker defenses/i.test(f)) ef.menorDefesaCategoria.chute = true;
     if (/Targets lowest defense vs statused foes/i.test(f)) ef.menorDefesaSeStatus = true;
     if ((x = f.match(/^(\w+) moves hit SpDef and get a ([\d.]+)x power boost/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) { ef.categoriaNaSpDef[c] = true; ef.bonusCategoria[c] = Math.max(ef.bonusCategoria[c] || 1, parseFloat(x[2])); });
@@ -1484,7 +1487,7 @@
       hemolise: false, trocaStatusDoTipo: {}, curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
       semRecuo: false, recuoMult: 1, custoPorAtaque: 0, custoTipo: {}, bloqueiaCura: false, liquidOoze: false,
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
-      bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {},
+      bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {}, precisaoPorTipo: {},
       menorDefesaCategoria: {}, menorDefesaSeStatus: false, flagMult: {}, prioTipoSempre: [], drenoTipo: {}, malicious: false,
       equinox: false, maiorMult: 0, maiorVel: 0, paradoxoItem: false, ritmico: 0, bonusVsStatus: {}, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
       campoResiduo: [], statusNaEntrada: {}, forcaUltimo: false, semStabOutros: false, recuoFrac: 1,
@@ -1667,7 +1670,9 @@
       if (/Multi-hit moves always hit the maximum/i.test(t)) ef.skillLink = true;
       if ((x = t.match(/Grants a ([\d.]+)x accuracy boost/i)) || (x = t.match(/(?:^|[.;] )([\d.]+)x accuracy/i))) ef.precisaoMult *= parseFloat(x[1]);
       if ((x = t.match(/\+(\d+)% accuracy/i))) ef.precisaoMult *= 1 + parseInt(x[1], 10) / 100;
-      if (/Moves always hit/i.test(t)) ef.semErrar = true;
+      if (/^Moves always hit/i.test(t)) ef.semErrar = true; // só Sighting System (onAccuracy sem CHECK); "X moves always hit" é por grupo (semErrarCategoria)
+      // Plasma Lamp (abilities.cc:6056): onAccuracy x1,2 só em golpe Fire/Electric, antes de estágios e Wide Lens (o poder x1,2 entra pelo texto, ver "Boost accuracy & power").
+      if ((x = t.match(/^Boost accuracy & power of (\w+) & (\w+) type moves by ([\d.]+)x/i))) [x[1], x[2]].forEach(function (p) { if (tipoDoTextoDuelo(p)) ef.precisaoPorTipo[tipoDoTextoDuelo(p)] = parseFloat(x[3]); });
       if (/Attacks used by and on this Pok[eé]mon bypass accuracy/i.test(t)) { ef.semErrar = true; ef.semErrarContraMim = true; }
       // --- atributo usado no ataque / na defesa ---
       if ((x = t.match(/uses \+(\d+)% of its Defense or SpDef during moves/i))) ef.ataqueExtra.push({ fonte: "defesa", pct: parseInt(x[1], 10) / 100 });
@@ -1955,6 +1960,7 @@
       if (u.ef.triage && g.dreno > 0 && extra && extra.dr) g.prio = Math.max(g.prio, 3); // Triage: golpe que cura (dreno) com +3
       var semErrarAqui = cats.some(function (c) { return u.ef.semErrarCategoria[c]; });
       if (semErrarAqui) g.precisao = 1; // Deadeye, Roundhouse
+      if (u.ef.precisaoPorTipo[tipo]) g.precisao = Math.min(1, g.precisao * u.ef.precisaoPorTipo[tipo]); // Plasma Lamp. shortcut: corta em 100% antes de evasão/Wide Lens (a conta do jogo corta depois), diferença só com evasão do alvo
       // Thunder/Hurricane (código oficial, battle_script_commands.c: EFFECT_THUNDER/EFFECT_HURRICANE): chuva = sempre acerta, sol = 50%.
       if (extra && (extra.ef === "Thunder" || extra.ef === "Hurricane")) { if (clima === "chuva") g.precisao = 1; else if (clima === "sol" && !semErrarAqui) g.precisao = 0.5; }
       // Axe Kick (NextDex: "Hurts on miss"): errar custa metade do HP máximo (regra da série), em média (1 - precisão) / 2 por uso.

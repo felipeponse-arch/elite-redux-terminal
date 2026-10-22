@@ -1,6 +1,6 @@
 # 01 — "Sempre acerta" global errado (Pinnacle Blade e +5) e precisão do Plasma Lamp
 
-Status: pronto-para-agente
+Status: resolvido-no-branch
 Tamanho: P. Antes do rank final (dados-2654/10).
 Evidência: relatorios/evidencia_simples_2026-10-22.md (pesquisador-de-mecanica, 22/10/2026). Regra: código do jogo (er-repo upcoming 217dd0f) vence.
 
