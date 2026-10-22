@@ -29,3 +29,9 @@ Rank recalculado com os tickets 02-19 e com a escolha de set corrigida (3 candid
 Dois comportamentos do motor são modelagem minha, sem código oficial por trás. Mantidos como estão até a resposta (nada foi apagado).
 1. Tirar o setup custa turno? Hoje, quem usa Clear Smog/Dragon Tail em vez do melhor golpe perde a fração do dano que o melhor golpe faria (custoDeTirarSetupDuelo). Na prática quase não muda resultado (4.320 duelos testados, nenhum mudou). Opções: (a) manter; (b) tirar o custo (tirar o setup é grátis, como antes); (c) manter só quando o golpe de tirar for bem mais fraco que o melhor.
 2. Inverse Room e o golpe do chefão: hoje o chefão usa o golpe que a IA escolheria na maior parte dos turnos. Opções: (a) manter; (b) voltar ao golpe de maior dano entre a tabela normal e a invertida; (c) média dos dois golpes pelos turnos de cada tabela.
+
+### 22/10/2026 - decisões do usuário
+- (c) Wooly Worm: a build curada do Discord (Assault Vest) segue como principal; o vídeo (Sticky Web) fica como nota.
+- Pergunta 1 (tirar o setup custa turno): manter como está (custoDeTirarSetupDuelo segue).
+- Pergunta 2 (Inverse Room e o golpe do chefão): opção (a), manter o golpe que a IA escolheria na maior parte dos turnos.
+- Falta só: comparar com a comunidade e a nota de cobertura/suporte, depois do rank final (dados-2654/10).
