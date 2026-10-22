@@ -1,6 +1,6 @@
 # 01 — Commit de nível 0 (ER_WIP) não pode esperar a vaga pesada
 
-Status: pronto-para-agente
+Status: resolvido-no-branch
 Prioridade: ALTA (usuário, 22/10/2026)
 Tamanho: P.
 Dono sugerido: qa-processo.

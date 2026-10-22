@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import {
   nivelDaMudanca, etapasDoNivel, ambienteDosFilhos, VARIAVEIS_GIT_DE_LOCALIZACAO,
-  arquivosEmStaging, classificarPorStaging,
+  arquivosEmStaging, classificarPorStaging, precisaDaVagaPesada,
 } from '../../scripts/nivel_da_mudanca.mjs';
 
 const TICKET = { branch: 'ticket-x', env: {} };
@@ -304,4 +304,14 @@ test('item crítico: no pre-commit a lista é a do COMMIT (commit -a, commit <ar
       assert.equal(nivelDaMudanca(arquivos, TICKET).nivel, esperado, nome);
     } finally { t.limpar(); }
   }
+});
+
+test("precisaDaVagaPesada: nível 0 e nível 1 sem sabotagem rodam sem a vaga; nível 2/3 e master pedem", () => {
+  const pede = (nivel, opts) => precisaDaVagaPesada(etapasDoNivel(nivel, { ...TICKET, ...opts }));
+  assert.equal(pede(0), false);
+  assert.equal(pede(1, { arquivos: ["tests/unit/x.test.mjs"] }), false);
+  assert.equal(pede(1, { arquivos: ["tests/unit/mutacoes.mjs"] }), true);
+  assert.equal(pede(2), true);
+  assert.equal(pede(3), true);
+  assert.equal(pede(0, { branch: "master" }), true);
 });

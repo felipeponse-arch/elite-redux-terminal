@@ -26,7 +26,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { segurarVaga } from "./vaga.mjs";
 import { lerVerde, gravarVerde, modoDaSabotagemNoMaster } from "./sabotagem_incremental.mjs";
-import { nivelDaMudanca, etapasDoNivel, ambienteDosFilhos, arquivosEmStaging, classificarPorStaging } from "./nivel_da_mudanca.mjs";
+import { nivelDaMudanca, etapasDoNivel, ambienteDosFilhos, arquivosEmStaging, classificarPorStaging, precisaDaVagaPesada } from "./nivel_da_mudanca.mjs";
 
 const RAIZ = fileURLToPath(new URL("..", import.meta.url));
 const ARGS = process.argv.slice(2);
@@ -67,9 +67,10 @@ if (modoNivel) process.exit(0);
 // a porta 8101 dos testes é da máquina, e com reuseExistingServer uma sessão testa o build da
 // outra; na mesma pasta ainda apagam o test-results uma da outra. Antes a trava FALHAVA na
 // hora; agora a vaga "pesada" (scripts/vaga.mjs) faz fila e ESPERA, com pid do dono (morto =
-// libera). Os filhos herdam ER_VAGA_DONO e não pedem a vaga de novo (a sabotagem roda aqui dentro).
+// libera). Nível sem etapa pesada (0, 1 sem sabotagem) não entra na fila (ticket portao-vaga/01). Os filhos herdam ER_VAGA_DONO e não pedem a vaga de novo (a sabotagem roda aqui dentro).
 try {
-  await segurarVaga("pesada");
+  // Sem etapa pesada (nível 0, nível 1 sem sabotagem) não entra na fila (ticket portao-vaga/01).
+  if (precisaDaVagaPesada(ETAPAS)) await segurarVaga("pesada");
 } catch (e) {
   console.error(e.message);
   process.exit(1);

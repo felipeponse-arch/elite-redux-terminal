@@ -137,6 +137,11 @@ export function etapasDoNivel(nivel, { branch, arquivos = [], verde = null, env 
   return etapas;
 }
 
+/** Só sabotagem, build e navegador disputam a porta 8101 e o test-results: check e unitários rodam sem a vaga pesada. */
+export function precisaDaVagaPesada(etapas) {
+  return etapas.some((e) => ["sabotagem", "build", "navegador"].includes(e.id));
+}
+
 /**
  * Arquivos em staging, lidos com o ambiente de quem chama (no pre-commit o git já aponta GIT_INDEX_FILE
  * para o índice CERTO do commit: o temporário em git commit -a/-o/<arquivo>). -z: nomes com acento ou
