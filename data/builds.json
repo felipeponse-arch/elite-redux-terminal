@@ -285,9 +285,9 @@
       "Ivy Cudgel",
       "Swords Dance",
       "Black Magic",
-      "Destiny Bond"
+      "Sucker Punch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Life Orb / Focus Sash.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Life Orb / Focus Sash. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): Destiny Bond → Sucker Punch.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -427,17 +427,17 @@
     "versao": "2.65beta"
   },
   "SPECIES_SCOVILLAIN_MEGA": {
-    "ability": "Big Leaves",
-    "nature": "Jolly",
+    "ability": "Rite Of Spring",
+    "nature": "Modest",
     "evs": "252 Atk / 6 SpD / 252 Spe",
     "item": "Swirly Glasses",
     "moves": [
       "Overheat",
       "Leaf Storm",
       "Sunny Day",
-      "Swords Dance"
+      "Seed Bomb"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Big Leaves → Rite Of Spring; nature Jolly → Modest; Swords Dance → Seed Bomb.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -622,17 +622,17 @@
     "versao": "2.65beta"
   },
   "SPECIES_MACHAMP_REDUX": {
-    "ability": "Multiscale",
+    "ability": "Impenetrable",
     "nature": "Adamant",
     "evs": "252 HP / 252 Atk / 6 Def",
-    "item": "Frost Orb",
+    "item": "Choice Band",
     "moves": [
       "One-Inch Punch",
       "Dragon Hammer",
       "Earthsplitter",
       "Bullet Punch"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Multiscale → Impenetrable; item Frost Orb → Choice Band.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -1092,17 +1092,17 @@
     "versao": "2.65beta"
   },
   "SPECIES_BEEFENDER": {
-    "ability": "Beast Boost",
+    "ability": "Merciless",
     "nature": "Jolly",
     "evs": "252 Atk / 6 SpD / 252 Spe",
     "item": "Focus Sash",
     "moves": [
       "Megahorn",
-      "Drill Peck",
+      "Berserker Horn",
       "Drill Run",
       "Victory Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Focus Sash / Life Orb.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Focus Sash / Life Orb. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Beast Boost → Merciless; Drill Peck → Berserker Horn.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -1212,17 +1212,17 @@
     "versao": "2.65beta"
   },
   "SPECIES_ROSERADE_MEGA": {
-    "ability": "Corrosion",
-    "nature": "Jolly",
-    "evs": "4 HP / 252 Atk / 252 Spe",
+    "ability": "Equinox",
+    "nature": "Timid",
+    "evs": "4 HP / 252 SpA / 252 Spe",
     "item": "",
     "moves": [
       "Leaf Storm",
       "Mortal Spin",
       "Venoshock",
-      "Victory Dance"
+      "Bullet Seed"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Corrosion → Equinox; nature Jolly → Timid; evs 4 HP / 252 Atk / 252 Spe → 4 HP / 252 SpA / 252 Spe; Victory Dance → Bullet Seed. Build fraca (0,59 no motor 1x1).",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -1392,17 +1392,17 @@
     "versao": "2.65beta"
   },
   "SPECIES_FUJIFLAP": {
-    "ability": "Air Blower",
+    "ability": "Hustle",
     "nature": "Adamant",
     "evs": "252 Atk / 6 SpD / 252 Spe",
     "item": "",
     "moves": [
-      "Dragon Claw",
+      "Wing Attack",
       "Grav Apple",
       "Victory Dance",
       "Gunk Shot"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell (Any) / Wide Lens (With Hustle) / Salac Berry (with Berry Smash) / Liechi Berry (with Berry Smash).",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell (Any) / Wide Lens (With Hustle) / Salac Berry (with Berry Smash) / Liechi Berry (with Berry Smash). Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Air Blower → Hustle; Dragon Claw → Wing Attack.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -1557,17 +1557,17 @@
     "versao": "2.65beta"
   },
   "SPECIES_FLAIRGRANCE": {
-    "ability": "Fairy Aura",
+    "ability": "Purple Haze",
     "nature": "Modest",
     "evs": "252 HP / 4 Def / 252 SpA",
     "item": "Shell Bell",
     "moves": [
       "Echoed Voice",
       "Draining Kiss",
-      "Sludge Wave",
+      "Calm Mind",
       "Mystical Fire"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Leftovers.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell / Leftovers. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Fairy Aura → Purple Haze; Sludge Wave → Calm Mind.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -1648,16 +1648,16 @@
   },
   "SPECIES_BRONTONANA": {
     "ability": "Dragon's Maw",
-    "nature": "Modest",
+    "nature": "Timid",
     "evs": "4 HP / 252 SpA / 252 Spe",
     "item": "Choice Specs",
     "moves": [
-      "Dragon Energy",
-      "Solar Beam",
+      "Dragon Pulse",
+      "Chloroblast",
       "Earth Power",
-      "Wyrm Wind"
+      "Gust"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Choice Specs / Wise Glasses / Choice Scarf.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Choice Specs / Wise Glasses / Choice Scarf. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): nature Modest → Timid; golpes Dragon Energy/Solar Beam/Earth Power/Wyrm Wind → Dragon Pulse/Chloroblast/Earth Power/Gust.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -1677,7 +1677,7 @@
     "versao": "2.65beta"
   },
   "SPECIES_SNEASLER_MEGA": {
-    "ability": "Weak Armor",
+    "ability": "Adrenaline Rush",
     "nature": "Jolly",
     "evs": "252 Atk / 4 SpD / 252 Spe",
     "item": "Sneaslerite",
@@ -1687,7 +1687,7 @@
       "Close Combat",
       "Swords Dance"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Sneaslerite / Focus Sash (Ω).",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Sneaslerite / Focus Sash (Ω). Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Weak Armor → Adrenaline Rush.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -1714,10 +1714,10 @@
     "moves": [
       "Web Shot",
       "Toxic Spikes",
-      "Roost",
+      "Leech Life",
       "Toxic"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Leftovers / Rocky Helmet / Light Clay.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Leftovers / Rocky Helmet / Light Clay. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): Roost → Leech Life.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -1827,17 +1827,17 @@
     "versao": "2.65beta"
   },
   "SPECIES_CRABOMINABLE_MEGA": {
-    "ability": "Icicle Fist",
+    "ability": "Hyper Aggressive",
     "nature": "Adamant",
     "evs": "252 HP / 252 Atk / 4 Def",
     "item": "Crabominite",
     "moves": [
       "Ice Hammer",
       "Aurora Veil",
-      "Hammer Arm",
+      "Drain Punch",
       "Bulk Up"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Icicle Fist → Hyper Aggressive; Hammer Arm → Drain Punch.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -2100,7 +2100,7 @@
     "versao": "2.65beta"
   },
   "SPECIES_LANTURN": {
-    "ability": "Drizzle",
+    "ability": "Photon Burst",
     "nature": "Modest",
     "evs": "252 HP / 252 SpA / 6 SpD",
     "item": "Lanturnite",
@@ -2108,9 +2108,9 @@
       "Parabolic Charge",
       "Hydro Pump",
       "Ice Beam",
-      "Water Gun"
+      "Signal Beam"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Lanturnite / Life Orb.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Lanturnite / Life Orb. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Drizzle → Photon Burst; Water Gun → Signal Beam.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
@@ -2920,7 +2920,7 @@
   },
   "SPECIES_MORPEKYLL": {
     "estilo": "ofensivo",
-    "ability": "Unburden",
+    "ability": "Looter",
     "nature": "Adamant",
     "evs": "196 HP / 228 Atk / 84 SpD",
     "item": "Figy Berry",
@@ -2930,13 +2930,13 @@
       "Sucker Punch",
       "Stuff Cheeks"
     ],
-    "note": "Do RyuXen no Build Workshop (27/09), EVs de nível 50. Ele deixou o 2º golpe como Taunt / Knock Off / Coverage: ficou o Knock Off. Item Figy Berry (a Liechi foi citada como alternativa). Contra o Norman ele iria de 252 HP e 28 Def e levaria Protect por causa do Fake Out.",
+    "note": "Do RyuXen no Build Workshop (27/09), EVs de nível 50. Ele deixou o 2º golpe como Taunt / Knock Off / Coverage: ficou o Knock Off. Item Figy Berry (a Liechi foi citada como alternativa). Contra o Norman ele iria de 252 HP e 28 Def e levaria Protect por causa do Fake Out. Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Unburden → Looter.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
   "SPECIES_BOARLOCK": {
     "estilo": "ofensivo",
-    "ability": "Gluttony",
+    "ability": "Magic Guard",
     "nature": "Modest",
     "evs": "252 HP / 252 SpA",
     "item": "Salac Berry",
@@ -2944,9 +2944,9 @@
       "Calm Mind",
       "Transmute",
       "Focus Blast",
-      "Dazzling Gleam"
+      "Extrasensory"
     ],
-    "note": "Do deeeep player no Build Workshop (04/10). Os dois últimos slots eram 'Focus Blast / Dazzling Gleam / Belch' nos dois: ficaram as duas primeiras opções (a Belch combina com a Salac Berry consumida).",
+    "note": "Do deeeep player no Build Workshop (04/10). Os dois últimos slots eram 'Focus Blast / Dazzling Gleam / Belch' nos dois: ficaram as duas primeiras opções (a Belch combina com a Salac Berry consumida). Revisada na 2.65.4 (dados-2654/08, veredito do playtester): ability Gluttony → Magic Guard; Dazzling Gleam → Extrasensory.",
     "fonte": "discord-build-workshop-2.65",
     "versao": "2.65beta"
   },
