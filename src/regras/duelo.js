@@ -2464,7 +2464,8 @@
       var L = CAMPO_DUELO && CAMPO_DUELO.lados;
       if (L) return telaDoLadoDuelo(L[u === eu ? "eu" : "foe"], u, atq, melhor, turnos, semTelas);
       var t = Math.max(u.ef.telaNaEntrada || 0, g && g.cat === "F" ? u.ef.telaF || 0 : 0, g && g.cat === "E" ? u.ef.telaE || 0 : 0);
-      return t && turnos > 0 && !semTelas && !atq.ef.infiltra && !atq.ef.demolidor && !(atq.ef.pinaculo && g && g.corte) ? 1 - 0.5 * Math.min(t, turnos) / turnos : 1;
+      var f = t && turnos > 0 && !semTelas && !atq.ef.infiltra && !(atq.ef.pinaculo && g && g.corte) ? 1 - 0.5 * Math.min(t, turnos) / turnos : 1;
+      return atq.ef.demolidor && turnos > 0 ? (1 + (turnos - 1) * f) / turnos : f; // Demolitionist: sem tela só no turno readied (1 dos `turnos`)
     }
     estagioMeu *= tela(foe, eu, meu.melhor.golpe, meu.melhor); estagioDele *= tela(eu, foe, dele.melhor.golpe, dele.melhor);
     // Baga de resistência (Occa...): o 1º golpe do tipo (super efetivo) sai pela metade - um quarto com Ripen.
@@ -3988,13 +3989,14 @@
   // buff de ginásio (telaF/telaE): as telas do lado são estado, e só Screen Cleaner/Defog/golpes as tiram.
   function telaDoLadoDuelo(lado, u, atq, melhor, turnos, semTelas) {
     var g = melhor && melhor.golpe;
-    if (!g || turnos <= 0 || atq.ef.infiltra || atq.ef.demolidor || (atq.ef.pinaculo && g.corte)) return 1;
+    if (!g || turnos <= 0 || atq.ef.infiltra || (atq.ef.pinaculo && g.corte)) return 1;
     var t = Math.max(g.cat === "F" ? lado.reflect : lado.luz, lado.veu);
     if (!semTelas) t = Math.max(t, g.cat === "F" ? u.ef.telaF || 0 : u.ef.telaE || 0);
     if (!t) return 1;
     var c = melhor.crit, p = c && c.certo > 1 ? (c.fator - 1) / (c.certo - 1) : 0, mult = c ? c.certo : 1;
     var comTela = (0.5 * (1 - p) + mult * p) / ((1 - p) + mult * p); // só o golpe que não é crítico leva a tela
-    return 1 - Math.min(t, turnos) / turnos * (1 - comTela);
+    var f = 1 - Math.min(t, turnos) / turnos * (1 - comTela);
+    return atq.ef.demolidor ? (1 + (turnos - 1) * f) / turnos : f; // Demolitionist: sem tela só no turno readied (abilities.cc:7747/7754), corte normal depois
   }
   // O que a habilidade faz no lado quando o Pokémon entra: Screen Cleaner limpa os dois lados (battle_util.c:8390-8413),
   // Defog tira só as telas do rival (battle_script_commands.c:6534-6537); Air Blower/Harukaze (Tailwind de 3 turnos),
@@ -4422,7 +4424,7 @@
       if (!vence(copia, nlc) || vence(quem, lc)) return;
       quem.frac = copia.frac; limpaTelasDoLadoDuelo(lc);
     }
-    // Demolitionist: o primeiro golpe de dano do turno de entrada derruba as telas do lado do alvo sem gastar o turno; o estado do lado fica
+    // Demolitionist: o primeiro golpe de dano do turno de entrada derruba as telas do lado do alvo ao acertar; o estado do lado fica
     // quebrado para os próximos do time. Só vale uma vez por Pokémon (readiedAction dura 1 turno, battle_util.c:2969): na volta seguinte o ef sai do u (a luta daquela volta ainda o vê).
     // shortcut: a entrada conta na primeira volta em que o Pokémon luta; troca de volta no meio do chefão não rearma.
     function quebraTelasDemolidor(quem, lc) {

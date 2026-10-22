@@ -24,7 +24,10 @@ test("o primeiro golpe de dano ignora a tela do rival: Reflect de 8 turnos não 
   const lado = (l) => Object.assign(R.novoLadoDuelo(), l);
   const causado = (hab, tela) => 1 - R.resultadoDoDuelo(regirock(hab), rotom(), NV, { detalhe: true, lados: { eu: lado({}), foe: lado(tela) }, sala: 0 }).fracFoe;
   const semTela = causado("Demolitionist", {});
-  assert.equal(causado("Demolitionist", { reflect: 8, luz: 8 }), semTela, "Demolitionist fura a tela");
+  const dem = causado("Demolitionist", { reflect: 8, luz: 8 }), sturdy = causado("Sturdy", { reflect: 8, luz: 8 });
+  // Só o turno readied ignora a tela (abilities.cc:7747/7754); do 2º turno em diante o corte normal volta.
+  assert.ok(dem > sturdy + 1e-9, "Demolitionist fura a tela no turno readied: causa mais que sem a habilidade");
+  assert.ok(dem < semTela - 1e-9, "mas a tela volta a cortar do 2º turno em diante: não é igual ao sem tela");
   assert.ok(causado("Sturdy", { reflect: 8, luz: 8 }) < causado("Sturdy", {}), "sem a habilidade a tela corta o dano (controle)");
 });
 
@@ -42,4 +45,10 @@ test("ignora Protect: o Protect de entrada (Coward) não bloqueia o golpe de que
   const bq = (atq) => R.bloqueiosNoDuelo(def, atq, dano(atq));
   assert.equal(bq(regirock("Sturdy")), 1, "controle: sem a habilidade o Protect bloqueia 1 golpe");
   assert.equal(bq(regirock("Demolitionist")), 0, "battle_util.c:6620");
+});
+
+test("ef.demolidor sai na volta seguinte do time (readiedAction dura 1 turno)", () => {
+  const r = R.simularLutaContraChefao([regirock("Demolitionist"), regirock("Demolitionist")], [rotom(), rotom(), rotom()], NV, comTela);
+  assert.ok(r.log.length >= 2, "precisa de 2 voltas para ver a flag sair");
+  assert.equal(r.log[0].lados.dele.reflect, 0, "quebra na volta de entrada");
 });
