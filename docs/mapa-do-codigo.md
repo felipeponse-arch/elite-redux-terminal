@@ -56,7 +56,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
 - **time_pelo_motor.js** - Modo Motor do Meu Time (ticket time-pelo-motor/01, Fase C, 21/10/2026): monta o time SEM IA, só pelo simulador.
-  motorMedia:61, motorArred:62, criarCacheDoMotor:65, motorGuardar:66, motorNivelDaEtapa:73, motorMontarLuta:79, motorMontarLutaComum:90, motorEspacadas:99, motorLutasComunsDoContexto:108, motorLutasDoContexto:123, motorValorDoObjetivo:135, contextoDoMotor:141, motorRaizDaLinha:151, motorChaveDaBuild:166, motorChaveDoContexto:169, motorBuildDoCandidato:170, motorSecar:205, motorCandidatosEmPassos:206, motorCandidatos:228, motorAquecerBuildsEmPassos:230, motorUnidade:236, motorSimular:248, motorEhMeu:264, motorAvaliar:265, motorMetricas:268, motorTemGolpeDeLado:277, motorBuscar:278, motorBuscarEmPassos:279, motorPlanoB:332, montarTimePeloMotor:365 (+1)
+  motorMedia:61, motorArred:62, criarCacheDoMotor:65, motorGuardar:66, motorNivelDaEtapa:73, motorMontarLuta:79, motorMontarLutaComum:90, motorEspacadas:99, motorLutasComunsDoContexto:108, motorLutasDoContexto:123, motorValorDoObjetivo:135, contextoDoMotor:141, motorRaizDaLinha:151, motorChaveDaBuild:166, motorChaveDoContexto:169, motorBuildDoCandidato:170, motorSecar:205, motorCandidatosEmPassos:206, motorCandidatos:228, motorAquecerBuildsEmPassos:230, motorUnidade:236, motorSimular:248, motorEhMeu:264, motorAvaliar:265, motorMetricas:268, motorTemGolpeDeLado:277, motorBuscar:278, motorBuscarEmPassos:279, motorPlanoB:332, motorItensCandidatos:371 (+4)
 - **time_pelo_motor_papeis.js** - Modo Motor do Meu Time, Fase D (papéis por build, tags, sinergia e explicação). Carrega depois de time_pelo_motor.js (mesmo escopo).
   motorMediana:22, motorUnidadeNaLuta:23, motorSemTipos:24, motorSemEsse:25, motorAux:26, motorLutasDeProva:27, motorAssinaturaDasLutas:28, motorCondicoes:33, motorLutaComClima:53, motorGanhoDaCondicao:56, motorSinergia:86, motorAlternativasArmadoras:101, motorExtrasDeSinergia:119, motorLutaDetalhada:136, motorSimularComClima:143, motorFoePorNome:155, motorProvasDosMembros:157, motorDeltaSemMembro:194, motorDeltaSemTipos:198, motorTemTipo:202, motorClassificar:207, motorTextos:306, motorTextosDaClassificacao:329
 - **tipos.js** - Tabela de efetividade de tipos, habilidades que alteram dano recebido por tipo e tipagem de espécie.
@@ -316,6 +316,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **modo_motor_sem_ia.test.mjs** - Modo Motor nunca chama a IA (ticket time-pelo-motor/01, Fase F3, 21/10/2026). Duas provas independentes:
 - **mono_run.test.mjs** - Mono run: disponibilidade por tipo e etapa (2026-09-26). O dado vem da
 - **montar_time_contra_chefao.test.mjs** - Botão "Montar time contra este chefão" (2026-09-29): o simulador de duelo
+- **motor_item.test.mjs** - O Modo Motor fecha o item de cada membro (ticket motor-item/01, 22/10/2026): testa os itens liberados na Etapa que o motor simula e
 - **multiplicadores_do_codigo_do_jogo.test.mjs** - Ticket calibracao-2026-10-15/03 (15/10/2026): multiplicadores de habilidade que o texto da NextDex traz, mas que o motor não lia
 - **nivel_da_mudanca.test.mjs** - Testes do gancho por nível (scripts/nivel_da_mudanca.mjs e scripts/verificar.mjs).
 - **numeros_da_versao_nova.test.mjs** - Ticket versao-nova/02 (15/10/2026): o app mira a versão MAIS NOVA do jogo (código/config primeiro, NextDex depois). Três números que a 2....
@@ -347,6 +348,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **revanche_sem_buffs.test.mjs** - Revisão dos ginásios (04/10): nos 8 scripts oficiais o líder, com o jogo zerado (FLAG_SYS_GAME_CLEAR), vai direto pro script
 - **sabotagem_incremental.test.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026). Cobre a regra:
 - **selo_do_pipeline.test.mjs** - Ticket versao-nova/03 (15/10/2026): o selo do pipeline de build. Antes só 2 casos (Ledian + Mega Punch/Aerial Ace contra o Ninetales)
+- **sempre_acerta_e_plasma_lamp.test.mjs** - Ticket mecanica-2026-10-22/01: "X moves always hit" não vale para todos os golpes; Plasma Lamp tem precisão x1,2 em Fire/Electric.
 - **sequencia_contra_chefao.test.mjs** - Luta inteira contra o time do chefão (2026-09-29, decisão do usuário): HP que
 - **setup_entre_duelos.test.mjs** - Ticket 05 (07/10/2026): os estágios de atributo só zeram para quem entra em campo
 - **sinergia_habilidade_movepool.test.mjs** - Gerador da sinergia habilidade x movepool (porte Node, lê o INGLÊS do dex). Trava: arquivo gravado == gerador, ids batem com o dex,
