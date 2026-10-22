@@ -34,3 +34,4 @@ tests/.sabotagem_cache.json
 
 # Grafo do código do Graphify (setup do toolkit, 17/10/2026): gerado por comando, não é fonte.
 graphify-out/
+graphify-in/

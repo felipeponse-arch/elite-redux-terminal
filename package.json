@@ -9,6 +9,7 @@
     "lint": "eslint . artifact_template.html",
     "check:tipos": "tsc -p tsconfig.json",
     "build": "node scripts/build.mjs",
+    "mapa": "node scripts/mapa_do_codigo.mjs",
     "verificar": "node scripts/verificar.mjs",
     "encalhados": "node scripts/encalhados.mjs",
     "checkpoint": "node scripts/checkpoint.mjs",

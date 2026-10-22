@@ -13,3 +13,6 @@ types/
 package-lock.json
 .env
 .env.*
+src/regras/
+src/ui/
+!graphify-in/
