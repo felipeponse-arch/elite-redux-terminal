@@ -130,7 +130,10 @@ test("wallbreaker e tanque com prova (Etapa 2, elenco do pipeline) e abstenção
 // ---------- tags e a 3ª variante ----------
 const POOL_CLIMA = ["Politoed", "Ludicolo", "Kingdra", "Swampert", "Floatzel", "Gyarados", "Scizor", "Garchomp", "Metagross", "Togekiss", "Pelipper", "Torkoal", "Charizard", "Venusaur", "Lilligant"];
 const clima = run({ milestone: 3, nomes: POOL_CLIMA });
-const tresVariantes = clima.R.montarTimePeloMotor(clima.ctx, { variantes: ["ofensivo", "seguro", "sinergia"] });
+// As 3 variantes usam um pool sem Politoed/Pelipper/Charizard: com a precisão corrigida (mecanica-01: Skill Link/Pinnacle Blade deixaram de "sempre acertar"; Plasma Lamp x1,2),
+// a chuva do Politoed passou a render mais que o sol no pool completo e a sinergia escolhe a chuva. Aqui o sol é a única armação (Charizard seria o 2º beneficiário do sol e tira o Togekiss).
+const sol = run({ milestone: 3, nomes: POOL_CLIMA.filter((n) => !["Politoed", "Pelipper", "Charizard"].includes(n)) });
+const tresVariantes = sol.R.montarTimePeloMotor(sol.ctx, { variantes: ["ofensivo", "seguro", "sinergia"] });
 const porChave = (k) => tresVariantes.variantes.find((v) => v.chave === k);
 
 test("tag com prova: Torkoal (Drought) arma o sol, Lilligant e Togekiss ganham (medido por duelo) e o time faz pontos a mais", () => {
@@ -139,7 +142,7 @@ test("tag com prova: Torkoal (Drought) arma o sol, Lilligant e Togekiss ganham (
   assert.ok(tag, JSON.stringify(v.tags));
   assert.equal(tag.armador, "Torkoal");
   assert.equal(tag.via, "Drought");
-  assert.ok(tag.beneficiarios.length >= 2 && tag.beneficiarios.every((b) => b.ganhoPorDuelo >= clima.R.MOTOR_PROVA_BENEFICIO));
+  assert.ok(tag.beneficiarios.length >= 2 && tag.beneficiarios.every((b) => b.ganhoPorDuelo >= sol.R.MOTOR_PROVA_BENEFICIO));
   assert.ok(tag.ganhoDoTime > 0 && tag.lutasMedidas >= 1);
   const con = (n) => v.membros.find((m) => m.nome === n).contribuicoes.map((c) => c.tipo);
   assert.ok(con("Torkoal").includes("habilita"));

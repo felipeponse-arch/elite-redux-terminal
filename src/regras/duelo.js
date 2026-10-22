@@ -1670,7 +1670,7 @@
       if (/Multi-hit moves always hit the maximum/i.test(t)) ef.skillLink = true;
       if ((x = t.match(/Grants a ([\d.]+)x accuracy boost/i)) || (x = t.match(/(?:^|[.;] )([\d.]+)x accuracy/i))) ef.precisaoMult *= parseFloat(x[1]);
       if ((x = t.match(/\+(\d+)% accuracy/i))) ef.precisaoMult *= 1 + parseInt(x[1], 10) / 100;
-      if (/^Moves always hit/i.test(t)) ef.semErrar = true; // só Sighting System (onAccuracy sem CHECK); "X moves always hit" é por grupo (semErrarCategoria)
+      if (/(?:^|[.;]\s+)Moves always hit/i.test(t)) ef.semErrar = true; // só Sighting System (onAccuracy sem CHECK); "X moves always hit" é por grupo (semErrarCategoria)
       // Plasma Lamp (abilities.cc:6056): onAccuracy x1,2 só em golpe Fire/Electric, antes de estágios e Wide Lens (o poder x1,2 entra pelo texto, ver "Boost accuracy & power").
       if ((x = t.match(/^Boost accuracy & power of (\w+) & (\w+) type moves by ([\d.]+)x/i))) [x[1], x[2]].forEach(function (p) { if (tipoDoTextoDuelo(p)) ef.precisaoPorTipo[tipoDoTextoDuelo(p)] = parseFloat(x[3]); });
       if (/Attacks used by and on this Pok[eé]mon bypass accuracy/i.test(t)) { ef.semErrar = true; ef.semErrarContraMim = true; }
