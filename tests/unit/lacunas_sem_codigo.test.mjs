@@ -57,7 +57,7 @@ test("Cold Plasma: golpe Electric queima em vez de paralisar; Fire é imune à q
 });
 
 // ---------- Overzealous (828): Impl existe e está vazia ----------
-test("Overzealous: o Impl<ABILITY_OVERZEALOUS> do upcoming (abilities.cc:10004) só tem randomizerBanned, sem onPriority: o motor segue sem efeito (decisão aguardando o Felipe)", () => {
+test("Overzealous: o Impl<ABILITY_OVERZEALOUS> do upcoming (abilities.cc:10004) só tem randomizerBanned, sem onPriority: o motor segue sem efeito (decisão do Felipe, 22/10/2026: o código vence)", () => {
   assert.equal(R.habilidadeSemRegraNoDuelo(idHab("Overzealous (N)")), true);
 });
 
