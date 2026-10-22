@@ -3528,5 +3528,294 @@
     "note": "Do vídeo \"RANKING Every Garchomp Form!\" (canal MegaFidough): Sinister Claws torna os golpes cortantes especiais (+30%) e baixa a Sp. Def do alvo; Dragon Claw de STAB, Seismic Blade de cobertura, Air Cutter como \"segundo STAB\" (Air Lift) e Dragon Dance. O vídeo não diz item, natureza nem EVs: natureza e EVs são o padrão do app para set especial rápido.",
     "fonte": "video-megafidough",
     "versao": "2.65beta"
+  },
+  "SPECIES_ISOSHREW": {
+    "ability": "Damp",
+    "nature": "Adamant",
+    "evs": "244 HP / 252 Atk / 4 Def / 4 SpA / 4 Spe",
+    "item": "Eviolite",
+    "moves": [
+      "Steamroller",
+      "Aqua Tail",
+      "Aqua Cutter",
+      "Pin Missile"
+    ],
+    "note": "Aparece na Etapa 1 (Stone Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "equilibrado",
+    "origem": "ia"
+  },
+  "SPECIES_ISOSLASH": {
+    "ability": "Fortitude",
+    "nature": "Adamant",
+    "evs": "4 HP / 252 Atk / 244 Spe",
+    "item": "Eviolite",
+    "moves": [
+      "Aqua Tail",
+      "Steamroller",
+      "Aqua Cutter",
+      "Pin Missile"
+    ],
+    "note": "Aparece na Etapa 1 (Stone Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "ofensivo",
+    "origem": "ia"
+  },
+  "SPECIES_VOLBEEP": {
+    "ability": "Anticipation",
+    "nature": "Adamant",
+    "evs": "4 HP / 248 Atk / 248 Spe",
+    "item": "Eviolite",
+    "moves": [
+      "Air Cutter",
+      "Fire Punch",
+      "Play Rough",
+      "Iron Head"
+    ],
+    "note": "Aparece na Etapa 2 (Knuckle Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "ofensivo",
+    "origem": "ia"
+  },
+  "SPECIES_ILLUMARS": {
+    "ability": "Dazzling",
+    "nature": "Modest",
+    "evs": "4 HP / 248 SpA / 248 Spe",
+    "item": "Eviolite",
+    "moves": [
+      "Hurricane",
+      "Moonblast",
+      "Wing Attack",
+      "Air Cutter"
+    ],
+    "note": "Aparece na Etapa 2 (Knuckle Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "ofensivo",
+    "origem": "ia"
+  },
+  "SPECIES_ASTROBEEP": {
+    "ability": "Precise Fist",
+    "nature": "Adamant",
+    "evs": "252 Atk / 252 Spe",
+    "item": "",
+    "moves": [
+      "Air Cutter",
+      "Fire Punch",
+      "Play Rough",
+      "Meteor Mash"
+    ],
+    "note": "Aparece na Etapa 3 (Dynamo Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "ofensivo",
+    "origem": "ia"
+  },
+  "SPECIES_ILLUMINAUT": {
+    "ability": "Cosmic Daze",
+    "nature": "Modest",
+    "evs": "252 SpA / 252 Spe",
+    "item": "",
+    "moves": [
+      "Hurricane",
+      "Pixie Beam",
+      "Wing Attack",
+      "Air Cutter"
+    ],
+    "note": "Aparece na Etapa 3 (Dynamo Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "ofensivo",
+    "origem": "ia"
+  },
+  "SPECIES_NOXISLASH": {
+    "ability": "Catastrophe",
+    "nature": "Adamant",
+    "evs": "252 Atk / 252 Spe",
+    "item": "",
+    "moves": [
+      "Double-Edge",
+      "Aqua Tail",
+      "Guillotine",
+      "Aqua Cutter"
+    ],
+    "note": "Aparece na Etapa 3 (Dynamo Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "ofensivo",
+    "origem": "ia"
+  },
+  "SPECIES_ASUDEM": {
+    "ability": "Mind Crunch",
+    "nature": "Modest",
+    "evs": "4 HP / 248 SpA / 4 SpD / 248 Spe",
+    "item": "",
+    "moves": [
+      "Draconic Fangs",
+      "Eclipse",
+      "Leech Life",
+      "Rip and Tear"
+    ],
+    "note": "Aparece na Etapa 4 (Heat Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "ofensivo",
+    "origem": "ia"
+  },
+  "SPECIES_DURALUDON_PARTNER_MEGA": {
+    "ability": "Draco Morale",
+    "nature": "Modest",
+    "evs": "8 HP / 248 SpA / 248 Spe",
+    "item": "Duraludite",
+    "moves": [
+      "Flash Cannon",
+      "Dark Pulse",
+      "Return",
+      "Aura Sphere"
+    ],
+    "note": "Aparece na Etapa 4 (Heat Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "ofensivo",
+    "origem": "ia"
+  },
+  "SPECIES_GRIMER_REDUX": {
+    "ability": "Ambush",
+    "nature": "Adamant",
+    "evs": "252 HP / 252 Atk / 4 SpD",
+    "item": "Eviolite",
+    "moves": [
+      "Power Whip",
+      "Grass Pledge",
+      "Giga Drain",
+      "Leafage"
+    ],
+    "note": "Etapa sem fonte; fim de jogo até confirmar. Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "equilibrado",
+    "origem": "ia"
+  },
+  "SPECIES_MUK_REDUX": {
+    "ability": "Engulf",
+    "nature": "Adamant",
+    "evs": "252 HP / 252 Atk / 4 Def",
+    "item": "Eviolite",
+    "moves": [
+      "Power Whip",
+      "Grass Pledge",
+      "Giga Drain",
+      "Leafage"
+    ],
+    "note": "Etapa sem fonte; fim de jogo até confirmar. Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "equilibrado",
+    "origem": "ia"
+  },
+  "SPECIES_MORAVINE": {
+    "ability": "Earth Eater",
+    "nature": "Adamant",
+    "evs": "252 HP / 252 Atk / 4 Def",
+    "item": "",
+    "moves": [
+      "Power Whip",
+      "Water Pledge",
+      "Grass Pledge",
+      "Liquidation"
+    ],
+    "note": "Etapa sem fonte; fim de jogo até confirmar. Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "equilibrado",
+    "origem": "ia"
+  },
+  "SPECIES_PHANPY_REDUX": {
+    "ability": "Rockhard Will",
+    "nature": "Adamant",
+    "evs": "252 HP / 252 Atk / 4 SpD",
+    "item": "Eviolite",
+    "moves": [
+      "Head Smash",
+      "Wood Hammer",
+      "Hard Press",
+      "Absorb"
+    ],
+    "note": "Etapa sem fonte; fim de jogo até confirmar. Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "equilibrado",
+    "origem": "ia"
+  },
+  "SPECIES_DONPHAN_REDUX": {
+    "ability": "Guardian Coat",
+    "nature": "Adamant",
+    "evs": "252 Atk / 252 Spe",
+    "item": "Eviolite",
+    "moves": [
+      "Last Resort",
+      "Hard Press",
+      "Absorb",
+      "Bulldoze"
+    ],
+    "note": "Etapa sem fonte; fim de jogo até confirmar. Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "ofensivo",
+    "origem": "ia"
+  },
+  "SPECIES_RUFFLET_REDUX": {
+    "ability": "Flock",
+    "nature": "Modest",
+    "evs": "252 HP / 252 SpA / 4 SpD",
+    "item": "Eviolite",
+    "moves": [
+      "Giant Gale",
+      "Overheat",
+      "Gust",
+      "Blaze Kick"
+    ],
+    "note": "Etapa sem fonte; fim de jogo até confirmar. Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "equilibrado",
+    "origem": "ia"
+  },
+  "SPECIES_BRAVIARY_REDUX": {
+    "ability": "Flame Body",
+    "nature": "Modest",
+    "evs": "252 SpA / 252 Spe",
+    "item": "",
+    "moves": [
+      "Giant Gale",
+      "Overheat",
+      "Blaze Kick",
+      "Flame Burst"
+    ],
+    "note": "Etapa sem fonte; fim de jogo até confirmar. Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "ofensivo",
+    "origem": "ia"
+  },
+  "SPECIES_MASTOPHAN": {
+    "ability": "Flourish",
+    "nature": "Adamant",
+    "evs": "252 HP / 252 Atk / 6 Def",
+    "item": "Leftovers",
+    "moves": [
+      "Grassy Terrain",
+      "Power Whip",
+      "Earthquake",
+      "Rock Slide"
+    ],
+    "note": "Etapa sem fonte; fim de jogo até confirmar. Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "fonte": "ia-curada-playtester",
+    "versao": "2.65.4",
+    "estilo": "equilibrado",
+    "origem": "ia"
   }
 }
