@@ -4141,4 +4141,18 @@ export const MUTACOES = [
     de: "if (salva && salva.source === \"sugestao\") salva = null;",
     para: "",
   },
+  {
+    id: "motor-juiz-ignora-as-comuns",
+    descricao: "o juiz do Modo Motor volta a olhar só os 29 chefões (as lutas comuns da fatia de 40% somem da decisão)",
+    arquivo: "time_pelo_motor.js",
+    de: "if (!c || !c.amostra.length) return vB;",
+    para: "return vB;",
+  },
+  {
+    id: "motor-fatia-invertida",
+    descricao: "a fatia do Modo Motor troca os lados: chefões 40% e comuns 60% (o rank é 60/40)",
+    arquivo: "time_pelo_motor.js",
+    de: "return c.fatia * vB + (1 - c.fatia) * obj.valor(",
+    para: "return (1 - c.fatia) * vB + c.fatia * obj.valor(",
+  },
 ];

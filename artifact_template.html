@@ -484,6 +484,7 @@
 <script id="bossdata" type="application/json">__BOSSES_JSON__</script>
 <script id="levelcapdata" type="application/json">__LEVELCAPS_JSON__</script>
 <script id="gymskillsdata" type="application/json">__GYM_SKILLS_JSON__</script>
+<script id="lutascomunsdata" type="application/json">__LUTAS_COMUNS_JSON__</script>
 <script id="monodisp" type="application/json">__MONO_DISP_JSON__</script>
 <script id="movecategorias" type="application/json">__MOVE_CATEGORIAS_JSON__</script>
 <script id="itensconfig" type="application/json">__ITENS_CONFIG_JSON__</script>
@@ -659,6 +660,8 @@
   // sem trava de dificuldade, ao contrario do sistema separado (e nao usado
   // aqui) que so vale no modo Hell. Fonte completa em data/gym_skills.json.
   var GYM_SKILLS = JSON.parse(document.getElementById("gymskillsdata").textContent || "null");
+  // As lutas comuns mais perigosas de cada etapa, pré-calculadas pelo rank (data/lutas_comuns_run.json): o Meu Time as usa na fatia de 40%.
+  var LUTAS_COMUNS_RUN = JSON.parse(document.getElementById("lutascomunsdata").textContent || "null");
   var SAVEDTEAMS_SEED = JSON.parse(document.getElementById("savedteamsseed").textContent || "[]");
   var ABILITY_PT = JSON.parse(document.getElementById("abilitypt").textContent || "{}");
   var MOVE_PT = JSON.parse(document.getElementById("movept").textContent || "{}");

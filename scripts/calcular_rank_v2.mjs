@@ -10,9 +10,13 @@
 //  5. dois eixos: POTENCIAL (com golpes de status/setup) e VIABILIDADE (sem eles);
 //     nota final = média geométrica dos dois.
 // Revanches, Frontier, Cynthia/Leaf e o campeão monotype ficam de fora (pós-jogo/opcional).
+//  6. todas as lutas (todas-as-lutas/02, 21/10/2026): além dos 29 chefões entram os treinadores comuns da run (scripts/estudo/lutas_comuns.mjs),
+//     com FATIA FIXA de peso: chefões 60% e comuns 40% (scripts/rank_fatia.mjs); dentro de cada fatia vale o peso por ameaça.
 // Fontes de cada decisão: docs/decisoes_mecanicas.md (seção Rank).
 //
-// Uso: node scripts/calcular_rank_v2.mjs [--amostra=N] [--gravar]
+// Uso: node scripts/calcular_rank_v2.mjs [--amostra=N] [--gravar] [--so-chefoes] [--fatia=0.6] [--saida=arq] [--relatorio=arq] [--gravar-lutas=arq]
+//  --gravar grava data/species_rank.json E data/lutas_comuns_run.json (as comuns mais perigosas de cada etapa, para o Meu Time);
+//  --gravar-lutas=arq grava só a lista das comuns (aceita --amostra, serve de prova); --so-chefoes é o rank antigo (29 lutas).
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,6 +24,8 @@ import { cpus, setPriority, constants as osConst } from "node:os";
 import { Worker, isMainThread, parentPort, workerData } from "node:worker_threads";
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 import { melhoresPelaSoma, notaDosEixos, escolherPelaNotaFinal } from "./rank_escolha.mjs";
+import { lutasComunsDaRun } from "./estudo/lutas_comuns.mjs";
+import { notasComFatia, comunsMaisPerigosas, FATIA_DOS_CHEFOES, COMUNS_POR_ETAPA } from "./rank_fatia.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const R = carregarRegras({ milestone: 9 });
@@ -49,13 +55,14 @@ for (const d of DIFICULDADES) {
     return { nome, etapa, nivel, foes: party.map((m) => foe(m, nivel)).filter(Boolean) };
   }).filter((l) => l && l.foes.length);
 }
-// Estudo "todas as lutas" (ticket todas-as-lutas/01, 16/10/2026): --lutas-extra=<arquivo de scripts/estudo/lutas_comuns.mjs> soma os
-// treinadores comuns da run às lutas de chefão, com o MESMO método; só com --saida=<arquivo>, nunca com --gravar.
+// Todas as lutas (todas-as-lutas/02): os treinadores comuns da run entram com o MESMO método, na fatia fixa de peso.
+// --lutas-extra=<arquivo> troca a lista (estudo); --so-chefoes tira as comuns (rank antigo, só as 29 lutas de chefão).
 const ARG = (k) => (process.argv.find((x) => x.startsWith(k + "=")) || "").slice(k.length + 1) || null;
 const LUTAS_EXTRA = ARG("--lutas-extra");
-if (LUTAS_EXTRA && process.argv.includes("--gravar")) throw new Error("--lutas-extra é só para estudo: use --saida, nunca --gravar");
-if (LUTAS_EXTRA) {
-  const extra = JSON.parse(readFileSync(LUTAS_EXTRA, "utf8")).lutas;
+const SO_CHEFOES = process.argv.includes("--so-chefoes");
+const FATIA = ARG("--fatia") ? Number(ARG("--fatia")) : FATIA_DOS_CHEFOES;
+if (!SO_CHEFOES) {
+  const extra = LUTAS_EXTRA ? JSON.parse(readFileSync(LUTAS_EXTRA, "utf8")).lutas : lutasComunsDaRun(RAIZ).lutas;
   for (const d of DIFICULDADES) {
     for (const l of extra) {
       const party = (l[d.chave] && l[d.chave].length ? l[d.chave] : l.party) || [];
@@ -168,34 +175,16 @@ const validos = Object.keys(res).filter((s) => res[s]);
 
 // Peso por ameaça (PvPoke): a luta que mais derruba as espécies pesa mais; iterado com as
 // espécies ponderadas pela própria nota (vencer quem os fortes também perdem vale mais).
+// Média só das lutas cobertas (desde que a espécie existe na run). Contar a luta não coberta como 0 misturava "aparece cedo" com
+// "é forte" (02/10: fortes da comunidade caíram de 73 para 65); a etapa fica à mostra ao lado da nota.
+// A fatia fixa (chefões x comuns) e a iteração moram em rank_fatia.mjs (notasComFatia).
 function notas(dif, eixo) {
-  const nomes = lutas[dif].map((l) => l.nome);
-  let pesoEsp = Object.fromEntries(validos.map((s) => [s, 1]));
-  let pesoLuta = {};
-  let nota = {};
-  for (let it = 0; it < 4; it++) {
-    for (const n of nomes) {
-      let soma = 0, peso = 0;
-      for (const s of validos) {
-        const e = res[s][dif] && res[s][dif].eixos[eixo].find((x) => x.luta === n);
-        if (!e) continue;
-        const m = e.brs.reduce((a, v) => a + v, 0) / e.brs.length;
-        soma += pesoEsp[s] * (1 - m); peso += pesoEsp[s];
-      }
-      pesoLuta[n] = peso ? soma / peso : 0;
-    }
-    for (const s of validos) {
-      const lista = (res[s][dif] && res[s][dif].eixos[eixo]) || [];
-      // Média só das lutas cobertas (desde que a espécie existe na run). Contar a luta não
-      // coberta como 0 misturava "aparece cedo" com "é forte" (02/10: fortes da comunidade
-      // caíram de 73 para 65); a etapa fica à mostra ao lado da nota.
-      const pesoCoberto = lista.reduce((a, e) => a + pesoLuta[e.luta], 0);
-      nota[s] = pesoCoberto ? lista.reduce((a, e) => a + pesoLuta[e.luta] * e.brs.reduce((x, v) => x + v, 0) / e.brs.length, 0) / pesoCoberto : 0;
-    }
-    const media = validos.reduce((a, s) => a + nota[s], 0) / validos.length;
-    pesoEsp = Object.fromEntries(validos.map((s) => [s, 0.5 + nota[s] / (2 * media)]));
-  }
-  return { nota, pesoLuta };
+  const L = lutas[dif];
+  const indice = Object.fromEntries(L.map((l, i) => [l.nome, i]));
+  const mediaDe = (e) => e.brs.reduce((a, v) => a + v, 0) / e.brs.length;
+  const lista = (s) => ((res[s][dif] && res[s][dif].eixos[eixo]) || []).map((e) => [indice[e.luta], mediaDe(e)]);
+  const r = notasComFatia(L.map((l) => ({ comum: !!l.comum })), validos, lista, FATIA);
+  return { nota: r.nota, pesoLuta: Object.fromEntries(L.map((l, i) => [l.nome, r.pesoLuta[i]])) };
 }
 function percentis(obj) {
   const ks = Object.keys(obj).sort((a, b) => obj[a] - obj[b]), n = ks.length, p = {};
@@ -228,6 +217,24 @@ for (const d of DIFICULDADES) {
   });
 }
 writeFileSync(ARG("--saida") || join(RAIZ, "..", "rank_v2_saida.json"), JSON.stringify(final));
+// Lista das comuns mais perigosas de cada etapa, com a ameaça medida (potencial): o Meu Time lê daqui (src/regras/time_pelo_motor.js),
+// sem simular as 500+ lutas ao vivo. Formato: lutas[dificuldade] = [{ nome, etapa, db, peso }]; times[nome] = { party, insane? } (insane só
+// quando difere do party: o dado é um arquivo só para as duas dificuldades).
+function lutasComunsParaOMeuTime(extraPorNome) {
+  const out = { fatia: FATIA, porEtapa: COMUNS_POR_ETAPA, amostra: amostra, lutas: {}, times: {} };
+  for (const d of DIFICULDADES) {
+    const L = lutas[d.chave], peso = L.map((l) => relatorio[d.chave].pesoLuta[l.nome]);
+    out.lutas[d.chave] = comunsMaisPerigosas(L, peso).map((s) => {
+      const e = extraPorNome[s.nome];
+      const t = (out.times[s.nome] = out.times[s.nome] || { party: e.party || [] });
+      if (d.chave === "insane" && e.insane && e.insane.length && JSON.stringify(e.insane) !== JSON.stringify(e.party)) t.insane = e.insane;
+      return { nome: s.nome, etapa: s.etapa, db: !!e.db, peso: Math.round(s.peso * 1000) / 1000 };
+    });
+  }
+  return out;
+}
+const extraPorNome = SO_CHEFOES ? {} : Object.fromEntries((LUTAS_EXTRA ? JSON.parse(readFileSync(LUTAS_EXTRA, "utf8")).lutas : lutasComunsDaRun(RAIZ).lutas).map((l) => [l.nome, l]));
+if (ARG("--gravar-lutas")) writeFileSync(ARG("--gravar-lutas"), JSON.stringify(lutasComunsParaOMeuTime(extraPorNome)));
 if (ARG("--relatorio")) writeFileSync(ARG("--relatorio"), JSON.stringify(Object.fromEntries(DIFICULDADES.map((x) => [x.chave, { pesoLuta: relatorio[x.chave].pesoLuta, comuns: lutas[x.chave].filter((l) => l.comum).map((l) => l.nome) }]))));
 // --gravar (só com o rank completo, sem --amostra): data/species_rank.json no formato que o app
 // lê. tier/score/monoRanks do topo = Fácil/Ace (party); src/regras/rank_da_run.js troca pela
@@ -273,5 +280,6 @@ if (process.argv.includes("--gravar")) {
     novo[s] = e;
   }
   writeFileSync(join(RAIZ, "data", "species_rank.json"), JSON.stringify(novo));
+  if (!SO_CHEFOES) writeFileSync(join(RAIZ, "data", "lutas_comuns_run.json"), JSON.stringify(lutasComunsParaOMeuTime(extraPorNome)));
   console.log("gravado: data/species_rank.json (rank v2 por dificuldade; fora do rank: " + Object.values(novo).filter((x) => x.foraDoRank).length + ")");
 }

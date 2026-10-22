@@ -50,6 +50,7 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
     MOVE_ROLES: lerJson("move_roles.json"),
     BOSSES: lerJson("bosses.json"),
     GYM_SKILLS: lerJson("gym_skills.json"),
+    LUTAS_COMUNS_RUN: lerJson("lutas_comuns_run.json"),
     MONO_DISP: lerJson("mono_disponibilidade.json"),
     MOVE_CATEGORIAS: lerJson("move_categorias.json"),
     ITENS_CONFIG: lerJson("itens_config.json"),

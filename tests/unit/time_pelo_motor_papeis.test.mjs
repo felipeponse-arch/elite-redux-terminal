@@ -9,8 +9,13 @@ import { carregarRegras } from "./carregar_regras.mjs";
 const igual = (a, b, msg) => assert.equal(JSON.stringify(a), JSON.stringify(b), msg);
 
 // Run com o elenco dado (6 no time, o resto na caixa) e builds salvas opcionais: { nome: [habilidade, golpes, natureza, evs] }.
-function run({ milestone = 2, nomes, builds = {} }) {
+// `comFatia`: false (padrão) liga o juiz só dos chefões, o das Fases C e D, onde estes casos foram escolhidos (os elencos e as lutas aqui são
+// fixados à mão). O juiz com as lutas comuns (todas-as-lutas/02, fatia 60/40) muda QUEM o Modo Motor escolhe, não o que um papel ou uma tag
+// exige como prova; a fatia tem os testes dela em time_pelo_motor_comuns.test.mjs e o último teste deste arquivo confere que a tag de clima
+// continua com prova no juiz com a fatia.
+function run({ milestone = 2, nomes, builds = {}, comFatia = false }) {
   const R = carregarRegras({ milestone });
+  if (!comFatia) R.LUTAS_COMUNS_RUN = null;
   const sp = (n) => R.SPECIES.find((s) => s && s.n === n);
   nomes.forEach((n) => assert.ok(sp(n), "espécie inexistente: " + n));
   R.state.team = nomes.slice(0, 6).map((n) => sp(n).x);
@@ -258,4 +263,16 @@ test("tempo: a classificação tem teto de 3 s por variante (medido: 0,1 a 0,4 s
     assert.ok(v.tempoClassificacaoMs <= v.tempoMs, v.chave);
   });
   console.log("# tempo (ms): " + tresVariantes.variantes.map((v) => v.chave + " total " + v.tempoMs + ", classificação " + v.tempoClassificacaoMs).join(" | ") + " | tudo " + tresVariantes.tempoMs);
+});
+
+test("com a fatia 60/40 o juiz escolhe outro time, mas a sinergia de sol continua com a prova medida (armador + dois beneficiários + ganho do time)", () => {
+  const r = run({ milestone: 3, nomes: POOL_CLIMA, comFatia: true });
+  assert.ok(r.ctx.lutas.comuns.amostra.length > 0, "o juiz com a fatia precisa ter comuns na amostra");
+  const v = r.R.montarTimePeloMotor(r.ctx, { variantes: ["sinergia"] }).variantes[0];
+  const tag = v.tags.find((x) => x.tag === "clima: sol");
+  assert.ok(tag, JSON.stringify(v.tags));
+  assert.equal(tag.armador, "Torkoal");
+  assert.ok(tag.beneficiarios.length >= 2 && tag.beneficiarios.every((b) => b.ganhoPorDuelo >= r.R.MOTOR_PROVA_BENEFICIO), JSON.stringify(tag.beneficiarios));
+  assert.ok(tag.ganhoDoTime > 0 && tag.lutasMedidas >= 1);
+  assert.ok(v.metricas.comuns && v.metricas.comuns.lutas > 0, "a conferência das comuns vem junto");
 });

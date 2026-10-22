@@ -51,6 +51,7 @@ const ARQUIVOS_DE_DADOS = {
   __PODER_VARIAVEL_JSON__: "poder_variavel.json",
   __ITEM_PT_JSON__: "item_translations_pt.json",
   __GYM_SKILLS_JSON__: "gym_skills.json",
+  __LUTAS_COMUNS_JSON__: "lutas_comuns_run.json",
   __MONO_DISP_JSON__: "mono_disponibilidade.json",
   __MOVE_CATEGORIAS_JSON__: "move_categorias.json",
   __ITENS_CONFIG_JSON__: "itens_config.json",
