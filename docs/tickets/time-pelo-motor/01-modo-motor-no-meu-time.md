@@ -1,6 +1,6 @@
 # Ticket 01 — Modo Motor no Meu Time
 
-Status: em-andamento — Fases A-F feitas (F2-F4 em 21/10/2026); falta o supervisor e a publicação (pelo fluxo de release do projeto). **PRIORIDADE ALTA** (Felipe, 17/10/2026).
+Status: resolvido (Fases A-F + F5 aprovadas; rank recalculado a4aa061; no master ab3f5a4; publicado na v183 em 21/10/2026)
 Começar depois do reset semanal de terça 20/10/2026, 23h (20/10/2026 é terça; 21/10/2026 é quarta).
 Tamanho: G. Relaciona: todas-as-lutas/02 (mesma régua 60/40 de lutas), time-melhor-no-geral (v180).
 
