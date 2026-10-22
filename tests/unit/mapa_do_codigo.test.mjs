@@ -17,3 +17,18 @@ test("funcoes e responsabilidade em texto mínimo", () => {
   assert.deepEqual(funcoes("// x\nfunction a(){}\nconst b = (x) => 1;\n  function interna(){}\n"), [["a", 2], ["b", 3]]);
   assert.equal(responsabilidade(["// ===== f.js =====", "// Faz coisa."]), "Faz coisa.");
 });
+
+test("chamada real entre arquivos aparece em 'chamado por' (ui chama regras)", async () => {
+  const { gerarChamadas } = await import("../../scripts/mapa_chamadas.mjs");
+  const raiz = new URL("../../", import.meta.url).pathname.replace(/^\/(\w:)/, "$1");
+  const { regras, ui } = gerarChamadas(raiz);
+  // renderTeamAnalysis (src/ui/arquetipo.js) usa abilityTypeMod (src/regras/tipos.js)
+  assert.match(regras, /^- abilityTypeMod:\d+ - .*chamado por: .*renderTeamAnalysis \(arquetipo\.js:\d+\)/m);
+  assert.match(ui, /^- renderTeamAnalysis:\d+ - .*chama: .*abilityTypeMod \(tipos\.js:\d+\)/m);
+});
+
+test("índice cobre .ps1 e testes", () => {
+  const m = gerarMapa();
+  assert.match(m, /## Scripts \(\.ps1\)/);
+  assert.match(m, /\*\*mapa_do_codigo\.test\.mjs\*\* - /);
+});

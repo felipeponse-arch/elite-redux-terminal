@@ -2,7 +2,7 @@
 
 Gerado por `npm run mapa` (scripts/mapa_do_codigo.mjs); o pré-commit regenera quando há `src/` ou `scripts/` em staging.
 Não edite à mão. Conflito de junção neste arquivo: regenere (`npm run mapa -- --rapido`) e adicione.
-Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limit). Chamadas entre arquivos não aparecem.
+Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limit). Quem chama quem entre arquivos: [chamadas-regras](mapa/chamadas-regras.md), [chamadas-ui](mapa/chamadas-ui.md).
 
 ## Regras (lógica pura) - src/regras/
 - **avisos_build.js** - Lote 5 das pesquisas de 06/10 (ideias do GPT, seções 3.2/17/26/42): Avisos de build e selo de
@@ -160,8 +160,10 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   lerCsv:38, lerNome:60, chave:69, distancia:70, variantes:88, casarNomes:101, lerAba:121, main:140
 - **itens_pela_config.mjs** - Parâmetros de item pelo código do jogo, não por números soltos no motor.
   lerItensDaConfig:18, TIPO_EN:46, efeitoDoItem:49, itensDeBatalha:55
+- **mapa_chamadas.mjs** - Chamadas entre arquivos do app (src/regras + src/ui) pela API do TypeScript.
+  carregarTs:10, grafoDeChamadas:25, lista:67, gerarChamadas:74
 - **mapa_do_codigo.mjs** - Gera docs/mapa-do-codigo.md: por arquivo de src/regras, src/ui e scripts/*.mjs, a responsabilidade
-  responsabilidade:18, funcoes:29, gerarMapa:39
+  responsabilidade:24, funcoes:35, gerarMapa:46, escreverMapa:69
 - **medir_texto_novo.mjs** - Mede o que um dado novo da NextDex faz com o parser de habilidades do motor (ticket versao-nova/04, 15/10/2026).
   semClimas:17, limpar:18, lerTodas:23
 - **nivel_da_mudanca.mjs** - Classificador do gancho por nível (melhoria A de docs/pipeline_do_projeto.md, 2026-10-14).
@@ -190,4 +192,176 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **varrer_chefoes.mjs** - Varredura dos dados de TODOS os chefes (membros de party/insane/hell): pedra sem Mega, habilidade/golpe sem id,
   add:6
 - **verificar.mjs** - Verificação antes de um commit (hook de pre-commit) e antes de publicar (prepare_publish.ps1).
-  rodar:39
+  rodar:38
+
+## Scripts (.ps1) - scripts/
+- **acrescentar_sprites_atlas.ps1** - >
+- **archive_build.ps1** - >
+- **audit_field_types.ps1** - Varredura sistemática de tipos no dado bruto do NextDex, 2026-09-10.
+  Get-TypeName:25, Note:32
+- **build.ps1** - (fast path when only editing the template,
+- **build_sprite_atlas.ps1** - >
+- **check_upstream.ps1** - >
+- **common.ps1** - Shared helpers for the Elite Redux Terminal data pipeline.
+  New-GameDataParser:6, Write-JsonString:14, Write-JsonValue:34, ConvertTo-JsonManual:69, Score-AbilityText:90, Get-TypeMultiplier:179, Get-AlwaysActiveAbilityIds:271, Get-AbilityAdjustedTypeMultiplier:287, Format-Evs:303
+- **compute_ability_movepool_synergy.ps1** - (sem comentário de topo)
+  Get-FlagMatches:56, Get-UnmappedHit:66, Get-TypeMatches:73
+- **compute_condition_move_synergy.ps1** - (sem comentário de topo)
+- **compute_move_effects.ps1** - (sem comentário de topo)
+  Get-MoveEffects:85
+- **compute_move_roles.ps1** - (sem comentário de topo)
+- **compute_species_rank.ps1** - (sem comentário de topo)
+  Get-AbilityScore:164, Get-BossDefenseScore:211, Get-MovepoolScore:237, Get-TypeScore:274, Get-Stage:337, Get-PercentileRanks:387, Get-Tier:412, Compute-Tiers:430
+- **compute_species_role.ps1** - (sem comentário de topo)
+  Get-MoveIdSet:52, Get-PercentileRanks:66
+- **dev_server.ps1** - Injecao de mock de sincronizacao (db), 2026-09-11: exclusiva deste servidor
+  Get-MockDbScript:13
+- **expand_combo_abilities.ps1** - >
+  Get-ComboParts:30, Flatten-Combo:45
+- **extract_boss_builds.ps1** - (sem comentário de topo)
+- **extract_bosses.ps1** - Generates data/bosses.json (boss trainers + their difficulty variants) from
+  ResolveAbility:29, ResolveAbilityId:39, ResolveParty:46
+- **install_git_hooks.ps1** - >
+- **prepare_publish.ps1** - (sem comentário de topo)
+  Fail:23
+- **research_ability_synergy.ps1** - Script de pesquisa/calibracao (NAO faz parte do build.ps1) - lista toda habilidade
+- **scheduled_upstream_check.ps1** - (sem comentário de topo)
+  Log:25, Show-Notification:29
+- **score_abilities.ps1** - >
+- **slim_dex.ps1** - (sem comentário de topo)
+- **transform.ps1** - Generates data/dex_compact.json from data/gameData_2654.json (the raw
+
+## Testes unitários (o que cobrem) - tests/unit/
+- **absorcao_flash_fire_dry_skin.test.mjs** - Ticket calibracao-2026-10-15/04 (15/10/2026): Flash Fire e Dry Skin absorvem o golpe (código do jogo: abilities.cc:696-706 e
+- **alarme_upstream.test.mjs** - Leitura das páginas oficiais pelo alarme de versão nova (sem rede).
+- **areia_e_sets_rapidos.test.mjs** - Diagnóstico dos físicos subavaliados (03/10): Tyranitar/Rock sem o +50% de Sp. Def na areia (código oficial
+- **atalhos_teclado.test.mjs** - Ticket 14 da dívida técnica (2026-10-08): atalhos que não são botão de verdade
+- **atributo_do_ataque.test.mjs** - Golpes que trocam o atributo de ataque ou de defesa (06/10, lote 4 da fila da comunidade; ver
+- **auditoria_do_motor.test.mjs** - Auditoria permanente do motor do duelo (revisão da equipe, 2026-09-30, pedido do
+- **avisos_e_selo_de_build.test.mjs** - Lote 5 das pesquisas de 06/10: Avisos de build (um bloco, reaproveitando as contas
+- **best_offense_pelo_codigo.test.mjs** - Ticket versao-nova/05 (15/10/2026), pergunta P2 respondida pelo Felipe: Best Offense e Magus Blades valem pelo CÓDIGO da versão mais nova
+- **buffs_e_pendencias_antigas.test.mjs** - Lote de 2026-10-01: buffs do ginásio no simulador (números do código do jogo,
+- **cache_sabotagem.test.mjs** - (sem comentário de topo)
+- **calibracao_calculadora_do_jogo.test.mjs** - Calibração do motor contra a calculadora de dano do próprio jogo (10/10/2026, prints do usuário).
+- **calibracao_simulador_wasm.test.mjs** - Calibração do motor contra o simulador do jogo compilado (WebAssembly, Elite Redux 2.65.3b), 21/10/2026
+- **campo_do_campeao_monotype.test.mjs** - Efeito do campeão monotype (04/10): o jogo anuncia um efeito por tipo (src/battle_main.c HandleMonoChampSpecialEffects
+- **campo_invertido_no_plano.test.mjs** - Achado do vídeo do usuário (02/10): o plano contra a Tate & Liza 1 chamava Axe Kick (Dark) de
+- **campo_no_duelo.test.mjs** - Campo no duelo (2026-09-29): terreno das habilidades (Grassy/Electric/Psychic/
+- **categorias_de_golpe.test.mjs** - Categoria de golpe (soco, mordida, corte...) do NextDex (2026-09-29): antes
+- **categorias_de_golpe_da_config.test.mjs** - Ticket calibracao-2026-10-15/01 (15/10/2026): as categorias de golpe (soco, mordida, corte, martelo, pulso, chifre,
+- **checar_encoding.test.mjs** - A trava de codificação (scripts/checar_encoding.mjs) precisa pegar exatamente
+- **checar_paralelo.test.mjs** - Testes do scripts/checar_paralelo.mjs (ticket 04, fluxo 14/10/2026).
+- **chefao_pela_interface.test.mjs** - Ticket 07 da dívida técnica (08/10/2026), 2ª metade: a luta inteira contra o time do chefão e a
+- **chefoes_pela_config.test.mjs** - Ticket 02 (07/10/2026): times dos chefões conferidos contra a config oficial do jogo (er-config
+- **chefoes_pela_config_nova.test.mjs** - Ticket versao-nova/05 (15/10/2026): os chefões contra o TrainerList da versão MAIS NOVA (er-config d1a9a4c, 14/10/2026). A comparação achou
+- **clima_oficial_e_revisao.test.mjs** - Achados da reunião de alinhamento (2026-09-30): clima com os números oficiais
+- **comparar_motor_ia.test.mjs** - Comparação Motor x IA (time-pelo-motor/01, Fase E): a leitura da resposta da IA e o juiz comum.
+- **condicoes_habilidade.test.mjs** - Habilidade condicional (reunião de 2026-09-28): a auditoria das builds salvas
+- **condicoes_no_duelo.test.mjs** - Condições da luta no duelo (2026-09-29): status no próprio Pokémon (Guts com
+- **config_v10.test.mjs** - Ticket versao-nova/10 (15/10/2026): o que sobrou da config d1a9a4c depois do v09 - aprendizado de golpes de TODAS as espécies, os quatro ...
+- **confronto.test.mjs** - Testes do motor de confronto (src/regras/confronto.js, 2026-09-24).
+- **critico_no_duelo.test.mjs** - Crítico no duelo (2026-09-29): antes o motor não tinha crítico nenhum - Super
+- **cura_recuo_no_duelo.test.mjs** - Cura, recuo e dano por contato no duelo (2026-09-29): recuo e dreno dos golpes
+- **dados_de_mega_e_presentes.test.mjs** - Achados de 03/10 na revisão das lutas: mega_forms.json (feito à mão em 09/2026) estava 36 pedras
+- **descricao_especie.test.mjs** - Descrição de teste do jogo escondida na ficha (15/10/2026): o Noxislash mostrava "Hi i use this for implementing.".
+- **diff_versoes.test.mjs** - Diff entre versões do gameData: detecta o que mudou e o que do app cita isso
+- **diversos_no_duelo.test.mjs** - Habilidades "diversas" no duelo (2026-09-29): o resto que muda um 1x1 -
+- **drench.test.mjs** - Ticket 17 (07/10/2026): status drench pelo código oficial (er-repo 217dd0f). Encharcado age por
+- **duelo_pela_interface.test.mjs** - Ticket 07 da dívida técnica (08/10/2026), 1ª metade: o duelo testado pela entrada pública.
+- **dupla_contagem_da_sinergia.test.mjs** - Ticket versao-nova/01 (15/10/2026): o código do jogo multiplica o bônus de golpe de uma habilidade UMA vez (abilities.cc, onModifyDamage).
+- **dupla_no_duelo.test.mjs** - Dupla (2026-09-29, decisão do usuário: duelo em dupla completo). 25 chefões
+- **efeitos_de_golpe.test.mjs** - Efeitos de golpe que a auditoria do motor apontou (2026-09-30), pelos textos do
+- **efeitos_de_golpe_03_10.test.mjs** - Efeitos de golpe da lista "sem regra" que pesavam em builds e chefes (03/10): Thunder/Hurricane no clima
+- **efeitos_pela_interface.test.mjs** - Ticket 07 da dívida técnica (08/10/2026), 2ª metade, bloco 2: efeitos do duelo que só tinham teste
+- **encalhados_e_checkpoint.test.mjs** - Testes de scripts/encalhados.mjs e scripts/checkpoint.mjs (melhoria C do fluxo).
+- **escolha_ia_candidatos.test.mjs** - A IA escolhe ENTRE os candidatos do pipeline de build (ticket 03 do pipeline; src/regras/escolha_ia_candidatos.js).
+- **estado_do_app.test.mjs** - Testes das regras que saíram do template na fase 3 da refatoração (2026-09-24):
+- **estagios_no_duelo.test.mjs** - Estágios de atributo no duelo (2026-09-29): entrada (Intrepid Sword), ao
+- **extracao_transform.test.mjs** - Ticket versao-nova/05 (15/10/2026): a extração do dado em Node (scripts/extracao/) é o que gera os arquivos derivados. Estes testes trava...
+- **extras_no_duelo.test.mjs** - Golpes extras, bloqueio e entrada no duelo (2026-09-29): Readied Action,
+- **ferramentas_ia.test.mjs** - Ferramentas que a IA consulta (src/regras/ferramentas_ia.js), testadas no Node sem navegador
+- **ficha_perfil_defensivo.test.mjs** - Ticket 13 (07/10/2026): faixas Fraco/Resiste/Imune da ficha, com as innates (sempre ativas).
+- **floettite_pos_jogo.test.mjs** - Ticket 08 (07/10/2026): a Floettite só sai depois de vencer a Elite 4 (NPC da primeira cidade,
+- **fluffiest.test.mjs** - Fluffiest (678): a descrição (NextDex e er-config) diz "contato x0,25, fogo x4", mas o código do jogo
+- **gerador_cacar_bugs.test.mjs** - Ticket 17 da dívida técnica (08/10/2026): caça-bugs no caminho do gerador de builds por IA
+- **golpe_chave_imposto.test.mjs** - Relato da Tate & Liza (03/10): o plano dizia Dragon Claw e a build da IA tinha Dragon Pulse. Agora a validação
+- **golpe_duplo.test.mjs** - Habilidades de golpe duplo (10/10/2026). O usuário testou no jogo: o Mega Punch do Ledian (Raging Boxer, Iron
+- **golpes_de_status.test.mjs** - Golpes de status no duelo (2026-09-29, decisão do usuário: "com regras
+- **golpes_novos_2654.test.mjs** - Ticket versao-nova/09 (15/10/2026): os 9 golpes novos do upcoming (er-config d1a9a4c, MoveList.textproto) entram no app, com as espécies ...
+- **gravacao_build_ia.test.mjs** - Caminho "resposta da IA -> build validada -> o que gravar" (src/regras/gravacao_build_ia.js e
+- **guarda_lutas_comuns.test.mjs** - Guardas de todas-as-lutas/02: dado provisório não publica; o rank gravado não aceita outra fatia nem outra lista de lutas.
+- **habilidades_mudadas_2654.test.mjs** - Ticket versao-nova/06 (15/10/2026): habilidades cujo efeito mudou na versão mais nova (dados-2654/02 e 03). Fonte: abilities.cc (upcoming...
+- **habilidades_novas_2654.test.mjs** - Ticket versao-nova/07 (15/10/2026): as 29 habilidades novas da NextDex 2.65.4 + as 9 do delta da er-config d1a9a4c (upcoming) funcionam n...
+- **ia_do_chefao_golpe.test.mjs** - Ticket 03 (07/10/2026): o chefão escolhe o golpe pelos pontos da IA do jogo (battle_ai_main.c AI_TryToFaint,
+- **importar_dex_strategy.test.mjs** - Importador das estratégias oficiais do código do jogo (src/data/dex-strategy.md), achado da pesquisa profunda de 06/10.
+- **imunidades_de_habilidade.test.mjs** - Imunidades escritas como "absorve"/"redireciona"/"em vez de ser atingido"
+- **inversa_ia.test.mjs** - Revisão de 07/10 (ticket 03 x Inverse Room): com a sala invertida cobrindo a luta, o chefão usa o golpe que a
+- **itens_consumiveis.test.mjs** - Berries na IA e habilidades que dependem de gastar o item (2026-09-26).
+- **itens_da_config.test.mjs** - Ticket calibracao-2026-10-15/02 (15/10/2026): os parâmetros dos itens vêm do `hold_effect_strength` da er-config, como o
+- **itens_no_duelo.test.mjs** - Itens no duelo (2026-09-29, decisão do usuário: "item nos sets do duelo").
+- **juiz_do_time.test.mjs** - Ticket time-pelo-motor/01, Fase B2 (21/10/2026): juiz do time pela LUTA COMPLETA (avaliarTimePelaLutaCompleta), ao lado do
+- **lacunas_sem_codigo.test.mjs** - Varredura "habilidades da config sem código" (21/10/2026; relatorios/sem_codigo_varredura_2026-10-21.md).
+- **lado_no_duelo.test.mjs** - Ticket time-pelo-motor/01, Fase B1 (20/10/2026): Reflect, Light Screen, Aurora Veil, Tailwind e Trick Room são
+- **level_cap_padrao_unico.test.mjs** - Ticket 04 (divida-tecnica): sem Level cap o padrão é um só (0 = sem limite; nível de cálculo 100).
+- **liberado_na_run.test.mjs** - Ticket 05 (divida-tecnica): liberadoNaRun é a única régua de pedra, item e golpe;
+- **lote_a_motor.test.mjs** - Lote A da força-tarefa (2026-10-02): correções do motor provadas na auditoria, cada uma
+- **lote_b_plano_real.test.mjs** - Lote B da força-tarefa (2026-10-02): o plano contra o chefão tem que corresponder ao time
+- **lote_c_validacao.test.mjs** - Lote C da força-tarefa (2026-10-02): validação estratégica das builds da IA e o que a
+- **lote_d_confiabilidade.test.mjs** - Lote D da força-tarefa (2026-10-02): confiabilidade do estado, do save, da sincronização
+- **lote_de_builds.test.mjs** - Lote de builds do time (2026-09-30, decisão do usuário: "sim, uma chamada pro
+- **manual_build.test.mjs** - Manual de build competitivo (reunião de 2026-09-28): regras gerais de nature,
+- **mapa_do_codigo.test.mjs** - Gerador do mapa do código: determinístico e acha função conhecida com a linha certa.
+- **marcas_do_rank.test.mjs** - Marcas sem nota do rank v2 (ponto 6, 2026-10-02): "Precisa de setter"
+- **mega_gate.test.mjs** - Trava de Mega Evolução nas SUGESTÕES (achado do usuário, print de 2026-09-24:
+- **modo_motor_sem_ia.test.mjs** - Modo Motor nunca chama a IA (ticket time-pelo-motor/01, Fase F3, 21/10/2026). Duas provas independentes:
+- **mono_run.test.mjs** - Mono run: disponibilidade por tipo e etapa (2026-09-26). O dado vem da
+- **montar_time_contra_chefao.test.mjs** - Botão "Montar time contra este chefão" (2026-09-29): o simulador de duelo
+- **multiplicadores_do_codigo_do_jogo.test.mjs** - Ticket calibracao-2026-10-15/03 (15/10/2026): multiplicadores de habilidade que o texto da NextDex traz, mas que o motor não lia
+- **nivel_da_mudanca.test.mjs** - Testes do gancho por nível (scripts/nivel_da_mudanca.mjs e scripts/verificar.mjs).
+- **numeros_da_versao_nova.test.mjs** - Ticket versao-nova/02 (15/10/2026): o app mira a versão MAIS NOVA do jogo (código/config primeiro, NextDex depois). Três números que a 2....
+- **onde_achar_itens.test.mjs** - Ticket 07 (07/10/2026): onde achar cada item na run, lido do código oficial do jogo (item no chão, escondido,
+- **perfectionist.test.mjs** - Ticket 08 (07/10/2026): Perfectionist pelo código oficial (abilities.cc Impl<ABILITY_PERFECTIONIST>):
+- **pipeline_build.test.mjs** - Pipeline de build com intenção (ticket 20 da dívida, 14/10/2026): src/regras/pipeline_build.js, só pela interface
+- **pipeline_kit_legal.test.mjs** - Fase 1 do pipeline: contrato determinístico do kit legal.
+- **pipeline_rascunho.test.mjs** - Rascunho coerente do pipeline de build (ticket docs/tickets/pipeline-build-2026-10-14/05-rascunho-coerente.md, revisão de metagame de 15/...
+- **plano_build.test.mjs** - Testes da build que acompanha o jogador (src/regras/plano_build.js), pedido do
+- **poder_que_cresce.test.mjs** - Ticket 19 (07/10/2026): poder que cresce e golpe que carrega, pelo código oficial (er-repo 217dd0f):
+- **poder_variavel.test.mjs** - Ticket 16 (07/10/2026): golpes de poder 1 no dado com o poder do código oficial (src/script_conditions.cc
+- **primeiro_golpe_e_booster_energy.test.mjs** - Ticket calibracao-2026-10-15/05 (15/10/2026):
+- **prioridade_bloqueada_no_1x1.test.mjs** - Queenly Majesty, Dazzling e Armor Tail ("Protects itself and ally from priority moves") no duelo 1x1 (10/10/2026).
+- **prioridade_condicional_no_duelo.test.mjs** - Prioridade no duelo (14/10/2026): golpe com prioridade (de base OU condicional: Coil Up, Sidewinder, Cutthroat, Edgelord,
+- **prioridade_e_campo_pelo_codigo.test.mjs** - Ticket calibracao-2026-10-15/06 (15/10/2026): prioridade e campo pelo código do jogo.
+- **prompt_build.test.mjs** - Revisão do prompt de build (2026-09-27, pedido do usuário): habilidade com
+- **prompts_ia.test.mjs** - Peças dos prompts de IA e leitura das respostas (src/regras/prompts_ia.js e
+- **rank_da_run.test.mjs** - Rank v2 no app (src/regras/rank_da_run.js): nota pela dificuldade da run, dois eixos,
+- **rank_disponibilidade.test.mjs** - Rank v2, ponto 3: data/rank_disponibilidade.json (gerado por scripts/gerar_rank_disponibilidade.mjs
+- **rank_escolha.test.mjs** - Ticket 08 (07/10/2026): a escolha do set do rank avalia por inteiro os melhores pela soma rápida
+- **rank_fatia.test.mjs** - Fatia fixa de peso do rank (ticket todas-as-lutas/02, 21/10/2026): chefões 60% e lutas comuns 40%, com a composição REAL da run
+- **rank_so_por_rankde.test.mjs** - ADR-003 (ticket 01): o dado do Rank só é lido por rankDe(); SPECIES_RANK não é reescrito depois da carga.
+- **reconciliar_build.test.mjs** - Build salva que muda de espécie (auto-evolução) ou chega de um save antigo precisa
+- **regras.test.mjs** - Testes unitários das regras do jogo (item Q3 da pauta técnica, 2026-09-16).
+- **regras_oficiais_fase4.test.mjs** - Fase 4 da reunião de 30/09/2026: o motor conferido contra o FAQ oficial, o
+- **respostas_do_usuario_08_10.test.mjs** - Ticket dados-2654/11 (08/10/2026): as 13 decisões que o usuário tomou sobre as dúvidas acumuladas.
+- **resto_das_habilidades.test.mjs** - O resto das habilidades (2026-09-29, pedido do usuário: "não quero que fique
+- **reticencias.test.mjs** - Ticket 13 (07/10): texto de tela usa o caractere … (U+2026), nunca três pontos.
+- **revanche_sem_buffs.test.mjs** - Revisão dos ginásios (04/10): nos 8 scripts oficiais o líder, com o jogo zerado (FLAG_SYS_GAME_CLEAR), vai direto pro script
+- **sabotagem_incremental.test.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026). Cobre a regra:
+- **selo_do_pipeline.test.mjs** - Ticket versao-nova/03 (15/10/2026): o selo do pipeline de build. Antes só 2 casos (Ledian + Mega Punch/Aerial Ace contra o Ninetales)
+- **sequencia_contra_chefao.test.mjs** - Luta inteira contra o time do chefão (2026-09-29, decisão do usuário): HP que
+- **setup_entre_duelos.test.mjs** - Ticket 05 (07/10/2026): os estágios de atributo só zeram para quem entra em campo
+- **sinergia_habilidade_movepool.test.mjs** - Gerador da sinergia habilidade x movepool (porte Node, lê o INGLÊS do dex). Trava: arquivo gravado == gerador, ids batem com o dex,
+- **sono_e_paralisia_champions.test.mjs** - Ticket versao-nova/08 (15/10/2026; dados-2654/07): o código novo liga o sono e a paralisia estilo Pokémon Champions.
+- **sprite_index.test.mjs** - Sprite pelo nome da espécie (15/10/2026): a versão nova do jogo deslocou os números e o Beedrill Mega mostrava o Blastoise Mega.
+- **status_no_duelo.test.mjs** - Status por chance no duelo (2026-09-29, grupo 1 do estudo de habilidades):
+- **sugestao_do_motor.test.mjs** - "Ficar com este time" grava as builds como "Sugestão do app" (ticket time-pelo-motor/01, F5, 21/10/2026).
+- **sync_progresso.test.mjs** - Sincronização não apaga run adiantada com run zerada (relato do usuário, 10/10/2026):
+- **telas_efetividade_real.test.mjs** - Ticket 12 (dados-2654): as telas mostram a efetividade REAL contra Solid Rock / Primal Armor e citam a
+- **texto_novo_das_habilidades.test.mjs** - Ticket versao-nova/04 (15/10/2026): o texto das habilidades mudou de redação na 2.65.4 da NextDex (07/10) e o parser do motor lê TEXTO. M...
+- **time_melhor_no_geral.test.mjs** - Tela do time = melhor time no geral, sem pensar no próximo chefão (usuário, 16/10/2026). As builds do "Montar time completo"
+- **time_pelo_motor.test.mjs** - Modo Motor do Meu Time, Fase C (ticket time-pelo-motor/01, 21/10/2026): montar o time SEM IA, só pelo simulador.
+- **time_pelo_motor_comuns.test.mjs** - Meu Time na mesma régua do rank (ticket todas-as-lutas/02, 21/10/2026): o juiz do Modo Motor pesa as lutas COMUNS mais perigosas de cada
+- **time_pelo_motor_papeis.test.mjs** - Modo Motor do Meu Time, Fase D (ticket time-pelo-motor/01, 21/10/2026): papéis por build, tags, sinergia e explicação.
+- **tira_setup.test.mjs** - Ticket 18 (07/10/2026): golpes que tiram setup, pelo código oficial (er-repo 217dd0f,
+- **traducoes_alinhadas_por_nome.test.mjs** - Versão 2.65.4 deslocou ids de habilidade (Mighty Horn 391 -> 390; 391 virou Hardened Sheath...). A tradução PT é indexada por id, então
+- **vaga.test.mjs** - Vaga de verificação pesada (scripts/vaga.mjs, melhoria B de 2026-10-13).
+- **validar_dado_cru.test.mjs** - Validação do dado cru do NextDex na ingestão (scripts/validar_dado_cru.mjs, lote 2).

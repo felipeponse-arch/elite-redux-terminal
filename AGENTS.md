@@ -37,8 +37,13 @@ framework), publicado como Artifact no claude.ai. Tudo em português do Brasil, 
 - **Context7** (plugin/MCP): documentação atual de bibliotecas (ESLint, Playwright, Node). Uma pergunta por conceito; nunca
   enviar código privado ou segredo.
 - **RTK**: resume a saída dos comandos (já ativo pelo cliente; `rtk proxy <cmd>` para a saída original).
-- **Mapa do código**: leia `docs/mapa-do-codigo.md` ANTES de abrir código (arquivo, responsabilidade, funções com linha);
-  abra só o trecho que precisa (offset/limit). Atualiza sozinho: o pré-commit regenera e inclui o mapa quando há `src/` ou
-  `scripts/` em staging; à mão, `npm run mapa` (também roda o Graphify; `-- --rapido` só o mapa). Conflito de junção
-  nele: regenerar. Graphify (`graphify-out/`, fora do git) segue disponível; não vê chamadas entre arquivos.
+- **Mapa do código**: leia `docs/mapa-do-codigo.md` ANTES de abrir código (arquivo, responsabilidade, funções com linha; também
+  scripts .ps1 e o que cada teste cobre). Quem chama quem entre arquivos: `docs/mapa/chamadas-regras.md` e `chamadas-ui.md`
+  (API do TypeScript; TS 5.9 em `teste/ferramentas/typescript-api`, fora do repo como o Graphify, porque o `typescript` 7 é nativo e não tem API em JS).
+  Abra só o trecho que precisa (offset/limit). Consistência: o pré-commit (~1,5 s) regenera os três arquivos e os inclui no
+  commit quando há `src/`, `scripts/` ou `tests/unit/` em staging, então o versionado nunca fica defasado. À mão: `npm run mapa`
+  (também recola src/regras+src/ui em `graphify-in/` e roda o Graphify; `-- --rapido` pula o Graphify). **Antes da junção no
+  master**, rodar `npm run mapa -- --rapido` e conferir `git status docs/mapa*` limpo (cobre commit com ER_WIP e código mexido
+  sem staging). Conflito de junção nesses arquivos: regenerar. Graphify (`graphify-out/`, fora do git): `graphify affected <função>`
+  mostra chamadores de outros arquivos; servidor MCP: `graphify-mcp.exe <graph.json>` (precisa do pacote `mcp` no venv dele).
 - **Agentes e modelos**: os papéis ficam em `teste/.claude/agents` e `docs/agents/` (modelo por papel, loops e grafos).
