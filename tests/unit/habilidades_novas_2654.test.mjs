@@ -214,7 +214,7 @@ test("Insect Eater: x1,5 contra alvo Bug e x0,5 contra atacante Bug, pelo TIPO D
   perto(dano(unid([], ["Normal"], [golpe("F", { tipo: "Dragon" })]), ds) / dano(unid([], ["Normal"], [golpe("F", { tipo: "Dragon" })]), plano), 1, 1e-6, "golpe Dragon de atacante Normal");
 });
 
-test("Packed Ice: imune a golpe Ice (abilities.cc:12781, o +2 de Defesa não está no motor); Mold Breaker atravessa", () => {
+test("Packed Ice: imune a golpe Ice (sem código no upcoming 217dd0f; o +2 de Defesa está em lacunas_sem_codigo.test.mjs); Mold Breaker atravessa", () => {
   assert.equal(R.abilityTypeModFor("Ice", ["Normal"], [idHab("Packed Ice")]).mult, 0);
   assert.equal(R.abilityTypeModFor("Water", ["Normal"], [idHab("Packed Ice")]).mult, 1);
   const alvo = unid(["Packed Ice"], ["Normal"], [golpe("F")]);

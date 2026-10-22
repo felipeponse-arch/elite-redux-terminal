@@ -686,9 +686,18 @@
     if ((x = f.match(/^(\w+)-type moves ignore abilities/i)) && tipoDoTextoDuelo(x[1])) ef.quebraTipo = tipoDoTextoDuelo(x[1]);
     // Hemorrhage (abilities.cc:12714-12720): o Hemotoxin do sangramento - o alvo que sangra perde as habilidades.
     if (/Supp?resses target's abilities when user inflicts bleeding/i.test(f)) ef.hemorragia = true;
+    // Hemolysis (battle_util.c:9010-9023: CanBattlerHeal e BenefitsFromStatBuffs dão FALSE a quem está envenenado com a Hemolysis do outro lado): o rival envenenado perde as subidas e não cura.
+    if (/Poisoned foes lose all stat buffs and can't heal/i.test(f)) ef.hemolise = true;
+    // Cold Plasma (sem código no upcoming 217dd0f; pela descrição): golpe do tipo queima em vez de paralisar.
+    if ((x = f.match(/^(\w+) type moves now inflict (\w+) instead of (\w+)/i)) && tipoDoTextoDuelo(x[1]) && statusDoTrechoDuelo(x[2])[0] && statusDoTrechoDuelo(x[3])[0]) ef.trocaStatusDoTipo[tipoDoTextoDuelo(x[1])] = [statusDoTrechoDuelo(x[3])[0], statusDoTrechoDuelo(x[2])[0]];
+    // Packed Ice (sem código no upcoming 217dd0f; pela descrição): +2 de Defesa em vez do golpe do tipo (a imunidade vem de TYPE_MOD_ABILITIES).
+    if ((x = f.match(/^Boosts Defense sharply instead of being hit by (\w+)-type moves/i)) && tipoDoTextoDuelo(x[1])) ef.aoApanhar.push({ stat: "def", n: 2, tipos: [tipoDoTextoDuelo(x[1])] });
+    // Lightsaber (Impl<ABILITY_LIGHT_SABER>, abilities.cc:10991-11011): golpe Keen Edge, 50% de disparar e então 1/4 queima, 1/4 paralisa, 1/2 nada = 12,5% de cada (os "25% de queimar ou paralisar" da descrição).
+    if ((x = f.match(/^(?:Keen Edge|Slashing|Sharpness) moves have (\d+)% burn or paralysis/i))) empurraStatusDuelo(ef, ef.statusAtaque, ["queimar", "paralisar"], parseInt(x[1], 10) / 100, { cat: "corte" });
     if ((x = f.match(/Every attack has an? (\d+)% (\w+) chance(?: and (\d+)% (\w+) chance)?/i))) {
       empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[2]), parseInt(x[1], 10) / 100, {});
-      if (x[3]) empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[4]), parseInt(x[3], 10) / 100, {});
+      // Malediction (sem código no upcoming 217dd0f; pela descrição "20% Bleed chance and 10% Curse chance"): a Maldição é o status do motor (1/4 do HP por turno).
+      if (x[3]) empurraStatusDuelo(ef, ef.statusAtaque, /^curse$/i.test(x[4]) ? ["maldicao"] : statusDoTrechoDuelo(x[4]), parseInt(x[3], 10) / 100, {});
     }
     if ((x = f.match(/^(\w+) moves inflict (\w+)/i)) && (fl = filtroDoTextoDuelo(x[1]))) empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[2]), 1, fl);
     if ((x = f.match(/(\d+)% to inflict ([\w/]+) when hit by contact/i))) empurraStatusDuelo(ef, ef.statusDefesa, statusDoTrechoDuelo(x[2]), parseInt(x[1], 10) / 100, {}, 0);
@@ -1319,6 +1328,8 @@
         out.push({ st: s, p: g.contato ? a.pContato : a.pOutro, doGolpe: false, ignoraGenero: a.ignoraGenero });
       });
     });
+    var troca = u.ef.trocaStatusDoTipo[g.tipo];
+    if (troca) out.forEach(function (s) { if (s.st === troca[0]) s.st = troca[1]; }); // Cold Plasma: o Electric queima em vez de paralisar
     return out.filter(function (s) { return s.p > 0; });
   }
   // Chance (por golpe) de cada status cair em "def" durante a luta: os do golpe de
@@ -1470,7 +1481,7 @@
       ataqueNaEntrada: 0, seguimentoCategoria: [], aoUsar: [], limpaBuffsNaEntrada: false, quedaNaEntrada: {},
       maiorNaEntrada: 0, maiorAtaqueNaEntrada: 0, shellSmashNaMetade: false, inverteIntimida: false, dobraQuedas: false,
       encadeiaStatus: {},
-      curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
+      hemolise: false, trocaStatusDoTipo: {}, curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
       semRecuo: false, recuoMult: 1, custoPorAtaque: 0, custoTipo: {}, bloqueiaCura: false, liquidOoze: false,
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
       bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {},
@@ -2401,17 +2412,18 @@
     // (na parte da luta em que sangra) e, na Eerie Fog, as subidas de quem não é
     // Ghost/Psychic caem 1 por turno até +0 (média ao longo dos turnos da luta).
     var climaDaLuta = climaNoCampoDuelo(eu, foe);
-    function regrasDasSubidas(u, est, pres) {
+    function regrasDasSubidas(u, est, pres, rival) {
       var nevoa = climaDaLuta === "nevoa" && u.tipos.indexOf("Ghost") === -1 && u.tipos.indexOf("Psychic") === -1;
       var sangra = pres.sangrar || 0;
+      if (rival.ef.hemolise) sangra = 1 - (1 - sangra) * (1 - Math.max(pres.envenenar || 0, pres.envenenarForte || 0)); // Hemolysis: o veneno também zera as subidas
       Object.keys(est).forEach(function (k) {
         if (est[k] <= 0) return;
         if (nevoa) est[k] = subidaMediaNaNevoa(est[k], Math.max(1, turnos));
         est[k] *= 1 - sangra;
       });
     }
-    regrasDasSubidas(eu, estMeu, nMim.pres);
-    regrasDasSubidas(foe, estDele, nele.pres);
+    regrasDasSubidas(eu, estMeu, nMim.pres, foe);
+    regrasDasSubidas(foe, estDele, nele.pres, eu);
     function porEstagio(atq, def, estAtq, estDef, g) {
       if (!g) return 1;
       var fisico = g.cat === "F", f = 1, defF = g.defNaDef || (fisico && !g.defEspecial);
@@ -2559,6 +2571,7 @@
       // parte da luta em que está sangrando.
       // Toda cura, inclusive a de campo por habilidade (revisão do mesmo dia).
       if (presNele.sangrar) ganha *= 1 - presNele.sangrar;
+      if (outro.ef.hemolise) ganha *= 1 - Math.max(presNele.envenenar || 0, presNele.envenenarForte || 0); // Hemolysis: quem está envenenado não cura
       return perde - ganha;
     }
     var atqMeu = meuDano(meu.melhor.dano) - nele.residuo - extraMeu, atqDele = deleDano(dele.melhor.dano) - nMim.residuo - extraDele;
