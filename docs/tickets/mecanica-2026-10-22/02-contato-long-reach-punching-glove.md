@@ -1,6 +1,6 @@
 # 02 — Long Reach e Punching Glove tiram o contato também das reações
 
-Status: pronto-para-agente
+Status: resolvido-no-branch
 Tamanho: M. Antes do rank final se der tempo.
 Evidência: relatorios/evidencia_simples_2026-10-22.md (pesquisador-de-mecanica, 22/10/2026). Regra: código do jogo (er-repo upcoming 217dd0f) vence.
 

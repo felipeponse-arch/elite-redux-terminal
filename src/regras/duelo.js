@@ -1921,12 +1921,13 @@
       // Reckless: golpe com recuo rende mais. Tough Claws e Big Pecks: golpe que faz contato rende mais; Long Reach, Protective Pads
       // e Punching Glove (num soco) tiram o contato (IsMoveMakingContact, battle_util.c:6578-6590).
       if (extra && extra.rc) hab *= u.ef.recuoMult;
-      var contato = temContatoDuelo(m);
       var itemTiraContato = u.it && !u.ef.klutz && (u.it.semEfeitoContato || (u.it.categoriaMult.soco && cats.indexOf("soco") !== -1));
-      if (contato && !u.ef.semContato && !itemTiraContato) hab *= u.ef.contatoMult;
+      // Ponto único (IsMoveMakingContact): g.contato já nasce sem o contato tirado, então bônus e reações (Rough Skin, Rocky Helmet, Static...) concordam.
+      var contato = temContatoDuelo(m) && !u.ef.semContato && !itemTiraContato;
+      if (contato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
-      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: temContatoDuelo(m), som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
+      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: contato, som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
         prioPrimeiro: cats.some(function (c) { return u.ef.prioPrimeiroCategoria[c]; }), // 1º uso (Coil Up...): o estado é gasto no fim do turno
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
           cats.some(function (c) { return u.ef.prioCheioCategoria[c] || u.ef.prioPrimeiroCategoria[c]; }),

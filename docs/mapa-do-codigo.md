@@ -261,6 +261,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **condicoes_no_duelo.test.mjs** - Condições da luta no duelo (2026-09-29): status no próprio Pokémon (Guts com
 - **config_v10.test.mjs** - Ticket versao-nova/10 (15/10/2026): o que sobrou da config d1a9a4c depois do v09 - aprendizado de golpes de TODAS as espécies, os quatro ...
 - **confronto.test.mjs** - Testes do motor de confronto (src/regras/confronto.js, 2026-09-24).
+- **contato_tirado_no_duelo.test.mjs** - Ticket mecanica-2026-10-22/02: Long Reach e Punching Glove (num soco) tiram o contato INTEIRO (IsMoveMakingContact, battle_util.c:6579-65...
 - **critico_no_duelo.test.mjs** - Crítico no duelo (2026-09-29): antes o motor não tinha crítico nenhum - Super
 - **cura_recuo_no_duelo.test.mjs** - Cura, recuo e dano por contato no duelo (2026-09-29): recuo e dreno dos golpes
 - **dados_de_mega_e_presentes.test.mjs** - Achados de 03/10 na revisão das lutas: mega_forms.json (feito à mão em 09/2026) estava 36 pedras
