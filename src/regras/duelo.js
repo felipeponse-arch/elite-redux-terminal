@@ -569,6 +569,9 @@
   function lerExtrasDaFraseDuelo(f, ef, climaOk) {
     var x;
     if (/Doubles attack on first turn/i.test(f)) ef.primeiroTurnoMult = 2;
+    // Demolitionist (abilities.cc:7745-7760, battle_util.c:6620): no turno de entrada (readiedAction) o golpe de dano ignora as telas do alvo e as quebra,
+    // e ignora Protect. O dobro de ataque vem da parte "Readied Action" (battle_util.c:7156).
+    if (/screens break on readied turn/i.test(f)) ef.demolidor = true;
     if (/Moves that need a charge turn are now used instantly/i.test(f)) ef.cargaInstantanea = true;
     if (/Can't use attacking moves twice in a row/i.test(f)) ef.truant = true;
     if (/Protects once against an attack/i.test(f)) ef.bloqueiaUmGolpe = true;
@@ -1494,7 +1497,7 @@
       seQuebra: false, venenoReduz: false, mudaTipoNoContato: null, telaNaEntrada: 0, imuneTipoNaEntrada: null,
       sincroniza: false, almaLigada: false, drenoCategoria: {},
       armaTerreno: null, limpaTerreno: false, lawnmower: false, sala: 0, inversa: 0, vento: 0, gravidade: false, limpaSala: false,
-      infiltra: false, limpaTelas: false, telaRepete: false, auroraBoreal: false, noTerreno: [], carregaNaEntrada: false,
+      infiltra: false, demolidor: false, limpaTelas: false, telaRepete: false, auroraBoreal: false, noTerreno: [], carregaNaEntrada: false,
       klutz: false, gostaDeBaga: false, bagaCedo: false, bagaCuraMin: 0, ripen: false, colheita: 0, rumina: false, unburden: false,
       desligaItem: false, roubaContato: false, roubaSemContato: false, seguraItem: false, nervoso: false,
       aoNocautear: [], curaAoNocautear: 0, curaNocaute: 0, curaNocauteMordida: 0, devora: 0, porDesmaio: 0, aoDesmaiarGolpe: 0, aoDesmaiarDevolve: false,
@@ -2458,7 +2461,7 @@
       var L = CAMPO_DUELO && CAMPO_DUELO.lados;
       if (L) return telaDoLadoDuelo(L[u === eu ? "eu" : "foe"], u, atq, melhor, turnos, semTelas);
       var t = Math.max(u.ef.telaNaEntrada || 0, g && g.cat === "F" ? u.ef.telaF || 0 : 0, g && g.cat === "E" ? u.ef.telaE || 0 : 0);
-      return t && turnos > 0 && !semTelas && !atq.ef.infiltra ? 1 - 0.5 * Math.min(t, turnos) / turnos : 1;
+      return t && turnos > 0 && !semTelas && !atq.ef.infiltra && !atq.ef.demolidor ? 1 - 0.5 * Math.min(t, turnos) / turnos : 1;
     }
     estagioMeu *= tela(foe, eu, meu.melhor.golpe, meu.melhor); estagioDele *= tela(eu, foe, dele.melhor.golpe, dele.melhor);
     // Baga de resistência (Occa...): o 1º golpe do tipo (super efetivo) sai pela metade - um quarto com Ripen.
@@ -2719,7 +2722,7 @@
     var balao = def.it && def.it.balao && !def.ef.klutz && danoAtq.melhor.golpe && danoAtq.melhor.golpe.tipo === "Ground" ? 1 : 0; // Air Balloon
     // Golpe de vários acertos gasta um bloqueio por acerto (Rock Blast quebra Disguise e Cheating Death de uma vez).
     var porGolpe = Math.max(1, Math.round((danoAtq.melhor.golpe && danoAtq.melhor.golpe.acertos) || 1));
-    var protecaoFura = def.ef.protegeNaEntrada && atq.ef.atravessaProtecao && danoAtq.melhor.golpe && danoAtq.melhor.golpe.contato ? 1 : 0; // Unseen Fist
+    var protecaoFura = def.ef.protegeNaEntrada && ((atq.ef.atravessaProtecao && danoAtq.melhor.golpe && danoAtq.melhor.golpe.contato) || atq.ef.demolidor) ? 1 : 0; // Unseen Fist; Demolitionist fura todo golpe (battle_util.c:6620)
     var acertosBloqueados = (def.ef.bloqueiaUmGolpe ? 1 : 0) + Math.max(0, def.ef.bloqueios - protecaoFura);
     return Math.floor(acertosBloqueados / porGolpe) + (def.ef.bloqueiaSuperEf && danoAtq.melhor.efTipo >= 2 ? 1 : 0) + balao;
   }
@@ -3982,7 +3985,7 @@
   // buff de ginásio (telaF/telaE): as telas do lado são estado, e só Screen Cleaner/Defog/golpes as tiram.
   function telaDoLadoDuelo(lado, u, atq, melhor, turnos, semTelas) {
     var g = melhor && melhor.golpe;
-    if (!g || turnos <= 0 || atq.ef.infiltra) return 1;
+    if (!g || turnos <= 0 || atq.ef.infiltra || atq.ef.demolidor) return 1;
     var t = Math.max(g.cat === "F" ? lado.reflect : lado.luz, lado.veu);
     if (!semTelas) t = Math.max(t, g.cat === "F" ? u.ef.telaF || 0 : u.ef.telaE || 0);
     if (!t) return 1;
@@ -4416,6 +4419,15 @@
       if (!vence(copia, nlc) || vence(quem, lc)) return;
       quem.frac = copia.frac; limpaTelasDoLadoDuelo(lc);
     }
+    // Demolitionist: o primeiro golpe de dano do turno de entrada derruba as telas do lado do alvo sem gastar o turno; o estado do lado fica
+    // quebrado para os próximos do time. Só vale uma vez por Pokémon (readiedAction dura 1 turno, battle_util.c:2969): na volta seguinte o ef sai do u (a luta daquela volta ainda o vê).
+    // shortcut: a entrada conta na primeira volta em que o Pokémon luta; troca de volta no meio do chefão não rearma.
+    function quebraTelasDemolidor(quem, lc) {
+      if (!quem.u.ef.demolidor) return;
+      if (quem.demolidorGasto) { quem.u = Object.assign({}, quem.u, { ef: Object.assign({}, quem.u.ef, { demolidor: false }) }); return; }
+      quem.demolidorGasto = true;
+      if (temTelaDuelo(lc)) limpaTelasDoLadoDuelo(lc);
+    }
     if (deles.length) entraDele(deles[0]);
     while (i < deles.length && time.some(function (c) { return c.vivo; }) && voltas++ < 60) {
       var f = deles[i];
@@ -4447,6 +4459,7 @@
       poeHazardComGolpe(f, atual, ladoMeu);
       if (!atual.vivo) continue;
       quebraTelasComGolpe(atual, f, ladoMeu, ladoDele); quebraTelasComGolpe(f, atual, ladoDele, ladoMeu);
+      quebraTelasDemolidor(atual, ladoDele); quebraTelasDemolidor(f, ladoMeu);
       poeEfeitoDeLadoComGolpe(atual, f, ladoMeu, ladoDele);
       poeEfeitoDeLadoComGolpe(f, atual, ladoDele, ladoMeu);
       if (!atual.vivo) continue;
