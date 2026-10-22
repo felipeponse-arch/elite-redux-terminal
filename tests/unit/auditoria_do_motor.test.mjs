@@ -25,7 +25,6 @@ const HABILIDADES_SEM_REGRA = {
   "Tag": "Pursuit em quem troca; o jogador não troca contra o chefão no modelo",
   "Multitype": "cada placa é uma espécie própria no dado",
   "Gifted Mind": "onAccuracy só de golpe de status (código oficial); o motor não tem acerto de status",
-  "Pinnacle Blade": "abilities.cc:8661-8692 sem onAccuracy; quebra de telas/substituto/Protect é o ticket mecanica-2026-10-22/03",
 };
 
 // A conta mora no motor (habilidadeSemRegraNoDuelo): é a mesma que decide o selo "estimada" do pipeline de build (versao-nova/03).

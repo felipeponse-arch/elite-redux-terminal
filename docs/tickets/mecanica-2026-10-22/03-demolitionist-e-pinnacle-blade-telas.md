@@ -1,6 +1,6 @@
 # 03 — Demolitionist e Pinnacle Blade: quebrar telas, substituto e Protect
 
-Status: pronto-para-agente
+Status: resolvido-no-branch (Demolitionist 4f125f7; Pinnacle Blade: telas e Protect feitos, Substitute do alvo não modelado no motor)
 Tamanho: M (cada). Pode ficar para depois do rank.
 Evidência: relatorios/evidencia_simples_2026-10-22.md (pesquisador-de-mecanica, 22/10/2026). Regra: código do jogo (er-repo upcoming 217dd0f) vence.
 

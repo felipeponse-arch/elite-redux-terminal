@@ -572,6 +572,9 @@
     // Demolitionist (abilities.cc:7745-7760, battle_util.c:6620): no turno de entrada (readiedAction) o golpe de dano ignora as telas do alvo e as quebra,
     // e ignora Protect. O dobro de ataque vem da parte "Readied Action" (battle_util.c:7156).
     if (/screens break on readied turn/i.test(f)) ef.demolidor = true;
+    // Pinnacle Blade (abilities.cc:8661-8692, battle_util.c:6622): golpe Keen Edge ignora as telas (onInfiltrate), quebra as do lado do alvo ao acertar e fura Protect (Feint).
+    // O texto também diz "always hit", mas o código não tem onAccuracy (ver acima). shortcut: o Substitute do alvo não é modelado no duelo (só como preparo do próprio lado).
+    if (/Slashing moves always hit and break protection and barriers/i.test(f)) ef.pinaculo = true;
     if (/Moves that need a charge turn are now used instantly/i.test(f)) ef.cargaInstantanea = true;
     if (/Can't use attacking moves twice in a row/i.test(f)) ef.truant = true;
     if (/Protects once against an attack/i.test(f)) ef.bloqueiaUmGolpe = true;
@@ -1497,7 +1500,7 @@
       seQuebra: false, venenoReduz: false, mudaTipoNoContato: null, telaNaEntrada: 0, imuneTipoNaEntrada: null,
       sincroniza: false, almaLigada: false, drenoCategoria: {},
       armaTerreno: null, limpaTerreno: false, lawnmower: false, sala: 0, inversa: 0, vento: 0, gravidade: false, limpaSala: false,
-      infiltra: false, demolidor: false, limpaTelas: false, telaRepete: false, auroraBoreal: false, noTerreno: [], carregaNaEntrada: false,
+      infiltra: false, demolidor: false, pinaculo: false, limpaTelas: false, telaRepete: false, auroraBoreal: false, noTerreno: [], carregaNaEntrada: false,
       klutz: false, gostaDeBaga: false, bagaCedo: false, bagaCuraMin: 0, ripen: false, colheita: 0, rumina: false, unburden: false,
       desligaItem: false, roubaContato: false, roubaSemContato: false, seguraItem: false, nervoso: false,
       aoNocautear: [], curaAoNocautear: 0, curaNocaute: 0, curaNocauteMordida: 0, devora: 0, porDesmaio: 0, aoDesmaiarGolpe: 0, aoDesmaiarDevolve: false,
@@ -1930,7 +1933,7 @@
       if (contato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
-      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: contato, som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
+      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: contato, corte: cats.indexOf("corte") !== -1, som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
         prioPrimeiro: cats.some(function (c) { return u.ef.prioPrimeiroCategoria[c]; }), // 1º uso (Coil Up...): o estado é gasto no fim do turno
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
           cats.some(function (c) { return u.ef.prioCheioCategoria[c] || u.ef.prioPrimeiroCategoria[c]; }),
@@ -2461,7 +2464,7 @@
       var L = CAMPO_DUELO && CAMPO_DUELO.lados;
       if (L) return telaDoLadoDuelo(L[u === eu ? "eu" : "foe"], u, atq, melhor, turnos, semTelas);
       var t = Math.max(u.ef.telaNaEntrada || 0, g && g.cat === "F" ? u.ef.telaF || 0 : 0, g && g.cat === "E" ? u.ef.telaE || 0 : 0);
-      return t && turnos > 0 && !semTelas && !atq.ef.infiltra && !atq.ef.demolidor ? 1 - 0.5 * Math.min(t, turnos) / turnos : 1;
+      return t && turnos > 0 && !semTelas && !atq.ef.infiltra && !atq.ef.demolidor && !(atq.ef.pinaculo && g && g.corte) ? 1 - 0.5 * Math.min(t, turnos) / turnos : 1;
     }
     estagioMeu *= tela(foe, eu, meu.melhor.golpe, meu.melhor); estagioDele *= tela(eu, foe, dele.melhor.golpe, dele.melhor);
     // Baga de resistência (Occa...): o 1º golpe do tipo (super efetivo) sai pela metade - um quarto com Ripen.
@@ -2722,7 +2725,7 @@
     var balao = def.it && def.it.balao && !def.ef.klutz && danoAtq.melhor.golpe && danoAtq.melhor.golpe.tipo === "Ground" ? 1 : 0; // Air Balloon
     // Golpe de vários acertos gasta um bloqueio por acerto (Rock Blast quebra Disguise e Cheating Death de uma vez).
     var porGolpe = Math.max(1, Math.round((danoAtq.melhor.golpe && danoAtq.melhor.golpe.acertos) || 1));
-    var protecaoFura = def.ef.protegeNaEntrada && ((atq.ef.atravessaProtecao && danoAtq.melhor.golpe && danoAtq.melhor.golpe.contato) || atq.ef.demolidor) ? 1 : 0; // Unseen Fist; Demolitionist fura todo golpe (battle_util.c:6620)
+    var protecaoFura = def.ef.protegeNaEntrada && ((atq.ef.atravessaProtecao && danoAtq.melhor.golpe && danoAtq.melhor.golpe.contato) || atq.ef.demolidor || (atq.ef.pinaculo && danoAtq.melhor.golpe && danoAtq.melhor.golpe.corte)) ? 1 : 0; // Unseen Fist; Demolitionist fura todo golpe (battle_util.c:6620); Pinnacle Blade, o Keen Edge (:6622)
     var acertosBloqueados = (def.ef.bloqueiaUmGolpe ? 1 : 0) + Math.max(0, def.ef.bloqueios - protecaoFura);
     return Math.floor(acertosBloqueados / porGolpe) + (def.ef.bloqueiaSuperEf && danoAtq.melhor.efTipo >= 2 ? 1 : 0) + balao;
   }
@@ -3985,7 +3988,7 @@
   // buff de ginásio (telaF/telaE): as telas do lado são estado, e só Screen Cleaner/Defog/golpes as tiram.
   function telaDoLadoDuelo(lado, u, atq, melhor, turnos, semTelas) {
     var g = melhor && melhor.golpe;
-    if (!g || turnos <= 0 || atq.ef.infiltra || atq.ef.demolidor) return 1;
+    if (!g || turnos <= 0 || atq.ef.infiltra || atq.ef.demolidor || (atq.ef.pinaculo && g.corte)) return 1;
     var t = Math.max(g.cat === "F" ? lado.reflect : lado.luz, lado.veu);
     if (!semTelas) t = Math.max(t, g.cat === "F" ? u.ef.telaF || 0 : u.ef.telaE || 0);
     if (!t) return 1;
@@ -4428,6 +4431,12 @@
       quem.demolidorGasto = true;
       if (temTelaDuelo(lc)) limpaTelasDoLadoDuelo(lc);
     }
+    // Pinnacle Blade: o golpe Keen Edge que acerta derruba as telas do lado do alvo (onAttacker); o próprio golpe já ignora a tela (tela()).
+    function quebraTelasPinaculo(quem, contra, lc) {
+      if (!quem.u.ef.pinaculo || !temTelaDuelo(lc)) return;
+      var golpe = danoNoDuelo(comoEstaDuelo(quem), comoEstaDuelo(contra), nivel).melhor.golpe;
+      if (golpe && golpe.corte) limpaTelasDoLadoDuelo(lc);
+    }
     if (deles.length) entraDele(deles[0]);
     while (i < deles.length && time.some(function (c) { return c.vivo; }) && voltas++ < 60) {
       var f = deles[i];
@@ -4460,6 +4469,7 @@
       if (!atual.vivo) continue;
       quebraTelasComGolpe(atual, f, ladoMeu, ladoDele); quebraTelasComGolpe(f, atual, ladoDele, ladoMeu);
       quebraTelasDemolidor(atual, ladoDele); quebraTelasDemolidor(f, ladoMeu);
+      quebraTelasPinaculo(atual, f, ladoDele); quebraTelasPinaculo(f, atual, ladoMeu);
       poeEfeitoDeLadoComGolpe(atual, f, ladoMeu, ladoDele);
       poeEfeitoDeLadoComGolpe(f, atual, ladoDele, ladoMeu);
       if (!atual.vivo) continue;
