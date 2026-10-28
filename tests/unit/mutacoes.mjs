@@ -3565,7 +3565,7 @@ export const MUTACOES = [
   {
     id: "versao-lido-indice-vazio",
     descricao: "o índice do texto novo fica vazio (o texto da 2.65.4 volta a derrubar o efeito de 57 habilidades)",
-    arquivo: "duelo.js",
+    arquivo: "texto_versao_nova.js",
     de: "  TEXTO_LIDO_DA_VERSAO_NOVA_DUELO.forEach(function (t) { LIDO_PELO_TEXTO_NOVO_DUELO[t[1]] = t[2]; });\n",
     para: "",
   },
@@ -3586,7 +3586,7 @@ export const MUTACOES = [
   {
     id: "versao-lido-entrada-guts-some",
     descricao: "a entrada do Guts sai da tabela (o texto novo \"Ups Attack by 1.5x if statused.\" deixa de ser lido)",
-    arquivo: "duelo.js",
+    arquivo: "texto_versao_nova.js",
     de: "    [\"Guts\", \"Ups Attack by 1.5x if statused.\",\n      \"Ups Atk by 1.5x if suffering from a status condition.\"],\n",
     para: "",
   },
