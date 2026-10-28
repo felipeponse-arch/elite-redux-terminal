@@ -1022,7 +1022,8 @@
       (tp = tipoDoTextoDuelo(x[1] || x[2] || x[3] || x[4]))) {
       if (/ Gem$/.test(nome)) { it.gema = tp; it.consumivel = true; } else it.tipoMult[tp] = 1.3;
     }
-    if (nome === "Eviolite" && sp && (sp.ev || []).some(function (ev) { return !isMegaEvoKind(ev[0]); })) { it.defMult = 1.5; it.spdMult = 1.5; }
+    // Eviolite (battle_util.c:7448-7450): a regra (evolui, exceto Necrozma, x1,5) vive em ITEM_STAT_MODS (calc_stat.js), fonte única.
+    if (nome === "Eviolite" && sp) { var rDef = itemRuleFor(nome, 2, sp, true), rSpd = itemRuleFor(nome, 4, sp, true); if (rDef) it.defMult = rDef.mult; if (rSpd) it.spdMult = rSpd.mult; }
     if (nome === "Scope Lens" || nome === "Razor Claw") it.critEstagio = 1;
     if (nome === "King's Rock" || nome === "Razor Fang") it.recuar = 0.1;
     if (nome === "Bright Powder") it.evasao = 1.1;

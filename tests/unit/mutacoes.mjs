@@ -4337,4 +4337,25 @@ export const MUTACOES = [
     de: "v.atual.x === c.x || v.atual.linha === c.linha",
     para: "v.atual.x === c.x",
   },
+  {
+    id: "item-atributo-raichu",
+    descricao: "Light Ball: Raichu deixa de valer x1,5 (cai em x2)",
+    arquivo: "calc_stat.js",
+    de: "{ statIdx: 1, mult: 1.5, base: [\"SPECIES_RAICHU\"] }",
+    para: "{ statIdx: 1, mult: 2, base: [\"SPECIES_RAICHU\"] }",
+  },
+  {
+    id: "item-atributo-necrozma",
+    descricao: "Eviolite: Necrozma deixa de ser excluída",
+    arquivo: "calc_stat.js",
+    de: "if (r.exceto && r.exceto.indexOf(sn) !== -1) return false;",
+    para: "",
+  },
+  {
+    id: "item-atributo-pichu",
+    descricao: "Light Ball: Pichu some da lista de SpA",
+    arquivo: "calc_stat.js",
+    de: "{ statIdx: 3, mult: 2, base: [\"SPECIES_PIKACHU\", \"SPECIES_PICHU\"] }",
+    para: "{ statIdx: 3, mult: 2, base: [\"SPECIES_PIKACHU\"] }",
+  },
 ];
