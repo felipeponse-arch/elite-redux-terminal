@@ -4597,4 +4597,11 @@ export const MUTACOES = [
     de: "var doTipo = tipos.map(itemDeTipoDoTime);",
     para: "var doTipo = tipos.map(function (t) { return Object.keys(ITENS_CONFIG.itens).filter(function (n) { var x = ITENS_CONFIG.itens[n]; return x.e === \"TYPE_POWER\" && x.t === t; }).sort()[0]; });",
   },
+  {
+    id: "tk25-pedras-adoption-sem-metagrossite-r",
+    descricao: "a lista do Adoption Center perde a Metagrossite R (a er-config traz 142)",
+    arquivo: "pedras_adoption_center.json",
+    de: "    \"Salamencite R\",\n    \"Metagrossite R\"\n",
+    para: "    \"Salamencite R\"\n",
+  },
 ];
