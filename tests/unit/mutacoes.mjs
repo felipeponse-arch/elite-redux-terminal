@@ -4170,11 +4170,11 @@ export const MUTACOES = [
     para: "if (p.robustos.length >= 0 &&",
   },
   {
-    id: "papel-sweeper-sem-golpe-de-setup",
-    descricao: "sweeper deixa de exigir golpe de setup na build",
+    id: "papel-prova-pontos-zero",
+    descricao: "o limiar de efeito de verdade da luta completa cai a 0 (qualquer empate de pontos passa a valer como efeito)",
     arquivo: "time_pelo_motor_papeis.js",
-    de: "if (motorTemTipo(ctx, c, [\"setup\"]) && p.sequencias.length) {",
-    para: "if (p.sequencias.length) {",
+    de: "var MOTOR_PROVA_PONTOS = 1;",
+    para: "var MOTOR_PROVA_PONTOS = 0;",
   },
   {
     id: "papel-sweeper-sem-ganho-do-setup",

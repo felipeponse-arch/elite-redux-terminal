@@ -17,6 +17,7 @@ function monta(milestone, nomes = ELENCO, extra = {}) {
 }
 
 test("item: o fechamento só oferece item que a Etapa libera (a lista pergunta ao filtro da run, item por item)", () => {
+  // Caminho inalcançável com o dado atual (todo item gerável liberado na Etapa 0); a trava injetada prova o filtro.
   // Com o dado de hoje todo item que a lista pode gerar já está liberado desde a Etapa 0 (conferido); então o filtro só se prova
   // se ele mandar: aqui a run passa a travar o Life Orb (o palpite do motor para ofensivos) e a lista tem que deixá-lo de fora.
   const { R, ctx } = monta(2, ["Garchomp", "Scizor", "Metagross", "Gyarados", "Togekiss", "Gardevoir"]);

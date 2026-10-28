@@ -50,6 +50,7 @@ test("armador: ter Tailwind NÃO basta, o efeito tem que valer ao menos 1 ponto 
   });
 });
 
+// Se quebrar com dado novo, achar outro time na fronteira (não afrouxar a asserção).
 test("estilo: Hyper Offense pede 4 ofensivos (com 3 e sem tanque é Balance) e Stall pede no máximo 1 (com 2 ofensivos e 3 de tanque/apoio é Balance)", () => {
   const tres = monta(["Togekiss", "Corviknight", "Venusaur", "Swampert", "Ferrothorn", "Metagross"]).classifica();
   assert.deepEqual([tres.estiloProva.ofensivos, tres.estiloProva.tanques], [3, 0], "caso na fronteira: 3 ofensivos e nenhum tanque");
