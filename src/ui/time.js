@@ -369,7 +369,7 @@
       teamSwapIdx = null;
       pcBoxSelectedX = null;
       myBuildLevelIsCustom = false;
-      logAutoAction("Novo jogo: time, caixa, arquétipo, progresso de insígnias e buffs de ginásio zerados. Builds, anotações e times salvos foram mantidos.");
+      logAutoAction("Novo jogo: time, caixa, arquétipo, progresso de Etapas e buffs de ginásio zerados. Builds, anotações e times salvos foram mantidos.");
     });
     var msSel = document.getElementById("settings-milestone");
     if (msSel) msSel.value = "0";
@@ -379,7 +379,7 @@
     if (!runTemAlgoPraZerar()) return;
     openConfirmModal(
       "Começar um jogo novo?",
-      "Isso zera a sua run: remove TODOS os Pokémon do time e da caixa, volta a insígnia pro início e limpa o arquétipo e os buffs de ginásio já resgatados. " +
+      "Isso zera a sua run: remove TODOS os Pokémon do time e da caixa, volta a Etapa pro início e limpa o arquétipo e os buffs de ginásio já resgatados. " +
         "Dificuldade, level cap e modo de Mega ficam como estão, mas o app pede pra você confirmar de novo. Builds, anotações e times salvos continuam guardados.",
       "Começar jogo novo",
       function () {

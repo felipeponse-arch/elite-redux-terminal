@@ -4597,4 +4597,11 @@ export const MUTACOES = [
     de: "var doTipo = tipos.map(itemDeTipoDoTime);",
     para: "var doTipo = tipos.map(function (t) { return Object.keys(ITENS_CONFIG.itens).filter(function (n) { var x = ITENS_CONFIG.itens[n]; return x.e === \"TYPE_POWER\" && x.t === t; }).sort()[0]; });",
   },
+  {
+    id: "tk27-rotulo-mega-volta-a-insignia",
+    descricao: "o rótulo da Mega tardia volta a dizer \"7ª insígnia\" em vez de Etapa 7",
+    arquivo: "formas_mega.js",
+    de: "7: \"Etapa 7 (Tate & Liza)\"",
+    para: "7: \"7ª insígnia (Tate & Liza)\"",
+  },
 ];

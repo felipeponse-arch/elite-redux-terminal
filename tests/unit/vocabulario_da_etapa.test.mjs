@@ -18,3 +18,12 @@ test("rótulo do lugar do item usa Etapa", () => {
   assert.ok(s.includes('"Etapa " + e'));
   assert.ok(!s.includes('"ª insígnia"'));
 });
+test("mensagens de progresso e rótulo de Mega dizem Etapa, não insígnia", () => {
+  assert.ok(ler("src/ui/progresso.js").includes("Você avançou de Etapa"));
+  const t = ler("src/ui/time.js");
+  assert.ok(t.includes("progresso de Etapas") && t.includes("volta a Etapa pro início"));
+  const m = ler("src/regras/formas_mega.js");
+  assert.ok(m.includes('4: "Etapa 4 (Flannery)"') && m.includes('7: "Etapa 7 (Tate & Liza)"'));
+  assert.ok(!/ROTULO_ETAPA_MEGA = \{[^}]*ª insígnia/.test(m));
+});
+// Insígnia fica de propósito em aba_chefoes.js ("Depois da Nª insígnia", fato do jogo: Hell) e em comentários.
