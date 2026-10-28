@@ -23,9 +23,9 @@ test("dex_compact.json gravado == extração do dado bruto (2.65.4) + o delta da
   const dex = extrairDex(bruto, { versao: dexGravado.meta.version, gerado: dexGravado.meta.generated, traducoesDeGolpe: JSON.parse(ler("data/move_translations_pt.json")) });
   aplicarPatch(dex, JSON.parse(ler("data/config_nova.json")));
   assert.equal(JSON.stringify(dex), ler("data/dex_compact.json"));
-  assert.equal(dexGravado.meta.version, "2.65.4");
-  assert.equal(dexGravado.species.length, 1925, "2.65.4: 1923 entradas de espécie + as Mega Bruxish e Jellicent da config");
-  assert.equal(dexGravado.abilities.length, 1072, "1063 da NextDex + 9 da config nova");
+  assert.equal(dexGravado.meta.version, "2.65.4.1"); // v2.65.4.1 (28/10)
+  assert.equal(dexGravado.species.length, 1933, "v2.65.4.1 (28/10): 1925 + 8 espécies Redux novas da er-config 486a964");
+  assert.equal(dexGravado.abilities.length, 1075, "v2.65.4.1 (28/10): 1072 + 3 da er-config 486a964");
 });
 
 test("ability_translations_pt.json gravado == compostas expandidas de novo (idempotente)", () => {

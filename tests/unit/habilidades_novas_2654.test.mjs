@@ -40,7 +40,7 @@ const SEM_REGRA_NOVAS = {
 const NOVAS_DO_DELTA = ["Photokinesis", "Photon Burst", "Rippling Punch", "Cackling", "Fresh Snowfall", "Sticky Situation", "Bioluminescent", "Blinking Flash", "Brain Freeze"];
 
 test("as 38 habilidades novas (29 da NextDex 2.65.4, ids 1034-1062, + 9 da config d1a9a4c, ids 1063-1071): cada uma é lida pelo motor ou está registrada como sem regra, com o motivo", () => {
-  assert.equal(R.ABILITIES.length, 1072);
+  assert.equal(R.ABILITIES.length, 1075); // v2.65.4.1 (28/10): 1072 + 3 habilidades novas da er-config 486a964
   const novas = [];
   for (let id = 1034; id <= 1071; id++) novas.push(R.ABILITIES[id][0]);
   assert.equal(novas.length, 38);

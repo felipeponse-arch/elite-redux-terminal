@@ -61,6 +61,7 @@ for (const a of AL) {
   if (o.name !== nome || o.desc !== desc) { rel.abilities.texto.push({ id, nomeAntigo: o.name, nomeNovo: nome, antigo: o.desc, novo: desc }); o.name = nome; o.desc = desc; }
 }
 // golpes
+const NOVOS_DO_PATCH = new Set(JSON.parse(fs.readFileSync(path.join(path.dirname(arq), "config_nova.json"), "utf8")).golpes.map((x) => x.nome));
 const ML = parse(ler('MoveList.textproto')).moves;
 const mv = porId(g.moves);
 for (const m of ML) {
@@ -69,9 +70,11 @@ for (const m of ML) {
     name: m.name[0], sName: m.short_name?.[0] ?? m.name[0], pwr: m.power?.[0] ?? 0, acc: m.accuracy?.[0] ?? 0, pp: m.pp?.[0] ?? 0,
     prio: m.priority?.[0] ?? 0, chance: m.effect_chance?.[0] ?? 0, desc: m.short_description?.[0] ?? '', lDesc: m.description?.[0] ?? '',
     types: [idx(g.typeT, (m.type?.[0] ?? 'TYPE_NORMAL').slice(5).replace(/^./, (c) => c) .toLowerCase().replace(/^./, (c) => c.toUpperCase()))],
-    target: idx(g.targetT, m.target?.[0]), split: idx(g.splitT, m.split?.[0]),
+    target: idx(g.targetT, m.target?.[0]), split: idx(g.splitT, m.split_modifier?.[0] ?? m.split?.[0]), // v2.65.4.1 (28/10): split_modifier (HITS_DEF...) é o split do dado achatado (NextDex); só o split base PERDIA o modificador
   };
   const o = mv.get(id);
+  // v2.65.4.1 (28/10): golpe novo que o config_nova.json já traz (efeito, flags, tutor) NÃO entra aqui: o patch da extração o põe completo; injetar sem efeito apagava o efeito (Eerie Laugh, Baneful Kick...)
+  if (!o && NOVOS_DO_PATCH.has(novo.name)) continue;
   if (!o) { const n = { ...novo, NAME, eff: 0, flags: [], arg: '', id, usesHpType: false }; g.moves.push(n); mv.set(id, n); rel.moves.novos.push({ id, nome: novo.name }); continue; }
   const dif = {};
   for (const k of Object.keys(novo)) if (JSON.stringify(o[k]) !== JSON.stringify(novo[k])) { dif[k] = [o[k], novo[k]]; o[k] = novo[k]; }

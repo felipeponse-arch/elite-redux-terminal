@@ -34,7 +34,7 @@ test("aprendizado pela config: 128 espécies mudam (level-up +105/-6, tutor +94/
 test("builds: nenhuma build de data/builds.json perdeu golpe por causa do aprendizado novo (a validação não acha golpe fora da espécie)", () => {
   const r = validarBuilds();
   assert.deepEqual(r.problemas, []);
-  assert.equal(r.pendentes.length, 211, "pendentes herdadas: 259 antes de saírem as 14 builds da curadoria do projeto; 244 depois; 230 quando dados-2654/08 corrigiu as 14 da tabela A; 211 quando os 19 sets revisados (14 + Breezing, Exeggutor Redux, Arbok, Heliosunny, Victreebel Redux) passaram a versão 2.65.4; nenhuma nova");
+  assert.equal(r.pendentes.length, 252, "v2.65.4.1 (28/10): lista regerada com a versão 2.65.4.1 (toda build validada antes volta a pedir revisão + 5 de habilidade perdida na config nova). Histórico: 259 antes de saírem as 14 builds da curadoria do projeto; 244 depois; 230 quando dados-2654/08 corrigiu as 14 da tabela A; 211 quando os 19 sets revisados (14 + Breezing, Exeggutor Redux, Arbok, Heliosunny, Victreebel Redux) passaram a versão 2.65.4; nenhuma nova");
 });
 
 test("aplicarPatch: retira e põe golpe de level-up e de tutor; cria a Mega a partir da base e aponta a evolução da base para ela", () => {
@@ -71,7 +71,7 @@ test("Lumberjack, Fae Hunter, Monster Hunter e Firefighter: x1,5 contra ALVO do 
 });
 
 test("Mega Bruxish e Mega Jellicent: no dado (a partir da config) mas PROVISÓRIAS - fora da Dex, das builds, do pipeline, do duelo e do rank até a config ter números reais", () => {
-  assert.equal(R.DATA.species.length, 1925);
+  assert.equal(R.DATA.species.length, 1933); // v2.65.4.1 (28/10): 1925 + 8 espécies Redux novas da er-config 486a964
   const b = R.DATA.species.find((s) => s && s.sname === "SPECIES_BRUXISH_MEGA"), j = R.DATA.species.find((s) => s && s.sname === "SPECIES_JELLICENT_MEGA");
   assert.ok(b && j, "estão no dado");
   assert.match(b.provisoria, /falta spe/); assert.match(j.provisoria, /falta spe/);
@@ -81,7 +81,7 @@ test("Mega Bruxish e Mega Jellicent: no dado (a partir da config) mas PROVISÓRI
   assert.deepEqual(b.lm, sp("Bruxish").lm); assert.deepEqual(j.tu, sp("Jellicent").tu);
   assert.equal(R.MEGA_FORMS["Bruxishite"], "SPECIES_BRUXISH_MEGA"); assert.equal(sp("Bruxish").ev[0][2], b.x);
   // fora de tudo que lê SPECIES
-  assert.equal(R.SPECIES.length, 1922); // as 1925 do dado menos a posição vazia e as duas provisórias
+  assert.equal(R.SPECIES.length, 1930); // v2.65.4.1 (28/10): as 1933 do dado menos a posição vazia e as duas provisórias
   assert.equal(sp("Bruxish Mega"), undefined); assert.equal(R.getSpeciesBySname("SPECIES_JELLICENT_MEGA"), null); assert.equal(R.getSpeciesByX(b.x), null);
   const rank = json("species_rank.json"), role = json("species_role.json");
   assert.ok(!("SPECIES_BRUXISH_MEGA" in rank) && !("SPECIES_JELLICENT_MEGA" in role));

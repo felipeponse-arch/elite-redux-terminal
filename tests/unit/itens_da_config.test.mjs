@@ -101,7 +101,7 @@ test("itensDeBatalha: guarda efeito (e), força (f) e tipo em inglês (t); deixa
 // ---------- o dado ----------
 test("itens_config.json: os números da er-config d1a9a4c que o ticket manda ler", () => {
   const f = (n) => config.itens[n] && config.itens[n].f;
-  assert.equal(config.meta.commit, "d1a9a4c");
+  assert.equal(config.meta.commit, "486a964"); // v2.65.4.1 (28/10): era d1a9a4c
   for (const n of ["Charcoal", "Mystic Water", "Black Glasses", "Miracle Seed", "Dragon Fang", "Silk Scarf"]) assert.equal(config.itens[n].e + ":" + f(n), "TYPE_POWER:30", n);
   assert.equal(config.itens["Spooky Plate"].e + ":" + f("Spooky Plate"), "PLATE:30");
   assert.equal(f("Muscle Band"), 15);
