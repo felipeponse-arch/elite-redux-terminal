@@ -156,12 +156,13 @@
     "Bruxishite": 7,
     "Jellicentite": 7,
     "Skarmorite X": 7,
-    // Sem fonte de obtenção segura (TK-P4: sala do mono-champ com gate não lido; Dream/Lucky Orb nem existem no código):
-    // sem Etapa conhecida = travado (10), como Salamencite R. Antes caíam no padrão 4, antes do dado (8).
-    "Abomasite S": 10,
-    "Dracovishite": 10,
-    "Chien-Paoite": 10,
-    "Galactic Orb": 10,
+    // Sala do mono-champ em Evergrande (EvergrandeCity_MonoChampRoom_1/scripts.pory:571,611,694,735), alcançável só depois da 8ª insígnia;
+    // gate da sala não lido. Decisão 3 (27/10): vale o dado (8), que o código não contradiz.
+    "Abomasite S": 8,
+    "Dracovishite": 8,
+    "Chien-Paoite": 8,
+    "Galactic Orb": 8,
+    // Dream Orb e Lucky Orb: nenhuma fonte no código do jogo; travadas (10) até decidir a remoção (decisão 12, ver ticket TK-11).
     "Dream Orb": 10,
     "Lucky Orb": 10
   };
