@@ -1510,7 +1510,7 @@ export const MUTACOES = [
     id: "rankv2-elite-usa-party",
     descricao: "Elite continua mostrando a nota do time party",
     arquivo: "rank_da_run.js",
-    de: "return dif === \"elite\" || dif === \"hell\" ? \"insane\" : \"party\";",
+    de: "return (TIER_DA_DIFICULDADE[dif] || TIER_DA_DIFICULDADE.easy).rank;",
     para: "return \"party\";",
   },
   {
