@@ -23,7 +23,7 @@
 
     if (LEVELCAPS) {
       document.getElementById("levelcap-note").textContent = LEVELCAPS.note + " Fonte: " + LEVELCAPS.source;
-      var lcHead = '<tr><th class="rowhead">Marco</th><th>Easy</th><th>More</th><th>Elite</th></tr>';
+      var lcHead = '<tr><th class="rowhead">Etapa</th><th>Easy</th><th>More</th><th>Elite</th></tr>';
       var lcRows = LEVELCAPS.rows.map(function (r) {
         var fmt = function (v) { return v === null ? "—" : v; };
         return '<tr><td class="rowhead">' + escapeHtml(r.milestone) + '</td><td class="mono">' + fmt(r.easy) + '</td><td class="mono">' + fmt(r.more) + '</td><td class="mono">' + fmt(r.elite) + '</td></tr>';
