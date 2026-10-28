@@ -213,6 +213,8 @@ test("rodada 2: a forma BASE segura a pedra da própria Mega (modo temporário),
 test("rodada 2: itens que se gastam na luta (Seeds, Adrenaline Orb, Leppa) não somem em silêncio", () => {
   for (const n of R.ITENS_GASTOS_NA_LUTA) {
     if (R.ITEMS.indexOf(n) === -1) continue;
+    // Item sem Etapa no dado (TK-05) a run não libera: a IA recusa de propósito (TK-18b), não some em silêncio.
+    if (R.etapaDoItem(n) === null) { assert.equal(valida({ item: n }).v, null, n + " sem Etapa: recusado"); continue; }
     assert.equal(valida({ item: n }).v.item, n, n + " é citado pelo prompt como item que se gasta");
   }
   assert.equal(valida({ item: "Leppa Berry" }).v.item, "Leppa Berry", "toda Berry serve pra Gluttony/Ripen/Harvest (o prompt diz 'uma Berry')");
