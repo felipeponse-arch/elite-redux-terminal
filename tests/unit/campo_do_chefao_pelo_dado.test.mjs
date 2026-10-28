@@ -30,3 +30,10 @@ test("o extrator lê o script como o jogo: case sem o id não herda o do case vi
   assert.deepEqual(r.map((x) => x.nome), ["A C"]);
   assert.equal(r[0].campo.id, "STATUS_FIELD_GRAVITY");
 });
+
+test("bosses.json guarda o campo dos 23 chefões (falha se o pipeline regerar sem rodar o extrator)", () => {
+  const esperados = ["Tate And Liza 1", "Tate And Liza 2", "Tate And Liza 3", "Steven Doubles", "Steven Doubles Legends"]
+    .concat(R.BOSSES.filter((b) => /^Monochamp /.test(b.name)).map((b) => b.name));
+  assert.equal(esperados.length, 23);
+  esperados.forEach((n) => assert.ok(R.BOSSES.find((b) => b.name === n).campo, n + " sem campo"));
+});
