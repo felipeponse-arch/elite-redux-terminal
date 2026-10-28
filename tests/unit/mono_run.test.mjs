@@ -126,3 +126,15 @@ test("importador: marcas e formas regionais da planilha", () => {
   assert.deepEqual(lerNome("Eevee #*"), { nome: "Eevee", marcas: "#*" });
   assert.deepEqual(lerCsv('a,"b, c",d\n1,2,3'), [["a", "b, c", "d"], ["1", "2", "3"]]);
 });
+
+test("D8-4: a Etapa mostrada vem do rank_disponibilidade (eApp); onde o rank é null, vale a da planilha", () => {
+  const etapa = JSON.parse(readFileSync("data/rank_disponibilidade.json", "utf8")).etapa;
+  let comEApp = 0;
+  for (const lista of Object.values(R.MONO_DISP.porTipo)) for (const e of lista) {
+    if (Number.isInteger(etapa[e.s])) assert.equal(e.eApp !== undefined ? e.eApp : e.e, etapa[e.s], "Etapa do app: " + e.s);
+    if (e.eApp !== undefined) comEApp++;
+  }
+  assert.ok(comEApp > 0);
+  const chansey = R.monoDisponibilidade("Normal", 1, []).novos.find((i) => i.sp.sname === "SPECIES_CHANSEY");
+  assert.ok(chansey, "Chansey aparece na Etapa 1 (planilha dizia 3)");
+});
