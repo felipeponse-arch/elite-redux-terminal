@@ -47,7 +47,7 @@ function enumMap(f) {
 const E = { ab: enumMap('AbilityEnum.proto'), mv: enumMap('MoveEnum.proto'), sp: enumMap('SpeciesEnum.proto'), it: enumMap('ItemEnum.proto') };
 const g = JSON.parse(fs.readFileSync(arq, 'utf8'));
 const idx = (t, n) => t.indexOf(n);
-const rel = { carimbo: {}, abilities: { novas: [], texto: [] }, moves: { novos: [], mudou: [] }, items: { novos: [] }, species: { novas: [], mudou: [] } };
+const rel = { carimbo: {}, abilities: { novas: [], texto: [] }, moves: { novos: [], mudou: [] }, items: { novos: [] }, species: { novas: [], mudou: [], incompletas: [] } };
 
 // habilidades
 const AL = parse(ler('AbilityList.textproto')).ability;
@@ -90,6 +90,7 @@ for (const i of IT) {
 // espécies
 const SL = parse(ler('SpeciesList.textproto')).species || [];
 const sp = porId(g.species);
+const novasObj = [];
 for (const s of SL) {
   const NAME = s.id?.[0], id = E.sp[NAME]; if (id == null) continue;
   const tipo = (n) => idx(g.typeT, n.slice(5).toLowerCase().replace(/^./, (c) => c.toUpperCase()));
@@ -97,7 +98,26 @@ for (const s of SL) {
   const base = [s.hp?.[0], s.atk?.[0], s.def?.[0], s.spatk?.[0], s.spdef?.[0], s.spe?.[0]];
   const abis = (s.ability || []).length === 3 ? s.ability.map((x) => E.ab[x] ?? 0) : [], inns = (s.innate || []).length === 3 ? s.innate.map((x) => E.ab[x] ?? 0) : [];
   const o = sp.get(id);
-  if (!o) { rel.species.novas.push({ id, nome: s.dex?.[0]?.name?.[0] ?? NAME, NAME, base, types: t, abis, inns }); continue; }
+  if (!o) {
+    // Espécie nova: só entra se a config traz tudo (6 stats, tipo, 3 habilidades, 3 inatas). Incompleta (ex.: Bruxish/Jellicent Mega
+    // sem spe) fica de fora = escondida, e é listada. SPECIES_EGG não está no SpeciesEnum (placeholder), então nem chega aqui.
+    const info = { id, nome: NAME, NAME, base, types: t, abis, inns };
+    if (!base.every((x) => x != null) || !t.length || !abis.length || !inns.length) { rel.species.incompletas.push(info); continue; }
+    const mae = sp.get(E.sp[s.form_of?.[0]]) ; // forma-base (de onde vêm dex, grupo de ovo, cor)
+    const fonte = s.mega ? sp.get(E.sp[s.mega[0].from?.[0]]) : null; // Mega herda golpes da forma Redux de origem
+    const L = s.learnset?.[0] || {};
+    const lv = []; for (const l of L.level || []) for (const m of l.move || []) lv.push({ id: E.mv[m] ?? -1, lv: l.level[0] });
+    const tut = (L.tutor || []).map((m) => E.mv[m]);
+    const evolutions = (s.evo || []).map((e) => ({ kd: 0, rs: String(e.level?.[0] ?? 0), in: E.sp[e.to[0]] }));
+    const n = { name: NAME.slice(8).toLowerCase().split('_').map((w) => w[0].toUpperCase() + w.slice(1)).join(' '), NAME,
+      stats: { base, types: t, catchR: 0, exp: 0, EVY: [0, 0, 0, 0, 0, 0], gender: (s.percent_female?.[0] ?? 50) * 254, eggC: 0, fren: 0, grow: 0, eggG: mae ? mae.stats.eggG : [], abis, inns, col: mae ? mae.stats.col : 0, noFlip: false, flags: '' },
+      evolutions, eggMoves: [], levelUpMoves: s.mega && fonte ? fonte.levelUpMoves : lv, TMHMMoves: [], tutor: s.mega && fonte ? fonte.tutor : tut, forms: [], SEnc: [], dex: mae ? mae.dex : { id: 0, desc: '', hw: [0, 0] }, id };
+    if (lv.some((m) => m.id < 0) || tut.some((m) => m == null)) { rel.species.incompletas.push({ ...info, motivo: 'golpe fora do MoveEnum' }); continue; }
+    g.species.push(n); sp.set(id, n); rel.species.novas.push(info); novasObj.push(n);
+    // Mega: a forma de origem ganha a evolução por pedra (in = índice da Mega em g.species, como o dado bruto)
+    if (s.mega && fonte) { const kd = g.evoKindT.indexOf('EVO_MEGA_EVOLUTION'); if (!fonte.evolutions.some((e) => e.kd === kd)) fonte.evolutions.push({ kd, rs: s.mega[0].item[0], in: g.species.length - 1 }); }
+    continue;
+  }
   const dif = {};
   const cmp = (k, a, b) => { if (JSON.stringify(a) !== JSON.stringify(b)) { dif[k] = [a, b]; return true; } };
   if (base.every((x) => x != null) && cmp('base', o.stats.base, base)) o.stats.base = base;
@@ -106,7 +126,9 @@ for (const s of SL) {
   if (inns.length && cmp('inns', o.stats.inns, inns)) o.stats.inns = inns;
   if (Object.keys(dif).length) rel.species.mudou.push({ id, nome: o.name, dif });
 }
+// evolução por nível: `in` é o ÍNDICE em g.species (não o id), e o alvo pode vir depois na lista
+for (const n of novasObj) for (const e of n.evolutions) if (e.kd === 0) e.in = g.species.findIndex((x) => x.id === e.in);
 rel.carimbo = { origem: 'er-config', pasta: cfg };
-console.log(JSON.stringify({ abNovas: rel.abilities.novas.length, abTexto: rel.abilities.texto.length, mvNovos: rel.moves.novos.length, mvMudou: rel.moves.mudou.length, itNovos: rel.items.novos.length, spNovas: rel.species.novas.length, spMudou: rel.species.mudou.length }));
+console.log(JSON.stringify({ abNovas: rel.abilities.novas.length, abTexto: rel.abilities.texto.length, mvNovos: rel.moves.novos.length, mvMudou: rel.moves.mudou.length, itNovos: rel.items.novos.length, spNovas: rel.species.novas.length, spIncompletas: rel.species.incompletas.length, spMudou: rel.species.mudou.length }));
 if (saida) fs.writeFileSync(saida, JSON.stringify(rel, null, 1));
 if (aplicar) fs.writeFileSync(arq, JSON.stringify(g));
