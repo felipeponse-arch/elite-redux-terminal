@@ -1,5 +1,5 @@
 // Ticket versao-nova/05 (15/10/2026): a extração do dado em Node (scripts/extracao/) é o que gera os arquivos derivados. Estes testes travam que os arquivos
-// gravados em data/ são exatamente o que a extração produz do dado bruto (data/gameData_2654.json): dado e derivado nunca divergem em silêncio.
+// gravados em data/ são exatamente o que a extração produz do dado bruto (data/gameData.json): dado e derivado nunca divergem em silêncio.
 // A equivalência com os scripts PowerShell antigos (transform.ps1 + slim_dex.ps1, expand_combo_abilities.ps1, extract_bosses.ps1) foi provada uma vez com o dado
 // antigo: dex_compact.json e ability_translations_pt.json saíram idênticos byte a byte; bosses.json igual, exceto os 5 Eviolites dos times Hell (item de índice 0
 // que o PowerShell descartava).
@@ -16,7 +16,7 @@ import { lerPedrasDoAdoptionCenter } from "../../scripts/extracao/pedras_adoptio
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const ler = (a) => readFileSync(join(RAIZ, a), "utf8");
-const bruto = JSON.parse(ler("data/gameData_2654.json"));
+const bruto = JSON.parse(ler("data/gameData.json"));
 const dexGravado = JSON.parse(ler("data/dex_compact.json"));
 
 test("dex_compact.json gravado == extração do dado bruto (2.65.4) + o delta da config d1a9a4c (data/config_nova.json), byte a byte", () => {

@@ -1,5 +1,5 @@
 // Varredura "habilidades da config sem código" (21/10/2026; relatorios/sem_codigo_varredura_2026-10-21.md).
-// Regra do usuário: com código no er-repo `upcoming` (217dd0f) vale o código; sem código vale a DESCRIÇÃO oficial (data/gameData_2654.json).
+// Regra do usuário: com código no er-repo `upcoming` (217dd0f) vale o código; sem código vale a DESCRIÇÃO oficial (data/gameData.json).
 // Várias dessas habilidades não têm dono na Dex do app (Hemolysis, Cold Plasma, Packed Ice...): o teste usa uma espécie real com a habilidade ISOLADA.
 import { test } from "node:test";
 import assert from "node:assert/strict";
