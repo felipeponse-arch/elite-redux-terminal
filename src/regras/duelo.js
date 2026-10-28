@@ -248,8 +248,8 @@
   var ALTERNA_PELO_CAMPO_DUELO = { "Blast Burn": 1, "Hydro Cannon": 1, "Frenzy Plant": 1, "Rock Wrecker": 1, "Prismatic Laser": 1, "Meteor Assault": 1, "Eternabeam": 1,
     "Gigaton Hammer": 1, "Blood Moon": 1, "Rip and Tear": 1, "Spectral Serenade": 1, "Blue Moon": 1, "Tsunami Hammer": 1 };
   // Golpe de dois turnos (carrega antes de bater): efeitos do dado; Solar Beam/Blade ("Solarbeam") e o resto do grupo.
-  // Sky Drop (efeito próprio, também de 2 turnos) fica fora como antes (a tradução PT o tirava); o pacote de evidência não o listou.
-  var EFEITOS_DE_CARGA_DUELO = { "Solarbeam": 1, "Two Turn Secondary": 1, "Semi Invulnerable": 1, "Two Turn Retaliation": 1, "Sky Drop": 1 };
+  // Sky Drop: o efeito "Sky Drop" é compartilhado com o Seismic Toss (dano fixo = nível), então o golpe de 2 turnos sai pelo NOME, não pelo efeito.
+  var EFEITOS_DE_CARGA_DUELO = { "Solarbeam": 1, "Two Turn Secondary": 1, "Semi Invulnerable": 1, "Two Turn Retaliation": 1 };
   function golpeUtilNoDuelo(id) {
     var m = MOVES[id];
     if (!m || !(m[3] > 0) || DATA.splits[m[2]] === "STATUS") return false;
@@ -1871,7 +1871,7 @@
       // Recarga não é carga: Hyper Beam e parecidos ficam (com a penalidade de recarga em danoNoDuelo).
       // Golpe de dois turnos: pelo EFEITO do dado (TK-06), não pela tradução PT.
       var efeito = MOVES[id][11];
-      if (!EFEITOS_DE_CARGA_DUELO[efeito]) return true;
+      if (!EFEITOS_DE_CARGA_DUELO[efeito] && MOVES[id][0] !== "Sky Drop") return true;
       if (u.ef.cargaInstantanea || (u.it && u.it.cargaUmaVez)) return true; // Accelerate, Power Herb
       return efeito === "Solarbeam" && (clima === "sol" || u.ef.chloroplast);
     });
