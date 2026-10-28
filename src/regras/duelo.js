@@ -2001,6 +2001,8 @@
   // (abilityTypeModFor, resistTipo) + habilidades do ATACANTE (contraTipo,
   // vsTipo). Mold Breaker e parecidas atravessam as habilidades do defensor.
   var INVERSA_PERMANENTE_DUELO = 99;
+  // Inverse Room: a tabela de efetividade ao contrário (golpe e hazard de tipo usam esta mesma regra).
+  function inverterEfetividadeDuelo(v) { return v === 0 || v < 1 ? 2 : v > 1 ? 0.5 : 1; }
   function emAreaDuelo(g) { return !!g.area && g.area !== "aleatorio"; }
   function efetividadeNoDuelo(atq, tipo, def) {
     var troca = atq.ef.contraTipo[tipo];
@@ -2015,7 +2017,7 @@
     var raw = tiposDef.reduce(function (m, t) {
       if (gravidade && t === "Flying") return m;
       var v = troca && troca[t] !== undefined ? troca[t] : typeMultiplier(tipo, [t]);
-      if (inversa) v = v === 0 || v < 1 ? 2 : v > 1 ? 0.5 : 1; // Inverse Room: a tabela ao contrário
+      if (inversa) v = inverterEfetividadeDuelo(v);
       if (t === "Flying" && v > 1 && (atq.ef.ventoForte || def.ef.ventoForte)) v = 1; // Delta Stream: Flying sem fraqueza
       return m * v;
     }, 1);
@@ -3761,9 +3763,10 @@
     var ladoMeu = inicio ? Object.assign(novoLadoDuelo(), inicio.lado) : novoLadoDuelo(), ladoDele = novoLadoDuelo();
     if (inicio) aplicarStatusNoFimDuelo(time, inicio.statusNoFim);
     var log = [], voltas = 0;
+    function inversaPermanente() { return time.concat(deles).some(function (c) { return c.u.ef.inversa >= INVERSA_PERMANENTE_DUELO; }); }
     function vivos(l) { return l.filter(function (c) { return c.vivo; }); }
     var frenteDeles = deles.slice(0, 2), frenteMinha = [];
-    frenteDeles.forEach(function (f) { entrarNoLadoDuelo(f, ladoDele); });
+    frenteDeles.forEach(function (f) { entrarNoLadoDuelo(f, ladoDele, inversaPermanente()); });
     function escolherMeu(excluir) {
       var livres = time.filter(function (c) { return c.vivo && frenteMinha.indexOf(c) === -1 && c !== excluir; });
       if (!livres.length) return null;
@@ -3775,7 +3778,7 @@
     }
     function entraMeu(c) {
       if (!c) return;
-      entrarNoLadoDuelo(c, ladoMeu);
+      entrarNoLadoDuelo(c, ladoMeu, inversaPermanente());
       c.u.ef.hazards.forEach(function (h) { if (h.quando === "entrada") poeHazardDuelo(ladoDele, h.tipo); });
       var parceiro = frenteMinha.filter(function (x) { return x !== c && x.vivo; })[0];
       if (parceiro && c.u.ef.hospitalidade) parceiro.frac = Math.min(1, parceiro.frac + c.u.ef.hospitalidade);
@@ -3865,7 +3868,7 @@
         var restantes = deles.filter(function (d) { return d.vivo && frenteDeles.indexOf(d) === -1; });
         var meusEmCampo = vivos(frenteMinha);
         var prox = meusEmCampo.length ? escolherProximoDoChefao(restantes, meusEmCampo, nivel) : restantes[0];
-        if (prox) entrarNoLadoDuelo(prox, ladoDele);
+        if (prox) entrarNoLadoDuelo(prox, ladoDele, inversaPermanente());
         return prox || f;
       });
       // Receiver: quem fica herda a habilidade do parceiro que caiu.
@@ -4026,13 +4029,16 @@
   // Quem entra num lado com hazard: dano (Stealth Rock pela tabela de Rock, Spikes
   // em quem está no chão), veneno (Toxic Spikes; Poison no chão recolhe) e -1 de
   // Velocidade (Sticky Web). Heavy-Duty Boots e Magic Guard protegem do dano.
-  function entrarNoLadoDuelo(c, lado) {
+  // inversa: Inverse Room cobrindo a luta (GetTypeModifier do jogo inverte também Stealth Rock/Creeping Thorns).
+  function entrarNoLadoDuelo(c, lado, inversa) {
     var u = c.u;
     if (u.item === "Heavy-Duty Boots") return;
     var chao = aterradoDuelo(u);
+    var inv = inversa || (CAMPO_DUELO && CAMPO_DUELO.inversaAtiva);
+    var ef = function (t) { return u.tipos.reduce(function (p, x) { var v = typeMultiplier(t, [x]); return p * (inv ? inverterEfetividadeDuelo(v) : v); }, 1); };
     if (!u.ef.semResiduo) {
-      if (lado.rocha) c.frac -= typeMultiplier("Rock", u.tipos) / 8;
-      if (lado.espinhoVerde) c.frac -= typeMultiplier("Grass", u.tipos) / 8; // Creeping Thorns: efeito de Stealth Rock no dado, tipo Grass
+      if (lado.rocha) c.frac -= ef("Rock") / 8;
+      if (lado.espinhoVerde) c.frac -= ef("Grass") / 8; // Creeping Thorns: efeito de Stealth Rock no dado, tipo Grass
       if (chao) c.frac -= HAZARD_ESPINHO_DUELO[lado.espinho];
     }
     if (lado.toxico && chao) {
@@ -4256,6 +4262,7 @@
     var log = [], atual = null, i = 0, voltas = 0;
     // Trick Room é do campo, não de um lado (battle_util.c:4605 gFieldTimers); os outros ficam em ladoMeu/ladoDele.
     var campo = { sala: 0 };
+    function inversaPermanente() { return time.concat(deles).some(function (c) { return c.u.ef.inversa >= INVERSA_PERMANENTE_DUELO; }); }
     function salaPermanente() { return time.concat(deles).some(function (c) { return c.u.ef.sala > SALA_PERMANENTE_DUELO; }); }
     // Clima com duração (lote B, 2026-10-02; NextDex 2.65beta "Lasts 8 turns"): `inicio.clima`
     // traz as unidades sem clima. O do chefão vale desde o início; o do jogador só depois que
@@ -4311,7 +4318,7 @@
       if (c.u.ef.brasas) ladoDele.brasas = true; // Hot Coals: queima o próximo que entrar do lado dele
       if (c.u.ef.limpaHazards) ladoMeu = ladoSemHazardsDuelo(ladoMeu);
       entradaDeLadoDuelo(c.u, ladoMeu, ladoDele, campo, salaPermanente());
-      entrarNoLadoDuelo(c, ladoMeu);
+      entrarNoLadoDuelo(c, ladoMeu, inversaPermanente());
       c.u.ef.hazards.forEach(function (h) { if (h.quando === "entrada") poeHazardDuelo(ladoDele, h.tipo); });
       if (c.frac <= 0) { c.vivo = false; c.frac = 0; }
     }
@@ -4322,7 +4329,7 @@
       if (atual && atual.vivo && atual.u.ef.tocaia) atual.bonus.primeiroGolpe = atual.u.ef.tocaia;
       if (f.u.ef.limpaHazards) ladoDele = ladoSemHazardsDuelo(ladoDele);
       entradaDeLadoDuelo(f.u, ladoDele, ladoMeu, campo, salaPermanente());
-      entrarNoLadoDuelo(f, ladoDele);
+      entrarNoLadoDuelo(f, ladoDele, inversaPermanente());
       f.u.ef.hazards.forEach(function (h) { if (h.quando === "entrada") poeHazardDuelo(ladoMeu, h.tipo); });
       if (f.frac <= 0) { f.vivo = false; f.frac = 0; }
     }

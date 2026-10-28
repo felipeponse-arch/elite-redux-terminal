@@ -140,6 +140,13 @@ export const MUTACOES = [
     para: "if (false) {",
   },
   {
+    id: "hazard-de-tipo-ignora-inverse-room",
+    descricao: "Stealth Rock e Creeping Thorns usam a tabela normal sob Inverse Room",
+    arquivo: "duelo.js",
+    de: "return p * (inv ? inverterEfetividadeDuelo(v) : v);",
+    para: "return p * v;",
+  },
+  {
     id: "inversa-fora-do-duelo-ignorada",
     descricao: "o plano do chefão (fora do duelo) usa a tabela de tipos normal mesmo na batalha invertida",
     arquivo: "duelo.js",
