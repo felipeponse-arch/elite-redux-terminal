@@ -49,6 +49,9 @@ if (-not $SkipExtract) {
     Write-Output "--- regenerating dex_compact.json and bosses.json from raw source ---"
     & (Join-Path $PSScriptRoot "transform.ps1")
     & (Join-Path $PSScriptRoot "extract_bosses.ps1")
+    # Regerar o bosses.json apaga o campo de batalha (Trick Room, Gravity, Monochamp); regrava dos scripts de mapa do jogo.
+    $erRepo = if ($env:ER_REPO) { $env:ER_REPO } else { Join-Path $PSScriptRoot "..\..\ferramentas\er-repo" }
+    if (Test-Path $erRepo) { & node (Join-Path $PSScriptRoot "extrair_campo_chefoes.mjs") $erRepo --aplicar } else { throw "er-repo nao encontrado em $erRepo (defina ER_REPO): sem ele o bosses.json perde o campo dos chefoes" }
     Write-Output "--- extracting boss reference builds ---"
     & (Join-Path $PSScriptRoot "extract_boss_builds.ps1")
     # These used to be manual, run-by-hand steps, which meant a fresh

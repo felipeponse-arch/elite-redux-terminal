@@ -14,7 +14,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **campo.js** - TK-16 (campo, fase 1): FONTE ÚNICA do vocabulário de clima, terreno, telas e hazards, e das durações de campo.
   rotuloDoArquetipoDeCampo:46, hazardCheioNoLado:57, poeHazardNoLado:58
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
-  gymLeaderBaseName:45, getRemainingBossEntries:51, computeSharedRisks:109, bossSpeedSummary:132, computeBossAttackTypes:147, bossSafetyScore:171, bestBoxCandidateForBoss:183, confrontoUnitOf:233, confrontoFoesDe:258, confrontoMelhorUnidade:269, confrontoMinhasUnidades:279, confrontoUnidadesDaCaixa:289, confrontoParaParty:298, bossPartyPorDificuldade:327, bestRankForm:333, nextFightCx:351, varianteDoChefao:358, gymSkillsSummaryFor:367, regraDeCampoDoChefao:416, comportamentoDaIADoChefao:433, habilidadesExtrasDoHell:446, regrasDoHell:447, ehRevancheDeLider:454, buffsParaMostrarDoChefao:473, buffsAtivosDoChefao:482, computeSpeedTiers:495
+  gymLeaderBaseName:55, getRemainingBossEntries:61, computeSharedRisks:119, bossSpeedSummary:142, computeBossAttackTypes:157, bossSafetyScore:181, bestBoxCandidateForBoss:193, confrontoUnitOf:243, confrontoFoesDe:268, confrontoMelhorUnidade:279, confrontoMinhasUnidades:289, confrontoUnidadesDaCaixa:299, confrontoParaParty:308, bossPartyPorDificuldade:337, bestRankForm:343, nextFightCx:361, varianteDoChefao:368, gymSkillsSummaryFor:377, regraDeCampoDoChefao:422, comportamentoDaIADoChefao:449, habilidadesExtrasDoHell:462, regrasDoHell:463, ehRevancheDeLider:470, buffsParaMostrarDoChefao:489, buffsAtivosDoChefao:498, computeSpeedTiers:511
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
   descricaoDeHabilidade:85, descricaoDeHabilidadePorId:96, expandirTextoDeHabilidade:107, habilidadeArma:121, nomesDeHabilidades:124, podeTerStatus:132, garantiaDoTime:140, garantiaDaCondicao:154, comoGarantir:170, condicaoDaBuild:189, precisaDeSetter:212, blocoCondicoesIA:237
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
@@ -60,7 +60,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
 - **time_pelo_motor.js** - Modo Motor do Meu Time (ticket time-pelo-motor/01, Fase C, 21/10/2026): monta o time SEM IA, só pelo simulador.
-  motorMedia:61, motorArred:62, criarCacheDoMotor:65, motorGuardar:66, motorNivelDaEtapa:73, motorMontarLuta:79, motorMontarLutaComum:90, motorEspacadas:99, motorLutasComunsDoContexto:108, motorLutasDoContexto:123, motorValorDoObjetivo:135, contextoDoMotor:141, motorRaizDaLinha:151, motorChaveDaBuild:165, motorChaveDoContexto:168, motorBuildDoCandidato:169, motorSecar:204, motorCandidatosEmPassos:205, motorCandidatos:227, motorAquecerBuildsEmPassos:229, motorUnidade:235, motorSimular:247, motorEhMeu:263, motorAvaliar:264, motorMetricas:267, motorTemGolpeDeLado:276, motorBuscar:277, motorBuscarEmPassos:278, motorPlanoB:331, motorItensCandidatos:370 (+4)
+  motorMedia:60, motorArred:61, criarCacheDoMotor:64, motorGuardar:65, motorNivelDaEtapa:72, motorMontarLuta:78, motorMontarLutaComum:89, motorEspacadas:98, motorLutasComunsDoContexto:107, motorLutasDoContexto:122, motorValorDoObjetivo:134, contextoDoMotor:140, motorRaizDaLinha:150, motorChaveDaBuild:164, motorChaveDoContexto:167, motorBuildDoCandidato:168, motorSecar:203, motorCandidatosEmPassos:204, motorCandidatos:226, motorAquecerBuildsEmPassos:228, motorUnidade:234, motorSimular:246, motorEhMeu:262, motorAvaliar:263, motorMetricas:266, motorTemGolpeDeLado:275, motorBuscar:276, motorBuscarEmPassos:277, motorPlanoB:330, motorItensCandidatos:369 (+4)
 - **time_pelo_motor_papeis.js** - Modo Motor do Meu Time, Fase D (papéis por build, tags, sinergia e explicação). Carrega depois de time_pelo_motor.js (mesmo escopo).
   motorMediana:22, motorUnidadeNaLuta:23, motorSemTipos:24, motorSemEsse:25, motorAux:26, motorLutasDeProva:27, motorAssinaturaDasLutas:28, motorCondicoes:33, motorLutaComClima:53, motorGanhoDaCondicao:56, motorSinergia:86, motorAlternativasArmadoras:101, motorExtrasDeSinergia:119, motorLutaDetalhada:136, motorSimularComClima:143, motorFoePorNome:155, motorProvasDosMembros:157, motorDeltaSemMembro:194, motorDeltaSemTipos:198, motorTemTipo:202, motorClassificar:207, motorTextos:306, motorTextosDaClassificacao:329
 - **tipos.js** - Tabela de efetividade de tipos, habilidades que alteram dano recebido por tipo e tipagem de espécie.
@@ -147,6 +147,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   git:13, normalizarCaminho:22, lerWorktrees:27, lerStatus:45, avaliarAlertas:66, idade:77, formatarRelatorio:84, coletar:105
 - **etapa_do_mapa.mjs** - Resolvedor único de mapa do jogo -> etapa da run (índice de levelcaps.json), compartilhado pelo rank de
   chaveDoMapa:7, etapaDoLocalDaPlanilha:9, criarEtapaDoMapa:21
+- **extrair_campo_chefoes.mjs** - Grava em data/bosses.json o campo `campo` (efeito de campo da luta) de cada chefão, lido dos
+  arquivos:11, nomeDoChefao:18, extrairCampos:22
 - **extrair_categorias_golpes.mjs** - Categorias de golpe, chance e efeito extra. As categorias que reforçam habilidades (soco, mordida, corte,
 - **gerar_mega_forms.mjs** - Completa data/mega_forms.json (pedra -> forma Mega/Primal) com as evoluções do dado bruto 2.65beta.
 - **gerar_onde_achar_itens.mjs** - Gera data/onde_achar_itens.json: onde cada item se consegue na run e a partir de qual etapa (ticket 07,
@@ -181,7 +183,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **rank_escolha.mjs** - Escolha do set no rank v2 (ticket 08, 07/10/2026). A soma rápida (nota do duelo contra todos os
   melhoresPelaSoma:9, mediaDoEixo:13, notaDosEixos:18, escolherPelaNotaFinal:22
 - **rank_fatia.mjs** - Rank com fatia fixa de peso (ticket todas-as-lutas/02, decisão do usuário em 16/10/2026): chefões 60% e lutas comuns 40%.
-  notasComFatia:10, comunsMaisPerigosas:37
+  notasComFatia:9, comunsMaisPerigosas:36
 - **remapear_sprite_index.mjs** - Sprites pelo NOME da espécie (15/10/2026). O atlas (data/sprite_atlas.png) foi montado com o índice pelo número da espécie (x) do
   indicePorNumero:8
 - **sabotagem_incremental.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026): no master a sabotagem roda só as
@@ -254,6 +256,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **campo_caracterizacao_tk16.test.mjs** - TK-16 (campo, fase 1): caracterização ANTES da refatoração. Fixa o veredito do motor (R.resultadoDoDuelo) em lutas com
 - **campo_com_lutas_comuns.test.mjs** - todas-as-lutas/03: o alvo { campo: true } mede também as lutas comuns (mesma fatia 60/40 do rank, vinda de data/lutas_comuns_run.json).
 - **campo_do_campeao_monotype.test.mjs** - Efeito do campeão monotype (04/10): o jogo anuncia um efeito por tipo (src/battle_main.c HandleMonoChampSpecialEffects
+- **campo_do_chefao_pelo_dado.test.mjs** - TK-20 D9.5b: a regra de campo do chefão vem do dado (bosses.json `campo`, extraído do script do mapa do jogo),
 - **campo_fonte_unica.test.mjs** - TK-16 (campo, fase 1): src/regras/campo.js é a fonte única de clima, terreno, telas, hazards e durações de campo.
 - **campo_invertido_no_plano.test.mjs** - Achado do vídeo do usuário (02/10): o plano contra a Tate & Liza 1 chamava Axe Kick (Dark) de
 - **campo_no_duelo.test.mjs** - Campo no duelo (2026-09-29): terreno das habilidades (Grassy/Electric/Psychic/
@@ -388,6 +391,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sync_soma_errada.test.mjs** - TK-01 (decisão 2 do usuário, 27/10/2026): save com soma errada nunca é regravado nem enviado à nuvem.
 - **telas_efetividade_real.test.mjs** - Ticket 12 (dados-2654): as telas mostram a efetividade REAL contra Solid Rock / Primal Armor e citam a
 - **texto_novo_das_habilidades.test.mjs** - Ticket versao-nova/04 (15/10/2026): o texto das habilidades mudou de redação na 2.65.4 da NextDex (07/10) e o parser do motor lê TEXTO. M...
+- **tier_e_fatia_unicos.test.mjs** - TK-20: dificuldade -> tier e a fatia 60/40 têm UMA fonte (src/regras/chefoes.js), lida por chefões, rank, Meu Time,
 - **time_melhor_no_geral.test.mjs** - Tela do time = melhor time no geral, sem pensar no próximo chefão (usuário, 16/10/2026). As builds do "Montar time completo"
 - **time_pelo_motor.test.mjs** - Modo Motor do Meu Time, Fase C (ticket time-pelo-motor/01, 21/10/2026): montar o time SEM IA, só pelo simulador.
 - **time_pelo_motor_comuns.test.mjs** - Meu Time na mesma régua do rank (ticket todas-as-lutas/02, 21/10/2026): o juiz do Modo Motor pesa as lutas COMUNS mais perigosas de cada

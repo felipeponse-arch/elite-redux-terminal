@@ -14,6 +14,13 @@ export const MUTACOES = [
     para: "ef.anulaSalas = false;",
   },
   {
+    id: "campo-do-chefao-sem-sala",
+    descricao: "o campo gravado no dado do chefão (Tate & Liza: STATUS_FIELD_TRICK_ROOM) deixa de virar Trick Room na regra",
+    arquivo: "chefoes.js",
+    de: "if (c.id === \"STATUS_FIELD_TRICK_ROOM\") r.sala = true;",
+    para: "",
+  },
+  {
     id: "proximo-do-chefao-sem-tipagem",
     descricao: "o próximo do chefão volta a ignorar a nota de tipagem ofensiva (ordem da fila)",
     arquivo: "duelo.js",
@@ -1517,7 +1524,7 @@ export const MUTACOES = [
     id: "rankv2-elite-usa-party",
     descricao: "Elite continua mostrando a nota do time party",
     arquivo: "rank_da_run.js",
-    de: "return dif === \"elite\" || dif === \"hell\" ? \"insane\" : \"party\";",
+    de: "return (TIER_DA_DIFICULDADE[dif] || TIER_DA_DIFICULDADE.easy).rank;",
     para: "return \"party\";",
   },
   {
@@ -4324,11 +4331,32 @@ export const MUTACOES = [
     para: "l.more) || 100",
   },
   {
+    id: "tier-hell-do-rank-vira-party",
+    descricao: "Hell passa a usar a visão party do rank (o comitê decidiu: Hell usa a insane)",
+    arquivo: "chefoes.js",
+    de: 'hell: { chefao: "hell", rank: "insane" }',
+    para: 'hell: { chefao: "hell", rank: "party" }',
+  },
+  {
+    id: "tier-hell-do-chefao-vira-insane",
+    descricao: "o time do chefão em Hell volta a ser o insane (antes: a chave hell)",
+    arquivo: "chefoes.js",
+    de: 'hell: { chefao: "hell", rank: "insane" }',
+    para: 'hell: { chefao: "insane", rank: "insane" }',
+  },
+  {
+    id: "fatia-dos-chefoes-50-50",
+    descricao: "a fatia única dos chefões deixa de ser 60% (decisão do usuário, 16/10/2026)",
+    arquivo: "chefoes.js",
+    de: "var FATIA_DOS_CHEFOES = 0.6;",
+    para: "var FATIA_DOS_CHEFOES = 0.5;",
+  },
+  {
     id: "motor-fatia-ignora-o-dado",
     descricao: "a fatia do Modo Motor ignora a fatia do dado do rank e usa sempre o padrão",
     arquivo: "time_pelo_motor.js",
-    de: "fatia: dado && dado.fatia !== undefined ? dado.fatia : MOTOR_FATIA_PADRAO",
-    para: "fatia: MOTOR_FATIA_PADRAO",
+    de: "fatia: dado && dado.fatia !== undefined ? dado.fatia : FATIA_DOS_CHEFOES",
+    para: "fatia: FATIA_DOS_CHEFOES",
   },
   {
     id: "motor-busca-desempate-ultimo",
