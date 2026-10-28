@@ -12,7 +12,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **calc_stat.js** - Fórmula de status final (base+IV+EV+nível+nature+item) e o que deriva
   especiePorNomeDoItem:135, regraCasaComEspecie:139, itemRuleFor:149, calcFinalStat:160, minEvSameStat:200, nextEvBreakpoint:210, priorityOrderForEvs:235, trimAndReallocateEvs:238
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
-  gymLeaderBaseName:55, getRemainingBossEntries:61, computeSharedRisks:119, bossSpeedSummary:142, computeBossAttackTypes:157, bossSafetyScore:181, bestBoxCandidateForBoss:193, confrontoUnitOf:243, confrontoFoesDe:268, confrontoMelhorUnidade:279, confrontoMinhasUnidades:289, confrontoUnidadesDaCaixa:299, confrontoParaParty:308, bossPartyPorDificuldade:337, bestRankForm:343, nextFightCx:361, varianteDoChefao:368, gymSkillsSummaryFor:377, regraDeCampoDoChefao:426, comportamentoDaIADoChefao:443, habilidadesExtrasDoHell:456, regrasDoHell:457, ehRevancheDeLider:464, buffsParaMostrarDoChefao:483, buffsAtivosDoChefao:492, computeSpeedTiers:505
+  gymLeaderBaseName:55, getRemainingBossEntries:61, computeSharedRisks:119, bossSpeedSummary:142, computeBossAttackTypes:157, bossSafetyScore:181, bestBoxCandidateForBoss:193, confrontoUnitOf:243, confrontoFoesDe:268, confrontoMelhorUnidade:279, confrontoMinhasUnidades:289, confrontoUnidadesDaCaixa:299, confrontoParaParty:308, bossPartyPorDificuldade:337, bestRankForm:343, nextFightCx:361, varianteDoChefao:368, gymSkillsSummaryFor:377, regraDeCampoDoChefao:422, comportamentoDaIADoChefao:449, habilidadesExtrasDoHell:462, regrasDoHell:463, ehRevancheDeLider:470, buffsParaMostrarDoChefao:489, buffsAtivosDoChefao:498, computeSpeedTiers:511
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
   descricaoDeHabilidade:89, descricaoDeHabilidadePorId:100, expandirTextoDeHabilidade:111, habilidadeArma:125, nomesDeHabilidades:128, podeTerStatus:136, garantiaDoTime:144, garantiaDaCondicao:158, comoGarantir:174, condicaoDaBuild:193, precisaDeSetter:216, blocoCondicoesIA:241
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
@@ -143,6 +143,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   git:13, normalizarCaminho:22, lerWorktrees:27, lerStatus:45, avaliarAlertas:66, idade:77, formatarRelatorio:84, coletar:105
 - **etapa_do_mapa.mjs** - Resolvedor único de mapa do jogo -> etapa da run (índice de levelcaps.json), compartilhado pelo rank de
   chaveDoMapa:7, etapaDoLocalDaPlanilha:9, criarEtapaDoMapa:21
+- **extrair_campo_chefoes.mjs** - Grava em data/bosses.json o campo `campo` (efeito de campo da luta) de cada chefão, lido dos
+  arquivos:11, nomeDoChefao:18, extrairCampos:22
 - **extrair_categorias_golpes.mjs** - Categorias de golpe, chance e efeito extra. As categorias que reforçam habilidades (soco, mordida, corte,
 - **gerar_mega_forms.mjs** - Completa data/mega_forms.json (pedra -> forma Mega/Primal) com as evoluções do dado bruto 2.65beta.
 - **gerar_onde_achar_itens.mjs** - Gera data/onde_achar_itens.json: onde cada item se consegue na run e a partir de qual etapa (ticket 07,
@@ -249,6 +251,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **calibracao_simulador_wasm.test.mjs** - Calibração do motor contra o simulador do jogo compilado (WebAssembly, Elite Redux 2.65.3b), 21/10/2026
 - **campo_com_lutas_comuns.test.mjs** - todas-as-lutas/03: o alvo { campo: true } mede também as lutas comuns (mesma fatia 60/40 do rank, vinda de data/lutas_comuns_run.json).
 - **campo_do_campeao_monotype.test.mjs** - Efeito do campeão monotype (04/10): o jogo anuncia um efeito por tipo (src/battle_main.c HandleMonoChampSpecialEffects
+- **campo_do_chefao_pelo_dado.test.mjs** - TK-20 D9.5b: a regra de campo do chefão vem do dado (bosses.json `campo`, extraído do script do mapa do jogo),
 - **campo_invertido_no_plano.test.mjs** - Achado do vídeo do usuário (02/10): o plano contra a Tate & Liza 1 chamava Axe Kick (Dark) de
 - **campo_no_duelo.test.mjs** - Campo no duelo (2026-09-29): terreno das habilidades (Grassy/Electric/Psychic/
 - **categorias_de_golpe.test.mjs** - Categoria de golpe (soco, mordida, corte...) do NextDex (2026-09-29): antes

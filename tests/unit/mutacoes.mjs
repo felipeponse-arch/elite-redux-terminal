@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "campo-do-chefao-sem-sala",
+    descricao: "o campo gravado no dado do chefão (Tate & Liza: STATUS_FIELD_TRICK_ROOM) deixa de virar Trick Room na regra",
+    arquivo: "chefoes.js",
+    de: "if (c.id === \"STATUS_FIELD_TRICK_ROOM\") r.sala = true;",
+    para: "",
+  },
+  {
     id: "proximo-do-chefao-sem-tipagem",
     descricao: "o próximo do chefão volta a ignorar a nota de tipagem ofensiva (ordem da fila)",
     arquivo: "duelo.js",

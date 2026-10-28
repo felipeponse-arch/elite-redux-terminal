@@ -393,12 +393,9 @@
   // Gravity. O campeão monotype (BATTLE_FIELD_EFFECT_MONOCHAMP, src/battle_main.c HandleMonoChampSpecialEffects +
   // textos de anúncio em src/battle_message.c) tem um efeito por tipo; o simulador ainda NÃO conta nenhum deles
   // (naoSimulado), mas a tela e o pedido à IA mostram o texto.
-  var REGRA_DE_CAMPO_DO_CHEFAO = {
-    "Tate And Liza 1": { sala: true, inversa: true, texto: "Trick Room permanente e batalha INVERTIDA (tabela de tipos ao contrario) a luta inteira" },
-    "Tate And Liza 2": { sala: true, texto: "Trick Room permanente a luta inteira" },
-    "Tate And Liza 3": { sala: true, texto: "Trick Room permanente a luta inteira" },
-    "Steven Doubles": { gravidade: true, texto: "Gravity a luta inteira (Ground acerta voadores, sem Levitate)" },
-    "Steven Doubles Legends": { gravidade: true, texto: "Gravity a luta inteira (Ground acerta voadores, sem Levitate)" }
+  var TEXTO_DO_CAMPO_POR_ID = {
+    STATUS_FIELD_TRICK_ROOM: "Trick Room permanente a luta inteira",
+    STATUS_FIELD_GRAVITY: "Gravity a luta inteira (Ground acerta voadores, sem Levitate)"
   };
   var EFEITO_DO_CAMPEAO_MONOTYPE = {
     Normal: "Trick Room e Wonder Room se alternam a cada turno até o fim da luta.",
@@ -420,10 +417,19 @@
     Dark: "Todo o seu time começa dormindo.",
     Fairy: "Misty Terrain permanente: os golpes Fairy do time do campeão acertam Poison e Steel com super efetividade."
   };
-  Object.keys(EFEITO_DO_CAMPEAO_MONOTYPE).forEach(function (tipo) {
-    REGRA_DE_CAMPO_DO_CHEFAO["Monochamp " + tipo] = { texto: EFEITO_DO_CAMPEAO_MONOTYPE[tipo], naoSimulado: true };
-  });
-  function regraDeCampoDoChefao(nome) { return REGRA_DE_CAMPO_DO_CHEFAO[nome] || null; }
+  // O campo vem do dado do chefão (bosses.json `campo`, gravado por scripts/extrair_campo_chefoes.mjs a partir do
+  // script do mapa); aqui só se traduz o id do jogo no que o app simula e no texto da tela.
+  function regraDeCampoDoChefao(nome) {
+    var b = BOSSES.filter(function (x) { return x.name === nome; })[0];
+    var c = b && b.campo;
+    if (!c) return null;
+    if (c.efeito === "MONOCHAMP") return { texto: EFEITO_DO_CAMPEAO_MONOTYPE[c.id.replace("TYPE_", "").charAt(0) + c.id.replace("TYPE_", "").slice(1).toLowerCase()], naoSimulado: true };
+    var r = { texto: TEXTO_DO_CAMPO_POR_ID[c.id] };
+    if (c.id === "STATUS_FIELD_TRICK_ROOM") r.sala = true;
+    if (c.id === "STATUS_FIELD_GRAVITY") r.gravidade = true;
+    if (c.inversa) { r.inversa = true; r.texto = "Trick Room permanente e batalha INVERTIDA (tabela de tipos ao contrario) a luta inteira"; }
+    return r;
+  }
 
   // Jeito de lutar da IA por treinador (ticket 03, 07/10): flags da config oficial (er-config TrainerList 7be1617:
   // prefer_status, prefer_stall, risky; o gerador tools/codegen TrainerPartyGenerator.kt vira AI_FLAG_*) e o que
