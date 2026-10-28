@@ -109,6 +109,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 ## Scripts (.mjs) - scripts/
 - **alarme_upstream.mjs** - Alarme de versão nova do Elite Redux (2026-09-24, pedido do usuário: "faz o
   ultimaVersaoDoDex:35, versaoDaPaginaDeDownload:43, hashDoConteudo:50, baixar:55, main:76
+- **atualizar_de_config.mjs** - Atualiza data/gameData_2654.json a partir do er-config (código/config do jogo é a verdade).
+  saida:10, desescapar:14, parse:23, ler:41, enumMap:42, idx:49, porId:54
 - **build.mjs** - Montagem do artifact_final.html em Node (fase 8 da refatoração, 2026-09-24).
   ler:21, trocarTudo:24, falhar:25
 - **cache_sabotagem.mjs** - Cache de "arquivo lembrado" da sabotagem (tests/.sabotagem_cache.json, fora do git).
