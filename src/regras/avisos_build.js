@@ -15,7 +15,7 @@
       acima.map(function (g) { return g.nome + " (nível " + g.nivel + ")"; }).join(", ") + "." });
     // 2. Mega antes da hora: a forma (pedra tardia incluída) ou a pedra segurada ainda não existe pro jogador.
     if (isMegaForm(sp) && !megaFormLiberada(sp)) {
-      out.push({ tipo: "mega", texto: "Esta Mega só a partir da " + rotuloEtapaDaMega(sp) + "; até lá a criatura luta como a forma base." });
+      out.push({ tipo: "mega", texto: "Esta Mega " + quandoMega(sp) + "; até lá a criatura luta como a forma base." });
     } else if (build.item && MEGA_FORMS[build.item] !== undefined) {
       if (!liberadoNaRun(state.settings.milestone, cap, { pedra: build.item })) {
         var etapa = etapaDaPedra(build.item);

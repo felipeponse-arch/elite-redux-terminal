@@ -10,7 +10,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - bossMonCardHtml:493 - chama: calcFinalStat (calc_stat.js:119), itemRuleFor (calc_stat.js:106), ABILITIES (dados_base.js:10), getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), +1
 - bossState:13 - chamado por: initProgress (progresso.js:105), quemResolvePreencher (quem_resolve.js:66), quemResolveRestaurar (quem_resolve.js:103)
 - campoDoChefaoHtml:178 - chama: regraDeCampoDoChefao (chefoes.js:416)
-- candidatosDoJogador:248 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), battleUnitsOf (formas_mega.js:239), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:75)
+- candidatosDoJogador:248 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), battleUnitsOf (formas_mega.js:246), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:75)
 - guardarTimeAnterior:266 - chama: getSpeciesByX (dados_base.js:78), xsToSnames (save.js:24), generatedTeamResult (arquetipo.js:35), teamKeyFor (arquetipo.js:14), acao (nucleo.js:242), +1
 - hellDoChefaoHtml:199 - chama: regrasDoHell (chefoes.js:447)
 - iaDoChefaoHtml:190 - chama: comportamentoDaIADoChefao (chefoes.js:433)
@@ -21,7 +21,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderBossDetail:589 - chama: nivelDeCalculo (level_cap.js:63), monotypeAtivo (mono_run.js:73), quemResolveCardHtml (quem_resolve.js:83), quemResolveRestaurar (quem_resolve.js:103), bossConfrontoHtml (resumo_luta.js:96)
 - renderGymSkillsCardHtml:456 - chama: ehRevancheDeLider (chefoes.js:454), gymLeaderBaseName (chefoes.js:45), gymSkillsSummaryFor (chefoes.js:367)
 - selectBoss:437 - chama: varianteDoChefao (chefoes.js:358)
-- simularSemTravarATela:324 - chama: montarTimeContraChefaoEmPassos (duelo.js:4681), totalDePassosContraChefao (duelo.js:4680)
+- simularSemTravarATela:324 - chama: montarTimeContraChefaoEmPassos (duelo.js:4683), totalDePassosContraChefao (duelo.js:4682)
 
 ## ui/arquetipo.js
 - applyRecommendedTeam:207 - chama: getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), formFamilyOf (formas_mega.js:58), entradasDoJogador (liberado_na_run.js:34), flashToast (dex_lista.js:473), +4 | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorFicarComVariante (modo_motor.js:120)
@@ -36,7 +36,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - monoRunCardHtml:516 - chama: entradasDoJogador (liberado_na_run.js:34), MONO_MARCAS (mono_run.js:11), avisoProximoLider (mono_run.js:159), fraquezasDoTipo (mono_run.js:81), monoDisponibilidade (mono_run.js:177), +2
 - planoContraChefaoHtml:387 - chama: NOME_DA_CONDICAO (condicoes_habilidade.js:42)
 - renderMonoRun:573 - chama: state (nucleo.js:8) | chamado por: renderTeam (time.js:8)
-- renderTeamAnalysis:599 - chama: computeSharedRisks (chefoes.js:109), USABLE_TYPES (dados_base.js:128), abilityTypeMod (tipos.js:169) | chamado por: renderTeam (time.js:8)
+- renderTeamAnalysis:599 - chama: computeSharedRisks (chefoes.js:109), USABLE_TYPES (dados_base.js:128), abilityTypeMod (tipos.js:172) | chamado por: renderTeam (time.js:8)
 - renderTeamStrategy:482 - chama: modoDeMontagem (modo_motor.js:9), modoMotorAquecer (modo_motor.js:41), modoMotorResultadoHtml (modo_motor.js:234) | chamado por: modoMotorFicarComVariante (modo_motor.js:120), modoMotorMontar (modo_motor.js:69), renderTeam (time.js:8)
 - resumoDoArquetipo:74 - chama: state (nucleo.js:8)
 - teamKeyFor:14 - chamado por: guardarTimeAnterior (aba_chefoes.js:266), montarTimeContraEsteChefao (aba_chefoes.js:337)
@@ -48,7 +48,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## ui/caixa.js
 - pcBoxSelectedX:14 - chamado por: zerarRun (time.js:356)
-- renderBox:16 - chama: ABILITIES (dados_base.js:10), getSpeciesByX (dados_base.js:78), uniqueIds (dados_base.js:118), speciesTypeNames (tipos.js:250), rankBadgeHtml (dex_ficha.js:169), +4
+- renderBox:16 - chama: ABILITIES (dados_base.js:10), getSpeciesByX (dados_base.js:78), uniqueIds (dados_base.js:118), speciesTypeNames (tipos.js:253), rankBadgeHtml (dex_ficha.js:169), +4
 
 ## ui/dex_ficha.js
 - RANK_TIER_CLASS:154 - chamado por: monoRunCardHtml (arquetipo.js:516)
@@ -56,9 +56,9 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - buildSynergyHtml:42 - chama: sinergiasDaEspecie (duelo.js:1416) | chamado por: buildEntryHtml (editor_build.js:182), strategySetsHtml (editor_build.js:432), renderTeam (time.js:8)
 - conditionMoveSynergyNoteHtml:70 - chama: buildNoteHtml (editor_build.js:155)
 - evoConditionText:88 - chama: EVOKINDS (dados_base.js:13), EVO_LEVEL_FEMALE (dados_base.js:32), EVO_LEVEL_MALE (dados_base.js:31), EVO_MEGA_KINDS (dados_base.js:34), EVO_PRIMAL (dados_base.js:33)
-- fichaCabecalhoHtml:515 - chama: descricaoDaEspecie (dados_base.js:185), compraDeInicialTexto (mono_run.js:48), speciesTypeNames (tipos.js:250), state (nucleo.js:8)
+- fichaCabecalhoHtml:515 - chama: descricaoDaEspecie (dados_base.js:185), compraDeInicialTexto (mono_run.js:48), speciesTypeNames (tipos.js:253), state (nucleo.js:8)
 - fichaConhecerHtml:569 - chama: uniqueIds (dados_base.js:118), sinergiasDaEspecie (duelo.js:1416), bst (dex_lista.js:152)
-- fichaEfetividadeHtml:434 - chama: perfilDefensivoDaEspecie (tipos.js:175)
+- fichaEfetividadeHtml:434 - chama: perfilDefensivoDaEspecie (tipos.js:178)
 - fichaEvolucaoHtml:457 - chama: getSpeciesByX (dados_base.js:78)
 - fichaFormasHtml:475 - chama: getSpeciesByX (dados_base.js:78)
 - fichaNavHtml:446 - chama: listaAtual (dex_lista.js:210) | chamado por: renderList (dex_lista.js:243)
@@ -80,8 +80,8 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/dex_lista.js
 - bst:152 - chamado por: fichaConhecerHtml (dex_ficha.js:569), compareResultHtml (ficha_extras.js:22)
 - flashToast:473 - chamado por: initBosses (aba_chefoes.js:33), montarTimeContraEsteChefao (aba_chefoes.js:337), applyRecommendedTeam (arquetipo.js:207), generateCompleteTeam (arquetipo.js:302), generateTeamForArchetype (arquetipo.js:153), +4
-- getFiltered:171 - chama: SPECIES (dados_base.js:52), rankDe (rank_da_run.js:28), speciesTypeNames (tipos.js:250), state (nucleo.js:8)
-- linhaDaListaHtml:212 - chama: speciesTypeNames (tipos.js:250), rankBadgeHtml (dex_ficha.js:169), state (nucleo.js:8)
+- getFiltered:171 - chama: SPECIES (dados_base.js:52), rankDe (rank_da_run.js:28), speciesTypeNames (tipos.js:253), state (nucleo.js:8)
+- linhaDaListaHtml:212 - chama: speciesTypeNames (tipos.js:253), rankBadgeHtml (dex_ficha.js:169), state (nucleo.js:8)
 - listaAtual:210 - chamado por: fichaNavHtml (dex_ficha.js:446)
 - openConfirmModal:403 - chamado por: excluirTimeSalvo (time.js:273)
 - openSwapModal:328 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8)
@@ -114,10 +114,10 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - bossReferenceHtml:103 - chama: DIFF_LABELS (aba_chefoes.js:233), buildEntryHtml (editor_build.js:182) | chamado por: fichaNotasHtml (dex_ficha.js:602)
 - buildHistoryHtml:87 - chama: buildEntryHtml (editor_build.js:182) | chamado por: fichaNotasHtml (dex_ficha.js:602), renderTeam (time.js:8)
 - compareCardHtml:14 - chamado por: selectSpecies (dex_ficha.js:610)
-- compareResultHtml:22 - chama: effectiveBuild (builds.js:200), stripNote (builds.js:49), speciesTypeNames (tipos.js:250), STAT_LABELS_SHORT (aba_chefoes.js:588), rankBadgeHtml (dex_ficha.js:169), +1
-- megaLockedTagHtml:199 - chama: isMegaForm (formas_mega.js:64), megaFormLiberada (formas_mega.js:176), rotuloEtapaDaMega (formas_mega.js:177) | chamado por: renderBox (caixa.js:16), renderTeam (time.js:8)
+- compareResultHtml:22 - chama: effectiveBuild (builds.js:200), stripNote (builds.js:49), speciesTypeNames (tipos.js:253), STAT_LABELS_SHORT (aba_chefoes.js:588), rankBadgeHtml (dex_ficha.js:169), +1
+- megaLockedTagHtml:199 - chama: isMegaForm (formas_mega.js:64), megaFormLiberada (formas_mega.js:179), megaSoNoDebug (formas_mega.js:180), quandoMega (formas_mega.js:182), rotuloEtapaDaMega (formas_mega.js:183) | chamado por: renderBox (caixa.js:16), renderTeam (time.js:8)
 - notesCardHtml:78 - chama: state (nucleo.js:8) | chamado por: fichaNotasHtml (dex_ficha.js:602)
-- otherFormsHtml:206 - chama: formFamilyOf (formas_mega.js:58), isMegaForm (formas_mega.js:64), megaFormLiberada (formas_mega.js:176), rotuloEtapaDaMega (formas_mega.js:177) | chamado por: renderTeam (time.js:8)
+- otherFormsHtml:206 - chama: formFamilyOf (formas_mega.js:58), isMegaForm (formas_mega.js:64), megaFormLiberada (formas_mega.js:179), megaSoNoDebug (formas_mega.js:180), quandoMega (formas_mega.js:182), +1 | chamado por: renderTeam (time.js:8)
 - planoDaBuildHtml:179 - chama: buildNoteHtml (editor_build.js:155) | chamado por: myBuildEditorHtml (editor_build.js:223), renderTeam (time.js:8)
 - rotuloDaBuild:170 - chama: ESTILO_ROTULO (plano_build.js:20), SUGESTAO_ROTULO (sugestao_do_motor.js:11) | chamado por: renderTeam (time.js:8)
 
@@ -141,7 +141,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - modoMotorFavoritosHtml:161 - chamado por: archetypeCardHtml (arquetipo.js:85)
 - modoMotorFicarComVariante:120 - chama: getSpeciesByX (dados_base.js:78), SUGESTAO_ROTULO (sugestao_do_motor.js:11), gravarSugestoesDoMotor (sugestao_do_motor.js:61), planoDeGravarSugestoes (sugestao_do_motor.js:39), applyRecommendedTeam (arquetipo.js:207), +4
 - modoMotorMembroHtml:178 - chama: MOTOR_FRASE_DA_PROVA (time_pelo_motor_papeis.js:321)
-- modoMotorMontar:69 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:239), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:75), contextoDoMotor (time_pelo_motor.js:141), +3
+- modoMotorMontar:69 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:246), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:75), contextoDoMotor (time_pelo_motor.js:141), +3
 - modoMotorResultadoHtml:234 - chamado por: renderTeamStrategy (arquetipo.js:482)
 - modoMotorRodapeHtml:191 - chama: SUGESTAO_ROTULO (sugestao_do_motor.js:11)
 - modoMotorSeletorHtml:153 - chamado por: archetypeCardHtml (arquetipo.js:85)
@@ -195,7 +195,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## ui/resumo_luta.js
 - bossConfrontoHtml:96 - chama: confrontoParaParty (chefoes.js:298) | chamado por: renderBossDetail (aba_chefoes.js:589)
-- boxFitNote:154 - chama: computeSharedRisks (chefoes.js:109), battleUnitsOf (formas_mega.js:239), unitTypeMult (formas_mega.js:255) | chamado por: renderBox (caixa.js:16)
+- boxFitNote:154 - chama: computeSharedRisks (chefoes.js:109), battleUnitsOf (formas_mega.js:246), unitTypeMult (formas_mega.js:262) | chamado por: renderBox (caixa.js:16)
 - confrontoAjustesHtml:44 - chama: coberturaSugerida (confronto.js:196)
 - confrontoPlanoHtml:67 - chama: aberturaEmDupla (confronto.js:319), cuidadosDoChefao (confronto.js:302)
 - dashboardConfrontoHtml:135 - chama: bossPartyPorDificuldade (chefoes.js:327), confrontoParaParty (chefoes.js:298)
@@ -235,7 +235,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - zerarRun:356 - chama: logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), myBuildLevelIsCustom (aba_chefoes.js:31), generatedTeamResult (arquetipo.js:35), teamRecommendation (arquetipo.js:30), +4
 
 ## ui/tipos.js
-- computeRoleCompendium:91 - chama: ROLE_LABEL_PT (dados_base.js:179), SPECIES (dados_base.js:52), rankDe (rank_da_run.js:28), speciesTypeNames (tipos.js:250), state (nucleo.js:8)
+- computeRoleCompendium:91 - chama: ROLE_LABEL_PT (dados_base.js:179), SPECIES (dados_base.js:52), rankDe (rank_da_run.js:28), speciesTypeNames (tipos.js:253), state (nucleo.js:8)
 - renderRoleCompendium:113 - chama: rankBadgeHtml (dex_ficha.js:169)
-- renderSpeedTiers:35 - chama: SPEEDTIER_NATURE (chefoes.js:493), computeSpeedTiers (chefoes.js:495), speciesTypeNames (tipos.js:250), state (nucleo.js:8)
-- renderTypeMatrix:9 - chama: USABLE_TYPES (dados_base.js:128), typeMultiplier (tipos.js:240)
+- renderSpeedTiers:35 - chama: SPEEDTIER_NATURE (chefoes.js:493), computeSpeedTiers (chefoes.js:495), speciesTypeNames (tipos.js:253), state (nucleo.js:8)
+- renderTypeMatrix:9 - chama: USABLE_TYPES (dados_base.js:128), typeMultiplier (tipos.js:243)

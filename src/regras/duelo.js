@@ -1863,6 +1863,8 @@
       // Hidden Power/Secret Power/Techno Blast (m[10]) usam o tipo do hpType de quem usa (só
       // chefão tem, bosses.json hpt); m[9] = 2º tipo do golpe (Muddy Water Ground/Water...).
       var tipo = m[10] && u.hpt ? u.hpt : TYPES[m[1]], hab = 1;
+      // Tera Starstorm vira Stellar só com usuário Stellar (battle_main.c:5038 e 5119-5121); sem isso segue Normal.
+      if (m[0] === "Tera Starstorm" && u.tipos.indexOf("Stellar") !== -1) tipo = "Stellar";
       if (m[11] === "Electro Shot") hab *= multDoEstagio(u.ef.estagioMult || 1); // o +1 de Sp. Atk entra antes do dano
       var tipo2 = m[9] !== undefined && m[9] >= 0 ? TYPES[m[9]] : null;
       var conv = u.ef.converte[tipo];

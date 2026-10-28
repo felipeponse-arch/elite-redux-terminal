@@ -199,7 +199,7 @@
   function megaLockedTagHtml(sp) {
     if (!sp || !isMegaForm(sp) || megaFormLiberada(sp)) return "";
     var quando = rotuloEtapaDaMega(sp);
-    return ' <span class="mega-lock-tag" title="Esta Mega só a partir da ' + escapeHtml(quando) + '. Até lá as sugestões contam esta criatura como a forma base.">Mega só na ' + escapeHtml(quando.split(" (")[0]) + '</span>';
+    return ' <span class="mega-lock-tag" title="Esta Mega ' + escapeHtml(quandoMega(sp)) + '. Até lá as sugestões contam esta criatura como a forma base.">' + (megaSoNoDebug(sp) ? "Só no modo debug do jogo" : "Mega só na " + escapeHtml(quando.split(" (")[0])) + '</span>';
   }
   // Linha "Outra forma: Mega X" no card do time (2026-09-16) - lembra que a
   // mesma criatura tem outra forma disponível, com link pra ficha dela.
@@ -212,6 +212,6 @@
       var travada = others.filter(function (f) { return isMegaForm(f) && !megaFormLiberada(f); })[0];
       if (!travada) return "";
       var quando = rotuloEtapaDaMega(travada);
-      return ' <span class="mega-lock-tag" title="Mega Evolução só a partir da ' + escapeHtml(quando) + '.">Mega só na ' + escapeHtml(quando.split(" (")[0]) + '</span>';
+      return ' <span class="mega-lock-tag" title="Mega Evolução ' + escapeHtml(quandoMega(travada)) + '.">' + (megaSoNoDebug(travada) ? "Só no modo debug do jogo" : "Mega só na " + escapeHtml(quando.split(" (")[0])) + '</span>';
     })();
   }

@@ -164,8 +164,11 @@
     "Galactic Orb": 8,
     // Dream Orb e Lucky Orb: nenhuma fonte no código do jogo; travadas (10) até decidir a remoção (decisão 12, ver ticket TK-11).
     "Dream Orb": 10,
-    "Lucky Orb": 10
+    "Lucky Orb": 10,
+    // Decisão do usuário 28/10 (TK-04, achado motor-D1.4): Tera Orb só existe no modo debug do jogo (er-repo data/scripts/debug.inc:203); nunca sugerida.
+    "Tera Orb": 10
   };
+  var PEDRAS_SO_DEBUG = { "Tera Orb": true };
   var ROTULO_ETAPA_MEGA = { 4: "4ª insígnia (Flannery)", 5: "5ª insígnia (Norman)", 6: "6ª insígnia (Winona)", 7: "7ª insígnia (Tate & Liza)", 10: "sem Etapa conhecida (pedra sem fonte de obtenção)" };
   // Etapa em que esta forma Mega fica disponível: a da pedra, se for tardia.
   function etapaDaMega(megaSp) {
@@ -174,7 +177,11 @@
     }, MEGA_UNLOCK_MILESTONE);
   }
   function megaFormLiberada(f) { return !isMegaForm(f) || state.settings.milestone >= etapaDaMega(f); }
+  function megaSoNoDebug(megaSp) { return stonesOf(megaSp).some(function (p) { return PEDRAS_SO_DEBUG[p]; }); }
+  // Frase pronta pro aviso: "só a partir da 4ª insígnia" ou, na forma que só o modo debug dá, "só no modo debug do jogo".
+  function quandoMega(megaSp) { return megaSoNoDebug(megaSp) ? "só no modo debug do jogo" : "só a partir da " + rotuloEtapaDaMega(megaSp); }
   function rotuloEtapaDaMega(megaSp) {
+    if (megaSoNoDebug(megaSp)) return "modo debug do jogo";
     var et = etapaDaMega(megaSp);
     return ROTULO_ETAPA_MEGA[et] || (LEVELCAPS && LEVELCAPS.rows[et] ? LEVELCAPS.rows[et].milestone : "etapa " + et);
   }

@@ -17,7 +17,7 @@
   // Não chama a IA: quem bloqueia nem gasta a consulta.
   function motivoDeNaoGerarBuild(sp) {
     if (!sp || !isMegaForm(sp) || megaFormLiberada(sp)) return null;
-    return "Não gerei a build de " + sp.n + ": esta Mega só a partir da " + rotuloEtapaDaMega(sp) + ". Até lá a criatura luta como a forma base.";
+    return "Não gerei a build de " + sp.n + ": esta Mega " + quandoMega(sp) + ". Até lá a criatura luta como a forma base.";
   }
 
   // ---- resposta -> build validada ----

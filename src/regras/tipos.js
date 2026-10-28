@@ -24,7 +24,10 @@
     Dragon:   { Dragon:2, Steel:0.5, Fairy:0 },
     Dark:     { Fighting:0.5, Psychic:2, Ghost:2, Dark:0.5, Fairy:0.5 },
     Steel:    { Fire:0.5, Water:0.5, Electric:0.5, Ice:2, Rock:2, Steel:0.5, Fairy:2 },
-    Fairy:    { Fire:0.5, Fighting:2, Poison:0.5, Dragon:2, Dark:2, Steel:0.5 }
+    Fairy:    { Fire:0.5, Fighting:2, Poison:0.5, Dragon:2, Dark:2, Steel:0.5 },
+    // Stellar (battle_util.c:1012-1013, sTypeEffectivenessTable): x2 só contra Stellar, x1 contra o resto, e
+    // ninguém bate Stellar acima de x1 (coluna Stellar toda 1.0). Fora do USABLE_TYPES: só o Terapagos Primal e o Tera Starstorm.
+    Stellar:  { Stellar:2 }
   };
 
   // Curated, NOT auto-generated: type-effectiveness modifiers para habilidades

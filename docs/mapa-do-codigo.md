@@ -28,7 +28,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **ferramentas_ia.js** - Ferramentas que a IA consulta (aiTool_*) e a fábrica única delas (buildStandardAiTools).
   aiTool_getTeamWeaknesses:15, aiTool_getSpeciesRank:24, aiTool_getPriorityMoveOptions:51, aiTool_getAbilityMovepoolSynergy:75, aiTool_getConditionMoveSynergy:99, aiTool_getNextBossRoster:120, aiTool_getItemInfo:150, aiTool_getRemainingBosses:159, aiTool_getBoxCandidatesForBoss:182, aiTool_getSpeedBenchmark:204, buildStandardAiTools:249
 - **formas_mega.js** - Família de formas (base <-> mega), modo de Mega Evolução, pedras e unidades de batalha.
-  isMegaEvoKind:22, megaFormsOf:31, formFamilyPromptNote:39, megaModePromptLine:53, formFamilyOf:58, isMegaForm:64, megaMode:75, megaEvolutionUnlocked:88, etapaDaMega:171, megaFormLiberada:176, rotuloEtapaDaMega:177, battleFamilyOf:195, usableSpeciesFor:198, megaPromptBlock:202, stonesOf:229, battleUnitsOf:239, unitTypeMult:255
+  isMegaEvoKind:22, megaFormsOf:31, formFamilyPromptNote:39, megaModePromptLine:53, formFamilyOf:58, isMegaForm:64, megaMode:75, megaEvolutionUnlocked:88, etapaDaMega:174, megaFormLiberada:179, megaSoNoDebug:180, quandoMega:182, rotuloEtapaDaMega:183, battleFamilyOf:202, usableSpeciesFor:205, megaPromptBlock:209, stonesOf:236, battleUnitsOf:246, unitTypeMult:262
 - **golpes.js** - O que cada golpe faz (papel pelo efeito real) e como descrevê-lo pra IA.
   dadoExterno:19, movePromptLine:28, ehGolpeDePivo:41, ehPrioridadeDeDano:49, moveRoleOf:53
 - **gravacao_build_ia.js** - O caminho "resposta da IA -> build validada -> o que gravar", sem tela (ticket 06 da dívida
@@ -60,7 +60,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **time_pelo_motor_papeis.js** - Modo Motor do Meu Time, Fase D (papéis por build, tags, sinergia e explicação). Carrega depois de time_pelo_motor.js (mesmo escopo).
   motorMediana:22, motorUnidadeNaLuta:23, motorSemTipos:24, motorSemEsse:25, motorAux:26, motorLutasDeProva:27, motorAssinaturaDasLutas:28, motorCondicoes:33, motorLutaComClima:53, motorGanhoDaCondicao:56, motorSinergia:86, motorAlternativasArmadoras:101, motorExtrasDeSinergia:119, motorLutaDetalhada:136, motorSimularComClima:143, motorFoePorNome:155, motorProvasDosMembros:157, motorDeltaSemMembro:194, motorDeltaSemTipos:198, motorTemTipo:202, motorClassificar:207, motorTextos:306, motorTextosDaClassificacao:329
 - **tipos.js** - Tabela de efetividade de tipos, habilidades que alteram dano recebido por tipo e tipagem de espécie.
-  alwaysActiveAbilities:160, abilityTypeMod:169, perfilDefensivoDaEspecie:175, abilityTypeModFor:192, typeMultiplier:240, speciesTypeNames:250
+  alwaysActiveAbilities:163, abilityTypeMod:172, perfilDefensivoDaEspecie:178, abilityTypeModFor:195, typeMultiplier:243, speciesTypeNames:253
 - **validacao_build_ia.js** - Validação da build sugerida pela IA contra o dado real.
   megaStoneRuleFor:14, ehBerry:40, itemSeGastaNaLuta:41, regraItemConsumivelPara:47, regraItemConsumivelPrompt:57, papelNormalizado:76, conferirPapelDaBuild:80, evoluiAinda:108, conflitoDeNature:119, conflitoDeItem:136, citarDoModelo:158, evsEmFormatoValido:162, limitarEvsAoJogo:169, contextoDeValidacao:197, validateAiBuild:214, setsValidosDaResposta:482, ajustarBuildDaIa:498, entradaDaCuradaParaTimeNovo:517
 
@@ -371,6 +371,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **time_pelo_motor.test.mjs** - Modo Motor do Meu Time, Fase C (ticket time-pelo-motor/01, 21/10/2026): montar o time SEM IA, só pelo simulador.
 - **time_pelo_motor_comuns.test.mjs** - Meu Time na mesma régua do rank (ticket todas-as-lutas/02, 21/10/2026): o juiz do Modo Motor pesa as lutas COMUNS mais perigosas de cada
 - **time_pelo_motor_papeis.test.mjs** - Modo Motor do Meu Time, Fase D (ticket time-pelo-motor/01, 21/10/2026): papéis por build, tags, sinergia e explicação.
+- **tipo_stellar.test.mjs** - Tipo Stellar (TK-04, achado motor-D1.4; decisão do usuário 28/10): tabela contra battle_util.c:1012-1013 e 1056-1057
 - **tira_setup.test.mjs** - Ticket 18 (07/10/2026): golpes que tiram setup, pelo código oficial (er-repo 217dd0f,
 - **traducoes_alinhadas_por_nome.test.mjs** - Versão 2.65.4 deslocou ids de habilidade (Mighty Horn 391 -> 390; 391 virou Hardened Sheath...). A tradução PT é indexada por id, então
 - **vaga.test.mjs** - Vaga de verificação pesada (scripts/vaga.mjs, melhoria B de 2026-10-13).
