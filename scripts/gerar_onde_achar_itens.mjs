@@ -125,6 +125,25 @@ for (const nome of JSON.parse(ler("data/pedras_adoption_center.json")).pedras) {
   (achados[nome] = achados[nome] || []).push({ etapa, local: "Adoption Center", como: "compra por BP (precisa do Mega Bracelet)" });
 }
 
+// 6. NPC de lendários de Littleroot (TK-05a, 28/10/2026): só entrega depois do campeão (FLAG_SYS_GAME_CLEAR,
+// scripts.pory), então Etapa = a última (campeão). Lista = additem do script + macro ALL_LEGENDARY_SAGE_ITEMS
+// (itens com talk_to_legendary_sage no er-config; ER_CONFIG ou ../er-config ao lado do repo).
+// Fora de propósito: Memories do Silvally, TM01-10 da enfermeira, Sweet/Tart Apple e Cracked Pot (sem chamador).
+{
+  const ids = new Set();
+  const pory = ler(join(repo, "data/maps/LittlerootTown/scripts.pory"));
+  const ini = pory.indexOf("script LittlerootTown_EventScript_LegendaryNPC");
+  for (const m of pory.slice(ini, pory.indexOf("setflag(FLAG_GOT_LEGENDARY_NPC_ITEMS)", ini)).matchAll(/additem\((ITEM_\w+)\)/g)) ids.add(m[1]);
+  const dirItens = join(process.env.ER_CONFIG || join(repo, "../er-config"), "items");
+  if (!existsSync(dirItens)) { console.error("er-config/items não achado (defina ER_CONFIG)"); process.exit(2); }
+  for (const f of readdirSync(dirItens).filter((x) => x.endsWith(".textproto")))
+    for (const b of ler(join(dirItens, f)).split(/^item \{/m)) {
+      const i = b.match(/^\s*id: (ITEM_\w+)/m);
+      if (i && /talk_to_legendary_sage: true/.test(b)) ids.add(i[1]);
+    }
+  for (const id of ids) anotar(id, "NPC de lendários (Littleroot, após o campeão)", "presente do Sábio", caps.length - 1);
+}
+
 // Uma linha por (local, como), da etapa mais cedo para a mais tarde; no máximo 6 por item.
 const saida = {};
 for (const nome of Object.keys(achados).sort()) {

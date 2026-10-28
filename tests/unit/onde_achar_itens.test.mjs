@@ -66,3 +66,10 @@ test("Lum Berry tem Etapa vinda das árvores de berry do jogo (TK-05a; new_game.
   const dado = JSON.parse(readFileSync("data/onde_achar_itens.json", "utf8"))["Lum Berry"];
   assert.ok(dado && dado.length === 3 && dado.every((x) => x.como === "árvore de berry" && Number.isInteger(x.etapa)), JSON.stringify(dado));
 });
+
+test("NPC de lendários de Littleroot dá Etapa 9 (pós-campeão); Sweet Apple (mart sem mapa) segue sem Etapa (TK-05a)", () => {
+  const d = JSON.parse(readFileSync("data/onde_achar_itens.json", "utf8"));
+  assert.ok(d["Gracidea"].some((x) => x.etapa === 9 && /NPC de lendários/.test(x.local)), JSON.stringify(d["Gracidea"]));
+  assert.ok(d["Fire Memory"].some((x) => x.etapa === 9));
+  assert.ok(!(d["Sweet Apple"] || []).some((x) => Number.isInteger(x.etapa)));
+});
