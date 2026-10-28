@@ -184,7 +184,7 @@
       var rank = rankDe(e.s);
       var mono = rank && rank.monoRanks && rank.monoRanks[tipo];
       return {
-        sp: sp, local: e.l, etapa: e.e,
+        sp: sp, local: e.l, etapa: e.eApp !== undefined ? e.eApp : e.e, // eApp = Etapa do rank_disponibilidade (D8-4)
         marcas: (e.m || "").split("").filter(function (m) { return MONO_MARCAS[m]; }),
         tier: mono ? mono.tier : null, score: mono ? mono.score : -1,
         cobre: cobreFraquezas(sp, fraquezasDoTipo(tipo)),

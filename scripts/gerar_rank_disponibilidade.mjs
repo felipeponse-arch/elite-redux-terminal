@@ -160,6 +160,12 @@ writeFileSync("data/rank_disponibilidade.json", JSON.stringify({
   etapa: saida,
   motivoFora
 }) + "\n");
+// D8-4: a Etapa por espécie é uma só (esta). A planilha segue como entrada (`e`); a Etapa do app vai em `eApp` só onde difere e o rank tem número
+// (null no rank = pós-jogo/DexNav, a planilha mostra a Etapa dela). mono_run.js lê eApp ?? e.
+let eAppN = 0;
+for (const lista of Object.values(mono.porTipo)) for (const x of lista) { delete x.eApp; const r = saida[x.s]; if (Number.isInteger(r) && r !== x.e) { x.eApp = r; eAppN++; } }
+writeFileSync("data/mono_disponibilidade.json", JSON.stringify(mono) + String.fromCharCode(10));
+console.log("mono_disponibilidade: eApp em", eAppN, "entradas");
 // auditoria dentro do repositório, em tmp/ (ignorada pelo git; grande, só para depurar)
 mkdirSync("tmp", { recursive: true });
 writeFileSync(join("tmp", "rank_disponibilidade_auditoria.json"), JSON.stringify({ versaoDasFontes, origem, evidencias, conflitos }, null, 1));
