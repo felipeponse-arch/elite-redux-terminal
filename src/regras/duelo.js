@@ -234,16 +234,19 @@
     if (!m) return 1;
     return ACERTOS_PELO_TEXTO_DUELO[m[0]] || ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;
   }
-  // Recarga pelo EFEITO do dado, não pela tradução PT (TK-06; decisão 7 do usuário, 28/10). Hyper Beam e Giga Impact são
-  // EFFECT_RECHARGE (MOVE_EFFECT_RECHARGE, battle_script_commands.c:2828). Os outros são o campo `every_other_turn` do MoveList da
-  // er-config (battle_util.c:1607: não repete o golpe no turno seguinte, salvo Rampage/Master Hand/Raging Goddess/Berserker Rage); o dado
-  // do app não traz esse campo, então a lista vem de lá. Rock Wrecker: o gameData diz Hit, mas o código do jogo o trata assim (não é carga).
-  // Só estes 7 entram: os outros 6 `every_other_turn` (Gigaton Hammer, Blood Moon, Rip and Tear...) já valiam sem penalidade - fica como está, pergunta aberta.
-  var RECARGA_PELO_CAMPO_DUELO = { "Blast Burn": 1, "Hydro Cannon": 1, "Frenzy Plant": 1, "Rock Wrecker": 1, "Prismatic Laser": 1, "Meteor Assault": 1, "Eternabeam": 1 };
+  // Recarga pelo EFEITO do dado, não pela tradução PT (TK-06; decisão 7 do usuário, 28/10). Só Hyper Beam e Giga Impact são
+  // EFFECT_RECHARGE (MOVE_EFFECT_RECHARGE, battle_script_commands.c:2828): o x0,5 (x0,75 com Rampage) é deles.
   function golpeDeRecargaDuelo(id) {
     var m = MOVES[id];
-    return !!m && (m[11] === "Recharge" || RECARGA_PELO_CAMPO_DUELO[m[0]] === 1);
+    return !!m && m[11] === "Recharge";
   }
+  // every_other_turn (MoveList.textproto da er-config; 13 golpes, conferidos um a um): NÃO é recarga - o jogo só proíbe ESCOLHER o mesmo
+  // golpe duas vezes seguidas (battle_util.c:1607-1617, B_MSG_CANTSELECTTWICE), salvo Rampage/Master Hand/Raging Goddess/Berserker Rage
+  // (as 4 já ligam ef.semRecarga pelo texto). Decisão do usuário (28/10): o motor alterna o golpe com o melhor OUTRO do set
+  // (média dos dois turnos em danoNoDuelo; sem outro golpe, o turno alternado vale 0 - shortcut: Struggle ignorado).
+  // Eternabeam: sem effect no textproto (EFFECT_HIT); a descrição "descansa" é só texto, o código é o every_other_turn.
+  var ALTERNA_PELO_CAMPO_DUELO = { "Blast Burn": 1, "Hydro Cannon": 1, "Frenzy Plant": 1, "Rock Wrecker": 1, "Prismatic Laser": 1, "Meteor Assault": 1, "Eternabeam": 1,
+    "Gigaton Hammer": 1, "Blood Moon": 1, "Rip and Tear": 1, "Spectral Serenade": 1, "Blue Moon": 1, "Tsunami Hammer": 1 };
   // Golpe de dois turnos (carrega antes de bater): efeitos do dado; Solar Beam/Blade ("Solarbeam") e o resto do grupo.
   // Sky Drop (efeito próprio, também de 2 turnos) fica fora como antes (a tradução PT o tirava); o pacote de evidência não o listou.
   var EFEITOS_DE_CARGA_DUELO = { "Solarbeam": 1, "Two Turn Secondary": 1, "Semi Invulnerable": 1, "Two Turn Retaliation": 1, "Sky Drop": 1 };
@@ -1953,7 +1956,7 @@
       if (contato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
       if (golpeDeRecargaDuelo(id)) hab *= u.ef.semRecarga ? 0.75 : 0.5;
-      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: contato, contatoBruto: temContatoDuelo(m), corte: cats.indexOf("corte") !== -1, som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
+      var g = { nome: m[0], alterna: ALTERNA_PELO_CAMPO_DUELO[m[0]] === 1 && !u.ef.semRecarga, tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: contato, contatoBruto: temContatoDuelo(m), corte: cats.indexOf("corte") !== -1, som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
         prioPrimeiro: cats.some(function (c) { return u.ef.prioPrimeiroCategoria[c]; }), // 1º uso (Coil Up...): o estado é gasto no fim do turno
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
           cats.some(function (c) { return u.ef.prioCheioCategoria[c] || u.ef.prioPrimeiroCategoria[c]; }),
@@ -2209,6 +2212,12 @@
       if (dano > melhor.dano) melhor = este;
       if (prioAqui > 0 && dano > melhorPrio.dano) melhorPrio = { dano: dano };
     });
+    // Alterna (every_other_turn): o golpe vale a média com o melhor OUTRO golpe; reescolhe o melhor com esse valor.
+    var melhorOutro = function (c) { return candidatos.reduce(function (m, o) { return o !== c && o.dano > m ? o.dano : m; }, 0); };
+    if (candidatos.some(function (c) { return c.golpe.alterna; })) {
+      candidatos = candidatos.map(function (c) { return c.golpe.alterna ? Object.assign({}, c, { dano: (c.dano + melhorOutro(c)) / 2 }) : c; });
+      melhor = candidatos.reduce(function (m, c) { return c.dano > m.dano ? c : m; }, { dano: 0, prio: 0, golpe: null });
+    }
     return { melhor: melhor, melhorPrio: melhorPrio, segundo: segundo, ia: escolhaDaIADuelo(candidatos, atq, def) || melhor };
   }
   // Escolha de golpe da IA dos treinadores (ticket 03, 07/10; código oficial battle_ai_main.c AI_TryToFaint e

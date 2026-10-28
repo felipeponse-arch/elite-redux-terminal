@@ -10,12 +10,41 @@ const mk = (ab) => ({ ef: R.efeitoDasHabilidadesNoDuelo((ab || []).map((n) => R.
 const prep = (nome, ab, clima) => R.prepararGolpesDuelo([R.MOVE_ID_BY_NAME[nome]], mk(ab), clima || null);
 const perto = (a, b) => Math.abs(a - b) < 1e-6;
 
-test("Hyper Beam, Giga Impact e Rock Wrecker são recarga, não carga: entram, com dano x0,5", () => {
-  for (const nome of ["Hyper Beam", "Giga Impact", "Rock Wrecker", "Eternabeam"]) {
+test("Hyper Beam e Giga Impact são recarga (efeito Recharge), entram com dano x0,5; every_other_turn NÃO leva a penalidade", () => {
+  for (const nome of ["Hyper Beam", "Giga Impact"]) {
     const g = prep(nome)[0];
-    assert.ok(g, nome + " tem que entrar (hoje caía no filtro de carga)");
+    assert.ok(g, nome + " tem que entrar");
     assert.ok(perto(g.forca, g.forcaBase * 0.5), nome + ": " + g.forca + " x " + g.forcaBase);
   }
+  for (const nome of ["Rock Wrecker", "Eternabeam", "Hydro Cannon", "Gigaton Hammer", "Blood Moon", "Tsunami Hammer"]) {
+    const g = prep(nome)[0];
+    assert.ok(g && perto(g.forca, g.forcaBase) && g.alterna === true, nome + " alterna, sem x0,5");
+  }
+  assert.equal(prep("Hydro Cannon", ["Rampage"])[0].alterna, false, "Rampage libera a repetição");
+});
+
+test("as 4 habilidades liberam a repetição do every_other_turn (battle_util.c:1607)", () => {
+  for (const ab of ["Rampage", "Master Hand", "Raging Goddess", "Berserker Rage"]) assert.equal(prep("Blast Burn", [ab])[0].alterna, false, ab);
+});
+
+test("duelo: Hydro Cannon alterna com o melhor outro golpe; com Rampage repete; Hyper Beam segue x0,5", () => {
+  const NIVEL = 55;
+  const mon = (hab, golpes) => {
+    const s = R.SPECIES.find((x) => x && x.n === "Blastoise");
+    const u = R.unidadeDaBuild(s, { ability: "Run Away", nature: "Modest", evs: [0, 0, 0, 252, 0, 0], item: "", moves: golpes }, NIVEL, null);
+    const ids = hab.map((n) => R.ABILITY_ID_BY_NAME[n]);
+    u.ids = ids; u.ef = R.efeitoDasHabilidadesNoDuelo(ids, "Blastoise|" + hab.join("+"), null);
+    u.golpeIds = golpes.map((n) => R.MOVE_ID_BY_NAME[n]);
+    u.golpesProntos = R.prepararGolpesDuelo(u.golpeIds, u, null);
+    return u;
+  };
+  const alvo = mon([], ["Tackle"]);
+  const d = (hab, golpes) => R.danoNoDuelo(mon(hab, golpes), alvo, NIVEL).melhor.dano;
+  const cheio = d(["Rampage"], ["Hydro Cannon"]), outro = d([], ["Ice Beam"]);
+  assert.ok(cheio > outro, "o teste precisa do Hydro Cannon como melhor golpe");
+  assert.ok(perto(d([], ["Hydro Cannon"]), cheio / 2), "sem outro golpe, o turno alternado vale 0");
+  assert.ok(perto(d([], ["Hydro Cannon", "Ice Beam"]), (cheio + outro) / 2), "alterna com o melhor outro");
+  assert.ok(perto(d(["Rampage"], ["Hydro Cannon", "Ice Beam"]), cheio), "Rampage repete");
 });
 
 test("Rampage, Master Hand e Raging Goddess: sem recarga após nocaute, x0,75 em vez de x0,5", () => {
