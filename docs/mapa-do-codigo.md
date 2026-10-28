@@ -111,7 +111,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 ## Scripts (.mjs) - scripts/
 - **alarme_upstream.mjs** - Alarme de versão nova do Elite Redux (2026-09-24, pedido do usuário: "faz o
   ultimaVersaoDoDex:35, versaoDaPaginaDeDownload:43, hashDoConteudo:50, baixar:55, main:76
-- **atualizar_de_config.mjs** - Atualiza data/gameData_2654.json a partir do er-config (código/config do jogo é a verdade).
+- **atualizar_de_config.mjs** - Atualiza data/gameData.json a partir do er-config (código/config do jogo é a verdade).
   saida:10, desescapar:14, parse:23, ler:41, enumMap:42, idx:49, porId:54
 - **build.mjs** - Montagem do artifact_final.html em Node (fase 8 da refatoração, 2026-09-24).
   ler:21, trocarTudo:24, falhar:25
@@ -233,7 +233,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   Log:25, Show-Notification:29
 - **score_abilities.ps1** - >
 - **slim_dex.ps1** - (sem comentário de topo)
-- **transform.ps1** - Generates data/dex_compact.json from data/gameData_2654.json (the raw
+- **transform.ps1** - Generates data/dex_compact.json from data/gameData.json (the raw
 
 ## Testes unitários (o que cobrem) - tests/unit/
 - **absorcao_flash_fire_dry_skin.test.mjs** - Ticket calibracao-2026-10-15/04 (15/10/2026): Flash Fire e Dry Skin absorvem o golpe (código do jogo: abilities.cc:696-706 e
@@ -339,6 +339,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **nivel_da_mudanca.test.mjs** - Testes do gancho por nível (scripts/nivel_da_mudanca.mjs e scripts/verificar.mjs).
 - **numeros_da_versao_nova.test.mjs** - Ticket versao-nova/02 (15/10/2026): o app mira a versão MAIS NOVA do jogo (código/config primeiro, NextDex depois). Três números que a 2....
 - **onde_achar_itens.test.mjs** - Ticket 07 (07/10/2026): onde achar cada item na run, lido do código oficial do jogo (item no chão, escondido,
+- **origem_dado_cru.test.mjs** - TK-25: o dado cru ativo não leva versão no nome, e todo .ps1 que grava/lê dado usa UTF-8 explícito
 - **pedras_etapa_dado.test.mjs** - TK-11 (decisão 3): nenhuma pedra libera ANTES do dado (onde_achar_itens), salvo as que o código do jogo trava mais cedo
 - **perfectionist.test.mjs** - Ticket 08 (07/10/2026): Perfectionist pelo código oficial (abilities.cc Impl<ABILITY_PERFECTIONIST>):
 - **pinnacle_blade_pelo_codigo.test.mjs** - Ticket mecanica-2026-10-22/03 (parte Pinnacle Blade), 22/10/2026. Vale pelo CÓDIGO da versão nova (er-repo upcoming):
