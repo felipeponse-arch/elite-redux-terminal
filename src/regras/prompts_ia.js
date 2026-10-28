@@ -297,8 +297,11 @@
   // Itens da lista que só saem DEPOIS da Etapa atual (decisão do usuário, 08/10): a IA evita,
   // mas pode usar com motivo claro. Vem de ONDE_ACHAR_ITENS (código oficial do jogo).
   function itensAindaIndisponiveisParaIA() {
-    return AI_ITEM_POOL.map(function (n) { return { n: n, p: primeiroLugarDoItem(n) }; })
-      .filter(function (x) { return x.p && !liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: x.n }); })
+    // Lista única do time (itens_do_time.js): o que não está liberado nesta Etapa é o que falta nela.
+    var liberados = itensDoTime(state.settings.milestone, getCurrentCap());
+    return AI_ITEM_POOL.filter(function (n) { return liberados.indexOf(n) === -1; })
+      .map(function (n) { return { n: n, p: primeiroLugarDoItem(n) }; })
+      .filter(function (x) { return x.p; })
       .sort(function (a, b) { return a.p.etapa - b.p.etapa; });
   }
   function blocoItensAindaIndisponiveisIA() {

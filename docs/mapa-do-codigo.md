@@ -48,7 +48,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **plano_build.js** - Build que acompanha o jogador: plano de golpes por slot, estilo da build e
   evsTextoParaArray:24, estiloDeEvs:37, estiloDoRitmo:48, nivelDoGolpe:56, nivelDeEvolucaoDaForma:68, validarPlano:80, planoSaneado:107, golpesNoCap:123, trocasEntreCaps:141, curadasDe:153, curadaParaEstilo:160
 - **prompts_ia.js** - Peças dos prompts de IA (o que vai pro modelo) e a tradução dos erros da IA pro
-  archetypeBuildGuidance:58, planoPromptBlock:75, contextoDoModoPrompt:85, anexarPlanoDaIa:125, sampleErrorMessage:147, versaoDosDados:190, cabecalhoIA:191, linhaHabilidadeIA:198, blocoEspecieIA:202, nomePapel:228, blocoPapelIA:229, blocoMovepoolIA:259, blocoRegrasDePapelIA:265, blocoMegaIA:271, comDescricaoIA:284, blocoItensDaEspecieIA:287, blocoItensIA:292, itensAindaIndisponiveisParaIA:299, blocoItensAindaIndisponiveisIA:304, blocoItensComunsIA:310, blocoTimeEmUsoIA:340, blocoManualIA:386, linhaVelocidadeIA:407, linhasProximaLutaIA:423, blocoContextoIA:459, envelopeContextoIA:462, linhasContextoDaEspecieIA:469, avisoInnatesEliteIA:492, linhasContextoComumIA:498, linhaProvadoIA:517 (+14)
+  archetypeBuildGuidance:58, planoPromptBlock:75, contextoDoModoPrompt:85, anexarPlanoDaIa:125, sampleErrorMessage:147, versaoDosDados:190, cabecalhoIA:191, linhaHabilidadeIA:198, blocoEspecieIA:202, nomePapel:228, blocoPapelIA:229, blocoMovepoolIA:259, blocoRegrasDePapelIA:265, blocoMegaIA:271, comDescricaoIA:284, blocoItensDaEspecieIA:287, blocoItensIA:292, itensAindaIndisponiveisParaIA:299, blocoItensAindaIndisponiveisIA:307, blocoItensComunsIA:313, blocoTimeEmUsoIA:343, blocoManualIA:389, linhaVelocidadeIA:410, linhasProximaLutaIA:426, blocoContextoIA:462, envelopeContextoIA:465, linhasContextoDaEspecieIA:472, avisoInnatesEliteIA:495, linhasContextoComumIA:501, linhaProvadoIA:520 (+14)
 - **rank_da_run.js** - Rank v2 (2026-10-02, modelo aprovado pelo usuário - scripts/calcular_rank_v2.mjs):
   chaveDoRankDaDificuldade:23, rankDe:29, dominantesNoTipo:51, rankDaDificuldadeDe:69
 - **reconciliar_build.js** - Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
@@ -312,6 +312,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **itens_da_config.test.mjs** - Ticket calibracao-2026-10-15/02 (15/10/2026): os parâmetros dos itens vêm do `hold_effect_strength` da er-config, como o
 - **itens_de_atributo.test.mjs** - TK-08 (28/10/2026): itens que mexem num atributo da espécie, iguais ao código do jogo (er-repo f34fc2b,
 - **itens_do_time.test.mjs** - TK-14 (motor-D5.3, decisão do usuário 28/10): UMA lista de itens para o set do duelo, o Motor e a IA.
+- **itens_indisponiveis_ia_paridade.test.mjs** - TK-14: o aviso "ainda nao disponiveis" da IA usa a lista unica (itensDoTime) e da o mesmo resultado da regra antiga.
 - **itens_no_duelo.test.mjs** - Itens no duelo (2026-09-29, decisão do usuário: "item nos sets do duelo").
 - **itens_registro_14.test.mjs** - TK-14 (estrutura-2026-10-22): itens. Expert Belt 1,2x do código (não o f:30 da config), Knock Off pela regra real do jogo
 - **juiz_do_time.test.mjs** - Ticket time-pelo-motor/01, Fase B2 (21/10/2026): juiz do time pela LUTA COMPLETA (avaliarTimePelaLutaCompleta), ao lado do

@@ -4577,6 +4577,13 @@ export const MUTACOES = [
     para: "AI_ITEM_POOL.indexOf(nome) !== -1 && !itemEsgotadoNoTime(donos)",
   },
   {
+    id: "tk14-indisponiveis-ia-propria-lista",
+    descricao: "o aviso de itens ainda indisponiveis da IA deixa de ler a lista unica (itensDoTime) e trata o pool inteiro como liberado",
+    arquivo: "prompts_ia.js",
+    de: "var liberados = itensDoTime(state.settings.milestone, getCurrentCap());",
+    para: "var liberados = AI_ITEM_POOL;",
+  },
+  {
     id: "tk14-itens-do-time-sem-limite",
     descricao: "o conjunto único deixa de olhar o limite de itens iguais no time",
     arquivo: "itens_do_time.js",
