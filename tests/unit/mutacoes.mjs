@@ -4569,4 +4569,11 @@ export const MUTACOES = [
     de: "return uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });",
     para: "return sp.ab.map(function (id) { return ABILITIES[id][0]; });",
   },
+  {
+    id: "last-stand-sem-fracao-de-pv",
+    descricao: "o Last Stand volta a valer x1,3 fixo, sem olhar quanto PV o dono perde até vencer",
+    arquivo: "duelo.js",
+    de: "return 1 + u.ef.lastStand * Math.min(1, nVencer * danoLevado / hp) / 2;",
+    para: "return 1 + u.ef.lastStand / 2;",
+  },
 ];

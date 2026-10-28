@@ -573,8 +573,8 @@
     re = /Lowers the (Attack|Defense|Special Attack|Special Defense) of other Pokemon by (\d+)%/gi;
     while ((x = re.exec(f))) ef.ruina[estagioDoTexto(x[1])] = 1 - parseInt(x[2], 10) / 100;
     if (/Boosts highest attack by \+1 when at 1\/2 of max HP/i.test(f)) ef.berserk = true;
-    // Last Stand: cresce até o máximo conforme o HP cai - na média da luta, metade do caminho.
-    if (/Def and SpDef increase as HP drops/i.test(f) && (x = t.match(/increase as HP drops\. Max ([\d.]+)x/i))) { ef.defMult *= (1 + parseFloat(x[1])) / 2; ef.spdMult *= (1 + parseFloat(x[1])) / 2; }
+    // Last Stand (abilities.cc:7959-7965): Def/SpDef x(1 + 0,6 x fração de PV perdido). Guarda só o teto; o fator sai da fração média de cada luta (ultimaResistenciaDuelo).
+    if (/Def and SpDef increase as HP drops/i.test(f) && (x = t.match(/increase as HP drops\. Max ([\d.]+)x/i))) ef.lastStand = parseFloat(x[1]) - 1;
     if ((x = f.match(/Does (\d+)% more damage if the target has any lowered stat/i))) ef.bonusContraReduzido = 1 + parseInt(x[1], 10) / 100;
     if ((x = f.match(/Raises Atk by ([\d.]+)x in (sun|rain|sand|hail|fog)/i)) && climaOk(x[2])) ef.atkMult *= parseFloat(x[1]);
     // Primeiro golpe da categoria com prioridade (Coil Up, Cutthroat, Sidewinder): vale no 1º golpe.
@@ -1512,7 +1512,7 @@
       statusProprio: [], ultimoMult: 1, critUltimo: 0, antesReducao: 0, prioNoFinal: false,
       prioCheioCategoria: {}, prioPrimeiroCategoria: {}, prioCheioSom: false, teraShell: false, reviveHP: 0, curaStatus: 0,
       estagioEntrada: {}, download: false, aoApanhar: [], aoApanharAtacante: [], porTurno: {}, aoGolpear: [],
-      aoSerReduzido: {}, imuneQuedas: {}, ignoraEstagios: false, estagioMult: 1, ruina: {}, berserk: false,
+      aoSerReduzido: {}, imuneQuedas: {}, ignoraEstagios: false, estagioMult: 1, ruina: {}, berserk: false, lastStand: 0,
       bonusContraReduzido: 1,
       primeiroTurnoMult: 1, cargaInstantanea: false, truant: false, bloqueiaUmGolpe: false, contraAtaque: null,
       ataqueNaEntrada: 0, seguimentoCategoria: [], aoUsar: [], limpaBuffsNaEntrada: false, quedaNaEntrada: {},
@@ -2283,6 +2283,13 @@
     if (efeito === "Electro Ball") { var r = Math.floor(velocidadeBaseDuelo(atq) / velocidadeBaseDuelo(def)); return r >= PODER_ELECTRO_BALL.length ? PODER_ELECTRO_BALL.length - 1 : PODER_ELECTRO_BALL[r]; }
     return 1; // Sky Drop / Level Damage: dano fixo, tratado no danoNoDuelo
   }
+  // Last Stand: fração média de PV perdida = metade do que ele perde até vencer (n golpes x dano / PV, teto 1).
+  // shortcut: aproxima o dano recebido por 1/fator (Def e SpDef, sem laço por turno) e ignora ordem de golpe e cura; trocar por laço por turno se precisar de exatidão.
+  function ultimaResistenciaDuelo(u, nVencer, danoLevado, hp) {
+    if (!u.ef.lastStand) return 1;
+    if (!(hp > 0) || nVencer === Infinity) return 1 + u.ef.lastStand / 2;
+    return 1 + u.ef.lastStand * Math.min(1, nVencer * danoLevado / hp) / 2;
+  }
   function golpesNecessariosDuelo(hp, d) { return d > 0 ? Math.ceil(hp / d) : Infinity; }
   // Quantos golpes de dano `d` derrubam `hp` quando o 1º golpe sai multiplicado por `pm` (Multiscale: 0,5) e os outros saem inteiros.
   function golpesNecessariosComPrimeiroDuelo(hp, d, pm) {
@@ -3027,6 +3034,9 @@
         if (inverte) { a = -a; b = -b; }
         primeiro = a > b ? true : a < b ? false : null;
       }
+      // Last Stand: o dano que o dono leva cai pelo fator da fração média de PV perdida até ele vencer (ou cair).
+      dD /= ultimaResistenciaDuelo(eu, golpesNecessariosDuelo(hpF, dM), dD, hpE);
+      dM /= ultimaResistenciaDuelo(foe, golpesNecessariosDuelo(hpE, dD), dM, hpF);
       var nE = golpesNecessariosDuelo(hpF, dM), nD = golpesNecessariosDuelo(hpE, dD);
       if (nE !== Infinity) nE += nec - euPreciso + (euPreciso - golpesNecessariosDuelo(hpFoe, st.meu)); // Focus Sash, bloqueios
       if (nD !== Infinity) nD += elePrecisa - golpesNecessariosDuelo(hpEu, st.dele);
