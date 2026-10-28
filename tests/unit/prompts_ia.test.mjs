@@ -136,3 +136,15 @@ test("mensagens de erro da IA: permissão, limite e falha temporária têm texto
   const c = R.sampleErrorMessage({ code: "codigo_novo_desconhecido" });
   assert.ok(a !== b && b !== c && a !== c);
 });
+
+test("TK-17: lista REJEITADOS do prompt sai de ITENS_CHOICE/ITENS_VEST/GOLPES_QUE_PASSAM_ITEM (fonte única)", () => {
+  R.ITENS_CHOICE.push("Choice Teste");
+  R.ITENS_VEST.push("Vest Teste");
+  R.GOLPES_QUE_PASSAM_ITEM.push("Golpe Teste");
+  try {
+    const p = R.montarPromptBuild(sp("SPECIES_GARCHOMP"), {});
+    for (const x of ["Choice Teste", "Vest Teste", "Golpe Teste"]) assert.ok(p.indexOf(x) !== -1, x);
+  } finally {
+    R.ITENS_CHOICE.pop(); R.ITENS_VEST.pop(); R.GOLPES_QUE_PASSAM_ITEM.pop();
+  }
+});

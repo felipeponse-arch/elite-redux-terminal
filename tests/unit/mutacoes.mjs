@@ -4597,4 +4597,11 @@ export const MUTACOES = [
     de: "var doTipo = tipos.map(itemDeTipoDoTime);",
     para: "var doTipo = tipos.map(function (t) { return Object.keys(ITENS_CONFIG.itens).filter(function (n) { var x = ITENS_CONFIG.itens[n]; return x.e === \"TYPE_POWER\" && x.t === t; }).sort()[0]; });",
   },
+  {
+    id: "tk17-rejeitados-a-mao",
+    descricao: "a lista REJEITADOS do prompt volta a ser texto à mão (Trick/Switcheroo fora da fonte única)",
+    arquivo: "prompts_ia.js",
+    de: "(exceto \" + GOLPES_QUE_PASSAM_ITEM.join(\"/\") + \", que passam o item)",
+    para: "(exceto Trick/Switcheroo, que passam o item)",
+  },
 ];

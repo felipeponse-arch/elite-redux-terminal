@@ -336,7 +336,9 @@
       // conferidas em conflitoDeItem, validacao_build_ia.js).
       "ITEM x BUILD: o item precisa reforcar o papel, a habilidade ou os golpes escolhidos - diga na rationale o que ele reforca. " +
       "Escolha o item que MAIS ajuda este Pokemon; no time vale no MAXIMO " + MAX_MESMO_ITEM_NO_TIME + " membros com o mesmo item (a lista de itens ja em uso vem abaixo, quando houver). " +
-      "Sao REJEITADOS: Choice Band/Specs/Scarf com golpe de status (exceto Trick/Switcheroo, que passam o item); Assault Vest ou Tactical Vest com golpe de status (o jogo impede usar); Eviolite numa forma que nao evolui mais.\n";
+      // Listas vindas de validacao_build_ia.js (mesma fonte do conflitoDeItem).
+      "Sao REJEITADOS: " + ITENS_CHOICE.join("/") + " com golpe de status (exceto " + GOLPES_QUE_PASSAM_ITEM.join("/") + ", que passam o item); " +
+      ITENS_VEST.join(" ou ") + " com golpe de status (o jogo impede usar); Eviolite numa forma que nao evolui mais.\n";
   }
   // O que o resto do time já usa (só a build de 1 membro recebe: as Estratégias
   // são leitura exploratória da espécie, não do time).
