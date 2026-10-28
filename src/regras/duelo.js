@@ -2378,7 +2378,7 @@
         var pres = fica * Math.max(doOrbe, presencaDoStatus(p, turnos, 1));
         r.pres[s] = pres;
         if (regra.recebeMais) r.recebeMais *= 1 + regra.recebeMais * pres;
-        if (regra.residuo && !alvo.ef.semResiduo && !alvo.ef.semResiduoDe[s]) r.residuo += regra.residuo * alvo.stats[0] * pres;
+        if (regra.residuo && !alvo.ef.semResiduo && !alvo.ef.semResiduoDe[s]) r.residuo += Math.max(1, regra.residuo * alvo.stats[0]) * pres; // piso 1 como o jogo (battle_util.c:2484,2542)
         if (regra.recuo && !alvo.ef.semResiduo) r.residuo += regra.recuo * danoDoAlvo * pres;
       });
       return r;
@@ -3559,6 +3559,7 @@
       if (gY) r.multY = 1 / multDoEstagio((e[gY.cat === "F" ? "def" : "spd"] || 0) * mult);
       r.velX = multDoEstagio((e.spe || 0) * mult);
       r.custo = e.custo || 0;
+      if (nome === "Belly Drum" && x.stats[0] <= 1) return null; // HP 1 (Shedinja): falha (battle_script_commands.c:11373)
       // Estágios que ficam com quem fez o setup (ticket 05): levados ao próximo duelo se ele continuar em campo.
       r.estagiosGanhos = {};
       ["atk", "def", "spa", "spd", "spe"].forEach(function (k) { if (e[k]) r.estagiosGanhos[k] = e[k] * mult; });
@@ -3593,7 +3594,7 @@
       var regra = STATUS_DUELO[s];
       if (!regra || (!x.ef.statusIgnoraImune && !podeSofrerStatusDuelo(y, s, x.ef))) return null; // Mycelium Might ignora imunidade
       if (s === "paralisar" && !p.ignoraTipo && efetividadeNoDuelo(x, "Electric", y) === 0) return null; // Thunder Wave não pega em Ground
-      if (regra.residuo && !y.ef.semResiduo && !y.ef.semResiduoDe[s]) r.residuoY += regra.residuo * base.hpY * acc;
+      if (regra.residuo && !y.ef.semResiduo && !y.ef.semResiduoDe[s]) r.residuoY += Math.max(1, regra.residuo * base.hpY) * acc; // piso 1 (HP 1 morre no 1º residual)
       if (regra.recuo) r.residuoY += regra.recuo * base.dY * acc;
       var corte = regra.corte || (gY && gY.cat === "F" ? regra.corteF : regra.corteE) || 0;
       if (s === "paralisar" && y.chefao && modoHellDuelo()) corte = 0; // Hell: o chefão paralisado sempre age, só perde Velocidade
@@ -3658,7 +3659,7 @@
     }
     if (p.tipo === "substituto") {
       // Substitute: 1/4 do HP vira um escudo que absorve um golpe e barra status.
-      if (base.dY >= base.hpX / 4) return null;
+      if (base.dY >= base.hpX / 4 || x.stats[0] <= 1) return null; // HP 1: hp <= max(1, max/4) falha (battle_script_commands.c:10570)
       r.custo = 0.25; r.perdeY = 1; return r;
     }
     if (p.tipo === "divide") {

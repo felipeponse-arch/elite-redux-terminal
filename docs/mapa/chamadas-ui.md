@@ -21,7 +21,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderBossDetail:589 - chama: nivelDeCalculo (level_cap.js:65), monotypeAtivo (mono_run.js:73), quemResolveCardHtml (quem_resolve.js:83), quemResolveRestaurar (quem_resolve.js:103), bossConfrontoHtml (resumo_luta.js:96)
 - renderGymSkillsCardHtml:456 - chama: ehRevancheDeLider (chefoes.js:454), gymLeaderBaseName (chefoes.js:45), gymSkillsSummaryFor (chefoes.js:367)
 - selectBoss:437 - chama: varianteDoChefao (chefoes.js:358)
-- simularSemTravarATela:324 - chama: montarTimeContraChefaoEmPassos (duelo.js:4683), totalDePassosContraChefao (duelo.js:4682)
+- simularSemTravarATela:324 - chama: montarTimeContraChefaoEmPassos (duelo.js:4684), totalDePassosContraChefao (duelo.js:4683)
 
 ## ui/arquetipo.js
 - applyRecommendedTeam:207 - chama: getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), formFamilyOf (formas_mega.js:58), entradasDoJogador (liberado_na_run.js:33), flashToast (dex_lista.js:473), +4 | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorFicarComVariante (modo_motor.js:119)
@@ -98,7 +98,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - buildEntryHtml:182 - chama: showdownSet (builds.js:58), buildSynergyHtml (dex_ficha.js:42) | chamado por: bossReferenceHtml (ficha_extras.js:103), buildHistoryHtml (ficha_extras.js:87)
 - buildNoteHtml:155 - chamado por: conditionMoveSynergyNoteHtml (dex_ficha.js:70), planoDaBuildHtml (ficha_extras.js:179), renderTeam (time.js:8)
 - copyText:11 - chamado por: initBosses (aba_chefoes.js:33)
-- evBreakpointNote:116 - chama: minEvSameStat (calc_stat.js:157), STAT_LABELS_SHORT (aba_chefoes.js:588)
+- evBreakpointNote:116 - chama: minEvSameStat (calc_stat.js:159), STAT_LABELS_SHORT (aba_chefoes.js:588)
 - hpEvEfficiencyNote:83 - chama: stripNote (builds.js:49), calcFinalStat (calc_stat.js:119)
 - itemDescHtml:45 - chama: ondeAcharItemTexto (avisos_build.js:100), stripNote (builds.js:49) | chamado por: renderTeam (time.js:8)
 - lerFormularioDoEditor:493 - chama: clampInt (dados_base.js:103)

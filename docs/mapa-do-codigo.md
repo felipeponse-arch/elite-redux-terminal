@@ -10,7 +10,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **builds.js** - Build mostrada (effectiveBuild: salva > herdada da base pela Mega > curada do
   entradaDeBuild:23, stripNote:49, showdownName:54, showdownSet:58, evsToShowdownText:75, teamItemsInUse:90, comecarLoteDeBuilds:118, concluirBuildDoLote:119, encerrarLoteDeBuilds:120, contaNoTime:121, teamMovesInUse:123, itensEmUsoComQuem:151, teamRolesInUse:163, golpesFuturosDe:177, effectiveBuild:200
 - **calc_stat.js** - Fórmula de status final (base+IV+EV+nível+nature+item) e o que deriva
-  itemRuleFor:106, calcFinalStat:119, minEvSameStat:157, nextEvBreakpoint:167, priorityOrderForEvs:192, trimAndReallocateEvs:195
+  itemRuleFor:106, calcFinalStat:119, minEvSameStat:159, nextEvBreakpoint:169, priorityOrderForEvs:194, trimAndReallocateEvs:197
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
   gymLeaderBaseName:45, getRemainingBossEntries:51, computeSharedRisks:109, bossSpeedSummary:132, computeBossAttackTypes:147, bossSafetyScore:171, bestBoxCandidateForBoss:183, confrontoUnitOf:233, confrontoFoesDe:258, confrontoMelhorUnidade:269, confrontoMinhasUnidades:279, confrontoUnidadesDaCaixa:289, confrontoParaParty:298, bossPartyPorDificuldade:327, bestRankForm:333, nextFightCx:351, varianteDoChefao:358, gymSkillsSummaryFor:367, regraDeCampoDoChefao:416, comportamentoDaIADoChefao:433, habilidadesExtrasDoHell:446, regrasDoHell:447, ehRevancheDeLider:454, buffsParaMostrarDoChefao:473, buffsAtivosDoChefao:482, computeSpeedTiers:495
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
@@ -363,6 +363,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sempre_acerta_e_plasma_lamp.test.mjs** - Ticket mecanica-2026-10-22/01: "X moves always hit" não vale para todos os golpes; Plasma Lamp tem precisão x1,2 em Fire/Electric.
 - **sequencia_contra_chefao.test.mjs** - Luta inteira contra o time do chefão (2026-09-29, decisão do usuário): HP que
 - **setup_entre_duelos.test.mjs** - Ticket 05 (07/10/2026): os estágios de atributo só zeram para quem entra em campo
+- **shedinja_hp1.test.mjs** - Shedinja HP 1 (decisão 5 do usuário, TK-09): o jogo fixa maxHP em 1 (pokemon.c:1000-1001);
 - **sinergia_habilidade_movepool.test.mjs** - Gerador da sinergia habilidade x movepool (porte Node, lê o INGLÊS do dex). Trava: arquivo gravado == gerador, ids batem com o dex,
 - **sono_e_paralisia_champions.test.mjs** - Ticket versao-nova/08 (15/10/2026; dados-2654/07): o código novo liga o sono e a paralisia estilo Pokémon Champions.
 - **sprite_index.test.mjs** - Sprite pelo nome da espécie (15/10/2026): a versão nova do jogo deslocou os números e o Beedrill Mega mostrava o Blastoise Mega.
