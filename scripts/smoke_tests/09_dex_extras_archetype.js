@@ -215,7 +215,7 @@ async function section09() {
 
   // --- 22. Âncoras de calibração do rank (QA: "calibração roda ANTES de
   // qualquer publish, com espécies de controle conhecidas"). Desde 2026-09-28
-  // o rank é o duelo simulado (scripts/calcular_rank_duelo.mjs) e a âncora
+  // o rank é o duelo simulado (scripts/calcular_rank_v2.mjs) e a âncora
   // antiga (Probopass SS, calibrada pra fórmula de tipagem defensiva) saiu.
   // Rank v2 (02/10): Primal Kyogre saiu do rank (só no pós-jogo pelo código do jogo).
   // Âncora nova: Sandslash Mega, SS em Fácil/Ace e em Elite, obtível na etapa 4

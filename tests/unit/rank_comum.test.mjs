@@ -25,9 +25,9 @@ test("unidadeComItemLiberado: item não liberado na Etapa da luta cai para sem i
   assert.equal(unidadeComItemLiberado(R, com, 8, 50, montar).item, "Big Pearl", "Etapa 8: liberado, fica");
 });
 
-test("camposHerdados: só estágio e dupla passam; bst/duelo/habilidade do rank antigo não", () => {
+test("camposHerdados: só o estágio passa (dupla saiu da tela); bst/duelo/habilidade do rank antigo não", () => {
   const antigo = { tier: "S", score: 90, bst: 600, bstPct: 80, abilityScore: 1, duelo: { vitorias: 50 }, dupla: { tier: "A" }, stage: 3, stageTier: "A", stageScore: 80 };
-  assert.deepEqual(camposHerdados(antigo), { stage: 3, stageTier: "A", stageScore: 80, dupla: { tier: "A" } });
+  assert.deepEqual(camposHerdados(antigo), { stage: 3, stageTier: "A", stageScore: 80 });
   assert.deepEqual(camposHerdados(undefined), {});
 });
 

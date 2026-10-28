@@ -1888,7 +1888,7 @@ export const MUTACOES = [
     id: "rank-herda-campos-do-rank-antigo",
     descricao: "o rank v2 volta a herdar bst/duelo e demais campos do rank antigo",
     arquivo: "rank_comum.mjs",
-    de: 'for (const k of ["stage", "stageTier", "stageScore", "dupla"]) if (a[k] !== undefined) out[k] = a[k];',
+    de: 'for (const k of ["stage", "stageTier", "stageScore"]) if (a[k] !== undefined) out[k] = a[k];',
     para: "Object.assign(out, a);",
   },
   {

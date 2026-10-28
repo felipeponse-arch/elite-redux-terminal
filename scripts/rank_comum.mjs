@@ -18,10 +18,10 @@ export function unidadeComItemLiberado(R, u, etapa, cap, montar) {
   return montar("");
 }
 
-// Campos que a nova nota herda da linha anterior de species_rank.json: estágio (vem de compute_species_rank.ps1) e a nota em dupla
-// (legado do rank antigo, nível 50; a tela ainda lê). Nenhum campo bst/duelo/habilidade do rank antigo passa para o rank v2.
+// Campos que a nova nota herda da linha anterior de species_rank.json: estágio (vem de compute_species_rank.ps1). A nota em dupla saiu
+// (decisão do usuário, 28/10/2026). Nenhum campo bst/duelo/habilidade do rank antigo passa para o rank v2.
 export function camposHerdados(antigo) {
   const a = antigo || {}, out = {};
-  for (const k of ["stage", "stageTier", "stageScore", "dupla"]) if (a[k] !== undefined) out[k] = a[k];
+  for (const k of ["stage", "stageTier", "stageScore"]) if (a[k] !== undefined) out[k] = a[k];
   return out;
 }
