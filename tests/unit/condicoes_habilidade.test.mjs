@@ -107,3 +107,13 @@ test("mega no modo temporário: a dica não manda segurar orbe (o slot é da ped
   if (!mega) return; // nenhuma mega com habilidade de status neste dado - nada a conferir
   assert.doesNotMatch(R.blocoCondicoesIA(mega), /segurar (Toxic|Flame) Orb/);
 });
+
+// TK-13: imunidade de tipo vem de STATUS_DUELO (jogo: battle_util.c:5088 CanBeBurned, orbe em :6289).
+test("podeTerStatus usa a imunidade de tipo do duelo (Fire x queimadura, Steel x veneno)", () => {
+  const comTipo = (nome) => R.SPECIES.find((x) => R.speciesTypeNames(x).includes(nome));
+  const fogo = comTipo("Fire"), aco = comTipo("Steel"), agua = comTipo("Water");
+  assert.equal(R.podeTerStatus(fogo, "queimadura", []), false); // Fire + Flame Orb
+  assert.equal(R.podeTerStatus(aco, "veneno", []), false);
+  assert.equal(R.podeTerStatus(agua, "queimadura", []), true);
+  assert.equal(R.podeTerStatus(agua, "veneno", []), true);
+});

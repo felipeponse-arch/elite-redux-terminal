@@ -996,6 +996,13 @@ export const MUTACOES = [
     para: "",
   },
   {
+    id: "status-unico-imunidade-de-tipo",
+    descricao: "podeTerStatus ignora a imunidade de tipo de STATUS_DUELO (Fire + Flame Orb voltaria a valer)",
+    arquivo: "condicoes_habilidade.js",
+    de: "if (regra && (regra.imunes || []).some(function (tp) { return tipos.indexOf(tp) !== -1; })) return false;",
+    para: "",
+  },
+  {
     id: "condicional-time-nao-conta",
     descricao: "membro do time com Rain Dance deixa de garantir Swift Swim",
     arquivo: "condicoes_habilidade.js",

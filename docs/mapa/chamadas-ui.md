@@ -65,7 +65,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - fichaNotasHtml:602 - chama: bossReferenceHtml (ficha_extras.js:103), buildHistoryHtml (ficha_extras.js:87), notesCardHtml (ficha_extras.js:78)
 - fichaStatsHtml:424 - chama: statPct (dex_lista.js:163), statTier (dex_lista.js:164)
 - howToObtainText:245 - chama: MAPS (dados_base.js:49)
-- marcasDoRankHtml:297 - chama: precisaDeSetter (condicoes_habilidade.js:214), nivelDaHabilidadeNoElite (level_cap.js:40), rankDaDificuldadeDe (rank_da_run.js:68), state (nucleo.js:8)
+- marcasDoRankHtml:297 - chama: precisaDeSetter (condicoes_habilidade.js:216), nivelDaHabilidadeNoElite (level_cap.js:40), rankDaDificuldadeDe (rank_da_run.js:68), state (nucleo.js:8)
 - rankBadgeHtml:169 - chama: FORA_DO_RANK (rank_da_run.js:10), MOTIVO_FORA_DO_RANK_PT (rank_da_run.js:17), rankDe (rank_da_run.js:28) | chamado por: renderBox (caixa.js:16), linhaDaListaHtml (dex_lista.js:212), compareResultHtml (ficha_extras.js:22), renderTeam (time.js:8), renderRoleCompendium (tipos.js:113)
 - rankDuplaBadgeHtml:204 - chama: rankDe (rank_da_run.js:28)
 - rankInfoLineHtml:319 - chama: FORA_DO_RANK (rank_da_run.js:10), MOTIVO_FORA_DO_RANK_PT (rank_da_run.js:17), rankDe (rank_da_run.js:28)
