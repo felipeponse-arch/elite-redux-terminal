@@ -30,7 +30,7 @@
   // migrated, exported and imported as a unit. Schema (v: 2):
   //   { v, team: [sname], box: [sname], savedTeams: [{name, team:[sname], depois?}],
   //     settings: {difficulty, levelCapMode, megaMode, milestone, runConfirmedAt, sort, typeFilter},
-  //     notes, autoEvolved, autoLog, gymSkillsCleared, customBuilds, strategySets, archetype,
+  //     motorFavoritos? [sname], notes, autoEvolved, autoLog, gymSkillsCleared, customBuilds, strategySets, archetype,
   //     orphans dentro de team/box, dataVersion, savedAt, soma }
   // v: applySave só avisa (log) quando o save é de formato MAIS NOVO que este app; ainda não há migração.
   // applySave é defensivo: campo inválido ou ausente em settings mantém o valor atual do state (não zera).
@@ -204,6 +204,8 @@
       });
     }
     state.strategySets = sanitizarStrategySets(save.strategySets);
+    // Favoritos do Modo Motor (TK-02b, 28/10/2026): só espécie conhecida, sem repetir. Save antigo sem o campo = vazio.
+    state.motorFavoritos = Array.isArray(save.motorFavoritos) ? semRepetido(save.motorFavoritos.filter(function (s) { return typeof s === "string" && !!SPECIES_BY_SNAME[s]; })) : [];
     // Arquétipo do time (Fase 3b, 2026-09-12) - defensivo igual notes/
     // customBuilds acima: só aceita valor que já é uma das opções reais
     // (um save editado à mão ou de outra versão não pode injetar algo fora
@@ -334,7 +336,7 @@
     return save;
   }
   function montarSave(opts) {
-    return {
+    var save = {
       v: SCHEMA_VERSION,
       dataVersion: DATA.meta ? DATA.meta.version : null,
       savedAt: opts && opts.manterData && dataDoSaveCarregado ? dataDoSaveCarregado : new Date().toISOString(),
@@ -357,6 +359,9 @@
       strategySets: state.strategySets,
       archetype: state.archetype
     };
+    // Só grava quando há favorito: sem ele o save fica idêntico ao de antes (mesma soma, sem diferença falsa no sync).
+    if (state.motorFavoritos && state.motorFavoritos.length) save.motorFavoritos = state.motorFavoritos.slice();
+    return save;
   }
 
   // Progresso da run (10/10/2026): o sync só olhava a data do último salvamento, e uma

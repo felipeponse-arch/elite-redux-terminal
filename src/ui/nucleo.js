@@ -63,6 +63,7 @@
     // cada recarga da página pagava a mesma chamada de novo). Ver
     // sanitizarStrategySets() em applySave().
     strategySets: {},
+    motorFavoritos: [], // favoritos do Modo Motor (snames); vão pro save
     // Arquétipo do time (Fase 3b do roadmap de estratégia, 2026-09-12) - dois
     // eixos INDEPENDENTES (fonte real trazida pelo usuário, r/VGC via
     // Reddit): ritmo (Hyper Offense/Balance/Bulky Offense/Stall/Semi-Stall)

@@ -4,10 +4,9 @@
   // Só desenho e orquestração: a regra está em src/regras/time_pelo_motor.js (montarTimePeloMotorEmPassos). Este arquivo NUNCA
   // chama claude.use nem pedirIA (tests/unit/modo_motor_sem_ia.test.mjs confere o fonte; a seção 31 do smoke confere a execução).
   //
-  // Estado só de tela (não vai para o save): o modo escolhido, os favoritos e o último resultado. Favorito = um Pokémon do time
+  // Estado só de tela: o modo escolhido e o último resultado. Os favoritos moram em state.motorFavoritos (vão para o save e a nuvem). Favorito = um Pokémon do time
   // atual que o jogador pede para manter (a vaga dele só escolhe a forma); no máximo os que estão no time.
   var modoDeMontagem = "motor";
-  var motorFavoritos = [];
   var motorTela = null;          // { res, chaveCtx, aplicada: chave da variante | null }
   var motorRodando = false;
   var motorCacheDaTela = null;   // o mesmo cache serve a montagem e o aquecimento
@@ -31,7 +30,7 @@
   }
   function modoMotorFavoritosValidos() {
     var meus = modoMotorCapturados().map(function (c) { return c.sp.sname; });
-    return motorFavoritos.filter(function (s) { return meus.indexOf(s) !== -1; });
+    return state.motorFavoritos.filter(function (s) { return meus.indexOf(s) !== -1; });
   }
   function modoMotorSegundos(ms) { return (Math.round(ms / 100) / 10).toFixed(1).replace(".", ",") + " s"; }
   function modoMotorEsperar() { return new Promise(function (ok) { setTimeout(ok, 0); }); }
@@ -261,8 +260,9 @@
         return;
       }
       if (alvo.dataset.motorFav) {
-        var s = alvo.dataset.motorFav, i = motorFavoritos.indexOf(s);
-        if (i === -1) motorFavoritos.push(s); else motorFavoritos.splice(i, 1);
+        var s = alvo.dataset.motorFav, i = state.motorFavoritos.indexOf(s);
+        if (i === -1) state.motorFavoritos.push(s); else state.motorFavoritos.splice(i, 1);
+        persist();
         redesenhar();
         var de = document.querySelector('[data-motor-fav="' + s + '"]');
         if (de) de.focus();

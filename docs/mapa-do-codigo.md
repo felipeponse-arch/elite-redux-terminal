@@ -52,7 +52,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **reconciliar_build.js** - Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
   movepoolCompletoDe:17, habilidadeSubstitutaPara:26, reconciliarBuild:39
 - **save.js** - Save do app: formato gravado (buildSave), leitura defensiva (applySave e os
-  snamesToXs:15, xsToSnames:24, applySave:47, anteriorSaneado:231, sanitizarStrategySets:250, textoCanonicoDoSave:296, somaDoSave:311, conferirSomaDoSave:321, saveEnviavel:328, buildSave:331, montarSave:336, progressoDoSave:368, saveChegandoTemMenosProgresso:374, syncContentDiffers:388
+  snamesToXs:15, xsToSnames:24, applySave:47, anteriorSaneado:233, sanitizarStrategySets:252, textoCanonicoDoSave:298, somaDoSave:313, conferirSomaDoSave:323, saveEnviavel:330, buildSave:333, montarSave:338, progressoDoSave:373, saveChegandoTemMenosProgresso:379, syncContentDiffers:393
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
 - **time_pelo_motor.js** - Modo Motor do Meu Time (ticket time-pelo-motor/01, Fase C, 21/10/2026): monta o time SEM IA, só pelo simulador.
@@ -86,9 +86,9 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **ia.js** - IA: cliente único pedirIA e os geradores de build/Estratégias (o pedido e o status na tela).
   erroIAPassageiro:52, comTempoLimite:61, opcoesDaIA:72, obterClienteSample:75, esperarMs:79, pedirIA:80, chamarModelo:90, pedirIAAgora:109, gravarBuildValidadaDaIa:141, aplicarCuradaNoTimeNovo:153, gerarBuildsDoTimeComIA:176, generateBuildWithAI:278, gerarPlanoParaBuild:342
 - **modo_motor.js** - Modo Motor no Meu Time (ticket time-pelo-motor/01, Fase F2, 21/10/2026). O Modo Motor é o PADRÃO (aprovação do usuário, 21/10):
-  modoMotorCache:20, modoMotorChave:22, modoMotorCapturados:27, modoMotorFavoritosValidos:32, modoMotorSegundos:36, modoMotorEsperar:37, modoMotorAquecer:41, modoMotorMontar:69, modoMotorVarianteDe:119, modoMotorFicarComVariante:120, modoMotorSeletorHtml:153, modoMotorFavoritosHtml:161, modoMotorBotaoHtml:173, modoMotorMembroHtml:178, modoMotorRodapeHtml:191, modoMotorVarianteHtml:206, modoMotorResultadoHtml:234
+  modoMotorCache:19, modoMotorChave:21, modoMotorCapturados:26, modoMotorFavoritosValidos:31, modoMotorSegundos:35, modoMotorEsperar:36, modoMotorAquecer:40, modoMotorMontar:68, modoMotorVarianteDe:118, modoMotorFicarComVariante:119, modoMotorSeletorHtml:152, modoMotorFavoritosHtml:160, modoMotorBotaoHtml:172, modoMotorMembroHtml:177, modoMotorRodapeHtml:190, modoMotorVarianteHtml:205, modoMotorResultadoHtml:233
 - **nucleo.js** - Estado do app (state), gravação no aparelho e a camada de ações (acao/TELAS): toda mudança grava uma vez e redesenha cada tela uma vez.
-  lsGet:83, lsSet:84, setOrReplaceActiveBuild:93, addBuildVariant:100, setActiveBuildIndex:103, abrirVagaPreservando:117, removeBuildIndex:123, reinserirBuild:130, persist:143, showStorageBanner:165, abaAtiva:183, redesenharFichaAberta:196, telasDeBuild:236, acao:242, fichaAfetada:260, concluirAcoes:265, loadA11yPrefs:284, applyA11yPrefs:290, saveA11yPrefs:294, corDoTema:306, loadSave:336
+  lsGet:84, lsSet:85, setOrReplaceActiveBuild:94, addBuildVariant:101, setActiveBuildIndex:104, abrirVagaPreservando:118, removeBuildIndex:124, reinserirBuild:131, persist:144, showStorageBanner:166, abaAtiva:184, redesenharFichaAberta:197, telasDeBuild:237, acao:243, fichaAfetada:261, concluirAcoes:266, loadA11yPrefs:285, applyA11yPrefs:291, saveA11yPrefs:295, corDoTema:307, loadSave:337
 - **pipeline_tela.js** - Pipeline de build na tela (ticket docs/tickets/pipeline-build-2026-10-14/02): só desenho. As regras (candidatos, hit-kill,
   pipelineResultado:14, pipelineAlvoValido:26, pipelineSeletorDeAlvoHtml:32, pipelineResumoDoAlvo:46, pipelineVereditoDe:53, pipelineSeloHtml:63, pipelineGolpeHtml:71, pipelineCandidatoHtml:77, pipelinePainelDaFichaHtml:96, pipelineDesenharFicha:113, pipelineDesenharTime:125
 - **progresso.js** - Aba Progresso: dificuldade, level cap, insígnia, modo de Mega, confirmação da run e acessibilidade.
@@ -319,6 +319,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **modo_motor_sem_ia.test.mjs** - Modo Motor nunca chama a IA (ticket time-pelo-motor/01, Fase F3, 21/10/2026). Duas provas independentes:
 - **mono_run.test.mjs** - Mono run: disponibilidade por tipo e etapa (2026-09-26). O dado vem da
 - **montar_time_contra_chefao.test.mjs** - Botão "Montar time contra este chefão" (2026-09-29): o simulador de duelo
+- **motor_favoritos_save.test.mjs** - TK-02b (28/10/2026): favoritos do Modo Motor fazem parte do save (ida e volta, save antigo, saneamento).
 - **motor_item.test.mjs** - O Modo Motor fecha o item de cada membro (ticket motor-item/01, 22/10/2026): testa os itens liberados na Etapa que o motor simula e
 - **multiplicadores_do_codigo_do_jogo.test.mjs** - Ticket calibracao-2026-10-15/03 (15/10/2026): multiplicadores de habilidade que o texto da NextDex traz, mas que o motor não lia
 - **nivel_da_mudanca.test.mjs** - Testes do gancho por nível (scripts/nivel_da_mudanca.mjs e scripts/verificar.mjs).

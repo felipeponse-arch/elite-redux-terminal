@@ -112,14 +112,14 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - PACE_ARCHETYPES:142 - chamado por: applySave (save.js:47), archetypeCardHtml (arquetipo.js:85)
 - ROLE_LABEL_PT:179 - chamado por: aiTool_getSpeciesRank (ferramentas_ia.js:24), blocoTimeEmUsoIA (prompts_ia.js:423), descricaoTimeParaGuia (prompts_ia.js:875), montarPromptTimeArquetipo (prompts_ia.js:823), nomePapel (prompts_ia.js:311), +2
 - SPECIES:52 - chamado por: computeSpeedTiers (chefoes.js:495), especieDaFormaDuelo (duelo.js:3494), buildStandardAiTools (ferramentas_ia.js:249), especiesQueResolvem (pipeline_build.js:638), montarTimePeloMotorEmPassos (time_pelo_motor.js:435), +3
-- SPECIES_BY_SNAME:72 - chamado por: snamesToXs (save.js:15)
+- SPECIES_BY_SNAME:72 - chamado por: applySave (save.js:47), snamesToXs (save.js:15)
 - SPLIT_LABEL_PT:180 - chamado por: aiTool_getSpeciesRank (ferramentas_ia.js:24), roleTagsHtml (dex_ficha.js:224)
 - SPLIT_STATUS:29 - chamado por: moveRoleOf (golpes.js:53), conflitoDeItem (validacao_build_ia.js:136), updateMyBuildStatus (editor_build.js:362)
 - TATICA_ARCHETYPES:147 - chamado por: applySave (save.js:47), archetypeCardHtml (arquetipo.js:85)
 - TYPES:9 - chamado por: computeBossAttackTypes (chefoes.js:147), confrontoMoveType (confronto.js:32), efeitoDasHabilidadesNoDuelo (duelo.js:1463), escolherProximoDoChefao (duelo.js:4074), lerDiversosDaFraseDuelo (duelo.js:670), +11
 - USABLE_TYPES:128 - chamado por: computeSharedRisks (chefoes.js:109), fraquezasDoTipo (mono_run.js:81), resistemAoTipo (mono_run.js:84), applySave (save.js:47), perfilDefensivoDaEspecie (tipos.js:175), +2
 - WEATHER_ARCHETYPES:143 - chamado por: applySave (save.js:47), archetypeCardHtml (arquetipo.js:85)
-- clampInt:103 - chamado por: applySave (save.js:47), sanitizarStrategySets (save.js:250), limitarEvsAoJogo (validacao_build_ia.js:169), lerFormularioDoEditor (editor_build.js:493), updateMyBuildEvTotal (editor_build.js:332), +1
+- clampInt:103 - chamado por: applySave (save.js:47), sanitizarStrategySets (save.js:252), limitarEvsAoJogo (validacao_build_ia.js:169), lerFormularioDoEditor (editor_build.js:493), updateMyBuildEvTotal (editor_build.js:332), +1
 - descricaoDaEspecie:185 - chamado por: fichaCabecalhoHtml (dex_ficha.js:515)
 - getSpeciesBySname:79 - chamado por: entradaDeBuild (builds.js:23), confrontoFoesDe (chefoes.js:258), efeitoDasHabilidadesNoDuelo (duelo.js:1463), foeDeDuelo (duelo.js:3020), carryUserData (evolucao.js:167), +16
 - getSpeciesByX:78 - chamado por: effectiveBuild (builds.js:200), itensEmUsoComQuem (builds.js:151), teamItemsInUse (builds.js:90), teamMovesInUse (builds.js:123), teamRolesInUse (builds.js:163), +56
@@ -250,7 +250,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - megaEvolutionUnlocked:88 - chama: state (nucleo.js:8) | chamado por: blocoMegaIA (prompts_ia.js:354), montarPromptTimeArquetipo (prompts_ia.js:823)
 - megaFormLiberada:156 - chama: state (nucleo.js:8) | chamado por: avisosDaBuild (avisos_build.js:8), motivoDeNaoGerarBuild (gravacao_build_ia.js:18), megaLockedTagHtml (ficha_extras.js:199), otherFormsHtml (ficha_extras.js:206)
 - megaFormsOf:31 - chama: getSpeciesByX (dados_base.js:78) | chamado por: validateAiBuild (validacao_build_ia.js:214)
-- megaMode:75 - chama: state (nucleo.js:8) | chamado por: motorChaveDoContexto (time_pelo_motor.js:169), motorSimular (time_pelo_motor.js:248), megaStoneRuleFor (validacao_build_ia.js:14), modoMotorChave (modo_motor.js:22), initProgress (progresso.js:105), +1
+- megaMode:75 - chama: state (nucleo.js:8) | chamado por: motorChaveDoContexto (time_pelo_motor.js:169), motorSimular (time_pelo_motor.js:248), megaStoneRuleFor (validacao_build_ia.js:14), modoMotorChave (modo_motor.js:21), initProgress (progresso.js:105), +1
 - megaPromptBlock:182 - chamado por: blocoMegaIA (prompts_ia.js:354)
 - rotuloEtapaDaMega:157 - chamado por: avisosDaBuild (avisos_build.js:8), motivoDeNaoGerarBuild (gravacao_build_ia.js:18), megaLockedTagHtml (ficha_extras.js:199), otherFormsHtml (ficha_extras.js:206)
 - stonesOf:209 - chamado por: megaStoneRuleFor (validacao_build_ia.js:14), validateAiBuild (validacao_build_ia.js:214)
@@ -283,12 +283,12 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - LEVEL_CAP_MODES:15 - chamado por: applySave (save.js:47), initProgress (progresso.js:105)
 - NIVEL_DA_INNATE_ELITE:33 - chamado por: blocoEspecieIA (prompts_ia.js:285)
 - availableMovesFor:71 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:118), liberadoNaRun (liberado_na_run.js:23), state (nucleo.js:8) | chamado por: confrontoUnitOf (chefoes.js:233), comoGarantir (condicoes_habilidade.js:172), precisaDeSetter (condicoes_habilidade.js:214), aiTool_getPriorityMoveOptions (ferramentas_ia.js:51), pipelineCandidatos (pipeline_build.js:521), +5
-- capOuPadrao:59 - chamado por: gravarRespostaValidadaDaIa (gravacao_build_ia.js:105), contextoDoMotor (time_pelo_motor.js:141), montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorChave (modo_motor.js:22)
+- capOuPadrao:59 - chamado por: gravarRespostaValidadaDaIa (gravacao_build_ia.js:105), contextoDoMotor (time_pelo_motor.js:141), montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorChave (modo_motor.js:21)
 - getCurrentCap:49 - chama: state (nucleo.js:8) | chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:200), entradaDeBuild (builds.js:23), blocoPlanoCurtoIA (escolha_ia_candidatos.js:72), montarPromptEscolhaDeBuild (escolha_ia_candidatos.js:86), +23
 - golpesTravadosNoCap:88 - chama: MOVE_ID_BY_NAME (dados_base.js:87), liberadoNaRun (liberado_na_run.js:23), state (nucleo.js:8) | chamado por: avisosDaBuild (avisos_build.js:8), contextoDoModoPrompt (prompts_ia.js:168), entradaDaCuradaParaTimeNovo (validacao_build_ia.js:517), processarRevisoes (revisao_automatica.js:72), tarefaDeRevisao (revisao_automatica.js:24)
 - innatesAtivasNoNivel:34 - chama: state (nucleo.js:8) | chamado por: unidadeDeDuelo (duelo.js:3056), pipelineCandidatos (pipeline_build.js:521)
 - innatesTravadasNoNivel:44 - chamado por: blocoEspecieIA (prompts_ia.js:285)
-- levelCapMode:16 - chama: state (nucleo.js:8) | chamado por: motorChaveDoContexto (time_pelo_motor.js:169), motorNivelDaEtapa (time_pelo_motor.js:73), modoMotorChave (modo_motor.js:22), initProgress (progresso.js:105)
+- levelCapMode:16 - chama: state (nucleo.js:8) | chamado por: motorChaveDoContexto (time_pelo_motor.js:169), motorNivelDaEtapa (time_pelo_motor.js:73), modoMotorChave (modo_motor.js:21), initProgress (progresso.js:105)
 - levelCapModeFromDifficulty:22 - chamado por: applySave (save.js:47)
 - nivelDaHabilidadeNoElite:40 - chama: nomesDeHabilidades (condicoes_habilidade.js:128) | chamado por: marcasDoRankHtml (dex_ficha.js:297)
 - nivelDeCalculo:63 - chamado por: computeSpeedTiers (chefoes.js:495), pipelineResolverAlvo (pipeline_build.js:71), blocoEspecieIA (prompts_ia.js:285), validateAiBuild (validacao_build_ia.js:214), montarTimeContraEsteChefao (aba_chefoes.js:337), +5
@@ -298,14 +298,14 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - etapaDaPedra:16 - chama: MEGA_PEDRAS_TARDIAS (formas_mega.js:103), MEGA_UNLOCK_MILESTONE (formas_mega.js:87) | chamado por: avisosDaBuild (avisos_build.js:8), etapaDaMega (formas_mega.js:151)
 - etapaDoItem:18 - chama: primeiroLugarDoItem (avisos_build.js:94) | chamado por: pipelineEvioliteServe (pipeline_build.js:488)
 - liberadoNaRun:23 - chamado por: avisosDaBuild (avisos_build.js:8), availableMovesFor (level_cap.js:71), golpesTravadosNoCap (level_cap.js:88), pipelineEvioliteServe (pipeline_build.js:488), itensAindaIndisponiveisParaIA (prompts_ia.js:382), +3
-- xsDoJogador:38 - chamado por: rosterParaTimeIA (prompts_ia.js:777), viramDoTipoPrompt (prompts_ia.js:812), contextoDoMotor (time_pelo_motor.js:141), candidatosDoJogador (aba_chefoes.js:248), modoMotorCapturados (modo_motor.js:27), +2
+- xsDoJogador:38 - chamado por: rosterParaTimeIA (prompts_ia.js:777), viramDoTipoPrompt (prompts_ia.js:812), contextoDoMotor (time_pelo_motor.js:141), candidatosDoJogador (aba_chefoes.js:248), modoMotorCapturados (modo_motor.js:26), +2
 
 ## regras/lista_de_builds.js
-- acrescentarVarianteNaLista:23 - chama: entradaDeBuild (builds.js:23), getBuildList (evolucao.js:14), state (nucleo.js:8) | chamado por: gravarBuildDaIaNaLista (gravacao_build_ia.js:68), gravarSugestoesDoMotor (sugestao_do_motor.js:61), addBuildVariant (nucleo.js:100)
-- buildQueSaiParaAbrirVaga:43 - chama: getBuildList (evolucao.js:14) | chamado por: abrirVagaPreservando (nucleo.js:117)
+- acrescentarVarianteNaLista:23 - chama: entradaDeBuild (builds.js:23), getBuildList (evolucao.js:14), state (nucleo.js:8) | chamado por: gravarBuildDaIaNaLista (gravacao_build_ia.js:68), gravarSugestoesDoMotor (sugestao_do_motor.js:61), addBuildVariant (nucleo.js:101)
+- buildQueSaiParaAbrirVaga:43 - chama: getBuildList (evolucao.js:14) | chamado por: abrirVagaPreservando (nucleo.js:118)
 - liberarVagaNaLista:51 - chamado por: gravarBuildDaIaNaLista (gravacao_build_ia.js:68)
-- removerBuildDaLista:32 - chama: getBuildList (evolucao.js:14), state (nucleo.js:8) | chamado por: gravarSugestoesDoMotor (sugestao_do_motor.js:61), removeBuildIndex (nucleo.js:123)
-- trocarBuildAtivaNaLista:11 - chama: entradaDeBuild (builds.js:23), getBuildList (evolucao.js:14), state (nucleo.js:8) | chamado por: gravarBuildDaIaNaLista (gravacao_build_ia.js:68), setOrReplaceActiveBuild (nucleo.js:93)
+- removerBuildDaLista:32 - chama: getBuildList (evolucao.js:14), state (nucleo.js:8) | chamado por: gravarSugestoesDoMotor (sugestao_do_motor.js:61), removeBuildIndex (nucleo.js:124)
+- trocarBuildAtivaNaLista:11 - chama: entradaDeBuild (builds.js:23), getBuildList (evolucao.js:14), state (nucleo.js:8) | chamado por: gravarBuildDaIaNaLista (gravacao_build_ia.js:68), setOrReplaceActiveBuild (nucleo.js:94)
 
 ## regras/mono_run.js
 - CLIMA_OFICIAL:133 - chamado por: danoNoDuelo (duelo.js:2050), montarTimeNoClimaEmPassos (duelo.js:4545), prepararGolpesDuelo (duelo.js:1832), motorSimularComClima (time_pelo_motor_papeis.js:143)
@@ -355,7 +355,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - golpesNoCap:123 - chamado por: effectiveBuild (builds.js:200), myBuildEditorHtml (editor_build.js:223)
 - nivelDeEvolucaoDaForma:68 - chama: EVOKINDS (dados_base.js:13), EVO_LEVEL (dados_base.js:30) | chamado por: golpesFuturosDe (builds.js:177)
 - nivelDoGolpe:56 - chama: MOVE_ID_BY_NAME (dados_base.js:87) | chamado por: golpesFuturosDe (builds.js:177), gravarPlanoDaIa (gravacao_build_ia.js:134)
-- planoSaneado:107 - chamado por: entradaDeBuild (builds.js:23), anteriorSaneado (save.js:231), applySave (save.js:47)
+- planoSaneado:107 - chamado por: entradaDeBuild (builds.js:23), anteriorSaneado (save.js:233), applySave (save.js:47)
 - trocasEntreCaps:141 - chamado por: registrarTrocasDoPlano (revisao_automatica.js:149)
 - validarPlano:80 - chamado por: gravarPlanoDaIa (gravacao_build_ia.js:134), anexarPlanoDaIa (prompts_ia.js:208)
 
@@ -416,29 +416,29 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## regras/save.js
 - AUTO_LOG_MAX:37 - chamado por: logAutoAction (evolucao.js:229)
-- anteriorSaneado:231 - chama: planoSaneado (plano_build.js:107)
-- applySave:47 - chama: BUILD_SOURCES (builds.js:17), MONOTYPE_ARCHETYPES (dados_base.js:154), PACE_ARCHETYPES (dados_base.js:142), TATICA_ARCHETYPES (dados_base.js:147), USABLE_TYPES (dados_base.js:128), +9 | chamado por: loadSave (nucleo.js:336), aplicarSaveRemoto (sync.js:45)
-- buildSave:331 - chamado por: persist (nucleo.js:143), aplicarSaveRemoto (sync.js:45), connectSync (sync.js:179)
-- conferirSomaDoSave:321 - chamado por: loadSave (nucleo.js:336), remotoComSomaErrada (sync.js:88)
-- montarSave:336 - chama: state (nucleo.js:8)
-- reconciliouAoAplicar:44 - chamado por: loadSave (nucleo.js:336), aplicarSaveRemoto (sync.js:45)
-- sanitizarStrategySets:250 - chama: clampInt (dados_base.js:103), getSpeciesBySname (dados_base.js:79) | chamado por: generateStrategySets (revisao_automatica.js:182)
-- saveChegandoTemMenosProgresso:374 - chamado por: conflitoDeProgresso (sync.js:61)
-- saveEnviavel:328 - chamado por: connectSync (sync.js:179), remotoComSomaErrada (sync.js:88)
+- anteriorSaneado:233 - chama: planoSaneado (plano_build.js:107)
+- applySave:47 - chama: BUILD_SOURCES (builds.js:17), MONOTYPE_ARCHETYPES (dados_base.js:154), PACE_ARCHETYPES (dados_base.js:142), SPECIES_BY_SNAME (dados_base.js:72), TATICA_ARCHETYPES (dados_base.js:147), +10 | chamado por: loadSave (nucleo.js:337), aplicarSaveRemoto (sync.js:45)
+- buildSave:333 - chamado por: persist (nucleo.js:144), aplicarSaveRemoto (sync.js:45), connectSync (sync.js:179)
+- conferirSomaDoSave:323 - chamado por: loadSave (nucleo.js:337), remotoComSomaErrada (sync.js:88)
+- montarSave:338 - chama: state (nucleo.js:8)
+- reconciliouAoAplicar:44 - chamado por: loadSave (nucleo.js:337), aplicarSaveRemoto (sync.js:45)
+- sanitizarStrategySets:252 - chama: clampInt (dados_base.js:103), getSpeciesBySname (dados_base.js:79) | chamado por: generateStrategySets (revisao_automatica.js:182)
+- saveChegandoTemMenosProgresso:379 - chamado por: conflitoDeProgresso (sync.js:61)
+- saveEnviavel:330 - chamado por: connectSync (sync.js:179), remotoComSomaErrada (sync.js:88)
 - snamesToXs:15 - chama: SPECIES_BY_SNAME (dados_base.js:72) | chamado por: carregarTimeSalvo (time.js:245), renderSavedTeams (time.js:206)
-- syncContentDiffers:388 - chamado por: connectSync (sync.js:179)
+- syncContentDiffers:393 - chamado por: connectSync (sync.js:179)
 - xsToSnames:24 - chama: snameOf (dados_base.js:80) | chamado por: guardarTimeAnterior (aba_chefoes.js:266)
 
 ## regras/sugestao_do_motor.js
-- SUGESTAO_ROTULO:11 - chamado por: buildChipsHtml (editor_build.js:212), rotuloDaBuild (ficha_extras.js:170), modoMotorFicarComVariante (modo_motor.js:120), modoMotorRodapeHtml (modo_motor.js:191)
-- gravarSugestoesDoMotor:61 - chama: entradaDeBuild (builds.js:23), getBuildList (evolucao.js:14), acrescentarVarianteNaLista (lista_de_builds.js:23), removerBuildDaLista (lista_de_builds.js:32), state (nucleo.js:8) | chamado por: modoMotorFicarComVariante (modo_motor.js:120)
-- planoDeGravarSugestoes:39 - chama: getActiveBuild (evolucao.js:16), getBuildList (evolucao.js:14) | chamado por: modoMotorFicarComVariante (modo_motor.js:120)
+- SUGESTAO_ROTULO:11 - chamado por: buildChipsHtml (editor_build.js:212), rotuloDaBuild (ficha_extras.js:170), modoMotorFicarComVariante (modo_motor.js:119), modoMotorRodapeHtml (modo_motor.js:190)
+- gravarSugestoesDoMotor:61 - chama: entradaDeBuild (builds.js:23), getBuildList (evolucao.js:14), acrescentarVarianteNaLista (lista_de_builds.js:23), removerBuildDaLista (lista_de_builds.js:32), state (nucleo.js:8) | chamado por: modoMotorFicarComVariante (modo_motor.js:119)
+- planoDeGravarSugestoes:39 - chama: getActiveBuild (evolucao.js:16), getBuildList (evolucao.js:14) | chamado por: modoMotorFicarComVariante (modo_motor.js:119)
 
 ## regras/time_pelo_motor.js
-- contextoDoMotor:141 - chama: capOuPadrao (level_cap.js:59), xsDoJogador (liberado_na_run.js:38), state (nucleo.js:8) | chamado por: modoMotorAquecer (modo_motor.js:41), modoMotorMontar (modo_motor.js:69)
-- criarCacheDoMotor:65 - chamado por: modoMotorCache (modo_motor.js:20)
-- montarTimePeloMotorEmPassos:435 - chama: SPECIES (dados_base.js:52), motorClassificar (time_pelo_motor_papeis.js:207), motorTextos (time_pelo_motor_papeis.js:306) | chamado por: modoMotorMontar (modo_motor.js:69)
-- motorAquecerBuildsEmPassos:230 - chamado por: modoMotorAquecer (modo_motor.js:41)
+- contextoDoMotor:141 - chama: capOuPadrao (level_cap.js:59), xsDoJogador (liberado_na_run.js:38), state (nucleo.js:8) | chamado por: modoMotorAquecer (modo_motor.js:40), modoMotorMontar (modo_motor.js:68)
+- criarCacheDoMotor:65 - chamado por: modoMotorCache (modo_motor.js:19)
+- montarTimePeloMotorEmPassos:435 - chama: SPECIES (dados_base.js:52), motorClassificar (time_pelo_motor_papeis.js:207), motorTextos (time_pelo_motor_papeis.js:306) | chamado por: modoMotorMontar (modo_motor.js:68)
+- motorAquecerBuildsEmPassos:230 - chamado por: modoMotorAquecer (modo_motor.js:40)
 - motorArred:62 - chamado por: motorClassificar (time_pelo_motor_papeis.js:207), motorDeltaSemMembro (time_pelo_motor_papeis.js:194), motorDeltaSemTipos (time_pelo_motor_papeis.js:198), motorProvasDosMembros (time_pelo_motor_papeis.js:157)
 - motorAvaliar:265 - chamado por: motorClassificar (time_pelo_motor_papeis.js:207)
 - motorBuildDoCandidato:170 - chama: ABILITIES (dados_base.js:10), MOVES (dados_base.js:11), melhorUnidadeContra (duelo.js:3079), getActiveBuild (evolucao.js:16), liberadoNaRun (liberado_na_run.js:23), +2
@@ -459,7 +459,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - motorUnidade:236 - chama: planoDoGolpeStatus (duelo.js:3246), unidadeDaBuild (duelo.js:3153) | chamado por: motorCondicoes (time_pelo_motor_papeis.js:33), motorProvasDosMembros (time_pelo_motor_papeis.js:157), motorTemTipo (time_pelo_motor_papeis.js:202), motorUnidadeNaLuta (time_pelo_motor_papeis.js:23)
 
 ## regras/time_pelo_motor_papeis.js
-- MOTOR_FRASE_DA_PROVA:321 - chamado por: modoMotorMembroHtml (modo_motor.js:178)
+- MOTOR_FRASE_DA_PROVA:321 - chamado por: modoMotorMembroHtml (modo_motor.js:177)
 - motorAlternativasArmadoras:101 - chama: liberadoNaRun (liberado_na_run.js:23), motorChaveDaBuild (time_pelo_motor.js:166), motorChaveDoContexto (time_pelo_motor.js:169)
 - motorAux:26 - chama: motorGuardar (time_pelo_motor.js:66)
 - motorClassificar:207 - chama: serveProMono (mono_run.js:75), motorArred (time_pelo_motor.js:62), motorAvaliar (time_pelo_motor.js:265), motorSimular (time_pelo_motor.js:248), state (nucleo.js:8) | chamado por: montarTimePeloMotorEmPassos (time_pelo_motor.js:435)
