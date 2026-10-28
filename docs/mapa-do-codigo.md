@@ -247,6 +247,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **cache_sabotagem.test.mjs** - (sem comentário de topo)
 - **calibracao_calculadora_do_jogo.test.mjs** - Calibração do motor contra a calculadora de dano do próprio jogo (10/10/2026, prints do usuário).
 - **calibracao_simulador_wasm.test.mjs** - Calibração do motor contra o simulador do jogo compilado (WebAssembly, Elite Redux 2.65.3b), 21/10/2026
+- **campo_caracterizacao_tk16.test.mjs** - TK-16 (campo, fase 1): caracterização ANTES da refatoração. Fixa o veredito do motor (R.resultadoDoDuelo) em lutas com
 - **campo_com_lutas_comuns.test.mjs** - todas-as-lutas/03: o alvo { campo: true } mede também as lutas comuns (mesma fatia 60/40 do rank, vinda de data/lutas_comuns_run.json).
 - **campo_do_campeao_monotype.test.mjs** - Efeito do campeão monotype (04/10): o jogo anuncia um efeito por tipo (src/battle_main.c HandleMonoChampSpecialEffects
 - **campo_invertido_no_plano.test.mjs** - Achado do vídeo do usuário (02/10): o plano contra a Tate & Liza 1 chamava Axe Kick (Dark) de
