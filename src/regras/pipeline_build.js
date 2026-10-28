@@ -98,7 +98,7 @@
       listaComum.slice().sort(function (a, b) { return b.peso - a.peso || (a.nome < b.nome ? -1 : 1); }).forEach(function (c) {
         porEtapa[c.etapa] = (porEtapa[c.etapa] || 0) + 1;
         if (porEtapa[c.etapa] > PIPELINE_COMUNS_POR_ETAPA) return;
-        var tm = dadoComum.times[c.nome] || {}, pt = (DIFF_TO_BOSSKEY[state.settings.difficulty] === "insane" && tm.insane && tm.insane.length ? tm.insane : tm.party) || [];
+        var tm = dadoComum.times[c.nome] || {}, tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party", pt = (tm[tier] && tm[tier].length ? tm[tier] : tm.party) || [];
         for (var k = pt.length - 1; k >= 0; k--) {
           var fc = foeDeDuelo(pt[k], nivel, null);
           if (fc) { saida.foes.push(fc); saida.pesosComuns.push(c.peso); return; }

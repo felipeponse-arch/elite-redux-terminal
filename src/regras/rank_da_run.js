@@ -19,7 +19,8 @@
     dexnav: "só aparece no DexNav (liberado no fim do jogo)",
     "sem-fonte": "não achamos como pegar na run (forma só de batalha, de teste ou sem fonte)"
   };
-  function chaveDoRankDaDificuldade(dif) { return dif === "elite" ? "insane" : "party"; }
+  // Mapa próprio do rank (só existem as visões party e insane): Hell usa a insane, a mais difícil calculada. Separado de DIFF_TO_BOSSKEY (tier do chefão).
+  function chaveDoRankDaDificuldade(dif) { return dif === "elite" || dif === "hell" ? "insane" : "party"; }
   // ADR-003: o JSON de SPECIES_RANK não muda depois da carga. rankDe(sname) devolve a visão da Dificuldade da run
   // (state.settings.difficulty: tier, score, eixos, rank por tipo) por cima da entrada, lida a cada chamada: trocar a
   // Dificuldade ou carregar um save não precisa avisar ninguém, e teste que monta o state já enxerga a Nota certa.

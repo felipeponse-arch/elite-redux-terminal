@@ -16,7 +16,7 @@
   // (insane) e Elite mostrava o de Hell - o seletor manual de chips
   // (Padrao/Insane/Hell) continua disponivel pra quem quiser conferir os
   // outros tiers na mesma tela.
-  var DIFF_TO_BOSSKEY = { easy: "party", ace: "party", elite: "insane" };
+  var DIFF_TO_BOSSKEY = { easy: "party", ace: "party", elite: "insane", hell: "hell" };
 
   // "Estou no 2º badge, o que faz sentido daqui até o final?" - pedido do
   // usuário, 2026-09-10: sem NENHUMA pergunta nova pro jogador - usa só o
