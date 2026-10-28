@@ -70,7 +70,7 @@ const EFEITOS_DE_GOLPE_SEM_REGRA_EXPLICITA = ["Accuracy Down Hit", "Argument Hit
   "Mind Blown", "Misc Hit", "Mortal Spin", "Natural Gift", "Nightmare", "Pay Day", "Rain Hit",
   "Recoil 33", "Remove Terrain No Fail", "Rip And Tear", "Round", "Sandstorm Hit", "Sleep Hit",
   "Smack Down", "Snap Jaw", "Snore", "Sparkling Aria", "Spike Hit", "Stealth Rock Hit", "Sticky Web Hit", "Tailwind Hit",
-  "Thief", "Trepidation", "Two Turn Retaliation", "Wake Up Slap"];
+  "Thief", "Trepidation", "Wake Up Slap"];
 
 test("efeitos de golpe sem regra explícita: só os já conhecidos", () => {
   const src = readdirSync("src/regras").map((f) => readFileSync("src/regras/" + f, "utf8")).join("\n");

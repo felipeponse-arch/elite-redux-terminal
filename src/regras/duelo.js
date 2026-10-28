@@ -234,10 +234,23 @@
     if (!m) return 1;
     return ACERTOS_PELO_TEXTO_DUELO[m[0]] || ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;
   }
+  // Recarga pelo EFEITO do dado, não pela tradução PT (TK-06; decisão 7 do usuário, 28/10). Hyper Beam e Giga Impact são
+  // EFFECT_RECHARGE (MOVE_EFFECT_RECHARGE, battle_script_commands.c:2828). Os outros são o campo `every_other_turn` do MoveList da
+  // er-config (battle_util.c:1607: não repete o golpe no turno seguinte, salvo Rampage/Master Hand/Raging Goddess/Berserker Rage); o dado
+  // do app não traz esse campo, então a lista vem de lá. Rock Wrecker: o gameData diz Hit, mas o código do jogo o trata assim (não é carga).
+  // Só estes 7 entram: os outros 6 `every_other_turn` (Gigaton Hammer, Blood Moon, Rip and Tear...) já valiam sem penalidade - fica como está, pergunta aberta.
+  var RECARGA_PELO_CAMPO_DUELO = { "Blast Burn": 1, "Hydro Cannon": 1, "Frenzy Plant": 1, "Rock Wrecker": 1, "Prismatic Laser": 1, "Meteor Assault": 1, "Eternabeam": 1 };
+  function golpeDeRecargaDuelo(id) {
+    var m = MOVES[id];
+    return !!m && (m[11] === "Recharge" || RECARGA_PELO_CAMPO_DUELO[m[0]] === 1);
+  }
+  // Golpe de dois turnos (carrega antes de bater): efeitos do dado; Solar Beam/Blade ("Solarbeam") e o resto do grupo.
+  // Sky Drop (efeito próprio, também de 2 turnos) fica fora como antes (a tradução PT o tirava); o pacote de evidência não o listou.
+  var EFEITOS_DE_CARGA_DUELO = { "Solarbeam": 1, "Two Turn Secondary": 1, "Semi Invulnerable": 1, "Two Turn Retaliation": 1, "Sky Drop": 1 };
   function golpeUtilNoDuelo(id) {
     var m = MOVES[id];
     if (!m || !(m[3] > 0) || DATA.splits[m[2]] === "STATUS") return false;
-    return !/desmaia|descansa no turno/i.test(MOVE_PT[id] || "");
+    return !/desmaia/i.test(MOVE_PT[id] || "") && !golpeDeRecargaDuelo(id);
   }
   // Efeito oficial que troca o atributo de ataque (battle_util.c CalcAttackStat): Foul Play usa o Atk do ALVO; Body Press, a Def do usuário.
   // Poder que cresce (ticket 19; battle_util.c CalcMoveBasePower, EFFECT_MISC_HIT): o efeito vem do
@@ -259,7 +272,7 @@
     var lm = (sp.lm || []).filter(function (p) { return nivel === null || nivel === undefined || p[0] <= nivel; });
     return uniqueIds(lm.map(function (p) { return p[1]; }).concat(sp.tu || [])).filter(function (id) {
       var m = MOVES[id];
-      return m && m[3] > 0 && DATA.splits[m[2]] !== "STATUS" && /descansa no turno/i.test(MOVE_PT[id] || "");
+      return m && m[3] > 0 && DATA.splits[m[2]] !== "STATUS" && golpeDeRecargaDuelo(id);
     });
   }
   function golpesDeDueloAte(sp, nivel) {
@@ -1852,11 +1865,12 @@
       // Electro Shot (ticket 19; battle_scripts_1.s BattleScript_EffectElectroShot): carrega um turno subindo
       // +1 de Sp. Atk; na chuva dispara na hora. Accelerate e Power Herb também (twoturnmoveacceleratecheck).
       if (cat && cat.ef === "Electro Shot") return clima === "chuva" || u.ef.cargaInstantanea || !!(u.it && u.it.cargaUmaVez);
-      // Golpe de dois turnos: pela descrição ou pelo efeito "Semi Invulnerable" do dado
-      // (o Rock Climb é "A charging attack" no NextDex, mas a tradução não diz - escapava).
-      if (!/no primeiro turno|turno seguinte/i.test(MOVE_PT[id] || "") && !(cat && cat.ef === "Semi Invulnerable")) return true;
+      // Recarga não é carga: Hyper Beam e parecidos ficam (com a penalidade de recarga em danoNoDuelo).
+      // Golpe de dois turnos: pelo EFEITO do dado (TK-06), não pela tradução PT.
+      var efeito = MOVES[id][11];
+      if (!EFEITOS_DE_CARGA_DUELO[efeito]) return true;
       if (u.ef.cargaInstantanea || (u.it && u.it.cargaUmaVez)) return true; // Accelerate, Power Herb
-      return /^Solar (Beam|Blade)$/.test(MOVES[id][0]) && (clima === "sol" || u.ef.chloroplast);
+      return efeito === "Solarbeam" && (clima === "sol" || u.ef.chloroplast);
     });
     var lista = ids.map(function (id) {
       var m = MOVES[id];
@@ -1938,7 +1952,7 @@
       var contato = temContatoDuelo(m) && !u.ef.semContato && !itemTiraContato;
       if (contato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
-      if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
+      if (golpeDeRecargaDuelo(id)) hab *= u.ef.semRecarga ? 0.75 : 0.5;
       var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: contato, contatoBruto: temContatoDuelo(m), corte: cats.indexOf("corte") !== -1, som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
         prioPrimeiro: cats.some(function (c) { return u.ef.prioPrimeiroCategoria[c]; }), // 1º uso (Coil Up...): o estado é gasto no fim do turno
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||

@@ -1468,8 +1468,8 @@ export const MUTACOES = [
     id: "golpe-rock-climb-sem-carga",
     descricao: "Rock Climb volta a contar como golpe de um turno",
     arquivo: "duelo.js",
-    de: " && !(cat && cat.ef === \"Semi Invulnerable\")) return true;",
-    para: ") return true;",
+    de: "if (!EFEITOS_DE_CARGA_DUELO[efeito]) return true;",
+    para: "if (!EFEITOS_DE_CARGA_DUELO[efeito] || efeito === \"Semi Invulnerable\") return true;",
   },
   {
     id: "golpe-fake-out-todo-turno",
@@ -2956,8 +2956,8 @@ export const MUTACOES = [
     id: "itens-guarda-chuva-tira-carga-do-solar-beam",
     descricao: "a Utility Umbrella passa a tirar também a carga instantânea do Solar Beam no sol (no jogo a carga lê o clima, não o item)",
     arquivo: "duelo.js",
-    de: "return /^Solar (Beam|Blade)$/.test(MOVES[id][0]) && (clima === \"sol\" || u.ef.chloroplast);",
-    para: "return /^Solar (Beam|Blade)$/.test(MOVES[id][0]) && (climaDoDano === \"sol\" || u.ef.chloroplast);",
+    de: "return efeito === \"Solarbeam\" && (clima === \"sol\" || u.ef.chloroplast);",
+    para: "return efeito === \"Solarbeam\" && (climaDoDano === \"sol\" || u.ef.chloroplast);",
   },
   {
     id: "itens-gerador-custom-sem-nome-do-item",
@@ -4336,5 +4336,20 @@ export const MUTACOES = [
     arquivo: "time_pelo_motor.js",
     de: "v.atual.x === c.x || v.atual.linha === c.linha",
     para: "v.atual.x === c.x",
+  },
+  // Recarga e golpe de 2 turnos pelo EFEITO do dado (TK-06, 28/10/2026).
+  {
+    id: "recarga-pelo-efeito-sem-penalidade",
+    descricao: "Hyper Beam/Giga Impact (efeito Recharge) deixam de pagar o x0,5 da recarga",
+    arquivo: "duelo.js",
+    de: "return !!m && (m[11] === \"Recharge\" || RECARGA_PELO_CAMPO_DUELO[m[0]] === 1);",
+    para: "return !!m && RECARGA_PELO_CAMPO_DUELO[m[0]] === 1;",
+  },
+  {
+    id: "recarga-volta-a-ser-carga",
+    descricao: "golpe de recarga volta a cair no filtro de carga (nunca entra no duelo sem Accelerate)",
+    arquivo: "duelo.js",
+    de: "if (!EFEITOS_DE_CARGA_DUELO[efeito]) return true;",
+    para: "if (!EFEITOS_DE_CARGA_DUELO[efeito] && !golpeDeRecargaDuelo(id)) return true;",
   },
 ];
