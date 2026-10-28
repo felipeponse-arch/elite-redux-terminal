@@ -48,7 +48,7 @@ test("Aftermath: quem derruba leva o golpe de desmaio", () => {
 
 test("hazard: Stealth Rock fere quem entra, pela tabela de Rock; Heavy-Duty Boots protege", () => {
   const lado = R.novoLadoDuelo();
-  R.poeHazardDuelo(lado, "rocha");
+  R.poeHazardNoLado(lado, "rocha");
   const c = R.participanteDuelo(unidade(efDe([]), golpe("F"), { tipos: ["Fire"] }));
   R.entrarNoLadoDuelo(c, lado);
   assert.ok(perto(c.frac, 1 - 2 / 8), "Fire leva 2x de Rock");

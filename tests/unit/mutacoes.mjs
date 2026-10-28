@@ -2792,7 +2792,7 @@ export const MUTACOES = [
     id: "comp-hazard-nao-e-posto",
     descricao: "nenhum hazard (Stealth Rock, Loose Rocks, Spikes...) chega ao campo",
     arquivo: "@comportamento",
-    de: "poeHazardDuelo",
+    de: "poeHazardNoLado",
     para: "return;",
   },
   {
@@ -4547,5 +4547,19 @@ export const MUTACOES = [
     arquivo: "dados_base.js",
     de: "return uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });",
     para: "return sp.ab.map(function (id) { return ABILITIES[id][0]; });",
+  },
+  {
+    id: "campo-clima-dura-pouco",
+    descricao: "campo.js: o clima passa a durar 7 turnos em vez dos 8 do código do jogo",
+    arquivo: "campo.js",
+    de: "clima: 8, // WEATHER_DURATION",
+    para: "clima: 7, // WEATHER_DURATION",
+  },
+  {
+    id: "campo-hazard-sem-limite-de-camadas",
+    descricao: "campo.js: Spikes passam a acumular sem o teto de 3 camadas",
+    arquivo: "campo.js",
+    de: "espinho: 3, toxico: 2",
+    para: "espinho: 9, toxico: 2",
   },
 ];

@@ -8,7 +8,7 @@
   // Tipos de golpe de status do simulador (planoDoGolpeStatus): armar o campo, utilidade, e setup (que é do sweeper, não do suporte).
   var MOTOR_TIPOS_DE_ARMAR = ["tela", "vento", "sala", "defog", "hazard"];
   var MOTOR_TIPOS_DE_UTILIDADE = ["status", "queda", "taunt", "disable", "haze", "protege", "substituto", "divide"];
-  var MOTOR_ROTULO_CLIMA = { sol: "sol", chuva: "chuva", areia: "areia", granizo: "granizo", nevoa: "névoa" };
+  var MOTOR_ROTULO_CLIMA = ROTULO_CLIMA; // rótulos únicos em campo.js (TK-16)
   // ===================================================================================================================
   // Fase D (ticket time-pelo-motor/01, 21/10/2026): papéis POR BUILD, contribuição dos membros, tags e estilo do time.
   // Regra de ouro (ticket §2.4, §3 riscos 4 e 8): nada sai de stat nem de "tem o golpe". Cada rótulo carrega a PROVA medida no
