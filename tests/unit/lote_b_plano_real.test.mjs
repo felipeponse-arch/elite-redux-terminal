@@ -128,12 +128,7 @@ test("estratégia de clima: Courtney (Meteor Falls) com elenco de chuva só decl
   // Hoje o Ninetales (armador) não entra na luta simulada, então NÃO pode haver estratégia de clima: a asserção exige
   // a ausência (sem 'if'). Com a sabotagem a estratégia aparece com o Ninetales fora da luta. Se uma mudança do motor
   // fizer o armador entrar, este caso deixa de provar a regra: ache outro com 'node tests/run_sabotage.mjs loteB-estrategia'.
-  // v2.65.4.1 (28/10): com os dados novos o Tyranitar (armador de areia) ENTRA na luta e a estratégia é legítima; o caso deixou de provar a regra
-  // pela ausência. Fica o invariante (armador declarado entra); a sabotagem loteB-estrategia precisa de um caso novo (pendência do verificador).
-  if (res.estrategia) {
-    const n = res.estrategia.armador;
-    assert.ok(res.simulacao.log.some((l) => l.meu === n || l.entra === n), "armador " + n + " declarado mas não entrou");
-  }
+  assert.ok(!res.estrategia, "estratégia declarada sem o armador em campo: " + (res.estrategia && res.estrategia.armador));
 });
 
 // Terceiro caso fixo (15/10/2026, ticket versao-nova/01): a correção da dupla contagem da sinergia mudou o dano do Ninetales e o caso da
