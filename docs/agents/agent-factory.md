@@ -28,6 +28,10 @@ Práticas de trabalho que valem para todos (16/10/2026): [praticas-de-trabalho.m
      - `qa-processo`: testes unitários, testes de mutação/sabotagem e esteiras de verificação.
      - `seguranca`: dependências, sanitização e fronteiras locais/artifacts.
      - `ux-acessibilidade`: WCAG, clareza de textos e mensagens em PT-BR.
+     - `engenheira-de-codigo` (22/10/2026, Sonnet): refatoração e código novo fora do motor e dos dados, com TDD; passa pelo `revisor-de-codigo` e pelo `supervisor`.
+     - `revisor-de-codigo` (22/10/2026, Sonnet): revisão só de leitura do app inteiro, e de texto de agente, doc, prompt e ticket; não corrige.
+     - `pesquisador-web` (27/10/2026, Haiku): pesquisa na rede quando o código do jogo não responde; só relata, com fonte e data.
+     - `pesquisador-de-mecanica` e `verificador` (Haiku): ver `loops-e-grafos.md` §1-§2.
 
 4. **Validador de Entrega (`supervisor`, juiz único do Gauntlet Loop):**
    - Nada vai ao usuário sem validação prévia.
@@ -36,6 +40,8 @@ Práticas de trabalho que valem para todos (16/10/2026): [praticas-de-trabalho.m
    - Fonte do fluxo: `.claude/agents/supervisor.md` e a memória `feedback_gauntlet_loop` (espelho no cofre: `memoria-interna/feedback/gauntlet_loop.md`).
 
 ---
+
+Regras da equipe (antes copiadas em cada agente): arquivo único `C:/Users/Ponse/Documents/Claude/teste/.claude/regras-da-equipe.md`, referenciado por todos os agentes em `.claude/agents/` (27/10/2026, TK-31).
 
 ## 2. Ciclo de Vida da Demanda
 

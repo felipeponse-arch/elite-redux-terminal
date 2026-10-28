@@ -15,7 +15,7 @@ Esforço = nível de raciocínio. A tabela é proposta; o usuário confirma e po
 
 ## 2. Restrições reais já vividas
 a) **Gemini e o classificador de segurança (histórico; a rota pelo OmniRoute foi desligada em 17/10/2026).** Em 10/10/2026 o classificador barrou o envio de contexto do projeto ao Gemini. Essa rota só vale com autorização explícita e delimitada do usuário: quais arquivos, nunca chaves nem saves. Sem isso, a leitura pesada fica no Haiku ou no Sonnet.
-b) **Modelo de subagente.** Por regra do usuário, todo subagente roda no Sonnet 5.5. NÃO passar o parâmetro `model: "sonnet"` na chamada de `Agent`: o apelido apontava para um modelo que dava 404 (era o mapeamento do OmniRoute, tirado em 17/10/2026). Os agentes de `.claude/agents/` já trazem o modelo certo no cabeçalho; chamar sem o parâmetro.
+b) **Modelo de subagente.** Regra vigente (usuário, 14/10/2026, `CLAUDE.md` do projeto): orquestrador Opus 5.5; executores e supervisor Sonnet 5.5; `pesquisador-de-mecanica`, `pesquisador-web`, `verificador`, varreduras e `gerente` Haiku 5.5. NÃO passar o parâmetro `model: "sonnet"` na chamada de `Agent`: o apelido apontava para um modelo que dava 404 (era o mapeamento do OmniRoute, tirado em 17/10/2026). Os agentes de `.claude/agents/` já trazem o modelo certo no cabeçalho; chamar sem o parâmetro.
 c) **OmniRoute fora (17/10/2026).** O Claude Code não passa mais pelo OmniRoute (decisão do Felipe): sem COMBO-1 e sem a rota Gemini/antigravity.
 
 ## 3. Orçamento por limite semanal
@@ -31,6 +31,8 @@ Tamanhos de ticket: **P** (pequeno), **M** (médio), **G** (grande), como marcad
 Acima de 100% o gasto sai de créditos pagos: avisar o usuário antes de qualquer passo.
 
 ### Consumo real (a calibrar)
+As duas tabelas abaixo e o teto de ~120 mil tokens / ~35 chamadas por agente (usuário, 22/10/2026) são estimativas: a tabela está vazia porque ainda não há medição, e o teto não é medido por ninguém. Não inventar número: o dado vem do namespace `medicao-nos` do Ruflo (`loops-e-grafos.md` §5). Registrado como risco aceito em `loops-e-grafos.md` §6.
+
 Método: ler o uso semanal antes e depois de cada ticket e anotar a diferença em % do limite. Só entram medições reais; sem medição fica "?".
 
 | Tamanho | Consumo médio (% do limite semanal) | Amostras |
