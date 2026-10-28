@@ -25,6 +25,7 @@ import { Worker, isMainThread, parentPort, workerData } from "node:worker_thread
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 import { melhoresPelaSoma, notaDosEixos, escolherPelaNotaFinal } from "./rank_escolha.mjs";
 import { lutasComunsDaRun } from "./estudo/lutas_comuns.mjs";
+import { percentis, tierDe, unidadeComItemLiberado, camposHerdados } from "./rank_comum.mjs";
 import { notasComFatia, comunsMaisPerigosas, FATIA_DOS_CHEFOES, COMUNS_POR_ETAPA } from "./rank_fatia.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -93,13 +94,14 @@ function avaliar(sp) {
   for (const d of DIFICULDADES) {
     const cobertas = lutas[d.chave].filter((l) => l.etapa >= etapa);
     if (!cobertas.length) { out[d.chave] = null; continue; }
-    const nivelRef = cobertas[Math.floor(cobertas.length / 2)].nivel;
+    const lutaRef = cobertas[Math.floor(cobertas.length / 2)], nivelRef = lutaRef.nivel;
     const todosFoes = cobertas.flatMap((l) => l.foes);
     const golpes = R.golpesDeDueloAte(sp, nivelRef);
     const candidatos = [];
     for (const set of R.SETS_DE_DUELO) {
       for (const ab of R.uniqueIds(sp.ab || []).length ? R.uniqueIds(sp.ab) : [null]) {
-        const u = R.unidadeDeDuelo(sp, set, ab, nivelRef, golpes, null);
+        const u0 = R.unidadeDeDuelo(sp, set, ab, nivelRef, golpes, null);
+        const u = unidadeComItemLiberado(R, u0, lutaRef.etapa, nivelRef, (it) => R.unidadeDeDuelo(sp, set, ab, nivelRef, golpes, null, it));
         let s = 0;
         for (const f of todosFoes) s += R.resultadoDoDuelo(u, f, nivelRef);
         candidatos.push({ s, set, ab, u });
@@ -113,7 +115,9 @@ function avaliar(sp) {
       const comStatus = R.comQuatroGolpes({ set: melhor.set.nome, unidade: melhor.u }, sp, todosFoes, nivelRef, null);
       const receita = (comStatus && comStatus.unidade.receita) || { golpes: dano, status: [] };
       const montar = (l, golpes, status) => {
-        const u = R.unidadeDeDuelo(sp, melhor.set, melhor.ab, l.nivel, golpes, null);
+        const u0 = R.unidadeDeDuelo(sp, melhor.set, melhor.ab, l.nivel, golpes, null);
+        // Item do set só vale se já existe na Etapa da luta (TK-21 / D5.2).
+        const u = unidadeComItemLiberado(R, u0, l.etapa, l.nivel, (it) => R.unidadeDeDuelo(sp, melhor.set, melhor.ab, l.nivel, golpes, null, it));
         u.statusIds = (u.statusIds || []).filter((id) => status.indexOf(id) !== -1);
         return u;
       };
@@ -203,12 +207,6 @@ function notas(dif, eixo) {
   const r = notasComFatia(L.map((l) => ({ comum: !!l.comum })), validos, lista, FATIA);
   return { nota: r.nota, pesoLuta: Object.fromEntries(L.map((l, i) => [l.nome, r.pesoLuta[i]])) };
 }
-function percentis(obj) {
-  const ks = Object.keys(obj).sort((a, b) => obj[a] - obj[b]), n = ks.length, p = {};
-  ks.forEach((k, i) => { p[k] = Math.round(((i + 1) / n) * 10000) / 100; });
-  return p;
-}
-const tierDe = (p) => (p >= 97 ? "SS" : p >= 90 ? "S" : p >= 75 ? "A" : p >= 50 ? "B" : p >= 20 ? "C" : "D");
 const final = {};
 const relatorio = {};
 for (const d of DIFICULDADES) {
@@ -284,7 +282,7 @@ if (process.argv.includes("--gravar")) {
   const novo = {};
   for (const s of Object.keys(antigo)) {
     if (!final[s]) { novo[s] = { foraDoRank: (DISP && DISP.motivoFora[s]) || "sem-fonte" }; continue; }
-    const e = Object.assign({}, antigo[s], { etapa: final[s].etapa, porDificuldade: {} });
+    const e = Object.assign({}, camposHerdados(antigo[s]), { etapa: final[s].etapa, porDificuldade: {} });
     for (const d of DIFICULDADES) {
       const f = final[s][d.chave];
       if (!f) continue;

@@ -82,9 +82,8 @@ if (-not $SkipExtract) {
     Write-Output "--- categorias de golpe do NextDex (extrair_categorias_golpes.mjs) ---"
     node (Join-Path $PSScriptRoot "extrair_categorias_golpes.mjs")
     if ($LASTEXITCODE -ne 0) { throw "extrair_categorias_golpes.mjs falhou" }
-    Write-Output "--- rank por duelo contra os chefoes (calcular_rank_duelo.mjs) ---"
-    node (Join-Path $PSScriptRoot "calcular_rank_duelo.mjs") --gravar
-    if ($LASTEXITCODE -ne 0) { throw "calcular_rank_duelo.mjs falhou" }
+    # O rank por duelo (scripts/calcular_rank_v2.mjs --gravar, ~40 min) NAO roda no build: e passo manual, depois do compute_species_rank.ps1
+    # (TK-21, 28/10/2026: o rank antigo de nivel 50 saiu; um script so grava o species_rank.json).
     # Papel de cada golpe de status (cura/setup/pivo...) a partir do efeito
     # real do jogo - usado pela coerencia papel x golpe da build por IA.
     Write-Output "--- classificando golpes de status pelo efeito real ---"
