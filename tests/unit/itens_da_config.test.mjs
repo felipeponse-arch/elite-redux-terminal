@@ -9,17 +9,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { carregarRegras } from "./carregar_regras.mjs";
+import { carregarRegras, lerComMutacao } from "./carregar_regras.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
-function lerComMutacao(caminho, nome) {
-  let t = readFileSync(join(RAIZ, caminho), "utf8").replace(/\r\n/g, "\n");
-  if (process.env.MUTACAO_ARQUIVO === nome) {
-    if (t.split(process.env.MUTACAO_DE).length !== 2) throw new Error("trecho da sabotagem não encontrado (ou repetido) em " + nome + ": " + process.env.MUTACAO_DE);
-    t = t.replace(process.env.MUTACAO_DE, () => process.env.MUTACAO_PARA || "");
-  }
-  return t;
-}
 const M = await import("data:text/javascript;base64," + Buffer.from(lerComMutacao("scripts/itens_pela_config.mjs", "itens_pela_config.mjs")).toString("base64"));
 const config = JSON.parse(lerComMutacao("data/itens_config.json", "itens_config.json"));
 const itensDoApp = JSON.parse(readFileSync(join(RAIZ, "data", "item_descriptions.json"), "utf8"));

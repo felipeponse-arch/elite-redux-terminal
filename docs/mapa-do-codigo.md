@@ -351,6 +351,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **reticencias.test.mjs** - Ticket 13 (07/10): texto de tela usa o caractere … (U+2026), nunca três pontos.
 - **revanche_sem_buffs.test.mjs** - Revisão dos ginásios (04/10): nos 8 scripts oficiais o líder, com o jogo zerado (FLAG_SYS_GAME_CLEAR), vai direto pro script
 - **sabotagem_incremental.test.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026). Cobre a regra:
+- **sabotagem_runner.test.mjs** - TK-29 (27/10/2026): o runner de sabotagem só conta "pega" quando uma ASSERÇÃO falha, confere os alvos antes
 - **selo_do_pipeline.test.mjs** - Ticket versao-nova/03 (15/10/2026): o selo do pipeline de build. Antes só 2 casos (Ledian + Mega Punch/Aerial Ace contra o Ninetales)
 - **sempre_acerta_e_plasma_lamp.test.mjs** - Ticket mecanica-2026-10-22/01: "X moves always hit" não vale para todos os golpes; Plasma Lamp tem precisão x1,2 em Fire/Electric.
 - **sequencia_contra_chefao.test.mjs** - Luta inteira contra o time do chefão (2026-09-29, decisão do usuário): HP que

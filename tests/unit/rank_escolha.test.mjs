@@ -2,18 +2,10 @@
 // (scripts/rank_escolha.mjs). Carregado com a mesma sabotagem controlada de carregar_regras.mjs.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { lerComMutacao } from "./carregar_regras.mjs";
 
 const NOME = "rank_escolha.mjs";
-let codigo = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "..", "scripts", NOME), "utf8").replace(/\r\n/g, "\n");
-if (process.env.MUTACAO_ARQUIVO === NOME) {
-  const de = process.env.MUTACAO_DE, para = process.env.MUTACAO_PARA || "";
-  if (codigo.split(de).length !== 2) throw new Error("trecho da sabotagem não encontrado (ou repetido) em " + NOME + ": " + de);
-  codigo = codigo.replace(de, () => para);
-}
-const M = await import("data:text/javascript;base64," + Buffer.from(codigo).toString("base64"));
+const M = await import("data:text/javascript;base64," + Buffer.from(lerComMutacao("scripts/" + NOME, NOME)).toString("base64"));
 const eixo = (...brs) => [{ luta: "x", brs }];
 
 test("candidatos: os 3 melhores pela soma rápida, em ordem", () => {

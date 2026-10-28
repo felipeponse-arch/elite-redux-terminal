@@ -21,6 +21,8 @@ import { MUTACOES as TODAS } from "./unit/mutacoes.mjs";
 import { segurarVaga } from "../scripts/vaga.mjs";
 import { selecionarMutacoes } from "../scripts/sabotagem_incremental.mjs";
 import { gravarCacheMesclando } from "../scripts/cache_sabotagem.mjs";
+import { classificarFalha, conferirAlvos } from "./sabotagem_util.mjs";
+import { caminhoDoAlvo, lerComMutacao } from "./unit/carregar_regras.mjs";
 
 // Vaga pesada (melhoria B): rodada direta espera na fila; dentro do gancho (ER_VAGA_DONO) não pede de novo.
 await segurarVaga("pesada");
@@ -108,25 +110,48 @@ function contarFalhas(saida) {
   return (antesDoResumo.match(/^✖ .+? \(/gm) || []).length;
 }
 
+// "Pega" = uma ASSERÇÃO falhou (TK-29, 27/10/2026). Falha por outro motivo (erro de carga, TypeError do próprio
+// defeito) vira "erro-sem-assercao" e reprova a rodada: não prova que um teste protege a regra.
 async function avaliar(m) {
   const lembrado = cache[m.id];
   if (lembrado && ARQUIVOS_DE_TESTE.includes(lembrado)) {
     const r = await rodar(m, [lembrado]);
-    if (r.saida.includes("trecho da sabotagem não encontrado")) return { m, tipo: "quebrada" };
-    if (r.status !== 0) return { m, tipo: "pega", falhas: contarFalhas(r.saida), rapido: true };
+    const c = classificarFalha(r);
+    if (c === "quebrada") return { m, tipo: "quebrada" };
+    // atalho só vale com asserção; qualquer outra coisa cai na suíte inteira
+    if (c === "pega") return { m, tipo: "pega", falhas: contarFalhas(r.saida), rapido: true };
   }
   const r = await rodar(m, ARQUIVOS_DE_TESTE);
-  if (r.saida.includes("trecho da sabotagem não encontrado")) return { m, tipo: "quebrada" };
-  if (r.status === 0) { if (lembrado) atualizacoes.set(m.id, null); return { m, tipo: "sobreviveu" }; }
+  const c = classificarFalha(r);
+  if (c === "quebrada") return { m, tipo: "quebrada" };
+  if (c === "sobreviveu" || c === "erro-sem-assercao") {
+    if (lembrado) atualizacoes.set(m.id, null);
+    return { m, tipo: c };
+  }
   // Só lembra arquivo que pega SOZINHO (rodada isolada): teste que falha só por estado compartilhado com outro
   // arquivo daria "pega" falso no atalho (noite de 14/10: 3 buracos de cobertura passaram assim).
   // Lembra o primeiro dos arquivos que falharam que também pega sozinho; nenhum pega sozinho = não lembra.
   let lembrar = null;
   for (const arq of arquivosQueFalharam(r.saida)) {
-    if ((await rodar(m, [arq])).status !== 0) { lembrar = arq; break; }
+    if (classificarFalha(await rodar(m, [arq])) === "pega") { lembrar = arq; break; }
   }
   if (lembrar || lembrado) atualizacoes.set(m.id, lembrar);
   return { m, tipo: "pega", falhas: contarFalhas(r.saida), rapido: false };
+}
+
+// Conferência de alvos ANTES de rodar (alvo fora de src sem teste carregando virava "sobreviveu") e rodada de
+// base: a suíte sem sabotagem tem que estar verde, senão todo "pega" seria falso.
+const problemasDeAlvo = conferirAlvos(MUTACOES, caminhoDoAlvo, (c) => lerComMutacao(c, "-nenhum-"));
+if (problemasDeAlvo.length) {
+  for (const p of problemasDeAlvo) console.log(`ERRO      ${p.id}: ${p.motivo} - atualize tests/unit/mutacoes.mjs`);
+  console.log(`\n=== sabotagem ABORTADA: ${problemasDeAlvo.length} alvo(s) do catálogo quebrado(s) ===`);
+  process.exit(1);
+}
+const base = await rodar({ arquivo: "", de: "", para: "" }, ARQUIVOS_DE_TESTE);
+if (base.status !== 0) {
+  console.log(base.saida.split("\n").filter((l) => /^✖|ERR_/.test(l)).slice(0, 15).join("\n"));
+  console.log("\n=== sabotagem ABORTADA: a suíte unitária já falha SEM sabotagem (rodada de base) - conserte os testes antes ===");
+  process.exit(1);
 }
 
 const inicio = Date.now();
@@ -143,11 +168,15 @@ await Promise.all(Array.from({ length: Math.min(AO_MESMO_TEMPO, MUTACOES.length)
 
 let sobreviveram = 0;
 let quebradas = 0;
+let semAssercao = 0;
 for (const r of resultados) {
   const m = r.m;
   if (r.tipo === "quebrada") {
     quebradas++;
-    console.log(`ERRO      ${m.id}: o trecho sabotado não existe mais em src/regras/${m.arquivo} - atualize tests/unit/mutacoes.mjs`);
+    console.log(`ERRO      ${m.id}: o trecho sabotado não existe mais (ou o trecho mudou) em ${m.arquivo} - atualize tests/unit/mutacoes.mjs`);
+  } else if (r.tipo === "erro-sem-assercao") {
+    semAssercao++;
+    console.log(`SEM-ASSERCAO ${m.id}: ${m.descricao} - a suíte falhou, mas nenhuma asserção (erro de carga/TypeError): não prova proteção`);
   } else if (r.tipo === "sobreviveu") {
     sobreviveram++;
     console.log(`SOBREVIVEU ${m.id}: ${m.descricao} - nenhum teste unitário percebeu`);
@@ -156,5 +185,5 @@ for (const r of resultados) {
   }
 }
 gravarCacheMesclando(CACHE, atualizacoes, cache);
-console.log(`\n=== sabotagem: ${MUTACOES.length - sobreviveram - quebradas}/${MUTACOES.length} pegas em ${Math.round((Date.now() - inicio) / 1000)} s ===`);
-if (sobreviveram || quebradas) process.exitCode = 1;
+console.log(`\n=== sabotagem: ${MUTACOES.length - sobreviveram - quebradas - semAssercao}/${MUTACOES.length} pegas em ${Math.round((Date.now() - inicio) / 1000)} s ===`);
+if (sobreviveram || quebradas || semAssercao) process.exitCode = 1;

@@ -3,7 +3,7 @@
 // mesmas variáveis globais que o <script> principal cria com JSON.parse, e os
 // arquivos de regra rodam no mesmo escopo, na ORDEM dos marcadores
 // /*@regras NOME*/ do template - não existe uma segunda lista pra desatualizar.
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
@@ -11,15 +11,7 @@ import vm from "node:vm";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 // Sabotagem controlada também nos JSON de data/ (15/10/2026): MUTACAO_ARQUIVO igual ao nome do arquivo troca o trecho só nesta carga.
 // Sem isso, sabotagens de dado (dex_compact.json, move_roles.json, mega_forms.json...) sobreviviam em testes que só usam carregarRegras.
-const lerJson = (nome) => {
-  let texto = readFileSync(join(root, "data", nome), "utf8");
-  if (process.env.MUTACAO_ARQUIVO === nome) {
-    const normal = texto.replace(/\r\n/g, "\n");
-    if (normal.split(process.env.MUTACAO_DE).length !== 2) throw new Error("trecho da sabotagem não encontrado (ou repetido) em " + nome + ": " + process.env.MUTACAO_DE);
-    texto = normal.replace(process.env.MUTACAO_DE, () => process.env.MUTACAO_PARA || "");
-  }
-  return JSON.parse(texto);
-};
+const lerJson = (nome) => JSON.parse(aplicarTrecho(readFileSync(join(root, "data", nome), "utf8").replace(/\r\n/g, "\n"), nome));
 
 // Mesma reindexação por sname que o artifact_template.html faz ao carregar (CONDITION_MOVE_SYNERGY):
 // as ferramentas da IA (src/regras/ferramentas_ia.js) leem esse índice.
@@ -29,6 +21,27 @@ function indexarCondicaoGolpe(bruto) {
   (bruto.comboClimaAutossuficiente || []).forEach((c) => add(c.sname, { habilidade: c.habilidade, kind: c.kind, tipo: "clima", clima: c.clima, golpes: [c.golpe] }));
   (bruto.comboHpBaixoComRecuo || []).forEach((c) => add(c.sname, { habilidade: c.habilidade, kind: c.kind, tipo: "hp_baixo", golpes: c.golpesRecuo || [] }));
   return porSname;
+}
+
+// Carregador ÚNICO da sabotagem de arquivos fora do vm (TK-29, 27/10/2026): as seis cópias que cada teste
+// trazia (rank_escolha, categorias, chefões, itens, multiplicadores, respostas 08/10) agora chamam isto.
+// Troca um trecho EXATO (uma única ocorrência) só na memória, quando MUTACAO_ARQUIVO é o nome do alvo.
+export function aplicarTrecho(texto, nome, env = process.env) {
+  if (env.MUTACAO_ARQUIVO !== nome) return texto;
+  const de = env.MUTACAO_DE;
+  if (texto.split(de).length !== 2) throw new Error("trecho da sabotagem não encontrado (ou repetido) em " + nome + ": " + de);
+  return texto.replace(de, () => env.MUTACAO_PARA || "");
+}
+// `caminho` relativo à raiz do app. LF sempre (autocrlf no Windows).
+export function lerComMutacao(caminho, nome, env = process.env) {
+  return aplicarTrecho(readFileSync(join(root, caminho), "utf8").replace(/\r\n/g, "\n"), nome, env);
+}
+// Onde mora o alvo de uma sabotagem pelo nome curto do catálogo; null = não existe (ou "@comportamento").
+export function caminhoDoAlvo(nome) {
+  for (const dir of ["src/regras", "src/ui", "scripts", "data"]) {
+    if (existsSync(join(root, dir, nome))) return dir + "/" + nome;
+  }
+  return null;
 }
 
 export function carregarRegras({ difficulty = "ace", levelCapMode = "more", milestone = 0, megaMode = "temporaria" } = {}) {

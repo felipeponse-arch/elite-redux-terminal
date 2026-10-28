@@ -3,20 +3,9 @@
 // então o teste confere (1) a função de correção num recorte e (2) os 6 mons de bosses.json com os valores do TrainerList d1a9a4c.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import { lerTreinadores, compararMon, corrigirTimes, usarMapas } from "../../scripts/conferir_chefoes_config.mjs";
+import { lerComMutacao } from "./carregar_regras.mjs";
 
-const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
-function lerComMutacao(caminho, nome) {
-  let t = readFileSync(join(RAIZ, caminho), "utf8").replace(/\r\n/g, "\n");
-  if (process.env.MUTACAO_ARQUIVO === nome) {
-    if (t.split(process.env.MUTACAO_DE).length !== 2) throw new Error("trecho da sabotagem não encontrado (ou repetido) em " + nome + ": " + process.env.MUTACAO_DE);
-    t = t.replace(process.env.MUTACAO_DE, () => process.env.MUTACAO_PARA || "");
-  }
-  return t;
-}
 const BOSSES = JSON.parse(lerComMutacao("data/bosses.json", "bosses.json"));
 const mon = (nome, chave, pos) => BOSSES.find((b) => b.name === nome)[chave][pos - 1];
 
