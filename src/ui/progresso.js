@@ -169,7 +169,7 @@
       afterCapChange(function () {
         state.settings.milestone = parseInt(msSel.value, 10);
         if (cxAntes && state.settings.milestone > milestoneAntes) {
-          logAutoAction("Você avançou de insígnia, então assumi que venceu " + lutaAnterior.name + ". Antes da luta o quadro de confronto via " +
+          logAutoAction("Você avançou de Etapa, então assumi que venceu " + lutaAnterior.name + ". Antes da luta o quadro de confronto via " +
             cxAntes.c.buracos.length + " Pokémon dele sem resposta super efetiva e " + cxAntes.c.ameacas.length + " ameaçando metade ou mais do seu time.");
         }
       });

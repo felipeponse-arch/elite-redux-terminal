@@ -95,7 +95,7 @@
     var lista = (typeof ONDE_ACHAR_ITENS !== "undefined" && ONDE_ACHAR_ITENS[nome]) || [];
     return lista.filter(function (x) { return x.etapa !== null; })[0] || null;
   }
-  function rotuloDaEtapaDoItem(e) { return e === 0 ? "saída (antes da 1ª insígnia)" : e + "ª insígnia"; }
+  function rotuloDaEtapaDoItem(e) { return e === 0 ? "Etapa 0 (saída, antes da 1ª insígnia)" : "Etapa " + e; }
   // Texto curto para a descrição do item na build: até 2 lugares, do mais cedo ao mais tarde.
   function ondeAcharItemTexto(nome) {
     var lista = ((typeof ONDE_ACHAR_ITENS !== "undefined" && ONDE_ACHAR_ITENS[nome]) || []).slice(0, 2);

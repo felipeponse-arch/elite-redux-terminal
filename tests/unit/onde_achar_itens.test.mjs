@@ -53,7 +53,7 @@ test("pedras do Adoption Center (er-config oficial): compra por BP, no Norman ou
 test("item que só sai depois da etapa atual vira aviso; na etapa certa some", () => {
   const R = carregarRegras({ milestone: 1 });
   const av = tardio(R, "Focus Band");
-  assert.ok(av && /6ª insígnia/.test(av.texto) && /Shoal Cave/.test(av.texto), av && av.texto);
+  assert.ok(av && /Etapa 6/.test(av.texto) && /Shoal Cave/.test(av.texto), av && av.texto);
   R.state.settings.milestone = 6;
   assert.equal(tardio(R, "Focus Band"), undefined);
   R.state.settings.milestone = 0;

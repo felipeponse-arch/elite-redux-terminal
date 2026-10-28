@@ -4688,4 +4688,11 @@ export const MUTACOES = [
     de: "    \"Salamencite R\",\n    \"Metagrossite R\"\n",
     para: "    \"Salamencite R\"\n",
   },
+  {
+    id: "tk27-rotulo-mega-volta-a-insignia",
+    descricao: "o rótulo da Mega tardia volta a dizer \"7ª insígnia\" em vez de Etapa 7",
+    arquivo: "formas_mega.js",
+    de: "7: \"Etapa 7 (Tate & Liza)\"",
+    para: "7: \"7ª insígnia (Tate & Liza)\"",
+  },
 ];

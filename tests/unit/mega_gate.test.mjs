@@ -80,7 +80,7 @@ test("Megas de pedra tardia só contam a partir da 7ª insígnia (Tate & Liza)",
   for (const m of [4, 6]) comMilestone(m, () => {
     assert.ok(!R.battleFamilyOf(hax).some((s) => s.sname === "SPECIES_HAXORUS_MEGA"), "etapa " + m + ": Mega Haxorus fora");
     assert.equal(R.usableSpeciesFor(haxMega).sname, "SPECIES_HAXORUS", "Mega na caixa conta como a base");
-    assert.match(R.megaPromptBlock(hax), /DESTA ESPECIE: AINDA NAO DISPONIVEL.*7ª insígnia \(Tate & Liza\)/);
+    assert.match(R.megaPromptBlock(hax), /DESTA ESPECIE: AINDA NAO DISPONIVEL.*Etapa 7 \(Tate & Liza\)/);
   });
   comMilestone(7, () => {
     assert.ok(R.battleFamilyOf(hax).some((s) => s.sname === "SPECIES_HAXORUS_MEGA"), "7ª insígnia: libera");

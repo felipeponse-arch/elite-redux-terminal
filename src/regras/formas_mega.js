@@ -95,7 +95,7 @@
   Object.keys(PEDRAS_ETAPA.ondeSePega).forEach(function (p) { MEGA_PEDRAS_TARDIAS[p] = PEDRAS_ETAPA.ondeSePega[p].etapa; });
   var PEDRAS_SO_DEBUG = {};
   PEDRAS_ETAPA.soNoDebug.forEach(function (p) { PEDRAS_SO_DEBUG[p] = true; });
-  var ROTULO_ETAPA_MEGA = { 4: "4ª insígnia (Flannery)", 5: "5ª insígnia (Norman)", 6: "6ª insígnia (Winona)", 7: "7ª insígnia (Tate & Liza)", 10: "sem Etapa conhecida (pedra sem fonte de obtenção)" };
+  var ROTULO_ETAPA_MEGA = { 4: "Etapa 4 (Flannery)", 5: "Etapa 5 (Norman)", 6: "Etapa 6 (Winona)", 7: "Etapa 7 (Tate & Liza)", 10: "sem Etapa conhecida (pedra sem fonte de obtenção)" };
   // Etapa em que esta forma Mega fica disponível: a da pedra, se for tardia.
   function etapaDaMega(megaSp) {
     return stonesOf(megaSp).reduce(function (et, pedra) {
