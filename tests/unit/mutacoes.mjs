@@ -1010,13 +1010,6 @@ export const MUTACOES = [
     para: "",
   },
   {
-    id: "condicional-tipo-veneno-envenena",
-    descricao: "Toxic Orb conta como garantia em tipo Poison/Steel",
-    arquivo: "condicoes_habilidade.js",
-    de: "if (cond === \"veneno\" && (tipos.indexOf(\"Poison\") !== -1 || tipos.indexOf(\"Steel\") !== -1)) return false;",
-    para: "",
-  },
-  {
     id: "categoria-sem-bonus",
     descricao: "habilidade de categoria (Iron Fist...) deixa de dar bônus no golpe da categoria",
     arquivo: "duelo.js",
