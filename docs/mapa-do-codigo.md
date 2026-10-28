@@ -52,7 +52,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **reconciliar_build.js** - Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
   movepoolCompletoDe:17, habilidadeSubstitutaPara:26, reconciliarBuild:39
 - **save.js** - Save do app: formato gravado (buildSave), leitura defensiva (applySave e os
-  snamesToXs:15, xsToSnames:24, applySave:47, anteriorSaneado:233, sanitizarStrategySets:252, textoCanonicoDoSave:298, somaDoSave:313, conferirSomaDoSave:323, saveEnviavel:330, buildSave:333, montarSave:338, progressoDoSave:373, saveChegandoTemMenosProgresso:379, syncContentDiffers:393
+  snamesToXs:15, xsToSnames:24, applySave:47, anteriorSaneado:236, sanitizarStrategySets:255, textoCanonicoDoSave:301, somaDoSave:316, conferirSomaDoSave:326, saveEnviavel:333, buildSave:336, montarSave:341, progressoDoSave:377, saveChegandoTemMenosProgresso:383, syncContentDiffers:397
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
 - **time_pelo_motor.js** - Modo Motor do Meu Time (ticket time-pelo-motor/01, Fase C, 21/10/2026): monta o time SEM IA, só pelo simulador.

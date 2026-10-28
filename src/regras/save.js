@@ -205,7 +205,10 @@
     }
     state.strategySets = sanitizarStrategySets(save.strategySets);
     // Favoritos do Modo Motor (TK-02b, 28/10/2026): só espécie conhecida, sem repetir. Save antigo sem o campo = vazio.
-    state.motorFavoritos = Array.isArray(save.motorFavoritos) ? semRepetido(save.motorFavoritos.filter(function (s) { return typeof s === "string" && !!SPECIES_BY_SNAME[s]; })) : [];
+    // Desconhecida não se perde: fica em state.orphans.fav (como team/box) e volta no buildSave.
+    var favOrphans = [];
+    state.motorFavoritos = semRepetido(snamesToXs(save.motorFavoritos, favOrphans).map(snameOf));
+    state.orphans.fav = semRepetido(favOrphans);
     // Arquétipo do time (Fase 3b, 2026-09-12) - defensivo igual notes/
     // customBuilds acima: só aceita valor que já é uma das opções reais
     // (um save editado à mão ou de outra versão não pode injetar algo fora
@@ -360,7 +363,8 @@
       archetype: state.archetype
     };
     // Só grava quando há favorito: sem ele o save fica idêntico ao de antes (mesma soma, sem diferença falsa no sync).
-    if (state.motorFavoritos && state.motorFavoritos.length) save.motorFavoritos = state.motorFavoritos.slice();
+    var favs = (state.motorFavoritos || []).concat(state.orphans.fav || []);
+    if (favs.length) save.motorFavoritos = favs;
     return save;
   }
 

@@ -32,3 +32,9 @@ test("saneamento: desconhecida, repetida e não-texto saem", () => {
   R.applySave({ team: [], box: [], motorFavoritos: "x" });
   assert.deepEqual([...R.state.motorFavoritos], []);
 });
+
+test("favorito desconhecido sobrevive a applySave -> buildSave sem aparecer na tela", () => {
+  R.applySave({ team: [], box: [], motorFavoritos: ["SPECIES_PIKACHU", "SPECIES_FUTURA", "SPECIES_FUTURA"] });
+  assert.deepEqual([...R.state.motorFavoritos], ["SPECIES_PIKACHU"]);
+  assert.deepEqual([...R.buildSave().motorFavoritos], ["SPECIES_PIKACHU", "SPECIES_FUTURA"]);
+});

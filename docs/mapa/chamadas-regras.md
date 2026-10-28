@@ -112,18 +112,18 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - PACE_ARCHETYPES:142 - chamado por: applySave (save.js:47), archetypeCardHtml (arquetipo.js:85)
 - ROLE_LABEL_PT:179 - chamado por: aiTool_getSpeciesRank (ferramentas_ia.js:24), blocoTimeEmUsoIA (prompts_ia.js:423), descricaoTimeParaGuia (prompts_ia.js:875), montarPromptTimeArquetipo (prompts_ia.js:823), nomePapel (prompts_ia.js:311), +2
 - SPECIES:52 - chamado por: computeSpeedTiers (chefoes.js:495), especieDaFormaDuelo (duelo.js:3494), buildStandardAiTools (ferramentas_ia.js:249), especiesQueResolvem (pipeline_build.js:638), montarTimePeloMotorEmPassos (time_pelo_motor.js:435), +3
-- SPECIES_BY_SNAME:72 - chamado por: applySave (save.js:47), snamesToXs (save.js:15)
+- SPECIES_BY_SNAME:72 - chamado por: snamesToXs (save.js:15)
 - SPLIT_LABEL_PT:180 - chamado por: aiTool_getSpeciesRank (ferramentas_ia.js:24), roleTagsHtml (dex_ficha.js:224)
 - SPLIT_STATUS:29 - chamado por: moveRoleOf (golpes.js:53), conflitoDeItem (validacao_build_ia.js:136), updateMyBuildStatus (editor_build.js:362)
 - TATICA_ARCHETYPES:147 - chamado por: applySave (save.js:47), archetypeCardHtml (arquetipo.js:85)
 - TYPES:9 - chamado por: computeBossAttackTypes (chefoes.js:147), confrontoMoveType (confronto.js:32), efeitoDasHabilidadesNoDuelo (duelo.js:1463), escolherProximoDoChefao (duelo.js:4074), lerDiversosDaFraseDuelo (duelo.js:670), +11
 - USABLE_TYPES:128 - chamado por: computeSharedRisks (chefoes.js:109), fraquezasDoTipo (mono_run.js:81), resistemAoTipo (mono_run.js:84), applySave (save.js:47), perfilDefensivoDaEspecie (tipos.js:175), +2
 - WEATHER_ARCHETYPES:143 - chamado por: applySave (save.js:47), archetypeCardHtml (arquetipo.js:85)
-- clampInt:103 - chamado por: applySave (save.js:47), sanitizarStrategySets (save.js:252), limitarEvsAoJogo (validacao_build_ia.js:169), lerFormularioDoEditor (editor_build.js:493), updateMyBuildEvTotal (editor_build.js:332), +1
+- clampInt:103 - chamado por: applySave (save.js:47), sanitizarStrategySets (save.js:255), limitarEvsAoJogo (validacao_build_ia.js:169), lerFormularioDoEditor (editor_build.js:493), updateMyBuildEvTotal (editor_build.js:332), +1
 - descricaoDaEspecie:185 - chamado por: fichaCabecalhoHtml (dex_ficha.js:515)
 - getSpeciesBySname:79 - chamado por: entradaDeBuild (builds.js:23), confrontoFoesDe (chefoes.js:258), efeitoDasHabilidadesNoDuelo (duelo.js:1463), foeDeDuelo (duelo.js:3020), carryUserData (evolucao.js:167), +16
 - getSpeciesByX:78 - chamado por: effectiveBuild (builds.js:200), itensEmUsoComQuem (builds.js:151), teamItemsInUse (builds.js:90), teamMovesInUse (builds.js:123), teamRolesInUse (builds.js:163), +56
-- snameOf:80 - chamado por: xsToSnames (save.js:24)
+- snameOf:80 - chamado por: applySave (save.js:47), xsToSnames (save.js:24)
 - uniqueIds:118 - chamado por: nomesDeHabilidades (condicoes_habilidade.js:128), armadoresDeClima (duelo.js:3214), climaDoTimeDoChefao (duelo.js:3045), comHabilidadesDuelo (duelo.js:3449), foeDeDuelo (duelo.js:3020), +26
 
 ## regras/duelo.js
@@ -355,7 +355,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - golpesNoCap:123 - chamado por: effectiveBuild (builds.js:200), myBuildEditorHtml (editor_build.js:223)
 - nivelDeEvolucaoDaForma:68 - chama: EVOKINDS (dados_base.js:13), EVO_LEVEL (dados_base.js:30) | chamado por: golpesFuturosDe (builds.js:177)
 - nivelDoGolpe:56 - chama: MOVE_ID_BY_NAME (dados_base.js:87) | chamado por: golpesFuturosDe (builds.js:177), gravarPlanoDaIa (gravacao_build_ia.js:134)
-- planoSaneado:107 - chamado por: entradaDeBuild (builds.js:23), anteriorSaneado (save.js:233), applySave (save.js:47)
+- planoSaneado:107 - chamado por: entradaDeBuild (builds.js:23), anteriorSaneado (save.js:236), applySave (save.js:47)
 - trocasEntreCaps:141 - chamado por: registrarTrocasDoPlano (revisao_automatica.js:149)
 - validarPlano:80 - chamado por: gravarPlanoDaIa (gravacao_build_ia.js:134), anexarPlanoDaIa (prompts_ia.js:208)
 
@@ -416,17 +416,17 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## regras/save.js
 - AUTO_LOG_MAX:37 - chamado por: logAutoAction (evolucao.js:229)
-- anteriorSaneado:233 - chama: planoSaneado (plano_build.js:107)
-- applySave:47 - chama: BUILD_SOURCES (builds.js:17), MONOTYPE_ARCHETYPES (dados_base.js:154), PACE_ARCHETYPES (dados_base.js:142), SPECIES_BY_SNAME (dados_base.js:72), TATICA_ARCHETYPES (dados_base.js:147), +10 | chamado por: loadSave (nucleo.js:337), aplicarSaveRemoto (sync.js:45)
-- buildSave:333 - chamado por: persist (nucleo.js:144), aplicarSaveRemoto (sync.js:45), connectSync (sync.js:179)
-- conferirSomaDoSave:323 - chamado por: loadSave (nucleo.js:337), remotoComSomaErrada (sync.js:88)
-- montarSave:338 - chama: state (nucleo.js:8)
+- anteriorSaneado:236 - chama: planoSaneado (plano_build.js:107)
+- applySave:47 - chama: BUILD_SOURCES (builds.js:17), MONOTYPE_ARCHETYPES (dados_base.js:154), PACE_ARCHETYPES (dados_base.js:142), TATICA_ARCHETYPES (dados_base.js:147), USABLE_TYPES (dados_base.js:128), +10 | chamado por: loadSave (nucleo.js:337), aplicarSaveRemoto (sync.js:45)
+- buildSave:336 - chamado por: persist (nucleo.js:144), aplicarSaveRemoto (sync.js:45), connectSync (sync.js:179)
+- conferirSomaDoSave:326 - chamado por: loadSave (nucleo.js:337), remotoComSomaErrada (sync.js:88)
+- montarSave:341 - chama: state (nucleo.js:8)
 - reconciliouAoAplicar:44 - chamado por: loadSave (nucleo.js:337), aplicarSaveRemoto (sync.js:45)
-- sanitizarStrategySets:252 - chama: clampInt (dados_base.js:103), getSpeciesBySname (dados_base.js:79) | chamado por: generateStrategySets (revisao_automatica.js:182)
-- saveChegandoTemMenosProgresso:379 - chamado por: conflitoDeProgresso (sync.js:61)
-- saveEnviavel:330 - chamado por: connectSync (sync.js:179), remotoComSomaErrada (sync.js:88)
+- sanitizarStrategySets:255 - chama: clampInt (dados_base.js:103), getSpeciesBySname (dados_base.js:79) | chamado por: generateStrategySets (revisao_automatica.js:182)
+- saveChegandoTemMenosProgresso:383 - chamado por: conflitoDeProgresso (sync.js:61)
+- saveEnviavel:333 - chamado por: connectSync (sync.js:179), remotoComSomaErrada (sync.js:88)
 - snamesToXs:15 - chama: SPECIES_BY_SNAME (dados_base.js:72) | chamado por: carregarTimeSalvo (time.js:245), renderSavedTeams (time.js:206)
-- syncContentDiffers:393 - chamado por: connectSync (sync.js:179)
+- syncContentDiffers:397 - chamado por: connectSync (sync.js:179)
 - xsToSnames:24 - chama: snameOf (dados_base.js:80) | chamado por: guardarTimeAnterior (aba_chefoes.js:266)
 
 ## regras/sugestao_do_motor.js
