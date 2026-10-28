@@ -48,7 +48,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **prompts_ia.js** - Peças dos prompts de IA (o que vai pro modelo) e a tradução dos erros da IA pro
   soExistentes:32, itensDeEspeciePara:84, archetypeBuildGuidance:141, planoPromptBlock:158, contextoDoModoPrompt:168, anexarPlanoDaIa:208, sampleErrorMessage:230, versaoDosDados:273, cabecalhoIA:274, linhaHabilidadeIA:281, blocoEspecieIA:285, nomePapel:311, blocoPapelIA:312, blocoMovepoolIA:342, blocoRegrasDePapelIA:348, blocoMegaIA:354, comDescricaoIA:367, blocoItensDaEspecieIA:370, blocoItensIA:375, itensAindaIndisponiveisParaIA:382, blocoItensAindaIndisponiveisIA:387, blocoItensComunsIA:393, blocoTimeEmUsoIA:423, blocoManualIA:469, linhaVelocidadeIA:490, linhasProximaLutaIA:506, blocoContextoIA:542, envelopeContextoIA:545, linhasContextoDaEspecieIA:552, avisoInnatesEliteIA:575 (+16)
 - **rank_da_run.js** - Rank v2 (2026-10-02, modelo aprovado pelo usuário - scripts/calcular_rank_v2.mjs):
-  chaveDoRankDaDificuldade:22, rankDe:28, dominantesNoTipo:50, rankDaDificuldadeDe:68
+  chaveDoRankDaDificuldade:23, rankDe:29, dominantesNoTipo:51, rankDaDificuldadeDe:69
 - **reconciliar_build.js** - Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
   movepoolCompletoDe:17, habilidadeSubstitutaPara:26, reconciliarBuild:39
 - **save.js** - Save do app: formato gravado (buildSave), leitura defensiva (applySave e os
@@ -268,6 +268,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **demolitionist_pelo_codigo.test.mjs** - Ticket mecanica-2026-10-22/03 (parte Demolitionist), 22/10/2026. Valem pelo CÓDIGO da versão nova (er-repo upcoming):
 - **descricao_especie.test.mjs** - Descrição de teste do jogo escondida na ficha (15/10/2026): o Noxislash mostrava "Hi i use this for implementing.".
 - **diff_versoes.test.mjs** - Diff entre versões do gameData: detecta o que mudou e o que do app cita isso
+- **dificuldade_hell.test.mjs** - TK-10a: a Dificuldade Hell existe no save e no seletor; Dificuldade do jogador e tier do chefão são mapas separados.
 - **diversos_no_duelo.test.mjs** - Habilidades "diversas" no duelo (2026-09-29): o resto que muda um 1x1 -
 - **drench.test.mjs** - Ticket 17 (07/10/2026): status drench pelo código oficial (er-repo 217dd0f). Encharcado age por
 - **duelo_pela_interface.test.mjs** - Ticket 07 da dívida técnica (08/10/2026), 1ª metade: o duelo testado pela entrada pública.

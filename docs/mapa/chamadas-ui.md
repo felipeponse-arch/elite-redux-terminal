@@ -65,11 +65,11 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - fichaNotasHtml:602 - chama: bossReferenceHtml (ficha_extras.js:103), buildHistoryHtml (ficha_extras.js:87), notesCardHtml (ficha_extras.js:78)
 - fichaStatsHtml:424 - chama: statPct (dex_lista.js:163), statTier (dex_lista.js:164)
 - howToObtainText:245 - chama: MAPS (dados_base.js:49)
-- marcasDoRankHtml:297 - chama: precisaDeSetter (condicoes_habilidade.js:214), nivelDaHabilidadeNoElite (level_cap.js:40), rankDaDificuldadeDe (rank_da_run.js:68), state (nucleo.js:8)
-- rankBadgeHtml:169 - chama: FORA_DO_RANK (rank_da_run.js:10), MOTIVO_FORA_DO_RANK_PT (rank_da_run.js:17), rankDe (rank_da_run.js:28) | chamado por: renderBox (caixa.js:16), linhaDaListaHtml (dex_lista.js:212), compareResultHtml (ficha_extras.js:22), renderTeam (time.js:8), renderRoleCompendium (tipos.js:113)
-- rankDuplaBadgeHtml:204 - chama: rankDe (rank_da_run.js:28)
-- rankInfoLineHtml:319 - chama: FORA_DO_RANK (rank_da_run.js:10), MOTIVO_FORA_DO_RANK_PT (rank_da_run.js:17), rankDe (rank_da_run.js:28)
-- rankStageBadgeHtml:212 - chama: rankDe (rank_da_run.js:28)
+- marcasDoRankHtml:297 - chama: precisaDeSetter (condicoes_habilidade.js:214), nivelDaHabilidadeNoElite (level_cap.js:40), rankDaDificuldadeDe (rank_da_run.js:69), state (nucleo.js:8)
+- rankBadgeHtml:169 - chama: FORA_DO_RANK (rank_da_run.js:10), MOTIVO_FORA_DO_RANK_PT (rank_da_run.js:17), rankDe (rank_da_run.js:29) | chamado por: renderBox (caixa.js:16), linhaDaListaHtml (dex_lista.js:212), compareResultHtml (ficha_extras.js:22), renderTeam (time.js:8), renderRoleCompendium (tipos.js:113)
+- rankDuplaBadgeHtml:204 - chama: rankDe (rank_da_run.js:29)
+- rankInfoLineHtml:319 - chama: FORA_DO_RANK (rank_da_run.js:10), MOTIVO_FORA_DO_RANK_PT (rank_da_run.js:17), rankDe (rank_da_run.js:29)
+- rankStageBadgeHtml:212 - chama: rankDe (rank_da_run.js:29)
 - renderMovesTable:111 - chama: MOVES (dados_base.js:11), TYPES (dados_base.js:9), getCurrentCap (level_cap.js:49)
 - roleTagsHtml:224 - chama: ROLE_LABEL_PT (dados_base.js:179), SPLIT_LABEL_PT (dados_base.js:180) | chamado por: renderBox (caixa.js:16)
 - scheduleDashboardRefresh:737 - chama: renderDashboard (resumo_luta.js:183)
@@ -80,7 +80,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/dex_lista.js
 - bst:152 - chamado por: fichaConhecerHtml (dex_ficha.js:569), compareResultHtml (ficha_extras.js:22)
 - flashToast:473 - chamado por: initBosses (aba_chefoes.js:33), montarTimeContraEsteChefao (aba_chefoes.js:337), applyRecommendedTeam (arquetipo.js:207), generateCompleteTeam (arquetipo.js:302), generateTeamForArchetype (arquetipo.js:153), +4
-- getFiltered:171 - chama: SPECIES (dados_base.js:52), rankDe (rank_da_run.js:28), speciesTypeNames (tipos.js:250), state (nucleo.js:8)
+- getFiltered:171 - chama: SPECIES (dados_base.js:52), rankDe (rank_da_run.js:29), speciesTypeNames (tipos.js:250), state (nucleo.js:8)
 - linhaDaListaHtml:212 - chama: speciesTypeNames (tipos.js:250), rankBadgeHtml (dex_ficha.js:169), state (nucleo.js:8)
 - listaAtual:210 - chamado por: fichaNavHtml (dex_ficha.js:446)
 - openConfirmModal:403 - chamado por: excluirTimeSalvo (time.js:273)
@@ -189,7 +189,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - quemResolveCardHtml:83 - chama: DIFF_TO_BOSSKEY (chefoes.js:19), DIFF_LABELS (aba_chefoes.js:233), state (nucleo.js:8) | chamado por: renderBossDetail (aba_chefoes.js:589)
 - quemResolveChave:17 - chama: getCurrentCap (level_cap.js:49), state (nucleo.js:8)
 - quemResolveItemHtml:43 - chama: pipelineCandidatoHtml (pipeline_tela.js:77)
-- quemResolveOrigemHtml:37 - chama: rankDe (rank_da_run.js:28)
+- quemResolveOrigemHtml:37 - chama: rankDe (rank_da_run.js:29)
 - quemResolvePreencher:66 - chama: bossState (aba_chefoes.js:13)
 - quemResolveRestaurar:103 - chama: bossState (aba_chefoes.js:13) | chamado por: renderBossDetail (aba_chefoes.js:589)
 
@@ -235,7 +235,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - zerarRun:356 - chama: logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), myBuildLevelIsCustom (aba_chefoes.js:31), generatedTeamResult (arquetipo.js:35), teamRecommendation (arquetipo.js:30), +4
 
 ## ui/tipos.js
-- computeRoleCompendium:91 - chama: ROLE_LABEL_PT (dados_base.js:179), SPECIES (dados_base.js:52), rankDe (rank_da_run.js:28), speciesTypeNames (tipos.js:250), state (nucleo.js:8)
+- computeRoleCompendium:91 - chama: ROLE_LABEL_PT (dados_base.js:179), SPECIES (dados_base.js:52), rankDe (rank_da_run.js:29), speciesTypeNames (tipos.js:250), state (nucleo.js:8)
 - renderRoleCompendium:113 - chama: rankBadgeHtml (dex_ficha.js:169)
 - renderSpeedTiers:35 - chama: SPEEDTIER_NATURE (chefoes.js:493), computeSpeedTiers (chefoes.js:495), speciesTypeNames (tipos.js:250), state (nucleo.js:8)
 - renderTypeMatrix:9 - chama: USABLE_TYPES (dados_base.js:128), typeMultiplier (tipos.js:240)

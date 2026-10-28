@@ -68,7 +68,7 @@
       });
     }
     if (save.settings && typeof save.settings === "object") {
-      if (["easy", "ace", "elite"].indexOf(save.settings.difficulty) !== -1) state.settings.difficulty = save.settings.difficulty;
+      if (["easy", "ace", "elite", "hell"].indexOf(save.settings.difficulty) !== -1) state.settings.difficulty = save.settings.difficulty;
       if (LEVEL_CAP_MODES.indexOf(save.settings.levelCapMode) !== -1) state.settings.levelCapMode = save.settings.levelCapMode;
       else state.settings.levelCapMode = levelCapModeFromDifficulty(save.settings.difficulty);
       if (save.settings.megaMode === "permanente" || save.settings.megaMode === "temporaria") state.settings.megaMode = save.settings.megaMode;

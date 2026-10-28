@@ -39,8 +39,8 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - DIFF_TO_BOSSKEY:19 - chamado por: pipelineResolverAlvo (pipeline_build.js:71), motorLutasComunsDoContexto (time_pelo_motor.js:108), motorMontarLuta (time_pelo_motor.js:79), quemResolveCardHtml (quem_resolve.js:83)
 - LUTAS_DA_RUN:314 - chamado por: pipelineResolverAlvo (pipeline_build.js:71), motorLutasDoContexto (time_pelo_motor.js:123)
 - SPEEDTIER_NATURE:493 - chamado por: renderSpeedTiers (tipos.js:35)
-- bestBoxCandidateForBoss:183 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:219), unitTypeMult (formas_mega.js:235), serveProMono (mono_run.js:75), rankDe (rank_da_run.js:28), +1 | chamado por: aiTool_getBoxCandidatesForBoss (ferramentas_ia.js:182), linhasProximaLutaIA (prompts_ia.js:506), nextFightDetailHtml (resumo_luta.js:215)
-- bestRankForm:333 - chama: battleUnitsOf (formas_mega.js:219), rankDe (rank_da_run.js:28) | chamado por: nextFightDetailHtml (resumo_luta.js:215)
+- bestBoxCandidateForBoss:183 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:219), unitTypeMult (formas_mega.js:235), serveProMono (mono_run.js:75), rankDe (rank_da_run.js:29), +1 | chamado por: aiTool_getBoxCandidatesForBoss (ferramentas_ia.js:182), linhasProximaLutaIA (prompts_ia.js:506), nextFightDetailHtml (resumo_luta.js:215)
+- bestRankForm:333 - chama: battleUnitsOf (formas_mega.js:219), rankDe (rank_da_run.js:29) | chamado por: nextFightDetailHtml (resumo_luta.js:215)
 - bossPartyPorDificuldade:327 - chama: state (nucleo.js:8) | chamado por: aiTool_getNextBossRoster (ferramentas_ia.js:120), avisoProximoLider (mono_run.js:159), pipelineResolverAlvo (pipeline_build.js:71), linhasProximaLutaIA (prompts_ia.js:506), motorMontarLuta (time_pelo_motor.js:79), +2
 - bossSafetyScore:171 - chama: unitTypeMult (formas_mega.js:235)
 - bossSpeedSummary:132 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8) | chamado por: nextFightDetailHtml (resumo_luta.js:215)
@@ -230,7 +230,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - aiTool_getNextBossRoster:120 - chama: bossPartyPorDificuldade (chefoes.js:327), confrontoFoesDe (chefoes.js:258), confrontoParaParty (chefoes.js:298), getRemainingBossEntries (chefoes.js:51), coberturaSugerida (confronto.js:196), +1
 - aiTool_getPriorityMoveOptions:51 - chama: MOVES (dados_base.js:11), getSpeciesBySname (dados_base.js:79), availableMovesFor (level_cap.js:71)
 - aiTool_getRemainingBosses:159 - chama: getRemainingBossEntries (chefoes.js:51), getSpeciesByX (dados_base.js:78), speciesTypeNames (tipos.js:250)
-- aiTool_getSpeciesRank:24 - chama: ROLE_LABEL_PT (dados_base.js:179), SPLIT_LABEL_PT (dados_base.js:180), rankDe (rank_da_run.js:28)
+- aiTool_getSpeciesRank:24 - chama: ROLE_LABEL_PT (dados_base.js:179), SPLIT_LABEL_PT (dados_base.js:180), rankDe (rank_da_run.js:29)
 - aiTool_getSpeedBenchmark:204 - chama: computeSpeedTiers (chefoes.js:495), getSpeciesBySname (dados_base.js:79)
 - aiTool_getTeamWeaknesses:15 - chama: computeSharedRisks (chefoes.js:109), getSpeciesByX (dados_base.js:78), state (nucleo.js:8)
 - buildStandardAiTools:249 - chama: SPECIES (dados_base.js:52) | chamado por: opcoesDaIA (ia.js:72)
@@ -244,7 +244,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - battleUnitsOf:219 - chamado por: bestBoxCandidateForBoss (chefoes.js:183), bestRankForm (chefoes.js:333), confrontoMelhorUnidade (chefoes.js:269), especiesQueResolvem (pipeline_build.js:638), motorCandidatosEmPassos (time_pelo_motor.js:206), +3
 - etapaDaMega:151 - chama: etapaDaPedra (liberado_na_run.js:16)
 - formFamilyOf:58 - chama: getSpeciesByX (dados_base.js:78) | chamado por: mudancaDeTipo (mono_run.js:96), applyRecommendedTeam (arquetipo.js:207), otherFormsHtml (ficha_extras.js:206)
-- formFamilyPromptNote:39 - chama: ABILITIES (dados_base.js:10), uniqueIds (dados_base.js:118), rankDe (rank_da_run.js:28), speciesTypeNames (tipos.js:250) | chamado por: blocoMegaIA (prompts_ia.js:354), descricaoTimeParaGuia (prompts_ia.js:875), montarPromptTimeArquetipo (prompts_ia.js:823)
+- formFamilyPromptNote:39 - chama: ABILITIES (dados_base.js:10), uniqueIds (dados_base.js:118), rankDe (rank_da_run.js:29), speciesTypeNames (tipos.js:250) | chamado por: blocoMegaIA (prompts_ia.js:354), descricaoTimeParaGuia (prompts_ia.js:875), montarPromptTimeArquetipo (prompts_ia.js:823)
 - isMegaEvoKind:22 - chama: EVOKINDS (dados_base.js:13), EVO_MEGA_KINDS (dados_base.js:34), EVO_PRIMAL (dados_base.js:33) | chamado por: itemDoDuelo (duelo.js:984), itemDoSetDuelo (duelo.js:1066)
 - isMegaForm:64 - chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:200), motivoDeNaoGerarBuild (gravacao_build_ia.js:18), mudancaDeTipo (mono_run.js:96), blocoMegaIA (prompts_ia.js:354), +6
 - megaEvolutionUnlocked:88 - chama: state (nucleo.js:8) | chamado por: blocoMegaIA (prompts_ia.js:354), montarPromptTimeArquetipo (prompts_ia.js:823)
@@ -316,7 +316,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - compraDeInicialTexto:48 - chama: getSpeciesBySname (dados_base.js:79) | chamado por: fichaCabecalhoHtml (dex_ficha.js:515)
 - fraquezasDoTipo:81 - chama: USABLE_TYPES (dados_base.js:128), typeMultiplier (tipos.js:240) | chamado por: notaMonoDoCandidato (prompts_ia.js:806), monoRunCardHtml (arquetipo.js:516)
 - linhaEvolutivaDe:20 - chama: getSpeciesByX (dados_base.js:78)
-- monoDisponibilidade:177 - chama: getSpeciesBySname (dados_base.js:79), rankDe (rank_da_run.js:28) | chamado por: monoRunCardHtml (arquetipo.js:516)
+- monoDisponibilidade:177 - chama: getSpeciesBySname (dados_base.js:79), rankDe (rank_da_run.js:29) | chamado por: monoRunCardHtml (arquetipo.js:516)
 - monotypeAtivo:73 - chama: state (nucleo.js:8) | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), renderBossDetail (aba_chefoes.js:589)
 - mudancaDeTipo:96 - chama: formFamilyOf (formas_mega.js:58), isMegaForm (formas_mega.js:64), speciesTypeNames (tipos.js:250) | chamado por: notaMonoDoCandidato (prompts_ia.js:806), viramDoTipoPrompt (prompts_ia.js:812)
 - orientacaoMono:145 - chama: ITEMS (dados_base.js:12) | chamado por: archetypeBuildGuidance (prompts_ia.js:141), montarPromptTimeArquetipo (prompts_ia.js:823)
@@ -325,7 +325,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## regras/pipeline_build.js
 - candidatosDeBuild:517 - chamado por: candidatosParaAEscolhaDaIa (escolha_ia_candidatos.js:201), pipelineResultado (pipeline_tela.js:14)
-- especiesQueResolvem:638 - chama: SPECIES (dados_base.js:52), getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:219), serveProMono (mono_run.js:75), rankDe (rank_da_run.js:28), +1 | chamado por: quemResolveCalcular (quem_resolve.js:22)
+- especiesQueResolvem:638 - chama: SPECIES (dados_base.js:52), getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:219), serveProMono (mono_run.js:75), rankDe (rank_da_run.js:29), +1 | chamado por: quemResolveCalcular (quem_resolve.js:22)
 - fecharBuild:697 - chama: ALL_NATURES (dados_base.js:101), getSpeciesBySname (dados_base.js:79), validarRespostaDeBuildDaIa (gravacao_build_ia.js:26), megaStoneRuleFor (validacao_build_ia.js:14) | chamado por: fecharCandidatoDaEscolha (escolha_ia_candidatos.js:142)
 - pipelineAmeacasDePrioridade:147 - chama: aguentaUmGolpe (duelo.js:2253), golpesNecessariosDuelo (duelo.js:2243), prioBloqueadaPelaHabilidadeDuelo (duelo.js:1818)
 - pipelineAvaliarConjunto:278 - chama: golpesNecessariosComPrimeiroDuelo (duelo.js:2245)
@@ -385,7 +385,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - linhaProvadoIA:600 - chama: dadoExterno (golpes.js:19) | chamado por: linhaDoChefaoPorEspecieIA (escolha_ia_candidatos.js:68)
 - linhaVelocidadeIA:490 - chama: calcFinalStat (calc_stat.js:119), computeSpeedTiers (chefoes.js:495), state (nucleo.js:8)
 - linhasContextoComumIA:581 - chama: getRemainingBossEntries (chefoes.js:51), getSpeciesByX (dados_base.js:78), speciesTypeNames (tipos.js:250)
-- linhasContextoDaEspecieIA:552 - chama: sinergiasDaEspecie (duelo.js:1412), rankDe (rank_da_run.js:28)
+- linhasContextoDaEspecieIA:552 - chama: sinergiasDaEspecie (duelo.js:1412), rankDe (rank_da_run.js:29)
 - linhasProximaLutaIA:506 - chama: bestBoxCandidateForBoss (chefoes.js:183), bossPartyPorDificuldade (chefoes.js:327), confrontoFoesDe (chefoes.js:258), confrontoParaParty (chefoes.js:298), ehRevancheDeLider (chefoes.js:454), +6
 - montarPromptBuild:610 - chama: blocoCondicoesIA (condicoes_habilidade.js:239), getCurrentCap (level_cap.js:49) | chamado por: generateBuildWithAI (ia.js:278)
 - montarPromptBuildsDoTime:665 - chama: MAX_MESMO_ITEM_NO_TIME (builds.js:150), NOME_DA_CONDICAO (condicoes_habilidade.js:42), blocoCondicoesIA (condicoes_habilidade.js:239), dadoExterno (golpes.js:19), getCurrentCap (level_cap.js:49) | chamado por: gerarBuildsDoTimeComIA (ia.js:176)
@@ -406,8 +406,8 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## regras/rank_da_run.js
 - FORA_DO_RANK:10 - chamado por: rankBadgeHtml (dex_ficha.js:169), rankInfoLineHtml (dex_ficha.js:319)
 - MOTIVO_FORA_DO_RANK_PT:17 - chamado por: rankBadgeHtml (dex_ficha.js:169), rankInfoLineHtml (dex_ficha.js:319)
-- rankDaDificuldadeDe:68 - chamado por: marcasDoRankHtml (dex_ficha.js:297)
-- rankDe:28 - chama: state (nucleo.js:8) | chamado por: bestBoxCandidateForBoss (chefoes.js:183), bestRankForm (chefoes.js:333), aiTool_getSpeciesRank (ferramentas_ia.js:24), formFamilyPromptNote (formas_mega.js:39), monoDisponibilidade (mono_run.js:177), +10
+- rankDaDificuldadeDe:69 - chamado por: marcasDoRankHtml (dex_ficha.js:297)
+- rankDe:29 - chama: state (nucleo.js:8) | chamado por: bestBoxCandidateForBoss (chefoes.js:183), bestRankForm (chefoes.js:333), aiTool_getSpeciesRank (ferramentas_ia.js:24), formFamilyPromptNote (formas_mega.js:39), monoDisponibilidade (mono_run.js:177), +10
 
 ## regras/reconciliar_build.js
 - habilidadeSubstitutaPara:26 - chama: ABILITIES (dados_base.js:10), uniqueIds (dados_base.js:118), sinergiasDaEspecie (duelo.js:1412)
