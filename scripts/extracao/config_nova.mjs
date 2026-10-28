@@ -171,7 +171,7 @@ export function gerarPatch(dex, habilidadesDaConfig, especiesDaConfig, commit, g
     especiesNovas.push({ sname: c.sname, base: c.megafrom, pedraEnum: c.megaitem, tipos: [c.tipo1, c.tipo2].filter(Boolean),
       b: ["hp", "atk", "def", "spatk", "spdef", "spe"].map((k, i) => (b[k] !== undefined ? b[k] : base.b[i])), // a config omite `spe` nas duas Megas: vale a da espécie base
       speDaConfig: b.spe !== undefined,
-      provisoria: ["hp", "atk", "def", "spatk", "spdef", "spe"].every((k) => b[k] !== undefined) ? undefined : "a config d1a9a4c não traz todos os atributos base (falta " + ["hp", "atk", "def", "spatk", "spdef", "spe"].filter((k) => b[k] === undefined).join(", ") + "); os que faltam valem os da base; fora da Dex, das builds, do pipeline e do rank até a config ter números reais (scripts/extracao/provisorias.mjs)",
+      // decisão do usuário (28/10): as duas Megas sem `spe` na config entram como as demais (spe da base, speDaConfig:false); sem marca provisoria
       ab: c.ab.map(nomeAb), inn: c.inn.map(nomeAb), usaLearnset: c.usaLearnset || c.megafrom });
   }
   return { fonte: "Elite-Redux/er-config AbilityList, SpeciesList e MoveList.textproto", commit, renomeadas, descricoes, novas, especies, golpes: golpesNovos, aprende, especiesNovas };
