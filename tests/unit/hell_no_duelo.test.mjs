@@ -18,7 +18,7 @@ test("H1 Hell: Water x Charizard-like 2x vira 1,5x e Ground x Magnezone 4x vira 
     const x = unid(a, g), y = unid(d, g === "Surf" ? "Flamethrower" : "Thunderbolt");
     const ace = noModo("ace", () => dano(x, y)), h = noModo("hell", () => dano(x, y));
     assert.equal(ace.efTipo, tab, "tabela fica como está (limiares >=2)");
-    assert.ok(Math.abs(h.dano / ace.dano - hell / tab) < 1e-9, a + " x " + d + ": " + h.dano / ace.dano);
+    assert.ok(Math.abs(h.dano / ace.dano - 0.75 * hell / tab) < 1e-9, a + " x " + d + ": " + h.dano / ace.dano);
     assert.equal(noModo("elite", () => dano(x, y).dano), ace.dano);
   });
 });
@@ -26,11 +26,11 @@ test("H1 Hell: Water x Charizard-like 2x vira 1,5x e Ground x Magnezone 4x vira 
 test("H1 Hell vale para os dois lados e não mexe em neutro/resistido", () => {
   const x = unid("Vaporeon", "Surf"), y = unid("Charizard", "Flamethrower"); // y bate em x só neutro/resistido? Fire x Water = 0,5
   const a = noModo("ace", () => dano(y, x)), h = noModo("hell", () => dano(y, x));
-  assert.equal(h.dano, a.dano);
+  assert.ok(Math.abs(h.dano / a.dano - 0.75) < 1e-9, "neutro/resistido só leva o x0,75 global");
   const z = unid("Jolteon", "Thunderbolt"), w = unid("Vaporeon", "Surf");
   const lado = (p, q) => noModo("hell", () => dano(p, q)).dano / noModo("ace", () => dano(p, q)).dano;
-  assert.ok(Math.abs(lado(z, w) - 0.75) < 1e-9, "jogador bate super efetivo");
-  assert.ok(Math.abs(lado(unid("Garchomp", "Earthquake"), z) - 0.75) < 1e-9, "inimigo bate super efetivo (foe usa a mesma conta)");
+  assert.ok(Math.abs(lado(z, w) - 0.5625) < 1e-9, "jogador bate super efetivo");
+  assert.ok(Math.abs(lado(unid("Garchomp", "Earthquake"), z) - 0.5625) < 1e-9, "inimigo bate super efetivo (foe usa a mesma conta)");
 });
 
 test("H6 Hell: todo inimigo de todo chefão sai marcado (o jogador não), então a paralisia nunca o faz perder o turno", () => {
@@ -51,8 +51,9 @@ test("H4 Hell: o jogador tem IV 0 do 5º badge em diante; antes disso, no Ace e 
     assert.ok(stats("hell", 5).every((v, i) => v < ace5[i]), "todos os stats caem com IV 0");
     const b = R.BOSSES.find((x) => x.name === "Brawly 1");
     R.state.settings.milestone = 8;
-    const f = noModo("hell", () => R.foeDeDuelo(b.party[0], NIVEL, null)), g = noModo("ace", () => R.foeDeDuelo(b.party[0], NIVEL, null));
-    assert.deepEqual(f.stats, g.stats, "inimigo sempre com o IV do dado");
+    const f = noModo("hell", () => R.foeDeDuelo(b.party[0], NIVEL, null));
+    const g5 = noModo("ace", () => R.foeDeDuelo(b.party[0], NIVEL + 5, null));
+    assert.deepEqual(f.stats, g5.stats, "inimigo sempre com o IV do dado (nível +5 do R7 em Hell com 8 badges)");
   } finally { R.state.settings.milestone = antes; }
 });
 
@@ -70,4 +71,39 @@ test("H5 Hell: o 2º Pokémon com o mesmo item perde o item; fora do Hell fica i
 // H2: o motor não modela Evasion Up/Minimize (nenhum plano): a cláusula de evasão do Hell (só jogador, só treinador) já fica coerente.
 test("H2: Double Team e Minimize não têm plano no motor (nada a vetar no Hell)", () => {
   ["Double Team", "Minimize"].forEach((n) => assert.ok(!R.planoDoGolpeStatus(R.MOVE_ID_BY_NAME[n]), n));
+});
+
+const comItem = (nome, golpe, item) => R.unidadeDeDuelo(sp(nome), R.SETS_DE_DUELO[0], null, NIVEL, [R.MOVE_ID_BY_NAME[golpe]], null, item);
+// Expert Belt: o jogo compara o modificador já reduzido (battle_util.c:7677): em Hell o 2x (1,5) não ativa, só o 4x (2,5).
+test("Expert Belt em Hell: 2x não ativa, 4x ativa; no Ace ativa nos dois", () => {
+  const razao = (a, g, d, dg, dif) => noModo(dif, () => dano(comItem(a, g, "Expert Belt"), unid(d, dg)).dano / dano(comItem(a, g, "Leftovers"), unid(d, dg)).dano);
+  assert.ok(Math.abs(razao("Vaporeon", "Surf", "Charizard", "Flamethrower", "ace") - 1.2) < 1e-9);
+  assert.ok(Math.abs(razao("Vaporeon", "Surf", "Charizard", "Flamethrower", "hell") - 1) < 1e-9, "2x em Hell: sem cinto");
+  assert.ok(Math.abs(razao("Garchomp", "Earthquake", "Magnezone", "Thunderbolt", "hell") - 1.2) < 1e-9, "4x em Hell: cinto ativa");
+});
+
+// R14 (battle_util.c:7544-7551): Hell reduz todo dano a x0,75 e x0,9 a mais quando o defensor é inimigo com o 2º badge.
+test("R14 Hell: dano x0,75 global e x0,9 extra no inimigo só com milestone >= 2; Ace intacto", () => {
+  const marco = R.state.settings.milestone;
+  try {
+    const foe = R.foeDeDuelo(R.BOSSES.find((x) => x.name === "Brawly 1").party[0], NIVEL, null), eu = unid("Vaporeon", "Surf");
+    const razao = (a, d, m) => { R.state.settings.milestone = m; return noModo("hell", () => dano(a, d).dano) / noModo("ace", () => dano(a, d).dano); };
+    const t = (v, e, msg) => assert.ok(Math.abs(v - e) < 1e-9, msg + ": " + v);
+    assert.equal(noModo("ace", () => dano(eu, foe).efTipo), 1, "caso precisa ser neutro");
+    t(razao(eu, foe, 1), 0.75, "jogador no inimigo, 1 badge");
+    t(razao(eu, foe, 2), 0.675, "jogador no inimigo, 2 badges");
+    t(razao(foe, eu, 8), 0.75, "inimigo no jogador nunca leva o x0,9");
+  } finally { R.state.settings.milestone = marco; }
+});
+
+// R7 (battle_main.c:1807): Hell com o 3º badge dá +5 níveis ao inimigo, máximo 100.
+test("R7 Hell: inimigo +5 níveis com milestone >= 3 (teto 100); antes disso e no Ace/Elite fica igual", () => {
+  const marco = R.state.settings.milestone, m = R.BOSSES.find((x) => x.name === "Brawly 1").party[0];
+  const st = (dif, mk, n) => { R.state.settings.milestone = mk; return noModo(dif, () => R.foeDeDuelo(m, n, null).stats); };
+  try {
+    assert.deepEqual(st("hell", 3, NIVEL), st("ace", 3, NIVEL + 5));
+    assert.deepEqual(st("hell", 2, NIVEL), st("ace", 2, NIVEL));
+    assert.deepEqual(st("elite", 8, NIVEL), st("ace", 8, NIVEL));
+    assert.deepEqual(st("hell", 8, 98), st("ace", 8, 100), "teto 100");
+  } finally { R.state.settings.milestone = marco; }
 });

@@ -2158,7 +2158,8 @@
         if (g.som) red *= def.ef.reducao.som; // Punk Rock
       }
       if (efTipo >= 2 && !semBonus) red *= atq.ef.seBonus;
-      if (efTipo >= 2) red *= comItem(itA.seMult, ativoA); // Expert Belt
+      // Expert Belt compara o modificador já reduzido (battle_util.c:7677 `>= 2.0`): em Hell o 2x vira 1,5 e não ativa, só o 4x (2,5) ativa.
+      if (efTipo >= (modoHellDuelo() ? 4 : 2)) red *= comItem(itA.seMult, ativoA);
       // Tera Shell: com HP cheio todo golpe é pouco efetivo - vale no 1º de ~2 golpes.
       if (def.ef.teraShell && !atq.ef.quebraHabilidade && efTipo > 0.5) red *= (1 + 0.5 / efTipo) / 2;
       var precisao = precisaoAtq ? 1 : Math.min(1, g.precisao * (semBonus ? 1 : atq.ef.precisaoMult));
@@ -2174,7 +2175,7 @@
       if ((atq.ef.critSuperEf || atq.ef.seQuebra) && efTipo >= 2) precisao = 1; // Fatal/Deadly Precision: "never miss"
       var crit = fatorCriticoDuelo(atq, def, g, efTipo);
       // Hell: super efetivo 2x vira 1,5x e 4x vira 2,5x, nos dois lados (battle_util.c:7961-7969); efTipo segue o da tabela nos limiares >=2.
-      var fHell = modoHellDuelo() ? (efTipo === 2 ? 0.75 : efTipo === 4 ? 0.625 : 1) : 1;
+      var fHell = modoHellDuelo() ? (efTipo === 2 ? 0.75 : efTipo === 4 ? 0.625 : 1) * fDanoGlobalHell(def) : 1;
       var dano = ((((2 * nivel) / 5 + 2) * forca * A / D) / 50 + 2) * efTipo * fHell * red * ROLAGEM_MEDIA_DUELO * precisao * crit.fator * noCampo * comItem(itA.danoMult, ativoA);
       // Seismic Toss e Night Shade (battle_script_commands.c Cmd_calculatesetdamage): dano = nível de quem usa;
       // só a imunidade de tipo conta (já descartada acima), nada de atributo, STAB, crítico ou item.
@@ -3025,7 +3026,12 @@
     return speciesTypeNames(sp).concat(ef.tipoExtra).filter(function (t, i, a) { return a.indexOf(t) === i; });
   }
   // Pokémon de chefão (linha de bosses.json) no nível pedido.
+  // Hell (battle_util.c:7544-7551): todo golpe x0,75; quando o defensor é inimigo e o 2º badge já veio (milestone >= 2), mais x0,9.
+  function fDanoGlobalHell(def) { return 0.75 * (def.chefao && state.settings.milestone >= 2 ? 0.9 : 1); }
+  // Hell: com o 3º badge (milestone >= 3) o treinador ganha +5 níveis (battle_main.c:1807; pokemon_config.h:34-35), no máximo 100.
+  function nivelDoInimigoHell(nivel) { return modoHellDuelo() && state.settings.milestone >= 3 ? Math.min(100, nivel + 5) : nivel; }
   function foeDeDuelo(m, nivel, clima) {
+    nivel = nivelDoInimigoHell(nivel);
     var megaSname = MEGA_FORMS[m.item];
     var sp = (megaSname && getSpeciesBySname(megaSname)) || getSpeciesByX(m.x);
     if (!sp) return null;

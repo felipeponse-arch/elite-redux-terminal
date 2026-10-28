@@ -4365,4 +4365,32 @@ export const MUTACOES = [
     de: "    if (!modoHellDuelo()) return meus;\n    var vistos",
     para: "    return meus;\n    var vistos",
   },
+  {
+    id: "hell-expert-belt-no-2x",
+    descricao: "no Hell o Expert Belt volta a ativar no 2x (já reduzido a 1,5)",
+    arquivo: "duelo.js",
+    de: "if (efTipo >= (modoHellDuelo() ? 4 : 2)) red *=",
+    para: "if (efTipo >= 2) red *=",
+  },
+  {
+    id: "hell-dano-global-sem-regra",
+    descricao: "o Hell não reduz o dano em x0,75 (R14)",
+    arquivo: "duelo.js",
+    de: "return 0.75 * (def.chefao",
+    para: "return 1 * (def.chefao",
+  },
+  {
+    id: "hell-dano-inimigo-sem-0-9",
+    descricao: "o inimigo com o 2º badge não leva o x0,9 extra no Hell (R14)",
+    arquivo: "duelo.js",
+    de: "def.chefao && state.settings.milestone >= 2 ? 0.9 : 1",
+    para: "false ? 0.9 : 1",
+  },
+  {
+    id: "hell-niveis-extras-sem-regra",
+    descricao: "o inimigo do Hell não ganha +5 níveis com o 3º badge (R7)",
+    arquivo: "duelo.js",
+    de: "return modoHellDuelo() && state.settings.milestone >= 3 ? Math.min(100, nivel + 5) : nivel;",
+    para: "return nivel;",
+  },
 ];
