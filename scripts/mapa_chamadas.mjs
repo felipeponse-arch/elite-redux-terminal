@@ -40,6 +40,12 @@ export function grafoDeChamadas(raiz, pastas = ["src/regras", "src/ui"]) {
         const d = st.declarationList.declarations[0];
         if (d && ts.isIdentifier(d.name) && d.initializer && (ts.isArrowFunction(d.initializer) || ts.isFunctionExpression(d.initializer))) id = d.name.text;
       }
+      // IIFE nomeada: `(function loadSave() {...})();` (nucleo.js) também é nó, senão o que ela chama some do mapa.
+      else if (ts.isExpressionStatement(st) && ts.isCallExpression(st.expression)) {
+        let f = st.expression.expression;
+        while (ts.isParenthesizedExpression(f)) f = f.expression;
+        if (ts.isFunctionExpression(f) && f.name) id = f.name.text;
+      }
       if (!id) continue;
       const de = `${arq(sf)}:${id}`;
       linha.set(de, sf.getLineAndCharacterOfPosition(st.getStart()).line + 1);

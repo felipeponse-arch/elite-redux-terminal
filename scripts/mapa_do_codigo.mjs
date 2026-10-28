@@ -37,7 +37,7 @@ export function funcoes(texto, ehPs1 = false) {
   const primeira = linhas.find((l) => l.trim() && !l.trim().startsWith("//"));
   const base = primeira ? primeira.match(/^\s*/)[0] : "";
   if (ehPs1) return linhas.flatMap((l, i) => { const m = l.match(/^\s*function\s+([A-Za-z_][\w-]*)/i); return m ? [[m[1], i + 1]] : []; });
-  const re = new RegExp(String.raw`^${base}(?:export\s+)?(?:async\s+)?(?:function\*?\s+([A-Za-z_$][\w$]*)|(?:var|const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>))`);
+  const re = new RegExp(String.raw`^${base}(?:export\s+)?\(?(?:async\s+)?(?:function\*?\s+([A-Za-z_$][\w$]*)|(?:var|const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>))`);
   const achadas = [];
   linhas.forEach((l, i) => { const m = l.match(re); if (m) achadas.push([m[1] || m[2], i + 1]); });
   return achadas;

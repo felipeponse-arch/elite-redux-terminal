@@ -939,7 +939,7 @@
     desligarRevisaoAutomatica: function (sim) { revisaoAutomaticaDesligada = !!sim; },
     // O aquecimento do Modo Motor (builds calculadas em segundo plano) só atrapalharia as seções, que montam o estado à mão.
     desligarAquecimentoDoMotor: function (sim) { motorAquecimentoDesligado = !!sim; },
-    modoMotor: { estado: function () { return { modo: modoDeMontagem, favoritos: motorFavoritos.slice(), tela: motorTela, aquecidoPara: motorAquecidoPara }; } },
+    modoMotor: { estado: function () { return { modo: modoDeMontagem, favoritos: state.motorFavoritos.slice(), tela: motorTela, aquecidoPara: motorAquecidoPara }; } },
     // Ticket 03 do pipeline: liga/desliga a IA que escolhe entre candidatos (desligada = o prompt de build do zero de antes).
     definirEscolhaEntreCandidatos: function (sim) { escolhaEntreCandidatosLigada = !!sim; },
     montarPromptEscolhaDeBuild: montarPromptEscolhaDeBuild,

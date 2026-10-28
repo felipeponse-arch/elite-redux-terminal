@@ -27,9 +27,13 @@
 
   // ---------------- persistence ----------------
   // Everything is stored under ONE versioned key so the whole save can be
-  // migrated, exported and imported as a unit. Schema:
-  //   { v: 2, team: [sname], box: [sname], savedTeams: [{name, team:[sname]}],
-  //     settings: {difficulty, milestone}, dataVersion, savedAt }
+  // migrated, exported and imported as a unit. Schema (v: 2):
+  //   { v, team: [sname], box: [sname], savedTeams: [{name, team:[sname], depois?}],
+  //     settings: {difficulty, levelCapMode, megaMode, milestone, runConfirmedAt, sort, typeFilter},
+  //     motorFavoritos? [sname], notes, autoEvolved, autoLog, gymSkillsCleared, customBuilds, strategySets, archetype,
+  //     orphans dentro de team/box, dataVersion, savedAt, soma }
+  // v: applySave só avisa (log) quando o save é de formato MAIS NOVO que este app; ainda não há migração.
+  // applySave é defensivo: campo inválido ou ausente em settings mantém o valor atual do state (não zera).
   var AUTO_LOG_MAX = 30;
 
   // Teto de espécies com sets de Estratégias guardados no save (os mais
@@ -49,9 +53,10 @@
     var teamOrphans = [], boxOrphans = [];
     // Mais de 6 no time (save editado/de outra versão): o excedente vai pra caixa em vez
     // de sumir sem aviso (lote D da força-tarefa, 2026-10-02).
-    var timeTodo = snamesToXs(save.team, teamOrphans);
+    var semRepetido = function (l) { return l.filter(function (x, i) { return l.indexOf(x) === i; }); };
+    var timeTodo = semRepetido(snamesToXs(save.team, teamOrphans));
     state.team = timeTodo.slice(0, 6);
-    state.box = snamesToXs(save.box, boxOrphans).concat(timeTodo.slice(6).filter(function (x) { return state.team.indexOf(x) === -1; }));
+    state.box = semRepetido(snamesToXs(save.box, boxOrphans).concat(timeTodo.slice(6))).filter(function (x) { return state.team.indexOf(x) === -1; });
     // Data do save carregado: gravações AUTOMÁTICAS (ajuste na abertura) a mantêm, pra não
     // passarem por "mais novas" e apagarem no sync o que foi feito no outro aparelho.
     dataDoSaveCarregado = typeof save.savedAt === "string" ? save.savedAt : null;
@@ -120,6 +125,9 @@
           if (kept.length) state.gymSkillsCleared[leaderName] = kept;
         }
       });
+    }
+    if (typeof save.v === "number" && save.v > SCHEMA_VERSION) {
+      logAutoAction("Este save é de uma versão mais nova do app (formato " + save.v + "; este app lê o " + SCHEMA_VERSION + ") - carregado mesmo assim, mas pode perder campos novos ao salvar.");
     }
     if (teamOrphans.length || boxOrphans.length) {
       logAutoAction((teamOrphans.length + boxOrphans.length) + " Pokémon do save não existem nesta versão dos dados (" + teamOrphans.concat(boxOrphans).join(", ") + ") - guardados no save sem aparecer, pra não serem apagados.");
@@ -196,6 +204,11 @@
       });
     }
     state.strategySets = sanitizarStrategySets(save.strategySets);
+    // Favoritos do Modo Motor (TK-02b, 28/10/2026): só espécie conhecida, sem repetir. Save antigo sem o campo = vazio.
+    // Desconhecida não se perde: fica em state.orphans.fav (como team/box) e volta no buildSave.
+    var favOrphans = [];
+    state.motorFavoritos = semRepetido(snamesToXs(save.motorFavoritos, favOrphans).map(snameOf));
+    state.orphans.fav = semRepetido(favOrphans);
     // Arquétipo do time (Fase 3b, 2026-09-12) - defensivo igual notes/
     // customBuilds acima: só aceita valor que já é uma das opções reais
     // (um save editado à mão ou de outra versão não pode injetar algo fora
@@ -316,6 +329,9 @@
     return save.soma === somaDoSave(save) ? "ok" : "errada";
   }
 
+  // Decisão 2 do usuário (27/10/2026): save com soma errada nunca sobe para a nuvem.
+  function saveEnviavel(save) { return !!save && conferirSomaDoSave(save) !== "errada"; }
+
   // opts.manterData: gravação automática (não é ação do jogador) - mantém a data do save.
   function buildSave(opts) {
     var save = montarSave(opts);
@@ -323,7 +339,7 @@
     return save;
   }
   function montarSave(opts) {
-    return {
+    var save = {
       v: SCHEMA_VERSION,
       dataVersion: DATA.meta ? DATA.meta.version : null,
       savedAt: opts && opts.manterData && dataDoSaveCarregado ? dataDoSaveCarregado : new Date().toISOString(),
@@ -346,6 +362,10 @@
       strategySets: state.strategySets,
       archetype: state.archetype
     };
+    // Só grava quando há favorito: sem ele o save fica idêntico ao de antes (mesma soma, sem diferença falsa no sync).
+    var favs = (state.motorFavoritos || []).concat(state.orphans.fav || []);
+    if (favs.length) save.motorFavoritos = favs;
+    return save;
   }
 
   // Progresso da run (10/10/2026): o sync só olhava a data do último salvamento, e uma
@@ -384,5 +404,6 @@
       if (k !== "settings" || !v || typeof v !== "object") return v;
       var c = Object.assign({}, v); delete c.sort; delete c.typeFilter; return c;
     }
-    return Object.keys(chaves).some(function (k) { return JSON.stringify(semPreferenciaDeTela(k, a[k])) !== JSON.stringify(semPreferenciaDeTela(k, b[k])); });
+    // Texto canônico (igual ao da soma): o banco pode devolver as chaves em outra ordem.
+    return Object.keys(chaves).some(function (k) { return textoCanonicoDoSave(semPreferenciaDeTela(k, a[k])) !== textoCanonicoDoSave(semPreferenciaDeTela(k, b[k])); });
   }

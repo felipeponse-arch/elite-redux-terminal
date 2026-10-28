@@ -44,7 +44,7 @@
   // conferência dele não muda mais nada, então não há vai-e-volta.
   function aplicarSaveRemoto(remote) {
     applySave(remote);
-    lsSet(STORE_KEY, JSON.stringify(remote));
+    lsSet(STORE_KEY, JSON.stringify(buildSave({ manterData: true }))); // saneado pelo applySave, não o cru do outro aparelho
     // O marco pode ter mudado no outro aparelho: a referência das trocas do plano
     // (registrarTrocasDoPlano) passa a ser o cap que chegou.
     capRegistrado = getCurrentCap();
@@ -87,9 +87,10 @@
   // boa. Sem save local, só avisa.
   function remotoComSomaErrada(remote, local) {
     if (conferirSomaDoSave(remote) !== "errada") return false;
-    if (local) syncRef.set(local).catch(function () {});
+    var sobe = saveEnviavel(local);
+    if (sobe) syncRef.set(local).catch(function () {});
     showStorageBanner("O save que veio de outro aparelho não bate com a soma de verificação e foi ignorado. " +
-      "O save deste aparelho continua valendo" + (local ? " e foi enviado no lugar dele." : "."));
+      "O save deste aparelho continua valendo" + (sobe ? " e foi enviado no lugar dele." : "."));
     return true;
   }
   function pushToSync(save) {
@@ -169,6 +170,12 @@
     if (syncRetryTimer) clearTimeout(syncRetryTimer);
     syncRetryTimer = setTimeout(connectSync, delay);
   }
+  // Local ilegível não derruba a conferência: vira "sem local" (null).
+  function lerSaveLocal() {
+    var raw = lsGet(STORE_KEY);
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch (e) { console.warn("sync: save local ilegível", e); return null; }
+  }
   async function connectSync() {
     if (typeof claude === "undefined" || !claude.use) { setSyncStatusIndicator("só neste aparelho (ambiente sem plataforma)", true); return; }
     var db = await claude.use("db");
@@ -180,8 +187,9 @@
       var snap = await syncRef.get();
       if (snap.exists) {
         var remote = snap.data();
-        var localRaw = lsGet(STORE_KEY);
-        var local = localRaw ? JSON.parse(localRaw) : null;
+        var local = lerSaveLocal();
+        // Regra decidida (usuário, 27/10/2026): conflito = ÚLTIMO ESCRITOR VENCE (compara savedAt; o mais novo sobrescreve
+        // o outro sem mesclar). Só a perda de PROGRESSO da run pede confirmação (conflitoDeProgresso). Não mudar sem perguntar.
         if (syncContentDiffers(local, remote) && !remotoComSomaErrada(remote, local)) {
           if (!local || (remote.savedAt && (!local.savedAt || remote.savedAt > local.savedAt))) {
             // Remote has real differences and is the newer (or only) copy.
@@ -202,30 +210,21 @@
             }
           } else {
             // Local has real differences and isn't older - push it up.
-            syncRef.set(local).catch(function () {});
+            if (saveEnviavel(local)) syncRef.set(local).catch(function () {});
           }
         }
         // else: content already matches - nothing to write, nothing to show.
       } else {
-        var localRaw2 = lsGet(STORE_KEY);
-        var seed = localRaw2 ? JSON.parse(localRaw2) : buildSave();
-        syncRef.set(seed).catch(function () {});
+        var seed = lerSaveLocal() || buildSave();
+        if (saveEnviavel(seed)) syncRef.set(seed).catch(function () {});
       }
-    } catch (e) { /* get() failed - stay local-only for this load; persist() keeps trying to push */ }
+    } catch (e) { console.warn("sync: leitura inicial falhou, fica só local nesta carga", e); }
 
     syncRef.onSnapshot(function (snap) {
       if (!snap.exists || snap.metadata.hasPendingWrites) return;
       var remote = snap.data();
-      var localRaw3 = lsGet(STORE_KEY);
-      var local3 = null;
-      try { local3 = localRaw3 ? JSON.parse(localRaw3) : null; } catch (e) {
-        // Achado em auditoria (2026-09-13): ao contrário das outras 2 leituras
-        // deste mesmo fluxo (get() inicial e o "sem save local" acima), esta
-        // não tinha try/catch - um localStorage corrompido faria o remoto
-        // legítimo ser perdido em silêncio (exceção não tratada dentro do
-        // callback do onSnapshot). local3 = null cai no mesmo caminho já
-        // existente pra "sem local válido" logo abaixo - aplica o remoto.
-      }
+      var local3 = lerSaveLocal();
+      // Local ilegível = sem local válido (null): aplica o remoto (auditoria 2026-09-13; leitura em lerSaveLocal).
       if (!syncContentDiffers(local3, remote)) return;
       if (remotoComSomaErrada(remote, local3)) return;
       // Achado real, 2026-09-13 (usuário reportou times divergentes entre
@@ -238,7 +237,7 @@
       // servidor, sem relação com qual edição é realmente mais recente).
       // Mesmo critério de "quem é mais novo" agora nos dois lugares.
       if (local3 && local3.savedAt && remote.savedAt && remote.savedAt <= local3.savedAt) {
-        syncRef.set(local3).catch(function () {});
+        if (saveEnviavel(local3)) syncRef.set(local3).catch(function () {});
         return;
       }
       if (conflitoDeProgresso(remote, local3)) return;
