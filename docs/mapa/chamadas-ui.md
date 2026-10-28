@@ -43,7 +43,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - teamRecommendation:30 - chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorFicarComVariante (modo_motor.js:120), zerarRun (time.js:356)
 
 ## ui/auto_evolucao.js
-- autoEvolveRoster:20 - chama: devolveChainByX (evolucao.js:206), evoluirElencoSemDuplicar (evolucao.js:40), evolveChainByX (evolucao.js:66), logAutoAction (evolucao.js:229), podarAutoEvolved (evolucao.js:61), +3 | chamado por: initProgress (progresso.js:105)
+- autoEvolveRoster:20 - chama: devolveChainByX (evolucao.js:206), evoluirElencoSemDuplicar (evolucao.js:40), evolveChainByX (evolucao.js:66), logAutoAction (evolucao.js:229), podarAutoEvolved (evolucao.js:61), +3 | chamado por: loadSave (nucleo.js:336), initProgress (progresso.js:105)
 - renderAutoLog:9 - chama: state (nucleo.js:8) | chamado por: initProgress (progresso.js:105), registrarTrocasDoPlano (revisao_automatica.js:149)
 
 ## ui/caixa.js
@@ -155,9 +155,10 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - concluirAcoes:265 - chama: agendarRevisoes (revisao_automatica.js:169)
 - fichaAfetada:260 - chama: getSpeciesByX (dados_base.js:78)
 - loadA11yPrefs:284 - chamado por: initProgress (progresso.js:105)
+- loadSave:336 - chama: applySave (save.js:47), conferirSomaDoSave (save.js:321), reconciliouAoAplicar (save.js:44), autoEvolveRoster (auto_evolucao.js:20)
 - lsGet:83 - chamado por: ponteFalhas (revisao_automatica.js:22), lerSaveLocal (sync.js:174)
 - lsSet:84 - chamado por: registrarFalhaPonte (revisao_automatica.js:23), aplicarSaveRemoto (sync.js:45)
-- persist:143 - chama: buildSave (save.js:323), updateResetTeamBoxBtn (dex_ficha.js:751), pushToSync (sync.js:96) | chamado por: aplicarSaveRemoto (sync.js:45)
+- persist:143 - chama: buildSave (save.js:331), updateResetTeamBoxBtn (dex_ficha.js:751), pushToSync (sync.js:96) | chamado por: aplicarSaveRemoto (sync.js:45)
 - redesenharFichaAberta:196 - chama: selectSpecies (dex_ficha.js:610)
 - reinserirBuild:130 - chama: getBuildList (evolucao.js:14) | chamado por: apagarBuildComDesfazer (editor_build.js:516)
 - removeBuildIndex:123 - chama: removerBuildDaLista (lista_de_builds.js:32) | chamado por: apagarBuildComDesfazer (editor_build.js:516)
@@ -207,7 +208,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/revisao_automatica.js
 - agendarRevisoes:169 - chamado por: concluirAcoes (nucleo.js:265)
 - capRegistrado:148 - chamado por: initProgress (progresso.js:105), aplicarSaveRemoto (sync.js:45), zerarRun (time.js:356)
-- generateStrategySets:182 - chama: getCurrentCap (level_cap.js:49), montarPromptEstrategias (prompts_ia.js:713), sanitizarStrategySets (save.js:242), setsValidosDaResposta (validacao_build_ia.js:482), pedirIA (ia.js:80), +2
+- generateStrategySets:182 - chama: getCurrentCap (level_cap.js:49), montarPromptEstrategias (prompts_ia.js:713), sanitizarStrategySets (save.js:250), setsValidosDaResposta (validacao_build_ia.js:482), pedirIA (ia.js:80), +2
 - ponteFalhas:22 - chama: lsGet (nucleo.js:83)
 - processarRevisoes:72 - chama: golpesFuturosDe (builds.js:177), getSpeciesByX (dados_base.js:78), getBuildList (evolucao.js:14), logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), +13
 - registrarFalhaPonte:23 - chama: lsSet (nucleo.js:84)
@@ -216,12 +217,12 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - tarefaDeRevisao:24 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), MEGA_BASE_BY_X (formas_mega.js:21), isMegaForm (formas_mega.js:64), golpesTravadosNoCap (level_cap.js:88), +3
 
 ## ui/sync.js
-- aplicarSaveRemoto:45 - chama: getCurrentCap (level_cap.js:49), applySave (save.js:43), buildSave (save.js:323), reconciliouAoAplicar (save.js:40), STORE_KEY (nucleo.js:81), +3
-- conflitoDeProgresso:61 - chama: saveChegandoTemMenosProgresso (save.js:366)
-- connectSync:179 - chama: buildSave (save.js:323), saveEnviavel (save.js:320), syncContentDiffers (save.js:380)
+- aplicarSaveRemoto:45 - chama: getCurrentCap (level_cap.js:49), applySave (save.js:47), buildSave (save.js:331), reconciliouAoAplicar (save.js:44), STORE_KEY (nucleo.js:81), +3
+- conflitoDeProgresso:61 - chama: saveChegandoTemMenosProgresso (save.js:374)
+- connectSync:179 - chama: buildSave (save.js:331), saveEnviavel (save.js:328), syncContentDiffers (save.js:388)
 - lerSaveLocal:174 - chama: STORE_KEY (nucleo.js:81), lsGet (nucleo.js:83)
 - pushToSync:96 - chamado por: persist (nucleo.js:143)
-- remotoComSomaErrada:88 - chama: conferirSomaDoSave (save.js:313), saveEnviavel (save.js:320), showStorageBanner (nucleo.js:165)
+- remotoComSomaErrada:88 - chama: conferirSomaDoSave (save.js:321), saveEnviavel (save.js:328), showStorageBanner (nucleo.js:165)
 
 ## ui/time.js
 - TELAS_ELENCO:168 - chamado por: applyRecommendedTeam (arquetipo.js:207), initProgress (progresso.js:105)

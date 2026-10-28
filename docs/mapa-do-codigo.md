@@ -52,7 +52,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **reconciliar_build.js** - Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
   movepoolCompletoDe:17, habilidadeSubstitutaPara:26, reconciliarBuild:39
 - **save.js** - Save do app: formato gravado (buildSave), leitura defensiva (applySave e os
-  snamesToXs:15, xsToSnames:24, applySave:43, anteriorSaneado:223, sanitizarStrategySets:242, textoCanonicoDoSave:288, somaDoSave:303, conferirSomaDoSave:313, saveEnviavel:320, buildSave:323, montarSave:328, progressoDoSave:360, saveChegandoTemMenosProgresso:366, syncContentDiffers:380
+  snamesToXs:15, xsToSnames:24, applySave:47, anteriorSaneado:231, sanitizarStrategySets:250, textoCanonicoDoSave:296, somaDoSave:311, conferirSomaDoSave:321, saveEnviavel:328, buildSave:331, montarSave:336, progressoDoSave:368, saveChegandoTemMenosProgresso:374, syncContentDiffers:388
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
 - **time_pelo_motor.js** - Modo Motor do Meu Time (ticket time-pelo-motor/01, Fase C, 21/10/2026): monta o time SEM IA, só pelo simulador.
@@ -88,7 +88,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **modo_motor.js** - Modo Motor no Meu Time (ticket time-pelo-motor/01, Fase F2, 21/10/2026). O Modo Motor é o PADRÃO (aprovação do usuário, 21/10):
   modoMotorCache:20, modoMotorChave:22, modoMotorCapturados:27, modoMotorFavoritosValidos:32, modoMotorSegundos:36, modoMotorEsperar:37, modoMotorAquecer:41, modoMotorMontar:69, modoMotorVarianteDe:119, modoMotorFicarComVariante:120, modoMotorSeletorHtml:153, modoMotorFavoritosHtml:161, modoMotorBotaoHtml:173, modoMotorMembroHtml:178, modoMotorRodapeHtml:191, modoMotorVarianteHtml:206, modoMotorResultadoHtml:234
 - **nucleo.js** - Estado do app (state), gravação no aparelho e a camada de ações (acao/TELAS): toda mudança grava uma vez e redesenha cada tela uma vez.
-  lsGet:83, lsSet:84, setOrReplaceActiveBuild:93, addBuildVariant:100, setActiveBuildIndex:103, abrirVagaPreservando:117, removeBuildIndex:123, reinserirBuild:130, persist:143, showStorageBanner:165, abaAtiva:183, redesenharFichaAberta:196, telasDeBuild:236, acao:242, fichaAfetada:260, concluirAcoes:265, loadA11yPrefs:284, applyA11yPrefs:290, saveA11yPrefs:294, corDoTema:306
+  lsGet:83, lsSet:84, setOrReplaceActiveBuild:93, addBuildVariant:100, setActiveBuildIndex:103, abrirVagaPreservando:117, removeBuildIndex:123, reinserirBuild:130, persist:143, showStorageBanner:165, abaAtiva:183, redesenharFichaAberta:196, telasDeBuild:236, acao:242, fichaAfetada:260, concluirAcoes:265, loadA11yPrefs:284, applyA11yPrefs:290, saveA11yPrefs:294, corDoTema:306, loadSave:336
 - **pipeline_tela.js** - Pipeline de build na tela (ticket docs/tickets/pipeline-build-2026-10-14/02): só desenho. As regras (candidatos, hit-kill,
   pipelineResultado:14, pipelineAlvoValido:26, pipelineSeletorDeAlvoHtml:32, pipelineResumoDoAlvo:46, pipelineVereditoDe:53, pipelineSeloHtml:63, pipelineGolpeHtml:71, pipelineCandidatoHtml:77, pipelinePainelDaFichaHtml:96, pipelineDesenharFicha:113, pipelineDesenharTime:125
 - **progresso.js** - Aba Progresso: dificuldade, level cap, insígnia, modo de Mega, confirmação da run e acessibilidade.
@@ -161,7 +161,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **itens_pela_config.mjs** - Parâmetros de item pelo código do jogo, não por números soltos no motor.
   lerItensDaConfig:18, TIPO_EN:46, efeitoDoItem:49, itensDeBatalha:55
 - **mapa_chamadas.mjs** - Chamadas entre arquivos do app (src/regras + src/ui) pela API do TypeScript.
-  carregarTs:10, grafoDeChamadas:25, lista:67, gerarChamadas:74
+  carregarTs:10, grafoDeChamadas:25, lista:73, gerarChamadas:80
 - **mapa_do_codigo.mjs** - Gera docs/mapa-do-codigo.md: por arquivo de src/regras, src/ui e scripts/*.mjs, a responsabilidade
   responsabilidade:24, funcoes:35, gerarMapa:46, escreverMapa:69
 - **medir_texto_novo.mjs** - Mede o que um dado novo da NextDex faz com o parser de habilidades do motor (ticket versao-nova/04, 15/10/2026).
@@ -361,6 +361,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sprite_index.test.mjs** - Sprite pelo nome da espécie (15/10/2026): a versão nova do jogo deslocou os números e o Beedrill Mega mostrava o Blastoise Mega.
 - **status_no_duelo.test.mjs** - Status por chance no duelo (2026-09-29, grupo 1 do estudo de habilidades):
 - **sugestao_do_motor.test.mjs** - "Ficar com este time" grava as builds como "Sugestão do app" (ticket time-pelo-motor/01, F5, 21/10/2026).
+- **sync_canonico.test.mjs** - TK-02 (S12-2, S12-4, S12-5): comparação canônica no sync, campo v usado, team/box sem duplicata.
 - **sync_progresso.test.mjs** - Sincronização não apaga run adiantada com run zerada (relato do usuário, 10/10/2026):
 - **sync_soma_errada.test.mjs** - TK-01 (decisão 2 do usuário, 27/10/2026): save com soma errada nunca é regravado nem enviado à nuvem.
 - **telas_efetividade_real.test.mjs** - Ticket 12 (dados-2654): as telas mostram a efetividade REAL contra Solid Rock / Primal Armor e citam a

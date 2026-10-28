@@ -34,3 +34,13 @@ test("índice cobre .ps1 e testes", () => {
   assert.match(m, /## Scripts \(\.ps1\)/);
   assert.match(m, /\*\*mapa_do_codigo\.test\.mjs\*\* - /);
 });
+
+test("funcoes acha função nomeada dentro de IIFE (loadSave do nucleo.js)", () => {
+  assert.deepEqual(funcoes("function a(){}\n(function loadSave() {\n})();\n"), [["a", 1], ["loadSave", 2]]);
+});
+
+test("mapa de chamadas: loadSave (IIFE do nucleo.js) chama applySave no grafo", { skip: !temTs }, async () => {
+  const { grafoDeChamadas } = await import("../../scripts/mapa_chamadas.mjs");
+  const raiz = new URL("../../", import.meta.url).pathname.replace(/^\/(\w:)/, "$1");
+  assert.ok(grafoDeChamadas(raiz).chama.get("ui/nucleo.js:loadSave")?.has("regras/save.js:applySave"));
+});

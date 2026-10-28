@@ -188,6 +188,8 @@
       if (snap.exists) {
         var remote = snap.data();
         var local = lerSaveLocal();
+        // Regra decidida (usuário, 27/10/2026): conflito = ÚLTIMO ESCRITOR VENCE (compara savedAt; o mais novo sobrescreve
+        // o outro sem mesclar). Só a perda de PROGRESSO da run pede confirmação (conflitoDeProgresso). Não mudar sem perguntar.
         if (syncContentDiffers(local, remote) && !remotoComSomaErrada(remote, local)) {
           if (!local || (remote.savedAt && (!local.savedAt || remote.savedAt > local.savedAt))) {
             // Remote has real differences and is the newer (or only) copy.
