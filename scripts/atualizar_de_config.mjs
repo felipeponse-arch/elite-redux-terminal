@@ -69,7 +69,8 @@ for (const m of ML) {
   const novo = {
     name: m.name[0], sName: m.short_name?.[0] ?? m.name[0], pwr: m.power?.[0] ?? 0, acc: m.accuracy?.[0] ?? 0, pp: m.pp?.[0] ?? 0,
     prio: m.priority?.[0] ?? 0, chance: m.effect_chance?.[0] ?? 0, desc: m.short_description?.[0] ?? '', lDesc: m.description?.[0] ?? '',
-    types: [idx(g.typeT, (m.type?.[0] ?? 'TYPE_NORMAL').slice(5).replace(/^./, (c) => c) .toLowerCase().replace(/^./, (c) => c.toUpperCase()))],
+    // v2.65.4.1 (28/10): o segundo tipo do golpe (type2: Muddy Water, Flying Press, Aura Wheel, Scorched Earth, Saber Slashes) PERDIA ao sobrepor [t1,t2] por [t1].
+    types: [m.type?.[0] ?? 'TYPE_NORMAL', m.type2?.[0]].filter(Boolean).map((tp) => idx(g.typeT, tp.slice(5).toLowerCase().replace(/^./, (c) => c.toUpperCase()))),
     target: idx(g.targetT, m.target?.[0]), split: idx(g.splitT, m.split_modifier?.[0] ?? m.split?.[0]), // v2.65.4.1 (28/10): split_modifier (HITS_DEF...) é o split do dado achatado (NextDex); só o split base PERDIA o modificador
   };
   const o = mv.get(id);

@@ -756,7 +756,7 @@
     if (/Heal 1\/4 of max HP whenever below 1\/2/i.test(f)) ef.reviveHP = Math.max(ef.reviveHP, 0.25);
     if (/Changes type to a resist or an immunity before getting hit/i.test(f)) ef.sempreResiste = 1;
     if ((x = f.match(/Resists all attacks for (\w+) turns on first entry/i))) ef.sempreResiste = NUM_DO_TEXTO_DUELO[x[1].toLowerCase()] || 3;
-    if (/Changes type depending on the move it's about to use|changes its type to the move's type/i.test(f)) ef.stabTodos = true;
+    if (/Changes type depending on the move it's about to use|changes its type to the move's type|Changes type to move's type before use/i.test(f)) ef.stabTodos = true;
     // Redução de dano geral.
     if ((x = f.match(/Takes (\d+)% reduced damage/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
     if ((x = f.match(/Reduces damage taken by (\d+)%, but lowers speed by (\d+)%/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.speMult *= 1 - parseInt(x[2], 10) / 100; }
@@ -864,6 +864,10 @@
     if ((x = f.match(/Uses ([A-Z][\w ]+?) on switch-in/)) && poderDoGolpeDuelo(x[1])) ef.ataqueNaEntrada = poderDoGolpeDuelo(x[1]);
     // Estágios de entrada e reação a queda.
     if (/Casts Defense Curl on entry/i.test(f)) ef.estagioEntrada.def = (ef.estagioEntrada.def || 0) + 1;
+    // I Am Steve (Impl<ABILITY_I_AM_STEVE>, abilities.cc:11222-11225): usa No Retreat ao entrar = +1 nos cinco atributos (SETUP_DUELO). O aprisionamento do No Retreat não é modelado.
+    if (/^Uses No Retreat on entry/i.test(f)) ["atk", "def", "spa", "spd", "spe"].forEach(function (k) { ef.estagioEntrada[k] = (ef.estagioEntrada[k] || 0) + 1; });
+    // Foggy Eye (Impl<ABILITY_FOGGY_EYE>, abilities.cc:11475-11487): na névoa, golpe Ghost x1,5 e o dono resiste a Ghost (efetividade limitada a x0,5; aqui x0,5 sobre a efetividade, aproximação).
+    if (/^While in Fog, boost Ghost moves by 50% and resist Ghost moves/i.test(f) && climaOk("fog")) { ef.bonusTipo.Ghost = Math.max(ef.bonusTipo.Ghost || 1, 1.5); ef.resistTipo.Ghost = 0.5; }
     if (/Maxes Def on entry/i.test(f)) ef.estagioEntrada.def = 6;
     if (/-1 Def when hit/i.test(f)) ef.aoApanhar.push({ stat: "def", n: -1 });
     if (/Lowers the foe's highest Attack and Defense stat/i.test(f)) ef.malicious = true;
@@ -3413,7 +3417,7 @@
     if (/Uses Hyper Beam if any foe uses an stat boosting move/i.test(f)) ef.retribuicao = true;
     if (/Landing a crit boosts your 3 lowest stats/i.test(f)) ef.homeRun = true;
     if (/Uses Heart Swap on switch-in/i.test(f)) ef.trocaEstagios = true;
-    if (/Uses Chilly Reception at the end of your 2nd turn/i.test(f)) ef.fogeNaMetade = true; // sai no 2º turno: luta como quem sai na metade
+    if (/Uses Chilly Reception at (?:the )?end of (?:your )?(?:the )?2nd turn/i.test(f)) ef.fogeNaMetade = true; // sai no 2º turno: luta como quem sai na metade
     if (/Summons a sea of fire on entry/i.test(f)) ef.campoResiduo.push({ pct: 1 / 8, exceto: ["Fire"], soInimigo: true }); // Fire+Grass Pledge (série: 1/8, 4 turnos)
     if (/Sets the Swamp Pledge effect on entry/i.test(f)) ef.pantano = true; // Grass+Water Pledge: velocidade do outro 1/4
     if (/Summons the Rainbow Pledge effect on entry/i.test(f)) ef.chanceMult *= 2; // Fire+Water Pledge: chance de efeito dobrada

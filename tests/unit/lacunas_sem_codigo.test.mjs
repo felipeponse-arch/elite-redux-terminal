@@ -90,21 +90,23 @@ test("Packed Ice: imune a Ice e ganha +2 de Defesa ao ser 'atingido' por Ice (de
 });
 
 // ---------- Malediction (927): sem código no upcoming; descrição 20% sangramento + 10% maldição ----------
-test("Malediction (Hydreigon Mega, dono real): todo golpe tem 20% de sangrar e 10% de Maldição", () => {
-  assert.ok(R.SPECIES.some((s) => s && s.n === "Hydreigon Mega" && [].concat(s.ab, s.inn).includes(idHab("Malediction"))));
+// v2.65.4.1 (28/10): a config 486a964 tirou a Malediction do Hydreigon Mega; o dono real agora é a Sandslash Alolan Mega (inata).
+test("Malediction (Sandslash Alolan Mega, dono real): todo golpe tem 20% de sangrar e 10% de Maldição", () => {
+  assert.ok(R.SPECIES.some((s) => s && s.n === "Sandslash Alolan Mega" && [].concat(s.ab, s.inn).includes(idHab("Malediction"))));
   const ef = efDe(["Malediction"]);
   const por = (st) => ef.statusAtaque.filter((a) => a.st.includes(st)).map((a) => a.pOutro);
   assert.equal(por("sangrar").join(), "0.2");
   assert.equal(por("maldicao").join(), "0.1");
-  const eu = iso("Hydreigon Mega", ["Malediction"], ["Dark Pulse"]), alvo = iso("Magikarp", [], ["Tackle"]);
+  const eu = iso("Sandslash Alolan Mega", ["Malediction"], ["Dark Pulse"]), alvo = iso("Magikarp", [], ["Tackle"]);
   const c = R.chancesDeStatusNoDuelo(eu, alvo, eu.golpesProntos[0], alvo.golpesProntos[0]);
   perto(c.sangrar, 0.2, 1e-9); perto(c.maldicao, 0.1, 1e-9);
 });
 
 // ---------- Lightsaber (908): Impl<ABILITY_LIGHT_SABER> abilities.cc:10991-11011 ----------
-test("Lightsaber (Iron Saber, dono real): golpe Keen Edge tem 12,5% de queimar e 12,5% de paralisar (50% de disparo x 1/4 cada; abilities.cc:10995-11008)", () => {
-  assert.ok(sp("Iron Saber").inn.includes(idHab("Lightsaber")));
-  const eu = iso("Iron Saber", ["Lightsaber"], ["Leaf Blade", "Earthquake"]), alvo = iso("Magikarp", [], ["Tackle"]);
+// v2.65.4.1 (28/10): a config 486a964 tirou a Lightsaber do Iron Saber; o dono real agora é o Corn Tyrant (inata).
+test("Lightsaber (Corn Tyrant, dono real): golpe Keen Edge tem 12,5% de queimar e 12,5% de paralisar (50% de disparo x 1/4 cada; abilities.cc:10995-11008)", () => {
+  assert.ok(sp("Corn Tyrant").inn.includes(idHab("Lightsaber")));
+  const eu = iso("Corn Tyrant", ["Lightsaber"], ["Leaf Blade", "Earthquake"]), alvo = iso("Magikarp", [], ["Tackle"]);
   const chance = (nome) => R.chancesDeStatusNoDuelo(eu, alvo, eu.golpesProntos.find((g) => g.nome === nome), alvo.golpesProntos[0]);
   perto(chance("Leaf Blade").queimar, 0.125, 1e-9, "queimadura no golpe de corte");
   perto(chance("Leaf Blade").paralisar, 0.125, 1e-9, "paralisia no golpe de corte");
