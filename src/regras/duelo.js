@@ -698,7 +698,7 @@
     // Cackling (abilities.cc:12864-12875): Eerie Laugh na entrada (Dark, paralisa ignorando o tipo; 2 vezes por batalha - uma entrada no modelo).
     if (/^Uses Eerie Laugh on entry/i.test(f)) ef.statusNaEntrada.paralisar = 1;
     // Light Wield (abilities.cc:12819-12834): Light Screen do lado do dono por 3 turnos na entrada.
-    if ((x = f.match(/^Sets up Light Screen for (\d+) turns on entry/i))) ef.telaE = Math.max(ef.telaE || 0, DURACAO_CAMPO.telaCurta); // abilities.cc:12842-12844
+    if ((x = f.match(/^Sets up Light Screen for (\d+) turns on entry/i))) ef.telaLuz = Math.max(ef.telaLuz || 0, DURACAO_CAMPO.telaCurta); // abilities.cc:12842-12844
     // Rippling Punch (abilities.cc:12854-12862, onModifyMoveFlags): golpe de soco também é de som.
     if (/^Punching moves are also Sound moves/i.test(f)) ef.socoSom = true;
     // Sticky Situation (abilities.cc:12888-12898): golpe Bug derruba a Speed do alvo (-1 em cada acerto, sem chance).
@@ -809,7 +809,7 @@
     if (/Super-effective moves never miss and ignore abilities/i.test(f)) ef.seQuebra = true; // Deadly Precision
     if (/Inflicting poison also lowers Attack, SpAtk, and Speed/i.test(f)) ef.venenoReduz = true; // Neurotoxin
     if ((x = f.match(/Makes foe (\w+)-type on contact/i)) && tipoDoTextoDuelo(x[1])) ef.mudaTipoNoContato = tipoDoTextoDuelo(x[1]); // Damp, Magical Dust
-    if ((x = f.match(/(\d+) turns Aurora Veil on entry/i))) ef.telaNaEntrada = DURACAO_CAMPO.telaCurta; // abilities.cc:4488-4490
+    if ((x = f.match(/(\d+) turns Aurora Veil on entry/i))) ef.telaVeuNaEntrada = DURACAO_CAMPO.telaCurta; // abilities.cc:4488-4490
     if (/Uses Magnet Rise on entry/i.test(f)) ef.imuneTipoNaEntrada = "Ground";
     if (/gains \+2 Speed when when hit by rocks|gains \+2 Speed when hit by rocks/i.test(f)) ef.aoApanhar.push({ stat: "spe", n: 2, tipos: ["Rock"] });
     // Rivalry: gênero desconhecido - vale metade das vezes, nos dois sentidos.
@@ -931,7 +931,7 @@
     if ((x = f.match(/(\d+)% spdef boost under Toxic Terrain/i))) ef.noTerreno.push({ terreno: "toxico", stat: "spd", mult: 1 + parseInt(x[1], 10) / 100 }); // Biofilm
     if (/Removes terrain on switch-in|Destroys terrain|Eats terrain|Negates Weather, Rooms and Terrains/i.test(f)) ef.limpaTerreno = true;
     if (/Removes Terrain on switch-in, then ups Def or Sp\. Def/i.test(f)) ef.lawnmower = true; // sobe o stat conforme o terreno limpo
-    if (/Negates Weather, Rooms and Terrains/i.test(f)) ef.limpaSala = true;
+    if (/Negates Weather, Rooms and Terrains/i.test(f)) ef.anulaSalas = true;
     if ((x = f.match(/Sets up Trick Room on entry, lasts (\d+) turns/i))) ef.sala = DURACAO_CAMPO.salaCurta; // o texto só confirma; o número vem do código (abilities.cc:4463)
     if ((x = f.match(/Sets up Inverse Room on entry, lasts (\d+) turns/i))) ef.inversa = DURACAO_CAMPO.inversaCurta; // abilities.cc:6138
     if ((x = f.match(/Casts a (\d+)-turn Tailwind on entry/i))) ef.vento = parseInt(x[1], 10);
@@ -975,9 +975,9 @@
     var terreno = eu.ef.armaTerreno || (eu.ef.limpaTerreno ? null : foe.ef.armaTerreno);
     if (eu.ef.limpaTerreno && !eu.ef.armaTerreno) terreno = null;
     if (foe.ef.limpaTerreno && !eu.ef.armaTerreno) terreno = null;
-    var limpaSala = eu.ef.limpaSala || foe.ef.limpaSala;
-    return { terreno: terreno, sala: limpaSala ? 0 : Math.max(eu.ef.sala, foe.ef.sala), inversa: limpaSala ? 0 : Math.max(eu.ef.inversa, foe.ef.inversa),
-      gravidade: !limpaSala && (eu.ef.gravidade || foe.ef.gravidade) };
+    var anulaSalas = eu.ef.anulaSalas || foe.ef.anulaSalas;
+    return { terreno: terreno, sala: anulaSalas ? 0 : Math.max(eu.ef.sala, foe.ef.sala), inversa: anulaSalas ? 0 : Math.max(eu.ef.inversa, foe.ef.inversa),
+      gravidade: !anulaSalas && (eu.ef.gravidade || foe.ef.gravidade) };
   }
   // ---------- itens (2026-09-29) ----------
   // O texto do item no jogo não traz número ("Boosts the power of moves at the
@@ -1518,9 +1518,9 @@
       menorDefesaCategoria: {}, menorDefesaSeStatus: false, flagMult: {}, prioTipoSempre: [], drenoTipo: {}, malicious: false,
       equinox: false, maiorMult: 0, maiorVel: 0, paradoxoItem: false, ritmico: 0, bonusVsStatus: {}, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
       campoResiduo: [], statusNaEntrada: {}, forcaUltimo: false, semStabOutros: false, recuoFrac: 1,
-      seQuebra: false, venenoReduz: false, mudaTipoNoContato: null, telaNaEntrada: 0, imuneTipoNaEntrada: null,
+      seQuebra: false, venenoReduz: false, mudaTipoNoContato: null, telaVeuNaEntrada: 0, imuneTipoNaEntrada: null,
       sincroniza: false, almaLigada: false, drenoCategoria: {},
-      armaTerreno: null, limpaTerreno: false, lawnmower: false, sala: 0, inversa: 0, vento: 0, gravidade: false, limpaSala: false,
+      armaTerreno: null, limpaTerreno: false, lawnmower: false, sala: 0, inversa: 0, vento: 0, gravidade: false, anulaSalas: false,
       infiltra: false, demolidor: false, pinaculo: false, limpaTelas: false, telaRepete: false, auroraBoreal: false, noTerreno: [], carregaNaEntrada: false,
       klutz: false, gostaDeBaga: false, bagaCedo: false, bagaCuraMin: 0, ripen: false, colheita: 0, rumina: false, unburden: false,
       desligaItem: false, roubaContato: false, roubaSemContato: false, seguraItem: false, nervoso: false,
@@ -2495,11 +2495,11 @@
     if (eu.ef.venenoReduz) estagioDele *= 1 - envenenado(nele.pres) / 3;
     if (foe.ef.venenoReduz) estagioMeu *= 1 - envenenado(nMim.pres) / 3;
     var semTelas = eu.ef.limpaTelas || foe.ef.limpaTelas;
-    // Reflect/Light Screen do buff de ginásio (telaF/telaE): só a categoria da tela.
+    // Reflect/Light Screen do buff de ginásio (telaReflect/telaLuz): só a categoria da tela.
     function tela(u, atq, g, melhor) {
       var L = CAMPO_DUELO && CAMPO_DUELO.lados;
       if (L) return telaDoLadoDuelo(L[u === eu ? "eu" : "foe"], u, atq, melhor, turnos, semTelas);
-      var t = Math.max(u.ef.telaNaEntrada || 0, g && g.cat === "F" ? u.ef.telaF || 0 : 0, g && g.cat === "E" ? u.ef.telaE || 0 : 0);
+      var t = Math.max(u.ef.telaVeuNaEntrada || 0, g && g.cat === "F" ? u.ef.telaReflect || 0 : 0, g && g.cat === "E" ? u.ef.telaLuz || 0 : 0);
       var f = t && turnos > 0 && !semTelas && !atq.ef.infiltra && !(atq.ef.pinaculo && g && g.corte) ? 1 - 0.5 * Math.min(t, turnos) / turnos : 1;
       return atq.ef.demolidor && turnos > 0 ? (1 + (turnos - 1) * f) / turnos : f; // Demolitionist: sem tela só no turno readied (1 dos `turnos`)
     }
@@ -2793,7 +2793,7 @@
     if (ini && ini.lados) {
       CAMPO_DUELO.lados = ini.lados;
       if (CAMPO_DUELO.sala <= SALA_PERMANENTE_DUELO) CAMPO_DUELO.sala = 0;
-      if (!(eu.ef.limpaSala || foe.ef.limpaSala)) CAMPO_DUELO.sala = Math.max(CAMPO_DUELO.sala, ini.sala || 0);
+      if (!(eu.ef.anulaSalas || foe.ef.anulaSalas)) CAMPO_DUELO.sala = Math.max(CAMPO_DUELO.sala, ini.sala || 0);
     }
     try { return resultadoNoCampoDuelo(eu, foe, nivel, ini || {}); } finally { CAMPO_DUELO = antes; }
   }
@@ -4041,12 +4041,12 @@
   // Fator do dano que o lado de `u` (o defensor) recebe por causa das telas, sobre o melhor golpe de `atq`.
   // x0,5 em 1x1 (battle_util.c:7653-7655); não vale em crítico nem com Infiltrator (:7649-7651). Reflect cobre o
   // físico, Light Screen o especial, Aurora Veil os dois (:7648-7649). `semTelas` só afeta o que veio do
-  // buff de ginásio (telaF/telaE): as telas do lado são estado, e só Screen Cleaner/Defog/golpes as tiram.
+  // buff de ginásio (telaReflect/telaLuz): as telas do lado são estado, e só Screen Cleaner/Defog/golpes as tiram.
   function telaDoLadoDuelo(lado, u, atq, melhor, turnos, semTelas) {
     var g = melhor && melhor.golpe;
     if (!g || turnos <= 0 || atq.ef.infiltra || (atq.ef.pinaculo && g.corte)) return 1;
     var t = Math.max(g.cat === "F" ? lado.reflect : lado.luz, lado.veu);
-    if (!semTelas) t = Math.max(t, g.cat === "F" ? u.ef.telaF || 0 : u.ef.telaE || 0);
+    if (!semTelas) t = Math.max(t, g.cat === "F" ? u.ef.telaReflect || 0 : u.ef.telaLuz || 0);
     if (!t) return 1;
     var c = melhor.crit, p = c && c.certo > 1 ? (c.fator - 1) / (c.certo - 1) : 0, mult = c ? c.certo : 1;
     var comTela = (0.5 * (1 - p) + mult * p) / ((1 - p) + mult * p); // só o golpe que não é crítico leva a tela
@@ -4061,7 +4061,7 @@
     var ef = u.ef;
     if (ef.limpaTelas) { limpaTelasDoLadoDuelo(ladoOutro); if (ef.telaRepete) limpaTelasDoLadoDuelo(ladoDono); }
     if (ef.vento && !ladoDono.vento) ladoDono.vento = ef.vento;
-    if (ef.telaNaEntrada) ladoDono.veu = Math.max(ladoDono.veu, u.item === "Light Clay" ? DURACAO_LADO_DUELO.tela : ef.telaNaEntrada);
+    if (ef.telaVeuNaEntrada) ladoDono.veu = Math.max(ladoDono.veu, u.item === "Light Clay" ? DURACAO_LADO_DUELO.tela : ef.telaVeuNaEntrada);
     if (ef.sala && !campo.sala && !salaPermanente) campo.sala = ef.sala;
   }
   // Quem entra num lado com hazard: dano (Stealth Rock pela tabela de Rock, Spikes
@@ -4220,7 +4220,7 @@
         if (b.bloqueiaArea) efCopia().bloqueiaArea = true;
         if (abre && b.abreX) Object.keys(b.abreX).forEach(function (k) { mult[INDICE_DO_ATRIBUTO_DUELO[k]] *= b.abreX[k]; });
         if (abre && b.abreBloqueia) efCopia().bloqueiaUmGolpe = true;
-        if (abre && b.abreTela) { efCopia(); if (b.abreTela.F) ef.telaF = Math.max(ef.telaF || 0, b.abreTela.F); if (b.abreTela.E) ef.telaE = Math.max(ef.telaE || 0, b.abreTela.E); }
+        if (abre && b.abreTela) { efCopia(); if (b.abreTela.F) ef.telaReflect = Math.max(ef.telaReflect || 0, b.abreTela.F); if (b.abreTela.E) ef.telaLuz = Math.max(ef.telaLuz || 0, b.abreTela.E); }
         if (abre && b.abreSemCritico) efCopia().imuneCritico = true;
       });
       var mudouStat = mult.some(function (m) { return m !== 1; });

@@ -621,8 +621,8 @@ export const MUTACOES = [
     id: "buff-tela-sem-categoria",
     descricao: "Reflect do ginásio vira tela das duas categorias",
     arquivo: "duelo.js",
-    de: "if (b.abreTela.E) ef.telaE = Math.max(ef.telaE || 0, b.abreTela.E); }",
-    para: "if (b.abreTela.E) ef.telaE = Math.max(ef.telaE || 0, b.abreTela.E); if (b.abreTela.F) ef.telaE = b.abreTela.F; }",
+    de: "if (b.abreTela.E) ef.telaLuz = Math.max(ef.telaLuz || 0, b.abreTela.E); }",
+    para: "if (b.abreTela.E) ef.telaLuz = Math.max(ef.telaLuz || 0, b.abreTela.E); if (b.abreTela.F) ef.telaLuz = b.abreTela.F; }",
   },
   {
     id: "buff-status-pega-o-primeiro",
@@ -3786,8 +3786,8 @@ export const MUTACOES = [
     id: "versao-light-wield-sem-tela",
     descricao: "Light Wield deixa de montar a Light Screen",
     arquivo: "duelo.js",
-    de: "if ((x = f.match(/^Sets up Light Screen for (\\d+) turns on entry/i))) ef.telaE",
-    para: "if ((x = f.match(/^NUNCA up Light Screen for (\\d+) turns on entry/i))) ef.telaE",
+    de: "if ((x = f.match(/^Sets up Light Screen for (\\d+) turns on entry/i))) ef.telaLuz",
+    para: "if ((x = f.match(/^NUNCA up Light Screen for (\\d+) turns on entry/i))) ef.telaLuz",
   },
   {
     id: "versao-insect-eater-pelo-tipo-do-golpe",
