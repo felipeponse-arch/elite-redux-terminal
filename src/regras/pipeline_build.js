@@ -492,11 +492,12 @@
   }
   function pipelineValidarRascunho(sp, g) {
     var bruto = { ability: g.hab, nature: g.fin.nome, item: "", evs: g.fin.evs.slice(), moves: g.av.golpes.slice() };
-    var recusa = {}, v = validateAiBuild(sp, bruto, recusa, {});
+    // Mesmo contexto da IA (contextoDeValidacao; sem opts.chefao = {}, igual ao que era) - TK-18, 10.5.
+    var ctx = contextoDeValidacao(sp, null), recusa = {}, v = validateAiBuild(sp, bruto, recusa, ctx);
     if (v) {
       // Espécie que ainda evolui leva Eviolite (o motor já usa Eviolite nesses casos, itemDoSetDuelo). Item recusado (limite do time) = fica sem item.
       if (!v.item && pipelineEvioliteServe(sp)) {
-        var comEv = validateAiBuild(sp, Object.assign({}, bruto, { item: "Eviolite" }), {}, {});
+        var comEv = validateAiBuild(sp, Object.assign({}, bruto, { item: "Eviolite" }), {}, ctx);
         if (comEv && comEv.item === "Eviolite") return { v: comEv, itemDeRascunho: "Eviolite", tipoDoItem: "eviolite" };
       }
       return { v: v, itemDeRascunho: null };
@@ -507,7 +508,7 @@
     if (!item) return { v: null, motivo: recusa.txt };
     bruto.item = item;
     var recusa2 = {};
-    v = validateAiBuild(sp, bruto, recusa2, {});
+    v = validateAiBuild(sp, bruto, recusa2, ctx);
     if (!v) return { v: null, motivo: recusa2.txt };
     return { v: v, itemDeRascunho: v.item === item ? item : null, tipoDoItem: tipo, pedras: regra ? regra.stones.slice() : [] };
   }

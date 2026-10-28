@@ -42,7 +42,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **mono_run.js** - Mono run: o que dá pra pegar do seu tipo até a etapa atual (2026-09-26,
   linhaEvolutivaDe:20, compraDeInicialTexto:47, monotypeAtivo:72, serveProMono:74, fraquezasDoTipo:80, resistemAoTipo:83, cobreFraquezas:88, mudancaDeTipo:95, pctClima:133, climaQueCombina:141, orientacaoMono:144, avisoProximoLider:158, monoDisponibilidade:176
 - **pipeline_build.js** - Pipeline de build com intenção (ticket 20 da dívida, desenho de 14/10/2026; docs/pipeline_de_build.md).
-  pipelineEspecie:59, pipelineResolverAlvo:71, pipelineAmeacasDePrioridade:147, pipelineSemFuga:173, pipelineDuelo:174, pipelineLinhaDoGolpe:184, pipelineTierDaLinha:223, pipelineChaveDaLinha:228, pipelineSinergiasAtivas:233, pipelinePesoDoGolpe:238, pipelinePesoDoConjunto:241, pipelineTabela:247, pipelineValorDoGolpe:273, pipelineAvaliarConjunto:278, pipelineMontarConjunto:328, pipelineHabilidadesSemRegra:381, pipelineTierDoCandidato:389, pipelineVelocidade:392, pipelineMotivos:398, pipelineTiposExtraDeStab:425, pipelineSplitDoConjunto:440, pipelineNaturezaServe:450, pipelineAtributoFraco:454, pipelineNaturezaEEvs:460, pipelineGolpesComRecuo:474, pipelineSemRecuo:481, pipelineEvioliteServe:488, pipelineValidarRascunho:493, candidatosDeBuild:517, pipelineCandidatos:521 (+2)
+  pipelineEspecie:59, pipelineResolverAlvo:71, pipelineAmeacasDePrioridade:147, pipelineSemFuga:173, pipelineDuelo:174, pipelineLinhaDoGolpe:184, pipelineTierDaLinha:223, pipelineChaveDaLinha:228, pipelineSinergiasAtivas:233, pipelinePesoDoGolpe:238, pipelinePesoDoConjunto:241, pipelineTabela:247, pipelineValorDoGolpe:273, pipelineAvaliarConjunto:278, pipelineMontarConjunto:328, pipelineHabilidadesSemRegra:381, pipelineTierDoCandidato:389, pipelineVelocidade:392, pipelineMotivos:398, pipelineTiposExtraDeStab:425, pipelineSplitDoConjunto:440, pipelineNaturezaServe:450, pipelineAtributoFraco:454, pipelineNaturezaEEvs:460, pipelineGolpesComRecuo:474, pipelineSemRecuo:481, pipelineEvioliteServe:488, pipelineValidarRascunho:493, candidatosDeBuild:518, pipelineCandidatos:522 (+2)
 - **plano_build.js** - Build que acompanha o jogador: plano de golpes por slot, estilo da build e
   evsTextoParaArray:24, estiloDeEvs:37, estiloDoRitmo:48, nivelDoGolpe:56, nivelDeEvolucaoDaForma:68, validarPlano:80, planoSaneado:107, golpesNoCap:123, trocasEntreCaps:141, curadasDe:153, curadaParaEstilo:160
 - **prompts_ia.js** - Peças dos prompts de IA (o que vai pro modelo) e a tradução dos erros da IA pro
@@ -188,7 +188,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **validar_dado_cru.mjs** - Validação do dado CRU do NextDex (lote 2, 2026-10-06). Roda ANTES do
   unicos:19, validarDadoCru:21
 - **validar_dados.mjs** - Travas de dado do build (fase 8 da refatoração, 2026-09-24: porte em Node de
-  carregar:12, lista:13, validarBuilds:28, validarInvariantes:98
+  carregar:16, lista:17, validarBuilds:32, validarInvariantes:102
 - **validar_rank_v2.mjs** - Ponto 7 do rank v2: conferir o rank novo contra referências de fora, sem ajustar peso.
   norm:26, achar:30, postos:32, spearman:41, f2:49, media:50, notaV1:52
 - **varrer_chefoes.mjs** - Varredura dos dados de TODOS os chefes (membros de party/insane/hell): pedra sem Mega, habilidade/golpe sem id,

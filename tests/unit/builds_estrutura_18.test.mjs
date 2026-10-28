@@ -28,6 +28,12 @@ test("habilidadesEscolhiveis: igual à expressão antiga uniqueIds(ab).map(nome)
   assert.ok(n > 1000);
 });
 
+test("evioliteFunciona: o Necrozma base ainda 'evolui' (fusão), mas o Eviolite o exclui (battle_util.c:7448-7450); Kirlia vale", () => {
+  assert.equal(R.evoluiAinda(sp("Necrozma")), true);
+  assert.equal(R.evioliteFunciona(sp("Necrozma")), false);
+  assert.equal(R.evioliteFunciona(sp("Kirlia")), true);
+});
+
 // ---- item esgotado ----
 test("itemEsgotadoNoTime: esgotado quando já tem MAX_MESMO_ITEM_NO_TIME donos", () => {
   assert.equal(R.MAX_MESMO_ITEM_NO_TIME, 2);
