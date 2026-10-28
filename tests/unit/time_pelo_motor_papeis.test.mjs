@@ -306,8 +306,8 @@ test("com a fatia: wallbreaker e tanque seguem com prova; quem não tem papel se
 });
 
 test("com a fatia: nenhuma tag de armador nasce com menos de dois beneficiários medidos, em nenhuma variante", () => {
-  // v2.65.4.1 (28/10): com POOL_CLIMA os dados novos escolhem Pelipper + Politoed (chuva redundante, delta 0) e nenhuma tag nasce; o pool de sol segue gerando a tag (Torkoal, 3 beneficiários).
-  const r = run({ milestone: 3, nomes: SOL_POOL, comFatia: true });
+  // Pool de chuva sem beneficiários de sol e sem Pelipper (build Air Blower não arma): Politoed arma e o ganho do time é medido em várias lutas (v2.65.4.1, 28/10).
+  const r = run({ milestone: 3, nomes: ["Politoed", "Kingdra", "Floatzel", "Ludicolo", "Swampert", "Gyarados", "Scizor", "Garchomp"], comFatia: true });
   const out = r.R.montarTimePeloMotor(r.ctx, { variantes: ["ofensivo", "seguro", "sinergia"] });
   let tagsDeArmador = 0;
   out.variantes.forEach((v) => v.tags.filter((x) => x.armador).forEach((x) => {

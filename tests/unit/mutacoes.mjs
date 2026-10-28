@@ -4155,4 +4155,11 @@ export const MUTACOES = [
     de: "return c.fatia * vB + (1 - c.fatia) * obj.valor(",
     para: "return (1 - c.fatia) * vB + c.fatia * obj.valor(",
   },
+  {
+    id: "tag-armador-sem-ganho-do-time",
+    descricao: "a tag de armador nasce mesmo quando o time não ganha pontos com o clima nas lutas medidas",
+    arquivo: "time_pelo_motor_papeis.js",
+    de: "if (!usadas || !entrou || delta <= 0) return;",
+    para: "if (!usadas || !entrou) return;",
+  },
 ];
