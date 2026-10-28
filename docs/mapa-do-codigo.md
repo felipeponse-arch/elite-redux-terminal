@@ -10,7 +10,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **builds.js** - Build mostrada (effectiveBuild: salva > herdada da base pela Mega > curada do
   entradaDeBuild:23, stripNote:49, showdownName:54, showdownSet:58, evsToShowdownText:75, teamItemsInUse:90, comecarLoteDeBuilds:118, concluirBuildDoLote:119, encerrarLoteDeBuilds:120, contaNoTime:121, teamMovesInUse:123, itensEmUsoComQuem:151, teamRolesInUse:163, golpesFuturosDe:177, effectiveBuild:200
 - **calc_stat.js** - Fórmula de status final (base+IV+EV+nível+nature+item) e o que deriva
-  itemRuleFor:106, calcFinalStat:119, minEvSameStat:159, nextEvBreakpoint:169, priorityOrderForEvs:194, trimAndReallocateEvs:197
+  especiePorNomeDoItem:135, regraCasaComEspecie:139, itemRuleFor:149, calcFinalStat:160, minEvSameStat:200, nextEvBreakpoint:210, priorityOrderForEvs:235, trimAndReallocateEvs:238
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
   gymLeaderBaseName:45, getRemainingBossEntries:51, computeSharedRisks:109, bossSpeedSummary:132, computeBossAttackTypes:147, bossSafetyScore:171, bestBoxCandidateForBoss:183, confrontoUnitOf:233, confrontoFoesDe:258, confrontoMelhorUnidade:269, confrontoMinhasUnidades:279, confrontoUnidadesDaCaixa:289, confrontoParaParty:298, bossPartyPorDificuldade:327, bestRankForm:333, nextFightCx:351, varianteDoChefao:358, gymSkillsSummaryFor:367, regraDeCampoDoChefao:416, comportamentoDaIADoChefao:433, habilidadesExtrasDoHell:446, regrasDoHell:447, ehRevancheDeLider:454, buffsParaMostrarDoChefao:473, buffsAtivosDoChefao:482, computeSpeedTiers:495
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
@@ -306,6 +306,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **inversa_ia.test.mjs** - Revisão de 07/10 (ticket 03 x Inverse Room): com a sala invertida cobrindo a luta, o chefão usa o golpe que a
 - **itens_consumiveis.test.mjs** - Berries na IA e habilidades que dependem de gastar o item (2026-09-26).
 - **itens_da_config.test.mjs** - Ticket calibracao-2026-10-15/02 (15/10/2026): os parâmetros dos itens vêm do `hold_effect_strength` da er-config, como o
+- **itens_de_atributo.test.mjs** - TK-08 (28/10/2026): itens que mexem num atributo da espécie, iguais ao código do jogo (er-repo f34fc2b,
 - **itens_no_duelo.test.mjs** - Itens no duelo (2026-09-29, decisão do usuário: "item nos sets do duelo").
 - **juiz_do_time.test.mjs** - Ticket time-pelo-motor/01, Fase B2 (21/10/2026): juiz do time pela LUTA COMPLETA (avaliarTimePelaLutaCompleta), ao lado do
 - **lacunas_sem_codigo.test.mjs** - Varredura "habilidades da config sem código" (21/10/2026; relatorios/sem_codigo_varredura_2026-10-21.md).

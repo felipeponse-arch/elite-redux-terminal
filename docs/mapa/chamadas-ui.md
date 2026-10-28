@@ -7,7 +7,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/aba_chefoes.js
 - DIFF_LABELS:233 - chamado por: bossReferenceHtml (ficha_extras.js:103), quemResolveCardHtml (quem_resolve.js:83)
 - STAT_LABELS_SHORT:588 - chamado por: evBreakpointNote (editor_build.js:116), myBuildEditorHtml (editor_build.js:223), updateMyBuildStatus (editor_build.js:362), compareResultHtml (ficha_extras.js:22)
-- bossMonCardHtml:493 - chama: calcFinalStat (calc_stat.js:119), itemRuleFor (calc_stat.js:106), ABILITIES (dados_base.js:10), getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), +1
+- bossMonCardHtml:493 - chama: calcFinalStat (calc_stat.js:160), itemRuleFor (calc_stat.js:149), ABILITIES (dados_base.js:10), getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), +1
 - bossState:13 - chamado por: initProgress (progresso.js:105), quemResolvePreencher (quem_resolve.js:66), quemResolveRestaurar (quem_resolve.js:103)
 - campoDoChefaoHtml:178 - chama: regraDeCampoDoChefao (chefoes.js:416)
 - candidatosDoJogador:248 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), battleUnitsOf (formas_mega.js:246), xsDoJogador (liberado_na_run.js:37), serveProMono (mono_run.js:75)
@@ -21,7 +21,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderBossDetail:589 - chama: nivelDeCalculo (level_cap.js:65), monotypeAtivo (mono_run.js:73), quemResolveCardHtml (quem_resolve.js:83), quemResolveRestaurar (quem_resolve.js:103), bossConfrontoHtml (resumo_luta.js:96)
 - renderGymSkillsCardHtml:456 - chama: ehRevancheDeLider (chefoes.js:454), gymLeaderBaseName (chefoes.js:45), gymSkillsSummaryFor (chefoes.js:367)
 - selectBoss:437 - chama: varianteDoChefao (chefoes.js:358)
-- simularSemTravarATela:324 - chama: montarTimeContraChefaoEmPassos (duelo.js:4691), totalDePassosContraChefao (duelo.js:4690)
+- simularSemTravarATela:324 - chama: montarTimeContraChefaoEmPassos (duelo.js:4692), totalDePassosContraChefao (duelo.js:4691)
 
 ## ui/arquetipo.js
 - applyRecommendedTeam:207 - chama: getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), formFamilyOf (formas_mega.js:58), entradasDoJogador (liberado_na_run.js:33), flashToast (dex_lista.js:473), +4 | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorFicarComVariante (modo_motor.js:119)
@@ -53,11 +53,11 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/dex_ficha.js
 - RANK_TIER_CLASS:154 - chamado por: monoRunCardHtml (arquetipo.js:516)
 - abilityCard:14 - chama: ABILITIES (dados_base.js:10)
-- buildSynergyHtml:42 - chama: sinergiasDaEspecie (duelo.js:1416) | chamado por: buildEntryHtml (editor_build.js:182), strategySetsHtml (editor_build.js:432), renderTeam (time.js:8)
+- buildSynergyHtml:42 - chama: sinergiasDaEspecie (duelo.js:1417) | chamado por: buildEntryHtml (editor_build.js:182), strategySetsHtml (editor_build.js:432), renderTeam (time.js:8)
 - conditionMoveSynergyNoteHtml:70 - chama: buildNoteHtml (editor_build.js:155)
 - evoConditionText:88 - chama: EVOKINDS (dados_base.js:13), EVO_LEVEL_FEMALE (dados_base.js:32), EVO_LEVEL_MALE (dados_base.js:31), EVO_MEGA_KINDS (dados_base.js:34), EVO_PRIMAL (dados_base.js:33)
 - fichaCabecalhoHtml:515 - chama: descricaoDaEspecie (dados_base.js:185), compraDeInicialTexto (mono_run.js:48), speciesTypeNames (tipos.js:253), state (nucleo.js:8)
-- fichaConhecerHtml:569 - chama: uniqueIds (dados_base.js:118), sinergiasDaEspecie (duelo.js:1416), bst (dex_lista.js:152)
+- fichaConhecerHtml:569 - chama: uniqueIds (dados_base.js:118), sinergiasDaEspecie (duelo.js:1417), bst (dex_lista.js:152)
 - fichaEfetividadeHtml:434 - chama: perfilDefensivoDaEspecie (tipos.js:178)
 - fichaEvolucaoHtml:457 - chama: getSpeciesByX (dados_base.js:78)
 - fichaFormasHtml:475 - chama: getSpeciesByX (dados_base.js:78)
@@ -98,8 +98,8 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - buildEntryHtml:182 - chama: showdownSet (builds.js:58), buildSynergyHtml (dex_ficha.js:42) | chamado por: bossReferenceHtml (ficha_extras.js:103), buildHistoryHtml (ficha_extras.js:87)
 - buildNoteHtml:155 - chamado por: conditionMoveSynergyNoteHtml (dex_ficha.js:70), planoDaBuildHtml (ficha_extras.js:179), renderTeam (time.js:8)
 - copyText:11 - chamado por: initBosses (aba_chefoes.js:33)
-- evBreakpointNote:116 - chama: minEvSameStat (calc_stat.js:159), STAT_LABELS_SHORT (aba_chefoes.js:588)
-- hpEvEfficiencyNote:83 - chama: stripNote (builds.js:49), calcFinalStat (calc_stat.js:119)
+- evBreakpointNote:116 - chama: minEvSameStat (calc_stat.js:200), STAT_LABELS_SHORT (aba_chefoes.js:588)
+- hpEvEfficiencyNote:83 - chama: stripNote (builds.js:49), calcFinalStat (calc_stat.js:160)
 - itemDescHtml:45 - chama: ondeAcharItemTexto (avisos_build.js:100), stripNote (builds.js:49) | chamado por: renderTeam (time.js:8)
 - lerFormularioDoEditor:493 - chama: clampInt (dados_base.js:103)
 - megaModeBuildNoteHtml:174 - chama: megaStoneRuleFor (validacao_build_ia.js:14) | chamado por: renderTeam (time.js:8)
@@ -107,7 +107,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - seloDaBuildHtml:168 - chama: seloDaBuild (avisos_build.js:82) | chamado por: renderTeam (time.js:8)
 - strategySetsHtml:432 - chama: evsToShowdownText (builds.js:75), showdownSet (builds.js:58), nivelDeCalculo (level_cap.js:65), buildSynergyHtml (dex_ficha.js:42), state (nucleo.js:8) | chamado por: selectSpecies (dex_ficha.js:610)
 - updateMyBuildEvTotal:332 - chama: clampInt (dados_base.js:103)
-- updateMyBuildStatus:362 - chama: ITEM_MOVE_POWER_MODS (calc_stat.js:105), calcFinalStat (calc_stat.js:119), itemRuleFor (calc_stat.js:106), MOVE_BY_NAME (dados_base.js:86), SPLIT_STATUS (dados_base.js:29), +6
+- updateMyBuildStatus:362 - chama: ITEM_MOVE_POWER_MODS (calc_stat.js:132), calcFinalStat (calc_stat.js:160), itemRuleFor (calc_stat.js:149), MOVE_BY_NAME (dados_base.js:86), SPLIT_STATUS (dados_base.js:29), +6
 - wireMyBuildEditor:465 - chama: getActiveBuild (evolucao.js:16), nivelDeCalculo (level_cap.js:65), myBuildLevel (aba_chefoes.js:19), myBuildLevelIsCustom (aba_chefoes.js:31), pipelineDesenharFicha (pipeline_tela.js:113) | chamado por: selectSpecies (dex_ficha.js:610)
 
 ## ui/ficha_extras.js

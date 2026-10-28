@@ -77,19 +77,46 @@
   // Still no in-battle ability/stage modifiers (stat stages, weather, an
   // ability's damage-time effect) - this is "what does the stat screen
   // say", not an attempt to simulate a turn.
+  // TK-08 (28/10/2026, decisão 4 do usuário: "iguais ao jogo"). FONTE ÚNICA dos itens que mexem num atributo da espécie
+  // (calcFinalStat e o duelo leem só esta tabela). Fonte: er-repo f34fc2b, battle_util.c:7286-7321 (CalcAttackStat) e 7441-7450
+  // (CalcDefenseStat), battle_main.c:4232 (velocidade). A calculadora do jogo é aplicada ao atributo de ataque/defesa, então
+  // multiplicar o atributo final dá o mesmo dano. Light Ball e Thick Club olham a espécie-BASE (GET_BASE_SPECIES_ID =
+  // gFormSpeciesIdTables[x][0], gerado de form_of na er-config SpeciesList.textproto): TODA forma de Pikachu, Raichu e Marowak
+  // conta como a base. Por isso as linhas x1,6 do jogo (Partner, Belle, Cosplay, Libre, Pop Star, Rock Star, PhD, Partner Mega) são
+  // código morto: a base dessas formas é Pikachu, que casa antes e dá x2,0. Raichu Alolan e Mega X/Y têm form_of Raichu: x1,5.
+  // Campos da regra: statIdx (0 HP, 1 Atk, 2 Def, 3 SpA, 4 SpD, 5 Spe), mult, base (família de formas), exata (só a espécie
+  // exata, sem formas), evolui (só espécie que ainda evolui), exceto, emDano (o duelo aplica no golpe, pois Klutz/Knock Off tiram o item).
+  // Premissa de IV/EV (jogo pokemon.c:990-997): o inimigo e o jogador fora do Hell têm IV 31; EV ligado (enableEvs). Hell com
+  // HELL_MODE_0_IVS_FLAG zera o IV do jogador (TK-10b, ainda não modelado aqui).
+  var FORMAS_DA_BASE = {
+    SPECIES_PIKACHU: ["SPECIES_PIKACHU_COSPLAY", "SPECIES_PIKACHU_ROCK_STAR", "SPECIES_PIKACHU_BELLE", "SPECIES_PIKACHU_POP_STAR", "SPECIES_PIKACHU_PH_D",
+      "SPECIES_PIKACHU_LIBRE", "SPECIES_PIKACHU_ORIGINAL_CAP", "SPECIES_PIKACHU_HOENN_CAP", "SPECIES_PIKACHU_SINNOH_CAP", "SPECIES_PIKACHU_UNOVA_CAP",
+      "SPECIES_PIKACHU_KALOS_CAP", "SPECIES_PIKACHU_ALOLA_CAP", "SPECIES_PIKACHU_PARTNER_CAP", "SPECIES_PIKACHU_WORLD_CAP", "SPECIES_PIKACHU_PARTNER",
+      "SPECIES_PIKACHU_PARTNER_MEGA"],
+    SPECIES_PICHU: ["SPECIES_PICHU_SPIKY_EARED"],
+    SPECIES_RAICHU: ["SPECIES_RAICHU_ALOLAN", "SPECIES_RAICHU_MEGA_Y", "SPECIES_RAICHU_MEGA_X"],
+    SPECIES_MAROWAK: ["SPECIES_MAROWAK_ALOLAN"]
+  };
   var ITEM_STAT_MODS = {
     "Choice Band": [{ statIdx: 1, mult: 1.5 }],
     "Choice Specs": [{ statIdx: 3, mult: 1.5 }],
     "Choice Scarf": [{ statIdx: 5, mult: 1.5 }],
     "Assault Vest": [{ statIdx: 4, mult: 1.5 }],
     "Tactical Vest": [{ statIdx: 2, mult: 1.5 }],
-    "Thick Club": [{ statIdx: 1, mult: 2, speciesPrefix: ["Cubone", "Marowak"] }],
+    "Thick Club": [{ statIdx: 1, mult: 2, base: ["SPECIES_CUBONE", "SPECIES_MAROWAK"] }],
     "Light Ball": [
-      { statIdx: 1, mult: 2, speciesPrefix: ["Pikachu"] },
-      { statIdx: 3, mult: 2, speciesPrefix: ["Pikachu"] },
-      { statIdx: 1, mult: 1.5, speciesPrefix: ["Raichu"] },
-      { statIdx: 3, mult: 1.5, speciesPrefix: ["Raichu"] }
-    ]
+      { statIdx: 1, mult: 2, base: ["SPECIES_PIKACHU", "SPECIES_PICHU"] },
+      { statIdx: 3, mult: 2, base: ["SPECIES_PIKACHU", "SPECIES_PICHU"] },
+      { statIdx: 1, mult: 1.5, base: ["SPECIES_RAICHU"] },
+      { statIdx: 3, mult: 1.5, base: ["SPECIES_RAICHU"] }
+    ],
+    "Deep Sea Tooth": [{ statIdx: 3, mult: 2, exata: ["SPECIES_CLAMPERL"] }],
+    "Deep Sea Scale": [{ statIdx: 4, mult: 2, exata: ["SPECIES_CLAMPERL"] }],
+    // Ditto com Transform/Imposter troca os atributos pelos do alvo no duelo (o x2 some junto, como no jogo: sem STATUS2_TRANSFORMED).
+    "Metal Powder": [{ statIdx: 2, mult: 2, exata: ["SPECIES_DITTO"] }],
+    "Quick Powder": [{ statIdx: 5, mult: 2, exata: ["SPECIES_DITTO"] }],
+    "Eviolite": [{ statIdx: 2, mult: 1.5, evolui: true, exceto: ["SPECIES_NECROZMA"], emDano: true },
+      { statIdx: 4, mult: 1.5, evolui: true, exceto: ["SPECIES_NECROZMA"], emDano: true }]
   };
   // Move-power multipliers, distinto de ITEM_STAT_MODS acima (aquele muda um
   // STAT, este muda o PODER de um golpe direto) - adicionado 2026-09-09 pro
@@ -103,16 +130,30 @@
   // habilidade que este projeto não tem, o mesmo motivo de TYPE_MOD_ABILITIES
   // cobrir só um punhado de habilidades em vez das ~1033.
   var ITEM_MOVE_POWER_MODS = { "Life Orb": 1.3 };
-  function itemRuleFor(itemName, statIdx, speciesName) {
+  // Espécie do dex pelo nome (calcFinalStat recebe o nome); índice montado na primeira chamada.
+  var ESPECIE_POR_NOME = null;
+  function especiePorNomeDoItem(nome) {
+    if (!ESPECIE_POR_NOME) { ESPECIE_POR_NOME = Object.create(null); SPECIES.forEach(function (s) { if (!ESPECIE_POR_NOME[s.n]) ESPECIE_POR_NOME[s.n] = s; }); }
+    return ESPECIE_POR_NOME[nome] || null;
+  }
+  function regraCasaComEspecie(r, sp) {
+    if (!r.base && !r.exata && !r.evolui) return true;
+    if (!sp) return false;
+    var sn = sp.sname;
+    if (r.exceto && r.exceto.indexOf(sn) !== -1) return false;
+    if (r.evolui) return (sp.ev || []).some(function (ev) { return !isMegaEvoKind(ev[0]); });
+    if (r.exata) return r.exata.indexOf(sn) !== -1;
+    return r.base.some(function (b) { return b === sn || (FORMAS_DA_BASE[b] || []).indexOf(sn) !== -1; });
+  }
+  // Regra do item para o atributo statIdx de uma espécie (objeto do dex ou nome). incluirEmDano: o duelo pede também as regras emDano.
+  function itemRuleFor(itemName, statIdx, especie, incluirEmDano) {
     var rules = ITEM_STAT_MODS[itemName];
     if (!rules) return null;
+    var sp = (typeof especie === "string") ? especiePorNomeDoItem(especie) : especie;
     for (var i = 0; i < rules.length; i++) {
       var r = rules[i];
-      if (r.statIdx !== statIdx) continue;
-      if (!r.speciesPrefix) return r;
-      for (var j = 0; j < r.speciesPrefix.length; j++) {
-        if (speciesName && speciesName.indexOf(r.speciesPrefix[j]) === 0) return r;
-      }
+      if (r.statIdx !== statIdx || (r.emDano && !incluirEmDano)) continue;
+      if (regraCasaComEspecie(r, sp)) return r;
     }
     return null;
   }
