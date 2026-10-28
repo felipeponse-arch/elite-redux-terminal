@@ -156,9 +156,18 @@
   var STONES_BY_MEGA_SNAME = Object.create(null);
   Object.keys(MEGA_FORMS).forEach(function (stone) {
     if (ITEMS.indexOf(stone) === -1) return;
-    var sn = MEGA_FORMS[stone];
-    (STONES_BY_MEGA_SNAME[sn] = STONES_BY_MEGA_SNAME[sn] || []).push(stone);
+    [].concat(MEGA_FORMS[stone]).forEach(function (sn) {
+      (STONES_BY_MEGA_SNAME[sn] = STONES_BY_MEGA_SNAME[sn] || []).push(stone);
+    });
   });
+  // Forma que a pedra dá a esta criatura. O valor do MEGA_FORMS é um sname, ou uma lista quando a mesma pedra serve a duas
+  // formas (Aegislashite R: escudo/lâmina; Toxtricitite R: normal/Fuzz) - o jogo escolhe pela espécie atual (battle_util.c:8128).
+  function megaDaPedra(item, sp) {
+    var v = MEGA_FORMS[item];
+    if (!Array.isArray(v)) return v;
+    var alvos = sp ? (sp.ev || []).map(function (e) { return e[2]; }) : [];
+    return v.filter(function (sn) { var m = getSpeciesBySname(sn); return m && alvos.indexOf(m.x) !== -1; })[0];
+  }
   function stonesOf(megaSp) { return (megaSp && STONES_BY_MEGA_SNAME[megaSp.sname]) || []; }
 
   // Como a criatura realmente LUTA, conforme o modo. Cada "unidade" tem as

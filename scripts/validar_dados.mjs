@@ -132,12 +132,14 @@ export function validarInvariantes() {
   const idxMega = ["EVO_MEGA_EVOLUTION", "EVO_MOVE_MEGA_EVOLUTION", "EVO_PRIMAL_REVERSION"].map((r) => evoKinds.indexOf(r));
   const alvosMega = new Set();
   for (const s of porSname.values()) for (const ev of lista(s.ev)) if (ev && idxMega.includes(ev[0])) alvosMega.add(Number(ev[2]));
-  for (const [pedra, forma] of Object.entries(megaForms)) {
+  for (const [pedra, formas] of Object.entries(megaForms)) {
     if (!items.has(String(pedra))) erro(`mega_forms.json: pedra '${pedra}' nao existe nos itens`);
+    for (const forma of [].concat(formas)) {
     if (!porSname.has(String(forma))) erro(`mega_forms.json: forma '${forma}' (pedra ${pedra}) nao existe`);
     else if (!alvosMega.has(Number(porSname.get(String(forma)).x))) erro(`mega_forms.json: '${forma}' (pedra ${pedra}) nao e alvo de Mega/Primal de nenhuma base`);
+    }
   }
-  const comPedra = new Set(Object.values(megaForms).map(String));
+  const comPedra = new Set(Object.values(megaForms).flat().map(String));
   let megaSemPedra = 0;
   for (const x of alvosMega) if (porX.has(x) && !comPedra.has(String(porX.get(x).sname))) megaSemPedra++;
 
