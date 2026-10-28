@@ -1591,6 +1591,27 @@ export const MUTACOES = [
     para: ': false ? atq.stats[2] :',
   },
   {
+    id: "blinking-flash-sem-precisao",
+    descricao: "Blinking Flash deixa de tirar precisão do rival (o código do jogo dá 10% de -1 ACC por golpe de luz)",
+    arquivo: "duelo.js",
+    de: "if (outro.ef.luzReduzPrecisao && gOutro",
+    para: "if (false && outro.ef.luzReduzPrecisao && gOutro",
+  },
+  {
+    id: "run-away-mais-um",
+    descricao: "Run Away volta a dar +1 de Speed (o código do jogo dá +2, abilities.cc:11827)",
+    arquivo: "duelo.js",
+    de: "if (/Raises Speed if stats lowered by an enemy/i.test(f)) ef.aoSerReduzido.spe = 2;",
+    para: "if (/Raises Speed if stats lowered by an enemy/i.test(f)) ef.aoSerReduzido.spe = 1;",
+  },
+  {
+    id: "prankster-barra-golpe-de-lado",
+    descricao: "Prankster volta a barrar tela/vento/hazard contra Dark (BlocksPrankster não barra golpe de lado)",
+    arquivo: "duelo.js",
+    de: "if (!campo && x.ef.pranksterStatus",
+    para: "if (x.ef.pranksterStatus",
+  },
+  {
     id: "fluffiest-contato-pelo-texto",
     descricao: "Fluffiest segue o texto (contato x0,25) em vez do código do jogo (x0,5)",
     arquivo: "duelo.js",

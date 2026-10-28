@@ -35,7 +35,6 @@ function iso(especie, habs, golpes) {
 // ---------- conferência final: nenhuma das 38 esquecida ----------
 const SEM_REGRA_NOVAS = {
   "Grimace": "Mean Look na entrada (abilities.cc:10720): impede a troca do alvo; o duelo não modela troca (como Tag e Arena Trap)",
-  "Blinking Flash": "golpe de luz tem 10% de chance de -1 de precisão do alvo (abilities.cc:12907): o motor não modela estágio de precisão",
 };
 const NOVAS_DO_DELTA = ["Photokinesis", "Photon Burst", "Rippling Punch", "Cackling", "Fresh Snowfall", "Sticky Situation", "Bioluminescent", "Blinking Flash", "Brain Freeze"];
 

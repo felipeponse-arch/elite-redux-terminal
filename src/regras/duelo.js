@@ -562,7 +562,8 @@
     }
     // Quando o rival reduz os atributos: Competitive, Defiant, Run Away.
     if ((x = f.match(/Raises (Sp\. Atk|Attack) by two stages if stats are lowered by an enemy/i))) ef.aoSerReduzido[estagioDoTexto(x[1])] = 2;
-    if (/Raises Speed if stats lowered by an enemy/i.test(f)) ef.aoSerReduzido.spe = 1;
+    // Run Away: +2 de Speed (abilities.cc:11827 SetStatChanger(STAT_SPEED, 2)); o texto não traz o número.
+    if (/Raises Speed if stats lowered by an enemy/i.test(f)) ef.aoSerReduzido.spe = 2;
     // Imunidade a quedas (também barra Intimidate/Scare, como na série).
     if (/Immune to stat drops|Bounces back any stat drops/i.test(f)) { ["atk", "def", "spa", "spd", "spe"].forEach(function (s) { ef.imuneQuedas[s] = true; }); ef.imuneIntimida = true; ef.imuneAssusta = true; }
     if (/Enemies can't lower Atk\/SpAtk/i.test(f)) { ef.imuneQuedas.atk = true; ef.imuneQuedas.spa = true; ef.imuneIntimida = true; ef.imuneAssusta = true; }
@@ -812,6 +813,7 @@
     if ((x = f.match(/(\d+) turns Aurora Veil on entry/i))) ef.telaNaEntrada = parseInt(x[1], 10);
     if (/Uses Magnet Rise on entry/i.test(f)) ef.imuneTipoNaEntrada = "Ground";
     if (/gains \+2 Speed when when hit by rocks|gains \+2 Speed when hit by rocks/i.test(f)) ef.aoApanhar.push({ stat: "spe", n: 2, tipos: ["Rock"] });
+    if ((x = f.match(/^Light moves have a (\d+)% chance to lower accuracy/i))) ef.luzReduzPrecisao = parseInt(x[1], 10) / 100; // Blinking Flash
     // Rivalry: gênero desconhecido - vale metade das vezes, nos dois sentidos.
     if (/^Deals 1\.25x to same gender/i.test(f)) ef.danoMult *= 1.125;
     if (/^Takes \.75x from opposite gender/i.test(f)) ef.reducao.todos *= 0.875;
@@ -1213,7 +1215,7 @@
     return soma / n;
   }
   function estagiosMediosDuelo(u, outro, gU, gOutro, n) {
-    var s = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, acumula = Math.max(0, (n - 1) / 2);
+    var s = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0 }, acumula = Math.max(0, (n - 1) / 2);
     var mult = u.ef.estagioMult;
     function soma(stat, delta, doRival) {
       if (doRival && delta < 0 && (u.ef.imuneQuedas[stat] || (u.it && u.it.imuneQuedas))) return;
@@ -1278,6 +1280,9 @@
       u.ef.aoUsar.forEach(function (a) { if ((a.categoria === "recuo" ? gU.recuo > 0 : (gU.cats || []).indexOf(a.categoria) !== -1)) soma(a.stat, a.n * acumula, false); });
     }
     Object.keys(u.ef.porTurno).forEach(function (k) { soma(k, u.ef.porTurno[k] * acumula, false); });
+    // Blinking Flash do rival (abilities.cc:12919-12928): golpe de luz acertado tem 10% de chance de -1 ACC no alvo.
+    // shortcut: valor esperado, 10% x chance de acerto por turno acumulado (igual aos outros estágios), sem sortear nem limitar em -6; quem não pode ter ACC reduzida (Clear Amulet) fica de fora.
+    if (outro.ef.luzReduzPrecisao && gOutro && (gOutro.cats || []).indexOf("luz") !== -1 && !(u.it && u.it.imuneQuedas)) s.acc -= outro.ef.luzReduzPrecisao * (gOutro.precisao || 1) * acumula;
     // Item: subida uma vez por gatilho (Weakness Policy, Throat Spray, Kee Berry...) e baga de aperto.
     var ativo = itemAtivoDuelo(u, outro, gOutro ? gOutro.contato : undefined);
     if (u.it && ativo > 0) {
@@ -1493,7 +1498,7 @@
       prioridadeNoPrimeiro: false, prioTipoCheio: [], prioMult: 1,
       bonusTipo: {}, bonusGolpes: {}, golpeExtra: 1, seguimento: null, contraTipo: {},
       tecnico: null, resistidoX2: false, seBonus: 1, skillLink: false,
-      precisaoMult: 1, semErrar: false, semErrarContraMim: false,
+      precisaoMult: 1, luzReduzPrecisao: 0, semErrar: false, semErrarContraMim: false,
       quebraHabilidade: false, quebraTipo: null, queimaQualquerTipo: false, socoSom: false, hemorragia: false, resisteFortKnox: false, resistDeAtacante: {},
       bloqueiaBonus: false, aguenta: false,
       somMult: 1, somVira: null, ataqueExtra: [], defesaPelaVelocidade: null,
@@ -2484,6 +2489,10 @@
       var rDef = atq.ef.ruina[defF ? "def" : "spd"], rAtq = g.fonteAtk === "alvoAtk" ? 0 : def.ef.ruina[g.fonteAtk === "def" ? "def" : fisico ? "atk" : "spa"];
       if (rDef) f /= rDef;
       if (rAtq) f *= rAtq;
+      if (estAtq.acc && !atq.ef.semErrar && !def.ef.semErrarContraMim) { // estágio de precisão do jogo: (3+n)/3, n<0 = 3/(3-n)
+        var p0 = g.precisao || 1, fa = estAtq.acc >= 0 ? (3 + estAtq.acc) / 3 : 3 / (3 - estAtq.acc);
+        f *= Math.min(1, p0 * fa) / p0;
+      }
       if (atq.ef.bonusContraReduzido > 1) {
         var caiu = Object.keys(estDef).reduce(function (sm, k) { return sm + Math.max(0, -estDef[k]); }, 0);
         if ((atq.ef.intimida && !def.ef.imuneIntimida) || (atq.ef.assusta && !def.ef.imuneAssusta)) caiu = 1;
@@ -3589,9 +3598,10 @@
   }
   // Pode usar golpe de status contra o alvo? Magic Bounce devolve, Good As Gold
   // é imune; Prankster ganha prioridade mas falha em Dark.
-  function statusPassaDuelo(x, y) {
+  // campo: golpe de alvo USER/OPPONENTS_FIELD (tela, vento, hazard) - o Prankster não o barra (battle_util.c:8651-8657, BlocksPrankster).
+  function statusPassaDuelo(x, y, campo) {
     if (y.ef.refleteStatus || y.ef.imuneGolpeStatus) return false;
-    if (x.ef.pranksterStatus && (y.tipos || []).indexOf("Dark") !== -1) return false;
+    if (!campo && x.ef.pranksterStatus && (y.tipos || []).indexOf("Dark") !== -1) return false;
     if (x.ef.statusSom && y.ef.imuneFlag["Sound Based"]) return false; // Musical Notes contra Soundproof
     return true;
   }
@@ -3618,7 +3628,7 @@
       ["atk", "def", "spa", "spd", "spe"].forEach(function (k) { if (e[k]) r.estagiosGanhos[k] = e[k] * mult; });
       return r;
     }
-    if (!statusPassaDuelo(x, y)) return null;
+    if (!statusPassaDuelo(x, y, /^(tela|vento|hazard)$/.test(p.tipo))) return null;
     if (p.tipo === "queda") {
       var q = p.estagios;
       if (y.ef.imuneQuedas && Object.keys(q).some(function (k) { return y.ef.imuneQuedas[k]; })) return null;
