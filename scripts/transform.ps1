@@ -1,10 +1,10 @@
-﻿# Generates data/dex_compact.json from data/gameData_2654.json (the raw
+﻿# Generates data/dex_compact.json from data/gameData.json (the raw
 # Elite Redux NextDex export). Run via build.ps1, or standalone for debugging.
 
 . (Join-Path $PSScriptRoot "common.ps1")
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"
-$srcPath = Join-Path $dataDir "gameData_2654.json"
+$srcPath = Join-Path $dataDir "gameData.json"
 
 $ser = New-GameDataParser
 $json = Get-Content $srcPath -Raw -Encoding UTF8

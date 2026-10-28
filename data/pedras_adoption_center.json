@@ -1,5 +1,5 @@
 {
-  "fonte": "er-config oficial (github.com/Elite-Redux/er-config, commit d1a9a4c, items/MegaStonesList.textproto): itens com adoption_center: true. Vendidas por BP no NPC de pedras do Adoption Center (Mart de Oldale e outras 16 cidades; precisa do Mega Bracelet, dado pelo Norman). Ticket 08, 07/10.",
+  "fonte": "er-config oficial (github.com/Elite-Redux/er-config, commit 486a964 conferido em 28/10, items/MegaStonesList.textproto): itens com adoption_center: true (142 na config; faltam aqui Salamencite R e Metagrossite R, ver TK-25). Vendidas por BP no NPC de pedras do Adoption Center (Mart de Oldale e outras 16 cidades; precisa do Mega Bracelet, dado pelo Norman). Ticket 08, 07/10.",
   "pedras": [
     "Kingambitite R",
     "Ribombite",
@@ -140,6 +140,8 @@
     "Scovillainite",
     "Glimmoranite",
     "Tatsugirinite",
-    "Baxcalibrite"
+    "Baxcalibrite",
+    "Salamencite R",
+    "Metagrossite R"
   ]
 }

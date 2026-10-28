@@ -7,7 +7,7 @@
 //   1. a versão que o NextDex oficial abre por padrão (último item de
 //      allVersions em static/js/data_version.js - o próprio site usa essa regra);
 //   2. se o arquivo de dados dessa versão continua idêntico ao nosso snapshot
-//      (data/gameData_2654.json) - os devs às vezes corrigem dados sem trocar
+//      (data/gameData.json) - os devs às vezes corrigem dados sem trocar
 //      o número da versão;
 //   3. a "Latest Version" da página de download do site oficial.
 //
@@ -75,7 +75,7 @@ export async function baixar(url, comoBytes = false) {
 
 async function main() {
   const raiz = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-  const snapshot = readFileSync(path.join(raiz, "data", "gameData_2654.json"));
+  const snapshot = readFileSync(path.join(raiz, "data", "gameData.json"));
   const linhas = []; // { item, esperado, encontrado, estado: "ok" | "mudou" | "sem-rede" }
 
   const conferir = async (item, esperado, obter) => {

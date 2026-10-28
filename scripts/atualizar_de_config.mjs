@@ -1,4 +1,4 @@
-// Atualiza data/gameData_2654.json a partir do er-config (código/config do jogo é a verdade).
+// Atualiza data/gameData.json a partir do er-config (código/config do jogo é a verdade).
 // Uso: node scripts/atualizar_de_config.mjs <pasta-er-config> [--aplicar] [--saida=relatorio.json]
 // Só sobrepõe campos que mapeiam sem ambiguidade (nome, texto, números, tipo, alvo, split, habilidades, inatas,
 // stats base). Efeito/flags/evoluções/learnsets de espécie existente NÃO são tocados (ver relatório).
@@ -8,7 +8,7 @@ import path from 'node:path';
 const [, , cfg, ...flags] = process.argv;
 const aplicar = flags.includes('--aplicar');
 const saida = (flags.find((f) => f.startsWith('--saida=')) || '').slice(8);
-const arq = path.resolve('data/gameData_2654.json');
+const arq = path.resolve('data/gameData.json');
 
 // textproto: \NNN (octal) são bytes UTF-8 (ex.: Poké), \xHH idem, \n quebra de linha, \c = c
 function desescapar(s) {

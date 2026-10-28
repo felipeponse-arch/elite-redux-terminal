@@ -7,7 +7,7 @@
 // (TK-22, dados-P15-5: o arquivo nasceu à mão; a divergência é decisão do usuário, o script nunca troca sozinho).
 // Uso: node scripts/gerar_mega_forms.mjs [--gravar] [--conferir]   (sem --gravar só lista o que faltaria)
 import { readFileSync, writeFileSync } from "node:fs";
-const g = JSON.parse(readFileSync("data/gameData_2654.json", "utf8"));
+const g = JSON.parse(readFileSync("data/gameData.json", "utf8"));
 const atual = JSON.parse(readFileSync("data/mega_forms.json", "utf8"));
 const itens = Object.fromEntries(g.items.map((i) => [i.NAME, i.name]));
 const KIND = g.evoKindT;

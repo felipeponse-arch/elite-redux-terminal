@@ -36,7 +36,7 @@ Output: data/move_roles.json, { "<id do golpe>": "cura" | "setup" | ... }.
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"
 $ser = New-GameDataParser
-$raw = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "gameData_2654.json") -Raw -Encoding UTF8))
+$raw = $ser.DeserializeObject((Get-Content (Join-Path $dataDir "gameData.json") -Raw -Encoding UTF8))
 
 $effT = @($raw["effT"])
 $targetT = @($raw["targetT"])

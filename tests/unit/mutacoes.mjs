@@ -4681,4 +4681,11 @@ export const MUTACOES = [
     de: "espinho: 3, toxico: 2",
     para: "espinho: 9, toxico: 2",
   },
+  {
+    id: "tk25-pedras-adoption-sem-metagrossite-r",
+    descricao: "a lista do Adoption Center perde a Metagrossite R (a er-config traz 142)",
+    arquivo: "pedras_adoption_center.json",
+    de: "    \"Salamencite R\",\n    \"Metagrossite R\"\n",
+    para: "    \"Salamencite R\"\n",
+  },
 ];
