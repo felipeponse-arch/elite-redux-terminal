@@ -144,6 +144,16 @@
     "Luxraynite": 7,
     "Magnezonite": 7,
     "Purple Orb": 9,
+    // NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a): só pós-campeão, etapa 9.
+    "Adamant Orb": 9,
+    "Dynamax Orb": 9,
+    "Griseous Orb": 9,
+    "Lustrous Orb": 9,
+    "Rusted Shield": 9,
+    "Rusted Sword": 9,
+    "U-Necrozium Z": 9,
+    "Urshifite": 9,
+    "Zygardite": 9,
     // Sem fonte de obtenção (er-repo f34fc2b e er-config 486a964 só têm item/espécie; decisão do usuário 27/10: sem Etapa conhecida = travado).
     // 10 = além da última Etapa (9): a pedra nunca libera e a espécie Mega fica travada.
     "Salamencite R": 10,
