@@ -33,6 +33,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   dadoExterno:19, movePromptLine:28, ehGolpeDePivo:41, ehPrioridadeDeDano:49, moveRoleOf:53
 - **gravacao_build_ia.js** - O caminho "resposta da IA -> build validada -> o que gravar", sem tela (ticket 06 da dívida
   motivoDeNaoGerarBuild:18, validarRespostaDeBuildDaIa:26, textoDaRetentativaDeBuild:35, validarRespostaDoLoteDeBuilds:40, buildDoLoteDeBuilds:45, respostaDaIaObsoleta:55, textoDeLimiteDeBuilds:61, gravarBuildDaIaNaLista:68, gravarRespostaValidadaDaIa:105, gravarPlanoDaIa:134
+- **itens_do_time.js** - UMA lista de itens para o set do duelo (itemDoSetDuelo), o Modo Motor (time_pelo_motor.js) e a IA (prompts_ia.js,
+  soExistentes:30, itensDeEspeciePara:82, itemValidoNoTime:94, itensDoTime:98, itemDeTipoDoTime:102
 - **level_cap.js** - Level cap atual e golpes liberados por ele.
   levelCapMode:16, levelCapModeFromDifficulty:22, innatesAtivasNoNivel:34, nivelDaHabilidadeNoElite:40, innatesTravadasNoNivel:44, getCurrentCap:49, capOuPadrao:61, nivelDeCalculo:65, availableMovesFor:73, golpesTravadosNoCap:90
 - **liberado_na_run.js** - O que a run libera: UMA função pura (etapa, levelCap, alvo) -> boolean para pedra mega, item e
@@ -46,7 +48,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **plano_build.js** - Build que acompanha o jogador: plano de golpes por slot, estilo da build e
   evsTextoParaArray:24, estiloDeEvs:37, estiloDoRitmo:48, nivelDoGolpe:56, nivelDeEvolucaoDaForma:68, validarPlano:80, planoSaneado:107, golpesNoCap:123, trocasEntreCaps:141, curadasDe:153, curadaParaEstilo:160
 - **prompts_ia.js** - Peças dos prompts de IA (o que vai pro modelo) e a tradução dos erros da IA pro
-  soExistentes:32, itensDeEspeciePara:84, archetypeBuildGuidance:141, planoPromptBlock:158, contextoDoModoPrompt:168, anexarPlanoDaIa:208, sampleErrorMessage:230, versaoDosDados:273, cabecalhoIA:274, linhaHabilidadeIA:281, blocoEspecieIA:285, nomePapel:311, blocoPapelIA:312, blocoMovepoolIA:342, blocoRegrasDePapelIA:348, blocoMegaIA:354, comDescricaoIA:367, blocoItensDaEspecieIA:370, blocoItensIA:375, itensAindaIndisponiveisParaIA:382, blocoItensAindaIndisponiveisIA:387, blocoItensComunsIA:393, blocoTimeEmUsoIA:423, blocoManualIA:469, linhaVelocidadeIA:490, linhasProximaLutaIA:506, blocoContextoIA:542, envelopeContextoIA:545, linhasContextoDaEspecieIA:552, avisoInnatesEliteIA:575 (+16)
+  archetypeBuildGuidance:58, planoPromptBlock:75, contextoDoModoPrompt:85, anexarPlanoDaIa:125, sampleErrorMessage:147, versaoDosDados:190, cabecalhoIA:191, linhaHabilidadeIA:198, blocoEspecieIA:202, nomePapel:228, blocoPapelIA:229, blocoMovepoolIA:259, blocoRegrasDePapelIA:265, blocoMegaIA:271, comDescricaoIA:284, blocoItensDaEspecieIA:287, blocoItensIA:292, itensAindaIndisponiveisParaIA:299, blocoItensAindaIndisponiveisIA:304, blocoItensComunsIA:310, blocoTimeEmUsoIA:340, blocoManualIA:386, linhaVelocidadeIA:407, linhasProximaLutaIA:423, blocoContextoIA:459, envelopeContextoIA:462, linhasContextoDaEspecieIA:469, avisoInnatesEliteIA:492, linhasContextoComumIA:498, linhaProvadoIA:517 (+14)
 - **rank_da_run.js** - Rank v2 (2026-10-02, modelo aprovado pelo usuário - scripts/calcular_rank_v2.mjs):
   chaveDoRankDaDificuldade:23, rankDe:29, dominantesNoTipo:51, rankDaDificuldadeDe:69
 - **reconciliar_build.js** - Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
@@ -309,6 +311,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **itens_consumiveis.test.mjs** - Berries na IA e habilidades que dependem de gastar o item (2026-09-26).
 - **itens_da_config.test.mjs** - Ticket calibracao-2026-10-15/02 (15/10/2026): os parâmetros dos itens vêm do `hold_effect_strength` da er-config, como o
 - **itens_de_atributo.test.mjs** - TK-08 (28/10/2026): itens que mexem num atributo da espécie, iguais ao código do jogo (er-repo f34fc2b,
+- **itens_do_time.test.mjs** - TK-14 (motor-D5.3, decisão do usuário 28/10): UMA lista de itens para o set do duelo, o Motor e a IA.
 - **itens_no_duelo.test.mjs** - Itens no duelo (2026-09-29, decisão do usuário: "item nos sets do duelo").
 - **itens_registro_14.test.mjs** - TK-14 (estrutura-2026-10-22): itens. Expert Belt 1,2x do código (não o f:30 da config), Knock Off pela regra real do jogo
 - **juiz_do_time.test.mjs** - Ticket time-pelo-motor/01, Fase B2 (21/10/2026): juiz do time pela LUTA COMPLETA (avaliarTimePelaLutaCompleta), ao lado do

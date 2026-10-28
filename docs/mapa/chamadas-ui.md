@@ -30,8 +30,8 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - climaQueCombinaHtml:495 - chama: climaQueCombina (mono_run.js:141), state (nucleo.js:8)
 - computeTeamGenerationValidation:253 - chama: effectiveBuild (builds.js:202), computeSharedRisks (chefoes.js:109) | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337)
 - generateCompleteTeam:302 - chama: comecarLoteDeBuilds (builds.js:118), concluirBuildDoLote (builds.js:119), encerrarLoteDeBuilds (builds.js:120), getSpeciesByX (dados_base.js:78), flashToast (dex_lista.js:473), +4
-- generateTeamForArchetype:153 - chama: getSpeciesByX (dados_base.js:78), montarPromptTimeArquetipo (prompts_ia.js:823), rosterParaTimeIA (prompts_ia.js:777), snamesValidosDoTime (prompts_ia.js:863), flashToast (dex_lista.js:473), +2
-- generateTeamUsageGuide:270 - chama: guiaDaResposta (prompts_ia.js:908), montarPromptGuia (prompts_ia.js:885), pedirIA (ia.js:80)
+- generateTeamForArchetype:153 - chama: getSpeciesByX (dados_base.js:78), montarPromptTimeArquetipo (prompts_ia.js:740), rosterParaTimeIA (prompts_ia.js:694), snamesValidosDoTime (prompts_ia.js:780), flashToast (dex_lista.js:473), +2
+- generateTeamUsageGuide:270 - chama: guiaDaResposta (prompts_ia.js:825), montarPromptGuia (prompts_ia.js:802), pedirIA (ia.js:80)
 - generatedTeamResult:35 - chamado por: guardarTimeAnterior (aba_chefoes.js:266), montarTimeContraEsteChefao (aba_chefoes.js:337), zerarRun (time.js:356)
 - monoRunCardHtml:516 - chama: entradasDoJogador (liberado_na_run.js:33), MONO_MARCAS (mono_run.js:11), avisoProximoLider (mono_run.js:158), fraquezasDoTipo (mono_run.js:80), monoDisponibilidade (mono_run.js:176), +2
 - planoContraChefaoHtml:387 - chama: NOME_DA_CONDICAO (condicoes_habilidade.js:42)
@@ -125,11 +125,11 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - aplicarCuradaNoTimeNovo:153 - chama: getActiveBuild (evolucao.js:16), getBuildList (evolucao.js:14), logAutoAction (evolucao.js:229), curadaParaEstilo (plano_build.js:160), estiloDoRitmo (plano_build.js:48), +6 | chamado por: generateCompleteTeam (arquetipo.js:302)
 - generateBuildWithAI:278 - chama: candidatosParaAEscolhaDaIa (escolha_ia_candidatos.js:201), escolherCandidatoDaIa (escolha_ia_candidatos.js:168), montarPromptEscolhaDeBuild (escolha_ia_candidatos.js:86), motivoDeNaoGerarBuild (gravacao_build_ia.js:18), textoDaRetentativaDeBuild (gravacao_build_ia.js:35), +3 | chamado por: processarRevisoes (revisao_automatica.js:72)
 - gerarBuildsDoTimeComIA:176 - chama: concluirBuildDoLote (builds.js:119), candidatosParaAEscolhaDaIa (escolha_ia_candidatos.js:201), escolherCandidatoDaIa (escolha_ia_candidatos.js:168), montarPromptEscolhaDoTime (escolha_ia_candidatos.js:103), getBuildList (evolucao.js:14), +6 | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), generateCompleteTeam (arquetipo.js:302)
-- gerarPlanoParaBuild:342 - chama: gravarPlanoDaIa (gravacao_build_ia.js:134), getCurrentCap (level_cap.js:49), montarPromptPlano (prompts_ia.js:765), acao (nucleo.js:243), telasDeBuild (nucleo.js:237) | chamado por: processarRevisoes (revisao_automatica.js:72)
+- gerarPlanoParaBuild:342 - chama: gravarPlanoDaIa (gravacao_build_ia.js:134), getCurrentCap (level_cap.js:49), montarPromptPlano (prompts_ia.js:682), acao (nucleo.js:243), telasDeBuild (nucleo.js:237) | chamado por: processarRevisoes (revisao_automatica.js:72)
 - gravarBuildValidadaDaIa:141 - chama: gravarRespostaValidadaDaIa (gravacao_build_ia.js:105), flashToast (dex_lista.js:473), acao (nucleo.js:243), telasDeBuild (nucleo.js:237)
 - opcoesDaIA:72 - chama: buildStandardAiTools (ferramentas_ia.js:249)
 - pedirIA:80 - chamado por: generateTeamForArchetype (arquetipo.js:153), generateTeamUsageGuide (arquetipo.js:270), generateStrategySets (revisao_automatica.js:182)
-- pedirIAAgora:109 - chama: sampleErrorMessage (prompts_ia.js:230)
+- pedirIAAgora:109 - chama: sampleErrorMessage (prompts_ia.js:147)
 
 ## ui/modo_motor.js
 - modoDeMontagem:9 - chamado por: archetypeCardHtml (arquetipo.js:85), renderTeamStrategy (arquetipo.js:482)
@@ -209,7 +209,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/revisao_automatica.js
 - agendarRevisoes:169 - chamado por: concluirAcoes (nucleo.js:266)
 - capRegistrado:148 - chamado por: initProgress (progresso.js:105), aplicarSaveRemoto (sync.js:45), zerarRun (time.js:356)
-- generateStrategySets:182 - chama: getCurrentCap (level_cap.js:49), montarPromptEstrategias (prompts_ia.js:713), sanitizarStrategySets (save.js:255), setsValidosDaResposta (validacao_build_ia.js:478), pedirIA (ia.js:80), +2
+- generateStrategySets:182 - chama: getCurrentCap (level_cap.js:49), montarPromptEstrategias (prompts_ia.js:630), sanitizarStrategySets (save.js:255), setsValidosDaResposta (validacao_build_ia.js:478), pedirIA (ia.js:80), +2
 - ponteFalhas:22 - chama: lsGet (nucleo.js:84)
 - processarRevisoes:72 - chama: golpesFuturosDe (builds.js:179), getSpeciesByX (dados_base.js:78), getBuildList (evolucao.js:14), logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), +13
 - registrarFalhaPonte:23 - chama: lsSet (nucleo.js:85)

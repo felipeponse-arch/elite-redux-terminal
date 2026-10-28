@@ -4569,4 +4569,25 @@ export const MUTACOES = [
     de: 'if (nome === "Expert Belt") it.seMult = 1.2;',
     para: 'if (nome === "Expert Belt") it.seMult = 1.3;',
   },
+  {
+    id: "tk14-itens-do-time-sem-etapa",
+    descricao: "o conjunto único de itens deixa de olhar a liberação da Etapa (Motor e IA oferecem item travado)",
+    arquivo: "itens_do_time.js",
+    de: "AI_ITEM_POOL.indexOf(nome) !== -1 && liberadoNaRun(etapa, levelCap, { item: nome }) && !itemEsgotadoNoTime(donos)",
+    para: "AI_ITEM_POOL.indexOf(nome) !== -1 && !itemEsgotadoNoTime(donos)",
+  },
+  {
+    id: "tk14-itens-do-time-sem-limite",
+    descricao: "o conjunto único deixa de olhar o limite de itens iguais no time",
+    arquivo: "itens_do_time.js",
+    de: "liberadoNaRun(etapa, levelCap, { item: nome }) && !itemEsgotadoNoTime(donos)",
+    para: "liberadoNaRun(etapa, levelCap, { item: nome })",
+  },
+  {
+    id: "tk14-motor-item-tipo-fora-do-conjunto",
+    descricao: "o Motor volta a escolher o item de tipo alfabético do ITENS_CONFIG (Odd Incense no Psychic)",
+    arquivo: "time_pelo_motor.js",
+    de: "var doTipo = tipos.map(itemDeTipoDoTime);",
+    para: "var doTipo = tipos.map(function (t) { return Object.keys(ITENS_CONFIG.itens).filter(function (n) { var x = ITENS_CONFIG.itens[n]; return x.e === \"TYPE_POWER\" && x.t === t; }).sort()[0]; });",
+  },
 ];
