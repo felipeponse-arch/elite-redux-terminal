@@ -18,7 +18,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - montarTimeContraEsteChefao:337 - chama: comecarLoteDeBuilds (builds.js:118), encerrarLoteDeBuilds (builds.js:120), buffsAtivosDoChefao (chefoes.js:482), buffsParaMostrarDoChefao (chefoes.js:473), regraDeCampoDoChefao (chefoes.js:416), +16
 - myBuildLevel:19 - chamado por: myBuildEditorHtml (editor_build.js:223), updateMyBuildStatus (editor_build.js:362), wireMyBuildEditor (editor_build.js:465)
 - myBuildLevelIsCustom:31 - chamado por: myBuildEditorHtml (editor_build.js:223), wireMyBuildEditor (editor_build.js:465), initProgress (progresso.js:105), zerarRun (time.js:356)
-- renderBossDetail:589 - chama: nivelDeCalculo (level_cap.js:63), monotypeAtivo (mono_run.js:73), quemResolveCardHtml (quem_resolve.js:83), quemResolveRestaurar (quem_resolve.js:103), bossConfrontoHtml (resumo_luta.js:96)
+- renderBossDetail:589 - chama: nivelDeCalculo (level_cap.js:65), monotypeAtivo (mono_run.js:73), quemResolveCardHtml (quem_resolve.js:83), quemResolveRestaurar (quem_resolve.js:103), bossConfrontoHtml (resumo_luta.js:96)
 - renderGymSkillsCardHtml:456 - chama: ehRevancheDeLider (chefoes.js:454), gymLeaderBaseName (chefoes.js:45), gymSkillsSummaryFor (chefoes.js:367)
 - selectBoss:437 - chama: varianteDoChefao (chefoes.js:358)
 - simularSemTravarATela:324 - chama: montarTimeContraChefaoEmPassos (duelo.js:4683), totalDePassosContraChefao (duelo.js:4682)
@@ -105,10 +105,10 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - megaModeBuildNoteHtml:174 - chama: megaStoneRuleFor (validacao_build_ia.js:14) | chamado por: renderTeam (time.js:8)
 - myBuildEditorHtml:223 - chama: evsToShowdownText (builds.js:75), showdownSet (builds.js:58), ABILITIES (dados_base.js:10), ALL_NATURES (dados_base.js:101), ITEMS (dados_base.js:12), +12 | chamado por: selectSpecies (dex_ficha.js:610)
 - seloDaBuildHtml:168 - chama: seloDaBuild (avisos_build.js:82) | chamado por: renderTeam (time.js:8)
-- strategySetsHtml:432 - chama: evsToShowdownText (builds.js:75), showdownSet (builds.js:58), nivelDeCalculo (level_cap.js:63), buildSynergyHtml (dex_ficha.js:42), state (nucleo.js:8) | chamado por: selectSpecies (dex_ficha.js:610)
+- strategySetsHtml:432 - chama: evsToShowdownText (builds.js:75), showdownSet (builds.js:58), nivelDeCalculo (level_cap.js:65), buildSynergyHtml (dex_ficha.js:42), state (nucleo.js:8) | chamado por: selectSpecies (dex_ficha.js:610)
 - updateMyBuildEvTotal:332 - chama: clampInt (dados_base.js:103)
 - updateMyBuildStatus:362 - chama: ITEM_MOVE_POWER_MODS (calc_stat.js:105), calcFinalStat (calc_stat.js:119), itemRuleFor (calc_stat.js:106), MOVE_BY_NAME (dados_base.js:86), SPLIT_STATUS (dados_base.js:29), +6
-- wireMyBuildEditor:465 - chama: getActiveBuild (evolucao.js:16), nivelDeCalculo (level_cap.js:63), myBuildLevel (aba_chefoes.js:19), myBuildLevelIsCustom (aba_chefoes.js:31), pipelineDesenharFicha (pipeline_tela.js:113) | chamado por: selectSpecies (dex_ficha.js:610)
+- wireMyBuildEditor:465 - chama: getActiveBuild (evolucao.js:16), nivelDeCalculo (level_cap.js:65), myBuildLevel (aba_chefoes.js:19), myBuildLevelIsCustom (aba_chefoes.js:31), pipelineDesenharFicha (pipeline_tela.js:113) | chamado por: selectSpecies (dex_ficha.js:610)
 
 ## ui/ficha_extras.js
 - bossReferenceHtml:103 - chama: DIFF_LABELS (aba_chefoes.js:233), buildEntryHtml (editor_build.js:182) | chamado por: fichaNotasHtml (dex_ficha.js:602)
@@ -137,7 +137,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - modoMotorBotaoHtml:172 - chamado por: archetypeCardHtml (arquetipo.js:85)
 - modoMotorCache:19 - chama: criarCacheDoMotor (time_pelo_motor.js:65)
 - modoMotorCapturados:26 - chama: getSpeciesByX (dados_base.js:78), xsDoJogador (liberado_na_run.js:37), state (nucleo.js:8)
-- modoMotorChave:21 - chama: megaMode (formas_mega.js:75), capOuPadrao (level_cap.js:59), levelCapMode (level_cap.js:16), xsDoJogador (liberado_na_run.js:37), state (nucleo.js:8)
+- modoMotorChave:21 - chama: megaMode (formas_mega.js:75), capOuPadrao (level_cap.js:61), levelCapMode (level_cap.js:16), xsDoJogador (liberado_na_run.js:37), state (nucleo.js:8)
 - modoMotorFavoritosHtml:160 - chamado por: archetypeCardHtml (arquetipo.js:85)
 - modoMotorFavoritosValidos:31 - chama: state (nucleo.js:8)
 - modoMotorFicarComVariante:119 - chama: getSpeciesByX (dados_base.js:78), SUGESTAO_ROTULO (sugestao_do_motor.js:11), gravarSugestoesDoMotor (sugestao_do_motor.js:61), planoDeGravarSugestoes (sugestao_do_motor.js:39), applyRecommendedTeam (arquetipo.js:207), +4
@@ -215,7 +215,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - registrarFalhaPonte:23 - chama: lsSet (nucleo.js:85)
 - registrarTrocasDoPlano:149 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), logAutoAction (evolucao.js:229), trocasEntreCaps (plano_build.js:141), renderAutoLog (auto_evolucao.js:9), +1 | chamado por: initProgress (progresso.js:105)
 - revisaoStatusHtml:44 - chama: getSpeciesBySname (dados_base.js:79), getActiveBuild (evolucao.js:16) | chamado por: renderTeam (time.js:8)
-- tarefaDeRevisao:24 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), MEGA_BASE_BY_X (formas_mega.js:21), isMegaForm (formas_mega.js:64), golpesTravadosNoCap (level_cap.js:88), +3
+- tarefaDeRevisao:24 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), MEGA_BASE_BY_X (formas_mega.js:21), isMegaForm (formas_mega.js:64), golpesTravadosNoCap (level_cap.js:90), +3
 
 ## ui/sync.js
 - aplicarSaveRemoto:45 - chama: getCurrentCap (level_cap.js:49), applySave (save.js:47), buildSave (save.js:336), reconciliouAoAplicar (save.js:44), STORE_KEY (nucleo.js:82), +3

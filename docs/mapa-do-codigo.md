@@ -34,7 +34,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **gravacao_build_ia.js** - O caminho "resposta da IA -> build validada -> o que gravar", sem tela (ticket 06 da dívida
   motivoDeNaoGerarBuild:18, validarRespostaDeBuildDaIa:26, textoDaRetentativaDeBuild:35, validarRespostaDoLoteDeBuilds:40, buildDoLoteDeBuilds:45, respostaDaIaObsoleta:55, textoDeLimiteDeBuilds:61, gravarBuildDaIaNaLista:68, gravarRespostaValidadaDaIa:105, gravarPlanoDaIa:134
 - **level_cap.js** - Level cap atual e golpes liberados por ele.
-  levelCapMode:16, levelCapModeFromDifficulty:22, innatesAtivasNoNivel:34, nivelDaHabilidadeNoElite:40, innatesTravadasNoNivel:44, getCurrentCap:49, capOuPadrao:59, nivelDeCalculo:63, availableMovesFor:71, golpesTravadosNoCap:88
+  levelCapMode:16, levelCapModeFromDifficulty:22, innatesAtivasNoNivel:34, nivelDaHabilidadeNoElite:40, innatesTravadasNoNivel:44, getCurrentCap:49, capOuPadrao:61, nivelDeCalculo:65, availableMovesFor:73, golpesTravadosNoCap:90
 - **liberado_na_run.js** - O que a run libera: UMA função pura (etapa, levelCap, alvo) -> boolean para pedra mega, item e
   etapaDaPedra:15, etapaDoItem:17, liberadoNaRun:22, entradasDoJogador:33, xsDoJogador:37
 - **lista_de_builds.js** - As 4 mudanças na lista de builds salvas de uma espécie (state.customBuilds[sname],
@@ -310,6 +310,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **lacunas_sem_codigo.test.mjs** - Varredura "habilidades da config sem código" (21/10/2026; relatorios/sem_codigo_varredura_2026-10-21.md).
 - **lado_no_duelo.test.mjs** - Ticket time-pelo-motor/01, Fase B1 (20/10/2026): Reflect, Light Screen, Aurora Veil, Tailwind e Trick Room são
 - **level_cap_padrao_unico.test.mjs** - Ticket 04 (divida-tecnica): sem Level cap o padrão é um só (0 = sem limite; nível de cálculo 100).
+- **levelcaps_contra_jogo.test.mjs** - TK-23: data/levelcaps.json tem de bater com GetLevelCap() do código do jogo (pokemon.c); 100 = sem limite.
 - **liberado_na_run.test.mjs** - Ticket 05 (divida-tecnica): liberadoNaRun é a única régua de pedra, item e golpe;
 - **lote_a_motor.test.mjs** - Lote A da força-tarefa (2026-10-02): correções do motor provadas na auditoria, cada uma
 - **lote_b_plano_real.test.mjs** - Lote B da força-tarefa (2026-10-02): o plano contra o chefão tem que corresponder ao time

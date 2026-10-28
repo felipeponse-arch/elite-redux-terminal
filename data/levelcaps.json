@@ -1,5 +1,6 @@
 {
   "source": "https://eliteredux.net/level-caps/",
+  "fonteCodigo": "er-repo src/pokemon.c:4655-4657 (GetLevelCap), branch upcoming f34fc2b; 100 = nível máximo, sem limite",
   "note": "As colunas seguem a opção Level Cap do setup do jogo (Easy/More/Elite), separada da Dificuldade (Easy/Ace/Elite) - só o Elite muda os times dos chefões. Se você passar do cap, o Pokémon acima do nível pode parar de obedecer. Não existe opção pra desativar o level cap em si. A dificuldade pode ser mudada em qualquer Centro Pokémon, nos dois sentidos; aumentar depois de ter abaixado marca seu Hall da Fama com um ícone (anti-cheat pra challenge runs), mas o app permite normalmente.",
   "rows": [
     { "milestone": "Sem Badge (inicio)", "easy": 20, "more": 18, "elite": 16 },
@@ -9,8 +10,8 @@
     { "milestone": "Heat Badge (4o ginasio)", "easy": 65, "more": 55, "elite": 50 },
     { "milestone": "Balance Badge (5o ginasio)", "easy": 80, "more": 70, "elite": 55 },
     { "milestone": "Feather Badge (6o ginasio)", "easy": 90, "more": 85, "elite": 60 },
-    { "milestone": "Mind Badge (7o ginasio)", "easy": null, "more": 92, "elite": 70 },
-    { "milestone": "Rain Badge (8o ginasio)", "easy": null, "more": 95, "elite": 80 },
-    { "milestone": "Champion / Alto Comando", "easy": null, "more": null, "elite": null }
+    { "milestone": "Mind Badge (7o ginasio)", "easy": 100, "more": 92, "elite": 70 },
+    { "milestone": "Rain Badge (8o ginasio)", "easy": 100, "more": 95, "elite": 80 },
+    { "milestone": "Champion / Alto Comando", "easy": 100, "more": 100, "elite": 100 }
   ]
 }
