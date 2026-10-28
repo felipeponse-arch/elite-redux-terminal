@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "clueless-nao-anula-salas",
+    descricao: "Clueless (Negates Weather, Rooms and Terrains) deixa de anular Trick Room/Inverse Room/gravidade",
+    arquivo: "duelo.js",
+    de: "ef.anulaSalas = true;",
+    para: "ef.anulaSalas = false;",
+  },
+  {
     id: "proximo-do-chefao-sem-tipagem",
     descricao: "o próximo do chefão volta a ignorar a nota de tipagem ofensiva (ordem da fila)",
     arquivo: "duelo.js",
