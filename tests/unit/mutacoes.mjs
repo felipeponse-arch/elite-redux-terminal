@@ -4337,4 +4337,18 @@ export const MUTACOES = [
     de: "v.atual.x === c.x || v.atual.linha === c.linha",
     para: "v.atual.x === c.x",
   },
+  {
+    id: "hell-efetividade-sem-reducao",
+    descricao: "no Hell o super efetivo volta a 2x/4x (H1)",
+    arquivo: "duelo.js",
+    de: "var fHell = modoHellDuelo() ? (efTipo === 2 ? 0.75 : efTipo === 4 ? 0.625 : 1) : 1;",
+    para: "var fHell = 1;",
+  },
+  {
+    id: "hell-efetividade-vale-fora-do-hell",
+    descricao: "a redução do super efetivo vale em qualquer dificuldade (H1)",
+    arquivo: "duelo.js",
+    de: "var fHell = modoHellDuelo() ?",
+    para: "var fHell = true ?",
+  },
 ];

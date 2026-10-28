@@ -2173,7 +2173,9 @@
       }
       if ((atq.ef.critSuperEf || atq.ef.seQuebra) && efTipo >= 2) precisao = 1; // Fatal/Deadly Precision: "never miss"
       var crit = fatorCriticoDuelo(atq, def, g, efTipo);
-      var dano = ((((2 * nivel) / 5 + 2) * forca * A / D) / 50 + 2) * efTipo * red * ROLAGEM_MEDIA_DUELO * precisao * crit.fator * noCampo * comItem(itA.danoMult, ativoA);
+      // Hell: super efetivo 2x vira 1,5x e 4x vira 2,5x, nos dois lados (battle_util.c:7961-7969); efTipo segue o da tabela nos limiares >=2.
+      var fHell = modoHellDuelo() ? (efTipo === 2 ? 0.75 : efTipo === 4 ? 0.625 : 1) : 1;
+      var dano = ((((2 * nivel) / 5 + 2) * forca * A / D) / 50 + 2) * efTipo * fHell * red * ROLAGEM_MEDIA_DUELO * precisao * crit.fator * noCampo * comItem(itA.danoMult, ativoA);
       // Seismic Toss e Night Shade (battle_script_commands.c Cmd_calculatesetdamage): dano = nível de quem usa;
       // só a imunidade de tipo conta (já descartada acima), nada de atributo, STAB, crítico ou item.
       if (g.poderVariavel === "Sky Drop" || g.poderVariavel === "Level Damage") dano = nivel * precisao;

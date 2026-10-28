@@ -299,6 +299,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **habilidades_mudadas_2654.test.mjs** - Ticket versao-nova/06 (15/10/2026): habilidades cujo efeito mudou na versão mais nova (dados-2654/02 e 03). Fonte: abilities.cc (upcoming...
 - **habilidades_novas_2654.test.mjs** - Ticket versao-nova/07 (15/10/2026): as 29 habilidades novas da NextDex 2.65.4 + as 9 do delta da er-config d1a9a4c (upcoming) funcionam n...
 - **habilidades_texto_novo_2654.test.mjs** - TK-00b (28/10): textos de habilidade que a v2.65.4.1 reescreveu. A regra do motor lê o TEXTO; cada teste prova que a redação nova ainda
+- **hell_no_duelo.test.mjs** - TK-10b (28/10/2026): regras do modo Hell no motor. Fonte: relatorios/tk10b_evidencia.md (er-repo f34fc2b).
 - **ia_do_chefao_golpe.test.mjs** - Ticket 03 (07/10/2026): o chefão escolhe o golpe pelos pontos da IA do jogo (battle_ai_main.c AI_TryToFaint,
 - **importar_dex_strategy.test.mjs** - Importador das estratégias oficiais do código do jogo (src/data/dex-strategy.md), achado da pesquisa profunda de 06/10.
 - **imunidades_de_habilidade.test.mjs** - Imunidades escritas como "absorve"/"redireciona"/"em vez de ser atingido"
