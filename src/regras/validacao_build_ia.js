@@ -105,12 +105,6 @@
   var ITENS_CHOICE = ["Choice Band", "Choice Specs", "Choice Scarf"];
   var ITENS_VEST = ["Assault Vest", "Tactical Vest"];
   var GOLPES_QUE_PASSAM_ITEM = ["Trick", "Switcheroo"];
-  function evoluiAinda(sp) {
-    return (sp.ev || []).some(function (e) {
-      var k = DATA.evoKinds[e[0]];
-      return k !== "EVO_MEGA_EVOLUTION" && k !== "EVO_PRIMAL_REVERSION" && k !== "EVO_MOVE_MEGA_EVOLUTION";
-    });
-  }
   // Nature contra a própria build (manual competitivo, 2026-09-28): derrubar o
   // atributo de ataque que TODOS os golpes de dano usam, ou a Velocidade de um
   // Sweeper fora de Trick Room, é desperdício puro - regra básica de nature
@@ -147,7 +141,7 @@
     if (ITENS_VEST.indexOf(item) !== -1 && status.length) {
       return item + " impede golpe de status neste jogo, mas a build tem " + status.join(", ") + ". Tente gerar de novo.";
     }
-    if (item === "Eviolite" && !evoluiAinda(sp)) {
+    if (item === "Eviolite" && !evioliteFunciona(sp)) {
       return "Eviolite só funciona em quem ainda evolui, e " + sp.n + " não evolui mais. Tente gerar de novo.";
     }
     return null;
@@ -199,7 +193,7 @@
     if (!c || !c.boss) return {};
     var ctx = { buffs: buffsAtivosDoChefao(c.boss.name) };
     var est = c.estrategia;
-    var escolhiveis = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+    var escolhiveis = habilidadesEscolhiveis(sp);
     if (est && est.armador === sp.n && escolhiveis.indexOf(est.habilidade) !== -1) ctx.habilidadeExigida = est.habilidade;
     // Golpes-chave que o simulador provou contra os Pokémon do chefão (resumoProvadoPeloSimulador): a build entra com eles.
     var chave = c.provado && c.provado.chave;
@@ -213,16 +207,17 @@
   }
   function validateAiBuild(sp, raw, motivo, ctx) {
     if (!raw || typeof raw !== "object") return null;
-    var validAbilities = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+    var validAbilities = habilidadesEscolhiveis(sp);
     // Motivo específico em cada rejeição (2026-09-16): a nova tentativa
     // automática (U3) repassa o motivo à IA - "golpe inválido" genérico a faz
     // corrigir às cegas; o nome exato do que falhou, não.
-    function rejeita(txt) { if (motivo) motivo.txt = txt; return null; }
+    // codigo: identificador estável da recusa (o pipeline decide por ele, não pelo texto - TK-18, 10.1).
+    function rejeita(txt, codigo) { if (motivo) { motivo.txt = txt; motivo.codigo = codigo || "outro"; } return null; }
     if (typeof raw.ability !== "string" || validAbilities.indexOf(raw.ability) === -1) {
-      return rejeita("A habilidade \"" + citarDoModelo(raw.ability) + "\" não é uma das escolhíveis do " + sp.n + " (" + validAbilities.join(", ") + ").");
+      return rejeita("A habilidade \"" + citarDoModelo(raw.ability) + "\" não é uma das escolhíveis do " + sp.n + " (" + validAbilities.join(", ") + ").", "habilidade-invalida");
     }
     if (typeof raw.nature !== "string" || ALL_NATURES.indexOf(raw.nature) === -1) {
-      return rejeita("A natureza \"" + citarDoModelo(raw.nature) + "\" não existe.");
+      return rejeita("A natureza \"" + citarDoModelo(raw.nature) + "\" não existe.", "natureza-invalida");
     }
     // Trava por level cap (achado real, 2026-09-12: o editor manual de "Meu
     // build" já filtrava golpes de nível acima do cap desde 2026-09-10, mas
@@ -231,14 +226,14 @@
     // aprendido num nível acima do cap atual passava direto). Mesmo
     // critério de myBuildEditorHtml: golpe de tutor nunca trava por nível.
     var validMoves = availableMovesFor(sp).names;
-    if (!Array.isArray(raw.moves) || raw.moves.length !== 4) return rejeita("A build precisa de exatamente 4 golpes.");
+    if (!Array.isArray(raw.moves) || raw.moves.length !== 4) return rejeita("A build precisa de exatamente 4 golpes.", "golpes-invalidos");
     for (var i = 0; i < 4; i++) {
       if (validMoves.indexOf(raw.moves[i]) === -1) {
-        return rejeita("O golpe \"" + citarDoModelo(raw.moves[i]) + "\" não está no movepool do " + sp.n + " liberado até o level cap atual.");
+        return rejeita("O golpe \"" + citarDoModelo(raw.moves[i]) + "\" não está no movepool do " + sp.n + " liberado até o level cap atual.", "golpe-invalido");
       }
       // Golpe repetido (ticket 17, 08/10): o jogo não deixa o mesmo golpe em dois slots, e a build ficava com 3 golpes úteis.
       if (raw.moves.indexOf(raw.moves[i]) !== i) {
-        return rejeita("O golpe \"" + raw.moves[i] + "\" está repetido na build - os 4 golpes precisam ser diferentes.");
+        return rejeita("O golpe \"" + raw.moves[i] + "\" está repetido na build - os 4 golpes precisam ser diferentes.", "golpe-repetido");
       }
     }
     // ASSIMETRIA DELIBERADA (decisão do usuário, 2026-09-16) - esta regra é
@@ -300,11 +295,8 @@
         return (h.golpes || []).some(function (g) { return raw.moves.indexOf(g) !== -1; });
       });
       if (!temSinergia) {
-        if (motivo) {
-          motivo.txt = "A build sugerida não usa nenhum golpe potencializado por uma habilidade ou innate do " +
-            sp.n + " - pela regra do especialista, ela foi rejeitada. Tente gerar de novo.";
-        }
-        return null;
+        return rejeita("A build sugerida não usa nenhum golpe potencializado por uma habilidade ou innate do " +
+          sp.n + " - pela regra do especialista, ela foi rejeitada. Tente gerar de novo.", "sem-sinergia");
       }
     }
     // Só vale item que o prompt oferece (ticket 17, 08/10): o prompt diz "nenhum fora destes grupos", mas a
@@ -326,9 +318,13 @@
       if (stoneRule.stones.length === 1) {
         item = stoneRule.stones[0];
       } else {
-        if (motivo) motivo.txt = "No modo de mega temporária a " + sp.n + " precisa segurar a pedra (" + stoneRule.stones.join(" ou ") + ") - a build sugerida usou outro item. Tente gerar de novo.";
-        return null;
+        return rejeita("No modo de mega temporária a " + sp.n + " precisa segurar a pedra (" + stoneRule.stones.join(" ou ") + ") - a build sugerida usou outro item. Tente gerar de novo.", "pedra-obrigatoria");
       }
+    }
+    // Item que a run ainda não libera (decisão 10 do usuário, 28/10): a IA recusa como o Modo Motor (time_pelo_motor.js:196).
+    // A pedra que a mega temporária impõe fica de fora: o slot já é dela.
+    if (item && !stoneRule && !liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: item })) {
+      return rejeita(item + " ainda não está liberado nesta Etapa da run. Escolha outro item. Tente gerar de novo.", "item-nao-liberado");
     }
     // Habilidade que depende de gastar o item (ver regraItemConsumivelPara).
     // Dura, como a da sinergia: sem o item certo a habilidade não faz nada. A
@@ -339,7 +335,7 @@
       if (!serve) {
         return rejeita("A habilidade " + regraConsumivel.habilidade + " do " + sp.n + " só funciona gastando o item, mas a build usou " +
           (item ? "\"" + item + "\"" : "nenhum item") + " - precisa de " +
-          (regraConsumivel.precisa === "berry" ? "uma Berry" : "um item que se gasta na luta (Berry, Gem, Focus Sash, White Herb…)") + ". Tente gerar de novo.");
+          (regraConsumivel.precisa === "berry" ? "uma Berry" : "um item que se gasta na luta (Berry, Gem, Focus Sash, White Herb…)") + ". Tente gerar de novo.", "item-que-se-gasta");
       }
     }
     // No máximo 2 membros do time com o mesmo item (2026-09-29, decisão do
@@ -349,16 +345,16 @@
     // barrada pelos itens do time (achado no teste da mega permanente).
     if (item && !stoneRule && state.team.indexOf(sp.x) !== -1) {
       var comEsteItem = itensEmUsoComQuem(sp.x)[item] || [];
-      if (comEsteItem.length >= MAX_MESMO_ITEM_NO_TIME) {
+      if (itemEsgotadoNoTime(comEsteItem)) {
         return rejeita(item + " já está com " + comEsteItem.join(" e ") + " - no time vale no máximo " + MAX_MESMO_ITEM_NO_TIME +
-          " com o mesmo item. Escolha outro item que reforce o papel deste Pokémon. Tente gerar de novo.");
+          " com o mesmo item. Escolha outro item que reforce o papel deste Pokémon. Tente gerar de novo.", "item-esgotado");
       }
     }
     // EV fora do formato (ticket 17, 08/10): ausente, tamanho errado ou texto virava [0,0,0,0,0,0] em silêncio e a
     // build era salva sem EV nenhum. Agora rejeita (a nova tentativa leva o motivo). Número fora da faixa
     // (negativo, acima de 252, soma acima de 510) continua só sendo ajustado.
     if (!evsEmFormatoValido(raw.evs)) {
-      return rejeita("Os EVs precisam ser 6 números inteiros (HP, Atk, Def, SpA, SpD, Spe) - a resposta veio sem eles ou em outro formato.");
+      return rejeita("Os EVs precisam ser 6 números inteiros (HP, Atk, Def, SpA, SpD, Spe) - a resposta veio sem eles ou em outro formato.", "evs-invalidos");
     }
     var evs = limitarEvsAoJogo(raw.evs);
     // Coerência papel x golpe (pedido do usuário, 2026-09-16: "notei que está
@@ -374,39 +370,39 @@
     // (buildContextNotesHtml) - mesma assimetria das outras regras.
     var golpeDupla = raw.moves.filter(function (m) { return moveRoleOf(m) === "dupla"; })[0];
     if (golpeDupla) {
-      return rejeita("O golpe \"" + golpeDupla + "\" só tem efeito em batalha dupla - o app monta sets pra 1x1.");
+      return rejeita("O golpe \"" + golpeDupla + "\" só tem efeito em batalha dupla - o app monta sets pra 1x1.", "golpe-de-dupla");
     }
     var fullOffense = Math.max(evs[1], evs[3]) >= 200 && evs[5] >= 200 && (evs[0] + evs[2] + evs[4]) <= 12;
     if (fullOffense) {
       var curaMove = raw.moves.filter(function (m) { return moveRoleOf(m) === "cura"; })[0];
       var danoCount = raw.moves.filter(function (m) { return moveRoleOf(m) === "dano"; }).length;
       if (curaMove || danoCount < 2) {
-        if (motivo) {
-          motivo.txt = curaMove
+        {
+          var txtOfensivo = curaMove
             ? "A build sugerida é 100% ofensiva (EVs em ataque e velocidade) mas gastou um slot com " + curaMove +
               ", que só cura - esse slot rende mais como golpe de dano. Rejeitada; tente gerar de novo."
             : "A build sugerida é 100% ofensiva mas tem menos de 2 golpes de dano. Rejeitada; tente gerar de novo.";
+          return rejeita(txtOfensivo, "ofensiva-sem-dano");
         }
-        return null;
       }
     }
     var conflito = conflitoDeItem(item, raw.moves, sp);
-    if (conflito) return rejeita(conflito);
+    if (conflito) return rejeita(conflito, "conflito-item-golpe");
     // Habilidade condicional sem a condição garantida (2026-09-28, auditoria
     // das builds salvas: Goodra com Poison Heal e Choice Specs, Kingdra com
     // Swift Swim sem chuva no time) - ver condicaoDaBuild.
     var cond = condicaoDaBuild(sp, { ability: raw.ability, item: item, moves: raw.moves });
     if (cond && !cond.garantidaPor) {
       return rejeita("A habilidade " + cond.habilidade + " só funciona com " + cond.condicao + ", e nada na build nem no time garante isso" +
-        (cond.comoGarantir.length ? " - para usá-la: " + cond.comoGarantir.join(" ou ") + "; ou" : " -") + " escolha outra habilidade. Tente gerar de novo.");
+        (cond.comoGarantir.length ? " - para usá-la: " + cond.comoGarantir.join(" ou ") + "; ou" : " -") + " escolha outra habilidade. Tente gerar de novo.", "habilidade-sem-condicao");
     }
     // Papel declarado (2026-09-27): sem papel não há o que conferir (modos
     // antigos de revisão não pedem); com papel, contradição clara reprova.
     var papel = papelNormalizado(raw.papel);
     var problemaDoPapel = papel ? conferirPapelDaBuild(papel, evs, raw.moves, sp) : null;
-    if (problemaDoPapel) return rejeita(problemaDoPapel);
+    if (problemaDoPapel) return rejeita(problemaDoPapel, "papel-golpe");
     var problemaDaNature = conflitoDeNature(raw.nature, raw.moves, papel);
-    if (problemaDaNature) return rejeita(problemaDaNature);
+    if (problemaDaNature) return rejeita(problemaDaNature, "natureza-contra-build");
     // Justificativa, 2026-09-10 (revisão da equipe sobre "Gerar build com
     // IA"): uma frase livre, NÃO validada contra dados reais como tudo
     // acima - não há o que checar, é texto corrido, não uma referência de
@@ -420,14 +416,14 @@
     // (a) Armador do clima escolhido pelo simulador: tem que levar a habilidade que
     // arma - senão a estratégia de time que o simulador provou deixa de existir.
     if (ctx.habilidadeExigida && raw.ability !== ctx.habilidadeExigida) {
-      return rejeita("Este Pokémon é o armador do clima do time: a habilidade precisa ser " + ctx.habilidadeExigida + ".");
+      return rejeita("Este Pokémon é o armador do clima do time: a habilidade precisa ser " + ctx.habilidadeExigida + ".", "armador-do-clima");
     }
     // (b) Heal Block permanente ativo na luta alvo (buff do ginásio): cura não funciona.
     if ((ctx.buffs || []).indexOf("flannery_healblock") !== -1) {
       var curaInutil = raw.moves.filter(function (n) { return moveRoleOf(n) === "cura"; });
-      if (curaInutil.length) return rejeita("A luta alvo tem Heal Block permanente (buff do ginásio ainda ativo): " + curaInutil.join(", ") + " não cura nada. Troque por outro golpe.");
+      if (curaInutil.length) return rejeita("A luta alvo tem Heal Block permanente (buff do ginásio ainda ativo): " + curaInutil.join(", ") + " não cura nada. Troque por outro golpe.", "heal-block");
       if (["Leftovers", "Black Sludge", "Sitrus Berry", "Shell Bell", "Big Root"].indexOf(item) !== -1) {
-        return rejeita("A luta alvo tem Heal Block permanente: " + item + " não cura nada. Troque o item.");
+        return rejeita("A luta alvo tem Heal Block permanente: " + item + " não cura nada. Troque o item.", "heal-block");
       }
     }
     // (c) Atacante sem nenhum golpe com STAB (o próprio tipo, ou o que a habilidade
@@ -441,7 +437,7 @@
         return tiposComStab.indexOf(TYPES[m[1]]) !== -1 || (m[9] >= 0 && tiposComStab.indexOf(TYPES[m[9]]) !== -1) || !!(efSet.converte && efSet.converte[TYPES[m[1]]]);
       });
       if (ofensivos.length >= 2 && !temStab) {
-        return rejeita("Nenhum dos golpes de dano tem STAB (" + speciesTypeNames(sp).join("/") + "). Um atacante precisa de pelo menos um golpe do próprio tipo.");
+        return rejeita("Nenhum dos golpes de dano tem STAB (" + speciesTypeNames(sp).join("/") + "). Um atacante precisa de pelo menos um golpe do próprio tipo.", "sem-stab");
       }
     }
     var rationale = typeof raw.rationale === "string" ? raw.rationale.trim().slice(0, 360) : "";
@@ -499,7 +495,7 @@
     if (opts.modo === "ponte" && opts.alvo) {
       // A build de agora é a curada com golpes-ponte: habilidade, natureza,
       // item e EVs continuam os da curada (quando valem pra esta forma).
-      var alvoAb = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+      var alvoAb = habilidadesEscolhiveis(sp);
       if (alvoAb.indexOf(opts.alvo.ability) !== -1) validated.ability = opts.alvo.ability;
       if (opts.alvo.nature) validated.nature = opts.alvo.nature;
       validated.item = opts.alvo.item || "";
@@ -517,8 +513,8 @@
   function entradaDaCuradaParaTimeNovo(sp, cur) {
     if (!cur || golpesTravadosNoCap(sp, cur.moves).some(function (g) { return g.nivel !== null; })) return null;
     var item = stripNote(cur.item);
-    if (item && (itensEmUsoComQuem(sp.x)[item] || []).length >= MAX_MESMO_ITEM_NO_TIME) return null;
-    var escolhiveis = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+    if (item && itemEsgotadoNoTime(itensEmUsoComQuem(sp.x)[item])) return null;
+    var escolhiveis = habilidadesEscolhiveis(sp);
     if (escolhiveis.indexOf(cur.ability) === -1) return null;
     var entrada = { ability: cur.ability, nature: cur.nature, item: cur.item, moves: cur.moves.slice(), planoConsultado: true,
       ivs: [31, 31, 31, 31, 31, 31], evs: limitarEvsAoJogo(evsTextoParaArray(cur.evs)),

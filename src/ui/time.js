@@ -15,7 +15,7 @@
       if (members[i]) {
         var sp = members[i];
         var names = speciesTypeNames(sp);
-        var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ");
+        var abiNames = habilidadesEscolhiveis(sp).join(", ");
         var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ");
         var build = effectiveBuild(sp);
         var buildHtml = build ? (

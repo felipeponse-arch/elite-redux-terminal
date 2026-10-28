@@ -486,28 +486,29 @@
   // Item "por evolução pendente": Eviolite, se o jogo o dá até a Etapa atual (primeiroLugarDoItem) e a espécie ainda evolui (evoluiAinda: a
   // mesma regra de validateAiBuild, sem Mega).
   function pipelineEvioliteServe(sp) {
-    if (ITEMS.indexOf("Eviolite") === -1 || !evoluiAinda(sp)) return false;
+    if (ITEMS.indexOf("Eviolite") === -1 || !evioliteFunciona(sp)) return false;
     // Eviolite sem local com etapa no jogo (etapaDoItem null) não conta como disponível aqui.
     return etapaDoItem("Eviolite") !== null && liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: "Eviolite" });
   }
   function pipelineValidarRascunho(sp, g) {
     var bruto = { ability: g.hab, nature: g.fin.nome, item: "", evs: g.fin.evs.slice(), moves: g.av.golpes.slice() };
-    var recusa = {}, v = validateAiBuild(sp, bruto, recusa, {});
+    // Mesmo contexto da IA (contextoDeValidacao; sem opts.chefao = {}, igual ao que era) - TK-18, 10.5.
+    var ctx = contextoDeValidacao(sp, null), recusa = {}, v = validateAiBuild(sp, bruto, recusa, ctx);
     if (v) {
       // Espécie que ainda evolui leva Eviolite (o motor já usa Eviolite nesses casos, itemDoSetDuelo). Item recusado (limite do time) = fica sem item.
       if (!v.item && pipelineEvioliteServe(sp)) {
-        var comEv = validateAiBuild(sp, Object.assign({}, bruto, { item: "Eviolite" }), {}, {});
+        var comEv = validateAiBuild(sp, Object.assign({}, bruto, { item: "Eviolite" }), {}, ctx);
         if (comEv && comEv.item === "Eviolite") return { v: comEv, itemDeRascunho: "Eviolite", tipoDoItem: "eviolite" };
       }
       return { v: v, itemDeRascunho: null };
     }
     var item = null, tipo = null, regra = megaStoneRuleFor(sp);
-    if (/só funciona gastando o item/.test(recusa.txt || "") && ITEMS.indexOf(ITEM_DE_RASCUNHO_PIPELINE) !== -1) { item = ITEM_DE_RASCUNHO_PIPELINE; tipo = "gasta"; }
-    else if (/precisa segurar a pedra/.test(recusa.txt || "") && regra && regra.stones.length) { item = regra.stones[0]; tipo = "pedra"; }
+    if (recusa.codigo === "item-que-se-gasta" && ITEMS.indexOf(ITEM_DE_RASCUNHO_PIPELINE) !== -1) { item = ITEM_DE_RASCUNHO_PIPELINE; tipo = "gasta"; }
+    else if (recusa.codigo === "pedra-obrigatoria" && regra && regra.stones.length) { item = regra.stones[0]; tipo = "pedra"; }
     if (!item) return { v: null, motivo: recusa.txt };
     bruto.item = item;
     var recusa2 = {};
-    v = validateAiBuild(sp, bruto, recusa2, {});
+    v = validateAiBuild(sp, bruto, recusa2, ctx);
     if (!v) return { v: null, motivo: recusa2.txt };
     return { v: v, itemDeRascunho: v.item === item ? item : null, tipoDoItem: tipo, pedras: regra ? regra.stones.slice() : [] };
   }

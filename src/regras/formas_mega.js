@@ -23,6 +23,13 @@
     var k = EVOKINDS[kindIdx];
     return EVO_MEGA_KINDS.indexOf(k) !== -1 || k === EVO_PRIMAL;
   }
+  // "Ainda evolui": tem evolução que não é Mega/Primal (a única regra; antes eram 3 literais em outro arquivo - TK-18, 10.8).
+  function evoluiAinda(sp) {
+    return (sp.ev || []).some(function (e) { return !isMegaEvoKind(e[0]); });
+  }
+  // Eviolite: o jogo exclui o Necrozma base mesmo com fusão pendente (battle_util.c:7448-7450 CanEvolveStrict + SPECIES_NECROZMA).
+  // Só a regra do Eviolite usa isto; "ainda evolui" no geral continua sendo evoluiAinda.
+  function evioliteFunciona(sp) { return evoluiAinda(sp) && sp.n !== "Necrozma"; }
   SPECIES.forEach(function (s) {
     (s.ev || []).forEach(function (ev) {
       if (isMegaEvoKind(ev[0]) && SPECIES_BY_X[ev[2]]) MEGA_BASE_BY_X[ev[2]] = s.x;
@@ -44,7 +51,7 @@
       var stones = stonesOf(f);
       return f.n + " [sname " + f.sname + ", " + speciesTypeNames(f).join("/") + ", status base " + f.b.join("/") +
         (r ? ", rank " + r.tier : "") +
-        ", habilidades escolhiveis: " + uniqueIds(f.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ") +
+        ", habilidades escolhiveis: " + habilidadesEscolhiveis(f).join(", ") +
         ", innate: " + f.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ") +
         (stones.length ? ", pedra: " + stones.join(" ou ") : "") + "]";
     }).join("; ");

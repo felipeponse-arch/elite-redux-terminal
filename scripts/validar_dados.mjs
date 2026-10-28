@@ -4,6 +4,10 @@
 // vira conselho errado na tela do jogador, e nenhum teste de tela pega isso
 // (a tela renderiza feliz um golpe inventado).
 //
+// LIMITE (TK-18, achado 10.3): isto só prova "dado não inventado" (habilidade da espécie, golpe aprendido, golpe repetido,
+// plano). NÃO checa item, natureza, soma de EVs, Eviolite nem level cap - essas regras moram em validateAiBuild
+// (src/regras/validacao_build_ia.js), que roda em runtime.
+//
 // Uso direto: node scripts/validar_dados.mjs   (o build chama as duas funções)
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";

@@ -51,7 +51,7 @@
     if (selectedSp) {
       var names = speciesTypeNames(selectedSp);
       var fitNote = boxFitNote(selectedSp, state.team.map(getSpeciesByX).filter(Boolean));
-      var abiNames = uniqueIds(selectedSp.ab).map(function (id) { return ABILITIES[id][0]; }).join(", ");
+      var abiNames = habilidadesEscolhiveis(selectedSp).join(", ");
       var innNames = selectedSp.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ");
       var usageHtml = roleTagsHtml(selectedSp.sname);
       detailHtml = '<div class="pcbox-detail">' +

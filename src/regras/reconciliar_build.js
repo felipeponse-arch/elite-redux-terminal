@@ -24,7 +24,7 @@
   // ATIVA com os golpes que ficaram (mesmos dados de ABILITY_SYNERGY que a
   // validação da IA usa); sem sinergia, a primeira escolhível da espécie.
   function habilidadeSubstitutaPara(sp, moves) {
-    var escolhiveis = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+    var escolhiveis = habilidadesEscolhiveis(sp);
     var hits = sinergiasDaEspecie(sp);
     for (var i = 0; i < hits.length; i++) {
       var h = hits[i];
@@ -59,7 +59,7 @@
       out.plano = plano;
       if (fora.length) changes.push({ campo: "plano", de: fora.join(", "), para: "removido" });
     }
-    var escolhiveis = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+    var escolhiveis = habilidadesEscolhiveis(sp);
     if (out.ability && escolhiveis.indexOf(out.ability) === -1) {
       var nova = habilidadeSubstitutaPara(sp, out.moves);
       changes.push({ campo: "habilidade", de: out.ability, para: nova || "(nenhuma)" });

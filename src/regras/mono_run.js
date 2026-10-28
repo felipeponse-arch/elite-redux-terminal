@@ -22,8 +22,7 @@
     visto[sp.x] = true;
     for (var i = 0; i < linha.length; i++) {
       (linha[i].ev || []).forEach(function (e) {
-        var kind = DATA.evoKinds[e[0]];
-        if (kind === "EVO_MEGA_EVOLUTION" || kind === "EVO_PRIMAL_REVERSION" || kind === "EVO_MOVE_MEGA_EVOLUTION") return;
+                if (isMegaEvoKind(e[0])) return;
         var filho = getSpeciesByX(e[2]);
         if (filho && !visto[filho.x]) { visto[filho.x] = true; linha.push(filho); }
       });

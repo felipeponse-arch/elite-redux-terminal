@@ -115,6 +115,10 @@
   // like that shows ONE Evaporate card instead of three identical ones -
   // found by actually opening the Dex on the user's own team member, not
   // by reading the data cold.
+  // Habilidades que a espécie escolhe (nomes, sem repetir): a lista que o jogador pode pôr na build (TK-18, achado 10.9).
+  function habilidadesEscolhiveis(sp) {
+    return uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+  }
   function uniqueIds(ids) {
     var seen = {}, out = [];
     for (var i = 0; i < ids.length; i++) {

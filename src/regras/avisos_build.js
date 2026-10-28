@@ -39,7 +39,7 @@
       var stoneAv = megaStoneRuleFor(sp);
       if (!stoneAv && state.team.indexOf(sp.x) !== -1) {
         var comItem = itensEmUsoComQuem(sp.x)[itemAv] || [];
-        if (comItem.length >= MAX_MESMO_ITEM_NO_TIME) {
+        if (itemEsgotadoNoTime(comItem)) {
           out.push({ tipo: "item-repetido", texto: itemAv + " já está com " + comItem.join(" e ") + " - no time vale no máximo " + MAX_MESMO_ITEM_NO_TIME + " com o mesmo item." });
         }
       }
