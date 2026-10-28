@@ -116,4 +116,8 @@ test("podeTerStatus usa a imunidade de tipo do duelo (Fire x queimadura, Steel x
   assert.equal(R.podeTerStatus(aco, "veneno", []), false);
   assert.equal(R.podeTerStatus(agua, "queimadura", []), true);
   assert.equal(R.podeTerStatus(agua, "veneno", []), true);
+  const venenoso = comTipo("Poison");
+  assert.equal(R.podeTerStatus(aco, "queimadura", []), true); // Steel pode queimar
+  assert.equal(R.podeTerStatus(venenoso, "veneno", []), false);
+  assert.equal(R.podeTerStatus(fogo, "sono", []), true); // sono sem imunidade de tipo
 });
