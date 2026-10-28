@@ -370,6 +370,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **time_pelo_motor_papeis.test.mjs** - Modo Motor do Meu Time, Fase D (ticket time-pelo-motor/01, 21/10/2026): papéis por build, tags, sinergia e explicação.
 - **time_pelo_motor_papeis_regras.test.mjs** - Fronteiras das regras de papel e estilo do Modo Motor (TK-03, 27/10/2026): cada teste usa um time real da Etapa 4 que fica DO LADO DE DENTRO
 - **time_pelo_motor_regras.test.mjs** - Regras do Modo Motor que só a sabotagem do TK-03 (27/10/2026) mostrou sem proteção: item liberado e limite de repetição,
+- **tipos_contra_o_jogo.test.mjs** - TK-04 (motor-D1.1, D1.2): a tabela de tipos e TYPE_MOD_ABILITIES travadas contra o código do jogo.
 - **tira_setup.test.mjs** - Ticket 18 (07/10/2026): golpes que tiram setup, pelo código oficial (er-repo 217dd0f,
 - **traducoes_alinhadas_por_nome.test.mjs** - Versão 2.65.4 deslocou ids de habilidade (Mighty Horn 391 -> 390; 391 virou Hardened Sheath...). A tradução PT é indexada por id, então
 - **vaga.test.mjs** - Vaga de verificação pesada (scripts/vaga.mjs, melhoria B de 2026-10-13).
