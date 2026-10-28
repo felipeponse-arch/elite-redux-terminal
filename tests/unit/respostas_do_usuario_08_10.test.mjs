@@ -50,7 +50,7 @@ test("item 5 (ligação na UI): src/ui/ia.js não chama a IA para Mega travada, 
 test("item 6: o prompt diz quais itens ainda não estão disponíveis, e some quando já saíram", () => {
   const cedo = R0.blocoItensComunsIA(false, "");
   assert.match(cedo, /AINDA NAO DISPONIVEIS/);
-  assert.match(cedo, /Zoom Lens \(a partir da 1ª insígnia\)/, "item real do dado que só sai na 1ª insígnia");
+  assert.match(cedo, /Zoom Lens \(a partir da Etapa 1\)/, "item real do dado que só sai na Etapa 1");
   assert.match(cedo, /com motivo claro/, "a IA evita mas pode usar com motivo");
   assert.doesNotMatch(R.blocoItensComunsIA(false, ""), /AINDA NAO DISPONIVEIS/, "Etapa 8 já liberou todos");
 });
