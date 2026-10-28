@@ -315,6 +315,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **lado_no_duelo.test.mjs** - Ticket time-pelo-motor/01, Fase B1 (20/10/2026): Reflect, Light Screen, Aurora Veil, Tailwind e Trick Room são
 - **level_cap_padrao_unico.test.mjs** - Ticket 04 (divida-tecnica): sem Level cap o padrão é um só (0 = sem limite; nível de cálculo 100).
 - **levelcaps_contra_jogo.test.mjs** - TK-23: data/levelcaps.json tem de bater com GetLevelCap() do código do jogo (pokemon.c); 100 = sem limite.
+- **liberacao_por_etapa_caracterizacao.test.mjs** - TK-22: refatoração do registro da Etapa não pode mudar NENHUM resultado (pedras e itens x Etapas 0-10).
 - **liberado_na_run.test.mjs** - Ticket 05 (divida-tecnica): liberadoNaRun é a única régua de pedra, item e golpe;
 - **lote_a_motor.test.mjs** - Lote A da força-tarefa (2026-10-02): correções do motor provadas na auditoria, cada uma
 - **lote_b_plano_real.test.mjs** - Lote B da força-tarefa (2026-10-02): o plano contra o chefão tem que corresponder ao time
