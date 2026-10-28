@@ -80,7 +80,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **caixa.js** - Aba Caixa (PC Box): grade por páginas, busca e ações de cada Pokémon da caixa.
   renderBox:16
 - **dex_ficha.js** - Dex: ficha do Pokémon (stats, habilidades, golpes, rank, evolução) e o agendamento do resumo do topo.
-  abilityCard:14, buildSynergyHtml:42, conditionMoveSynergyNoteHtml:70, evoConditionText:88, renderMovesTable:111, rankBadgeHtml:169, rankDuplaBadgeHtml:204, rankStageBadgeHtml:212, roleTagsHtml:224, howToObtainText:245, whereToFindText:275, badgeDeTierHtml:293, marcasDoRankHtml:297, rankInfoLineHtml:319, goToDexSpecies:365, goToDexSpeciesStrategies:395, fichaStatsHtml:424, fichaEfetividadeHtml:434, fichaNavHtml:446, fichaEvolucaoHtml:457, fichaFormasHtml:475, fichaComoObterHtml:497, fichaCabecalhoHtml:515, fichaConhecerHtml:569, fichaGolpesHtml:591, fichaNotasHtml:602, selectSpecies:610, scheduleDashboardRefresh:737, updateResetTeamBoxBtn:751
+  abilityCard:14, buildSynergyHtml:42, conditionMoveSynergyNoteHtml:70, evoConditionText:88, renderMovesTable:111, rankBadgeHtml:169, rankStageBadgeHtml:203, roleTagsHtml:215, howToObtainText:236, whereToFindText:266, badgeDeTierHtml:284, marcasDoRankHtml:288, rankInfoLineHtml:310, goToDexSpecies:354, goToDexSpeciesStrategies:384, fichaStatsHtml:413, fichaEfetividadeHtml:423, fichaNavHtml:435, fichaEvolucaoHtml:446, fichaFormasHtml:464, fichaComoObterHtml:486, fichaCabecalhoHtml:504, fichaConhecerHtml:558, fichaGolpesHtml:580, fichaNotasHtml:591, selectSpecies:599, scheduleDashboardRefresh:726, updateResetTeamBoxBtn:740
 - **dex_lista.js** - Dex: filtro de tipo, busca, ordenação, lista em lotes e o modal de troca do time.
   moveListboxCursor:118, bst:152, statPct:163, statTier:164, getFiltered:171, linhaDaListaHtml:212, renderMaisLista:232, renderList:243, preencherListaSeCurta:283, syncRowAddButtons:313, openSwapModal:328, closeSwapModal:367, openConfirmModal:403, closeConfirmModal:411, esconderToast:437, agendarToast:451, flashToast:473
 - **editor_build.js** - Formato Showdown, cópia e o editor "Meu build" da ficha (e os sets de Estratégias).
@@ -119,10 +119,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   ler:21, trocarTudo:24, falhar:25
 - **cache_sabotagem.mjs** - Cache de "arquivo lembrado" da sabotagem (tests/.sabotagem_cache.json, fora do git).
   mesclarCache:9, ler:18, gravarCacheMesclando:26
-- **calcular_rank_duelo.mjs** - Rank por DUELO SIMULADO contra os chefões reais (reunião de 2026-09-28,
-  montarFoe:72, notaDaEspecie:90, percentis:146, tierDe:157, linha:170, med:186
 - **calcular_rank_v2.mjs** - Rank v2 (modelo aprovado pelo usuário em 2026-10-02, depois da pesquisa de método):
-  capDe:38, foe:42, ARG:60, etapaDe:79, br:82, avaliar:89, notas:198, percentis:206, tierDe:211, lutasComunsParaOMeuTime:240
+  capDe:39, foe:43, ARG:61, etapaDe:80, br:83, avaliar:90, notas:202, lutasComunsParaOMeuTime:238
 - **categorias_pela_config.mjs** - Categorias de golpe (soco, mordida, corte...) pelas FLAGS do jogo, não pelo texto da NextDex.
   lerGolpesDaConfig:37, recuoDoEfeito:65, categoriasDasFlags:71
 - **checar_css.mjs** - Travas dos tokens de CSS (fase 7 da refatoração, 2026-09-24). Roda no
@@ -180,6 +178,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   evsTexto:47, avaliar:49
 - **prototipo_kit_sinergia.mjs** - PROTÓTIPO DESCARTÁVEL (10/10/2026) — fases 1 e 2 do pipeline de build
   nomeHab:16
+- **rank_comum.mjs** - Peças do rank v2 que precisam de teste e de um lugar só (TK-21, 28/10/2026).
+  percentis:5, tierDe:12, unidadeComItemLiberado:16, camposHerdados:23
 - **rank_escolha.mjs** - Escolha do set no rank v2 (ticket 08, 07/10/2026). A soma rápida (nota do duelo contra todos os
   melhoresPelaSoma:9, mediaDoEixo:13, notaDosEixos:18, escolherPelaNotaFinal:22
 - **rank_fatia.mjs** - Rank com fatia fixa de peso (ticket todas-as-lutas/02, decisão do usuário em 16/10/2026): chefões 60% e lutas comuns 40%.
@@ -361,6 +361,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **prioridade_e_campo_pelo_codigo.test.mjs** - Ticket calibracao-2026-10-15/06 (15/10/2026): prioridade e campo pelo código do jogo.
 - **prompt_build.test.mjs** - Revisão do prompt de build (2026-09-27, pedido do usuário): habilidade com
 - **prompts_ia.test.mjs** - Peças dos prompts de IA e leitura das respostas (src/regras/prompts_ia.js e
+- **rank_comum.test.mjs** - TK-21 (rank): percentil e tier num lugar só; item do set só vale liberado na Etapa da luta; o rank v2 não herda campos do rank antigo.
 - **rank_da_run.test.mjs** - Rank v2 no app (src/regras/rank_da_run.js): nota pela dificuldade da run, dois eixos,
 - **rank_disponibilidade.test.mjs** - Rank v2, ponto 3: data/rank_disponibilidade.json (gerado por scripts/gerar_rank_disponibilidade.mjs
 - **rank_escolha.test.mjs** - Ticket 08 (07/10/2026): a escolha do set do rank avalia por inteiro os melhores pela soma rápida

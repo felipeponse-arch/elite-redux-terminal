@@ -1892,6 +1892,27 @@ export const MUTACOES = [
     para: "return mediaDoEixo(eixos.potencial);",
   },
   {
+    id: "rank-item-sem-checar-liberacao",
+    descricao: "o rank volta a usar o item do set sem checar se existe na Etapa da luta",
+    arquivo: "rank_comum.mjs",
+    de: "if (!u.item || R.liberadoNaRun(etapa, cap, { item: u.item })) return u;",
+    para: "if (true) return u;",
+  },
+  {
+    id: "rank-herda-campos-do-rank-antigo",
+    descricao: "o rank v2 volta a herdar bst/duelo e demais campos do rank antigo",
+    arquivo: "rank_comum.mjs",
+    de: 'for (const k of ["stage", "stageTier", "stageScore"]) if (a[k] !== undefined) out[k] = a[k];',
+    para: "Object.assign(out, a);",
+  },
+  {
+    id: "rank-percentil-empate-arredondado",
+    descricao: "o percentil do rank deixa de ser ordinal (posição / total)",
+    arquivo: "rank_comum.mjs",
+    de: "p[k] = Math.round(((i + 1) / n) * 10000) / 100;",
+    para: "p[k] = Math.round((i / n) * 10000) / 100;",
+  },
+  {
     id: "gerador-golpe-repetido",
     descricao: "a validação da build da IA volta a aceitar o mesmo golpe em dois slots",
     arquivo: "validacao_build_ia.js",

@@ -1,6 +1,6 @@
   // ===== src/regras/duelo.js =====
   // Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
-  // (scripts/calcular_rank_duelo.mjs) e do botão "Montar time contra este
+  // (scripts/calcular_rank_v2.mjs) e do botão "Montar time contra este
   // chefão" (aba Chefões). Colado no <script> principal por scripts/build.mjs
   // (marcador @regras duelo.js). Só lógica: nada aqui lê ou desenha a página.
   //

@@ -7,7 +7,8 @@
 4. **Verificar:** `npm run check` (rápido) e, antes de commitar, `npm run verificar` (o gancho de pré-commit roda sozinho,
    pelo nível da mudança). Ver `docs/quality.md`.
 5. **Dado novo do jogo:** skill `atualizar-dados-do-jogo` (ou `docs/pipeline_do_projeto.md`). Rank:
-   `scripts/calcular_rank_duelo.mjs` + `scripts/calcular_rank_v2.mjs --gravar` (demora: ~40 min em todos os núcleos).
+   `scripts/compute_species_rank.ps1` (base: estágio) e depois `scripts/calcular_rank_v2.mjs --gravar` (o único que grava
+   `data/species_rank.json`; demora ~40 min em todos os núcleos; Hell usa a visão Insane).
 6. **Trabalho:** tickets em `docs/tickets/`; fluxo sabatina → tickets → um worktree por ticket → portão → merge → publicar.
 7. **Publicar:** só pela skill `publicar-versao`.
 
