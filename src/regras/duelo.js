@@ -3061,6 +3061,19 @@
     return clima;
   }
   // item: o da build, quando há; sem ele, o que combina com o set e a habilidade (itemDoSetDuelo).
+  // Hell: o jogador joga com IV 0 depois da 5ª insígnia (pokemon.c:986-992, HELL_MODE_0_IVS_FLAG = FLAG_BADGE05_GET); o inimigo é sempre 31 (foeDeDuelo).
+  function ivDoJogadorDuelo() { return modoHellDuelo() && state.settings.milestone >= 5 ? 0 : 31; }
+  // Hell: item repetido no time do jogador só vale para o primeiro que o segura (pokemon.c:6294-6310, GetHeldItemIfNotDuplicate).
+  function semItemDuplicadoNoHell(meus) {
+    if (!modoHellDuelo()) return meus;
+    var vistos = {};
+    return meus.map(function (u) {
+      if (!u.item) return u;
+      if (!vistos[u.item]) { vistos[u.item] = 1; return u; }
+      var b = u.base, stats = b ? [0, 1, 2, 3, 4, 5].map(function (i) { return calcFinalStat(u.sp.b[i], b.iv, b.ev[i], b.nivel, i, b.nat, "", u.sp.n); }) : u.stats;
+      return Object.assign({}, u, { item: "", it: itemDoDuelo("", null), stats: stats });
+    });
+  }
   function unidadeDeDuelo(sp, set, abId, nivel, golpeIds, clima, item) {
     // Elite: só as innates que o nível já liberou (level_cap.js, innatesAtivasNoNivel).
     var innAtivas = innatesAtivasNoNivel(sp, nivel);
@@ -3069,7 +3082,8 @@
     if (ef.semRecarga) golpeIds = uniqueIds(golpeIds.concat(golpesDeRecargaAte(sp, nivel))); // Rampage: Hyper Beam e parecidos
     var nomeItem = item === undefined || item === null ? itemDoSetDuelo(set, sp, ef) : item;
     var u = { sp: sp, set: set.nome, ab: abId === null || abId === undefined ? "" : nomeHabDuelo(abId), abId: abId, ids: ids, item: nomeItem, it: itemDoDuelo(nomeItem, sp),
-      stats: [0, 1, 2, 3, 4, 5].map(function (i) { return calcFinalStat(sp.b[i], 31, set.evs[i], nivel, i, set.nature, nomeItem, sp.n); }) };
+      stats: [0, 1, 2, 3, 4, 5].map(function (i) { return calcFinalStat(sp.b[i], ivDoJogadorDuelo(), set.evs[i], nivel, i, set.nature, nomeItem, sp.n); }) };
+    u.base = { iv: ivDoJogadorDuelo(), ev: set.evs, nat: set.nature, nivel: nivel }; // para refazer os stats sem o item (H5)
     u.ef = ef;
     u.innAtivas = innAtivas;
     u.statusIds = planosUteisDuelo(golpesDeStatusAte(sp, nivel), u, golpeIds);
@@ -3758,6 +3772,7 @@
   // ordem da velocidade. Quem cai é trocado: o chefão manda o próximo; eu, o
   // melhor dos que sobram contra os dois de frente.
   function simularDuplaContraChefao(meus, foes, nivel, inicio) {
+    meus = semItemDuplicadoNoHell(meus);
     var time = meus.map(participanteDupla), deles = foes.map(participanteDupla);
     var ladoMeu = inicio ? Object.assign(novoLadoDuelo(), inicio.lado) : novoLadoDuelo(), ladoDele = novoLadoDuelo();
     if (inicio) aplicarStatusNoFimDuelo(time, inicio.statusNoFim);
@@ -4243,6 +4258,7 @@
   // luta inteira (o benefício é do time, não de quem usa): refaz a luta sem esses golpes e só fica com eles se ela não vence.
   function ehGolpeDeTelaOuVentoDuelo(id) { var p = planoDoGolpeStatus(id); return !!p && (p.tipo === "tela" || p.tipo === "vento"); }
   function simularLutaContraChefao(meus, foes, nivel, inicio) {
+    meus = semItemDuplicadoNoHell(meus);
     if (meus.some(function (u) { return (u.statusIds || []).some(ehGolpeDeTelaOuVentoDuelo); })) {
       var semEles = meus.map(function (u) { return Object.assign({}, u, { statusIds: (u.statusIds || []).filter(function (id) { return !ehGolpeDeTelaOuVentoDuelo(id); }) }); });
       var r = simularLutaDeVerdadeContraChefao(semEles, foes, nivel, inicio);

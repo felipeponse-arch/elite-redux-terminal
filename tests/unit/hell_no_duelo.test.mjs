@@ -39,3 +39,35 @@ test("H6 Hell: todo inimigo de todo chefão sai marcado (o jogador não), então
   assert.ok(n > 100);
   assert.equal(unid("Garchomp", "Earthquake").chefao, undefined);
 });
+
+// H4: IV 0 do jogador em Hell depois da 5ª insígnia (milestone >= 5); inimigo e fora do Hell seguem em 31.
+test("H4 Hell: o jogador tem IV 0 do 5º badge em diante; antes disso, no Ace e no inimigo fica 31", () => {
+  const stats = (dif, marco) => { R.state.settings.milestone = marco; return noModo(dif, () => unid("Garchomp", "Earthquake").stats); };
+  const antes = R.state.settings.milestone;
+  try {
+    const ace5 = stats("ace", 5);
+    assert.deepEqual(stats("hell", 4), stats("ace", 4), "Hell com 4 badges = igual ao Ace");
+    assert.deepEqual(stats("ace", 8), ace5);
+    assert.ok(stats("hell", 5).every((v, i) => v < ace5[i]), "todos os stats caem com IV 0");
+    const b = R.BOSSES.find((x) => x.name === "Brawly 1");
+    R.state.settings.milestone = 8;
+    const f = noModo("hell", () => R.foeDeDuelo(b.party[0], NIVEL, null)), g = noModo("ace", () => R.foeDeDuelo(b.party[0], NIVEL, null));
+    assert.deepEqual(f.stats, g.stats, "inimigo sempre com o IV do dado");
+  } finally { R.state.settings.milestone = antes; }
+});
+
+// H5: item repetido no time do jogador em Hell só vale para o primeiro (a luta usa o time com o item tirado).
+test("H5 Hell: o 2º Pokémon com o mesmo item perde o item; fora do Hell fica igual", () => {
+  const a = unid("Garchomp", "Earthquake"), b = unid("Magnezone", "Thunderbolt");
+  const ai = Object.assign({}, a, { item: "Life Orb", it: R.itemDoDuelo("Life Orb", a.sp) }), bi = Object.assign({}, b, { item: "Life Orb", it: R.itemDoDuelo("Life Orb", b.sp) });
+  const hell = noModo("hell", () => R.semItemDuplicadoNoHell([ai, bi])), ace = noModo("ace", () => R.semItemDuplicadoNoHell([ai, bi]));
+  assert.equal(hell[0].item, "Life Orb");
+  assert.equal(hell[1].item, "");
+  assert.equal(hell[1].it.danoMult, 1);
+  assert.equal(ace[1].item, "Life Orb");
+});
+
+// H2: o motor não modela Evasion Up/Minimize (nenhum plano): a cláusula de evasão do Hell (só jogador, só treinador) já fica coerente.
+test("H2: Double Team e Minimize não têm plano no motor (nada a vetar no Hell)", () => {
+  ["Double Team", "Minimize"].forEach((n) => assert.ok(!R.planoDoGolpeStatus(R.MOVE_ID_BY_NAME[n]), n));
+});

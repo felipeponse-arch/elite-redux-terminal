@@ -4351,4 +4351,18 @@ export const MUTACOES = [
     de: "var fHell = modoHellDuelo() ?",
     para: "var fHell = true ?",
   },
+  {
+    id: "hell-iv-zero-jogador-sem-regra",
+    descricao: "o jogador em Hell não fica com IV 0 depois do 5º badge (H4)",
+    arquivo: "duelo.js",
+    de: "return modoHellDuelo() && state.settings.milestone >= 5 ? 0 : 31;",
+    para: "return 31;",
+  },
+  {
+    id: "hell-item-duplicado-vale",
+    descricao: "item repetido no time do jogador em Hell volta a valer (H5)",
+    arquivo: "duelo.js",
+    de: "    if (!modoHellDuelo()) return meus;\n    var vistos",
+    para: "    return meus;\n    var vistos",
+  },
 ];
