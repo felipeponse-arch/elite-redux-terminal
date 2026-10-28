@@ -55,3 +55,12 @@ test("Bioluminescent: golpe Normal continua sem efeito em Ghost (a expansão do 
   const dono = unid(["Bioluminescent"], ["Electric"], [golpe("F")]);
   assert.equal(dano(dono, unid([], ["Ghost"], [golpe("F")])), 0);
 });
+
+// PALAVRAS_DE_CATEGORIA: "Thorns" não é chifre e "Light Screen" não é golpe de luz (falsos positivos achados no scan do lote 3).
+test("categorias do texto: Loose Thorns não vira chifre; Light Wield (Light Screen) não vira luz; Mighty Horn e Photokinesis seguem", () => {
+  const cats = (n) => R.categoriasDoTextoDuelo(R.textoHabDuelo(idHab(n)));
+  assert.equal(cats("Loose Thorns").includes("chifre"), false);
+  assert.equal(cats("Light Wield").includes("luz"), false);
+  assert.equal(cats("Mighty Horn").includes("chifre"), true);
+  assert.equal(cats("Photokinesis").includes("luz"), true);
+});
