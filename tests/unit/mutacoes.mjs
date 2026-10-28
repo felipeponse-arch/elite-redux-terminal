@@ -2891,8 +2891,8 @@ export const MUTACOES = [
     id: "categorias-arremesso-sem-palavra-no-texto",
     descricao: "o texto \"throwing moves\" das habilidades deixa de apontar para a categoria arremesso (Rocky Payload sem efeito)",
     arquivo: "duelo.js",
-    de: "{ nome: \"arremesso\", re: /\\bthrow/i }",
-    para: "{ nome: \"arremesso\", re: /nunca-casa-nada/i }",
+    de: "{ nome: \"arremesso\", flag: \"throwing\", re: /\\bthrow/i }",
+    para: "{ nome: \"arremesso\", flag: \"throwing\", re: /nunca-casa-nada/i }",
   },
 
   // ---- ticket calibracao-02 (15/10/2026): parâmetros de item pela config do jogo ----
@@ -3737,8 +3737,8 @@ export const MUTACOES = [
     id: "versao-luz-sem-categoria",
     descricao: "Photokinesis, Photon Burst e Blinking Flash deixam de reconhecer 'light moves' (a categoria luz some do texto)",
     arquivo: "duelo.js",
-    de: "{ nome: \"luz\", re: /\\blight\\b/i }",
-    para: "{ nome: \"luz\", re: /\\bnunca-casa\\b/i }",
+    de: "{ nome: \"luz\", flag: \"light\", re: /\\blight\\b/i }",
+    para: "{ nome: \"luz\", flag: \"light\", re: /\\bnunca-casa\\b/i }",
   },
   {
     id: "versao-photon-burst-ainda-especial",
@@ -4575,5 +4575,26 @@ export const MUTACOES = [
     arquivo: "duelo.js",
     de: "return 1 + u.ef.lastStand * Math.min(1, nVencer * danoLevado / hp) / 2;",
     para: "return 1 + u.ef.lastStand / 2;",
+  },
+  {
+    id: "estrutura-categoria-soco-flag-errada",
+    descricao: "a categoria soco do motor aponta para a flag errada da config (TK-12 estrutura D3.6: a tabela de palavras deixa de bater com FLAG_PARA_CATEGORIA)",
+    arquivo: "duelo.js",
+    de: "{ nome: \"soco\", flag: \"iron_fist\",",
+    para: "{ nome: \"soco\", flag: \"striker\",",
+  },
+  {
+    id: "estrutura-texto-versao-nova-indice-fora",
+    descricao: "texto_versao_nova.js deixa de montar o índice do texto lido (TK-12 estrutura D4.5b: o arquivo novo é a fonte, o motor só consulta)",
+    arquivo: "texto_versao_nova.js",
+    de: "LIDO_PELO_TEXTO_NOVO_DUELO[t[1]] = t[2];",
+    para: "void t;",
+  },
+  {
+    id: "estrutura-sem-regra-ignora-campos",
+    descricao: "o detector 'sem regra' deixa de olhar os campos lidos (TK-12 estrutura D4.4): toda habilidade vira 'sem regra'",
+    arquivo: "duelo.js",
+    de: "return campos.length === 0 && !TYPE_MOD_ABILITIES[id]",
+    para: "return true && !TYPE_MOD_ABILITIES[id]",
   },
 ];

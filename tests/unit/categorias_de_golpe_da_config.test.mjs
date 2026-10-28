@@ -191,3 +191,12 @@ test("recuoDoEfeito: EFFECT_RECOIL_25/33/50 dão o percentual; os outros efeitos
   assert.equal(M.recuoDoEfeito("EFFECT_RECOIL_25"), 25);
   for (const e of ["EFFECT_RECOIL_HP_25", "EFFECT_RECOIL_IF_MISS", "EFFECT_FLINCH_RECOIL_33", "EFFECT_BURN_UP", undefined]) assert.equal(M.recuoDoEfeito(e), null, String(e));
 });
+
+test("PALAVRAS_DE_CATEGORIA do motor: cada categoria carrega a flag da config que a origina, e bate com FLAG_PARA_CATEGORIA", () => {
+  const R = carregarRegras();
+  assert.ok(R.PALAVRAS_DE_CATEGORIA.length >= 11);
+  for (const p of R.PALAVRAS_DE_CATEGORIA) assert.equal(M.FLAG_PARA_CATEGORIA[p.flag], p.nome, "flag " + p.flag + " deve virar " + p.nome);
+  // "lunar" e a Air/contact não têm habilidade que as descreva em texto: ficam só na tabela da config.
+  const semTexto = Object.values(M.FLAG_PARA_CATEGORIA).filter((c) => !R.PALAVRAS_DE_CATEGORIA.some((p) => p.nome === c));
+  assert.deepEqual(semTexto, ["lunar"]);
+});

@@ -159,16 +159,18 @@
     return !/\bif\b|\bwhen\b|\bwhile\b|\buntil\b|\bin (rain|sun|sand|hail|fog|a sandstorm|grassy|electric|misty|psychic|toxic)\b|below|under \d|at (full|max) hp|first turn|after|statused|poisoned|burned|suffering|terrain|tailwind/i.test(f);
   }
   var ESTAGIOS_DUELO = { one: 1, two: 2 };
-  // Palavras do texto da habilidade -> categoria de golpe marcada no NextDex.
+  // Palavras do texto da habilidade -> categoria de golpe. `flag` é a flag do golpe na er-config que origina a categoria (a tradução flag -> categoria mora em
+  // scripts/categorias_pela_config.mjs, FLAG_PARA_CATEGORIA; tests/unit/categorias_de_golpe_da_config.test.mjs confere que as duas tabelas batem). Todas as
+  // categorias lidas aqui têm flag na config; só o texto (`re`) é do app, porque a habilidade descreve a flag em linguagem livre.
   var PALAVRAS_DE_CATEGORIA = [
-    { nome: "soco", re: /punch|iron fist/i }, { nome: "mordida", re: /bit(?:e|ing)|fang|strong jaw/i },
-    { nome: "corte", re: /slash|slicing|keen edge|sharpness/i }, { nome: "pulso", re: /mega launcher|beam\/pump|cannon|pulse/i },
-    { nome: "chifre", re: /\bhorn/i }, { nome: "broca", re: /drill/i }, { nome: "chute", re: /kick/i },
-    { nome: "flecha", re: /arrow/i }, { nome: "martelo", re: /hammer|slamm/i },
-    // Rocky Payload e Devious Present: "Rock-type and throwing moves" (flag `throwing` do golpe na er-config).
-    { nome: "arremesso", re: /\bthrow/i },
-    // Photokinesis, Photon Burst, Blinking Flash: "light moves" (flag `light` do golpe na er-config; categoria "luz" em move_categorias.json).
-    { nome: "luz", re: /\blight\b/i }
+    { nome: "soco", flag: "iron_fist", re: /punch|iron fist/i }, { nome: "mordida", flag: "strong_jaw", re: /bit(?:e|ing)|fang|strong jaw/i },
+    { nome: "corte", flag: "keen_edge", re: /slash|slicing|keen edge|sharpness/i }, { nome: "pulso", flag: "mega_launcher", re: /mega launcher|beam\/pump|cannon|pulse/i },
+    { nome: "chifre", flag: "horn", re: /\bhorn/i }, { nome: "broca", flag: "drill", re: /drill/i }, { nome: "chute", flag: "striker", re: /kick/i },
+    { nome: "flecha", flag: "arrow", re: /arrow/i }, { nome: "martelo", flag: "hammer", re: /hammer|slamm/i },
+    // Rocky Payload e Devious Present: "Rock-type and throwing moves".
+    { nome: "arremesso", flag: "throwing", re: /\bthrow/i },
+    // Photokinesis, Photon Burst, Blinking Flash: "light moves" (categoria "luz" em move_categorias.json).
+    { nome: "luz", flag: "light", re: /\blight\b/i }
   ];
   function categoriasDoTextoDuelo(trecho) {
     return PALAVRAS_DE_CATEGORIA.filter(function (p) { return p.re.test(trecho); }).map(function (p) { return p.nome; });
