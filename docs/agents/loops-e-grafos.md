@@ -13,7 +13,9 @@ concorrentes e testes frágeis, não do modelo.
 | Orquestrador (sessão principal) | Opus 5.5 | Monta o grafo, revisão final de G e mecânica, junção e GitHub |
 | Executores: qa-processo, construtor-de-builds, engenheira-do-motor, arquiteta-de-dados, engenheira-frontend, meta-pokemon, ux-acessibilidade, seguranca, playtester-de-build | Sonnet 5.5 | Acertar de primeira custa menos que várias voltas |
 | supervisor (revisor em contexto separado) | Sonnet 5.5 | É quem segura a qualidade |
-| pesquisador-de-mecanica, verificador, varreduras, gerente (triagem) | Haiku 5.5 | Ler, extrair, rodar portão: tarefa mecânica e verificável |
+| pesquisador-de-mecanica, pesquisador-web (27/10/2026), verificador, varreduras, gerente (triagem) | Haiku 5.5 | Ler, extrair, rodar portão: tarefa mecânica e verificável |
+| engenheira-de-codigo (22/10/2026: refatora e escreve código fora do motor e dos dados) | Sonnet 5.5 | Executora, mesmo fluxo dos demais executores |
+| revisor-de-codigo (22/10/2026: só leitura, app inteiro; também texto de agente, doc, prompt e ticket) | Sonnet 5.5 | Revisão com arquivo:linha, antes do `supervisor` |
 `supervisor-opus` foi aposentado em 20/10/2026 (cópia em `teste/salvaguarda/antes_ruflo_2026-10-20/`): G e mecânica têm revisão final do orquestrador.
 
 ## 2. O grafo (por demanda)
@@ -23,12 +25,15 @@ falha sem a mudança, relatório no formato do agente), arquivos que toca, taman
 - Nós que editam: até 2 ao mesmo tempo, em arquivos disjuntos.
 - Nós pesados (suíte, sabotagem, navegador): 1 por vez na máquina, pela vaga (`npm run pesado`); quem roda é o `verificador`.
 - Junção no master, GitHub e publicação: só o orquestrador, em série, com o portão completo PASSANDO antes do `push`.
+- Informação que NÃO está no código do jogo (er-repo/er-config): nó `pesquisador-web` antes do executor (regra do usuário, 27/10/2026: código do jogo é a verdade; sem resposta nele, pesquisa na rede). Ele só pesquisa e relata, com fonte e data.
+- Revisão de código: nó `revisor-de-codigo` (só leitura) entre o `verificador` e o `supervisor` quando o ticket mexe em código fora do motor ou em arquitetura; para texto de agente, doc, prompt ou ticket ele também é o revisor.
+- Modo noturno (skill `modo-noturno`, 27/10/2026): com o usuário dormindo, decisão que iria a ele passa por comitê (especialista + supervisor + gerente, 2 de 3 aprovam); a permissão acaba quando ele volta.
 - Mecânica: todo nó que mexe em golpe/habilidade/regra do motor depende de um nó `pesquisador-de-mecanica` antes.
 
 ```
-pesquisador-de-mecanica (N em paralelo, só se for mecânica)
+pesquisador-de-mecanica (N em paralelo, só se for mecânica) / pesquisador-web (se o código do jogo não responde)
         ↓ pacote de evidência (arquivo:linha + caso de dado real)
-executor (TDD, worktree do ticket) → verificador → supervisor   ← loop, até 3 voltas
+executor (TDD, worktree do ticket) → verificador → [revisor-de-codigo] → supervisor   ← loop, até 3 voltas
         ↓ VERDE + APROVADO
 orquestrador: revisão final (G e mecânica) → junção → portão completo → GitHub
 ```
@@ -71,3 +76,10 @@ limite. Testado em 20/10: grava em `teste/.swarm/memory.db` e persiste. `hooks_m
 **Se as ferramentas MCP do Ruflo caírem (21/10):** grave pela linha de comando, no mesmo banco:
 `node C:/Users/Ponse/Documents/Claude/teste/ferramentas/ruflo/node_modules/ruflo/bin/ruflo.js memory store --namespace medicao-nos --key <chave> --value <json>`
 (e `memory list --namespace medicao-nos`). O servidor MCP usa essa instalação fixa (3.59.8, em `teste/ferramentas/ruflo`), não `npx ruflo@latest`: o Ruflo publica várias versões por dia e o `npx` baixava a nova a cada início, derrubando a conexão. Atualizar só de propósito: `npm install --save-exact ruflo@<versão>` nessa pasta.
+
+## 6. Riscos aceitos (registrados em 27/10/2026, TK-31)
+Não são defeitos a corrigir: são escolhas conscientes, anotadas para ninguém "descobrir" de novo.
+- **qa-17.3a — texto de agente sem revisor.** O `gerente` pode acrescentar UMA regra curta à seção "Regras duras" de um agente (autonomia de 14/10). Essa mudança de texto não passa por revisor. Rede: cópia anterior em `agent-memory/gerente/historico/` e linha no registro. Alternativa para o comitê: o `revisor-de-codigo` olhar o registro no início de cada sessão.
+- **qa-17.7 — teto de ~120 mil tokens / ~35 chamadas sem medição.** Regra do usuário (22/10/2026); ninguém mede o consumo real do agente. Vale como estimativa.
+- **qa-17.8 — orquestrador revisa G e mecânica.** Sem `supervisor-opus` (aposentado em 20/10/2026), a revisão final desses casos é do próprio orquestrador, que também monta o grafo. Aceito pelo usuário; o contexto separado do `supervisor` Sonnet continua valendo nas demais voltas.
+- **qa-17.10 — tabela de consumo vazia** (`politica-de-modelo.md` §3): sem medição, nada é preenchido.
