@@ -4548,4 +4548,25 @@ export const MUTACOES = [
     de: "return uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });",
     para: "return sp.ab.map(function (id) { return ABILITIES[id][0]; });",
   },
+  {
+    id: "tk14-knock-off-eviolite-fixo",
+    descricao: "Eviolite/Meteorite voltam a contar como pedra fixa no Knock Off (regex /ite$/)",
+    arquivo: "duelo.js",
+    de: 'var n = u.item || (u.it && u.it.nome) || "", sn = (u.sp && u.sp.sname) || "";',
+    para: 'var n = u.item || (u.it && u.it.nome) || "", sn = (u.sp && u.sp.sname) || ""; if (/ite$/.test(n)) return true;',
+  },
+  {
+    id: "tk14-botas-ignoram-klutz",
+    descricao: "Heavy-Duty Boots e Light Clay deixam de olhar o Klutz (item ativo)",
+    arquivo: "duelo.js",
+    de: "return !!(u.it && u.it[flag] && !(u.ef && u.ef.klutz));",
+    para: "return !!(u.it && u.it[flag]);",
+  },
+  {
+    id: "tk14-expert-belt-da-config",
+    descricao: "Expert Belt passa a ler o f:30 da config (1,3x) em vez do 1,2x do código",
+    arquivo: "duelo.js",
+    de: 'if (nome === "Expert Belt") it.seMult = 1.2;',
+    para: 'if (nome === "Expert Belt") it.seMult = 1.3;',
+  },
 ];
