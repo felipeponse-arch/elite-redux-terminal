@@ -323,7 +323,7 @@
     // Rocky Payload e Devious Present: "Rock-type and throwing moves" (flag `throwing` do golpe na er-config).
     { nome: "arremesso", re: /\bthrow/i },
     // Photokinesis, Photon Burst, Blinking Flash: "light moves" (flag `light` do golpe na er-config; categoria "luz" em move_categorias.json).
-    { nome: "luz", re: /\blight(?: moves?|-based)/i }
+    { nome: "luz", re: /\blight\b/i }
   ];
   function categoriasDoTextoDuelo(trecho) {
     return PALAVRAS_DE_CATEGORIA.filter(function (p) { return p.re.test(trecho); }).map(function (p) { return p.nome; });
