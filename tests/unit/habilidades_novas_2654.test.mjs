@@ -180,7 +180,7 @@ test("Mana Coat: golpe físico x1,3 com Psychic Terrain no campo; o especial e o
 
 test("Light Wield: Light Screen de 3 turnos do lado do dono na entrada: o golpe especial que o enfrenta rende menos; o físico não; Infiltrator atravessa", () => {
   const wield = unid(["Light Wield"], ["Normal"], [golpe("F")]);
-  assert.equal(efDe(["Light Wield"]).telaE, 3);
+  assert.equal(efDe(["Light Wield"]).telaLuz, 3);
   const luta = (atq) => R.danoComStatusNoDuelo(atq, wield, R.danoNoDuelo(atq, wield, NIVEL), R.danoNoDuelo(wield, atq, NIVEL), 3, true).meu;
   const semTela = unid([], ["Normal"], [golpe("F")]);
   const luta0 = (atq) => R.danoComStatusNoDuelo(atq, semTela, R.danoNoDuelo(atq, semTela, NIVEL), R.danoNoDuelo(semTela, atq, NIVEL), 3, true).meu;

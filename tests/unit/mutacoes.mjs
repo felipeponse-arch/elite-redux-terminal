@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "clueless-nao-anula-salas",
+    descricao: "Clueless (Negates Weather, Rooms and Terrains) deixa de anular Trick Room/Inverse Room/gravidade",
+    arquivo: "duelo.js",
+    de: "ef.anulaSalas = true;",
+    para: "ef.anulaSalas = false;",
+  },
+  {
     id: "proximo-do-chefao-sem-tipagem",
     descricao: "o próximo do chefão volta a ignorar a nota de tipagem ofensiva (ordem da fila)",
     arquivo: "duelo.js",
@@ -212,7 +219,7 @@ export const MUTACOES = [
   {
     id: "item-de-especie-pra-qualquer-um",
     descricao: "Light Ball e cia. oferecidos pra qualquer espécie",
-    arquivo: "prompts_ia.js",
+    arquivo: "itens_do_time.js",
     de: "return sp.n === base || sp.n.indexOf(base + \" \") === 0;",
     para: "return true;",
   },
@@ -621,8 +628,8 @@ export const MUTACOES = [
     id: "buff-tela-sem-categoria",
     descricao: "Reflect do ginásio vira tela das duas categorias",
     arquivo: "duelo.js",
-    de: "if (b.abreTela.E) ef.telaE = Math.max(ef.telaE || 0, b.abreTela.E); }",
-    para: "if (b.abreTela.E) ef.telaE = Math.max(ef.telaE || 0, b.abreTela.E); if (b.abreTela.F) ef.telaE = b.abreTela.F; }",
+    de: "if (b.abreTela.E) ef.telaLuz = Math.max(ef.telaLuz || 0, b.abreTela.E); }",
+    para: "if (b.abreTela.E) ef.telaLuz = Math.max(ef.telaLuz || 0, b.abreTela.E); if (b.abreTela.F) ef.telaLuz = b.abreTela.F; }",
   },
   {
     id: "buff-status-pega-o-primeiro",
@@ -2183,7 +2190,7 @@ export const MUTACOES = [
     id: "d11-itens-tardios-sumem-do-prompt",
     descricao: "o prompt da IA deixa de dizer quais itens ainda não estão disponíveis",
     arquivo: "prompts_ia.js",
-    de: ".filter(function (x) { return x.p && !liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: x.n }); })",
+    de: ".filter(function (x) { return x.p; })",
     para: ".filter(function () { return false; })",
   },
   {
@@ -2792,7 +2799,7 @@ export const MUTACOES = [
     id: "comp-hazard-nao-e-posto",
     descricao: "nenhum hazard (Stealth Rock, Loose Rocks, Spikes...) chega ao campo",
     arquivo: "@comportamento",
-    de: "poeHazardDuelo",
+    de: "poeHazardNoLado",
     para: "return;",
   },
   {
@@ -3437,7 +3444,7 @@ export const MUTACOES = [
   {
     id: "campo-nevoa-valor-0-9",
     descricao: "o corte da Eerie Fog vira x0,9 em vez de x0,8",
-    arquivo: "mono_run.js",
+    arquivo: "campo.js",
     de: "ataqueContraGhostNaNevoa: 0.8 }",
     para: "ataqueContraGhostNaNevoa: 0.9 }",
   },
@@ -3786,8 +3793,8 @@ export const MUTACOES = [
     id: "versao-light-wield-sem-tela",
     descricao: "Light Wield deixa de montar a Light Screen",
     arquivo: "duelo.js",
-    de: "if ((x = f.match(/^Sets up Light Screen for (\\d+) turns on entry/i))) ef.telaE",
-    para: "if ((x = f.match(/^NUNCA up Light Screen for (\\d+) turns on entry/i))) ef.telaE",
+    de: "if ((x = f.match(/^Sets up Light Screen for (\\d+) turns on entry/i))) ef.telaLuz",
+    para: "if ((x = f.match(/^NUNCA up Light Screen for (\\d+) turns on entry/i))) ef.telaLuz",
   },
   {
     id: "versao-insect-eater-pelo-tipo-do-golpe",
@@ -4271,8 +4278,8 @@ export const MUTACOES = [
     id: "motor-item-nao-liberado-entra",
     descricao: "o fechamento de item ignora o filtro de item liberado na Etapa",
     arquivo: "time_pelo_motor.js",
-    de: "liberadoNaRun(ctx.etapa, ctx.cap, { item: n }) &&",
-    para: "true &&",
+    de: "if (build.item && !liberadoNaRun(ctx.etapa, ctx.cap, { item: build.item })) {",
+    para: "if (false) {",
   },
   {
     id: "motor-item-ignora-conflito",
@@ -4284,9 +4291,9 @@ export const MUTACOES = [
   {
     id: "motor-item-repetido-sem-limite",
     descricao: "o fechamento de item deixa o mesmo item entrar além do máximo do time",
-    arquivo: "time_pelo_motor.js",
-    de: "if (itemEsgotadoNoTime(busca.time.filter(",
-    para: "if (false && itemEsgotadoNoTime(busca.time.filter(",
+    arquivo: "itens_do_time.js",
+    de: "&& !itemEsgotadoNoTime(donos);",
+    para: "&& true;",
   },
   {
     id: "motor-item-fecha-build-salva",
@@ -4596,5 +4603,19 @@ export const MUTACOES = [
     arquivo: "time_pelo_motor.js",
     de: "var doTipo = tipos.map(itemDeTipoDoTime);",
     para: "var doTipo = tipos.map(function (t) { return Object.keys(ITENS_CONFIG.itens).filter(function (n) { var x = ITENS_CONFIG.itens[n]; return x.e === \"TYPE_POWER\" && x.t === t; }).sort()[0]; });",
+  },
+  {
+    id: "campo-clima-dura-pouco",
+    descricao: "campo.js: o clima passa a durar 7 turnos em vez dos 8 do código do jogo",
+    arquivo: "campo.js",
+    de: "clima: 8, // WEATHER_DURATION",
+    para: "clima: 7, // WEATHER_DURATION",
+  },
+  {
+    id: "campo-hazard-sem-limite-de-camadas",
+    descricao: "campo.js: Spikes passam a acumular sem o teto de 3 camadas",
+    arquivo: "campo.js",
+    de: "espinho: 3, toxico: 2",
+    para: "espinho: 9, toxico: 2",
   },
 ];

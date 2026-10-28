@@ -206,3 +206,12 @@ test("Air Blower do meu lado: Tailwind de 3 turnos na entrada (abilities.cc:1367
   assert.equal(s.log[0].lados.meu.vento, 3);
   assert.equal(s.log[1].lados.meu.vento, 3 - s.log[0].turnos);
 });
+
+// Clueless (id 426, "Negates Weather, Rooms and Terrains"): ROOM_HAS_EFFECT e IsTrickRoomActive/IsInverseRoomActive/
+// IsGravityActive dão FALSE com ela em campo (er-repo include/battle_util.h:48, src/battle_util.c:8704-8740).
+test("Clueless no meu lado anula o Trick Room de 5 turnos do chefão (Cofagrigus da Phoebe 2)", () => {
+  const duelo = (hab, sala) => R.resultadoDoDuelo(meu(80, "Lugia", ["Aeroblast"], { hab }), foeDe("Phoebe 2", "Cofagrigus", 80), 80,
+    { sala, lados: { eu: lado(), foe: lado() }, detalhe: true });
+  assert.notEqual(duelo("", 5).fracFoe, duelo("", 0).fracFoe, "pré-condição: sem Clueless a sala muda a luta");
+  assert.deepEqual(duelo("Clueless", 5), duelo("Clueless", 0), "com Clueless a sala não pesa");
+});

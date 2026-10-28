@@ -31,8 +31,8 @@ test("Reflect do ginásio corta só golpe físico; Light Screen só especial", (
   const base = foes();
   const reflect = R.foesComBuffsDoGinasio(base, ["tateliza_reflect"], 1)[0];
   const tela = R.foesComBuffsDoGinasio(base, ["tateliza_lightscreen"], 1)[0];
-  assert.equal(reflect.ef.telaF, 5); assert.ok(!reflect.ef.telaE);
-  assert.equal(tela.ef.telaE, 5); assert.ok(!tela.ef.telaF);
+  assert.equal(reflect.ef.telaReflect, 5); assert.ok(!reflect.ef.telaLuz);
+  assert.equal(tela.ef.telaLuz, 5); assert.ok(!tela.ef.telaReflect);
 });
 
 test("status 'nos últimos N': do fim pro começo, sem o 1º, só em quem está sem status", () => {

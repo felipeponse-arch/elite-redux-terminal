@@ -40,11 +40,11 @@
     // Terrenos (2026-09-26): habilidades que armam/aproveitam e o efeito, tudo
     // conferido no dado deste jogo (descrição do golpe de terreno) - efeito do
     // jogo original que a descrição não confirma fica de fora.
-    "Electric Terrain": "8 turnos, impede o sono. Electro Surge arma o terreno; Surge Surfer, Quark Drive, Hadron Engine, Power Leak e Backup Power se beneficiam dele. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
-    "Psychic Terrain": "8 turnos, bloqueia prioridade. Psychic Surge arma o terreno; Zen Garden e Brain Overload se beneficiam. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
-    "Grassy Terrain": "8 turnos, restaura HP. Grassy Surge e Seed Sower armam o terreno; Grass Pelt, Harukaze, Flower Necklace e Jungle Fever se beneficiam. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
-    "Misty Terrain": "8 turnos, bloqueia status. Misty Surge arma o terreno; Celestial Blessing se beneficia. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
-    "Toxic Terrain": "terreno deste jogo: 8 turnos, fortalece golpes Poison e causa dano nos Pokemon a cada turno. Toxic Surge arma; Biofilm se beneficia. Se esta espécie tiver uma dessas ou golpes Poison fortes, prioriza - senão, mantém o papel calculado normalmente."
+    "Electric Terrain": DURACAO_CAMPO.terreno + " turnos, impede o sono. Electro Surge arma o terreno; Surge Surfer, Quark Drive, Hadron Engine, Power Leak e Backup Power se beneficiam dele. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
+    "Psychic Terrain": DURACAO_CAMPO.terreno + " turnos, bloqueia prioridade. Psychic Surge arma o terreno; Zen Garden e Brain Overload se beneficiam. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
+    "Grassy Terrain": DURACAO_CAMPO.terreno + " turnos, restaura HP. Grassy Surge e Seed Sower armam o terreno; Grass Pelt, Harukaze, Flower Necklace e Jungle Fever se beneficiam. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
+    "Misty Terrain": DURACAO_CAMPO.terreno + " turnos, bloqueia status. Misty Surge arma o terreno; Celestial Blessing se beneficia. Se esta espécie tiver uma dessas, prioriza - senão, mantém o papel calculado normalmente.",
+    "Toxic Terrain": "terreno deste jogo: " + DURACAO_CAMPO.terreno + " turnos, fortalece golpes Poison e causa dano nos Pokemon a cada turno. Toxic Surge arma; Biofilm se beneficia. Se esta espécie tiver uma dessas ou golpes Poison fortes, prioriza - senão, mantém o papel calculado normalmente."
   };
 
   // Tática do time (2026-09-26): o que o time faz em campo, independente de
@@ -61,7 +61,7 @@
       parts.push("Estilo do time: " + state.archetype.pace + " - " + PACE_BUILD_GUIDANCE[state.archetype.pace]);
     }
     if (state.archetype.weather && WEATHER_BUILD_GUIDANCE[state.archetype.weather]) {
-      parts.push("Clima e campo do time: " + state.archetype.weather + " - " + WEATHER_BUILD_GUIDANCE[state.archetype.weather]);
+      parts.push("Clima e campo do time: " + rotuloDoArquetipoDeCampo(state.archetype.weather) + " - " + WEATHER_BUILD_GUIDANCE[state.archetype.weather]);
     }
     if (state.archetype.tatica && TATICA_BUILD_GUIDANCE[state.archetype.tatica]) {
       parts.push("Tatica do time: " + state.archetype.tatica + " - " + TATICA_BUILD_GUIDANCE[state.archetype.tatica]);
@@ -754,7 +754,7 @@
         (build ? ", habilidade escolhida: " + build.ability : ", habilidades escolhíveis: " + abiNames.join(", ")) +
         (monotype ? notaMonoDoCandidato(sp, monotype) : "");
     }).join("\n");
-    var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + weather : "", state.archetype.tatica ? "Tatica: " + state.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
+    var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + rotuloDoArquetipoDeCampo(weather) : "", state.archetype.tatica ? "Tatica: " + state.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
     return "Você é o especialista em meta do Pokemon Elite Redux (ROM hack), build " +
       versaoDosDados() + ". Monte o MELHOR time possível de até 6 Pokémon, usando " +
       "SOMENTE espécies desta lista real que o jogador já possui (time + caixa) - nunca invente nem sugira " +
