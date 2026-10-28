@@ -137,6 +137,10 @@
     "Luxraynite": 7,
     "Magnezonite": 7,
     "Purple Orb": 9,
+    // Sem fonte de obtenção (er-repo f34fc2b e er-config 486a964 só têm item/espécie; decisão do usuário 27/10: sem Etapa conhecida = travado).
+    // 10 = além da última Etapa (9): a pedra nunca libera e a espécie Mega fica travada.
+    "Salamencite R": 10,
+    "Metagrossite R": 10,
     "Quagsirenite": 7,
     "Relicanthite": 7,
     "Sceptilite": 7,
@@ -146,7 +150,7 @@
     "Swalotite": 7,
     "Swampertite": 7
   };
-  var ROTULO_ETAPA_MEGA = { 4: "4ª insígnia (Flannery)", 5: "5ª insígnia (Norman)", 6: "6ª insígnia (Winona)", 7: "7ª insígnia (Tate & Liza)" };
+  var ROTULO_ETAPA_MEGA = { 4: "4ª insígnia (Flannery)", 5: "5ª insígnia (Norman)", 6: "6ª insígnia (Winona)", 7: "7ª insígnia (Tate & Liza)", 10: "sem Etapa conhecida (pedra sem fonte de obtenção)" };
   // Etapa em que esta forma Mega fica disponível: a da pedra, se for tardia.
   function etapaDaMega(megaSp) {
     return stonesOf(megaSp).reduce(function (et, pedra) {

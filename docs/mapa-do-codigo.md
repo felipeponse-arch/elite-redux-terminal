@@ -28,7 +28,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **ferramentas_ia.js** - Ferramentas que a IA consulta (aiTool_*) e a fábrica única delas (buildStandardAiTools).
   aiTool_getTeamWeaknesses:15, aiTool_getSpeciesRank:24, aiTool_getPriorityMoveOptions:51, aiTool_getAbilityMovepoolSynergy:75, aiTool_getConditionMoveSynergy:99, aiTool_getNextBossRoster:120, aiTool_getItemInfo:150, aiTool_getRemainingBosses:159, aiTool_getBoxCandidatesForBoss:182, aiTool_getSpeedBenchmark:204, buildStandardAiTools:249
 - **formas_mega.js** - Família de formas (base <-> mega), modo de Mega Evolução, pedras e unidades de batalha.
-  isMegaEvoKind:22, megaFormsOf:31, formFamilyPromptNote:39, megaModePromptLine:53, formFamilyOf:58, isMegaForm:64, megaMode:75, megaEvolutionUnlocked:88, etapaDaMega:151, megaFormLiberada:156, rotuloEtapaDaMega:157, battleFamilyOf:175, usableSpeciesFor:178, megaPromptBlock:182, stonesOf:209, battleUnitsOf:219, unitTypeMult:235
+  isMegaEvoKind:22, megaFormsOf:31, formFamilyPromptNote:39, megaModePromptLine:53, formFamilyOf:58, isMegaForm:64, megaMode:75, megaEvolutionUnlocked:88, etapaDaMega:155, megaFormLiberada:160, rotuloEtapaDaMega:161, battleFamilyOf:179, usableSpeciesFor:182, megaPromptBlock:186, stonesOf:213, battleUnitsOf:223, unitTypeMult:239
 - **golpes.js** - O que cada golpe faz (papel pelo efeito real) e como descrevê-lo pra IA.
   dadoExterno:19, movePromptLine:28, ehGolpeDePivo:41, ehPrioridadeDeDano:49, moveRoleOf:53
 - **gravacao_build_ia.js** - O caminho "resposta da IA -> build validada -> o que gravar", sem tela (ticket 06 da dívida

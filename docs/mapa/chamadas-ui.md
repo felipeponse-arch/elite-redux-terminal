@@ -10,7 +10,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - bossMonCardHtml:493 - chama: calcFinalStat (calc_stat.js:119), itemRuleFor (calc_stat.js:106), ABILITIES (dados_base.js:10), getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), +1
 - bossState:13 - chamado por: initProgress (progresso.js:105), quemResolvePreencher (quem_resolve.js:66), quemResolveRestaurar (quem_resolve.js:103)
 - campoDoChefaoHtml:178 - chama: regraDeCampoDoChefao (chefoes.js:416)
-- candidatosDoJogador:248 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), battleUnitsOf (formas_mega.js:219), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:75)
+- candidatosDoJogador:248 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), battleUnitsOf (formas_mega.js:223), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:75)
 - guardarTimeAnterior:266 - chama: getSpeciesByX (dados_base.js:78), xsToSnames (save.js:24), generatedTeamResult (arquetipo.js:35), teamKeyFor (arquetipo.js:14), acao (nucleo.js:242), +1
 - hellDoChefaoHtml:199 - chama: regrasDoHell (chefoes.js:447)
 - iaDoChefaoHtml:190 - chama: comportamentoDaIADoChefao (chefoes.js:433)
@@ -115,9 +115,9 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - buildHistoryHtml:87 - chama: buildEntryHtml (editor_build.js:182) | chamado por: fichaNotasHtml (dex_ficha.js:602), renderTeam (time.js:8)
 - compareCardHtml:14 - chamado por: selectSpecies (dex_ficha.js:610)
 - compareResultHtml:22 - chama: effectiveBuild (builds.js:200), stripNote (builds.js:49), speciesTypeNames (tipos.js:250), STAT_LABELS_SHORT (aba_chefoes.js:588), rankBadgeHtml (dex_ficha.js:169), +1
-- megaLockedTagHtml:199 - chama: isMegaForm (formas_mega.js:64), megaFormLiberada (formas_mega.js:156), rotuloEtapaDaMega (formas_mega.js:157) | chamado por: renderBox (caixa.js:16), renderTeam (time.js:8)
+- megaLockedTagHtml:199 - chama: isMegaForm (formas_mega.js:64), megaFormLiberada (formas_mega.js:160), rotuloEtapaDaMega (formas_mega.js:161) | chamado por: renderBox (caixa.js:16), renderTeam (time.js:8)
 - notesCardHtml:78 - chama: state (nucleo.js:8) | chamado por: fichaNotasHtml (dex_ficha.js:602)
-- otherFormsHtml:206 - chama: formFamilyOf (formas_mega.js:58), isMegaForm (formas_mega.js:64), megaFormLiberada (formas_mega.js:156), rotuloEtapaDaMega (formas_mega.js:157) | chamado por: renderTeam (time.js:8)
+- otherFormsHtml:206 - chama: formFamilyOf (formas_mega.js:58), isMegaForm (formas_mega.js:64), megaFormLiberada (formas_mega.js:160), rotuloEtapaDaMega (formas_mega.js:161) | chamado por: renderTeam (time.js:8)
 - planoDaBuildHtml:179 - chama: buildNoteHtml (editor_build.js:155) | chamado por: myBuildEditorHtml (editor_build.js:223), renderTeam (time.js:8)
 - rotuloDaBuild:170 - chama: ESTILO_ROTULO (plano_build.js:20), SUGESTAO_ROTULO (sugestao_do_motor.js:11) | chamado por: renderTeam (time.js:8)
 
@@ -141,7 +141,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - modoMotorFavoritosHtml:161 - chamado por: archetypeCardHtml (arquetipo.js:85)
 - modoMotorFicarComVariante:120 - chama: getSpeciesByX (dados_base.js:78), SUGESTAO_ROTULO (sugestao_do_motor.js:11), gravarSugestoesDoMotor (sugestao_do_motor.js:61), planoDeGravarSugestoes (sugestao_do_motor.js:39), applyRecommendedTeam (arquetipo.js:207), +4
 - modoMotorMembroHtml:178 - chama: MOTOR_FRASE_DA_PROVA (time_pelo_motor_papeis.js:321)
-- modoMotorMontar:69 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:219), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:75), contextoDoMotor (time_pelo_motor.js:141), +3
+- modoMotorMontar:69 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:223), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:75), contextoDoMotor (time_pelo_motor.js:141), +3
 - modoMotorResultadoHtml:234 - chamado por: renderTeamStrategy (arquetipo.js:482)
 - modoMotorRodapeHtml:191 - chama: SUGESTAO_ROTULO (sugestao_do_motor.js:11)
 - modoMotorSeletorHtml:153 - chamado por: archetypeCardHtml (arquetipo.js:85)
@@ -195,7 +195,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## ui/resumo_luta.js
 - bossConfrontoHtml:96 - chama: confrontoParaParty (chefoes.js:298) | chamado por: renderBossDetail (aba_chefoes.js:589)
-- boxFitNote:154 - chama: computeSharedRisks (chefoes.js:109), battleUnitsOf (formas_mega.js:219), unitTypeMult (formas_mega.js:235) | chamado por: renderBox (caixa.js:16)
+- boxFitNote:154 - chama: computeSharedRisks (chefoes.js:109), battleUnitsOf (formas_mega.js:223), unitTypeMult (formas_mega.js:239) | chamado por: renderBox (caixa.js:16)
 - confrontoAjustesHtml:44 - chama: coberturaSugerida (confronto.js:196)
 - confrontoPlanoHtml:67 - chama: aberturaEmDupla (confronto.js:319), cuidadosDoChefao (confronto.js:302)
 - dashboardConfrontoHtml:135 - chama: bossPartyPorDificuldade (chefoes.js:327), confrontoParaParty (chefoes.js:298)

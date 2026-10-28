@@ -58,3 +58,14 @@ test("entradas do jogador: duas iguais (time + caixa) aparecem as duas; uma só 
   R2.state.box = [3];
   assert.deepEqual(R2.entradasDoJogador(), [1, 2, 3]);
 });
+
+// TK-00 (28/10): Salamencite R e Metagrossite R não têm fonte de obtenção no código do jogo.
+// Decisão do usuário (27/10): sem Etapa conhecida = travado, em qualquer Etapa (inclusive a última).
+test("pedras R sem fonte (Salamencite R, Metagrossite R) ficam travadas em todas as Etapas", () => {
+  for (const pedra of ["Salamencite R", "Metagrossite R"]) {
+    for (let etapa = 0; etapa <= 9; etapa++) {
+      assert.equal(R.liberadoNaRun(etapa, 100, { pedra }), false, pedra + " liberada na Etapa " + etapa);
+      assert.equal(R.liberadoNaRun(etapa, 100, { item: pedra }), false, pedra + " (item) liberada na Etapa " + etapa);
+    }
+  }
+});
