@@ -1475,8 +1475,8 @@ export const MUTACOES = [
     id: "golpe-rock-climb-sem-carga",
     descricao: "Rock Climb volta a contar como golpe de um turno",
     arquivo: "duelo.js",
-    de: "if (!EFEITOS_DE_CARGA_DUELO[efeito]) return true;",
-    para: "if (!EFEITOS_DE_CARGA_DUELO[efeito] || efeito === \"Semi Invulnerable\") return true;",
+    de: "if (!EFEITOS_DE_CARGA_DUELO[efeito] && MOVES[id][0] !== \"Sky Drop\") return true;",
+    para: "if ((!EFEITOS_DE_CARGA_DUELO[efeito] && MOVES[id][0] !== \"Sky Drop\") || efeito === \"Semi Invulnerable\") return true;",
   },
   {
     id: "golpe-fake-out-todo-turno",
@@ -1720,7 +1720,7 @@ export const MUTACOES = [
     id: "seismic-toss-sem-dano-fixo",
     descricao: "Seismic Toss/Night Shade deixam de causar dano igual ao nível",
     arquivo: "duelo.js",
-    de: "dano = nivel * precisao;",
+    de: "dano = nivelAtq * precisao;",
     para: "dano = dano * 1;",
   },
   {
@@ -4503,8 +4503,8 @@ export const MUTACOES = [
     id: "recarga-volta-a-ser-carga",
     descricao: "golpe de recarga volta a cair no filtro de carga (nunca entra no duelo sem Accelerate)",
     arquivo: "duelo.js",
-    de: "if (!EFEITOS_DE_CARGA_DUELO[efeito]) return true;",
-    para: "if (!EFEITOS_DE_CARGA_DUELO[efeito] && !golpeDeRecargaDuelo(id)) return true;",
+    de: "if (!EFEITOS_DE_CARGA_DUELO[efeito] && MOVES[id][0] !== \"Sky Drop\") return true;",
+    para: "if (!EFEITOS_DE_CARGA_DUELO[efeito] && MOVES[id][0] !== \"Sky Drop\" && !golpeDeRecargaDuelo(id)) return true;",
   },
   {
     id: "tk18-ia-aceita-item-nao-liberado",
