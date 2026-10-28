@@ -404,8 +404,8 @@ export const MUTACOES = [
     id: "loteD-setimo-some",
     descricao: "7º Pokémon do time some no carregamento",
     arquivo: "save.js",
-    de: "state.box = snamesToXs(save.box, boxOrphans).concat(timeTodo.slice(6).filter(function (x) { return state.team.indexOf(x) === -1; }));",
-    para: "state.box = snamesToXs(save.box, boxOrphans);",
+    de: "state.box = semRepetido(snamesToXs(save.box, boxOrphans).concat(timeTodo.slice(6))).filter(function (x) { return state.team.indexOf(x) === -1; });",
+    para: "state.box = semRepetido(snamesToXs(save.box, boxOrphans)).filter(function (x) { return state.team.indexOf(x) === -1; });",
   },
   {
     id: "loteD-boot-muda-data",
@@ -425,7 +425,7 @@ export const MUTACOES = [
     id: "loteD-dificuldade-livre",
     descricao: "save aceita dificuldade inexistente",
     arquivo: "save.js",
-    de: "if ([\"easy\", \"ace\", \"elite\"].indexOf(save.settings.difficulty) !== -1) state.settings.difficulty = save.settings.difficulty;",
+    de: "if ([\"easy\", \"ace\", \"elite\", \"hell\"].indexOf(save.settings.difficulty) !== -1) state.settings.difficulty = save.settings.difficulty;",
     para: "if (save.settings.difficulty) state.settings.difficulty = save.settings.difficulty;",
   },
   {
@@ -1503,7 +1503,7 @@ export const MUTACOES = [
     id: "rankv2-elite-usa-party",
     descricao: "Elite continua mostrando a nota do time party",
     arquivo: "rank_da_run.js",
-    de: "return dif === \"elite\" ? \"insane\" : \"party\";",
+    de: "return dif === \"elite\" || dif === \"hell\" ? \"insane\" : \"party\";",
     para: "return \"party\";",
   },
   {
