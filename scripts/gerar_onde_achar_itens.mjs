@@ -78,6 +78,29 @@ for (const l of ler(join(repo, "data/scripts/general_mart.inc")).split(/\r?\n/))
   if (m && lista !== null) anotar(m[1], "Poké Mart (a partir da " + lista + "ª insígnia)".replace("da 0ª insígnia", "o começo"), "loja", lista);
 }
 
+// 3b. Árvores de berry (ticket 05a, 28/10/2026): new_game.inc planta cada árvore com uma berry fixa
+// (setberrytree <árvore>, ITEM_TO_BERRY(ITEM_Y)); o mapa da árvore é o map.json cujo objeto de berry usa
+// aquele id em trainer_sight_or_berry_tree_id (nome em include/constants/berry.h). Etapa = a do mapa.
+const numeroDaArvore = {};
+for (const l of ler(join(repo, "include/constants/berry.h")).split(/\r?\n/)) {
+  const m = l.match(/^#define (BERRY_TREE_\w+)\s+(\d+)/);
+  if (m) numeroDaArvore[m[1]] = Number(m[2]);
+}
+const pastaDaArvore = {};
+for (const pasta of readdirSync(join(repo, "data/maps"))) {
+  const mapa = join(repo, "data/maps", pasta, "map.json");
+  if (!existsSync(mapa)) continue;
+  for (const ev of (JSON.parse(ler(mapa)).object_events || [])) {
+    const id = String(ev.trainer_sight_or_berry_tree_id);
+    if (ev.graphics_id === "OBJ_EVENT_GFX_BERRY_TREE") pastaDaArvore[numeroDaArvore[id] ?? Number(id)] = pasta;
+  }
+}
+for (const l of ler(join(repo, "data/scripts/new_game.inc")).split(/\r?\n/)) {
+  const m = l.match(/setberrytree\s+(\w+),\s*ITEM_TO_BERRY\((ITEM_\w+)\)/);
+  const pasta = m && pastaDaArvore[numeroDaArvore[m[1]] ?? Number(m[1])];
+  if (pasta) anotar(m[2], localLegivel(pasta), "árvore de berry", etapaDaPasta(pasta));
+}
+
 // 4. Pacote inicial (ticket 08): o que o jogo dá no Centro Pokémon depois de sair da cidade inicial, lido
 // do vídeo do usuário (data/pacote_inicial.json). Vale mais que o código público, que é de outra versão.
 // Pedras Mega do pacote: só ao enfrentar o Norman (etapaDasPedras), ou mais tarde se a pedra já tem trava

@@ -55,9 +55,14 @@ test("item que só sai depois da etapa atual vira aviso; na etapa certa some", (
   assert.equal(tardio(R, "Leftovers"), undefined, "item do pacote nunca é tardio");
 });
 
-test("item sem lugar com etapa na run (Lansat Berry) não gera aviso, mas mostra onde achar", () => {
+test("item sem lugar com etapa na run (Lava Cookie; a Lansat Berry ganhou árvore no TK-05a) não gera aviso, mas mostra onde achar", () => {
   const R = carregarRegras({ milestone: 0 });
-  assert.equal(tardio(R, "Lansat Berry"), undefined);
-  assert.match(R.ondeAcharItemTexto("Lansat Berry"), /fora da run/);
+  assert.equal(tardio(R, "Lava Cookie"), undefined);
+  assert.match(R.ondeAcharItemTexto("Lava Cookie"), /fora da run/);
   assert.match(R.ondeAcharItemTexto("Leftovers"), /Pacote inicial/);
+});
+
+test("Lum Berry tem Etapa vinda das árvores de berry do jogo (TK-05a; new_game.inc setberrytree 46/47/87)", () => {
+  const dado = JSON.parse(readFileSync("data/onde_achar_itens.json", "utf8"))["Lum Berry"];
+  assert.ok(dado && dado.length === 3 && dado.every((x) => x.como === "árvore de berry" && Number.isInteger(x.etapa)), JSON.stringify(dado));
 });
