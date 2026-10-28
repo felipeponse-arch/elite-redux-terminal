@@ -15,7 +15,7 @@ const EXCECAO = {
   Haxorusite: 7, // MeteorFalls_1F_1R/scripts.pory:17 (BADGE07), dado errado
   "Dragoninite X": 6, // SkyPillar_Outside/scripts.pory:185 (BADGE06)
   "Blue Orb": 7, "Red Orb": 7, Bruxishite: 7, Jellicentite: 7, "Skarmorite X": 7, // MeteorFalls_HaxorusRoom
-  "Abomasite S": 8, Dracovishite: 10, "Chien-Paoite": 8, "Galactic Orb": 8, "Dream Orb": 10, "Lucky Orb": 10, // sem fonte: travada
+  "Abomasite S": 8, Dracovishite: 8, "Chien-Paoite": 8, "Galactic Orb": 8, "Dream Orb": 10, "Lucky Orb": 10, // sem fonte: travada
 };
 
 test("nenhuma pedra libera antes do dado, exceto as 7 que o código do jogo trava antes (4 do mono-champ no dado 8; Dream/Lucky Orb travadas em 10)", () => {
