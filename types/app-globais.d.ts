@@ -17,6 +17,7 @@ declare var ABILITY_SYNERGY: Record<string, any[]>;
 declare var CONDITION_MOVE_SYNERGY: Record<string, any[]>;
 declare var LEVELCAPS: any;
 declare var MEGA_FORMS: any;
+declare var PEDRAS_ETAPA: any;
 declare var MOVE_PT: Record<string, string>;
 declare var MOVE_ROLES: any;
 declare var SPECIES_RANK: Record<string, any>;

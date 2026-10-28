@@ -821,6 +821,20 @@ export const MUTACOES = [
     para: "return true;",
   },
   {
+    id: "pedra-ignora-quando-vale",
+    descricao: "etapaDaPedra esquece o quandoVale (keystone): pedra fora do registro libera na Etapa 0",
+    arquivo: "liberado_na_run.js",
+    de: "Math.max(MEGA_UNLOCK_MILESTONE, MEGA_PEDRAS_TARDIAS[nome] || 0)",
+    para: "(MEGA_PEDRAS_TARDIAS[nome] || 0)",
+  },
+  {
+    id: "pedra-ignora-onde-se-pega",
+    descricao: "etapaDaPedra esquece a Etapa do lugar (ondeSePega): toda pedra libera na 4ª",
+    arquivo: "liberado_na_run.js",
+    de: "Math.max(MEGA_UNLOCK_MILESTONE, MEGA_PEDRAS_TARDIAS[nome] || 0)",
+    para: "MEGA_UNLOCK_MILESTONE",
+  },
+  {
     id: "liberado-pedra-sempre",
     descricao: "liberadoNaRun libera pedra mega em qualquer Etapa",
     arquivo: "liberado_na_run.js",

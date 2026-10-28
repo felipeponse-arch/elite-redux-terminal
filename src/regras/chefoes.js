@@ -267,7 +267,7 @@
   // item que ele segura o transforma (mesmo mapa MEGA_FORMS da calculadora).
   function confrontoFoesDe(party) {
     return (party || []).map(function (m) {
-      var megaSname = MEGA_FORMS[m.item];
+      var megaSname = megaDaPedra(m.item, getSpeciesByX(m.x));
       return foeFromBossMember(m, megaSname ? getSpeciesBySname(megaSname) : null);
     }).filter(Boolean);
   }

@@ -30,7 +30,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **ferramentas_ia.js** - Ferramentas que a IA consulta (aiTool_*) e a fábrica única delas (buildStandardAiTools).
   aiTool_getTeamWeaknesses:15, aiTool_getSpeciesRank:24, aiTool_getPriorityMoveOptions:51, aiTool_getAbilityMovepoolSynergy:75, aiTool_getConditionMoveSynergy:99, aiTool_getNextBossRoster:120, aiTool_getItemInfo:150, aiTool_getRemainingBosses:159, aiTool_getBoxCandidatesForBoss:182, aiTool_getSpeedBenchmark:204, buildStandardAiTools:249
 - **formas_mega.js** - Família de formas (base <-> mega), modo de Mega Evolução, pedras e unidades de batalha.
-  isMegaEvoKind:22, evoluiAinda:27, evioliteFunciona:32, megaFormsOf:38, formFamilyPromptNote:46, megaModePromptLine:60, formFamilyOf:65, isMegaForm:71, megaMode:82, megaEvolutionUnlocked:95, etapaDaMega:191, megaFormLiberada:196, megaSoNoDebug:197, quandoMega:199, rotuloEtapaDaMega:200, battleFamilyOf:219, usableSpeciesFor:222, megaPromptBlock:226, stonesOf:253, battleUnitsOf:263, unitTypeMult:279
+  isMegaEvoKind:22, evoluiAinda:27, evioliteFunciona:32, megaFormsOf:38, formFamilyPromptNote:46, megaModePromptLine:60, formFamilyOf:65, isMegaForm:71, megaMode:82, megaEvolutionUnlocked:93, etapaDaMega:100, megaFormLiberada:105, megaSoNoDebug:106, quandoMega:108, rotuloEtapaDaMega:109, battleFamilyOf:128, usableSpeciesFor:131, megaPromptBlock:135, megaDaPedra:165, stonesOf:171, battleUnitsOf:181, unitTypeMult:197
 - **golpes.js** - O que cada golpe faz (papel pelo efeito real) e como descrevê-lo pra IA.
   dadoExterno:19, movePromptLine:28, ehGolpeDePivo:41, ehPrioridadeDeDano:49, moveRoleOf:53
 - **gravacao_build_ia.js** - O caminho "resposta da IA -> build validada -> o que gravar", sem tela (ticket 06 da dívida
@@ -40,7 +40,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **level_cap.js** - Level cap atual e golpes liberados por ele.
   levelCapMode:16, levelCapModeFromDifficulty:22, innatesAtivasNoNivel:34, nivelDaHabilidadeNoElite:40, innatesTravadasNoNivel:44, getCurrentCap:49, capOuPadrao:61, nivelDeCalculo:65, availableMovesFor:73, golpesTravadosNoCap:90
 - **liberado_na_run.js** - O que a run libera: UMA função pura (etapa, levelCap, alvo) -> boolean para pedra mega, item e
-  etapaDaPedra:15, etapaDoItem:17, liberadoNaRun:22, entradasDoJogador:33, xsDoJogador:37
+  etapaDaPedra:16, etapaDoItem:18, liberadoNaRun:23, entradasDoJogador:34, xsDoJogador:38
 - **lista_de_builds.js** - As 4 mudanças na lista de builds salvas de uma espécie (state.customBuilds[sname],
   trocarBuildAtivaNaLista:11, acrescentarVarianteNaLista:23, removerBuildDaLista:32, buildQueSaiParaAbrirVaga:43, liberarVagaNaLista:51
 - **mono_run.js** - Mono run: o que dá pra pegar do seu tipo até a etapa atual (2026-09-26,
@@ -148,7 +148,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **extrair_campo_chefoes.mjs** - Grava em data/bosses.json o campo `campo` (efeito de campo da luta) de cada chefão, lido dos
   arquivos:11, nomeDoChefao:18, extrairCampos:22
 - **extrair_categorias_golpes.mjs** - Categorias de golpe, chance e efeito extra. As categorias que reforçam habilidades (soco, mordida, corte,
-- **gerar_mega_forms.mjs** - Completa data/mega_forms.json (pedra -> forma Mega/Primal) com as evoluções do dado bruto 2.65beta.
+- **gerar_mega_forms.mjs** - Completa data/mega_forms.json (pedra -> forma Mega/Primal) com as evoluções do dado bruto 2.65.4.1.
 - **gerar_onde_achar_itens.mjs** - Gera data/onde_achar_itens.json: onde cada item se consegue na run e a partir de qual etapa (ticket 07,
   ler:21, anotar:32, localLegivel:37, etapaDaPasta:38
 - **gerar_poder_variavel.mjs** - Gera data/poder_variavel.json (ticket 16, 07/10/2026): o que o motor precisa para os golpes de poder 1 no dado,
@@ -327,6 +327,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **lado_no_duelo.test.mjs** - Ticket time-pelo-motor/01, Fase B1 (20/10/2026): Reflect, Light Screen, Aurora Veil, Tailwind e Trick Room são
 - **level_cap_padrao_unico.test.mjs** - Ticket 04 (divida-tecnica): sem Level cap o padrão é um só (0 = sem limite; nível de cálculo 100).
 - **levelcaps_contra_jogo.test.mjs** - TK-23: data/levelcaps.json tem de bater com GetLevelCap() do código do jogo (pokemon.c); 100 = sem limite.
+- **liberacao_por_etapa_caracterizacao.test.mjs** - TK-22: refatoração do registro da Etapa não pode mudar NENHUM resultado (pedras e itens x Etapas 0-10).
 - **liberado_na_run.test.mjs** - Ticket 05 (divida-tecnica): liberadoNaRun é a única régua de pedra, item e golpe;
 - **lote_a_motor.test.mjs** - Lote A da força-tarefa (2026-10-02): correções do motor provadas na auditoria, cada uma
 - **lote_b_plano_real.test.mjs** - Lote B da força-tarefa (2026-10-02): o plano contra o chefão tem que corresponder ao time
@@ -336,6 +337,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **manual_build.test.mjs** - Manual de build competitivo (reunião de 2026-09-28): regras gerais de nature,
 - **mapa_do_codigo.test.mjs** - Gerador do mapa do código: determinístico e acha função conhecida com a linha certa.
 - **marcas_do_rank.test.mjs** - Marcas sem nota do rank v2 (ponto 6, 2026-10-02): "Precisa de setter"
+- **mega_forms_do_jogo.test.mjs** - TK-22: mega_forms.json segue o jogo (SpeciesList/MegaStonesList do er-config 486a964), inclusive pedras de 2 alvos.
 - **mega_gate.test.mjs** - Trava de Mega Evolução nas SUGESTÕES (achado do usuário, print de 2026-09-24:
 - **modo_motor_sem_ia.test.mjs** - Modo Motor nunca chama a IA (ticket time-pelo-motor/01, Fase F3, 21/10/2026). Duas provas independentes:
 - **mono_run.test.mjs** - Mono run: disponibilidade por tipo e etapa (2026-09-26). O dado vem da

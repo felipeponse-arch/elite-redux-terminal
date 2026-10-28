@@ -44,6 +44,7 @@ const ARQUIVOS_DE_DADOS = {
   __ABILITY_SYNERGY_JSON__: "species_ability_synergy.json",
   __CONDITION_MOVE_SYNERGY_JSON__: "condition_move_synergy.json",
   __MEGA_FORMS_JSON__: "mega_forms.json",
+  __PEDRAS_ETAPA_JSON__: "pedras_etapa.json",
   __MOVE_ROLES_JSON__: "move_roles.json",
   __CHANGELOG_JSON__: "changelog.json",
   __HOW_TO_OBTAIN_JSON__: "how_to_obtain.json",

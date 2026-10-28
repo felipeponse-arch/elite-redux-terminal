@@ -81,111 +81,20 @@
   //     só é necessária na primeira mega - o slot fica livre depois.
   function megaMode() { return state.settings.megaMode === "permanente" ? "permanente" : "temporaria"; }
 
-  // Trava de progresso (regra de jogo passada pelo usuário, 2026-09-20: "as
-  // [pedras mega] só são obtidas após a quarta insígnia" - achado real: o
-  // app estava sugerindo mega no time/caixa mesmo ANTES da primeira
-  // insígnia). Mesmo índice de milestone já usado em GYM_LEADER_MILESTONE.Flannery
-  // (artifact_template.html) - Flannery é o 4º líder, cuja vitória concede
-  // "Heat Badge (4o ginasio)" (LEVELCAPS.rows[4]); bate com a própria
-  // data/how_to_obtain.json ("Depois de vencer Flannery (4o ginasio)... Mystery
-  // Gift"), mesmo gatilho de progresso usado pra outros desbloqueios do hack.
-  // Só afeta o que conta como "disponível pra lutar agora" (battleUnitsOf) -
-  // a Dex continua mostrando a evolução mega normalmente, é só informação.
-  var MEGA_UNLOCK_MILESTONE = 4;
+  // Registro único da Etapa das pedras mega (TK-22): data/pedras_etapa.json (PEDRAS_ETAPA), com a fonte de cada
+  // entrada. Dois conceitos separados:
+  //   - quandoVale: a partir de quando o jogo deixa USAR a mega (Mega Bracelet + keystone; a 4ª insígnia,
+  //     regra do usuário de 20/09/2026; fonte no próprio JSON). Só afeta o que conta como "disponível pra lutar
+  //     agora" (battleUnitsOf) - a Dex continua mostrando a evolução mega, é só informação.
+  //   - ondeSePega: Etapa do lugar onde a pedra é obtida (NPC/treinador com trava de insígnia). Valor = índice de
+  //     levelcaps.json; 9 = pós-campeão; 10 = nunca libera (sem fonte de obtenção, ou só no debug do jogo).
+  // A Etapa em que a pedra libera = a maior das duas (etapaDaPedra, em liberado_na_run.js).
+  var MEGA_UNLOCK_MILESTONE = PEDRAS_ETAPA.quandoVale.etapa;
   function megaEvolutionUnlocked() { return state.settings.milestone >= MEGA_UNLOCK_MILESTONE; }
-
-  // Pedras que só aparecem mais tarde. Auditoria de 02/10/2026 no código oficial do jogo (er-repo, commit
-  // 217dd0f, o mesmo das fontes do rank): entra aqui a pedra cuja fonte é um NPC/treinador com trava de
-  // insígnia (FLAG_BADGE0n_GET em data/maps/<mapa>/scripts.pory; ex.: Route123 dá a Granbullite só com a
-  // 7ª). Pedra que também vem de item solto ou de NPC sem trava fica na 4ª. As 11 que SÓ saem do menu do totem
-  // Haxorus (Meteor Falls) valem 7: o Ace Trainer que tampa a porta da sala só sai com FLAG_BADGE07_GET
-  // (MeteorFalls_1F_1R/scripts.pory:17,619) e nem src/ (lojas, field_specials.c) nem data/ citam essas pedras em outro lugar. Granbullite foi o relato do usuário (vídeo de
-  // 02/10); Haxorusite e Dragoninite Y seguem em 7 por decisões anteriores (sem trava achada no código).
-  // Varredura de 04/10 (todas as fontes de pedra nos scripts, travas por insígnia): Dragoninite X (Sky Pillar, FLAG_BADGE06_GET),
-  // Hitmonleenite (Granite Cave B2F, BADGE06, mesma NPC das outras duas Hitmon), Infernapite (Game Corner, BADGE05, mesma NPC da
-  // Empoleonite e da Torterranite), Shedinjite (Abandoned Ship, BADGE07), Slakingite (Norman na volta, BADGE06, não 5), Purple Orb
-  // (Petalburg Woods, só com FLAG_SYS_GAME_CLEAR = etapa 9, Champion) e Latiasite/Latiosite (Southern Island exige o Eon Ticket da
-  // revanche do rival, também pós-jogo; antes disso só o menu do totem do Haxorus, na 7ª).
-  // Valor = etapa (índice de levelcaps.json) em que a pedra libera.
-  var MEGA_PEDRAS_TARDIAS = {
-    "Breloomite": 5,
-    "Empoleonite": 5,
-    "Feraligite X": 5,
-    "Feraligite Y": 5,
-    "Krookodilenite": 5,
-    "Infernapite": 5,
-    "Meganiumite": 5,
-    "Sandslashite": 5,
-    "Slakingite": 6,
-    "Torterranite": 5,
-    "Typhlosionite": 5,
-    "Dragoninite X": 6,
-    "Hitmonchanite": 6,
-    "Hitmonleenite": 6,
-    "Hitmontopite": 6,
-    "Nidokingite": 6,
-    "Nidoqueenite": 6,
-    "Toucannonite": 6,
-    "Altarianite": 7,
-    "Crobatite": 7,
-    "Dewgongite": 7,
-    "Dragoninite Y": 7,
-    "Galladite": 7,
-    "Gardevoirite": 7,
-    // Floettite: nenhum script público a dá; a "Evolution Data" do jogo cita o "legendary sage in
-    // Littleroot Town", e o usuário confirmou (07/10, ticket 08) que o NPC da primeira cidade só a
-    // entrega depois de vencer a Elite 4 - pós-jogo, como a Purple Orb.
-    "Floettite": 9,
-    "Granbullite": 7,
-    "Gyaradosite Y": 7,
-    "Haxorusite": 7,
-    "Latiasite": 7,
-    "Latiosite": 7,
-    "Luxraynite": 7,
-    "Magnezonite": 7,
-    "Purple Orb": 9,
-    // NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a): só pós-campeão, etapa 9.
-    "Adamant Orb": 9,
-    "Dynamax Orb": 9,
-    "Griseous Orb": 9,
-    "Lustrous Orb": 9,
-    "Rusted Shield": 9,
-    "Rusted Sword": 9,
-    "U-Necrozium Z": 9,
-    "Urshifite": 9,
-    "Zygardite": 9,
-    // Sem fonte de obtenção (er-repo f34fc2b e er-config 486a964 só têm item/espécie; decisão do usuário 27/10: sem Etapa conhecida = travado).
-    // 10 = além da última Etapa (9): a pedra nunca libera e a espécie Mega fica travada.
-    "Salamencite R": 10,
-    "Metagrossite R": 10,
-    "Quagsirenite": 7,
-    "Relicanthite": 7,
-    "Sceptilite": 7,
-    "Shedinjite": 7,
-    "Skarmorite": 7,
-    "Slowkingite": 7,
-    "Swalotite": 7,
-    "Swampertite": 7,
-    // TK-11 (decisão 3, 28/10): sala do totem Haxorus (MeteorFalls_HaxorusRoom/scripts.pory:312,317,377,382,417), 7ª insígnia
-    // pelo código (o dado dizia 8, sem respaldo: código vence). Antes caíam no padrão 4.
-    "Blue Orb": 7,
-    "Red Orb": 7,
-    "Bruxishite": 7,
-    "Jellicentite": 7,
-    "Skarmorite X": 7,
-    // Sala do mono-champ em Evergrande (EvergrandeCity_MonoChampRoom_1/scripts.pory:571,611,694,735), alcançável só depois da 8ª insígnia;
-    // gate da sala não lido. Decisão 3 (27/10): vale o dado (8), que o código não contradiz.
-    "Abomasite S": 8,
-    "Dracovishite": 8,
-    "Chien-Paoite": 8,
-    "Galactic Orb": 8,
-    // Dream Orb e Lucky Orb: nenhuma fonte no código do jogo; travadas (10) até decidir a remoção (decisão 12, ver ticket TK-11).
-    "Dream Orb": 10,
-    "Lucky Orb": 10,
-    // Decisão do usuário 28/10 (TK-04, achado motor-D1.4): Tera Orb só existe no modo debug do jogo (er-repo data/scripts/debug.inc:203); nunca sugerida.
-    "Tera Orb": 10
-  };
-  var PEDRAS_SO_DEBUG = { "Tera Orb": true };
+  var MEGA_PEDRAS_TARDIAS = {};
+  Object.keys(PEDRAS_ETAPA.ondeSePega).forEach(function (p) { MEGA_PEDRAS_TARDIAS[p] = PEDRAS_ETAPA.ondeSePega[p].etapa; });
+  var PEDRAS_SO_DEBUG = {};
+  PEDRAS_ETAPA.soNoDebug.forEach(function (p) { PEDRAS_SO_DEBUG[p] = true; });
   var ROTULO_ETAPA_MEGA = { 4: "4ª insígnia (Flannery)", 5: "5ª insígnia (Norman)", 6: "6ª insígnia (Winona)", 7: "7ª insígnia (Tate & Liza)", 10: "sem Etapa conhecida (pedra sem fonte de obtenção)" };
   // Etapa em que esta forma Mega fica disponível: a da pedra, se for tardia.
   function etapaDaMega(megaSp) {
@@ -247,9 +156,18 @@
   var STONES_BY_MEGA_SNAME = Object.create(null);
   Object.keys(MEGA_FORMS).forEach(function (stone) {
     if (ITEMS.indexOf(stone) === -1) return;
-    var sn = MEGA_FORMS[stone];
-    (STONES_BY_MEGA_SNAME[sn] = STONES_BY_MEGA_SNAME[sn] || []).push(stone);
+    [].concat(MEGA_FORMS[stone]).forEach(function (sn) {
+      (STONES_BY_MEGA_SNAME[sn] = STONES_BY_MEGA_SNAME[sn] || []).push(stone);
+    });
   });
+  // Forma que a pedra dá a esta criatura. O valor do MEGA_FORMS é um sname, ou uma lista quando a mesma pedra serve a duas
+  // formas (Aegislashite R: escudo/lâmina; Toxtricitite R: normal/Fuzz) - o jogo escolhe pela espécie atual (battle_util.c:8128).
+  function megaDaPedra(item, sp) {
+    var v = MEGA_FORMS[item];
+    if (!Array.isArray(v)) return v;
+    var alvos = sp ? (sp.ev || []).map(function (e) { return e[2]; }) : [];
+    return v.filter(function (sn) { var m = getSpeciesBySname(sn); return m && alvos.indexOf(m.x) !== -1; })[0];
+  }
   function stonesOf(megaSp) { return (megaSp && STONES_BY_MEGA_SNAME[megaSp.sname]) || []; }
 
   // Como a criatura realmente LUTA, conforme o modo. Cada "unidade" tem as

@@ -3070,7 +3070,7 @@
   function nivelDoInimigoHell(nivel) { return modoHellDuelo() && state.settings.milestone >= 3 ? Math.min(100, nivel + 5) : nivel; }
   function foeDeDuelo(m, nivel, clima) {
     nivel = nivelDoInimigoHell(nivel);
-    var megaSname = MEGA_FORMS[m.item];
+    var megaSname = megaDaPedra(m.item, getSpeciesByX(m.x));
     var sp = (megaSname && getSpeciesBySname(megaSname)) || getSpeciesByX(m.x);
     if (!sp) return null;
     // abiId do dado (2026-10-02): "As One"/"Embody Aspect" têm vários ids com o mesmo nome.

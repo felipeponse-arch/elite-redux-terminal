@@ -1,0 +1,268 @@
+{
+ "nota": "Registro único da Etapa das pedras mega (TK-22). Etapa = índice de levelcaps.json (insígnia n = Etapa n; 9 = pós-campeão; 10 = nunca libera). Dois conceitos separados: quandoVale (a partir de quando o jogo deixa USAR a mega) e ondeSePega (Etapa do lugar onde a pedra é obtida). A Etapa em que a pedra libera no app = a maior das duas. Pedra fora de ondeSePega: só vale o quandoVale.",
+ "quandoVale": {
+  "etapa": 4,
+  "fonte": "CanMegaEvolve exige Mega Bracelet + FLAG_SYS_RECEIVED_KEYSTONE (er-repo src/battle_util.c:8163-8167); o Norman entrega os dois só com as insígnias 1-4 (PetalburgCity_Gym/scripts.pory:1743,1755-1761); regra do usuário 20/09/2026: 4ª insígnia (Flannery)"
+ },
+ "soNoDebug": [
+  "Tera Orb"
+ ],
+ "ondeSePega": {
+  "Breloomite": {
+   "etapa": 5,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Empoleonite": {
+   "etapa": 5,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Feraligite X": {
+   "etapa": 5,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Feraligite Y": {
+   "etapa": 5,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Krookodilenite": {
+   "etapa": 5,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Infernapite": {
+   "etapa": 5,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Meganiumite": {
+   "etapa": 5,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Sandslashite": {
+   "etapa": 5,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Slakingite": {
+   "etapa": 6,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Torterranite": {
+   "etapa": 5,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Typhlosionite": {
+   "etapa": 5,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Dragoninite X": {
+   "etapa": 6,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Hitmonchanite": {
+   "etapa": 6,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Hitmonleenite": {
+   "etapa": 6,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Hitmontopite": {
+   "etapa": 6,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Nidokingite": {
+   "etapa": 6,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Nidoqueenite": {
+   "etapa": 6,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Toucannonite": {
+   "etapa": 6,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Altarianite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Crobatite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Dewgongite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Dragoninite Y": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Galladite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Gardevoirite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Floettite": {
+   "etapa": 9,
+   "fonte": "'Evolution Data' do jogo cita o 'legendary sage in Littleroot Town'; usuário confirmou (07/10, ticket 08): só depois da Elite 4"
+  },
+  "Granbullite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Gyaradosite Y": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Haxorusite": {
+   "etapa": 7,
+   "fonte": "menu do totem Haxorus (Meteor Falls): o Ace Trainer que tampa a porta só sai com FLAG_BADGE07_GET (MeteorFalls_1F_1R/scripts.pory:17,619)"
+  },
+  "Latiasite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Latiosite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Luxraynite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Magnezonite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Purple Orb": {
+   "etapa": 9,
+   "fonte": "Petalburg Woods, só com FLAG_SYS_GAME_CLEAR (pós-campeão)"
+  },
+  "Adamant Orb": {
+   "etapa": 9,
+   "fonte": "NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a)"
+  },
+  "Dynamax Orb": {
+   "etapa": 9,
+   "fonte": "NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a)"
+  },
+  "Griseous Orb": {
+   "etapa": 9,
+   "fonte": "NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a)"
+  },
+  "Lustrous Orb": {
+   "etapa": 9,
+   "fonte": "NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a)"
+  },
+  "Rusted Shield": {
+   "etapa": 9,
+   "fonte": "NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a)"
+  },
+  "Rusted Sword": {
+   "etapa": 9,
+   "fonte": "NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a)"
+  },
+  "U-Necrozium Z": {
+   "etapa": 9,
+   "fonte": "NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a)"
+  },
+  "Urshifite": {
+   "etapa": 9,
+   "fonte": "NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a)"
+  },
+  "Zygardite": {
+   "etapa": 9,
+   "fonte": "NPC de lendários de Littleroot (FLAG_SYS_GAME_CLEAR; talk_to_legendary_sage no er-config 486a964, TK-05a)"
+  },
+  "Salamencite R": {
+   "etapa": 10,
+   "fonte": "sem fonte de obtenção (er-repo f34fc2b e er-config 486a964 só têm item/espécie); decisão do usuário 27/10: sem Etapa conhecida = travado (10 = além da última Etapa)"
+  },
+  "Metagrossite R": {
+   "etapa": 10,
+   "fonte": "sem fonte de obtenção (er-repo f34fc2b e er-config 486a964 só têm item/espécie); decisão do usuário 27/10: sem Etapa conhecida = travado (10 = além da última Etapa)"
+  },
+  "Quagsirenite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Relicanthite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Sceptilite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Shedinjite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Skarmorite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Slowkingite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Swalotite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Swampertite": {
+   "etapa": 7,
+   "fonte": "auditoria de 02/10/2026 e varredura de 04/10/2026 nos scripts do er-repo (NPC/treinador com trava FLAG_BADGE0n_GET; Granbullite: relato do usuário, vídeo de 02/10)"
+  },
+  "Blue Orb": {
+   "etapa": 7,
+   "fonte": "sala do totem Haxorus (MeteorFalls_HaxorusRoom/scripts.pory:312,317,377,382,417): 7ª insígnia pelo código; TK-11 decisão 3, 28/10"
+  },
+  "Red Orb": {
+   "etapa": 7,
+   "fonte": "sala do totem Haxorus (MeteorFalls_HaxorusRoom/scripts.pory:312,317,377,382,417): 7ª insígnia pelo código; TK-11 decisão 3, 28/10"
+  },
+  "Bruxishite": {
+   "etapa": 7,
+   "fonte": "sala do totem Haxorus (MeteorFalls_HaxorusRoom/scripts.pory:312,317,377,382,417): 7ª insígnia pelo código; TK-11 decisão 3, 28/10"
+  },
+  "Jellicentite": {
+   "etapa": 7,
+   "fonte": "sala do totem Haxorus (MeteorFalls_HaxorusRoom/scripts.pory:312,317,377,382,417): 7ª insígnia pelo código; TK-11 decisão 3, 28/10"
+  },
+  "Skarmorite X": {
+   "etapa": 7,
+   "fonte": "sala do totem Haxorus (MeteorFalls_HaxorusRoom/scripts.pory:312,317,377,382,417): 7ª insígnia pelo código; TK-11 decisão 3, 28/10"
+  },
+  "Abomasite S": {
+   "etapa": 8,
+   "fonte": "sala do mono-champ em Evergrande (EvergrandeCity_MonoChampRoom_1/scripts.pory:571,611,694,735), só depois da 8ª insígnia; gate da sala não lido; decisão 3 (27/10): vale o dado (8)"
+  },
+  "Dracovishite": {
+   "etapa": 8,
+   "fonte": "sala do mono-champ em Evergrande (EvergrandeCity_MonoChampRoom_1/scripts.pory:571,611,694,735), só depois da 8ª insígnia; gate da sala não lido; decisão 3 (27/10): vale o dado (8)"
+  },
+  "Chien-Paoite": {
+   "etapa": 8,
+   "fonte": "sala do mono-champ em Evergrande (EvergrandeCity_MonoChampRoom_1/scripts.pory:571,611,694,735), só depois da 8ª insígnia; gate da sala não lido; decisão 3 (27/10): vale o dado (8)"
+  },
+  "Galactic Orb": {
+   "etapa": 8,
+   "fonte": "sala do mono-champ em Evergrande (EvergrandeCity_MonoChampRoom_1/scripts.pory:571,611,694,735), só depois da 8ª insígnia; gate da sala não lido; decisão 3 (27/10): vale o dado (8)"
+  },
+  "Dream Orb": {
+   "etapa": 10,
+   "fonte": "nenhuma fonte no código do jogo; travada (10) até decidir a remoção (decisão 12, TK-11)"
+  },
+  "Lucky Orb": {
+   "etapa": 10,
+   "fonte": "nenhuma fonte no código do jogo; travada (10) até decidir a remoção (decisão 12, TK-11)"
+  },
+  "Tera Orb": {
+   "etapa": 10,
+   "fonte": "Tera Orb só existe no modo debug do jogo (er-repo data/scripts/debug.inc:203); decisão do usuário 28/10 (TK-04, motor-D1.4)"
+  }
+ }
+}

@@ -509,7 +509,7 @@
     // transformation - that needs real turn-order + multi-Pokemon battle
     // state, the same category of simulation this calculator has always
     // stayed out of (see the level-cap caveat below).
-    var megaSname = MEGA_FORMS[m.item];
+    var megaSname = megaDaPedra(m.item, getSpeciesByX(m.x));
     var megaSp = megaSname ? getSpeciesBySname(megaSname) : null;
     var effectiveSp = megaSp || sp;
     var displayX = megaSp ? megaSp.x : m.x;
