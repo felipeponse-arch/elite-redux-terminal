@@ -148,7 +148,22 @@
     "Skarmorite": 7,
     "Slowkingite": 7,
     "Swalotite": 7,
-    "Swampertite": 7
+    "Swampertite": 7,
+    // TK-11 (decisão 3, 28/10): sala do totem Haxorus (MeteorFalls_HaxorusRoom/scripts.pory:312,317,377,382,417), 7ª insígnia
+    // pelo código (o dado dizia 8, sem respaldo: código vence). Antes caíam no padrão 4.
+    "Blue Orb": 7,
+    "Red Orb": 7,
+    "Bruxishite": 7,
+    "Jellicentite": 7,
+    "Skarmorite X": 7,
+    // Sem fonte de obtenção segura (TK-P4: sala do mono-champ com gate não lido; Dream/Lucky Orb nem existem no código):
+    // sem Etapa conhecida = travado (10), como Salamencite R. Antes caíam no padrão 4, antes do dado (8).
+    "Abomasite S": 10,
+    "Dracovishite": 10,
+    "Chien-Paoite": 10,
+    "Galactic Orb": 10,
+    "Dream Orb": 10,
+    "Lucky Orb": 10
   };
   var ROTULO_ETAPA_MEGA = { 4: "4ª insígnia (Flannery)", 5: "5ª insígnia (Norman)", 6: "6ª insígnia (Winona)", 7: "7ª insígnia (Tate & Liza)", 10: "sem Etapa conhecida (pedra sem fonte de obtenção)" };
   // Etapa em que esta forma Mega fica disponível: a da pedra, se for tardia.
