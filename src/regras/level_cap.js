@@ -48,7 +48,9 @@
 
   function getCurrentCap() {
     if (!LEVELCAPS || !LEVELCAPS.rows[state.settings.milestone]) return null;
-    return LEVELCAPS.rows[state.settings.milestone][levelCapMode()];
+    // O jogo usa 100 (nível máximo) onde não há limite (pokemon.c GetLevelCap); aqui 100 = sem cap (null), como sempre.
+    var c = LEVELCAPS.rows[state.settings.milestone][levelCapMode()];
+    return c >= 100 ? null : c;
   }
   // Padrão ÚNICO quando não há Level cap (Champion/sem tabela) - ticket divida-tecnica 04, usuário 21/10/2026:
   // sem cap = 0 (sem limite). Quem precisa de um NÍVEL pra calcular (stats, velocidade, simulação, EVs) usa
