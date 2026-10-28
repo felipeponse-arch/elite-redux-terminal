@@ -82,3 +82,10 @@ test("efeitos de golpe sem regra explícita: só os já conhecidos", () => {
   assert.equal(novos.length, 0, "efeito de golpe NOVO sem regra (decidir: implementar ou registrar): " + novos.join(", "));
   assert.equal(tratados.length, 0, "efeito da lista que o motor agora cita (tirar da lista): " + tratados.join(", "));
 });
+
+test("camposLidosDaHabilidade: diz qual campo do efeito a habilidade mexe (vazio = sem regra)", () => {
+  const id = (n) => R.ABILITIES.findIndex((a) => a && a[0] === n);
+  assert.ok(R.camposLidosDaHabilidade(id("Guts")).length > 0, "Guts mexe em algum campo");
+  assert.equal(R.camposLidosDaHabilidade(id("Honey Gather")).length, 0, "Honey Gather não mexe em nenhum");
+  assert.equal(R.camposLidosDaHabilidade(-1).length, 0);
+});

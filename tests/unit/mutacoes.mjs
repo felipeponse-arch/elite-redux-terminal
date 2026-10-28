@@ -2634,8 +2634,8 @@ export const MUTACOES = [
     id: "semregra-nunca",
     descricao: "nenhuma habilidade é 'sem regra no motor' (o selo nunca rebaixa)",
     arquivo: "duelo.js",
-    de: "var semRegra = JSON.stringify(ef, semClimas) === baseSemRegraDuelo &&",
-    para: "var semRegra = false &&",
+    de: "return campos.length === 0 && !TYPE_MOD_ABILITIES[id]",
+    para: "return false && !TYPE_MOD_ABILITIES[id]",
   },
   {
     id: "pipeline-garantido-pela-media",

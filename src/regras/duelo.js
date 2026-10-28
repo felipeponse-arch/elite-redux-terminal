@@ -1639,25 +1639,34 @@
   // Habilidade que o motor NÃO lê: sozinha, o efeito dela é igual ao de nenhuma habilidade, e ela não está na tabela de tipos, nem na
   // sinergia por golpe, nem arma clima. É a conta da auditoria permanente (tests/unit/auditoria_do_motor.test.mjs, lista
   // HABILIDADES_SEM_REGRA) e do selo "estimada" do pipeline de build (ticket versao-nova/03): o número do motor não conta o efeito dela.
-  var cacheSemRegraDuelo = {}, baseSemRegraDuelo = null, nomesComSinergiaDuelo = null;
-  function habilidadeSemRegraNoDuelo(id) {
-    if (id === undefined || id === null || id < 0 || !ABILITIES[id]) return false;
-    if (cacheSemRegraDuelo[id] !== undefined) return cacheSemRegraDuelo[id];
-    var semClimas = function (k, v) { return k === "climasProprios" ? undefined : v; };
+  // Campos do efeito (efeitoDasHabilidadesNoDuelo) que a habilidade muda em relação a nenhuma habilidade; "climasProprios" fica de fora (o clima que ela arma
+  // entra por habilidadeArma). Lista vazia = o parser não leu efeito nenhum. Serve de diagnóstico: diz QUAL campo a habilidade mexe.
+  var baseSemRegraDuelo = null, nomesComSinergiaDuelo = null, cacheCamposDuelo = {};
+  function camposLidosDaHabilidade(id) {
+    if (id === undefined || id === null || id < 0 || !ABILITIES[id]) return [];
+    if (cacheCamposDuelo[id] !== undefined) return cacheCamposDuelo[id];
     if (baseSemRegraDuelo === null) {
-      baseSemRegraDuelo = JSON.stringify(efeitoDasHabilidadesNoDuelo([], "SEMREGRA_BASE", null), semClimas);
+      baseSemRegraDuelo = efeitoDasHabilidadesNoDuelo([], "SEMREGRA_BASE", null);
       nomesComSinergiaDuelo = {};
       Object.keys(ABILITY_SYNERGY).forEach(function (sn) { ABILITY_SYNERGY[sn].forEach(function (h) { nomesComSinergiaDuelo[h.name] = true; }); });
     }
-    var nome = ABILITIES[id][0], texto = textoHabDuelo(id);
+    var texto = textoHabDuelo(id);
     // Condicional de clima conta ligada no clima que o próprio texto pede.
     var CLIMA = { rain: "chuva", sun: "sol", sand: "areia", sandstorm: "areia", hail: "granizo", fog: "nevoa" };
     var c = ((texto.match(/\b(rain|rains|sun|sunny|sand|sandstorm|hail|fog)\b/i) || [])[1] || "").toLowerCase().replace(/s$|ny$/, "");
     var ef = efeitoDasHabilidadesNoDuelo([id], "SEMREGRA_" + id, CLIMA[c] || null);
-    var semRegra = JSON.stringify(ef, semClimas) === baseSemRegraDuelo && !TYPE_MOD_ABILITIES[id] && !nomesComSinergiaDuelo[nome]
+    var campos = Object.keys(ef).filter(function (k) { return k !== "climasProprios" && JSON.stringify(ef[k]) !== JSON.stringify(baseSemRegraDuelo[k]); });
+    cacheCamposDuelo[id] = campos;
+    return campos;
+  }
+  // Habilidade que o motor NÃO lê: sozinha, o efeito dela é igual ao de nenhuma habilidade, e ela não está na tabela de tipos, nem na
+  // sinergia por golpe, nem arma clima. É a conta da auditoria permanente (tests/unit/auditoria_do_motor.test.mjs, lista
+  // HABILIDADES_SEM_REGRA, que guarda o motivo de cada uma) e do selo "estimada" do pipeline de build (ticket versao-nova/03).
+  function habilidadeSemRegraNoDuelo(id) {
+    if (id === undefined || id === null || id < 0 || !ABILITIES[id]) return false;
+    var campos = camposLidosDaHabilidade(id), nome = ABILITIES[id][0];
+    return campos.length === 0 && !TYPE_MOD_ABILITIES[id] && !nomesComSinergiaDuelo[nome]
       && !["chuva", "sol", "areia", "granizo", "nevoa"].some(function (cl) { return habilidadeArma(nome, cl); });
-    cacheSemRegraDuelo[id] = semRegra;
-    return semRegra;
   }
   // Clima no campo entre os dois lados: o que cada um arma (habilidade) ou o do
   // time (u.clima). Se os dois armam climas diferentes, depende de quem entra por
