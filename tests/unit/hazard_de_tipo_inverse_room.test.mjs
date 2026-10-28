@@ -30,3 +30,11 @@ test("na luta inteira: Inverse Room permanente do chefão inverte o Stealth Rock
   const hp = (inv) => R.simularLutaContraChefao([charizard()], foes(inv), 20, { statusNoFim: [], lado: { rocha: true } }).log[0].fracEu;
   assert.ok(hp(true) > 0.9 && hp(false) <= 0.5, "sob Inverse o Charizard perde 1/32 na entrada, não 1/2");
 });
+
+test("na dupla: Inverse Room permanente do chefão também inverte o Stealth Rock de quem entra", () => {
+  const b = R.BOSSES.find((x) => x.name === "Archie");
+  const foes = (inv) => R.foesComRegraDeCampo(b.party.map((m) => R.foeDeDuelo(m, 20, null)), inv ? { inversa: true } : null);
+  const r = (inv) => R.simularDuplaContraChefao([charizard(), charizard()], foes(inv), 20, { statusNoFim: [], lado: { rocha: true } });
+  // Dois Charizard entram sob Stealth Rock: 1/2 cada normal, 1/32 invertido (hpRestante soma os dois).
+  assert.ok(r(true).hpRestante - r(false).hpRestante > 0.5, "sob Inverse a dupla perde bem menos HP na entrada");
+});

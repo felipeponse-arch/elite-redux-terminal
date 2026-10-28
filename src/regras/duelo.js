@@ -3762,9 +3762,10 @@
     var ladoMeu = inicio ? Object.assign(novoLadoDuelo(), inicio.lado) : novoLadoDuelo(), ladoDele = novoLadoDuelo();
     if (inicio) aplicarStatusNoFimDuelo(time, inicio.statusNoFim);
     var log = [], voltas = 0;
+    function inversaPermanente() { return time.concat(deles).some(function (c) { return c.u.ef.inversa >= INVERSA_PERMANENTE_DUELO; }); }
     function vivos(l) { return l.filter(function (c) { return c.vivo; }); }
     var frenteDeles = deles.slice(0, 2), frenteMinha = [];
-    frenteDeles.forEach(function (f) { entrarNoLadoDuelo(f, ladoDele); });
+    frenteDeles.forEach(function (f) { entrarNoLadoDuelo(f, ladoDele, inversaPermanente()); });
     function escolherMeu(excluir) {
       var livres = time.filter(function (c) { return c.vivo && frenteMinha.indexOf(c) === -1 && c !== excluir; });
       if (!livres.length) return null;
@@ -3776,7 +3777,7 @@
     }
     function entraMeu(c) {
       if (!c) return;
-      entrarNoLadoDuelo(c, ladoMeu);
+      entrarNoLadoDuelo(c, ladoMeu, inversaPermanente());
       c.u.ef.hazards.forEach(function (h) { if (h.quando === "entrada") poeHazardDuelo(ladoDele, h.tipo); });
       var parceiro = frenteMinha.filter(function (x) { return x !== c && x.vivo; })[0];
       if (parceiro && c.u.ef.hospitalidade) parceiro.frac = Math.min(1, parceiro.frac + c.u.ef.hospitalidade);
@@ -3866,7 +3867,7 @@
         var restantes = deles.filter(function (d) { return d.vivo && frenteDeles.indexOf(d) === -1; });
         var meusEmCampo = vivos(frenteMinha);
         var prox = meusEmCampo.length ? escolherProximoDoChefao(restantes, meusEmCampo, nivel) : restantes[0];
-        if (prox) entrarNoLadoDuelo(prox, ladoDele);
+        if (prox) entrarNoLadoDuelo(prox, ladoDele, inversaPermanente());
         return prox || f;
       });
       // Receiver: quem fica herda a habilidade do parceiro que caiu.
