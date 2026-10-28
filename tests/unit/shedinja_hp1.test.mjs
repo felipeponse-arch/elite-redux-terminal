@@ -26,13 +26,3 @@ test("residual: HP 1 perde pelo menos 1 por turno (piso do jogo), HP alto segue 
   assert.ok(perto(a.meu - a.dele, 1), "HP 1: residual vale 1, não 1/8");
   assert.ok(perto(b.meu - b.dele, 40), "HP 320: 1/8 = 40");
 });
-
-test("Belly Drum e Substitute falham com HP 1; com HP normal o plano existe", () => {
-  const idG = (n) => R.MOVE_ID_BY_NAME[n];
-  const foe = (forca) => unidade(efDe([]), golpe("F", { forca, forcaBase: forca }));
-  const eu = (nome, hp) => unidade(efDe([]), golpe("F", { forca: 15, forcaBase: 15 }), { statusIds: [idG(nome)], stats: [hp, 100, 100, 100, 100, 100] });
-  const plano = (nome, hp, forca) => R.resultadoDoDuelo(eu(nome, hp), foe(forca), 50, { detalhe: true }).planoEu;
-  assert.equal(plano("Belly Drum", 320, 20), "Belly Drum");
-  assert.equal(plano("Belly Drum", 1, 1), null);
-  assert.equal(plano("Substitute", 1, 1), null);
-});

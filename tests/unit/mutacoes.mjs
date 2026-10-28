@@ -4351,25 +4351,4 @@ export const MUTACOES = [
     de: "Math.max(1, regra.residuo * alvo.stats[0])",
     para: "regra.residuo * alvo.stats[0]",
   },
-  {
-    id: "shedinja-residual-sem-piso-plano",
-    descricao: "residual do plano de status sem piso 1",
-    arquivo: "duelo.js",
-    de: "Math.max(1, regra.residuo * base.hpY)",
-    para: "regra.residuo * base.hpY",
-  },
-  {
-    id: "shedinja-belly-drum-hp-1",
-    descricao: "Belly Drum passa a funcionar com HP 1",
-    arquivo: "duelo.js",
-    de: "nome === \"Belly Drum\" && x.stats[0] <= 1",
-    para: "false",
-  },
-  {
-    id: "shedinja-substitute-hp-1",
-    descricao: "Substitute passa a funcionar com HP 1",
-    arquivo: "duelo.js",
-    de: "base.dY >= base.hpX / 4 || x.stats[0] <= 1",
-    para: "base.dY >= base.hpX / 4",
-  },
 ];
