@@ -19,11 +19,11 @@ const golpe = (cat, extra) => Object.assign({ nome: "T", tipo: "Normal", cat, co
 const unid = (habs, tipos) => { const ids = habs.map(idHab); return { sp: { n: "T", sname: "S", inn: [], t: [0, 0] }, tipos, ids, abId: ids[0] ?? null, ab: habs[0] || "", ef: R.efeitoDasHabilidadesNoDuelo(ids, "V10_" + habs.join("+"), null), item: "", it: R.itemDoDuelo("", null), stats: [320, 100, 100, 100, 100, 100], golpesProntos: [golpe("F")], statusIds: [] }; };
 const dano = (a, d) => R.danoNoDuelo(a, d, NIVEL).melhor.dano;
 
-test("aprendizado pela config: 128 espécies mudam (level-up +105/-6, tutor +94/-15); retiradas valem; os tutores universais ficam como a NextDex", () => {
+test("aprendizado pela config: 359 espécies mudam (level-up +218/-10, tutor +262/-19), config 486a964; retiradas valem; os tutores universais ficam como a NextDex", () => {
   const soma = { lm: 0, lmRem: 0, tu: 0, tuRem: 0 };
   for (const a of Object.values(patch.aprende)) for (const k of Object.keys(soma)) soma[k] += a[k].length;
-  assert.equal(Object.keys(patch.aprende).length, 128);
-  assert.deepEqual(soma, { lm: 105, lmRem: 6, tu: 94, tuRem: 15 });
+  assert.equal(Object.keys(patch.aprende).length, 359);
+  assert.deepEqual(soma, { lm: 218, lmRem: 10, tu: 262, tuRem: 19 });
   assert.ok(!sp("Arbok").lm.some((e) => e[0] === 61 && e[1] === id("Baneful Bunker")), "Arbok perdeu o Baneful Bunker no 61");
   assert.ok(!sp("Tentacool").tu.includes(id("Acid Armor")), "Tentacool perdeu o tutor Acid Armor");
   assert.ok(sp("Luxio").lm.some((e) => e[0] === 51 && e[1] === id("Arc Blast")), "Luxio ganhou o Arc Blast no 51");
@@ -34,7 +34,7 @@ test("aprendizado pela config: 128 espécies mudam (level-up +105/-6, tutor +94/
 test("builds: nenhuma build de data/builds.json perdeu golpe por causa do aprendizado novo (a validação não acha golpe fora da espécie)", () => {
   const r = validarBuilds();
   assert.deepEqual(r.problemas, []);
-  assert.equal(r.pendentes.length, 252, "v2.65.4.1 (28/10): lista regerada com a versão 2.65.4.1 (toda build validada antes volta a pedir revisão + 5 de habilidade perdida na config nova). Histórico: 259 antes de saírem as 14 builds da curadoria do projeto; 244 depois; 230 quando dados-2654/08 corrigiu as 14 da tabela A; 211 quando os 19 sets revisados (14 + Breezing, Exeggutor Redux, Arbok, Heliosunny, Victreebel Redux) passaram a versão 2.65.4; nenhuma nova");
+  assert.equal(r.pendentes.length, 247, "v2.65.4.1 (28/10): lista regerada com a versão 2.65.4.1 (toda build validada antes volta a pedir revisão + 5 de habilidade perdida na config nova). Histórico: 259 antes de saírem as 14 builds da curadoria do projeto; 244 depois; 230 quando dados-2654/08 corrigiu as 14 da tabela A; 211 quando os 19 sets revisados (14 + Breezing, Exeggutor Redux, Arbok, Heliosunny, Victreebel Redux) passaram a versão 2.65.4; nenhuma nova");
 });
 
 test("aplicarPatch: retira e põe golpe de level-up e de tutor; cria a Mega a partir da base e aponta a evolução da base para ela", () => {

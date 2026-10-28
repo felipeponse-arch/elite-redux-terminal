@@ -22,8 +22,8 @@ test("Cool Exit ('at end of 2nd turn. Once per battle.'): sai no 2º turno (abil
   assert.equal(ef("Cool Exit").fogeNaMetade, true);
 });
 
-test("I Am Steve (Swoobat, Noivern): No Retreat na entrada = +1 nos cinco atributos (abilities.cc:11222-11225)", () => {
-  assert.ok(dono("I Am Steve"));
+// v2.65.4.1 (28/10): a config 486a964 não dá mais I Am Steve a nenhuma espécie (Swoobat/Noivern viraram Echolocation); regra do motor segue pelo texto.
+test("I Am Steve (sem dono na config 486a964): No Retreat na entrada = +1 nos cinco atributos (abilities.cc:11222-11225)", () => {
   const e = ef("I Am Steve").estagioEntrada;
   ["atk", "def", "spa", "spd", "spe"].forEach((k) => assert.equal(e[k], 1, k));
 });
