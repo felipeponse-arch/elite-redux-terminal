@@ -121,6 +121,8 @@
     ev = (typeof ev === "number") ? ev : 0;
     level = level || 1;
     if (statIdx === 0) {
+      // Shedinja e Shedinja Mega: maxHP fixo em 1 (pokemon.c:1000-1001), sem fórmula.
+      if (speciesName === "Shedinja" || speciesName === "Shedinja Mega") return 1;
       return Math.floor(((2 * base + iv + Math.floor(ev / 4)) * level / 100) + level + 10);
     }
     var raw = Math.floor((2 * base + iv + Math.floor(ev / 4)) * level / 100) + 5;

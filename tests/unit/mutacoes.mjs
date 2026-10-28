@@ -4337,4 +4337,18 @@ export const MUTACOES = [
     de: "v.atual.x === c.x || v.atual.linha === c.linha",
     para: "v.atual.x === c.x",
   },
+  {
+    id: "shedinja-hp-1",
+    descricao: "Shedinja volta a ter HP pela fórmula",
+    arquivo: "calc_stat.js",
+    de: "speciesName === \"Shedinja\" || speciesName === \"Shedinja Mega\"",
+    para: "false",
+  },
+  {
+    id: "shedinja-residual-sem-piso-alvo",
+    descricao: "residual de status sem piso 1 (soma do duelo)",
+    arquivo: "duelo.js",
+    de: "Math.max(1, regra.residuo * alvo.stats[0])",
+    para: "regra.residuo * alvo.stats[0]",
+  },
 ];
