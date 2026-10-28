@@ -52,12 +52,14 @@ test("paralisia por chance de golpe (luta com status): o corte no dano do parali
     const foe = unid([], ["Normal"], [golpe("F")], { chefao });
     return R.danoComStatusNoDuelo(eu, foe, R.danoNoDuelo(eu, foe, NIVEL), R.danoNoDuelo(foe, eu, NIVEL), 8, true).dele;
   };
-  const semStatus = (() => { const e2 = unid([], ["Normal"], [golpe("F")]); const foe = unid([], ["Normal"], [golpe("F")]); return R.danoComStatusNoDuelo(e2, foe, R.danoNoDuelo(e2, foe, NIVEL), R.danoNoDuelo(foe, e2, NIVEL), 8, true).dele; })();
+  const semStatusDe = (chefao) => { const e2 = unid([], ["Normal"], [golpe("F")]); const foe = unid([], ["Normal"], [golpe("F")], { chefao }); return R.danoComStatusNoDuelo(e2, foe, R.danoNoDuelo(e2, foe, NIVEL), R.danoNoDuelo(foe, e2, NIVEL), 8, true).dele; };
+  const semStatus = semStatusDe(false);
   const razao = luta(false) / semStatus;
   assert.ok(razao < 0.97 && razao > 0.86, "corte de ~12,5% (com a presença do status menor que 100%): " + razao);
   try {
     R.state.settings.difficulty = "hell";
-    perto(luta(true) / semStatus, 1, 1e-9, "chefão no Hell");
+    // base no mesmo modo: isola a regra da paralisia dos outros fatores do Hell (x0,75 global etc.)
+    perto(luta(true) / semStatusDe(true), 1, 1e-9, "chefão no Hell");
   } finally { R.state.settings.difficulty = "ace"; }
 });
 
