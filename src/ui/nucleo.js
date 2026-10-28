@@ -355,8 +355,8 @@
         // Cobre o caso de um save de ANTES desta feature existir: se o cap
         // salvo já libera evoluções que nunca foram aplicadas, aplica agora
         // mesmo, antes da primeira renderização.
-        // A soma errada também regrava: o aviso sai uma vez só (a cópia crua já foi guardada).
-        if (autoEvolveRoster(true) || reconciliouAoAplicar || somaErrada) persist({ manterData: true }); // ajuste automático, não ação do jogador
+        // Soma errada NÃO regrava (decisão 2, 27/10): a cópia crua fica, o aviso pode repetir.
+        if (autoEvolveRoster(true) || reconciliouAoAplicar) persist({ manterData: true }); // ajuste automático, não ação do jogador
         return;
       } catch (e) {
         // BUG P0 achado em auditoria, 2026-09-18: antes disto, um save

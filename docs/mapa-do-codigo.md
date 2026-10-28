@@ -52,7 +52,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **reconciliar_build.js** - Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
   movepoolCompletoDe:17, habilidadeSubstitutaPara:26, reconciliarBuild:39
 - **save.js** - Save do app: formato gravado (buildSave), leitura defensiva (applySave e os
-  snamesToXs:15, xsToSnames:24, applySave:43, anteriorSaneado:223, sanitizarStrategySets:242, textoCanonicoDoSave:288, somaDoSave:303, conferirSomaDoSave:313, buildSave:320, montarSave:325, progressoDoSave:357, saveChegandoTemMenosProgresso:363, syncContentDiffers:377
+  snamesToXs:15, xsToSnames:24, applySave:43, anteriorSaneado:223, sanitizarStrategySets:242, textoCanonicoDoSave:288, somaDoSave:303, conferirSomaDoSave:313, saveEnviavel:320, buildSave:323, montarSave:328, progressoDoSave:360, saveChegandoTemMenosProgresso:366, syncContentDiffers:380
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
 - **time_pelo_motor.js** - Modo Motor do Meu Time (ticket time-pelo-motor/01, Fase C, 21/10/2026): monta o time SEM IA, só pelo simulador.
@@ -100,7 +100,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **revisao_automatica.js** - Revisão automática das builds do time (evolução, plano, golpe-ponte) e as trocas do plano ao mudar o cap.
   ponteFalhas:22, registrarFalhaPonte:23, tarefaDeRevisao:24, revisaoEmAndamento:43, revisaoStatusHtml:44, iaLiberadaSemPerguntar:61, processarRevisoes:72, registrarTrocasDoPlano:149, agendarRevisoes:169, generateStrategySets:182
 - **sync.js** - Sincronização entre aparelhos (capability db) e os avisos de sync.
-  aplicarSaveRemoto:45, conflitoDeProgresso:61, remotoComSomaErrada:88, pushToSync:95, showSyncBanner:104, syncBannerOffset:118, atualizarTituloDoSubtitulo:138, setSyncStatusIndicator:142, scheduleSyncRetry:161, connectSync:172
+  aplicarSaveRemoto:45, conflitoDeProgresso:61, remotoComSomaErrada:88, pushToSync:96, showSyncBanner:105, syncBannerOffset:119, atualizarTituloDoSubtitulo:139, setSyncStatusIndicator:143, scheduleSyncRetry:162, lerSaveLocal:174, connectSync:179
 - **time.js** - Aba Time: cards dos membros, troca com a caixa, times salvos e "Novo jogo".
   renderTeam:8, swapPanelHtml:144, telasDeElenco:170, rosterMove:178, teamsMatch:199, renderSavedTeams:206, carregarTimeSalvo:245, excluirTimeSalvo:273, comecarRenomearTimeSalvo:291, salvarNomeTimeSalvo:297, zerarRun:356
 - **tipos.js** - Aba Tipos: tabela de efetividade, velocidades e compêndio de papéis.
@@ -362,6 +362,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **status_no_duelo.test.mjs** - Status por chance no duelo (2026-09-29, grupo 1 do estudo de habilidades):
 - **sugestao_do_motor.test.mjs** - "Ficar com este time" grava as builds como "Sugestão do app" (ticket time-pelo-motor/01, F5, 21/10/2026).
 - **sync_progresso.test.mjs** - Sincronização não apaga run adiantada com run zerada (relato do usuário, 10/10/2026):
+- **sync_soma_errada.test.mjs** - TK-01 (decisão 2 do usuário, 27/10/2026): save com soma errada nunca é regravado nem enviado à nuvem.
 - **telas_efetividade_real.test.mjs** - Ticket 12 (dados-2654): as telas mostram a efetividade REAL contra Solid Rock / Primal Armor e citam a
 - **texto_novo_das_habilidades.test.mjs** - Ticket versao-nova/04 (15/10/2026): o texto das habilidades mudou de redação na 2.65.4 da NextDex (07/10) e o parser do motor lê TEXTO. M...
 - **time_melhor_no_geral.test.mjs** - Tela do time = melhor time no geral, sem pensar no próximo chefão (usuário, 16/10/2026). As builds do "Montar time completo"

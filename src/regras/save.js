@@ -316,6 +316,9 @@
     return save.soma === somaDoSave(save) ? "ok" : "errada";
   }
 
+  // Decisão 2 do usuário (27/10/2026): save com soma errada nunca sobe para a nuvem.
+  function saveEnviavel(save) { return !!save && conferirSomaDoSave(save) !== "errada"; }
+
   // opts.manterData: gravação automática (não é ação do jogador) - mantém a data do save.
   function buildSave(opts) {
     var save = montarSave(opts);
