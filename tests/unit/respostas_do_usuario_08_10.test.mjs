@@ -4,22 +4,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { carregarRegras } from "./carregar_regras.mjs";
+import { carregarRegras, lerComMutacao } from "./carregar_regras.mjs";
 import { validarBuilds } from "../../scripts/validar_dados.mjs";
 
 const R = carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" });
 const R0 = carregarRegras({ milestone: 0, difficulty: "ace", levelCapMode: "more" });
 // Sabotagem (tests/run_sabotage.mjs) para arquivos fora de src/regras, que o carregarRegras não cobre:
 // src/ui/ia.js e data/builds.json passam por aqui, com o mesmo MUTACAO_* (trecho exato, só na memória).
-function lerComMutacao(caminho, nome) {
-  let t = readFileSync(new URL(caminho, import.meta.url), "utf8").replaceAll(String.fromCharCode(13, 10), String.fromCharCode(10));
-  if (process.env.MUTACAO_ARQUIVO === nome) {
-    if (t.split(process.env.MUTACAO_DE).length !== 2) throw new Error("trecho da sabotagem não encontrado (ou repetido) em " + nome);
-    t = t.replace(process.env.MUTACAO_DE, () => process.env.MUTACAO_PARA || "");
-  }
-  return t;
-}
-const bruto = JSON.parse(lerComMutacao("../../data/builds.json", "builds.json"));
+const bruto = JSON.parse(lerComMutacao("data/builds.json", "builds.json"));
 const uma = (v) => (Array.isArray(v) ? v : [v]);
 
 test("item 4: build da IA promovida pelo playtester tem Confiança consenso (não relato)", () => {
@@ -41,7 +33,7 @@ test("item 5 (ligação na UI): src/ui/ia.js não chama a IA para Mega travada, 
   const Ru = carregarRegras({ milestone: 0, difficulty: "ace", levelCapMode: "more" });
   const el = { textContent: "" };
   Ru.document = { getElementById: () => el };
-  vm.runInContext(lerComMutacao("../../src/ui/ia.js", "ia.js"), Ru, { filename: "src/ui/ia.js" });
+  vm.runInContext(lerComMutacao("src/ui/ia.js", "ia.js"), Ru, { filename: "src/ui/ia.js" });
   let chamadas = 0;
   Ru.pedirIA = async () => { chamadas++; return { ok: false, mensagem: "sem IA no teste" }; };
   const mega = Ru.getSpeciesBySname("SPECIES_ABSOL_MEGA");

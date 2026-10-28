@@ -14,7 +14,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
   gymLeaderBaseName:45, getRemainingBossEntries:51, computeSharedRisks:109, bossSpeedSummary:132, computeBossAttackTypes:147, bossSafetyScore:171, bestBoxCandidateForBoss:183, confrontoUnitOf:233, confrontoFoesDe:258, confrontoMelhorUnidade:269, confrontoMinhasUnidades:279, confrontoUnidadesDaCaixa:289, confrontoParaParty:298, bossPartyPorDificuldade:327, bestRankForm:333, nextFightCx:351, varianteDoChefao:358, gymSkillsSummaryFor:367, regraDeCampoDoChefao:416, comportamentoDaIADoChefao:433, habilidadesExtrasDoHell:446, regrasDoHell:447, ehRevancheDeLider:454, buffsParaMostrarDoChefao:473, buffsAtivosDoChefao:482, computeSpeedTiers:495
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
-  descricaoDeHabilidade:89, descricaoDeHabilidadePorId:100, expandirTextoDeHabilidade:111, habilidadeArma:125, nomesDeHabilidades:128, podeTerStatus:134, garantiaDoTime:142, garantiaDaCondicao:156, comoGarantir:172, condicaoDaBuild:191, precisaDeSetter:214, blocoCondicoesIA:239
+  descricaoDeHabilidade:89, descricaoDeHabilidadePorId:100, expandirTextoDeHabilidade:111, habilidadeArma:125, nomesDeHabilidades:128, podeTerStatus:136, garantiaDoTime:144, garantiaDaCondicao:158, comoGarantir:174, condicaoDaBuild:193, precisaDeSetter:216, blocoCondicoesIA:241
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
   confrontoDamagingMoves:29, confrontoMoveType:32, foeAbilityIds:36, foeFromBossMember:49, ofensaContra:59, ameacaDe:91, velocidadeBase:114, confrontoDuelo:126, confrontoTime:146, coberturaSugerida:196, confrontoDuelosDe:243, valorDoTime:249, melhoresTrocas:265, cuidadosDoChefao:302, aberturaEmDupla:319
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
@@ -355,6 +355,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **reticencias.test.mjs** - Ticket 13 (07/10): texto de tela usa o caractere … (U+2026), nunca três pontos.
 - **revanche_sem_buffs.test.mjs** - Revisão dos ginásios (04/10): nos 8 scripts oficiais o líder, com o jogo zerado (FLAG_SYS_GAME_CLEAR), vai direto pro script
 - **sabotagem_incremental.test.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026). Cobre a regra:
+- **sabotagem_runner.test.mjs** - TK-29 (27/10/2026): o runner de sabotagem só conta "pega" quando uma ASSERÇÃO falha, confere os alvos antes
 - **selo_do_pipeline.test.mjs** - Ticket versao-nova/03 (15/10/2026): o selo do pipeline de build. Antes só 2 casos (Ledian + Mega Punch/Aerial Ace contra o Ninetales)
 - **sempre_acerta_e_plasma_lamp.test.mjs** - Ticket mecanica-2026-10-22/01: "X moves always hit" não vale para todos os golpes; Plasma Lamp tem precisão x1,2 em Fire/Electric.
 - **sequencia_contra_chefao.test.mjs** - Luta inteira contra o time do chefão (2026-09-29, decisão do usuário): HP que
@@ -371,6 +372,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **time_pelo_motor.test.mjs** - Modo Motor do Meu Time, Fase C (ticket time-pelo-motor/01, 21/10/2026): montar o time SEM IA, só pelo simulador.
 - **time_pelo_motor_comuns.test.mjs** - Meu Time na mesma régua do rank (ticket todas-as-lutas/02, 21/10/2026): o juiz do Modo Motor pesa as lutas COMUNS mais perigosas de cada
 - **time_pelo_motor_papeis.test.mjs** - Modo Motor do Meu Time, Fase D (ticket time-pelo-motor/01, 21/10/2026): papéis por build, tags, sinergia e explicação.
+- **time_pelo_motor_papeis_regras.test.mjs** - Fronteiras das regras de papel e estilo do Modo Motor (TK-03, 27/10/2026): cada teste usa um time real da Etapa 4 que fica DO LADO DE DENTRO
+- **time_pelo_motor_regras.test.mjs** - Regras do Modo Motor que só a sabotagem do TK-03 (27/10/2026) mostrou sem proteção: item liberado e limite de repetição,
 - **tipo_stellar.test.mjs** - Tipo Stellar (TK-04, achado motor-D1.4; decisão do usuário 28/10): tabela contra battle_util.c:1012-1013 e 1056-1057
 - **tipos_habilidade_id_nome.test.mjs** - TK-00: trava id x nome de TYPE_MOD_ABILITIES. O id é do dex_compact do app (NextDex), NÃO o do enum do jogo
 - **tira_setup.test.mjs** - Ticket 18 (07/10/2026): golpes que tiram setup, pelo código oficial (er-repo 217dd0f,

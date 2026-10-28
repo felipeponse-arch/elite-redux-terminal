@@ -128,12 +128,14 @@
   function nomesDeHabilidades(ids) {
     return uniqueIds(ids || []).map(function (id) { return ABILITIES[id] ? ABILITIES[id][0] : ""; }).filter(Boolean);
   }
-  // Pode ficar com este status? Tipo Poison/Steel não é envenenado (o próprio
-  // jogo confirma a regra ao descrever Corrosion como exceção: "Can poison any
-  // type"); habilidade que bloqueia o status também impede.
+  // Condição do texto -> status do duelo (STATUS_DUELO, duelo.js: fonte única de vocabulário e de imunidade por tipo).
+  var STATUS_DUELO_DA_CONDICAO = { "veneno": "envenenarForte", "queimadura": "queimar", "sono": "sono" };
+  // Pode ficar com este status? Imunidade de tipo vem de STATUS_DUELO (jogo: CanBeBurned/CanBurnType em
+  // battle_util.c:5088, chamado pelo Flame Orb em :6289; Toxic Orb idem); habilidade que bloqueia o status também impede.
+  // Mycelium Might (battle_util.c:5090) não é modelado aqui: o orbe é auto-aplicado e esta checagem não trata essa exceção.
   function podeTerStatus(sp, cond, habilidades) {
-    var tipos = speciesTypeNames(sp);
-    if (cond === "veneno" && (tipos.indexOf("Poison") !== -1 || tipos.indexOf("Steel") !== -1)) return false;
+    var tipos = speciesTypeNames(sp), regra = STATUS_DUELO[STATUS_DUELO_DA_CONDICAO[cond]];
+    if (regra && (regra.imunes || []).some(function (tp) { return tipos.indexOf(tp) !== -1; })) return false;
     var bloqueio = BLOQUEIA_STATUS[cond];
     return !bloqueio || !habilidades.some(function (n) { return bloqueio.test(descricaoDeHabilidade(n)); });
   }
