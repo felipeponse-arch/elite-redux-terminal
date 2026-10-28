@@ -327,7 +327,7 @@
     if (pivos.length) linhas.push("Golpes de PIVÔ que esta forma usa agora: " + pivos.join(", ") + ".");
     // Achado no teste com o time real do usuário (2026-09-27): Kirlia ainda
     // evolui e a build usava Babiri Berry - a IA não pesava o Eviolite.
-    if (evoluiAinda(sp) && ITEMS.indexOf("Eviolite") !== -1) {
+    if (evioliteFunciona(sp) && ITEMS.indexOf("Eviolite") !== -1) {
       linhas.push("Esta forma AINDA EVOLUI: Eviolite (aumenta Def e Def. Especial de quem ainda evolui) costuma ser o item defensivo mais forte aqui - considere.");
     }
     if (comTime) {
@@ -429,7 +429,7 @@
     // os outros seguravam e todo Hyper Offense saía com Life Orb.
     var itens = itensEmUsoComQuem(sp.x);
     var nomesItens = Object.keys(itens);
-    var esgotados = nomesItens.filter(function (i) { return itens[i].length >= MAX_MESMO_ITEM_NO_TIME; });
+    var esgotados = nomesItens.filter(function (i) { return itemEsgotadoNoTime(itens[i]); });
     return "" +
       (nomesItens.length ? ("Itens JA EM USO por outros membros do time: " + nomesItens.map(function (i) {
         return dadoExterno(i) + " (" + itens[i].map(dadoExterno).join(", ") + ")";
@@ -827,7 +827,7 @@
       var r = rankDe(sp.sname);
       var build = effectiveBuild(sp);
       var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; });
-      var abiNames = uniqueIds(sp.ab).map(function (id) { return ABILITIES[id][0]; });
+      var abiNames = habilidadesEscolhiveis(sp);
       return sp.sname + " " + sp.n + " (" + speciesTypeNames(sp).join("/") + formFamilyPromptNote(sp) + "), Velocidade base " + sp.b[5] +
         (r ? ", rank " + r.tier : "") + (roleNames.length ? ", papel " + roleNames.join("/") : "") +
         ", innate: " + innNames.join(", ") +

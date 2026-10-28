@@ -153,8 +153,7 @@
       motorPaiDe = Object.create(null);
       SPECIES.forEach(function (s) {
         (s.ev || []).forEach(function (e) {
-          var kind = DATA.evoKinds[e[0]];
-          if (kind === "EVO_MEGA_EVOLUTION" || kind === "EVO_PRIMAL_REVERSION" || kind === "EVO_MOVE_MEGA_EVOLUTION") return;
+                    if (isMegaEvoKind(e[0])) return;
           if (motorPaiDe[e[2]] === undefined) motorPaiDe[e[2]] = s.x;
         });
       });
@@ -410,7 +409,7 @@
         for (var k = 0; k < itens.length; k++) {
           var cand = motorComItem(c, itens[k]);
           // Mesmo item no time: no máximo MAX_MESMO_ITEM_NO_TIME (a regra do app).
-          if (busca.time.filter(function (m, j) { return j !== i && m.build.item === itens[k]; }).length >= MAX_MESMO_ITEM_NO_TIME) continue;
+          if (itemEsgotadoNoTime(busca.time.filter(function (m, j) { return j !== i && m.build.item === itens[k]; }))) continue;
           var v = motorValorDoObjetivo(ctx, obj, busca.time.map(function (m, j) { return j === i ? cand : m; }));
           yield "item";
           if (v > melhorV + 1e-9) { melhorV = v; melhor = itens[k]; }

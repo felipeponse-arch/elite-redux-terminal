@@ -486,7 +486,7 @@
   // Item "por evolução pendente": Eviolite, se o jogo o dá até a Etapa atual (primeiroLugarDoItem) e a espécie ainda evolui (evoluiAinda: a
   // mesma regra de validateAiBuild, sem Mega).
   function pipelineEvioliteServe(sp) {
-    if (ITEMS.indexOf("Eviolite") === -1 || !evoluiAinda(sp)) return false;
+    if (ITEMS.indexOf("Eviolite") === -1 || !evioliteFunciona(sp)) return false;
     // Eviolite sem local com etapa no jogo (etapaDoItem null) não conta como disponível aqui.
     return etapaDoItem("Eviolite") !== null && liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: "Eviolite" });
   }
@@ -502,8 +502,8 @@
       return { v: v, itemDeRascunho: null };
     }
     var item = null, tipo = null, regra = megaStoneRuleFor(sp);
-    if (/só funciona gastando o item/.test(recusa.txt || "") && ITEMS.indexOf(ITEM_DE_RASCUNHO_PIPELINE) !== -1) { item = ITEM_DE_RASCUNHO_PIPELINE; tipo = "gasta"; }
-    else if (/precisa segurar a pedra/.test(recusa.txt || "") && regra && regra.stones.length) { item = regra.stones[0]; tipo = "pedra"; }
+    if (recusa.codigo === "item-que-se-gasta" && ITEMS.indexOf(ITEM_DE_RASCUNHO_PIPELINE) !== -1) { item = ITEM_DE_RASCUNHO_PIPELINE; tipo = "gasta"; }
+    else if (recusa.codigo === "pedra-obrigatoria" && regra && regra.stones.length) { item = regra.stones[0]; tipo = "pedra"; }
     if (!item) return { v: null, motivo: recusa.txt };
     bruto.item = item;
     var recusa2 = {};

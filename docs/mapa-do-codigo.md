@@ -8,7 +8,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **avisos_build.js** - Lote 5 das pesquisas de 06/10 (ideias do GPT, seções 3.2/17/26/42): Avisos de build e selo de
   avisosDaBuild:8, seloDaBuild:82, primeiroLugarDoItem:94, rotuloDaEtapaDoItem:98, ondeAcharItemTexto:100
 - **builds.js** - Build mostrada (effectiveBuild: salva > herdada da base pela Mega > curada do
-  entradaDeBuild:23, stripNote:49, showdownName:54, showdownSet:58, evsToShowdownText:75, teamItemsInUse:90, comecarLoteDeBuilds:118, concluirBuildDoLote:119, encerrarLoteDeBuilds:120, contaNoTime:121, teamMovesInUse:123, itensEmUsoComQuem:151, teamRolesInUse:163, golpesFuturosDe:177, effectiveBuild:200
+  entradaDeBuild:23, stripNote:49, showdownName:54, showdownSet:58, evsToShowdownText:75, teamItemsInUse:90, comecarLoteDeBuilds:118, concluirBuildDoLote:119, encerrarLoteDeBuilds:120, contaNoTime:121, teamMovesInUse:123, itemEsgotadoNoTime:152, itensEmUsoComQuem:153, teamRolesInUse:165, golpesFuturosDe:179, effectiveBuild:202
 - **calc_stat.js** - Fórmula de status final (base+IV+EV+nível+nature+item) e o que deriva
   itemRuleFor:106, calcFinalStat:119, minEvSameStat:157, nextEvBreakpoint:167, priorityOrderForEvs:192, trimAndReallocateEvs:195
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
@@ -18,7 +18,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
   confrontoDamagingMoves:29, confrontoMoveType:32, foeAbilityIds:36, foeFromBossMember:49, ofensaContra:59, ameacaDe:91, velocidadeBase:114, confrontoDuelo:126, confrontoTime:146, coberturaSugerida:196, confrontoDuelosDe:243, valorDoTime:249, melhoresTrocas:265, cuidadosDoChefao:302, aberturaEmDupla:319
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
-  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, uniqueIds:118, descricaoDaEspecie:185
+  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:189
 - **duelo.js** - Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
   nomeHabDuelo:46, textoHabDuelo:203, bonusDeGolpeLidoDoTextoDuelo:231, acertosDoGolpeDuelo:232, golpeUtilNoDuelo:237, categoriaNoDuelo:249, temContatoDuelo:255, golpesDeRecargaAte:258, golpesDeDueloAte:265, golpesDeStatusAte:271, tipoDoTextoDuelo:292, fraseFixaDuelo:297, categoriasDoTextoDuelo:312, categoriasDoGolpeDuelo:315, modoHellDuelo:340, statusDoTrechoDuelo:385, presencaDoStatus:392, todosOsStatusDuelo:398, lerStatusDaFraseDuelo:403, chanceDoEstagioCrit:453, lerCriticoDaFraseDuelo:454, lerCondicaoDaFraseDuelo:480, estagioDoTexto:509, multDoEstagio:510, lerEstagioDaFraseDuelo:512, poderDoGolpeDuelo:567, lerExtrasDaFraseDuelo:569, lerCuraDaFraseDuelo:624, filtroDoTextoDuelo:657, empurraStatusDuelo:667 (+141)
 - **escolha_ia_candidatos.js** - A IA ESCOLHE ENTRE os candidatos do pipeline de build (passo 4 de docs/pipeline_de_build.md; ticket 03 de
@@ -28,7 +28,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **ferramentas_ia.js** - Ferramentas que a IA consulta (aiTool_*) e a fábrica única delas (buildStandardAiTools).
   aiTool_getTeamWeaknesses:15, aiTool_getSpeciesRank:24, aiTool_getPriorityMoveOptions:51, aiTool_getAbilityMovepoolSynergy:75, aiTool_getConditionMoveSynergy:99, aiTool_getNextBossRoster:120, aiTool_getItemInfo:150, aiTool_getRemainingBosses:159, aiTool_getBoxCandidatesForBoss:182, aiTool_getSpeedBenchmark:204, buildStandardAiTools:249
 - **formas_mega.js** - Família de formas (base <-> mega), modo de Mega Evolução, pedras e unidades de batalha.
-  isMegaEvoKind:22, megaFormsOf:31, formFamilyPromptNote:39, megaModePromptLine:53, formFamilyOf:58, isMegaForm:64, megaMode:75, megaEvolutionUnlocked:88, etapaDaMega:174, megaFormLiberada:179, megaSoNoDebug:180, quandoMega:182, rotuloEtapaDaMega:183, battleFamilyOf:202, usableSpeciesFor:205, megaPromptBlock:209, stonesOf:236, battleUnitsOf:246, unitTypeMult:262
+  isMegaEvoKind:22, evoluiAinda:27, evioliteFunciona:32, megaFormsOf:38, formFamilyPromptNote:46, megaModePromptLine:60, formFamilyOf:65, isMegaForm:71, megaMode:82, megaEvolutionUnlocked:95, etapaDaMega:181, megaFormLiberada:186, megaSoNoDebug:187, quandoMega:189, rotuloEtapaDaMega:190, battleFamilyOf:209, usableSpeciesFor:212, megaPromptBlock:216, stonesOf:243, battleUnitsOf:253, unitTypeMult:269
 - **golpes.js** - O que cada golpe faz (papel pelo efeito real) e como descrevê-lo pra IA.
   dadoExterno:19, movePromptLine:28, ehGolpeDePivo:41, ehPrioridadeDeDano:49, moveRoleOf:53
 - **gravacao_build_ia.js** - O caminho "resposta da IA -> build validada -> o que gravar", sem tela (ticket 06 da dívida
@@ -40,7 +40,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **lista_de_builds.js** - As 4 mudanças na lista de builds salvas de uma espécie (state.customBuilds[sname],
   trocarBuildAtivaNaLista:11, acrescentarVarianteNaLista:23, removerBuildDaLista:32, buildQueSaiParaAbrirVaga:43, liberarVagaNaLista:51
 - **mono_run.js** - Mono run: o que dá pra pegar do seu tipo até a etapa atual (2026-09-26,
-  linhaEvolutivaDe:20, compraDeInicialTexto:48, monotypeAtivo:73, serveProMono:75, fraquezasDoTipo:81, resistemAoTipo:84, cobreFraquezas:89, mudancaDeTipo:96, pctClima:134, climaQueCombina:142, orientacaoMono:145, avisoProximoLider:159, monoDisponibilidade:177
+  linhaEvolutivaDe:20, compraDeInicialTexto:47, monotypeAtivo:72, serveProMono:74, fraquezasDoTipo:80, resistemAoTipo:83, cobreFraquezas:88, mudancaDeTipo:95, pctClima:133, climaQueCombina:141, orientacaoMono:144, avisoProximoLider:158, monoDisponibilidade:176
 - **pipeline_build.js** - Pipeline de build com intenção (ticket 20 da dívida, desenho de 14/10/2026; docs/pipeline_de_build.md).
   pipelineEspecie:59, pipelineResolverAlvo:71, pipelineAmeacasDePrioridade:147, pipelineSemFuga:173, pipelineDuelo:174, pipelineLinhaDoGolpe:184, pipelineTierDaLinha:223, pipelineChaveDaLinha:228, pipelineSinergiasAtivas:233, pipelinePesoDoGolpe:238, pipelinePesoDoConjunto:241, pipelineTabela:247, pipelineValorDoGolpe:273, pipelineAvaliarConjunto:278, pipelineMontarConjunto:328, pipelineHabilidadesSemRegra:381, pipelineTierDoCandidato:389, pipelineVelocidade:392, pipelineMotivos:398, pipelineTiposExtraDeStab:425, pipelineSplitDoConjunto:440, pipelineNaturezaServe:450, pipelineAtributoFraco:454, pipelineNaturezaEEvs:460, pipelineGolpesComRecuo:474, pipelineSemRecuo:481, pipelineEvioliteServe:488, pipelineValidarRascunho:493, candidatosDeBuild:517, pipelineCandidatos:521 (+2)
 - **plano_build.js** - Build que acompanha o jogador: plano de golpes por slot, estilo da build e
@@ -56,13 +56,13 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
 - **time_pelo_motor.js** - Modo Motor do Meu Time (ticket time-pelo-motor/01, Fase C, 21/10/2026): monta o time SEM IA, só pelo simulador.
-  motorMedia:61, motorArred:62, criarCacheDoMotor:65, motorGuardar:66, motorNivelDaEtapa:73, motorMontarLuta:79, motorMontarLutaComum:90, motorEspacadas:99, motorLutasComunsDoContexto:108, motorLutasDoContexto:123, motorValorDoObjetivo:135, contextoDoMotor:141, motorRaizDaLinha:151, motorChaveDaBuild:166, motorChaveDoContexto:169, motorBuildDoCandidato:170, motorSecar:205, motorCandidatosEmPassos:206, motorCandidatos:228, motorAquecerBuildsEmPassos:230, motorUnidade:236, motorSimular:248, motorEhMeu:264, motorAvaliar:265, motorMetricas:268, motorTemGolpeDeLado:277, motorBuscar:278, motorBuscarEmPassos:279, motorPlanoB:332, motorItensCandidatos:371 (+4)
+  motorMedia:61, motorArred:62, criarCacheDoMotor:65, motorGuardar:66, motorNivelDaEtapa:73, motorMontarLuta:79, motorMontarLutaComum:90, motorEspacadas:99, motorLutasComunsDoContexto:108, motorLutasDoContexto:123, motorValorDoObjetivo:135, contextoDoMotor:141, motorRaizDaLinha:151, motorChaveDaBuild:165, motorChaveDoContexto:168, motorBuildDoCandidato:169, motorSecar:204, motorCandidatosEmPassos:205, motorCandidatos:227, motorAquecerBuildsEmPassos:229, motorUnidade:235, motorSimular:247, motorEhMeu:263, motorAvaliar:264, motorMetricas:267, motorTemGolpeDeLado:276, motorBuscar:277, motorBuscarEmPassos:278, motorPlanoB:331, motorItensCandidatos:370 (+4)
 - **time_pelo_motor_papeis.js** - Modo Motor do Meu Time, Fase D (papéis por build, tags, sinergia e explicação). Carrega depois de time_pelo_motor.js (mesmo escopo).
   motorMediana:22, motorUnidadeNaLuta:23, motorSemTipos:24, motorSemEsse:25, motorAux:26, motorLutasDeProva:27, motorAssinaturaDasLutas:28, motorCondicoes:33, motorLutaComClima:53, motorGanhoDaCondicao:56, motorSinergia:86, motorAlternativasArmadoras:101, motorExtrasDeSinergia:119, motorLutaDetalhada:136, motorSimularComClima:143, motorFoePorNome:155, motorProvasDosMembros:157, motorDeltaSemMembro:194, motorDeltaSemTipos:198, motorTemTipo:202, motorClassificar:207, motorTextos:306, motorTextosDaClassificacao:329
 - **tipos.js** - Tabela de efetividade de tipos, habilidades que alteram dano recebido por tipo e tipagem de espécie.
   alwaysActiveAbilities:163, abilityTypeMod:172, perfilDefensivoDaEspecie:178, abilityTypeModFor:195, typeMultiplier:243, speciesTypeNames:253
 - **validacao_build_ia.js** - Validação da build sugerida pela IA contra o dado real.
-  megaStoneRuleFor:14, ehBerry:40, itemSeGastaNaLuta:41, regraItemConsumivelPara:47, regraItemConsumivelPrompt:57, papelNormalizado:76, conferirPapelDaBuild:80, evoluiAinda:108, conflitoDeNature:119, conflitoDeItem:136, citarDoModelo:158, evsEmFormatoValido:162, limitarEvsAoJogo:169, contextoDeValidacao:197, validateAiBuild:214, setsValidosDaResposta:482, ajustarBuildDaIa:498, entradaDaCuradaParaTimeNovo:517
+  megaStoneRuleFor:14, ehBerry:40, itemSeGastaNaLuta:41, regraItemConsumivelPara:47, regraItemConsumivelPrompt:57, papelNormalizado:76, conferirPapelDaBuild:80, conflitoDeNature:113, conflitoDeItem:130, citarDoModelo:152, evsEmFormatoValido:156, limitarEvsAoJogo:163, contextoDeValidacao:191, validateAiBuild:208, setsValidosDaResposta:478, ajustarBuildDaIa:494, entradaDaCuradaParaTimeNovo:513
 
 ## Interface - src/ui/
 - **aba_chefoes.js** - Aba Chefões: lista, time do chefão por dificuldade, buffs de ginásio e exportação.
@@ -243,6 +243,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **avisos_e_selo_de_build.test.mjs** - Lote 5 das pesquisas de 06/10: Avisos de build (um bloco, reaproveitando as contas
 - **best_offense_pelo_codigo.test.mjs** - Ticket versao-nova/05 (15/10/2026), pergunta P2 respondida pelo Felipe: Best Offense e Magus Blades valem pelo CÓDIGO da versão mais nova
 - **buffs_e_pendencias_antigas.test.mjs** - Lote de 2026-10-01: buffs do ginásio no simulador (números do código do jogo,
+- **builds_estrutura_18.test.mjs** - TK-18 (estrutura-2026-10-22): builds. Código de motivo na recusa, IA recusa item não liberado (decisão 10),
 - **cache_sabotagem.test.mjs** - (sem comentário de topo)
 - **calibracao_calculadora_do_jogo.test.mjs** - Calibração do motor contra a calculadora de dano do próprio jogo (10/10/2026, prints do usuário).
 - **calibracao_simulador_wasm.test.mjs** - Calibração do motor contra o simulador do jogo compilado (WebAssembly, Elite Redux 2.65.3b), 21/10/2026
