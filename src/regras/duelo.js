@@ -1009,12 +1009,15 @@
       custoAtaque: 0, drenoPct: 0, drenoMult: 1, danoAoContato: 0, contraCatUmaVez: null, bagaHP: 0, bagaHPLimite: 0, bagaResiste: null,
       bagaAperto: null, curaStatusUmaVez: false, estagioUmaVez: [], recuar: 0, imuneEfeito: false, imuneQuedas: false, semEfeitoContato: false,
       balao: false, cargaUmaVez: false, dadoCarregado: false, metronomo: false, consumivel: false, baga: false,
-      gemaMult: 1.5, garra: 0, guardaChuvaSol: false, boosterEnergy: false };
+      gemaMult: 1.5, garra: 0, guardaChuvaSol: false, boosterEnergy: false, botas: false, argilaLeve: false };
     var t = (typeof ITEM_DESC !== "undefined" && ITEM_DESC[nome]) || "";
     var x, tp;
     if (!nome) { cacheItemDuelo[chave] = it; return it; }
     if (nome === "Life Orb") { it.danoMult = 1.3; it.custoAtaque = 0.1; }
+    // Expert Belt: 1,2x fixo no código (battle_util.c:7675-7677). O f:30 da config NÃO é o multiplicador: não generalizar o "1 + f/100" para ele.
     if (nome === "Expert Belt") it.seMult = 1.2;
+    if (nome === "Heavy-Duty Boots") it.botas = true; // hazards de entrada (Klutz desliga)
+    if (nome === "Light Clay") it.argilaLeve = true; // telas mais longas (Klutz desliga)
     if (nome === "Muscle Band") it.fisicoMult = modificadorDoItemDuelo(nome, "MUSCLE_BAND", 15);
     if (nome === "Wise Glasses") it.especialMult = modificadorDoItemDuelo(nome, "WISE_GLASSES", 15);
     // Soul Dew (battle_util.c:7020-7026 e 7455-7461, B_SOUL_DEW_BOOST = GEN_3): Latias e Latios (e as megas) levam o golpe
@@ -1107,10 +1110,18 @@
     // Knock Off ("Knocks down the foe's held item to prevent its use during the battle",
     // NextDex; sem bônus de dano neste hack): como o roubo acima, o item vale ~metade da
     // luta. Pedra de Mega e orbe primal não caem; Sticky Hold segura (2026-09-30).
-    var pedraFixa = /ite(?: [XYZ])?$/.test(u.it.nome) || /^(Red|Blue) Orb$/.test(u.it.nome);
-    if (!u.ef.seguraItem && !pedraFixa && (outro.golpesProntos || []).some(function (g) { return g.efeito === "Knock Off"; })) f *= 0.5;
+    if (!u.ef.seguraItem && !itemNaoSaiDoPokemon(u) && (outro.golpesProntos || []).some(function (g) { return g.efeito === "Knock Off"; })) f *= 0.5;
     return f;
   }
+  // Item que o jogo NÃO deixa tirar (CanBattlerGetOrLoseItem, battle_util.c:8282-8305): pedra de Mega e Orbe Primal; Drive no Genesect,
+  // Memory no Silvally e Plate no Arceus. Eviolite e Meteorite NÃO entram: saem no Knock Off (decisão 9).
+  function itemNaoSaiDoPokemon(u) {
+    var n = u.item || (u.it && u.it.nome) || "", sn = (u.sp && u.sp.sname) || "";
+    if ((typeof MEGA_FORMS !== "undefined" && MEGA_FORMS[n] !== undefined) || /^(Red|Blue) Orb$/.test(n)) return true;
+    return (/^SPECIES_GENESECT/.test(sn) && / Drive$/.test(n)) || (/^SPECIES_SILVALLY/.test(sn) && / Memory$/.test(n)) || (/^SPECIES_ARCEUS/.test(sn) && / Plate$/.test(n));
+  }
+  // Item de efeito de campo que vale só se o item está ATIVO: o Pokémon ainda o segura (u.it some quando é tirado/gasto) e não tem Klutz.
+  function itemDeCampoAtivo(u, flag) { return !!(u.it && u.it[flag] && !(u.ef && u.ef.klutz)); }
   function comItem(mult, ativo) { return 1 + (mult - 1) * ativo; }
   // ---------- sequência: nocaute, desmaio e hazards (2026-09-29) ----------
   function lerSequenciaDaFraseDuelo(f, ef) {
@@ -4033,7 +4044,7 @@
     if (sala > 0) return permanente ? sala : 0;
     return DURACAO_LADO_DUELO.sala;
   }
-  function duracaoTelaDuelo(u) { return u.item === "Light Clay" ? DURACAO_LADO_DUELO.telaLightClay : DURACAO_LADO_DUELO.tela; }
+  function duracaoTelaDuelo(u) { return itemDeCampoAtivo(u, "argilaLeve") ? DURACAO_LADO_DUELO.telaLightClay : DURACAO_LADO_DUELO.tela; }
   function temTelaDuelo(l) { return l.reflect > 0 || l.luz > 0 || l.veu > 0; }
   function limpaTelasDoLadoDuelo(l) { l.reflect = 0; l.luz = 0; l.veu = 0; }
   // Fim do turno: cada timer cai 1 (battle_util.c:1799, 1930, 2053). O turno do uso não conta (`started`,
@@ -4064,7 +4075,7 @@
     var ef = u.ef;
     if (ef.limpaTelas) { limpaTelasDoLadoDuelo(ladoOutro); if (ef.telaRepete) limpaTelasDoLadoDuelo(ladoDono); }
     if (ef.vento && !ladoDono.vento) ladoDono.vento = ef.vento;
-    if (ef.telaNaEntrada) ladoDono.veu = Math.max(ladoDono.veu, u.item === "Light Clay" ? DURACAO_LADO_DUELO.tela : ef.telaNaEntrada);
+    if (ef.telaNaEntrada) ladoDono.veu = Math.max(ladoDono.veu, itemDeCampoAtivo(u, "argilaLeve") ? DURACAO_LADO_DUELO.tela : ef.telaNaEntrada);
     if (ef.sala && !campo.sala && !salaPermanente) campo.sala = ef.sala;
   }
   function poeHazardDuelo(lado, tipo) {
@@ -4080,7 +4091,7 @@
   // inversa: Inverse Room cobrindo a luta (GetTypeModifier do jogo inverte também Stealth Rock/Creeping Thorns).
   function entrarNoLadoDuelo(c, lado, inversa) {
     var u = c.u;
-    if (u.item === "Heavy-Duty Boots") return;
+    if (itemDeCampoAtivo(u, "botas")) return;
     var chao = aterradoDuelo(u);
     var inv = inversa || (CAMPO_DUELO && CAMPO_DUELO.inversaAtiva);
     var ef = function (t) { return u.tipos.reduce(function (p, x) { var v = typeMultiplier(t, [x]); return p * (inv ? inverterEfetividadeDuelo(v) : v); }, 1); };

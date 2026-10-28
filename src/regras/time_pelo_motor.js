@@ -376,12 +376,10 @@
       if (s === "PHYSICAL") fis = true; else if (s === "SPECIAL") esp = true;
       if (t && tipos.indexOf(t) === -1) tipos.push(t);
     });
-    var doTipo = tipos.map(function (t) {
-      return Object.keys(ITENS_CONFIG.itens).filter(function (n) { var x = ITENS_CONFIG.itens[n]; return x.e === "TYPE_POWER" && x.t === t; }).sort()[0];
-    });
+    var doTipo = tipos.map(itemDeTipoDoTime); // o mesmo item de tipo que a IA oferece (TK-14)
     [palpite].concat(MOTOR_ITENS_FIXOS, fis ? ["Muscle Band"] : [], esp ? ["Wise Glasses"] : [], doTipo).forEach(function (n) {
-      // Mesmas travas da build da IA (conflitoDeItem): Assault Vest com golpe de status, Eviolite sem evolução... (supervisor, 22/10).
-      if (n && lista.indexOf(n) === -1 && ITEMS.indexOf(n) !== -1 && liberadoNaRun(ctx.etapa, ctx.cap, { item: n }) &&
+      // Conjunto único de itens (itemValidoNoTime) + as mesmas travas da build da IA (conflitoDeItem): Assault Vest com golpe de status, Eviolite sem evolução... (supervisor, 22/10).
+      if (n && lista.indexOf(n) === -1 && itemValidoNoTime(n, ctx.etapa, ctx.cap) &&
         !conflitoDeItem(n, (c.build && c.build.moves) || [], c.sp)) lista.push(n);
     });
     return lista;
@@ -409,7 +407,7 @@
         for (var k = 0; k < itens.length; k++) {
           var cand = motorComItem(c, itens[k]);
           // Mesmo item no time: no máximo MAX_MESMO_ITEM_NO_TIME (a regra do app).
-          if (itemEsgotadoNoTime(busca.time.filter(function (m, j) { return j !== i && m.build.item === itens[k]; }))) continue;
+          if (!itemValidoNoTime(itens[k], ctx.etapa, ctx.cap, busca.time.filter(function (m, j) { return j !== i && m.build.item === itens[k]; }))) continue;
           var v = motorValorDoObjetivo(ctx, obj, busca.time.map(function (m, j) { return j === i ? cand : m; }));
           yield "item";
           if (v > melhorV + 1e-9) { melhorV = v; melhor = itens[k]; }
