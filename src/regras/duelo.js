@@ -893,7 +893,9 @@
     if ((x = f.match(/Ups Special Attack by (\d+)% if suffering/i))) ef.statusProprio.push({ stat: "spa", mult: 1 + parseInt(x[1], 10) / 100, quais: null });
     if (/Halves Atk and Sp\. Atk stats if user is below 1\/3/i.test(f)) { ef.atkMult *= 1 - 0.5 / 3; ef.spaMult *= 1 - 0.5 / 3; } // último terço da luta
     if ((x = f.match(/Deals (\d+)% more damage for each repeated move use/i))) ef.ritmico = parseInt(x[1], 10) / 100;
+    // Cosmic Daze/Cosmic Dust (abilities.cc:6758-6763): x2 se o alvo está confuso OU enfurecido (um MUL(2) só, não acumula).
     if (/Deals 2x damage vs confused/i.test(f)) ef.bonusVsStatus.confundir = 2;
+    if (/Deals 2x damage vs confused and enraged/i.test(f)) ef.bonusVsEnfurecido = 2;
     if ((x = f.match(/Drain moves recover \+(\d+)% HP & apply Leech Seed/i))) { ef.drenoMult = 1 + parseInt(x[1], 10) / 100; ef.sementeNoDreno = true; }
     if (/Charges up when getting hit/i.test(f)) ef.carregaAoApanhar = true;
     if (/Contact attacks make foes move last/i.test(f)) ef.forcaUltimo = true;
@@ -1516,7 +1518,7 @@
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
       bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {}, precisaoPorTipo: {},
       menorDefesaCategoria: {}, menorDefesaSeStatus: false, flagMult: {}, prioTipoSempre: [], drenoTipo: {}, malicious: false,
-      equinox: false, maiorMult: 0, maiorVel: 0, paradoxoItem: false, ritmico: 0, bonusVsStatus: {}, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
+      equinox: false, maiorMult: 0, maiorVel: 0, paradoxoItem: false, ritmico: 0, bonusVsStatus: {}, bonusVsEnfurecido: 0, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
       campoResiduo: [], statusNaEntrada: {}, forcaUltimo: false, semStabOutros: false, recuoFrac: 1,
       seQuebra: false, venenoReduz: false, mudaTipoNoContato: null, telaNaEntrada: 0, imuneTipoNaEntrada: null,
       sincroniza: false, almaLigada: false, drenoCategoria: {},
@@ -2531,7 +2533,9 @@
       // Power Outage: o 1º golpe Electric sai 2x, depois perde o tipo (e o STAB).
       if (u.ef.apagao && g && g.tipo === "Electric" && turnos > 0) f *= (2 + (turnos - 1) / (g.stab ? 1.5 : 1)) / turnos;
       if (u.ef.ventoCarga && g && g.tipo === "Electric" && turnos > 0 && outroU.golpesProntos && outroU.golpesProntos.some(function (x) { return (x.flags || []).indexOf("Air/Wing Based") !== -1; })) f *= (2 * turnos - 1) / turnos; // Wind Power
-      Object.keys(u.ef.bonusVsStatus).forEach(function (s) { f *= 1 + (presNoAlvo[s] || 0) * (u.ef.bonusVsStatus[s] - 1); }); // Cosmic Daze
+      // Cosmic Daze: alvo enfurecido (Berserk DNA, névoa) leva x2 certo; o x2 de confuso não soma por cima.
+      if (u.ef.bonusVsEnfurecido && outroU.ef.enfurecido) f *= u.ef.bonusVsEnfurecido;
+      else Object.keys(u.ef.bonusVsStatus).forEach(function (s) { f *= 1 + (presNoAlvo[s] || 0) * (u.ef.bonusVsStatus[s] - 1); }); // Cosmic Daze
       // Exploit Weakness: contra alvo com status, bate na defesa mais fraca.
       if (u.ef.menorDefesaSeStatus && melhor && melhor.razaoMenorDef > 1) {
         var pres = Object.keys(presNoAlvo).reduce(function (mx, s) { return /recuar|medo|confundir|paixao/.test(s) ? mx : Math.max(mx, presNoAlvo[s]); }, 0);
