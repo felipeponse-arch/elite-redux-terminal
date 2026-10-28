@@ -505,6 +505,7 @@
 <script id="abilitysynergy" type="application/json">__ABILITY_SYNERGY_JSON__</script>
 <script id="conditionmovesynergy" type="application/json">__CONDITION_MOVE_SYNERGY_JSON__</script>
 <script id="megaforms" type="application/json">__MEGA_FORMS_JSON__</script>
+<script id="pedrasetapa" type="application/json">__PEDRAS_ETAPA_JSON__</script>
 <script id="moveroles" type="application/json">__MOVE_ROLES_JSON__</script>
 <script id="changelog" type="application/json">__CHANGELOG_JSON__</script>
 <script>
@@ -640,6 +641,7 @@
   // ability_translations_pt.json) - re-run the research if this hack adds
   // new Mega/Primal items and they're missing here.
   var MEGA_FORMS = JSON.parse(document.getElementById("megaforms").textContent || "{}");
+  var PEDRAS_ETAPA = JSON.parse(document.getElementById("pedrasetapa").textContent);
   // Player-facing "o que mudou" list, hand-authored (data/changelog.json) -
   // newest date first. Fase 1 quality-of-life item, 2026-09-09.
   var CHANGELOG = JSON.parse(document.getElementById("changelog").textContent || "[]");

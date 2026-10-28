@@ -53,6 +53,7 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
     SPECIES_ROLE: lerJson("species_role.json"),
     ABILITY_SYNERGY: lerJson("species_ability_synergy.json"),
     MEGA_FORMS: lerJson("mega_forms.json"),
+    PEDRAS_ETAPA: lerJson("pedras_etapa.json"),
     LEVELCAPS: lerJson("levelcaps.json"),
     MOVE_PT: lerJson("move_translations_pt.json"),
     ABILITY_PT: lerJson("ability_translations_pt.json"),
