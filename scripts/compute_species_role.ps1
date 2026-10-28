@@ -37,6 +37,10 @@ Output: data/species_role.json, keyed by sname.
 Run depois de transform.ps1 (precisa de dex_compact.json com "b"/"lm"/"tu").
 #>
 
+# -Especies SPECIES_A,SPECIES_B: acrescenta SO essas entradas ao arquivo existente (percentis calculados com o dex inteiro);
+# as demais entradas ficam como estao. Uso: pesquisa/novas especies sem refazer o arquivo todo.
+param([string]$Especies = "")
+
 . (Join-Path $PSScriptRoot "common.ps1")
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"
@@ -176,7 +180,13 @@ foreach ($r in $rows) {
 }
 
 $outPath = Join-Path $dataDir "species_role.json"
-[System.IO.File]::WriteAllText($outPath, (ConvertTo-JsonManual $out), (New-Object System.Text.UTF8Encoding($false)))
+if ($Especies) {
+    $novas = [ordered]@{}
+    foreach ($sn in $Especies.Split(",")) { if (-not $out.Contains($sn)) { throw "especie fora do dex: $sn" }; $novas[$sn] = $out[$sn] }
+    $antigo = [System.IO.File]::ReadAllText($outPath, (New-Object System.Text.UTF8Encoding($false))).TrimEnd()
+    $json = $antigo.Substring(0, $antigo.Length - 1) + "," + (ConvertTo-JsonManual $novas).Substring(1)
+} else { $json = ConvertTo-JsonManual $out }
+[System.IO.File]::WriteAllText($outPath, $json, (New-Object System.Text.UTF8Encoding($false)))
 
 Write-Output "compute_species_role.ps1: OK ($($out.Keys.Count) especies) -> $outPath ($((Get-Item $outPath).Length) bytes)"
 Write-Output "-- papeis (uma especie pode ter mais de um) --"

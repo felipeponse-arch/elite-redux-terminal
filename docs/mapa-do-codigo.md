@@ -118,7 +118,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **calcular_rank_duelo.mjs** - Rank por DUELO SIMULADO contra os chefões reais (reunião de 2026-09-28,
   montarFoe:72, notaDaEspecie:90, percentis:146, tierDe:157, linha:170, med:186
 - **calcular_rank_v2.mjs** - Rank v2 (modelo aprovado pelo usuário em 2026-10-02, depois da pesquisa de método):
-  capDe:38, foe:42, ARG:60, etapaDe:79, br:82, avaliar:89, notas:183, percentis:191, tierDe:196, lutasComunsParaOMeuTime:225
+  capDe:38, foe:42, ARG:60, etapaDe:79, br:82, avaliar:89, notas:198, percentis:206, tierDe:211, lutasComunsParaOMeuTime:240
 - **categorias_pela_config.mjs** - Categorias de golpe (soco, mordida, corte...) pelas FLAGS do jogo, não pelo texto da NextDex.
   lerGolpesDaConfig:37, recuoDoEfeito:65, categoriasDasFlags:71
 - **checar_css.mjs** - Travas dos tokens de CSS (fase 7 da refatoração, 2026-09-24). Roda no
@@ -215,7 +215,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **compute_species_rank.ps1** - (sem comentário de topo)
   Get-AbilityScore:164, Get-BossDefenseScore:211, Get-MovepoolScore:237, Get-TypeScore:274, Get-Stage:337, Get-PercentileRanks:387, Get-Tier:412, Compute-Tiers:430
 - **compute_species_role.ps1** - (sem comentário de topo)
-  Get-MoveIdSet:52, Get-PercentileRanks:66
+  Get-MoveIdSet:56, Get-PercentileRanks:70
 - **dev_server.ps1** - Injecao de mock de sincronizacao (db), 2026-09-11: exclusiva deste servidor
   Get-MockDbScript:13
 - **expand_combo_abilities.ps1** - >

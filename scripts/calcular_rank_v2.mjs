@@ -14,7 +14,7 @@
 //     com FATIA FIXA de peso: chefões 60% e comuns 40% (scripts/rank_fatia.mjs); dentro de cada fatia vale o peso por ameaça.
 // Fontes de cada decisão: docs/decisoes_mecanicas.md (seção Rank).
 //
-// Uso: node scripts/calcular_rank_v2.mjs [--amostra=N] [--gravar] [--so-chefoes] [--fatia=0.6] [--saida=arq] [--relatorio=arq] [--gravar-lutas=arq]
+// Uso: node scripts/calcular_rank_v2.mjs [--especies=A,B] [--amostra=N] [--gravar] [--so-chefoes] [--fatia=0.6] [--saida=arq] [--relatorio=arq] [--gravar-lutas=arq]
 //  --gravar grava data/species_rank.json E data/lutas_comuns_run.json (as comuns mais perigosas de cada etapa, para o Meu Time);
 //  --gravar-lutas=arq grava só a lista das comuns (aceita --amostra, serve de prova); --so-chefoes é o rank antigo (29 lutas).
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
@@ -144,6 +144,21 @@ if (!isMainThread) {
 
 // Prioridade abaixo do normal (16/10/2026): o cálculo usa todos os núcleos e travava o PC; assim o resto da máquina vem primeiro.
 try { setPriority(osConst.priority.PRIORITY_BELOW_NORMAL); } catch (e) { /* sem permissão: segue na prioridade normal */ }
+// --especies=A,B: acrescenta a data/species_rank.json SÓ essas espécies (as demais entradas ficam como estão), pelo mesmo avaliar().
+// Sem Etapa o avaliar devolve null e vale a regra do --gravar (foraDoRank: motivo da disponibilidade ou "sem-fonte"). Espécie com
+// Etapa precisa do rank completo (a nota é percentil da população inteira): aí aborta em vez de inventar.
+if (ARG("--especies")) {
+  const arq = join(RAIZ, "data", "species_rank.json"), rank = JSON.parse(readFileSync(arq, "utf8"));
+  for (const s of ARG("--especies").split(",")) {
+    if (!R.getSpeciesBySname(s)) throw new Error("espécie fora do dex: " + s);
+    if (rank[s]) throw new Error("já está no rank: " + s);
+    if (avaliar(R.getSpeciesBySname(s))) throw new Error(s + " tem Etapa: rode o rank completo (--gravar)");
+    rank[s] = { foraDoRank: (DISP && DISP.motivoFora[s]) || "sem-fonte" };
+  }
+  writeFileSync(arq, JSON.stringify(rank));
+  console.log("acrescentado ao data/species_rank.json: " + ARG("--especies"));
+  process.exit(0);
+}
 const t0 = Date.now();
 const amostra = parseInt((process.argv.find((x) => x.startsWith("--amostra=")) || "").split("=")[1], 10) || 1;
 const todas = R.SPECIES.filter((sp) => sp && sp.sname).map((sp) => sp.sname).filter((_, i) => i % amostra === 0);
