@@ -15,12 +15,12 @@ test("pedra: 4ª insígnia por padrão, tardia pela tabela", () => {
   assert.equal(R.liberadoNaRun(4, 40, { pedra: comum }), true);
 });
 
-test("item: usa o local do código do jogo; sem local com etapa conta liberado", () => {
+test("item: usa o local do código do jogo; sem Etapa fica travado", () => {
   const nome = Object.keys(R.ONDE_ACHAR_ITENS).find((n) => R.primeiroLugarDoItem(n) && R.primeiroLugarDoItem(n).etapa > 3 && !R.MEGA_FORMS[n]);
   const e = R.primeiroLugarDoItem(nome).etapa;
   assert.equal(R.liberadoNaRun(e - 1, 40, { item: nome }), false);
   assert.equal(R.liberadoNaRun(e, 40, { item: nome }), true);
-  assert.equal(R.liberadoNaRun(0, 40, { item: "Item que nao existe" }), true);
+  assert.equal(R.liberadoNaRun(9, 40, { item: "Item que nao existe" }), false);
   assert.equal(R.liberadoNaRun(5, 40, { item: "Gardevoirite" }), false); // item que é pedra cai na regra da pedra
 });
 
@@ -68,4 +68,15 @@ test("pedras R sem fonte (Salamencite R, Metagrossite R) ficam travadas em todas
       assert.equal(R.liberadoNaRun(etapa, 100, { item: pedra }), false, pedra + " (item) liberada na Etapa " + etapa);
     }
   }
+});
+
+// Decisão 8 do usuário (28/10, TK-05): item sem Etapa conhecida = travado; pedra sem dado segue na 4ª.
+test("item sem Etapa travado em toda Etapa; Lum Berry na 5; pedra sem dado na 4ª", () => {
+  for (const item of ["Metronome", "Grip Claw", "Utility Umbrella", "Room Service", "Blunder Policy", "Absorb Bulb", "Cell Battery", "Luminous Moss", "Snowball", "Jaboca Berry", "Rowap Berry"]) {
+    assert.equal(R.liberadoNaRun(9, 100, { item }), false, item);
+  }
+  assert.equal(R.liberadoNaRun(4, 40, { item: "Lum Berry" }), false);
+  assert.equal(R.liberadoNaRun(5, 40, { item: "Lum Berry" }), true);
+  const comum = Object.keys(R.MEGA_FORMS).find((p) => !R.MEGA_PEDRAS_TARDIAS[p] && R.primeiroLugarDoItem(p) === null);
+  if (comum) assert.equal(R.liberadoNaRun(4, 40, { item: comum }), true);
 });

@@ -807,6 +807,13 @@ export const MUTACOES = [
     para: "return true;",
   },
   {
+    id: "liberado-item-sem-etapa-livre",
+    descricao: "liberadoNaRun libera item sem Etapa conhecida",
+    arquivo: "liberado_na_run.js",
+    de: "return e !== null && etapa >= e; }",
+    para: "return e === null || etapa >= e; }",
+  },
+  {
     id: "liberado-golpe-sempre",
     descricao: "liberadoNaRun libera golpe acima do level cap",
     arquivo: "liberado_na_run.js",

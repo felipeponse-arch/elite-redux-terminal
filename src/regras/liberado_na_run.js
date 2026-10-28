@@ -6,9 +6,8 @@
   //
   // alvo (um dos três):
   //   { pedra: "Charizardite X" }  - pedra mega: etapa em MEGA_PEDRAS_TARDIAS, senão a 4ª insígnia;
-  //   { item: "Eviolite" }         - qualquer item; pedra mega cai na regra da pedra; item sem local
-  //                                  com etapa no código do jogo conta como liberado (o dado não
-  //                                  basta pra afirmar que falta);
+  //   { item: "Eviolite" }         - qualquer item; pedra mega cai na regra da pedra; item sem Etapa conhecida fica
+  //                                  TRAVADO em toda Etapa (decisão 8 do usuário, 28/10);
   //   { golpe: 36 }                - nível em que o golpe é aprendido; null = tutor/sem nível (livre);
   //                                  levelCap null/undefined = sem limite.
 
@@ -23,7 +22,7 @@
   function liberadoNaRun(etapa, levelCap, alvo) {
     if (!alvo) return true;
     if (alvo.pedra !== undefined) return etapa >= etapaDaPedra(alvo.pedra);
-    if (alvo.item !== undefined) { var e = etapaDoItem(alvo.item); return e === null || etapa >= e; }
+    if (alvo.item !== undefined) { var e = etapaDoItem(alvo.item); return e !== null && etapa >= e; }
     if (alvo.golpe !== undefined) return alvo.golpe === null || levelCap === null || levelCap === undefined || alvo.golpe <= levelCap;
     return true;
   }

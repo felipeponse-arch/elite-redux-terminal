@@ -10,7 +10,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - bossMonCardHtml:493 - chama: calcFinalStat (calc_stat.js:119), itemRuleFor (calc_stat.js:106), ABILITIES (dados_base.js:10), getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), +1
 - bossState:13 - chamado por: initProgress (progresso.js:105), quemResolvePreencher (quem_resolve.js:66), quemResolveRestaurar (quem_resolve.js:103)
 - campoDoChefaoHtml:178 - chama: regraDeCampoDoChefao (chefoes.js:416)
-- candidatosDoJogador:248 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), battleUnitsOf (formas_mega.js:246), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:75)
+- candidatosDoJogador:248 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), battleUnitsOf (formas_mega.js:246), xsDoJogador (liberado_na_run.js:37), serveProMono (mono_run.js:75)
 - guardarTimeAnterior:266 - chama: getSpeciesByX (dados_base.js:78), xsToSnames (save.js:24), generatedTeamResult (arquetipo.js:35), teamKeyFor (arquetipo.js:14), acao (nucleo.js:242), +1
 - hellDoChefaoHtml:199 - chama: regrasDoHell (chefoes.js:447)
 - iaDoChefaoHtml:190 - chama: comportamentoDaIADoChefao (chefoes.js:433)
@@ -24,7 +24,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - simularSemTravarATela:324 - chama: montarTimeContraChefaoEmPassos (duelo.js:4683), totalDePassosContraChefao (duelo.js:4682)
 
 ## ui/arquetipo.js
-- applyRecommendedTeam:207 - chama: getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), formFamilyOf (formas_mega.js:58), entradasDoJogador (liberado_na_run.js:34), flashToast (dex_lista.js:473), +4 | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorFicarComVariante (modo_motor.js:120)
+- applyRecommendedTeam:207 - chama: getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), formFamilyOf (formas_mega.js:58), entradasDoJogador (liberado_na_run.js:33), flashToast (dex_lista.js:473), +4 | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorFicarComVariante (modo_motor.js:120)
 - archetypeCardHtml:85 - chama: MONOTYPE_ARCHETYPES (dados_base.js:154), PACE_ARCHETYPES (dados_base.js:142), TATICA_ARCHETYPES (dados_base.js:147), WEATHER_ARCHETYPES (dados_base.js:143), modoDeMontagem (modo_motor.js:9), +4
 - buffsMudaram:383 - chama: buffsParaMostrarDoChefao (chefoes.js:473)
 - climaQueCombinaHtml:495 - chama: climaQueCombina (mono_run.js:142), state (nucleo.js:8)
@@ -33,7 +33,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - generateTeamForArchetype:153 - chama: getSpeciesByX (dados_base.js:78), montarPromptTimeArquetipo (prompts_ia.js:823), rosterParaTimeIA (prompts_ia.js:777), snamesValidosDoTime (prompts_ia.js:863), flashToast (dex_lista.js:473), +2
 - generateTeamUsageGuide:270 - chama: guiaDaResposta (prompts_ia.js:908), montarPromptGuia (prompts_ia.js:885), pedirIA (ia.js:80)
 - generatedTeamResult:35 - chamado por: guardarTimeAnterior (aba_chefoes.js:266), montarTimeContraEsteChefao (aba_chefoes.js:337), zerarRun (time.js:356)
-- monoRunCardHtml:516 - chama: entradasDoJogador (liberado_na_run.js:34), MONO_MARCAS (mono_run.js:11), avisoProximoLider (mono_run.js:159), fraquezasDoTipo (mono_run.js:81), monoDisponibilidade (mono_run.js:177), +2
+- monoRunCardHtml:516 - chama: entradasDoJogador (liberado_na_run.js:33), MONO_MARCAS (mono_run.js:11), avisoProximoLider (mono_run.js:159), fraquezasDoTipo (mono_run.js:81), monoDisponibilidade (mono_run.js:177), +2
 - planoContraChefaoHtml:387 - chama: NOME_DA_CONDICAO (condicoes_habilidade.js:42)
 - renderMonoRun:573 - chama: state (nucleo.js:8) | chamado por: renderTeam (time.js:8)
 - renderTeamAnalysis:599 - chama: computeSharedRisks (chefoes.js:109), USABLE_TYPES (dados_base.js:128), abilityTypeMod (tipos.js:172) | chamado por: renderTeam (time.js:8)
@@ -136,12 +136,12 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - modoMotorAquecer:41 - chama: contextoDoMotor (time_pelo_motor.js:141), motorAquecerBuildsEmPassos (time_pelo_motor.js:230) | chamado por: renderTeamStrategy (arquetipo.js:482)
 - modoMotorBotaoHtml:173 - chamado por: archetypeCardHtml (arquetipo.js:85)
 - modoMotorCache:20 - chama: criarCacheDoMotor (time_pelo_motor.js:65)
-- modoMotorCapturados:27 - chama: getSpeciesByX (dados_base.js:78), xsDoJogador (liberado_na_run.js:38), state (nucleo.js:8)
-- modoMotorChave:22 - chama: megaMode (formas_mega.js:75), capOuPadrao (level_cap.js:59), levelCapMode (level_cap.js:16), xsDoJogador (liberado_na_run.js:38), state (nucleo.js:8)
+- modoMotorCapturados:27 - chama: getSpeciesByX (dados_base.js:78), xsDoJogador (liberado_na_run.js:37), state (nucleo.js:8)
+- modoMotorChave:22 - chama: megaMode (formas_mega.js:75), capOuPadrao (level_cap.js:59), levelCapMode (level_cap.js:16), xsDoJogador (liberado_na_run.js:37), state (nucleo.js:8)
 - modoMotorFavoritosHtml:161 - chamado por: archetypeCardHtml (arquetipo.js:85)
 - modoMotorFicarComVariante:120 - chama: getSpeciesByX (dados_base.js:78), SUGESTAO_ROTULO (sugestao_do_motor.js:11), gravarSugestoesDoMotor (sugestao_do_motor.js:61), planoDeGravarSugestoes (sugestao_do_motor.js:39), applyRecommendedTeam (arquetipo.js:207), +4
 - modoMotorMembroHtml:178 - chama: MOTOR_FRASE_DA_PROVA (time_pelo_motor_papeis.js:321)
-- modoMotorMontar:69 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:246), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:75), contextoDoMotor (time_pelo_motor.js:141), +3
+- modoMotorMontar:69 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:246), xsDoJogador (liberado_na_run.js:37), serveProMono (mono_run.js:75), contextoDoMotor (time_pelo_motor.js:141), +3
 - modoMotorResultadoHtml:234 - chamado por: renderTeamStrategy (arquetipo.js:482)
 - modoMotorRodapeHtml:191 - chama: SUGESTAO_ROTULO (sugestao_do_motor.js:11)
 - modoMotorSeletorHtml:153 - chamado por: archetypeCardHtml (arquetipo.js:85)

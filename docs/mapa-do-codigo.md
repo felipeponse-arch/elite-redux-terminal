@@ -36,7 +36,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **level_cap.js** - Level cap atual e golpes liberados por ele.
   levelCapMode:16, levelCapModeFromDifficulty:22, innatesAtivasNoNivel:34, nivelDaHabilidadeNoElite:40, innatesTravadasNoNivel:44, getCurrentCap:49, capOuPadrao:59, nivelDeCalculo:63, availableMovesFor:71, golpesTravadosNoCap:88
 - **liberado_na_run.js** - O que a run libera: UMA função pura (etapa, levelCap, alvo) -> boolean para pedra mega, item e
-  etapaDaPedra:16, etapaDoItem:18, liberadoNaRun:23, entradasDoJogador:34, xsDoJogador:38
+  etapaDaPedra:15, etapaDoItem:17, liberadoNaRun:22, entradasDoJogador:33, xsDoJogador:37
 - **lista_de_builds.js** - As 4 mudanças na lista de builds salvas de uma espécie (state.customBuilds[sname],
   trocarBuildAtivaNaLista:11, acrescentarVarianteNaLista:23, removerBuildDaLista:32, buildQueSaiParaAbrirVaga:43, liberarVagaNaLista:51
 - **mono_run.js** - Mono run: o que dá pra pegar do seu tipo até a etapa atual (2026-09-26,
