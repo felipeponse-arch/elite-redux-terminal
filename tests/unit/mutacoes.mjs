@@ -4597,4 +4597,11 @@ export const MUTACOES = [
     de: "return campos.length === 0 && !TYPE_MOD_ABILITIES[id]",
     para: "return true && !TYPE_MOD_ABILITIES[id]",
   },
+  {
+    id: "estrutura-sinergia-sem-bonus-nome-fora-do-dado",
+    descricao: "um dos 7 nomes da lista 'sinergia sem bônus de dano' sai do dado (TK-12 estrutura D4.3: o conjunto por ID perderia a entrada em silêncio)",
+    arquivo: "duelo.js",
+    de: "\"Well Baked Body\", \"Justified\", \"Inflatable\", \"Flash Fire\", \"Elemental Vortex\"];",
+    para: "\"Well Baked Bod\", \"Justified\", \"Inflatable\", \"Flash Fire\", \"Elemental Vortex\"];",
+  },
 ];

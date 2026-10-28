@@ -72,7 +72,10 @@
   // nos golpes de ar/asa etc.; o simulador do jogo (2.65.3b) mostra o Aerial Ace do Ledian sem esse x1,3 (calibracao-simulador/01, 21/10/2026).
   // Flash Fire e Elemental Vortex (B4, 21/10): o x1,5 em Fire só liga depois de absorver um golpe Fire (abilities.cc:695-706 e 8262-8264); o gatilho já
   // é modelado em danoComStatusNoDuelo (`absorveReforca`), então a sinergia sempre ligada contava o bônus duas vezes.
-  var SINERGIA_SEM_BONUS_DE_DANO_DUELO = { "Aerodynamics": 1, "Motor Drive": 1, "Well Baked Body": 1, "Justified": 1, "Inflatable": 1, "Flash Fire": 1, "Elemental Vortex": 1 };
+  // TK-12 D4.3: lista de NOMES (nenhum campo do texto distingue essas 7) vira conjunto por ID (a chave que o motor mais usa), montado uma vez de ABILITY_ID_BY_NAME.
+  var NOMES_SINERGIA_SEM_BONUS_DE_DANO_DUELO = ["Aerodynamics", "Motor Drive", "Well Baked Body", "Justified", "Inflatable", "Flash Fire", "Elemental Vortex"];
+  var SINERGIA_SEM_BONUS_DE_DANO_DUELO = {};
+  NOMES_SINERGIA_SEM_BONUS_DE_DANO_DUELO.forEach(function (nome) { SINERGIA_SEM_BONUS_DE_DANO_DUELO[ABILITY_ID_BY_NAME[nome]] = 1; });
   function bonusDeGolpeLidoDoTextoDuelo(ef) { return Object.keys(ef.bonusTipo).length > 0 || Object.keys(ef.bonusCategoria).length > 0 || Object.keys(ef.flagMult).length > 0 || ef.contatoMult !== 1; }
   function acertosDoGolpeDuelo(id) {
     var m = MOVES[id];
@@ -1622,7 +1625,7 @@
     (ABILITY_SYNERGY[sname] || []).forEach(function (h) {
       var id = ids.filter(function (i) { return nomeHabDuelo(i) === h.name; })[0];
       if (id === undefined) return;
-      if (SINERGIA_SEM_BONUS_DE_DANO_DUELO[h.name]) return; // o jogo não dá bônus de dano a ela (lista acima de bonusDeGolpeLidoDoTextoDuelo)
+      if (SINERGIA_SEM_BONUS_DE_DANO_DUELO[id]) return; // o jogo não dá bônus de dano a ela (lista acima de bonusDeGolpeLidoDoTextoDuelo)
       // Habilidade cujo bônus de golpe o texto já ensina: a leitura do texto vale para todo golpe e a sinergia por golpe da espécie
       // contaria o mesmo bônus duas vezes (Tough Claws x1,3 x 1,3 = 1,69; Nocturnal x1,25 x 1,25 = 1,54).
       if (bonusDeGolpeLidoDoTextoDuelo(efeitoDasHabilidadesNoDuelo([id], "solo#" + id, null))) return;
