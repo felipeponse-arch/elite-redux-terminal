@@ -11,7 +11,7 @@
 //
 // Regras com fonte citada: data/disponibilidade_regras.json.
 // Uso: node scripts/gerar_rank_disponibilidade.mjs <caminho do er-repo> [--estrito]
-import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
@@ -160,8 +160,9 @@ writeFileSync("data/rank_disponibilidade.json", JSON.stringify({
   etapa: saida,
   motivoFora
 }) + "\n");
-// auditoria fora do repositório (grande, só para depurar)
-writeFileSync(join("..", "rank_disponibilidade_auditoria.json"), JSON.stringify({ versaoDasFontes, origem, evidencias, conflitos }, null, 1));
+// auditoria dentro do repositório, em tmp/ (ignorada pelo git; grande, só para depurar)
+mkdirSync("tmp", { recursive: true });
+writeFileSync(join("tmp", "rank_disponibilidade_auditoria.json"), JSON.stringify({ versaoDasFontes, origem, evidencias, conflitos }, null, 1));
 const contagem = {};
 for (const m of Object.values(motivoFora)) contagem[m] = (contagem[m] || 0) + 1;
 console.log("fora por motivo:", JSON.stringify(contagem), "| conflitos entre fontes:", conflitos.length);
