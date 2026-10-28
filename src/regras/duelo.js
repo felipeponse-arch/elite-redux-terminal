@@ -234,10 +234,26 @@
     if (!m) return 1;
     return ACERTOS_PELO_TEXTO_DUELO[m[0]] || ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;
   }
+  // Recarga pelo EFEITO do dado, não pela tradução PT (TK-06; decisão 7 do usuário, 28/10). Só Hyper Beam e Giga Impact são
+  // EFFECT_RECHARGE (MOVE_EFFECT_RECHARGE, battle_script_commands.c:2828): o x0,5 (x0,75 com Rampage) é deles.
+  function golpeDeRecargaDuelo(id) {
+    var m = MOVES[id];
+    return !!m && m[11] === "Recharge";
+  }
+  // every_other_turn (MoveList.textproto da er-config; 13 golpes, conferidos um a um): NÃO é recarga - o jogo só proíbe ESCOLHER o mesmo
+  // golpe duas vezes seguidas (battle_util.c:1607-1617, B_MSG_CANTSELECTTWICE), salvo Rampage/Master Hand/Raging Goddess/Berserker Rage
+  // (as 4 já ligam ef.semRecarga pelo texto). Decisão do usuário (28/10): o motor alterna o golpe com o melhor OUTRO do set
+  // (média dos dois turnos em danoNoDuelo; sem outro golpe, o turno alternado vale 0 - shortcut: Struggle ignorado).
+  // Eternabeam: sem effect no textproto (EFFECT_HIT); a descrição "descansa" é só texto, o código é o every_other_turn.
+  var ALTERNA_PELO_CAMPO_DUELO = { "Blast Burn": 1, "Hydro Cannon": 1, "Frenzy Plant": 1, "Rock Wrecker": 1, "Prismatic Laser": 1, "Meteor Assault": 1, "Eternabeam": 1,
+    "Gigaton Hammer": 1, "Blood Moon": 1, "Rip and Tear": 1, "Spectral Serenade": 1, "Blue Moon": 1, "Tsunami Hammer": 1 };
+  // Golpe de dois turnos (carrega antes de bater): efeitos do dado; Solar Beam/Blade ("Solarbeam") e o resto do grupo.
+  // Sky Drop: o efeito "Sky Drop" é compartilhado com o Seismic Toss (dano fixo = nível), então o golpe de 2 turnos sai pelo NOME, não pelo efeito.
+  var EFEITOS_DE_CARGA_DUELO = { "Solarbeam": 1, "Two Turn Secondary": 1, "Semi Invulnerable": 1, "Two Turn Retaliation": 1 };
   function golpeUtilNoDuelo(id) {
     var m = MOVES[id];
     if (!m || !(m[3] > 0) || DATA.splits[m[2]] === "STATUS") return false;
-    return !/desmaia|descansa no turno/i.test(MOVE_PT[id] || "");
+    return !/desmaia/i.test(MOVE_PT[id] || "") && !golpeDeRecargaDuelo(id);
   }
   // Efeito oficial que troca o atributo de ataque (battle_util.c CalcAttackStat): Foul Play usa o Atk do ALVO; Body Press, a Def do usuário.
   // Poder que cresce (ticket 19; battle_util.c CalcMoveBasePower, EFFECT_MISC_HIT): o efeito vem do
@@ -259,7 +275,7 @@
     var lm = (sp.lm || []).filter(function (p) { return nivel === null || nivel === undefined || p[0] <= nivel; });
     return uniqueIds(lm.map(function (p) { return p[1]; }).concat(sp.tu || [])).filter(function (id) {
       var m = MOVES[id];
-      return m && m[3] > 0 && DATA.splits[m[2]] !== "STATUS" && /descansa no turno/i.test(MOVE_PT[id] || "");
+      return m && m[3] > 0 && DATA.splits[m[2]] !== "STATUS" && golpeDeRecargaDuelo(id);
     });
   }
   function golpesDeDueloAte(sp, nivel) {
@@ -1853,11 +1869,12 @@
       // Electro Shot (ticket 19; battle_scripts_1.s BattleScript_EffectElectroShot): carrega um turno subindo
       // +1 de Sp. Atk; na chuva dispara na hora. Accelerate e Power Herb também (twoturnmoveacceleratecheck).
       if (cat && cat.ef === "Electro Shot") return clima === "chuva" || u.ef.cargaInstantanea || !!(u.it && u.it.cargaUmaVez);
-      // Golpe de dois turnos: pela descrição ou pelo efeito "Semi Invulnerable" do dado
-      // (o Rock Climb é "A charging attack" no NextDex, mas a tradução não diz - escapava).
-      if (!/no primeiro turno|turno seguinte/i.test(MOVE_PT[id] || "") && !(cat && cat.ef === "Semi Invulnerable")) return true;
+      // Recarga não é carga: Hyper Beam e parecidos ficam (com a penalidade de recarga em danoNoDuelo).
+      // Golpe de dois turnos: pelo EFEITO do dado (TK-06), não pela tradução PT.
+      var efeito = MOVES[id][11];
+      if (!EFEITOS_DE_CARGA_DUELO[efeito] && MOVES[id][0] !== "Sky Drop") return true;
       if (u.ef.cargaInstantanea || (u.it && u.it.cargaUmaVez)) return true; // Accelerate, Power Herb
-      return /^Solar (Beam|Blade)$/.test(MOVES[id][0]) && (clima === "sol" || u.ef.chloroplast);
+      return efeito === "Solarbeam" && (clima === "sol" || u.ef.chloroplast);
     });
     var lista = ids.map(function (id) {
       var m = MOVES[id];
@@ -1939,8 +1956,8 @@
       var contato = temContatoDuelo(m) && !u.ef.semContato && !itemTiraContato;
       if (contato) hab *= u.ef.contatoMult;
       // Golpe de recarga com Rampage: sem recarga quando nocauteia - na média, 3/4 do dano por turno.
-      if (/descansa no turno/i.test(MOVE_PT[id] || "")) hab *= u.ef.semRecarga ? 0.75 : 0.5;
-      var g = { nome: m[0], tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: contato, contatoBruto: temContatoDuelo(m), corte: cats.indexOf("corte") !== -1, som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
+      if (golpeDeRecargaDuelo(id)) hab *= u.ef.semRecarga ? 0.75 : 0.5;
+      var g = { nome: m[0], alterna: ALTERNA_PELO_CAMPO_DUELO[m[0]] === 1 && !u.ef.semRecarga, tipo: tipo, tipo2: tipo2, cat: cat, defEspecial: defEspecial, defNaDef: DATA.splits[m[2]] === "HITS_DEF" || cats.some(function (c) { return u.ef.categoriaNaDef[c]; }), fonteAtk: FONTE_DO_ATAQUE_DUELO[m[11]] || null, contato: contato, contatoBruto: temContatoDuelo(m), corte: cats.indexOf("corte") !== -1, som: som, prio: (m[7] || 0) + (u.ef.prioBP && m[3] > 0 && m[3] < u.ef.prioBP ? 1 : 0),
         prioPrimeiro: cats.some(function (c) { return u.ef.prioPrimeiroCategoria[c]; }), // 1º uso (Coil Up...): o estado é gasto no fim do turno
         prioCheio: u.ef.prioTipoCheio.indexOf(tipo) !== -1 || (som && u.ef.prioCheioSom) ||
           cats.some(function (c) { return u.ef.prioCheioCategoria[c] || u.ef.prioPrimeiroCategoria[c]; }),
@@ -2202,6 +2219,12 @@
       if (dano > melhor.dano) melhor = este;
       if (prioAqui > 0 && dano > melhorPrio.dano) melhorPrio = { dano: dano };
     });
+    // Alterna (every_other_turn): o golpe vale a média com o melhor OUTRO golpe; reescolhe o melhor com esse valor.
+    var melhorOutro = function (c) { return candidatos.reduce(function (m, o) { return o !== c && o.dano > m ? o.dano : m; }, 0); };
+    if (candidatos.some(function (c) { return c.golpe.alterna; })) {
+      candidatos = candidatos.map(function (c) { return c.golpe.alterna ? Object.assign({}, c, { dano: (c.dano + melhorOutro(c)) / 2 }) : c; });
+      melhor = candidatos.reduce(function (m, c) { return c.dano > m.dano ? c : m; }, { dano: 0, prio: 0, golpe: null });
+    }
     return { melhor: melhor, melhorPrio: melhorPrio, segundo: segundo, ia: escolhaDaIADuelo(candidatos, atq, def) || melhor };
   }
   // Escolha de golpe da IA dos treinadores (ticket 03, 07/10; código oficial battle_ai_main.c AI_TryToFaint e
