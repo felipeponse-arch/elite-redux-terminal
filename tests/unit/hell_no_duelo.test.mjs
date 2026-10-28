@@ -107,3 +107,20 @@ test("R7 Hell: inimigo +5 níveis com milestone >= 3 (teto 100); antes disso e n
     assert.deepEqual(st("hell", 8, 98), st("ace", 8, 100), "teto 100");
   } finally { R.state.settings.milestone = marco; }
 });
+
+// R7 (revisão do supervisor): o +5 vale também no dano do inimigo (termo 2L/5+2 e Night Shade), não só nos stats.
+test("R7 Hell: dano do inimigo usa o nível +5 (50 -> 55: termo 24, não 22); fora do Hell igual", () => {
+  const marco = R.state.settings.milestone, base = R.BOSSES.find((x) => x.name === "Brawly 1").party[0];
+  const eu = unid("Vaporeon", "Surf");
+  const dele = (dif, mv) => { R.state.settings.milestone = 3; return noModo(dif, () => { const f = R.foeDeDuelo(Object.assign({}, base, { mv: [mv] }), NIVEL, null); return { f, d: dano(f, eu).dano }; }); };
+  try {
+    const h = dele("hell", "Night Shade"), a = dele("ace", "Night Shade");
+    assert.equal(h.f.nivelDuelo, NIVEL + 5);
+    assert.ok(Math.abs(h.d - (NIVEL + 5)) < 1e-9, "Night Shade = nível efetivo, deu " + h.d);
+    assert.ok(Math.abs(a.d - NIVEL) < 1e-9, "Ace: nível sem +5, deu " + a.d);
+    const x = dele("hell", "Tackle"), y = dele("hell", "Tackle");
+    y.f.nivelDuelo = NIVEL; // sem o +5 no termo de nível, o dano cai
+    const dd = (f) => noModo("hell", () => dano(f, eu).dano);
+    assert.ok(dd(x.f) > dd(y.f), "termo de nível 24 > 22");
+  } finally { R.state.settings.milestone = marco; }
+});

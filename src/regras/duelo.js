@@ -2176,10 +2176,11 @@
       var crit = fatorCriticoDuelo(atq, def, g, efTipo);
       // Hell: super efetivo 2x vira 1,5x e 4x vira 2,5x, nos dois lados (battle_util.c:7961-7969); efTipo segue o da tabela nos limiares >=2.
       var fHell = modoHellDuelo() ? (efTipo === 2 ? 0.75 : efTipo === 4 ? 0.625 : 1) * fDanoGlobalHell(def) : 1;
-      var dano = ((((2 * nivel) / 5 + 2) * forca * A / D) / 50 + 2) * efTipo * fHell * red * ROLAGEM_MEDIA_DUELO * precisao * crit.fator * noCampo * comItem(itA.danoMult, ativoA);
+      var nivelAtq = atq.nivelDuelo || nivel; // Hell: o inimigo tem +5 níveis de fato
+      var dano = ((((2 * nivelAtq) / 5 + 2) * forca * A / D) / 50 + 2) * efTipo * fHell * red * ROLAGEM_MEDIA_DUELO * precisao * crit.fator * noCampo * comItem(itA.danoMult, ativoA);
       // Seismic Toss e Night Shade (battle_script_commands.c Cmd_calculatesetdamage): dano = nível de quem usa;
       // só a imunidade de tipo conta (já descartada acima), nada de atributo, STAB, crítico ou item.
-      if (g.poderVariavel === "Sky Drop" || g.poderVariavel === "Level Damage") dano = nivel * precisao;
+      if (g.poderVariavel === "Sky Drop" || g.poderVariavel === "Level Damage") dano = nivelAtq * precisao;
       // Golpe que baixa o próprio Sp. Atk em 2 a cada uso (Overheat, Draco Meteor, Leaf
       // Storm...; revisão de 2026-09-30 - antes contava força cheia todo turno):
       // média do dano ao longo dos golpes que precisa pra derrubar.
@@ -3039,7 +3040,7 @@
     var abiId = m.abiId !== undefined && m.abiId >= 0 ? m.abiId : ABILITY_ID_BY_NAME[m.abi];
     var ids = uniqueIds((sp.inn || []).concat(abiId !== undefined && !megaSname ? [abiId] : []));
     var ev = m.evsRaw || [0, 0, 0, 0, 0, 0], iv = m.ivsRaw || [31, 31, 31, 31, 31, 31];
-    var foe = { sp: sp, nome: m.n || sp.n, ids: ids, item: m.item || "", it: itemDoDuelo(m.item || "", sp),
+    var foe = { nivelDuelo: nivel, sp: sp, nome: m.n || sp.n, ids: ids, item: m.item || "", it: itemDoDuelo(m.item || "", sp),
       stats: [0, 1, 2, 3, 4, 5].map(function (i) { return calcFinalStat(sp.b[i], iv[i], ev[i], nivel, i, m.nat, m.item, sp.n); }) };
     foe.hpt = m.hpt || null; // tipo do Hidden Power deste Pokémon (antes de preparar os golpes)
     foe.ef = efeitoDasHabilidadesNoDuelo(ids, sp.sname, clima);

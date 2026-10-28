@@ -4341,8 +4341,8 @@ export const MUTACOES = [
     id: "hell-efetividade-sem-reducao",
     descricao: "no Hell o super efetivo volta a 2x/4x (H1)",
     arquivo: "duelo.js",
-    de: "var fHell = modoHellDuelo() ? (efTipo === 2 ? 0.75 : efTipo === 4 ? 0.625 : 1) : 1;",
-    para: "var fHell = 1;",
+    de: "(efTipo === 2 ? 0.75 : efTipo === 4 ? 0.625 : 1) * fDanoGlobalHell(def)",
+    para: "fDanoGlobalHell(def)",
   },
   {
     id: "hell-efetividade-vale-fora-do-hell",
@@ -4392,5 +4392,12 @@ export const MUTACOES = [
     arquivo: "duelo.js",
     de: "return modoHellDuelo() && state.settings.milestone >= 3 ? Math.min(100, nivel + 5) : nivel;",
     para: "return nivel;",
+  },
+  {
+    id: "hell-dano-ignora-nivel-extra",
+    descricao: "o dano do inimigo do Hell ignora o +5 de nível (R7: termo 2L/5+2 e Night Shade)",
+    arquivo: "duelo.js",
+    de: "var nivelAtq = atq.nivelDuelo || nivel;",
+    para: "var nivelAtq = nivel;",
   },
 ];
