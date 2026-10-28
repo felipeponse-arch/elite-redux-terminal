@@ -25,7 +25,7 @@ import { Worker, isMainThread, parentPort, workerData } from "node:worker_thread
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 import { melhoresPelaSoma, notaDosEixos, escolherPelaNotaFinal } from "./rank_escolha.mjs";
 import { lutasComunsDaRun } from "./estudo/lutas_comuns.mjs";
-import { notasComFatia, comunsMaisPerigosas, FATIA_DOS_CHEFOES, COMUNS_POR_ETAPA } from "./rank_fatia.mjs";
+import { notasComFatia, comunsMaisPerigosas, COMUNS_POR_ETAPA } from "./rank_fatia.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const R = carregarRegras({ milestone: 9 });
@@ -60,9 +60,9 @@ for (const d of DIFICULDADES) {
 const ARG = (k) => (process.argv.find((x) => x.startsWith(k + "=")) || "").slice(k.length + 1) || null;
 const LUTAS_EXTRA = ARG("--lutas-extra");
 const SO_CHEFOES = process.argv.includes("--so-chefoes");
-const FATIA = ARG("--fatia") ? Number(ARG("--fatia")) : FATIA_DOS_CHEFOES;
+const FATIA = ARG("--fatia") ? Number(ARG("--fatia")) : R.FATIA_DOS_CHEFOES;
 // A fatia 60/40 é decisão do usuário (16/10/2026): o rank GRAVADO não aceita outra fatia nem outra lista de lutas.
-if (process.argv.includes("--gravar") && (FATIA !== FATIA_DOS_CHEFOES || LUTAS_EXTRA || SO_CHEFOES)) throw new Error("--gravar exige a fatia " + FATIA_DOS_CHEFOES + " e a lista oficial de lutas (sem --fatia diferente, --lutas-extra ou --so-chefoes)");
+if (process.argv.includes("--gravar") && (FATIA !== R.FATIA_DOS_CHEFOES || LUTAS_EXTRA || SO_CHEFOES)) throw new Error("--gravar exige a fatia " + R.FATIA_DOS_CHEFOES + " e a lista oficial de lutas (sem --fatia diferente, --lutas-extra ou --so-chefoes)");
 if (!SO_CHEFOES) {
   const extra = LUTAS_EXTRA ? JSON.parse(readFileSync(LUTAS_EXTRA, "utf8")).lutas : lutasComunsDaRun(RAIZ).lutas;
   for (const d of DIFICULDADES) {

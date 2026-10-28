@@ -4,7 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
 import { lutasComunsDaRun } from "../../scripts/estudo/lutas_comuns.mjs";
-import { notasComFatia, comunsMaisPerigosas, FATIA_DOS_CHEFOES, COMUNS_POR_ETAPA } from "../../scripts/rank_fatia.mjs";
+import { notasComFatia, comunsMaisPerigosas, COMUNS_POR_ETAPA } from "../../scripts/rank_fatia.mjs";
 
 const R = carregarRegras({ milestone: 0 });
 const comuns = lutasComunsDaRun().lutas;
@@ -14,14 +14,14 @@ const todas = lutas.map((_, i) => i);
 test("a composição real: 29 chefões e centenas de comuns (sem a fatia as comuns dominariam)", () => {
   assert.equal(R.LUTAS_DA_RUN.length, 29);
   assert.ok(comuns.length >= 500, "comuns: " + comuns.length);
-  assert.equal(FATIA_DOS_CHEFOES, 0.6);
+  assert.equal(R.FATIA_DOS_CHEFOES, 0.6);
 });
 
 test("a fatia 60/40 pesa certo: quem gabarita só os chefões tira 0,6; quem gabarita só as comuns tira 0,4", () => {
   const br = { soChefao: (i) => (lutas[i].comum ? 0 : 1), soComum: (i) => (lutas[i].comum ? 1 : 0) };
   const lista = (s) => todas.map((i) => [i, br[s](i)]);
   const validos = ["soChefao", "soComum"];
-  const com = notasComFatia(lutas, validos, lista, FATIA_DOS_CHEFOES);
+  const com = notasComFatia(lutas, validos, lista, R.FATIA_DOS_CHEFOES);
   assert.ok(Math.abs(com.nota.soChefao - 0.6) < 1e-9, "soChefao " + com.nota.soChefao);
   assert.ok(Math.abs(com.nota.soComum - 0.4) < 1e-9, "soComum " + com.nota.soComum);
   // Sem a fatia (todas no mesmo saco) quem só gabarita os chefões fica perto de zero: era o problema que a fatia resolve.
@@ -34,7 +34,7 @@ test("espécie que só enfrenta uma fatia fica com a nota dessa fatia (não é p
   const ultimaComum = Math.max(...comuns.map((l) => l.etapa));
   // "tarde" só cobre as lutas de chefão da última etapa em diante; nenhuma comum.
   const lista = (s) => todas.filter((i) => s === "cedo" || (!lutas[i].comum && lutas[i].etapa >= ultimaComum)).map((i) => [i, 0.8]);
-  const r = notasComFatia(lutas, ["cedo", "tarde"], lista, FATIA_DOS_CHEFOES);
+  const r = notasComFatia(lutas, ["cedo", "tarde"], lista, R.FATIA_DOS_CHEFOES);
   assert.ok(Math.abs(r.nota.tarde - 0.8) < 1e-9 && Math.abs(r.nota.cedo - 0.8) < 1e-9);
 });
 

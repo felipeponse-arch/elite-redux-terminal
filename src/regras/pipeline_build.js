@@ -104,7 +104,7 @@
           if (fc) { saida.foes.push(fc); saida.pesosComuns.push(c.peso); return; }
         }
       });
-      if (saida.pesosComuns.length) saida.fatia = dadoComum.fatia !== undefined ? dadoComum.fatia : 0.6;
+      if (saida.pesosComuns.length) saida.fatia = dadoComum.fatia !== undefined ? dadoComum.fatia : FATIA_DOS_CHEFOES;
       saida.info = { chefao: null, indice: null, pokemon: saida.foes.map(function (f) { return f.nome; }), origem: "campo", lutas: saida.nChefoes, comuns: saida.pesosComuns.length };
       return saida;
     }

@@ -16,7 +16,17 @@
   // (insane) e Elite mostrava o de Hell - o seletor manual de chips
   // (Padrao/Insane/Hell) continua disponivel pra quem quiser conferir os
   // outros tiers na mesma tela.
-  var DIFF_TO_BOSSKEY = { easy: "party", ace: "party", elite: "insane", hell: "hell" };
+  // UMA tabela dificuldade -> tier (TK-20): "chefao" = time do chefão (DIFF_TO_BOSSKEY); "rank" = visão do rank da espécie
+  // (rank_da_run.js; só existem party e insane, então Hell usa a insane, a mais difícil calculada, até existir rank Hell).
+  var TIER_DA_DIFICULDADE = {
+    easy: { chefao: "party", rank: "party" }, ace: { chefao: "party", rank: "party" },
+    elite: { chefao: "insane", rank: "insane" }, hell: { chefao: "hell", rank: "insane" }
+  };
+  var DIFF_TO_BOSSKEY = {};
+  Object.keys(TIER_DA_DIFICULDADE).forEach(function (d) { DIFF_TO_BOSSKEY[d] = TIER_DA_DIFICULDADE[d].chefao; });
+  // Fatia fixa do rank v2 (decisão do usuário, 16/10/2026): chefões 60%, lutas comuns 40%. Lida pelo Meu Time, pelo pipeline de build e
+  // por scripts/calcular_rank_v2.mjs (via carregarRegras): não há outra cópia.
+  var FATIA_DOS_CHEFOES = 0.6;
 
   // "Estou no 2º badge, o que faz sentido daqui até o final?" - pedido do
   // usuário, 2026-09-10: sem NENHUMA pergunta nova pro jogador - usa só o

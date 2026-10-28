@@ -33,7 +33,6 @@
   // por variante; 1 comum por etapa (7 lutas) e 10 na conferência levaram a montagem de 6,8 s para 15,8 s, acima dos 10 s do ticket.
   var MOTOR_COMUNS_NA_AMOSTRA = 3;
   var MOTOR_COMUNS_NA_CONFERENCIA = 3;
-  var MOTOR_FATIA_PADRAO = 0.6;
   // Os objetivos de seleção. Todos leem os MESMOS números da luta completa (venceu, derrubados, total, vivos, pontos); só mudam
   // o que premiam. A régua comum (pontos médios, vitórias, cobertura) é a mesma nas variantes e vem em `metricas`.
   var MOTOR_OBJETIVOS = {
@@ -117,7 +116,7 @@
       if (vistas[l.etapa] === 1) amostra.push(l); // a mais perigosa de cada etapa; abaixo, afinada para MOTOR_COMUNS_NA_AMOSTRA
       if (vistas[l.etapa] <= MOTOR_COMUNS_NA_CONFERENCIA) conferencia.push(l);
     });
-    return { todas: todas, restantes: restantes, amostra: motorEspacadas(amostra.sort(ordem), MOTOR_COMUNS_NA_AMOSTRA), conferencia: conferencia.sort(ordem), fatia: dado && dado.fatia !== undefined ? dado.fatia : MOTOR_FATIA_PADRAO };
+    return { todas: todas, restantes: restantes, amostra: motorEspacadas(amostra.sort(ordem), MOTOR_COMUNS_NA_AMOSTRA), conferencia: conferencia.sort(ordem), fatia: dado && dado.fatia !== undefined ? dado.fatia : FATIA_DOS_CHEFOES };
   }
   // As lutas do contexto: todas as 29 (conferência final) e a amostra fixa (busca), função só da etapa.
   function motorLutasDoContexto(etapa) {
