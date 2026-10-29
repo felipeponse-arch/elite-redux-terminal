@@ -250,16 +250,6 @@
   // compartilhados do time") e effectiveBuild() (já usada em toda parte
   // que mostra a build ativa) - nunca afirma "time pronto" se algum
   // membro ainda não tem build salva de verdade.
-  function computeTeamGenerationValidation(members) {
-    var withoutBuild = members.filter(function (sp) { return !effectiveBuild(sp); }).map(function (sp) { return sp.n; });
-    return {
-      total: members.length,
-      withoutBuild: withoutBuild,
-      allBuilt: withoutBuild.length === 0,
-      sharedRisks: computeSharedRisks(members)
-    };
-  }
-
   // Guia de utilização (item 3 do pedido do usuário, 2026-09-17: conceito,
   // abertura, desenvolvimento, condição de vitória, ameaças/respostas) -
   // pede pra IA um texto PRÁTICO desta equipe especificamente, com as

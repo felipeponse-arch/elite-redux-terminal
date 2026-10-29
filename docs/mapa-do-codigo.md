@@ -8,7 +8,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **avisos_build.js** - Lote 5 das pesquisas de 06/10 (ideias do GPT, seções 3.2/17/26/42): Avisos de build e selo de
   avisosDaBuild:8, seloDaBuild:82, primeiroLugarDoItem:94, rotuloDaEtapaDoItem:98, ondeAcharItemTexto:100
 - **builds.js** - Build mostrada (effectiveBuild: salva > herdada da base pela Mega > curada do
-  entradaDeBuild:23, stripNote:49, showdownName:54, showdownSet:58, evsToShowdownText:75, teamItemsInUse:90, comecarLoteDeBuilds:118, concluirBuildDoLote:119, encerrarLoteDeBuilds:120, contaNoTime:121, teamMovesInUse:123, itemEsgotadoNoTime:152, itensEmUsoComQuem:153, teamRolesInUse:165, golpesFuturosDe:179, effectiveBuild:202
+  entradaDeBuild:23, stripNote:49, showdownName:54, showdownSet:58, evsToShowdownText:75, teamItemsInUse:90, comecarLoteDeBuilds:118, concluirBuildDoLote:119, encerrarLoteDeBuilds:120, contaNoTime:121, teamMovesInUse:123, itemEsgotadoNoTime:152, itensEmUsoComQuem:153, teamRolesInUse:165, golpesFuturosDe:179, effectiveBuild:202, computeTeamGenerationValidation:240
 - **calc_stat.js** - Fórmula de status final (base+IV+EV+nível+nature+item) e o que deriva
   especiePorNomeDoItem:135, regraCasaComEspecie:139, itemRuleFor:149, calcFinalStat:160, minEvSameStat:200, nextEvBreakpoint:210, priorityOrderForEvs:235, trimAndReallocateEvs:238
 - **campo.js** - TK-16 (campo, fase 1): FONTE ÚNICA do vocabulário de clima, terreno, telas e hazards, e das durações de campo.
@@ -74,7 +74,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **abas.js** - Navegação entre abas (e o redesenho da aba que abre).
   posicionarProgresso:22, closeMorePanel:32
 - **arquetipo.js** - Arquétipo do time, time sugerido e o Gerador Inteligente de Times.
-  teamKeyFor:14, classeDeEntradaDoCardGerado:41, archetypeChipsHtml:53, resumoDoArquetipo:74, archetypeCardHtml:85, generateTeamForArchetype:153, applyRecommendedTeam:207, computeTeamGenerationValidation:253, generateTeamUsageGuide:270, generateCompleteTeam:302, vereditoDaLutaHtml:365, buffsMudaram:383, planoContraChefaoHtml:387, generatedTeamCardHtml:436, renderTeamStrategy:482, climaQueCombinaHtml:495, monoRunCardHtml:516, renderMonoRun:573, renderTeamAnalysis:599
+  teamKeyFor:14, classeDeEntradaDoCardGerado:41, archetypeChipsHtml:53, resumoDoArquetipo:74, archetypeCardHtml:85, generateTeamForArchetype:153, applyRecommendedTeam:207, generateTeamUsageGuide:260, generateCompleteTeam:292, vereditoDaLutaHtml:355, buffsMudaram:373, planoContraChefaoHtml:377, generatedTeamCardHtml:426, renderTeamStrategy:472, climaQueCombinaHtml:485, monoRunCardHtml:506, renderMonoRun:563, renderTeamAnalysis:589
 - **auto_evolucao.js** - Registro "O que o app fez sozinho" na tela e a auto-evolução do time/caixa pelo level cap.
   renderAutoLog:9, autoEvolveRoster:20
 - **caixa.js** - Aba Caixa (PC Box): grade por páginas, busca e ações de cada Pokémon da caixa.
@@ -410,5 +410,6 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **tira_setup.test.mjs** - Ticket 18 (07/10/2026): golpes que tiram setup, pelo código oficial (er-repo 217dd0f,
 - **traducoes_alinhadas_por_nome.test.mjs** - Versão 2.65.4 deslocou ids de habilidade (Mighty Horn 391 -> 390; 391 virou Hardened Sheath...). A tradução PT é indexada por id, então
 - **vaga.test.mjs** - Vaga de verificação pesada (scripts/vaga.mjs, melhoria B de 2026-10-13).
+- **validacao_do_time_gerado.test.mjs** - TK-28: a decisão "quais Pokémon do time ainda estão sem build" mora em src/regras (computeTeamGenerationValidation), não na tela.
 - **validar_dado_cru.test.mjs** - Validação do dado cru do NextDex na ingestão (scripts/validar_dado_cru.mjs, lote 2).
 - **vocabulario_da_etapa.test.mjs** - TK-27: texto da UI usa "Etapa" (GLOSSARY.md), não "marco".

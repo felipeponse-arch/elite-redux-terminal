@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "validacao-time-gerado-inverte-sem-build",
+    descricao: "TK-28: a validação do time gerado lista quem TEM build como se não tivesse",
+    arquivo: "builds.js",
+    de: "members.filter(function (sp) { return !effectiveBuild(sp); })",
+    para: "members.filter(function (sp) { return !!effectiveBuild(sp); })",
+  },
+  {
     id: "time-salvo-sprite-sem-nome-acessivel",
     descricao: "TK-28: o sprite do time salvo perde o aria-label (leitor de tela lê só um botão sem nome)",
     arquivo: "time.js",
