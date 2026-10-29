@@ -4730,4 +4730,19 @@ export const MUTACOES = [
     de: "7: \"Etapa 7 (Tate & Liza)\"",
     para: "7: \"7ª insígnia (Tate & Liza)\"",
   },
+  {
+    id: "veredito-luta-vence-sem-vencer",
+    descricao: "o veredito da luta declara vitória (ok e \"Vence:\") mesmo sem vencer",
+    arquivo: "chefoes.js",
+    de: "{ ok: !!l.venceu, titulo: l.venceu ? \"Vence:\"",
+    para: "{ ok: true, titulo: \"Vence:\"",
+  },
+  {
+    id: "faixa-hp-luta-limiar-alto",
+    descricao: "a faixa de HP da luta só vira \"alto\" a partir de 75 em vez de 50",
+    arquivo: "chefoes.js",
+    de: "hp >= 50 ? \"alto\"",
+    para: "hp >= 75 ? \"alto\"",
+  },
 ];
+
