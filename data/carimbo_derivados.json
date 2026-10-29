@@ -226,5 +226,26 @@
     "curadoriaEm": "2026-10-15",
     "commit": "1345f29",
     "manual": true
+  },
+  "bosses.json": {
+    "jogo": "v2.65.4.1",
+    "er-repo": "f34fc2b",
+    "er-config": "486a964",
+    "dadosDe": "2026-10-27",
+    "geradoEm": "2026-10-29"
+  },
+  "species_rank.json": {
+    "jogo": "v2.65.4.1",
+    "er-repo": "f34fc2b",
+    "er-config": "486a964",
+    "dadosDe": "2026-10-27",
+    "geradoEm": "2026-10-29"
+  },
+  "lutas_comuns_run.json": {
+    "jogo": "v2.65.4.1",
+    "er-repo": "f34fc2b",
+    "er-config": "486a964",
+    "dadosDe": "2026-10-27",
+    "geradoEm": "2026-10-29"
   }
 }
