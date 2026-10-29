@@ -4702,4 +4702,11 @@ export const MUTACOES = [
     de: "carimbarDerivado(\"species_rank.json\");",
     para: "",
   },
+  {
+    id: "tk24-derivado-sem-entrada",
+    descricao: "builds.json some do registro de carimbos (derivado sem versão/frescor registrados)",
+    arquivo: "carimbo_derivados.json",
+    de: "\"builds.json\": {",
+    para: "\"builds_x.json\": {",
+  },
 ];
