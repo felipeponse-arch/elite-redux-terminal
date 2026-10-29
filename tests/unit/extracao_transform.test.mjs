@@ -3,6 +3,7 @@
 // A equivalência com os scripts PowerShell antigos (transform.ps1 + slim_dex.ps1, expand_combo_abilities.ps1, extract_bosses.ps1) foi provada uma vez com o dado
 // antigo: dex_compact.json e ability_translations_pt.json saíram idênticos byte a byte; bosses.json igual, exceto os 5 Eviolites dos times Hell (item de índice 0
 // que o PowerShell descartava).
+import { N_ESPECIES, N_HABILIDADES } from "./contagens_versao.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -24,8 +25,8 @@ test("dex_compact.json gravado == extração do dado bruto (2.65.4) + o delta da
   aplicarPatch(dex, JSON.parse(ler("data/config_nova.json")));
   assert.equal(JSON.stringify(dex), ler("data/dex_compact.json"));
   assert.equal(dexGravado.meta.version, "2.65.4.1"); // v2.65.4.1 (28/10)
-  assert.equal(dexGravado.species.length, 1933, "v2.65.4.1 (28/10): 1925 + 8 espécies Redux novas da er-config 486a964");
-  assert.equal(dexGravado.abilities.length, 1075, "v2.65.4.1 (28/10): 1072 + 3 da er-config 486a964");
+  assert.equal(dexGravado.species.length, N_ESPECIES, "v2.65.4.1 (28/10): 1925 + 8 espécies Redux novas da er-config 486a964");
+  assert.equal(dexGravado.abilities.length, N_HABILIDADES, "v2.65.4.1 (28/10): 1072 + 3 da er-config 486a964");
 });
 
 test("ability_translations_pt.json gravado == compostas expandidas de novo (idempotente)", () => {

@@ -1,6 +1,7 @@
 // Ticket versao-nova/09 (15/10/2026): os 9 golpes novos do upcoming (er-config d1a9a4c, MoveList.textproto) entram no app, com as espécies que os aprendem
 // e as categorias de flag (luz, chifre, chute). O resto da MoveList (poder, precisão, prioridade, tipo) é igual ao da NextDex 2.65.4: a conferência
 // golpe a golpe contra a config não achou diferença; as flags já vinham da config (golpes_flags_config.json).
+import { N_GOLPES } from "./contagens_versao.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -27,7 +28,7 @@ const ESPERADO = [
 ];
 
 test("os 9 golpes novos estão no dex, em seguida aos 1032 da NextDex, com tipo, split, poder, precisão, efeito, categoria de flag e chance da config", () => {
-  assert.equal(R.MOVES.length, 1041);
+  assert.equal(R.MOVES.length, N_GOLPES);
   assert.deepEqual(patch.golpes.map((g) => g.nome), ESPERADO.map((e) => e[0]));
   ESPERADO.forEach(([nome, tipo, split, poder, prec, prio, efeito, cats, chance], i) => {
     const m = R.MOVES[1032 + i];

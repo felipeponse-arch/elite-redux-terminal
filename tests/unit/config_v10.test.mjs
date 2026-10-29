@@ -1,5 +1,6 @@
 // Ticket versao-nova/10 (15/10/2026): o que sobrou da config d1a9a4c depois do v09 - aprendizado de golpes de TODAS as espécies, os quatro "Hunter/jack" pelo tipo
 // de quem ataca (abilities.cc:5752 Lumberjack, Fae Hunter, Monster Hunter, Firefighter; mesma família do Dragonslayer e do Insect Eater) e as Mega Bruxish e Jellicent.
+import { N_ESPECIES } from "./contagens_versao.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -72,7 +73,7 @@ test("Lumberjack, Fae Hunter, Monster Hunter e Firefighter: x1,5 contra ALVO do 
 
 test("Mega Bruxish e Mega Jellicent: no dado a partir da config, como as demais Megas (decisão do usuário, 28/10: entram na Dex, nas builds e no pipeline; a config não traz spe, vale a da base)", () => {
   // Fixture: a config 486a964 traz as duas sem spe; o usuário mandou trazê-las mesmo assim (spe da espécie base, speDaConfig:false).
-  assert.equal(R.DATA.species.length, 1933);
+  assert.equal(R.DATA.species.length, N_ESPECIES);
   const b = R.DATA.species.find((s) => s && s.sname === "SPECIES_BRUXISH_MEGA"), j = R.DATA.species.find((s) => s && s.sname === "SPECIES_JELLICENT_MEGA");
   assert.ok(b && j, "estão no dado"); assert.ok(!b.provisoria && !j.provisoria, "sem marca provisoria");
   assert.deepEqual([...b.t].map((i) => R.TYPES[i]), ["Water", "Psychic"]); assert.deepEqual([...j.t].map((i) => R.TYPES[i]), ["Water", "Ghost"]);
@@ -80,7 +81,7 @@ test("Mega Bruxish e Mega Jellicent: no dado a partir da config, como as demais 
   assert.deepEqual([...b.ab, ...b.inn].map((i) => R.ABILITIES[i][0]), ["Dazzling", "Defiant", "Predator", "Strong Jaw", "Wonder Skin", "Psychic Mind"]);
   assert.deepEqual(b.lm, sp("Bruxish").lm); assert.deepEqual(j.tu, sp("Jellicent").tu);
   assert.equal(R.MEGA_FORMS["Bruxishite"], "SPECIES_BRUXISH_MEGA"); assert.equal(sp("Bruxish").ev[0][2], b.x);
-  assert.equal(R.SPECIES.length, 1932); // as 1933 do dado menos a posição vazia
+  assert.equal(R.SPECIES.length, N_ESPECIES - 1); // as 1933 do dado menos a posição vazia
   assert.equal(R.getSpeciesBySname("SPECIES_JELLICENT_MEGA").x, j.x); assert.equal(R.getSpeciesByX(b.x).sname, "SPECIES_BRUXISH_MEGA");
   const role = json("species_role.json"), disp = json("rank_disponibilidade.json").etapa;
   assert.ok("SPECIES_BRUXISH_MEGA" in role && "SPECIES_JELLICENT_MEGA" in role);

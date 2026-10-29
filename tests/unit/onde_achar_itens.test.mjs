@@ -3,6 +3,7 @@
 // só sai depois" passa a valer para qualquer item com etapa conhecida, não só pedra Mega.
 // Ticket 08 (07/10): o pacote inicial do vídeo do usuário (data/pacote_inicial.json) vem antes de tudo - Leftovers,
 // Eviolite e Choice Band estão nele, então saem desde o começo (o código público é de outra versão).
+import { N_PEDRAS_ADOPTION } from "./contagens_versao.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -41,7 +42,7 @@ test("o pacote não corta fonte antiga: Honey e Ultra Ball mantêm o Poké Mart 
 
 test("pedras do Adoption Center (er-config oficial): compra por BP, no Norman ou na trava que já têm", () => {
   const ad = JSON.parse(lerComMutacao("data/pedras_adoption_center.json", "pedras_adoption_center.json")).pedras;
-  assert.equal(ad.length, 142); // er-config 486a964 (TK-25): entram Salamencite R e Metagrossite R
+  assert.equal(ad.length, N_PEDRAS_ADOPTION); // er-config 486a964 (TK-25): entram Salamencite R e Metagrossite R
   assert.ok(ad.includes("Salamencite R") && ad.includes("Metagrossite R"));
   const caminho = [6, 4].map((n) => new URL("../".repeat(n) + "ferramentas/er-config/items/MegaStonesList.textproto", import.meta.url)).find((u) => existsSync(u)); // fora do repo: confere só quando existe
   if (caminho) assert.deepEqual(ad, lerPedrasDoAdoptionCenter(readFileSync(caminho, "utf8")), "bate com a er-config, na ordem");

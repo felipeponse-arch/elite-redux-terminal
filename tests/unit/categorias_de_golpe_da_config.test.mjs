@@ -4,6 +4,7 @@
 // Antes, 98 golpes (Crunch, Stone Edge, Brick Break, Wood Hammer, Sludge Bomb...) ficavam sem categoria e Strong Jaw,
 // Keen Edge, Iron Fist, Super Slammer e Mega Launcher não os reforçavam.
 // Chefões e espécies reais do app. Sabotagem controlada (tests/run_sabotage.mjs) também nos arquivos fora de src/regras.
+import { N_GOLPES } from "./contagens_versao.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -88,7 +89,7 @@ test("move_categorias.json: o campo `c` de TODOS os 1041 golpes é exatamente o 
     assert.deepEqual((categorias[id] && categorias[id].c) || [], esperado, m[0]);
     conferidos++;
   });
-  assert.equal(conferidos, 1041);
+  assert.equal(conferidos, N_GOLPES);
 });
 
 test("os golpes que o relatório de calibração achou sem categoria (99 pares golpe+categoria) agora têm a categoria do jogo", () => {

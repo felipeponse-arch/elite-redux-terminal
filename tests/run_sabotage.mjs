@@ -8,7 +8,7 @@
 //   node tests/run_sabotage.mjs --desde <sha>  (idem, desde um commit: o último master verde; sha inválido = completa)
 //
 // Mais rápido (Fase 3 da reunião de 30/09 - o usuário achou a rodada inteira
-// demorada, ~9 min pra 118): basta UM teste falhar pra sabotagem ser pega, então
+// demorada, ~9 min já com 118; hoje são centenas): basta UM teste falhar pra sabotagem ser pega, então
 // o script lembra (tests/.sabotagem_cache.json, fora do git) qual arquivo de
 // teste pegou cada uma e roda SÓ ele primeiro. Se ele não pegar (o teste mudou),
 // cai na suíte inteira - "pega" continua querendo dizer "um teste falhou de
