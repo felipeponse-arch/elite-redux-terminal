@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "alias-weather-archetypes-volta",
+    descricao: "TK-33b: o alias WEATHER_ARCHETYPES (= ARQUETIPOS_DE_CAMPO) volta em dados_base.js",
+    arquivo: "dados_base.js",
+    de: "var PACE_ARCHETYPES = [",
+    para: "var WEATHER_ARCHETYPES = ARQUETIPOS_DE_CAMPO; var PACE_ARCHETYPES = [",
+  },
+  {
+    id: "alias-condicao-do-arquetipo-volta",
+    descricao: "TK-33b: o alias CONDICAO_DO_ARQUETIPO (= CONDICAO_DO_ARQUETIPO_CAMPO) volta em condicoes_habilidade.js",
+    arquivo: "condicoes_habilidade.js",
+    de: "var CONDICOES_DE_CAMPO = ",
+    para: "var CONDICAO_DO_ARQUETIPO = CONDICAO_DO_ARQUETIPO_CAMPO; var CONDICOES_DE_CAMPO = ",
+  },
+  {
     id: "fatias-de-peso-copia-propria-de-tier",
     descricao: "TK-33b: o estudo fatias_de_peso volta a ter cópia própria (e defasada) de tierDe/percentis em vez de importar do rank_comum",
     arquivo: "fatias_de_peso.mjs",

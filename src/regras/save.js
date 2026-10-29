@@ -221,7 +221,7 @@
       if (PACE_ARCHETYPES.indexOf(save.archetype.pace) !== -1) state.archetype.pace = save.archetype.pace;
       // "Snow" de save anterior a 2026-09-26 é o mesmo clima, agora "Hail".
       var climaSalvo = save.archetype.weather === "Snow" ? "Hail" : save.archetype.weather;
-      if (WEATHER_ARCHETYPES.indexOf(climaSalvo) !== -1) state.archetype.weather = climaSalvo;
+      if (ARQUETIPOS_DE_CAMPO.indexOf(climaSalvo) !== -1) state.archetype.weather = climaSalvo;
       if (TATICA_ARCHETYPES.indexOf(save.archetype.tatica) !== -1) state.archetype.tatica = save.archetype.tatica;
       if (MONOTYPE_ARCHETYPES.indexOf(save.archetype.monotype) !== -1) state.archetype.monotype = save.archetype.monotype;
       if (typeof save.archetype.reasoning === "string") state.archetype.reasoning = save.archetype.reasoning.slice(0, 500);

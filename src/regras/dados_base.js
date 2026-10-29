@@ -144,7 +144,6 @@
   // Machine armam; várias habilidades ativam "in fog"); Toxic Terrain também
   // (Toxic Surge).
   var PACE_ARCHETYPES = ["Hyper Offense", "Balance", "Bulky Offense", "Stall", "Semi-Stall"];
-  var WEATHER_ARCHETYPES = ARQUETIPOS_DE_CAMPO; // lista única em campo.js (TK-16)
   // Quarto eixo, "Tática" (2026-09-26): o que o time faz em campo, combinável
   // com estilo e clima (ex.: Rain + Armadilhas e pivô).
   var TATICA_ARCHETYPES = ["Telas", "Armadilhas e pivô"];

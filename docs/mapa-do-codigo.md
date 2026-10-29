@@ -16,11 +16,11 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
   gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:424, comportamentoDaIADoChefao:451, habilidadesExtrasDoHell:464, regrasDoHell:465, ehRevancheDeLider:472, buffsParaMostrarDoChefao:491, buffsAtivosDoChefao:500, computeSpeedTiers:513, planoDaLuta:533, resumoDaLuta:546, quemRespondeNoPlano:562 (+2)
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
-  descricaoDeHabilidade:85, descricaoDeHabilidadePorId:96, expandirTextoDeHabilidade:107, habilidadeArma:121, nomesDeHabilidades:124, podeTerStatus:132, garantiaDoTime:140, garantiaDaCondicao:154, comoGarantir:170, condicaoDaBuild:189, precisaDeSetter:212, blocoCondicoesIA:237
+  descricaoDeHabilidade:83, descricaoDeHabilidadePorId:94, expandirTextoDeHabilidade:105, habilidadeArma:119, nomesDeHabilidades:122, podeTerStatus:130, garantiaDoTime:138, garantiaDaCondicao:152, comoGarantir:168, condicaoDaBuild:187, precisaDeSetter:210, blocoCondicoesIA:235
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
   confrontoDamagingMoves:29, confrontoMoveType:32, foeAbilityIds:36, foeFromBossMember:49, ofensaContra:59, ameacaDe:91, velocidadeBase:114, confrontoDuelo:126, confrontoTime:146, coberturaSugerida:196, confrontoDuelosDe:243, valorDoTime:249, melhoresTrocas:265, cuidadosDoChefao:302, aberturaEmDupla:319
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
-  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:188
+  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:187
 - **duelo.js** - Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
   nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:79, acertosDoGolpeDuelo:80, golpeDeRecargaDuelo:87, golpeUtilNoDuelo:101, categoriaNoDuelo:113, temContatoDuelo:119, golpesDeRecargaAte:122, golpesDeDueloAte:129, golpesDeStatusAte:135, tipoDoTextoDuelo:156, fraseFixaDuelo:161, categoriasDoTextoDuelo:178, categoriasDoGolpeDuelo:181, modoHellDuelo:206, statusDoTrechoDuelo:251, presencaDoStatus:258, todosOsStatusDuelo:264, lerStatusDaFraseDuelo:269, chanceDoEstagioCrit:319, lerCriticoDaFraseDuelo:320, lerCondicaoDaFraseDuelo:346, estagioDoTexto:375, multDoEstagio:376, lerEstagioDaFraseDuelo:378, poderDoGolpeDuelo:434, lerExtrasDaFraseDuelo:436, lerCuraDaFraseDuelo:491, filtroDoTextoDuelo:524 (+149)
 - **escolha_ia_candidatos.js** - A IA ESCOLHE ENTRE os candidatos do pipeline de build (passo 4 de docs/pipeline_de_build.md; ticket 03 de
@@ -245,6 +245,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 ## Testes unitários (o que cobrem) - tests/unit/
 - **absorcao_flash_fire_dry_skin.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **alarme_upstream.test.mjs** - Leitura das páginas oficiais pelo alarme de versão nova (sem rede).
+- **aliases_de_campo_tirados.test.mjs** - TK-33b item 8: os aliases de migração CONDICAO_DO_ARQUETIPO e WEATHER_ARCHETYPES saíram; todos leem campo.js direto.
 - **areia_e_sets_rapidos.test.mjs** - Diagnóstico dos físicos subavaliados (03/10): Tyranitar/Rock sem o +50% de Sp. Def na areia (código oficial
 - **atalhos_teclado.test.mjs** - Ticket 14 da dívida técnica (2026-10-08): atalhos que não são botão de verdade
 - **atributo_do_ataque.test.mjs** - Golpes que trocam o atributo de ataque ou de defesa (06/10, lote 4 da fila da comunidade; ver

@@ -45,7 +45,7 @@ test("clima sem setter: avisa; o time (ou o Clima do time) que arma cala o aviso
   const b = { moves: ["Scratch"], ability: achada.hab };
   assert.ok(tipos(R, achada.sp, b).includes("setter"));
   const cond = R.precisaDeSetter(achada.sp, achada.hab)[0].condicao.split("|")[0];
-  const clima = Object.keys(R.CONDICAO_DO_ARQUETIPO).find((k) => R.CONDICAO_DO_ARQUETIPO[k] === cond);
+  const clima = Object.keys(R.CONDICAO_DO_ARQUETIPO_CAMPO).find((k) => R.CONDICAO_DO_ARQUETIPO_CAMPO[k] === cond);
   R.state.archetype.weather = clima;
   assert.ok(!tipos(R, achada.sp, b).includes("setter"), "Clima do time arma a condição");
 });

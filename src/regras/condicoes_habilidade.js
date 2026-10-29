@@ -69,8 +69,6 @@
     "terreno nevoento": /misty terrain on entry/i,
     "terreno toxico": /toxic terrain on entry/i
   };
-  // Clima e campo do arquétipo -> condição que o time inteiro joga.
-  var CONDICAO_DO_ARQUETIPO = CONDICAO_DO_ARQUETIPO_CAMPO; // mapa único em campo.js (TK-16)
   // Orbe que causa o status no próprio Pokémon (texto do jogo: Toxic Orb
   // "badly poisons the holder", Flame Orb "inflicts a burn on holder").
   var ORBES_DE_STATUS = { "veneno": "Toxic Orb", "queimadura": "Flame Orb" };
@@ -138,7 +136,7 @@
   // Quem já garante a condição hoje, fora do próprio Pokémon: o time (build
   // ativa de cada membro + innates) e o Clima e campo do arquétipo.
   function garantiaDoTime(sp, cond) {
-    if (CONDICAO_DO_ARQUETIPO[state.archetype.weather] === cond) return "o Clima e campo do time (" + state.archetype.weather + ")";
+    if (CONDICAO_DO_ARQUETIPO_CAMPO[state.archetype.weather] === cond) return "o Clima e campo do time (" + state.archetype.weather + ")";
     var membros = state.team.map(getSpeciesByX).filter(function (m) { return m && m.x !== sp.x; });
     for (var i = 0; i < membros.length; i++) {
       var m = membros[i], b = getActiveBuild(m.sname);
@@ -208,7 +206,7 @@
   // rank o golpe de carga que não dispara sem sol (prepararGolpesDuelo).
   // Retorna [{ condicao, nome, habilidades: [...], golpes: [...] }] - golpes = os que
   // armam a condição no movepool (ela arma sozinha, mas gastando turno e espaço).
-  var CONDICOES_DE_CAMPO = Object.keys(CONDICAO_DO_ARQUETIPO).map(function (k) { return CONDICAO_DO_ARQUETIPO[k]; });
+  var CONDICOES_DE_CAMPO = Object.keys(CONDICAO_DO_ARQUETIPO_CAMPO).map(function (k) { return CONDICAO_DO_ARQUETIPO_CAMPO[k]; });
   function precisaDeSetter(sp, habilidadeEscolhida) {
     var innates = nomesDeHabilidades(sp.inn), escolhiveis = nomesDeHabilidades(sp.ab);
     var porCondicao = {}, ordem = [];
