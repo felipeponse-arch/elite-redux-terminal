@@ -22,7 +22,8 @@ test("todo markup de atalho para espécie nasce com tabindex=0 e role=button", (
       const ini = texto.lastIndexOf("\n", m.index) + 1;
       const fim = texto.indexOf("\n", m.index);
       const linha = texto.slice(ini, fim === -1 ? undefined : fim);
-      if (!/tabindex="0"/.test(linha) || !/role="button"/.test(linha)) furos.push(nome + ": " + m[0].slice(0, 90));
+      // <button> nativo já recebe o Tab e o Enter/Espaço (TK-28, acessibilidade).
+      if (!/^<button\b/.test(m[0]) && (!/tabindex="0"/.test(linha) || !/role="button"/.test(linha))) furos.push(nome + ": " + m[0].slice(0, 90));
     }
   }
   assert.deepEqual(furos, []);

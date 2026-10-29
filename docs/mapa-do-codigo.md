@@ -263,7 +263,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **campo_fonte_unica.test.mjs** - TK-16 (campo, fase 1): src/regras/campo.js é a fonte única de clima, terreno, telas, hazards e durações de campo.
 - **campo_invertido_no_plano.test.mjs** - Achado do vídeo do usuário (02/10): o plano contra a Tate & Liza 1 chamava Axe Kick (Dark) de
 - **campo_no_duelo.test.mjs** - Campo no duelo (2026-09-29): terreno das habilidades (Grassy/Electric/Psychic/
-- **carimbo_derivados.test.mjs** - TK-24: todo derivado gerado (rank, lutas comuns, chefões) deixa carimbo de versão/frescor em
+- **carimbo_derivados.test.mjs** - Depende de dado: rank/lutas/chefões (lê os derivados gravados; muda quando eles são regerados).
 - **categorias_de_golpe.test.mjs** - Categoria de golpe (soco, mordida, corte...) do NextDex (2026-09-29): antes
 - **categorias_de_golpe_da_config.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **checar_encoding.test.mjs** - A trava de codificação (scripts/checar_encoding.mjs) precisa pegar exatamente

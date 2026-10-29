@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas/chefões (lê os derivados gravados; muda quando eles são regerados).
 // TK-24: todo derivado gerado (rank, lutas comuns, chefões) deixa carimbo de versão/frescor em
 // data/carimbo_derivados.json, copiado de data/carimbo_dados.json no momento da geração.
 import { test } from "node:test";
