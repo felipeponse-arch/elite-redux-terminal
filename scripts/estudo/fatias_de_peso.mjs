@@ -7,17 +7,12 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { notasComFatia } from "../rank_fatia.mjs";
+import { percentis, tierDe } from "../rank_comum.mjs"; // cortes de tier e percentil: uma cópia só (TK-33b item 7)
 
 const [arq, pasta, listaFatias = "igual,0.5,0.6,0.7"] = process.argv.slice(2);
 const { lutas, res } = JSON.parse(readFileSync(arq, "utf8"));
 const DIFS = ["party", "insane"];
 const validos = Object.keys(res);
-const tierDe = (p) => (p >= 97 ? "SS" : p >= 90 ? "S" : p >= 75 ? "A" : p >= 50 ? "B" : p >= 20 ? "C" : "D"); // igual ao rank v2
-function percentis(obj) {
-  const ks = Object.keys(obj).sort((a, b) => obj[a] - obj[b]), n = ks.length, p = {};
-  ks.forEach((k, i) => { p[k] = Math.round(((i + 1) / n) * 10000) / 100; });
-  return p;
-}
 
 function notas(dif, eixo, fatia) {
   return notasComFatia(lutas[dif], validos, (s) => (res[s][dif] && res[s][dif][eixo]) || [], fatia); // o mesmo cálculo do rank (rank_fatia.mjs)

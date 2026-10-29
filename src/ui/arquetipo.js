@@ -92,7 +92,7 @@
         ? '<p class="mybuild-hint">"Montar meu melhor time" escolhe o melhor time de até 6 só com o simulador de duelo do app: não gasta a sua conta de IA, dá o mesmo resultado para a mesma entrada e mostra a prova de cada papel. Usa só os Pokémon que você já tem (time + caixa). Dos chips abaixo ele respeita o Monotype; Estilo, Clima e campo e Tática valem para a IA e para as builds curadas.</p>'
         : '<p class="mybuild-hint">Escolha um Estilo, Clima e campo, Tática e/ou Monotype e peça o melhor time de até 6, usando só os Pokémon que você já tem (time + caixa). "Gerar time completo" monta a composição, gera a build de cada um e escreve o guia de como jogar - tudo numa ação só.</p>') +
       '<div class="archetype-axis"><span class="archetype-axis-label">Estilo</span>' + archetypeChipsHtml("pace", PACE_ARCHETYPES, state.archetype.pace || "", false) + '</div>' +
-      '<div class="archetype-axis"><span class="archetype-axis-label">Clima e campo</span>' + archetypeChipsHtml("weather", WEATHER_ARCHETYPES, state.archetype.weather || "", false) + '</div>' +
+      '<div class="archetype-axis"><span class="archetype-axis-label">Clima e campo</span>' + archetypeChipsHtml("weather", ARQUETIPOS_DE_CAMPO, state.archetype.weather || "", false) + '</div>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Tática</span>' + archetypeChipsHtml("tatica", TATICA_ARCHETYPES, state.archetype.tatica || "", false) + '</div>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Monotype</span>' + archetypeChipsHtml("monotype", MONOTYPE_ARCHETYPES, state.archetype.monotype || "", true) + '</div>' +
       (motor ? modoMotorFavoritosHtml() : "") +

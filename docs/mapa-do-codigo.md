@@ -14,13 +14,13 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **campo.js** - TK-16 (campo, fase 1): FONTE ÚNICA do vocabulário de clima, terreno, telas e hazards, e das durações de campo.
   rotuloDoArquetipoDeCampo:46, hazardCheioNoLado:57, poeHazardNoLado:58
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
-  gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:424, comportamentoDaIADoChefao:451, habilidadesExtrasDoHell:464, regrasDoHell:465, ehRevancheDeLider:472, buffsParaMostrarDoChefao:491, buffsAtivosDoChefao:500, computeSpeedTiers:513, planoDaLuta:533, resumoDaLuta:546, quemRespondeNoPlano:562 (+2)
+  gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:426, comportamentoDaIADoChefao:459, habilidadesExtrasDoHell:472, regrasDoHell:473, ehRevancheDeLider:480, buffsParaMostrarDoChefao:499, buffsAtivosDoChefao:508, computeSpeedTiers:521, planoDaLuta:541, resumoDaLuta:554, quemRespondeNoPlano:570 (+2)
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
-  descricaoDeHabilidade:85, descricaoDeHabilidadePorId:96, expandirTextoDeHabilidade:107, habilidadeArma:121, nomesDeHabilidades:124, podeTerStatus:132, garantiaDoTime:140, garantiaDaCondicao:154, comoGarantir:170, condicaoDaBuild:189, precisaDeSetter:212, blocoCondicoesIA:237
+  descricaoDeHabilidade:83, descricaoDeHabilidadePorId:94, expandirTextoDeHabilidade:105, habilidadeArma:119, nomesDeHabilidades:122, podeTerStatus:130, garantiaDoTime:138, garantiaDaCondicao:152, comoGarantir:168, condicaoDaBuild:187, precisaDeSetter:210, blocoCondicoesIA:235
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
   confrontoDamagingMoves:29, confrontoMoveType:32, foeAbilityIds:36, foeFromBossMember:49, ofensaContra:59, ameacaDe:91, velocidadeBase:114, confrontoDuelo:126, confrontoTime:146, coberturaSugerida:196, confrontoDuelosDe:243, valorDoTime:249, melhoresTrocas:265, cuidadosDoChefao:302, aberturaEmDupla:319
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
-  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:188
+  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:187
 - **duelo.js** - Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
   nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:79, acertosDoGolpeDuelo:80, golpeDeRecargaDuelo:87, golpeUtilNoDuelo:101, categoriaNoDuelo:113, temContatoDuelo:119, golpesDeRecargaAte:122, golpesDeDueloAte:129, golpesDeStatusAte:135, tipoDoTextoDuelo:156, fraseFixaDuelo:161, categoriasDoTextoDuelo:178, categoriasDoGolpeDuelo:181, modoHellDuelo:206, statusDoTrechoDuelo:251, presencaDoStatus:258, todosOsStatusDuelo:264, lerStatusDaFraseDuelo:269, chanceDoEstagioCrit:319, lerCriticoDaFraseDuelo:320, lerCondicaoDaFraseDuelo:346, estagioDoTexto:375, multDoEstagio:376, lerEstagioDaFraseDuelo:378, poderDoGolpeDuelo:434, lerExtrasDaFraseDuelo:436, lerCuraDaFraseDuelo:491, filtroDoTextoDuelo:524 (+149)
 - **escolha_ia_candidatos.js** - A IA ESCOLHE ENTRE os candidatos do pipeline de build (passo 4 de docs/pipeline_de_build.md; ticket 03 de
@@ -30,7 +30,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **ferramentas_ia.js** - Ferramentas que a IA consulta (aiTool_*) e a fábrica única delas (buildStandardAiTools).
   aiTool_getTeamWeaknesses:15, aiTool_getSpeciesRank:24, aiTool_getPriorityMoveOptions:51, aiTool_getAbilityMovepoolSynergy:75, aiTool_getConditionMoveSynergy:99, aiTool_getNextBossRoster:120, aiTool_getItemInfo:150, aiTool_getRemainingBosses:159, aiTool_getBoxCandidatesForBoss:182, aiTool_getSpeedBenchmark:204, buildStandardAiTools:249
 - **formas_mega.js** - Família de formas (base <-> mega), modo de Mega Evolução, pedras e unidades de batalha.
-  isMegaEvoKind:22, evoluiAinda:27, evioliteFunciona:32, megaFormsOf:38, formFamilyPromptNote:46, megaModePromptLine:60, formFamilyOf:65, isMegaForm:71, megaMode:82, megaEvolutionUnlocked:93, etapaDaMega:100, megaFormLiberada:105, megaSoNoDebug:106, quandoMega:108, rotuloEtapaDaMega:109, battleFamilyOf:128, usableSpeciesFor:131, megaPromptBlock:135, megaDaPedra:165, stonesOf:171, battleUnitsOf:181, unitTypeMult:197
+  isMegaEvoKind:22, evoluiAinda:27, evioliteFunciona:32, megaFormsOf:38, formFamilyPromptNote:46, megaModePromptLine:60, formFamilyOf:65, isMegaForm:71, megaMode:82, megaEvolutionUnlocked:93, rotuloDaEtapaDaMegaLiberada:102, etapaDaMega:104, megaFormLiberada:109, megaSoNoDebug:110, quandoMega:112, rotuloEtapaDaMega:113, battleFamilyOf:132, usableSpeciesFor:135, megaPromptBlock:139, megaDaPedra:169, stonesOf:175, battleUnitsOf:185, unitTypeMult:201
 - **golpes.js** - O que cada golpe faz (papel pelo efeito real) e como descrevê-lo pra IA.
   dadoExterno:19, movePromptLine:28, ehGolpeDePivo:41, ehPrioridadeDeDano:49, moveRoleOf:53
 - **gravacao_build_ia.js** - O caminho "resposta da IA -> build validada -> o que gravar", sem tela (ticket 06 da dívida
@@ -245,6 +245,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 ## Testes unitários (o que cobrem) - tests/unit/
 - **absorcao_flash_fire_dry_skin.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **alarme_upstream.test.mjs** - Leitura das páginas oficiais pelo alarme de versão nova (sem rede).
+- **aliases_de_campo_tirados.test.mjs** - TK-33b item 8: os aliases de migração CONDICAO_DO_ARQUETIPO e WEATHER_ARCHETYPES saíram; todos leem campo.js direto.
 - **areia_e_sets_rapidos.test.mjs** - Diagnóstico dos físicos subavaliados (03/10): Tyranitar/Rock sem o +50% de Sp. Def na areia (código oficial
 - **atalhos_teclado.test.mjs** - Ticket 14 da dívida técnica (2026-10-08): atalhos que não são botão de verdade
 - **atributo_do_ataque.test.mjs** - Golpes que trocam o atributo de ataque ou de defesa (06/10, lote 4 da fila da comunidade; ver
@@ -272,6 +273,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **chefoes_pela_config.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **chefoes_pela_config_nova.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **clima_oficial_e_revisao.test.mjs** - Achados da reunião de alinhamento (2026-09-30): clima com os números oficiais
+- **comentario_acima_sem_dono.test.mjs** - TK-33b item 9: comentário "NOME_EM_CAIXA_ALTA acima" não pode apontar para algo declarado em OUTRO arquivo
 - **comparar_motor_ia.test.mjs** - Comparação Motor x IA (time-pelo-motor/01, Fase E): a leitura da resposta da IA e o juiz comum.
 - **condicoes_habilidade.test.mjs** - Habilidade condicional (reunião de 2026-09-28): a auditoria das builds salvas
 - **condicoes_no_duelo.test.mjs** - Condições da luta no duelo (2026-09-29): status no próprio Pokémon (Guts com
@@ -297,8 +299,10 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **escolha_ia_candidatos.test.mjs** - A IA escolhe ENTRE os candidatos do pipeline de build (ticket 03 do pipeline; src/regras/escolha_ia_candidatos.js).
 - **estado_do_app.test.mjs** - Testes das regras que saíram do template na fase 3 da refatoração (2026-09-24):
 - **estagios_no_duelo.test.mjs** - Estágios de atributo no duelo (2026-09-29): entrada (Intrepid Sword), ao
+- **etapa_mega_fonte_unica.test.mjs** - TK-33b item 6: a Etapa/líder da Mega nos textos vem de data/pedras_etapa.json (quandoVale + lideres),
 - **extracao_transform.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **extras_no_duelo.test.mjs** - Golpes extras, bloqueio e entrada no duelo (2026-09-29): Readied Action,
+- **fatias_de_peso_fonte_unica.test.mjs** - TK-33b item 7: scripts/estudo/fatias_de_peso.mjs usa tierDe e percentis de scripts/rank_comum.mjs (nada de cópia).
 - **ferramentas_ia.test.mjs** - Ferramentas que a IA consulta (src/regras/ferramentas_ia.js), testadas no Node sem navegador
 - **ficha_perfil_defensivo.test.mjs** - Ticket 13 (07/10/2026): faixas Fraco/Resiste/Imune da ficha, com as innates (sempre ativas).
 - **floettite_pos_jogo.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
@@ -310,6 +314,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **golpes_novos_2654.test.mjs** - Ticket versao-nova/09 (15/10/2026): os 9 golpes novos do upcoming (er-config d1a9a4c, MoveList.textproto) entram no app, com as espécies ...
 - **gravacao_build_ia.test.mjs** - Caminho "resposta da IA -> build validada -> o que gravar" (src/regras/gravacao_build_ia.js e
 - **guarda_lutas_comuns.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
+- **gym_skills_texto_do_jogo.test.mjs** - Texto dos buffs de ginásio conferido contra o código do jogo (er-repo f34fc2b, src/battle_events.c; comitê 29/10, TK-33b).
 - **habilidades_lote3_tk12.test.mjs** - TK-12 (28/10/2026): divergências do lote 3 (pacote onda0_P2_lote3) contra o código do jogo (er-repo f34fc2b), com dado real.
 - **habilidades_lotes_1_2_pelo_codigo.test.mjs** - TK-12, divergências dos lotes 1 e 2 conferidas no código do jogo (er-repo f34fc2b):
 - **habilidades_mudadas_2654.test.mjs** - Ticket versao-nova/06 (15/10/2026): habilidades cujo efeito mudou na versão mais nova (dados-2654/02 e 03). Fonte: abilities.cc (upcoming...
@@ -381,6 +386,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **rank_so_por_rankde.test.mjs** - ADR-003 (ticket 01): o dado do Rank só é lido por rankDe(); SPECIES_RANK não é reescrito depois da carga.
 - **recarga_e_dois_turnos.test.mjs** - TK-06 (decisão 7 do usuário, 28/10): recarga e golpe de 2 turnos lidos do EFEITO do dado, não da tradução PT.
 - **reconciliar_build.test.mjs** - Build salva que muda de espécie (auto-evolução) ou chega de um save antigo precisa
+- **regra_de_campo_do_chefao_tk33b.test.mjs** - TK-33b item 10: regraDeCampoDoChefao sem repetição (TYPE_ tirado uma vez, texto do Trick Room numa constante,
 - **regras.test.mjs** - Testes unitários das regras do jogo (item Q3 da pauta técnica, 2026-09-16).
 - **regras_com_fixture.test.mjs** - TK-30 (28/10/2026, decisão do usuário): a REGRA é testada aqui com espécie INVENTADA (montada no teste, sem depender do dado);
 - **regras_oficiais_fase4.test.mjs** - Fase 4 da reunião de 30/09/2026: o motor conferido contra o FAQ oficial, o
@@ -424,4 +430,5 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **validacao_do_time_gerado.test.mjs** - TK-28: a decisão "quais Pokémon do time ainda estão sem build" mora em src/regras (computeTeamGenerationValidation), não na tela.
 - **validar_dado_cru.test.mjs** - Validação do dado cru do NextDex na ingestão (scripts/validar_dado_cru.mjs, lote 2).
 - **veredito_da_luta.test.mjs** - TK-28: a decisão do veredito da luta e do plano contra o chefão mora em src/regras (chefoes.js), não na tela.
+- **veu_do_cabecalho_do_chefao.test.mjs** - TK-33b item 11 (TK-28): o véu atrás do texto do cabeçalho do chefão (Aqua/Magma) tem de garantir contraste AA
 - **vocabulario_da_etapa.test.mjs** - TK-27: texto da UI usa "Etapa" (GLOSSARY.md), não "marco".

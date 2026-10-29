@@ -14,19 +14,18 @@ test("clima: a lista e os rótulos do campo.js são os que os consumidores usam"
   assert.equal(J(R.CLIMAS_DE_ESTRATEGIA), J(R.CLIMAS_DO_CAMPO));
   assert.equal(J(Object.keys(R.MOTOR_ROTULO_CLIMA)), J(R.CLIMAS_DO_CAMPO));
   // todo clima que um arquétipo mapeia existe no motor, e todo clima do motor tem arquétipo
-  const doArquetipo = Object.values(R.CONDICAO_DO_ARQUETIPO).filter((c) => !c.startsWith("terreno"));
+  const doArquetipo = Object.values(R.CONDICAO_DO_ARQUETIPO_CAMPO).filter((c) => !c.startsWith("terreno"));
   assert.equal(J([...doArquetipo].sort()), J([...R.CLIMAS_DO_CAMPO].sort()));
   // climaQueCombina (mono_run) só aponta para arquétipo existente
-  Object.keys(R.CLIMA_QUE_COMBINA).forEach((t) => assert.ok(R.WEATHER_ARCHETYPES.includes(R.CLIMA_QUE_COMBINA[t].clima), t));
+  Object.keys(R.CLIMA_QUE_COMBINA).forEach((t) => assert.ok(R.ARQUETIPOS_DE_CAMPO.includes(R.CLIMA_QUE_COMBINA[t].clima), t));
 });
 
 test("terreno: id, tipo reforçado e arquétipo batem entre campo.js, condições e duelo", () => {
   assert.equal(J(Object.values(R.TERRENO_DO_TEXTO).sort()), J([...R.TERRENOS_DO_CAMPO].sort()));
   assert.equal(J(Object.keys(R.TIPO_DO_TERRENO).sort()), J([...R.TERRENOS_DO_CAMPO].sort()));
-  const condTerreno = Object.values(R.CONDICAO_DO_ARQUETIPO).filter((c) => c.startsWith("terreno"));
+  const condTerreno = Object.values(R.CONDICAO_DO_ARQUETIPO_CAMPO).filter((c) => c.startsWith("terreno"));
   // Psychic Terrain não tem condição de habilidade no mapa (comportamento existente, fora do TK-16): 4 de 5.
   assert.equal(condTerreno.length, R.TERRENOS_DO_CAMPO.length - 1);
-  assert.equal(R.WEATHER_ARCHETYPES.length, R.ARQUETIPOS_DE_CAMPO.length);
   // cada habilidade que arma terreno resolve para um id do campo.js
   ["Electro Surge", "Grassy Surge", "Psychic Surge", "Misty Surge", "Toxic Surge"].forEach((h) => {
     assert.ok(R.TERRENOS_DO_CAMPO.includes(efDe(h).armaTerreno), h);

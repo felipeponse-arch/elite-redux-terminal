@@ -4,6 +4,12 @@
   "etapa": 4,
   "fonte": "CanMegaEvolve exige Mega Bracelet + FLAG_SYS_RECEIVED_KEYSTONE (er-repo src/battle_util.c:8163-8167); o Norman entrega os dois só com as insígnias 1-4 (PetalburgCity_Gym/scripts.pory:1743,1755-1761); regra do usuário 20/09/2026: 4ª insígnia (Flannery)"
  },
+ "lideres": {
+  "4": "Flannery",
+  "5": "Norman",
+  "6": "Winona",
+  "7": "Tate & Liza"
+ },
  "soNoDebug": [
   "Tera Orb"
  ],

@@ -48,7 +48,7 @@ test("prompt: antes da 4ª insígnia avisa que Mega ainda não existe, e não li
   comMilestone(2, () => {
     const bloco = R.megaPromptBlock(especie("SPECIES_ABSOL"));
     assert.match(bloco, /AINDA NAO DISPONIVEL/);
-    assert.match(bloco, /4a insignia/);
+    assert.match(bloco, /Etapa 4 \(Flannery\)/); // Fixture: era /4a insignia/; texto agora vem de pedras_etapa.json (TK-33b item 6)
     assert.equal(R.formFamilyPromptNote(especie("SPECIES_ABSOL")), "", "sem 'outras formas' com a Mega antes de liberar");
   });
   comMilestone(4, () => {

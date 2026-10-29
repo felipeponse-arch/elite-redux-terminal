@@ -115,7 +115,7 @@ test("clima que combina: só bônus confirmado nas páginas oficiais", () => {
   assert.equal(R.climaQueCombina("Psychic").clima, "Eerie Fog");
   assert.equal(R.climaQueCombina("Rock"), null, "areia pra Rock não está confirmada neste jogo");
   for (const t of Object.keys(R.CLIMA_QUE_COMBINA)) {
-    assert.ok(R.WEATHER_ARCHETYPES.includes(R.CLIMA_QUE_COMBINA[t].clima), "o clima sugerido existe no arquétipo");
+    assert.ok(R.ARQUETIPOS_DE_CAMPO.includes(R.CLIMA_QUE_COMBINA[t].clima), "o clima sugerido existe no arquétipo");
   }
   assert.match(R.orientacaoMono("Ice"), /Clima que combina com Ice .*Hail - tipo Ice ganha 50% de Defesa/);
   assert.doesNotMatch(R.orientacaoMono("Rock"), /Clima que combina/);

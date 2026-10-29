@@ -59,7 +59,7 @@
     }
     var c = sp && compraDeInicialCache[sp.sname];
     if (!c) return "";
-    var quando = "depois de vencer a Flannery, por 15 BP " + c.onde;
+    var quando = "depois de vencer a " + PEDRAS_ETAPA.lideres[PEDRAS_ETAPA.quandoVale.etapa] + ", por 15 BP " + c.onde;
     return c.base.sname === sp.sname
       ? "Loja de iniciais: " + quando + "."
       : "Evolução de inicial: compre o " + c.base.n + " " + quando + " e evolua.";
