@@ -7,6 +7,27 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "campo-chefao-trick-room-texto-repetido",
+    descricao: "TK-33b: regraDeCampoDoChefao volta a repetir o texto 'Trick Room permanente' em vez de usar a constante",
+    arquivo: "chefoes.js",
+    de: "r.texto = TRICK_ROOM_PERMANENTE + \" e batalha",
+    para: "r.texto = \"Trick Room permanente e batalha",
+  },
+  {
+    id: "campo-chefao-type-replace-repetido",
+    descricao: "TK-33b: regraDeCampoDoChefao volta a tirar o prefixo TYPE_ duas vezes",
+    arquivo: "chefoes.js",
+    de: "EFEITO_DO_CAMPEAO_MONOTYPE[tipo.charAt(0) + tipo.slice(1).toLowerCase()]",
+    para: "EFEITO_DO_CAMPEAO_MONOTYPE[c.id.replace(\"TYPE_\", \"\").charAt(0) + c.id.replace(\"TYPE_\", \"\").slice(1).toLowerCase()]",
+  },
+  {
+    id: "campo-chefao-filtra-bosses-por-chamada",
+    descricao: "TK-33b: regraDeCampoDoChefao volta a filtrar BOSSES inteiro a cada chamada",
+    arquivo: "chefoes.js",
+    de: "var c = campoDoChefaoPorNome[nome];",
+    para: "var b = BOSSES.filter(function (x) { return x.name === nome; })[0]; var c = b && b.campo;",
+  },
+  {
     id: "comentario-itens-aponta-acima-de-outro-arquivo",
     descricao: "TK-33b: o comentário de itens_do_time.js volta a mandar ver ITEM_STAT_MODS 'acima' (ele mora em calc_stat.js)",
     arquivo: "itens_do_time.js",

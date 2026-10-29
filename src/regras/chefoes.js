@@ -395,8 +395,9 @@
   // Gravity. O campeão monotype (BATTLE_FIELD_EFFECT_MONOCHAMP, src/battle_main.c HandleMonoChampSpecialEffects +
   // textos de anúncio em src/battle_message.c) tem um efeito por tipo; o simulador ainda NÃO conta nenhum deles
   // (naoSimulado), mas a tela e o pedido à IA mostram o texto.
+  var TRICK_ROOM_PERMANENTE = "Trick Room permanente";
   var TEXTO_DO_CAMPO_POR_ID = {
-    STATUS_FIELD_TRICK_ROOM: "Trick Room permanente a luta inteira",
+    STATUS_FIELD_TRICK_ROOM: TRICK_ROOM_PERMANENTE + " a luta inteira",
     STATUS_FIELD_GRAVITY: "Gravity a luta inteira (Ground acerta voadores, sem Levitate)"
   };
   var EFEITO_DO_CAMPEAO_MONOTYPE = {
@@ -421,15 +422,22 @@
   };
   // O campo vem do dado do chefão (bosses.json `campo`, gravado por scripts/extrair_campo_chefoes.mjs a partir do
   // script do mapa); aqui só se traduz o id do jogo no que o app simula e no texto da tela.
+  var campoDoChefaoPorNome = null; // índice nome -> campo, montado na 1ª chamada (BOSSES não muda depois de carregado)
   function regraDeCampoDoChefao(nome) {
-    var b = BOSSES.filter(function (x) { return x.name === nome; })[0];
-    var c = b && b.campo;
+    if (!campoDoChefaoPorNome) {
+      campoDoChefaoPorNome = Object.create(null);
+      BOSSES.forEach(function (x) { if (!(x.name in campoDoChefaoPorNome)) campoDoChefaoPorNome[x.name] = x.campo; }); // o 1º com o nome vale
+    }
+    var c = campoDoChefaoPorNome[nome];
     if (!c) return null;
-    if (c.efeito === "MONOCHAMP") return { texto: EFEITO_DO_CAMPEAO_MONOTYPE[c.id.replace("TYPE_", "").charAt(0) + c.id.replace("TYPE_", "").slice(1).toLowerCase()], naoSimulado: true };
+    if (c.efeito === "MONOCHAMP") {
+      var tipo = c.id.replace("TYPE_", "");
+      return { texto: EFEITO_DO_CAMPEAO_MONOTYPE[tipo.charAt(0) + tipo.slice(1).toLowerCase()], naoSimulado: true };
+    }
     var r = { texto: TEXTO_DO_CAMPO_POR_ID[c.id] };
     if (c.id === "STATUS_FIELD_TRICK_ROOM") r.sala = true;
     if (c.id === "STATUS_FIELD_GRAVITY") r.gravidade = true;
-    if (c.inversa) { r.inversa = true; r.texto = "Trick Room permanente e batalha INVERTIDA (tabela de tipos ao contrario) a luta inteira"; }
+    if (c.inversa) { r.inversa = true; r.texto = TRICK_ROOM_PERMANENTE + " e batalha INVERTIDA (tabela de tipos ao contrario) a luta inteira"; }
     return r;
   }
 
