@@ -8,13 +8,13 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **avisos_build.js** - Lote 5 das pesquisas de 06/10 (ideias do GPT, seções 3.2/17/26/42): Avisos de build e selo de
   avisosDaBuild:8, seloDaBuild:82, primeiroLugarDoItem:94, rotuloDaEtapaDoItem:98, ondeAcharItemTexto:100
 - **builds.js** - Build mostrada (effectiveBuild: salva > herdada da base pela Mega > curada do
-  entradaDeBuild:23, stripNote:49, showdownName:54, showdownSet:58, evsToShowdownText:75, teamItemsInUse:90, comecarLoteDeBuilds:118, concluirBuildDoLote:119, encerrarLoteDeBuilds:120, contaNoTime:121, teamMovesInUse:123, itemEsgotadoNoTime:152, itensEmUsoComQuem:153, teamRolesInUse:165, golpesFuturosDe:179, effectiveBuild:202
+  entradaDeBuild:23, stripNote:49, showdownName:54, showdownSet:58, evsToShowdownText:75, teamItemsInUse:90, comecarLoteDeBuilds:118, concluirBuildDoLote:119, encerrarLoteDeBuilds:120, contaNoTime:121, teamMovesInUse:123, itemEsgotadoNoTime:152, itensEmUsoComQuem:153, teamRolesInUse:165, golpesFuturosDe:179, effectiveBuild:202, computeTeamGenerationValidation:240
 - **calc_stat.js** - Fórmula de status final (base+IV+EV+nível+nature+item) e o que deriva
   especiePorNomeDoItem:135, regraCasaComEspecie:139, itemRuleFor:149, calcFinalStat:160, minEvSameStat:200, nextEvBreakpoint:210, priorityOrderForEvs:235, trimAndReallocateEvs:238
 - **campo.js** - TK-16 (campo, fase 1): FONTE ÚNICA do vocabulário de clima, terreno, telas e hazards, e das durações de campo.
   rotuloDoArquetipoDeCampo:46, hazardCheioNoLado:57, poeHazardNoLado:58
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
-  gymLeaderBaseName:55, getRemainingBossEntries:61, computeSharedRisks:119, bossSpeedSummary:142, computeBossAttackTypes:157, bossSafetyScore:181, bestBoxCandidateForBoss:193, confrontoUnitOf:243, confrontoFoesDe:268, confrontoMelhorUnidade:279, confrontoMinhasUnidades:289, confrontoUnidadesDaCaixa:299, confrontoParaParty:308, bossPartyPorDificuldade:337, bestRankForm:343, nextFightCx:361, varianteDoChefao:368, gymSkillsSummaryFor:377, regraDeCampoDoChefao:422, comportamentoDaIADoChefao:449, habilidadesExtrasDoHell:462, regrasDoHell:463, ehRevancheDeLider:470, buffsParaMostrarDoChefao:489, buffsAtivosDoChefao:498, computeSpeedTiers:511
+  gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:424, comportamentoDaIADoChefao:451, habilidadesExtrasDoHell:464, regrasDoHell:465, ehRevancheDeLider:472, buffsParaMostrarDoChefao:491, buffsAtivosDoChefao:500, computeSpeedTiers:513, planoDaLuta:533, resumoDaLuta:546, quemRespondeNoPlano:562 (+2)
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
   descricaoDeHabilidade:85, descricaoDeHabilidadePorId:96, expandirTextoDeHabilidade:107, habilidadeArma:121, nomesDeHabilidades:124, podeTerStatus:132, garantiaDoTime:140, garantiaDaCondicao:154, comoGarantir:170, condicaoDaBuild:189, precisaDeSetter:212, blocoCondicoesIA:237
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
@@ -56,7 +56,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **reconciliar_build.js** - Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
   movepoolCompletoDe:17, habilidadeSubstitutaPara:26, reconciliarBuild:39
 - **save.js** - Save do app: formato gravado (buildSave), leitura defensiva (applySave e os
-  snamesToXs:15, xsToSnames:24, applySave:47, anteriorSaneado:236, sanitizarStrategySets:255, textoCanonicoDoSave:301, somaDoSave:316, conferirSomaDoSave:326, saveEnviavel:333, buildSave:336, montarSave:341, progressoDoSave:377, saveChegandoTemMenosProgresso:383, syncContentDiffers:397
+  snamesToXs:15, xsToSnames:24, ehBackupDeTime:48, applySave:49, anteriorSaneado:239, sanitizarStrategySets:258, textoCanonicoDoSave:304, somaDoSave:319, conferirSomaDoSave:329, saveEnviavel:336, buildSave:339, montarSave:344, progressoDoSave:380, saveChegandoTemMenosProgresso:386, syncContentDiffers:400
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
 - **texto_versao_nova.js** - Texto da habilidade que o parser do duelo lê (tabelas de dado, saídas de duelo.js em 28/10/2026, TK-12 estrutura D4.5b).
@@ -71,11 +71,11 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 
 ## Interface - src/ui/
 - **aba_chefoes.js** - Aba Chefões: lista, time do chefão por dificuldade, buffs de ginásio e exportação.
-  initBosses:33, getFilteredBosses:148, nomeDaCategoriaDeChefao:175, campoDoChefaoHtml:178, opcionalHtml:185, iaDoChefaoHtml:190, hellDoChefaoHtml:199, bossCatColor:209, renderBossList:211, candidatosDoJogador:248, mesmoConjunto:265, guardarTimeAnterior:266, planoDaLuta:292, resumoDaLuta:305, simularSemTravarATela:324, montarTimeContraEsteChefao:337, selectBoss:437, renderGymSkillsCardHtml:456, bossMonCardHtml:493, renderBossDetail:589
+  initBosses:33, getFilteredBosses:148, nomeDaCategoriaDeChefao:175, campoDoChefaoHtml:178, opcionalHtml:185, iaDoChefaoHtml:190, hellDoChefaoHtml:199, bossCatColor:209, renderBossList:211, candidatosDoJogador:248, mesmoConjunto:265, guardarTimeAnterior:266, simularSemTravarATela:295, montarTimeContraEsteChefao:308, selectBoss:404, renderGymSkillsCardHtml:423, bossMonCardHtml:460, renderBossDetail:556
 - **abas.js** - Navegação entre abas (e o redesenho da aba que abre).
   posicionarProgresso:22, closeMorePanel:32
 - **arquetipo.js** - Arquétipo do time, time sugerido e o Gerador Inteligente de Times.
-  teamKeyFor:14, classeDeEntradaDoCardGerado:41, archetypeChipsHtml:53, resumoDoArquetipo:74, archetypeCardHtml:85, generateTeamForArchetype:153, applyRecommendedTeam:207, computeTeamGenerationValidation:253, generateTeamUsageGuide:270, generateCompleteTeam:302, vereditoDaLutaHtml:365, buffsMudaram:383, planoContraChefaoHtml:387, generatedTeamCardHtml:436, renderTeamStrategy:482, climaQueCombinaHtml:495, monoRunCardHtml:516, renderMonoRun:573, renderTeamAnalysis:599
+  teamKeyFor:14, classeDeEntradaDoCardGerado:41, archetypeChipsHtml:53, resumoDoArquetipo:74, archetypeCardHtml:85, generateTeamForArchetype:153, applyRecommendedTeam:207, generateTeamUsageGuide:260, generateCompleteTeam:292, vereditoDaLutaHtml:355, buffsMudaram:364, planoContraChefaoHtml:368, generatedTeamCardHtml:417, renderTeamStrategy:463, climaQueCombinaHtml:476, monoRunCardHtml:497, renderMonoRun:554, renderTeamAnalysis:580
 - **auto_evolucao.js** - Registro "O que o app fez sozinho" na tela e a auto-evolução do time/caixa pelo level cap.
   renderAutoLog:9, autoEvolveRoster:20
 - **caixa.js** - Aba Caixa (PC Box): grade por páginas, busca e ações de cada Pokémon da caixa.
@@ -107,7 +107,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sync.js** - Sincronização entre aparelhos (capability db) e os avisos de sync.
   aplicarSaveRemoto:45, conflitoDeProgresso:61, remotoComSomaErrada:88, pushToSync:96, showSyncBanner:105, syncBannerOffset:119, atualizarTituloDoSubtitulo:139, setSyncStatusIndicator:143, scheduleSyncRetry:162, lerSaveLocal:174, connectSync:179
 - **time.js** - Aba Time: cards dos membros, troca com a caixa, times salvos e "Novo jogo".
-  renderTeam:8, swapPanelHtml:144, telasDeElenco:170, rosterMove:178, teamsMatch:199, renderSavedTeams:206, carregarTimeSalvo:245, excluirTimeSalvo:273, comecarRenomearTimeSalvo:291, salvarNomeTimeSalvo:297, zerarRun:356
+  renderTeam:8, swapPanelHtml:144, telasDeElenco:170, rosterMove:178, teamsMatch:199, htmlDoCartaoDoTimeSalvo:208, renderSavedTeams:227, carregarTimeSalvo:251, excluirTimeSalvo:279, comecarRenomearTimeSalvo:297, salvarNomeTimeSalvo:303, zerarRun:362
 - **tipos.js** - Aba Tipos: tabela de efetividade, velocidades e compêndio de papéis.
   renderTypeMatrix:9, renderSpeedTiers:35, wireSpeedTiersOnce:63, computeRoleCompendium:91, renderRoleCompendium:113
 
@@ -410,11 +410,15 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **time_pelo_motor_papeis.test.mjs** - Modo Motor do Meu Time, Fase D (ticket time-pelo-motor/01, 21/10/2026): papéis por build, tags, sinergia e explicação.
 - **time_pelo_motor_papeis_regras.test.mjs** - Fronteiras das regras de papel e estilo do Modo Motor (TK-03, 27/10/2026): cada teste usa um time real da Etapa 4 que fica DO LADO DE DENTRO
 - **time_pelo_motor_regras.test.mjs** - Regras do Modo Motor que só a sabotagem do TK-03 (27/10/2026) mostrou sem proteção: item liberado e limite de repetição,
+- **times_salvos_acessibilidade.test.mjs** - TK-28 (achados de acessibilidade): o cartão do time salvo gera HTML acessível.
+- **times_salvos_backup.test.mjs** - TK-28: backup do time por CAMPO (backup: true), não pelo prefixo "Antes de " do nome; cabeçalho do chefão por função.
 - **tipo_stellar.test.mjs** - Tipo Stellar (TK-04, achado motor-D1.4; decisão do usuário 28/10): tabela contra battle_util.c:1012-1013 e 1056-1057
 - **tipos_contra_o_jogo.test.mjs** - TK-04 (motor-D1.1, D1.2): a tabela de tipos e TYPE_MOD_ABILITIES travadas contra o código do jogo.
 - **tipos_habilidade_id_nome.test.mjs** - TK-00: trava id x nome de TYPE_MOD_ABILITIES. O id é do dex_compact do app (NextDex), NÃO o do enum do jogo
 - **tira_setup.test.mjs** - Ticket 18 (07/10/2026): golpes que tiram setup, pelo código oficial (er-repo 217dd0f,
 - **traducoes_alinhadas_por_nome.test.mjs** - Versão 2.65.4 deslocou ids de habilidade (Mighty Horn 391 -> 390; 391 virou Hardened Sheath...). A tradução PT é indexada por id, então
 - **vaga.test.mjs** - Vaga de verificação pesada (scripts/vaga.mjs, melhoria B de 2026-10-13).
+- **validacao_do_time_gerado.test.mjs** - TK-28: a decisão "quais Pokémon do time ainda estão sem build" mora em src/regras (computeTeamGenerationValidation), não na tela.
 - **validar_dado_cru.test.mjs** - Validação do dado cru do NextDex na ingestão (scripts/validar_dado_cru.mjs, lote 2).
+- **veredito_da_luta.test.mjs** - TK-28: a decisão do veredito da luta e do plano contra o chefão mora em src/regras (chefoes.js), não na tela.
 - **vocabulario_da_etapa.test.mjs** - TK-27: texto da UI usa "Etapa" (GLOSSARY.md), não "marco".

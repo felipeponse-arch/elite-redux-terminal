@@ -7,6 +7,41 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "validacao-time-gerado-inverte-sem-build",
+    descricao: "TK-28: a validação do time gerado lista quem TEM build como se não tivesse",
+    arquivo: "builds.js",
+    de: "members.filter(function (sp) { return !effectiveBuild(sp); })",
+    para: "members.filter(function (sp) { return !!effectiveBuild(sp); })",
+  },
+  {
+    id: "time-salvo-sprite-sem-nome-acessivel",
+    descricao: "TK-28: o sprite do time salvo perde o aria-label (leitor de tela lê só um botão sem nome)",
+    arquivo: "time.js",
+    de: "title=\"Ver na Dex\" aria-label=\"Ver ' + escapeHtml(sp.n) + ' na Dex\">",
+    para: "title=\"Ver na Dex\">",
+  },
+  {
+    id: "time-salvo-renomear-sem-rotulo",
+    descricao: "TK-28: o campo de renomear o time salvo perde o aria-label",
+    arquivo: "time.js",
+    de: " aria-label=\"Nome do time\"",
+    para: "",
+  },
+  {
+    id: "backup-de-time-so-pelo-nome",
+    descricao: "TK-28: o backup do time volta a ser reconhecido só pelo prefixo do nome, ignorando o campo backup",
+    arquivo: "save.js",
+    de: "t.backup === true || (t.backup === undefined && /^Antes de /.test(t.name || \"\"))",
+    para: "/^Antes de /.test(t.name || \"\")",
+  },
+  {
+    id: "cabecalho-chefao-sem-arte-magma",
+    descricao: "TK-28: o cabeçalho do chefão da Magma perde a classe de arte",
+    arquivo: "chefoes.js",
+    de: "/Magma/.test(cat) ? \" chefao-heroi chefao-magma\"",
+    para: "/nunca-casa/.test(cat) ? \" chefao-heroi chefao-magma\"",
+  },
+  {
     id: "clueless-nao-anula-salas",
     descricao: "Clueless (Negates Weather, Rooms and Terrains) deixa de anular Trick Room/Inverse Room/gravidade",
     arquivo: "duelo.js",
@@ -4786,4 +4821,19 @@ export const MUTACOES = [
     de: "if (barra) falhar(",
     para: "if (false) falhar(",
   },
+  {
+    id: "veredito-luta-vence-sem-vencer",
+    descricao: "o veredito da luta declara vitória (ok e \"Vence:\") mesmo sem vencer",
+    arquivo: "chefoes.js",
+    de: "{ ok: !!l.venceu, titulo: l.venceu ? \"Vence:\"",
+    para: "{ ok: true, titulo: \"Vence:\"",
+  },
+  {
+    id: "faixa-hp-luta-limiar-alto",
+    descricao: "a faixa de HP da luta só vira \"alto\" a partir de 75 em vez de 50",
+    arquivo: "chefoes.js",
+    de: "hp >= 50 ? \"alto\"",
+    para: "hp >= 75 ? \"alto\"",
+  },
 ];
+

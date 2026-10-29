@@ -269,7 +269,7 @@
     // visual: clicar duas vezes criava dois "Antes de Flannery 1" e gastava as
     // 3 vagas); só então usa uma vaga livre.
     var idx = -1;
-    state.savedTeams.forEach(function (t, i) { if (idx === -1 && /^Antes de /.test(t.name || "")) idx = i; });
+    state.savedTeams.forEach(function (t, i) { if (idx === -1 && ehBackupDeTime(t)) idx = i; });
     // O time atual é o que o próprio botão montou antes (outro chefão ou o mesmo
     // de novo): o backup do time do JOGADOR fica como está (revisão de 2026-09-30:
     // antes ele era sobrescrito pelo time do botão e o time original se perdia).
@@ -285,37 +285,8 @@
     if (!state.team.length) return { salvo: false, snames: [] };
     if (idx === -1 && state.savedTeams.length < 3) idx = state.savedTeams.length;
     if (idx === -1) return { salvo: false, snames: snames };
-    acao(["timesSalvos"], function () { state.savedTeams[idx] = { name: "Antes de " + bossName, team: snames, depois: novo.slice() }; });
+    acao(["timesSalvos"], function () { state.savedTeams[idx] = { name: "Antes de " + bossName, team: snames, depois: novo.slice(), backup: true }; });
     return { salvo: true, snames: snames };
-  }
-  // Plano da luta em texto curto, por Pokémon do chefão, na ordem em que ele entra.
-  function planoDaLuta(r) {
-    return r.plano.map(function (p) {
-      return {
-        foe: p.foe.nome,
-        tipos: p.foe.tipos,
-        coberto: p.coberto,
-        respostas: p.respostas.filter(function (a) { return a.nota >= 0.5; }).map(function (a) {
-          return { nome: a.sp.n, x: a.sp.x, golpe: a.golpe, efTipo: a.efTipo };
-        })
-      };
-    });
-  }
-  // A luta inteira simulada (HP passando de uma luta pra outra), em frases curtas.
-  function resumoDaLuta(sim) {
-    if (!sim) return null;
-    return { venceu: sim.venceu, derrubados: sim.derrubados, total: sim.total, vivos: sim.vivos, dupla: !!sim.dupla,
-      passos: sim.log.map(function (l) {
-        if (l.derruba) return l.quem + " derruba " + l.derruba + (l.golpe ? " (" + l.golpe + ")" : "");
-        if (l.troca) return "troque " + l.sai + " por " + l.entra + " contra " + l.contra;
-        var hp = Math.round((l.fracEu || 0) * 100);
-        return l.meu + " contra " + l.contra + ": " + (l.venceu === true ? "vence, fica com " + hp + "% de HP" : "cai");
-      }),
-      // HP que sobra em cada passo (0 a 100), na mesma ordem de "passos"; null onde não há duelo (troca, derrubada em dupla).
-      hps: sim.log.map(function (l) {
-        if (l.derruba || l.troca) return null;
-        return l.venceu === true ? Math.round((l.fracEu || 0) * 100) : 0;
-      }) };
   }
   // Simulador sem travar a tela (Fase 3, 2026-09-30): a conta leva 1-4 s no
   // desktop e mais no celular; roda em passos (montarTimeContraChefaoEmPassos) e
@@ -366,11 +337,7 @@
       var members = state.team.map(getSpeciesByX).filter(Boolean);
       var plano = planoDaLuta(r);
       // Quem responde a quem: cada Pokémon do chefão aponta a melhor resposta.
-      var responde = {};
-      r.plano.forEach(function (p) {
-        var a = p.respostas[0];
-        if (a && a.nota >= 0.5) (responde[a.sp.sname] = responde[a.sp.sname] || []).push(p.foe.nome);
-      });
+      var responde = quemRespondeNoPlano(r.plano);
       generatedTeamResult = {
         archetypeLabel: "contra " + boss.name, chefao: boss.name, plano: plano, clima: r.clima, estrategia: r.estrategia, luta: resumoDaLuta(r.simulacao),
         progresso: "Gerando as builds…", anterior: anterior, buffs: buffsParaMostrarDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name), forTeamKey: teamKeyFor(members)
@@ -616,7 +583,7 @@
     document.getElementById("boss-detail").innerHTML =
       '<button class="back-btn" id="boss-back-to-list">&larr; Voltar para a lista</button>' +
       // Cabeçalho com a arte da equipe (ticket 14): só Aqua e Magma têm arte; os outros seguem sem fundo.
-      '<div class="detail-head' + (/Aqua/.test(boss.cat) ? ' chefao-heroi chefao-aqua' : /Magma/.test(boss.cat) ? ' chefao-heroi chefao-magma' : '') + '"><div class="detail-titles">' +
+      '<div class="detail-head' + classeDoCabecalhoDoChefao(boss.cat) + '"><div class="detail-titles">' +
         '<h2>' + escapeHtml(boss.name) + '</h2>' +
         '<div class="detail-dexno mono">' + escapeHtml(nomeDaCategoriaDeChefao(boss.cat)) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +

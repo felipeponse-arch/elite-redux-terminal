@@ -53,6 +53,8 @@
   // rebatalha abaixo e na chave de GYM_SKILLS.leaders - promovido a funcao
   // pra nao divergir entre os dois lugares que precisam dele.
   function gymLeaderBaseName(name) { return String(name || "").replace(/\s+\d+$/, "").trim(); }
+  // Classe extra do cabeçalho do chefão (TK-28): só Aqua e Magma têm arte.
+  function classeDoCabecalhoDoChefao(cat) { return /Aqua/.test(cat) ? " chefao-heroi chefao-aqua" : /Magma/.test(cat) ? " chefao-heroi chefao-magma" : ""; }
 
   // Cada líder aparece várias vezes em bosses.json (Wattson 1, 2, 3...) -
   // são rebatalhas em pontos diferentes do jogo, não dificuldades; só a
@@ -526,3 +528,50 @@
     rows.sort(function (a, b) { return b.invested - a.invested || b.base - a.base; });
     return { level: level, rows: rows };
   }
+
+  // Plano da luta em texto curto, por Pokémon do chefão, na ordem em que ele entra.
+  function planoDaLuta(r) {
+    return r.plano.map(function (p) {
+      return {
+        foe: p.foe.nome,
+        tipos: p.foe.tipos,
+        coberto: p.coberto,
+        respostas: p.respostas.filter(function (a) { return a.nota >= 0.5; }).map(function (a) {
+          return { nome: a.sp.n, x: a.sp.x, golpe: a.golpe, efTipo: a.efTipo };
+        })
+      };
+    });
+  }
+  // A luta inteira simulada (HP passando de uma luta pra outra), em frases curtas.
+  function resumoDaLuta(sim) {
+    if (!sim) return null;
+    return { venceu: sim.venceu, derrubados: sim.derrubados, total: sim.total, vivos: sim.vivos, dupla: !!sim.dupla,
+      passos: sim.log.map(function (l) {
+        if (l.derruba) return l.quem + " derruba " + l.derruba + (l.golpe ? " (" + l.golpe + ")" : "");
+        if (l.troca) return "troque " + l.sai + " por " + l.entra + " contra " + l.contra;
+        var hp = Math.round((l.fracEu || 0) * 100);
+        return l.meu + " contra " + l.contra + ": " + (l.venceu === true ? "vence, fica com " + hp + "% de HP" : "cai");
+      }),
+      // HP que sobra em cada passo (0 a 100), na mesma ordem de "passos"; null onde não há duelo (troca, derrubada em dupla).
+      hps: sim.log.map(function (l) {
+        if (l.derruba || l.troca) return null;
+        return l.venceu === true ? Math.round((l.fracEu || 0) * 100) : 0;
+      }) };
+  }
+  // Quem responde a quem (TK-28, saiu da montagem na tela): cada Pokémon do chefão aponta a melhor resposta; chave = sname de quem responde.
+  function quemRespondeNoPlano(plano) {
+    var responde = {};
+    plano.forEach(function (p) {
+      var a = p.respostas[0];
+      if (a && a.nota >= 0.5) (responde[a.sp.sname] = responde[a.sp.sname] || []).push(p.foe.nome);
+    });
+    return responde;
+  }
+  // Veredito da luta simulada (TK-28): se deu certo, o título e a contagem; a tela só desenha. Sem a luta inteira, vale a cobertura do plano.
+  function vereditoDaLuta(res, nMembros, cobertos) {
+    var l = res.luta;
+    if (l) return { ok: !!l.venceu, titulo: l.venceu ? "Vence:" : "Derruba:", chip: l.venceu ? l.vivos + " de " + nMembros + " de pé" : l.derrubados + " de " + l.total, luta: true, dupla: !!l.dupla };
+    return { ok: cobertos === res.plano.length, titulo: "Respostas claras:", chip: cobertos + " de " + res.plano.length, luta: false, dupla: false };
+  }
+  // Faixa de HP que sobra no passo da luta (0 a 100), que a barrinha pinta.
+  function faixaDeHpDaLuta(hp) { return hp >= 50 ? "alto" : hp >= 25 ? "medio" : "baixo"; }

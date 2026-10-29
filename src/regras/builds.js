@@ -235,3 +235,14 @@
     var dc = golpesNoCap(sp, cur.moves, cur.plano, getCurrentCap());
     return Object.assign({}, cur, { moves: dc.moves, origem: "curada", estilo: cur.estilo || estiloDeEvs(cur.evs), trocas: dc.trocas, pendentes: dc.pendentes });
   }
+
+  // Validação do time gerado (TK-28, movida da tela): quem do time ainda não tem build efetiva e os riscos de tipo em comum.
+  function computeTeamGenerationValidation(members) {
+    var withoutBuild = members.filter(function (sp) { return !effectiveBuild(sp); }).map(function (sp) { return sp.n; });
+    return {
+      total: members.length,
+      withoutBuild: withoutBuild,
+      allBuilt: withoutBuild.length === 0,
+      sharedRisks: computeSharedRisks(members)
+    };
+  }

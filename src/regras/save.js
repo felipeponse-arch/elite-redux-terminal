@@ -44,6 +44,8 @@
   var reconciliouAoAplicar = false;
   var dataDoSaveCarregado = null; // data do save que applySave carregou (buildSave com manterData) // antes de applySave (no-use-before-define, 2026-09-30)
 
+  // Backup "Antes de <chefão>" (TK-28): o campo `backup` manda; save antigo só tinha o prefixo no nome (leitura aceita os dois).
+  function ehBackupDeTime(t) { return !!t && (t.backup === true || (t.backup === undefined && /^Antes de /.test(t.name || ""))); }
   function applySave(save) {
     if (!save || typeof save !== "object") return;
     // Orphans (snames this build doesn't recognise) are stored INSIDE
@@ -66,6 +68,7 @@
         return t && Array.isArray(t.team);
       }).slice(0, 3).map(function (t) {
         var slot = { name: String(t.name || ""), team: t.team.filter(function (s) { return typeof s === "string"; }) };
+        if (ehBackupDeTime(t)) slot.backup = true;
         // "depois" (2026-09-30): no backup "Antes de <chefão>", o time que o botão
         // "Montar time contra este chefão" montou - diz se o time atual é do botão.
         if (Array.isArray(t.depois)) slot.depois = t.depois.filter(function (s) { return typeof s === "string"; });
