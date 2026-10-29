@@ -300,6 +300,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **etapa_mega_fonte_unica.test.mjs** - TK-33b item 6: a Etapa/líder da Mega nos textos vem de data/pedras_etapa.json (quandoVale + lideres),
 - **extracao_transform.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **extras_no_duelo.test.mjs** - Golpes extras, bloqueio e entrada no duelo (2026-09-29): Readied Action,
+- **fatias_de_peso_fonte_unica.test.mjs** - TK-33b item 7: scripts/estudo/fatias_de_peso.mjs usa tierDe e percentis de scripts/rank_comum.mjs (nada de cópia).
 - **ferramentas_ia.test.mjs** - Ferramentas que a IA consulta (src/regras/ferramentas_ia.js), testadas no Node sem navegador
 - **ficha_perfil_defensivo.test.mjs** - Ticket 13 (07/10/2026): faixas Fraco/Resiste/Imune da ficha, com as innates (sempre ativas).
 - **floettite_pos_jogo.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).

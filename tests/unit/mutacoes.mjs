@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "fatias-de-peso-copia-propria-de-tier",
+    descricao: "TK-33b: o estudo fatias_de_peso volta a ter cópia própria (e defasada) de tierDe/percentis em vez de importar do rank_comum",
+    arquivo: "fatias_de_peso.mjs",
+    de: "import { percentis, tierDe } from \"../rank_comum.mjs\";",
+    para: "const tierDe = (p) => (p >= 95 ? \"SS\" : \"D\"); const percentis = (o) => o; //",
+  },
+  {
     id: "etapa-mega-texto-fixo-mono-run",
     descricao: "TK-33b: a loja de iniciais volta a citar 'Flannery' em texto fixo em vez do líder da Etapa da Mega (pedras_etapa.json)",
     arquivo: "mono_run.js",

@@ -38,7 +38,7 @@ export function lerComMutacao(caminho, nome, env = process.env) {
 }
 // Onde mora o alvo de uma sabotagem pelo nome curto do catálogo; null = não existe (ou "@comportamento").
 export function caminhoDoAlvo(nome) {
-  for (const dir of ["src/regras", "src/ui", "scripts", "data"]) {
+  for (const dir of ["src/regras", "src/ui", "scripts", "scripts/estudo", "data"]) {
     if (existsSync(join(root, dir, nome))) return dir + "/" + nome;
   }
   return null;
