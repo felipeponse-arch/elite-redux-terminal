@@ -1,4 +1,4 @@
-// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
+// Fatia fixa de peso do rank (ticket todas-as-lutas/02, 21/10/2026): chefões 60% e lutas comuns 40%, com a composição REAL da run
 // (as 29 lutas de chefão de LUTAS_DA_RUN + os treinadores comuns do dado do jogo). Sem fatia, as comuns pesam ~95% (estudo.md §4).
 import { test } from "node:test";
 import assert from "node:assert/strict";
