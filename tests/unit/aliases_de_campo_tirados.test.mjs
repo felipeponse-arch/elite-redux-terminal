@@ -9,7 +9,7 @@ test("os aliases não existem mais e os nomes de campo.js têm o conteúdo que e
   assert.equal(R.CONDICAO_DO_ARQUETIPO, undefined);
   assert.equal(R.WEATHER_ARCHETYPES, undefined);
   assert.equal(R.ARQUETIPOS_DE_CAMPO.length, 11);
-  assert.equal(Object.keys(R.CONDICAO_DO_ARQUETIPO_CAMPO).length, 9);
+  assert.equal(Object.keys(R.CONDICAO_DO_ARQUETIPO_CAMPO).length, 10); // 9 + Psychic Terrain (TK-33a, comitê 29/10)
 });
 
 test("os consumidores citam o nome de campo.js (e ninguém cita o alias)", () => {

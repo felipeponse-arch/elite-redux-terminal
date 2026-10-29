@@ -11,7 +11,6 @@ const idHab = (n) => R.ABILITY_ID_BY_NAME[n];
 const efDe = (nome) => R.efeitoDasHabilidadesNoDuelo([idHab(nome)], "TK16_" + nome, null);
 
 test("clima: a lista e os rótulos do campo.js são os que os consumidores usam", () => {
-  assert.equal(J(R.CLIMAS_DE_ESTRATEGIA), J(R.CLIMAS_DO_CAMPO));
   assert.equal(J(Object.keys(R.MOTOR_ROTULO_CLIMA)), J(R.CLIMAS_DO_CAMPO));
   // todo clima que um arquétipo mapeia existe no motor, e todo clima do motor tem arquétipo
   const doArquetipo = Object.values(R.CONDICAO_DO_ARQUETIPO_CAMPO).filter((c) => !c.startsWith("terreno"));
@@ -24,8 +23,8 @@ test("terreno: id, tipo reforçado e arquétipo batem entre campo.js, condiçõe
   assert.equal(J(Object.values(R.TERRENO_DO_TEXTO).sort()), J([...R.TERRENOS_DO_CAMPO].sort()));
   assert.equal(J(Object.keys(R.TIPO_DO_TERRENO).sort()), J([...R.TERRENOS_DO_CAMPO].sort()));
   const condTerreno = Object.values(R.CONDICAO_DO_ARQUETIPO_CAMPO).filter((c) => c.startsWith("terreno"));
-  // Psychic Terrain não tem condição de habilidade no mapa (comportamento existente, fora do TK-16): 4 de 5.
-  assert.equal(condTerreno.length, R.TERRENOS_DO_CAMPO.length - 1);
+  // Os 5 terrenos têm condição de habilidade no mapa (Psychic Terrain entrou no TK-33a, comitê 29/10).
+  assert.equal(condTerreno.length, R.TERRENOS_DO_CAMPO.length);
   // cada habilidade que arma terreno resolve para um id do campo.js
   ["Electro Surge", "Grassy Surge", "Psychic Surge", "Misty Surge", "Toxic Surge"].forEach((h) => {
     assert.ok(R.TERRENOS_DO_CAMPO.includes(efDe(h).armaTerreno), h);

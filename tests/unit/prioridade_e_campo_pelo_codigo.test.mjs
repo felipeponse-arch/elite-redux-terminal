@@ -52,7 +52,7 @@ test("Misty Terrain: Fairy do atacante no chão sai x1,3; Dragon contra alvo no 
   const atq = (tipo) => sintetica([], [golpe(tipo, "E")], { stats: [320, 100, 100, 100, 100, 100] });
   const alvo = sintetica([], [golpe("Normal")], { tipos: ["Normal"] });
   const sem = (tipo) => dano(atq(tipo), alvo);
-  const nevoento = (tipo) => comTerreno("nevoa", () => dano(atq(tipo), alvo));
+  const nevoento = (tipo) => comTerreno("nevoento", () => dano(atq(tipo), alvo));
   perto(nevoento("Dragon") / sem("Dragon"), 1, 1e-9, "Dragon no Misty Terrain");
   perto(nevoento("Fairy") / sem("Fairy"), 1.3, 0.03, "Fairy no Misty Terrain");
   perto(nevoento("Fire") / sem("Fire"), 1, 1e-9, "outro tipo");
