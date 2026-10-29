@@ -4724,6 +4724,13 @@ export const MUTACOES = [
     para: "var doTipo = tipos.map(function (t) { return Object.keys(ITENS_CONFIG.itens).filter(function (n) { var x = ITENS_CONFIG.itens[n]; return x.e === \"TYPE_POWER\" && x.t === t; }).sort()[0]; });",
   },
   {
+    id: "tk17-rejeitados-a-mao",
+    descricao: "a lista REJEITADOS do prompt volta a ser texto à mão (Trick/Switcheroo fora da fonte única)",
+    arquivo: "prompts_ia.js",
+    de: "(exceto \" + GOLPES_QUE_PASSAM_ITEM.join(\"/\") + \", que passam o item)",
+    para: "(exceto Trick/Switcheroo, que passam o item)",
+  },
+  {
     id: "campo-clima-dura-pouco",
     descricao: "campo.js: o clima passa a durar 7 turnos em vez dos 8 do código do jogo",
     arquivo: "campo.js",
@@ -4834,6 +4841,20 @@ export const MUTACOES = [
     arquivo: "chefoes.js",
     de: "hp >= 50 ? \"alto\"",
     para: "hp >= 75 ? \"alto\"",
+  },
+  {
+    id: "tk17-constante-sheer-force-errada",
+    descricao: "SHEER_FORCE_MULT do motor diverge do texto/código do jogo (1,4 em vez de 1,3)",
+    arquivo: "duelo.js",
+    de: "var SHEER_FORCE_MULT = 1.3;",
+    para: "var SHEER_FORCE_MULT = 1.4;",
+  },
+  {
+    id: "tk17-prompt-technician-a-mao",
+    descricao: "o prompt da Technician volta a ter o limite escrito à mão (50 em vez da constante)",
+    arquivo: "prompts_ia.js",
+    de: '"Technician (golpe de " + TECHNICIAN_LIMITE + " de poder',
+    para: '"Technician (golpe de 50 de poder',
   },
 ];
 

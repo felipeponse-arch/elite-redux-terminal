@@ -772,6 +772,12 @@
   var TERRENO_DO_TEXTO_DUELO = TERRENO_DO_TEXTO; // tabelas únicas em campo.js (TK-16)
   var TIPO_DO_TERRENO_DUELO = TIPO_DO_TERRENO;
   var REFORCO_DO_TERRENO_DUELO = 1.3;
+  // Multiplicadores de habilidade (er-repo f34fc2b, abilities.cc: SERENE_GRACE :861, TECHNICIAN :1595, SHEER_FORCE :1851).
+  // O prompt da IA (prompts_ia.js) lê daqui; o motor lê Technician e Sheer Force do texto do jogo, e o teste confere que batem.
+  var SERENE_GRACE_MULT = 2;
+  var TECHNICIAN_LIMITE = 60;
+  var TECHNICIAN_MULT = 1.5;
+  var SHEER_FORCE_MULT = 1.3;
   var SALA_PERMANENTE_DUELO = 10; // battle_script_commands.c:11908: timer > 10 não é desligado pelo golpe (Tate & Liza, battle_util.c:4275-4278)
   var CAMPO_DUELO = null; // contexto do duelo em andamento (resultadoDoDuelo liga e desliga)
   function lerCampoDaFraseDuelo(f, ef) {
@@ -1621,7 +1627,7 @@
         if (/Attack/i.test(x[2]) && !/Sp/i.test(x[2])) ef.atkMult *= 1 + parseInt(x[3], 10) / 100; else ef.spaMult *= 1 + parseInt(x[3], 10) / 100;
       }
       // --- status por chance: quem causa (ataque/defesa) e quem é imune ---
-      if (/Doubles chance of secondary effects/i.test(t)) ef.chanceMult = 2;
+      if (/Doubles chance of secondary effects/i.test(t)) ef.chanceMult = SERENE_GRACE_MULT;
       if ((x = t.match(/Exchanges added effects on its moves for ([\d.]+)x/i))) ef.semEfeitoExtra = parseFloat(x[1]);
       if (/Only damaged by attacks/i.test(t)) ef.semResiduo = true;
       if (/Immune to added move effects/i.test(t)) ef.imuneEfeitoDeGolpe = true;

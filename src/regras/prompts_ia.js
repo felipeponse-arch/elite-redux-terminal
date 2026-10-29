@@ -336,7 +336,9 @@
       // conferidas em conflitoDeItem, validacao_build_ia.js).
       "ITEM x BUILD: o item precisa reforcar o papel, a habilidade ou os golpes escolhidos - diga na rationale o que ele reforca. " +
       "Escolha o item que MAIS ajuda este Pokemon; no time vale no MAXIMO " + MAX_MESMO_ITEM_NO_TIME + " membros com o mesmo item (a lista de itens ja em uso vem abaixo, quando houver). " +
-      "Sao REJEITADOS: Choice Band/Specs/Scarf com golpe de status (exceto Trick/Switcheroo, que passam o item); Assault Vest ou Tactical Vest com golpe de status (o jogo impede usar); Eviolite numa forma que nao evolui mais.\n";
+      // Listas vindas de validacao_build_ia.js (mesma fonte do conflitoDeItem).
+      "Sao REJEITADOS: " + ITENS_CHOICE.join("/") + " com golpe de status (exceto " + GOLPES_QUE_PASSAM_ITEM.join("/") + ", que passam o item); " +
+      ITENS_VEST.join(" ou ") + " com golpe de status (o jogo impede usar); Eviolite numa forma que nao evolui mais.\n";
   }
   // O que o resto do time já usa (só a build de 1 membro recebe: as Estratégias
   // são leitura exploratória da espécie, não do time).
@@ -374,9 +376,9 @@
     "Skill Link": "Skill Link: golpes de 2 a 5 acertos sempre acertam o maximo - prefira golpes de varios acertos do movepool; Loaded Dice fica redundante.",
     "Super Luck": "Super Luck (+1 no critico): Scope Lens (\"improves the critical-hit rate\") soma - golpes de critico alto rendem mais.",
     "Sniper": "Sniper (critico 2,25x): combine com Scope Lens e golpes de critico alto.",
-    "Technician": "Technician (golpe de 60 de poder ou menos x1,5): priorize os golpes fracos do movepool que ele transforma em fortes, inclusive os de varios acertos.",
-    "Sheer Force": "Sheer Force (x1,3 em golpe com efeito extra, que perde o efeito): prefira golpes com efeito secundario.",
-    "Serene Grace": "Serene Grace (dobra a chance de efeito extra): prefira golpes com efeito secundario (flinch, status, queda de status).",
+    "Technician": "Technician (golpe de " + TECHNICIAN_LIMITE + " de poder ou menos x" + String(TECHNICIAN_MULT).replace(".", ",") + "): priorize os golpes fracos do movepool que ele transforma em fortes, inclusive os de varios acertos.",
+    "Sheer Force": "Sheer Force (x" + String(SHEER_FORCE_MULT).replace(".", ",") + " em golpe com efeito extra, que perde o efeito): prefira golpes com efeito secundario.",
+    "Serene Grace": "Serene Grace (" + (SERENE_GRACE_MULT === 2 ? "dobra" : "x" + SERENE_GRACE_MULT) + " a chance de efeito extra): prefira golpes com efeito secundario (flinch, status, queda de status).",
     "Contrary": "Contrary (queda de status vira aumento): golpes cuja descricao (no movepool acima) diz que baixam os status do proprio usuario viram setup - se houver, use.",
     "Simple": "Simple (dobra mudancas de status): um golpe de setup rende em dobro - inclua um se o movepool tiver.",
     "Speed Boost": "Speed Boost (+1 de Velocidade por turno): Protect ou um setup no primeiro turno e comum; EV de Velocidade pode ceder para bulk/ataque.",

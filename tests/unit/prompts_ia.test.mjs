@@ -136,3 +136,26 @@ test("mensagens de erro da IA: permissão, limite e falha temporária têm texto
   const c = R.sampleErrorMessage({ code: "codigo_novo_desconhecido" });
   assert.ok(a !== b && b !== c && a !== c);
 });
+
+test("TK-17: lista REJEITADOS do prompt sai de ITENS_CHOICE/ITENS_VEST/GOLPES_QUE_PASSAM_ITEM (fonte única)", () => {
+  R.ITENS_CHOICE.push("Choice Teste");
+  R.ITENS_VEST.push("Vest Teste");
+  R.GOLPES_QUE_PASSAM_ITEM.push("Golpe Teste");
+  try {
+    const p = R.montarPromptBuild(sp("SPECIES_GARCHOMP"), {});
+    for (const x of ["Choice Teste", "Vest Teste", "Golpe Teste"]) assert.ok(p.indexOf(x) !== -1, x);
+  } finally {
+    R.ITENS_CHOICE.pop(); R.ITENS_VEST.pop(); R.GOLPES_QUE_PASSAM_ITEM.pop();
+  }
+});
+
+test("TK-17: constantes do motor (abilities.cc f34fc2b) batem com o texto do jogo e o prompt as usa", () => {
+  const ef = (n) => R.efeitoDasHabilidadesNoDuelo([R.ABILITY_ID_BY_NAME[n]], "TK17|" + n, null);
+  assert.equal(ef("Serene Grace").chanceMult, R.SERENE_GRACE_MULT);
+  const tc = ef("Technician").tecnico; assert.equal(tc.limite, R.TECHNICIAN_LIMITE); assert.equal(tc.mult, R.TECHNICIAN_MULT);
+  assert.equal(ef("Sheer Force").semEfeitoExtra, R.SHEER_FORCE_MULT);
+  const m = R.MANUAL_POR_HABILIDADE;
+  assert.ok(m["Technician"].startsWith("Technician (golpe de " + R.TECHNICIAN_LIMITE + " de poder ou menos x1,5)"));
+  assert.ok(m["Sheer Force"].startsWith("Sheer Force (x1,3 em golpe"));
+  assert.ok(m["Serene Grace"].startsWith("Serene Grace (dobra a chance"));
+});
