@@ -226,6 +226,20 @@
     // Sono (Champions): contador 2 (1/3) ou 3 (2/3), -1 a cada tentativa de agir, e acorda no turno em que zera: perde 1 turno (1/3) ou 2 (2/3).
     sono: { corte: 0.5, imunes: [] }
   };
+  // Imunidade a status por HABILIDADE, como o código do jogo decide (fonte única de condicoes_habilidade e do duelo).
+  // abilities.cc: onStatusImmune com CHECK_STATUS1 = sono, veneno, queimadura, paralisia, congelar e sangrar
+  // (include/abilities.hh:103-110); NÃO inclui confusão, paixão, recuo, medo, semente etc. O texto "Immune to status"
+  // do NextDex dizia mais que o código; estas 7 seguem o código (decisão do usuário, 29/10, TK-13b).
+  var STATUS1_DUELO = ["sono", "envenenar", "envenenarForte", "queimar", "paralisar", "congelar", "sangrar"];
+  var IMUNE_STATUS_POR_HABILIDADE = {
+    "Purifying Salt": STATUS1_DUELO, // abilities.cc:6921
+    "Comatose": STATUS1_DUELO, // :2948
+    "Hyper Cleanse": STATUS1_DUELO, // :10337
+    "Petroleum Jelly": STATUS1_DUELO, // :12694 (usa o onStatusImmune do Hyper Cleanse)
+    "Blood Stigma": STATUS1_DUELO, // :8409
+    "Blood Stain": STATUS1_DUELO, // :8395
+    "Immunity": STATUS1_DUELO.filter(function (s) { return s !== "sono"; }) // :682-686 (CHECK_STATUS1 & ~CHECK_SLEEP)
+  };
   // Efeito extra do golpe no NextDex (effT) -> status do duelo.
   var STATUS_DO_EFEITO_DUELO = {
     "Burn Hit": ["queimar"], "Frostbite Hit": ["congelar"], "Paralyze Hit": ["paralisar"], "Bleed Hit": ["sangrar"],
@@ -1606,6 +1620,7 @@
         ef.speMult *= 1 + parseInt(x[1], 10) / 100;
         if (/Attack/i.test(x[2]) && !/Sp/i.test(x[2])) ef.atkMult *= 1 + parseInt(x[3], 10) / 100; else ef.spaMult *= 1 + parseInt(x[3], 10) / 100;
       }
+      var imuneAntes = IMUNE_STATUS_POR_HABILIDADE[nomeHabDuelo(id)] ? Object.assign({}, ef.imuneStatus) : null; // o texto não manda nestas (tabela acima)
       // --- status por chance: quem causa (ataque/defesa) e quem é imune ---
       if (/Doubles chance of secondary effects/i.test(t)) ef.chanceMult = SERENE_GRACE_MULT;
       if ((x = t.match(/Exchanges added effects on its moves for ([\d.]+)x/i))) ef.semEfeitoExtra = parseFloat(x[1]);
@@ -1616,6 +1631,7 @@
         lerExtrasDaFraseDuelo(f, ef, climaOk); lerCuraDaFraseDuelo(f, ef, climaOk); lerDiversosDaFraseDuelo(f, ef, climaOk);
         lerCampoDaFraseDuelo(f, ef); lerItemDaFraseDuelo(f, ef, climaOk); lerSequenciaDaFraseDuelo(f, ef); lerDuplaDaFraseDuelo(f, ef, climaOk); lerStatusGolpeDaFraseDuelo(f, ef); lerRestoDaFraseDuelo(f, ef, climaOk); lerFormaDaFraseDuelo(f, ef); lerSupressaoDaFraseDuelo(f, ef); lerLote4DaFraseDuelo(f, ef);
       });
+      if (imuneAntes) { ef.imuneStatus = imuneAntes; IMUNE_STATUS_POR_HABILIDADE[nomeHabDuelo(id)].forEach(function (s) { ef.imuneStatus[s] = true; }); }
     });
     ef.stabExtra = ef.stabExtra.filter(function (tp, i, a) { return a.indexOf(tp) === i; });
     ef.tipoExtra = ef.tipoExtra.filter(function (tp, i, a) { return a.indexOf(tp) === i; });

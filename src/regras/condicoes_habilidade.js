@@ -72,12 +72,6 @@
   // Orbe que causa o status no próprio Pokémon (texto do jogo: Toxic Orb
   // "badly poisons the holder", Flame Orb "inflicts a burn on holder").
   var ORBES_DE_STATUS = { "veneno": "Toxic Orb", "queimadura": "Flame Orb" };
-  // Texto de habilidade que impede o status em si mesmo.
-  var BLOQUEIA_STATUS = {
-    "veneno": /cannot be poisoned|immune to status/i,
-    "queimadura": /burn-immune|no burns|immune to burn|immune to status/i,
-    "sono": /fall asleep|immune to sleep|rest fails|immune to status/i
-  };
 
   var descricaoDeHabilidadeCache = {};
   function descricaoDeHabilidade(nome) {
@@ -123,15 +117,22 @@
     return uniqueIds(ids || []).map(function (id) { return ABILITIES[id] ? ABILITIES[id][0] : ""; }).filter(Boolean);
   }
   // Condição do texto -> status do duelo (STATUS_DUELO, duelo.js: fonte única de vocabulário e de imunidade por tipo).
-  var STATUS_DUELO_DA_CONDICAO = { "veneno": "envenenarForte", "queimadura": "queimar", "sono": "sono" };
+  var STATUS_DUELO_DA_CONDICAO = { "veneno": "envenenarForte", "queimadura": "queimar", "sono": "sono", "paralisia": "paralisar", "congelar": "congelar", "sangrar": "sangrar" };
   // Pode ficar com este status? Imunidade de tipo vem de STATUS_DUELO (jogo: CanBeBurned/CanBurnType em
-  // battle_util.c:5088, chamado pelo Flame Orb em :6289; Toxic Orb idem); habilidade que bloqueia o status também impede.
-  // Mycelium Might (battle_util.c:5090) não é modelado aqui: o orbe é auto-aplicado e esta checagem não trata essa exceção.
-  function podeTerStatus(sp, cond, habilidades) {
-    var tipos = speciesTypeNames(sp), regra = STATUS_DUELO[STATUS_DUELO_DA_CONDICAO[cond]];
-    if (regra && (regra.imunes || []).some(function (tp) { return tipos.indexOf(tp) !== -1; })) return false;
-    var bloqueio = BLOQUEIA_STATUS[cond];
-    return !bloqueio || !habilidades.some(function (n) { return bloqueio.test(descricaoDeHabilidade(n)); });
+  // battle_util.c:5088, chamado pelo Flame Orb em :6289; Toxic Orb idem). A imunidade de habilidade vem do duelo
+  // (efeitoDasHabilidadesNoDuelo: texto + IMUNE_STATUS_POR_HABILIDADE), a mesma fonte do motor.
+  // contexto (opcional, estado da luta): { status1: já tem status, misty: Terreno Nevoento sobre ele no chão, safeguard: Safeguard no lado }
+  // = IsStatusImmune (battle_util.c:5051-5058) e CanBe* (:5085). Mycelium Might (:5090) ignora habilidade, campo e tipo, mas não o status1.
+  function podeTerStatus(sp, cond, habilidades, contexto) {
+    var s = STATUS_DUELO_DA_CONDICAO[cond], ctx = contexto || {};
+    if (!s) return true;
+    if (ctx.status1) return false;
+    var ef = efeitoDasHabilidadesNoDuelo(habilidades.map(function (n) { return ABILITY_ID_BY_NAME[n]; }).filter(function (id) { return id !== undefined; }), "podeTerStatus", null);
+    if (ef.statusIgnoraImune) return true;
+    if (ctx.misty || ctx.safeguard) return false;
+    var tipos = speciesTypeNames(sp);
+    if ((STATUS_DUELO[s].imunes || []).some(function (tp) { return tipos.indexOf(tp) !== -1; })) return false;
+    return !ef.imuneStatus[s];
   }
   // Quem já garante a condição hoje, fora do próprio Pokémon: o time (build
   // ativa de cada membro + innates) e o Clima e campo do arquétipo.

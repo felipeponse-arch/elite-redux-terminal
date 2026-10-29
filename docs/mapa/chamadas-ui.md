@@ -21,7 +21,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderBossDetail:556 - chama: classeDoCabecalhoDoChefao (chefoes.js:57), nivelDeCalculo (level_cap.js:65), monotypeAtivo (mono_run.js:72), quemResolveCardHtml (quem_resolve.js:83), quemResolveRestaurar (quem_resolve.js:103), +1
 - renderGymSkillsCardHtml:423 - chama: ehRevancheDeLider (chefoes.js:484), gymLeaderBaseName (chefoes.js:55), gymSkillsSummaryFor (chefoes.js:379)
 - selectBoss:404 - chama: varianteDoChefao (chefoes.js:370)
-- simularSemTravarATela:295 - chama: montarTimeContraChefaoEmPassos (duelo.js:4612), totalDePassosContraChefao (duelo.js:4611)
+- simularSemTravarATela:295 - chama: montarTimeContraChefaoEmPassos (duelo.js:4628), totalDePassosContraChefao (duelo.js:4627)
 
 ## ui/arquetipo.js
 - applyRecommendedTeam:207 - chama: getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), formFamilyOf (formas_mega.js:65), entradasDoJogador (liberado_na_run.js:34), flashToast (dex_lista.js:473), +4 | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:308), modoMotorFicarComVariante (modo_motor.js:119)
@@ -54,11 +54,11 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/dex_ficha.js
 - RANK_TIER_CLASS:154 - chamado por: monoRunCardHtml (arquetipo.js:497)
 - abilityCard:14 - chama: ABILITIES (dados_base.js:10)
-- buildSynergyHtml:42 - chama: sinergiasDaEspecie (duelo.js:1294) | chamado por: buildEntryHtml (editor_build.js:182), strategySetsHtml (editor_build.js:432), renderTeam (time.js:8)
+- buildSynergyHtml:42 - chama: sinergiasDaEspecie (duelo.js:1308) | chamado por: buildEntryHtml (editor_build.js:182), strategySetsHtml (editor_build.js:432), renderTeam (time.js:8)
 - conditionMoveSynergyNoteHtml:70 - chama: buildNoteHtml (editor_build.js:155)
 - evoConditionText:88 - chama: EVOKINDS (dados_base.js:13), EVO_LEVEL_FEMALE (dados_base.js:32), EVO_LEVEL_MALE (dados_base.js:31), EVO_MEGA_KINDS (dados_base.js:34), EVO_PRIMAL (dados_base.js:33)
 - fichaCabecalhoHtml:504 - chama: descricaoDaEspecie (dados_base.js:187), compraDeInicialTexto (mono_run.js:47), speciesTypeNames (tipos.js:253), state (nucleo.js:8)
-- fichaConhecerHtml:558 - chama: uniqueIds (dados_base.js:122), sinergiasDaEspecie (duelo.js:1294), bst (dex_lista.js:152)
+- fichaConhecerHtml:558 - chama: uniqueIds (dados_base.js:122), sinergiasDaEspecie (duelo.js:1308), bst (dex_lista.js:152)
 - fichaEfetividadeHtml:423 - chama: perfilDefensivoDaEspecie (tipos.js:178)
 - fichaEvolucaoHtml:446 - chama: getSpeciesByX (dados_base.js:78)
 - fichaFormasHtml:464 - chama: getSpeciesByX (dados_base.js:78)
@@ -66,7 +66,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - fichaNotasHtml:591 - chama: bossReferenceHtml (ficha_extras.js:103), buildHistoryHtml (ficha_extras.js:87), notesCardHtml (ficha_extras.js:78)
 - fichaStatsHtml:413 - chama: statPct (dex_lista.js:163), statTier (dex_lista.js:164)
 - howToObtainText:236 - chama: MAPS (dados_base.js:49)
-- marcasDoRankHtml:288 - chama: precisaDeSetter (condicoes_habilidade.js:210), nivelDaHabilidadeNoElite (level_cap.js:40), rankDaDificuldadeDe (rank_da_run.js:69), state (nucleo.js:8)
+- marcasDoRankHtml:288 - chama: precisaDeSetter (condicoes_habilidade.js:211), nivelDaHabilidadeNoElite (level_cap.js:40), rankDaDificuldadeDe (rank_da_run.js:69), state (nucleo.js:8)
 - rankBadgeHtml:169 - chama: FORA_DO_RANK (rank_da_run.js:10), MOTIVO_FORA_DO_RANK_PT (rank_da_run.js:17), rankDe (rank_da_run.js:29) | chamado por: renderBox (caixa.js:16), linhaDaListaHtml (dex_lista.js:212), compareResultHtml (ficha_extras.js:22), renderTeam (time.js:8), renderRoleCompendium (tipos.js:113)
 - rankInfoLineHtml:310 - chama: FORA_DO_RANK (rank_da_run.js:10), MOTIVO_FORA_DO_RANK_PT (rank_da_run.js:17), rankDe (rank_da_run.js:29)
 - rankStageBadgeHtml:203 - chama: rankDe (rank_da_run.js:29)
