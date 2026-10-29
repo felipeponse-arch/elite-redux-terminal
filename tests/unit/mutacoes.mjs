@@ -1575,7 +1575,7 @@ export const MUTACOES = [
     id: "f4-false-swipe-volta",
     descricao: "False Swipe volta a contar como golpe de nocaute",
     arquivo: "duelo.js",
-    de: "if (cat && cat.ef === \"False Swipe\") return false;",
+    de: "if (dadoDoGolpe && dadoDoGolpe.ef === \"False Swipe\") return false;",
     para: "",
   },
   {
@@ -2014,8 +2014,8 @@ export const MUTACOES = [
     id: "electro-shot-sem-carga",
     descricao: "Electro Shot dispara na hora sem chuva",
     arquivo: "duelo.js",
-    de: "if (cat && cat.ef === \"Electro Shot\") return clima === \"chuva\" ||",
-    para: "if (cat && cat.ef === \"Electro Shot\") return true ||",
+    de: "if (dadoDoGolpe && dadoDoGolpe.ef === \"Electro Shot\") return clima === \"chuva\" ||",
+    para: "if (dadoDoGolpe && dadoDoGolpe.ef === \"Electro Shot\") return true ||",
   },
   {
     id: "electro-shot-sem-bonus",

@@ -571,7 +571,7 @@
     // Packed Ice (sem código no upcoming 217dd0f; pela descrição): +2 de Defesa em vez do golpe do tipo (a imunidade vem de TYPE_MOD_ABILITIES).
     if ((x = f.match(/^Boosts Defense sharply instead of being hit by (\w+)-type moves/i)) && tipoDoTextoDuelo(x[1])) ef.aoApanhar.push({ stat: "def", n: 2, tipos: [tipoDoTextoDuelo(x[1])] });
     // Lightsaber (Impl<ABILITY_LIGHT_SABER>, abilities.cc:10991-11011): golpe Keen Edge, 50% de disparar e então 1/4 queima, 1/4 paralisa, 1/2 nada = 12,5% de cada (os "25% de queimar ou paralisar" da descrição).
-    if ((x = f.match(/^(?:Keen Edge|Slashing|Sharpness) moves have (\d+)% burn or paralysis/i))) empurraStatusDuelo(ef, ef.statusAtaque, ["queimar", "paralisar"], parseInt(x[1], 10) / 100, { cat: "corte" });
+    if ((x = f.match(/^(?:Keen Edge|Slashing|Sharpness) moves have (\d+)% burn or paralysis/i))) empurraStatusDuelo(ef, ef.statusAtaque, ["queimar", "paralisar"], parseInt(x[1], 10) / 100, { categoria: "corte" });
     if ((x = f.match(/Every attack has an? (\d+)% (\w+) chance(?: and (\d+)% (\w+) chance)?/i))) {
       empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[2]), parseInt(x[1], 10) / 100, {});
       // Malediction (sem código no upcoming 217dd0f; pela descrição "20% Bleed chance and 10% Curse chance"): a Maldição é o status do motor (1/4 do HP por turno).
