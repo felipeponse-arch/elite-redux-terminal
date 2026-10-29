@@ -20,7 +20,7 @@
   // `data/dex_compact.json` deste hack antes de entrar aqui, a mesma
   // disciplina de toda lista curada deste projeto. Não é teoria completa de
   // itens (este projeto não tem modelo mecânico por item além de
-  // ITEM_STAT_MODS/ITEM_MOVE_POWER_MODS acima) - é um menu real e limitado
+  // ITEM_STAT_MODS/ITEM_MOVE_POWER_MODS, em calc_stat.js) - é um menu real e limitado
   // pra escolher, exatamente o mesmo tratamento que golpes/habilidades já
   // recebem.
   // Por grupo (2026-09-26, pedido do usuário: "temos mais itens que podem ajudar

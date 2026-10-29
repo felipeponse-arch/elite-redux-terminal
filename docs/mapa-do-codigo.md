@@ -273,6 +273,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **chefoes_pela_config.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **chefoes_pela_config_nova.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **clima_oficial_e_revisao.test.mjs** - Achados da reunião de alinhamento (2026-09-30): clima com os números oficiais
+- **comentario_acima_sem_dono.test.mjs** - TK-33b item 9: comentário "NOME_EM_CAIXA_ALTA acima" não pode apontar para algo declarado em OUTRO arquivo
 - **comparar_motor_ia.test.mjs** - Comparação Motor x IA (time-pelo-motor/01, Fase E): a leitura da resposta da IA e o juiz comum.
 - **condicoes_habilidade.test.mjs** - Habilidade condicional (reunião de 2026-09-28): a auditoria das builds salvas
 - **condicoes_no_duelo.test.mjs** - Condições da luta no duelo (2026-09-29): status no próprio Pokémon (Guts com

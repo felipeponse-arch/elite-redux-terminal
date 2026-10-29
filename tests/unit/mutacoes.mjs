@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "comentario-itens-aponta-acima-de-outro-arquivo",
+    descricao: "TK-33b: o comentário de itens_do_time.js volta a mandar ver ITEM_STAT_MODS 'acima' (ele mora em calc_stat.js)",
+    arquivo: "itens_do_time.js",
+    de: "ITEM_STAT_MODS/ITEM_MOVE_POWER_MODS, em calc_stat.js)",
+    para: "ITEM_STAT_MODS/ITEM_MOVE_POWER_MODS acima)",
+  },
+  {
     id: "alias-weather-archetypes-volta",
     descricao: "TK-33b: o alias WEATHER_ARCHETYPES (= ARQUETIPOS_DE_CAMPO) volta em dados_base.js",
     arquivo: "dados_base.js",
