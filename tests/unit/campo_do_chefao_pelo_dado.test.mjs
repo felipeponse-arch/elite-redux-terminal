@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // TK-20 D9.5b: a regra de campo do chefão vem do dado (bosses.json `campo`, extraído do script do mapa do jogo),
 // não do nome. Caracterização: os mesmos 5 chefões simulados de antes + os 18 Monochamp; nenhum outro ganhou campo.
 import { test } from "node:test";

@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket calibracao-2026-10-15/05 (15/10/2026):
 // A6) Multiscale, Brain Mass e Shadow Shield cortam pela metade só o 1º golpe com o HP cheio (abilities.cc:1947, 11518, 3171:
 //     `if (BATTLER_MAX_HP(battler)) MUL(.5)`), não 25% da luta toda (antes: reducao.todos = 0,75 fixo).

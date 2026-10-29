@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 import { readFileSync } from "node:fs";
 // Mono run: disponibilidade por tipo e etapa (2026-09-26). O dado vem da
 // planilha da comunidade, importada por scripts/importar_mono.mjs; aqui se

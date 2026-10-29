@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Testes do motor de confronto (src/regras/confronto.js, 2026-09-24).
 // Fixtures achadas no dado real; as pré-condições de cada teste conferem o
 // dado antes de confiar nele, pra um rebalanceamento do hack acusar aqui em

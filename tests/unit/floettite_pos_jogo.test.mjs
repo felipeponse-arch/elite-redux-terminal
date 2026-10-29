@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket 08 (07/10/2026): a Floettite só sai depois de vencer a Elite 4 (NPC da primeira cidade,
 // confirmado pelo usuário; nenhum script público a dá). A Floette Eternal Flower continua na 6ª
 // insígnia (Mystery Gift), mas a Mega dela é pós-jogo: fora do rank e da sugestão de Mega na run.

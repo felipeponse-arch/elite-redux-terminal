@@ -1,3 +1,4 @@
+// Fonte: data/gameData.json + regras do motor atuais (instantâneo de caracterização, TK-22); regenerar só junto com mudança de regra aprovada.
 // Gera o instantâneo de caracterização da liberação por Etapa (TK-22): cada pedra e item x Etapas 0-10.
 // Uso: node tests/unit/fixtures/gerar_liberacao_por_etapa.mjs > tests/unit/fixtures/liberacao_por_etapa.json
 import { readFileSync } from "node:fs";

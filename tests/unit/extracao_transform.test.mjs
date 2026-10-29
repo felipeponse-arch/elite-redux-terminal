@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket versao-nova/05 (15/10/2026): a extração do dado em Node (scripts/extracao/) é o que gera os arquivos derivados. Estes testes travam que os arquivos
 // gravados em data/ são exatamente o que a extração produz do dado bruto (data/gameData.json): dado e derivado nunca divergem em silêncio.
 // A equivalência com os scripts PowerShell antigos (transform.ps1 + slim_dex.ps1, expand_combo_abilities.ps1, extract_bosses.ps1) foi provada uma vez com o dado

@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket versao-nova/10 (15/10/2026): o que sobrou da config d1a9a4c depois do v09 - aprendizado de golpes de TODAS as espécies, os quatro "Hunter/jack" pelo tipo
 // de quem ataca (abilities.cc:5752 Lumberjack, Fae Hunter, Monster Hunter, Firefighter; mesma família do Dragonslayer e do Insect Eater) e as Mega Bruxish e Jellicent.
 import { N_ESPECIES } from "./contagens_versao.mjs";

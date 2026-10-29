@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Guardas de todas-as-lutas/02: dado provisório não publica; o rank gravado não aceita outra fatia nem outra lista de lutas.
 import { test } from "node:test";
 import assert from "node:assert/strict";

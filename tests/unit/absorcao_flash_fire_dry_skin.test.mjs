@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket calibracao-2026-10-15/04 (15/10/2026): Flash Fire e Dry Skin absorvem o golpe (código do jogo: abilities.cc:696-706 e
 // 1471-1487, `onAbsorb`; a er-config diz "complete immunity to Fire-type moves"). Antes a tabela de tipos deixava as duas de fora porque
 // o texto curto ("Powers up Fire-type moves by 1.5x if hit by a Fire-type move", "Water/Rain heals") não diz "imune", e o Fire contra um

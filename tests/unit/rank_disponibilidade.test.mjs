@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Rank v2, ponto 3: data/rank_disponibilidade.json (gerado por scripts/gerar_rank_disponibilidade.mjs
 // a partir da planilha + código oficial). O gerador precisa do er-repo, que não vive no projeto;
 // estes testes travam o RESULTADO e as regras que ele promete.

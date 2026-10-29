@@ -19,8 +19,8 @@ test("funcoes e responsabilidade em texto mínimo", () => {
   assert.equal(responsabilidade(["// ===== f.js =====", "// Faz coisa."]), "Faz coisa.");
 });
 
-// Sem o TS 5.9 de teste/ferramentas (CI, outra máquina) as chamadas não são geradas: o teste é pulado, não falha.
-test("chamada real entre arquivos aparece em 'chamado por' (ui chama regras)", { skip: !temTs }, async () => {
+// Sem o TS 5.9 de teste/ferramentas (CI, outra máquina) o teste FALHA, a não ser que se peça o pulo (ER_SEM_TS=1).
+test("chamada real entre arquivos aparece em 'chamado por' (ui chama regras)", { skip: !temTs && process.env.ER_SEM_TS === "1" }, async () => {
   const { gerarChamadas } = await import("../../scripts/mapa_chamadas.mjs");
   const raiz = new URL("../../", import.meta.url).pathname.replace(/^\/(\w:)/, "$1");
   const { regras, ui } = gerarChamadas(raiz);
@@ -39,7 +39,7 @@ test("funcoes acha função nomeada dentro de IIFE (loadSave do nucleo.js)", () 
   assert.deepEqual(funcoes("function a(){}\n(function loadSave() {\n})();\n"), [["a", 1], ["loadSave", 2]]);
 });
 
-test("mapa de chamadas: loadSave (IIFE do nucleo.js) chama applySave no grafo", { skip: !temTs }, async () => {
+test("mapa de chamadas: loadSave (IIFE do nucleo.js) chama applySave no grafo", { skip: !temTs && process.env.ER_SEM_TS === "1" }, async () => {
   const { grafoDeChamadas } = await import("../../scripts/mapa_chamadas.mjs");
   const raiz = new URL("../../", import.meta.url).pathname.replace(/^\/(\w:)/, "$1");
   assert.ok(grafoDeChamadas(raiz).chama.get("ui/nucleo.js:loadSave")?.has("regras/save.js:applySave"));

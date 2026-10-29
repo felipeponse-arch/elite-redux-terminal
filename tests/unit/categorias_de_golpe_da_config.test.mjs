@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket calibracao-2026-10-15/01 (15/10/2026): as categorias de golpe (soco, mordida, corte, martelo, pulso, chifre,
 // flecha, chute, arremesso...) vêm das FLAGS do MoveList da er-config (como o código do jogo as lê: abilities.cc
 // DoesMoveMatchFlag e gBattleMoves[move].hammerBased/hornBased/arrowBased/throwingBased), não do texto da NextDex.

@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket versao-nova/01 (15/10/2026): o código do jogo multiplica o bônus de golpe de uma habilidade UMA vez (abilities.cc, onModifyDamage).
 // O motor lia o texto da habilidade (bonusTipo/bonusCategoria/flagMult/contatoMult) E somava por cima a "sinergia por golpe" da espécie
 // (data/species_ability_synergy.json -> bonusGolpes): Nocturnal x1,25 virava x1,54. A sinergia agora só vale para a habilidade cujo texto

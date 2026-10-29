@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Meu Time na mesma régua do rank (ticket todas-as-lutas/02, 21/10/2026): o juiz do Modo Motor pesa as lutas COMUNS mais perigosas de cada
 // etapa (data/lutas_comuns_run.json, pré-calculado pelo rank) com a fatia do rank (chefões 60%, comuns 40%), sem simular as 538 ao vivo.
 // Dado real: espécies, builds e lutas da run; nenhum valor à mão.
