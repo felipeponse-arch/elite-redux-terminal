@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const ginasios = JSON.parse(readFileSync(new URL("../../data/gym_skills.json", import.meta.url), "utf8"));
-const buffs = Object.values(ginasios).flatMap((g) => (g && g.buffs) || []);
+// os líderes ficam num nível abaixo da raiz: junta todo array `buffs` que aparecer
+const buffs = [];
+(function juntar(o) { if (o && typeof o === "object") for (const [k, v] of Object.entries(o)) { if (k === "buffs" && Array.isArray(v)) buffs.push(...v); else juntar(v); } })(ginasios);
 
 test("status nos N últimos: o texto diz que só pega quem está sem status e nunca o 1º (battle_events.c:135-146)", () => {
   const nosUltimos = buffs.filter((b) => /últimos Pokémon do seu time começa/i.test(b.detail));
