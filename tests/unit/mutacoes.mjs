@@ -4993,8 +4993,22 @@ export const MUTACOES = [
     id: "tk33a-rks-system-sem-stab-em-todos",
     descricao: "TK-33a: o RKS System perde o STAB em todos os golpes (omniStab do jogo)",
     arquivo: "duelo.js",
-    de: "before use|Also has Protean/i.test(f)) ef.stabTodos = true;",
-    para: "before use/i.test(f)) ef.stabTodos = true;",
+    de: "before use|Also has Protean/i.test(f)) ef.stabTodos = ef.tipoDoGolpe = true;",
+    para: "before use/i.test(f)) ef.stabTodos = ef.tipoDoGolpe = true;",
+  },
+  {
+    id: "tk34-protean-nao-troca-o-tipo-na-defesa",
+    descricao: "TK-34: Protean/Libero/RKS/Pattern Change deixam de virar mono do tipo do golpe (a defesa lê o tipo original)",
+    arquivo: "duelo.js",
+    de: "if (!u.ef.tipoDoGolpe || !gU",
+    para: "if (true || !u.ef.tipoDoGolpe || !gU",
+  },
+  {
+    id: "tk34-color-change-volta-ao-teto-05",
+    descricao: "TK-34: o Color Change volta à aproximação de teto 0,5 (não chega à imunidade)",
+    arquivo: "duelo.js",
+    de: "return def.tipos.indexOf(melhorT) !== -1 ? efAtual : melhorM;",
+    para: "return def.tipos.indexOf(melhorT) !== -1 ? efAtual : Math.max(melhorM, efAtual > 0.5 ? 0.5 : efAtual);",
   },
 ];
 

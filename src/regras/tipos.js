@@ -63,8 +63,9 @@
   //   - efeitos condicionados a clima/terreno (ex: Foggy Eye só sob
   //     neblina) - mesma razão que o dashboard só olha pro PRÓXIMO chefão:
   //     não dá pra assumir a condição ativa numa sugestão estática;
-  //   - mudança de tipo dinâmica no meio da batalha (Color Change, Protean)
-  //     - não modelável sem simular o turno.
+  //   - mudança de tipo dinâmica no meio da batalha (Color Change, Protean): o duelo.js
+  //     já trata (comTipoDoGolpe e efetividadeComColorChange, TK-34); aqui, na sugestão
+  //     estática, continua fora.
   // Ids batem com os índices de ABILITIES / dex_compact.json "abilities".
   // Combos (ids que juntam 2+ habilidades, ex Aerialist = Levitate + Flock)
   // ganham sua PRÓPRIA entrada aqui quando um componente relevante existe -

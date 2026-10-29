@@ -614,9 +614,9 @@
     if (/Sets up Protect on switch-in/i.test(f)) ef.bloqueios = Math.max(ef.bloqueios, 1);
     if (/Endures the? a single KO|Endures a single KO/i.test(f)) ef.aguenta = true;
     if (/Heal 1\/4 of max HP whenever below 1\/2/i.test(f)) ef.reviveHP = Math.max(ef.reviveHP, 0.25);
-    if (/Changes type to a resist or an immunity before getting hit/i.test(f)) ef.sempreResiste = 1;
+    if (/Changes type to a resist or an immunity before getting hit/i.test(f)) ef.corCamaleao = true; // Color Change (abilities.cc:649-672): vira o tipo que mais resiste ao golpe, 1x por turno
     if ((x = f.match(/Resists all attacks for (\w+) turns on first entry/i))) ef.sempreResiste = NUM_DO_TEXTO_DUELO[x[1].toLowerCase()] || 3;
-    if (/Changes type depending on the move it's about to use|changes its type to the move's type|Changes type to move's type before use|Also has Protean/i.test(f)) ef.stabTodos = true; // RKS System: omniStab (abilities.cc:3111-3126, Protean sem a limitação de uma vez; STAB x2 vem do Adaptability)
+    if (/Changes type depending on the move it's about to use|changes its type to the move's type|Changes type to move's type before use|Also has Protean/i.test(f)) ef.stabTodos = ef.tipoDoGolpe = true; // tipoDoGolpe: o tipo vira o do golpe (TK-34; Protean/Libero 1x por entrada, RKS/Pattern Change/Prismatic Fur 1x por turno). RKS System: omniStab (abilities.cc:3111-3126, Protean sem a limitação de uma vez; STAB x2 vem do Adaptability)
     // Redução de dano geral.
     if ((x = f.match(/Reduces damage taken by (\d+)%, but lowers speed by (\d+)%/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.speMult *= 1 - parseInt(x[2], 10) / 100; }
     // Feathercoat (abilities.cc:12377-12386): x(1 - a%) em todo golpe e x(1 - b%) NO TOTAL se o golpe é resistido (não soma: o jogo troca o fator).
@@ -1371,7 +1371,7 @@
       hemolise: false, trocaStatusDoTipo: {}, curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
       semRecuo: false, recuoMult: 1, custoPorAtaque: 0, custoTipo: {}, bloqueiaCura: false, liquidOoze: false,
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
-      bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {}, precisaoPorTipo: {},
+      bloqueios: 0, sempreResiste: 0, corCamaleao: false, tipoDoGolpe: false, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {}, precisaoPorTipo: {},
       menorDefesaCategoria: {}, menorDefesaSeStatus: false, flagMult: {}, prioTipoSempre: [], drenoTipo: {}, malicious: false,
       equinox: false, maiorMult: 0, maiorVel: 0, paradoxoItem: false, ritmico: 0, bonusVsStatus: {}, bonusVsEnfurecido: 0, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
       campoResiduo: [], statusNaEntrada: {}, forcaUltimo: false, semStabOutros: false, recuoFrac: 1,
@@ -2006,7 +2006,9 @@
       if (g.nome === "Grassy Glide" && terreno === "grama" && aterradoDuelo(atq)) prioAqui += 1;
       if (terreno === "psiquico" && prioAqui > 0 && aterradoDuelo(def)) return; // Psychic Terrain: o golpe com prioridade falha inteiro (CANCELLER_PSYCHIC_TERRAIN)
       if (def.ef.barraPrioridade && prioAqui > 0) prioAqui = 0; // Surprise! na névoa
-      if (abreDef && def.ef.sempreResiste && efTipo > 0.5) efTipo = 0.5; // Color Change, Soothsayer
+      if (abreDef && def.ef.sempreResiste && efTipo > 0.5) efTipo = 0.5; // Soothsayer
+      // Color Change: antes do dano vira o tipo (único) que mais resiste ao golpe, e só se ainda não o tem (abilities.cc:649-672; 1x por turno = todo golpe do 1x1).
+      if (abreDef && def.ef.corCamaleao && !g.tipo2) efTipo = efetividadeComColorChange(atq, g.tipo, def, efTipo);
       var fisico = g.cat === "F", defF = g.defNaDef || (fisico && !g.defEspecial);
       var A = ataqueNoDuelo(atq, g, def) * (fisico ? intim : assus) * ataqueNaNevoa;
       A *= noTerrenoDuelo(atq, fisico ? "atk" : "spa");
@@ -2580,6 +2582,24 @@
     for (var t = 1; t < n; t++) est = [est[0] * (1 - p) + est[1], est[2], est[3] + est[0] * p / 2, est[0] * p / 2];
     return 1 - est[0];
   }
+  // Color Change: empate fica com o tipo atual (strict <, bestType começa em type1) e a ordem dos tipos é a do jogo.
+  function efetividadeComColorChange(atq, tipo, def, efAtual) {
+    var mono = function (t) { return efetividadeNoDuelo(atq, tipo, Object.assign({}, def, { tipos: [t] })); };
+    var melhorT = def.tipos[0], melhorM = mono(melhorT);
+    for (var i = 0; i < TYPES.length && melhorM !== 0; i++) { var m = mono(TYPES[i]); if (m < melhorM) { melhorM = m; melhorT = TYPES[i]; } }
+    return def.tipos.indexOf(melhorT) !== -1 ? efAtual : melhorM; // já tem o tipo: não muda
+  }
+  // Protean, Libero, RKS System, Pattern Change, Prismatic Fur (TK-34): depois do 1º golpe de quem tem a habilidade, ele vira mono do tipo do golpe
+  // e o outro bate nele pela tabela nova (battle.h:759-764). Retorna o dano que o outro faz em "u".
+  // shortcut: o 1º golpe do outro sempre pega o tipo original (o outro age antes) e os seguintes o tipo novo, sem olhar velocidade; trocar por ordem real se o motor ganhar turno.
+  function comTipoDoGolpe(u, outro, danoDeU, danoSobreU, nivel) {
+    var gU = danoDeU.melhor.golpe;
+    if (!u.ef.tipoDoGolpe || !gU || !gU.tipo || (u.tipos.length === 1 && u.tipos[0] === gU.tipo)) return danoSobreU;
+    var depois = comoIADuelo(danoNoDuelo(outro, Object.assign({}, u, { tipos: [gU.tipo] }), nivel));
+    var n = Math.max(1, Math.min(TURNOS_MAX_STATUS, golpesNecessariosDuelo(u.stats[0], danoSobreU.melhor.dano)));
+    var misto = (danoSobreU.melhor.dano + (n - 1) * depois.melhor.dano) / n;
+    return { melhor: Object.assign({}, danoSobreU.melhor, { dano: misto }), melhorPrio: danoSobreU.melhorPrio, segundo: danoSobreU.segundo };
+  }
   function comTipoMudado(atq, def, danoAtq, danoDef, nivel) {
     var novo = def.ef.mudaTipoNoContato ? null : atq.ef.mudaTipoNoContato; // quem tem a habilidade muda o OUTRO
     var gA = danoAtq.melhor.golpe;
@@ -2718,6 +2738,9 @@
     // Damp/Magical Dust: depois do 1º contato o outro vira do tipo - o resto da luta usa a tabela nova.
     meu = comTipoMudado(eu, foe, meu, dele, nivel);
     dele = comoIADuelo(comTipoMudado(foe, eu, dele, meu, nivel));
+    // Protean e afins: o tipo de quem usa vira o do golpe (TK-34).
+    dele = comoIADuelo(comTipoDoGolpe(eu, foe, meu, dele, nivel));
+    meu = comTipoDoGolpe(foe, eu, dele, meu, nivel);
     var trocaHab = comHabilidadeTrocada(eu, foe, meu, dele, nivel);
     meu = trocaHab.meu; dele = comoIADuelo(trocaHab.dele);
     var turnos = Math.min(TURNOS_MAX_STATUS, golpesNecessariosDuelo(hpFoe, meu.melhor.dano), golpesNecessariosDuelo(hpEu, dele.melhor.dano));
