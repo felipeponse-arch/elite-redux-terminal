@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "veu-do-chefao-some",
+    descricao: "TK-33b: o véu atrás do texto do cabeçalho do chefão (Aqua/Magma) some: arte crua atrás do texto",
+    arquivo: "time_caixa.css",
+    de: "background: color-mix(in srgb, var(--surface) 88%, transparent); padding: var(--space-2) var(--space-3);",
+    para: "padding: var(--space-2) var(--space-3);",
+  },
+  {
+    id: "veu-do-chefao-fraco-demais",
+    descricao: "TK-33b: o véu do cabeçalho do chefão cai de 88% para 20%: o contraste do texto sobre a arte volta a reprovar",
+    arquivo: "time_caixa.css",
+    de: "background: color-mix(in srgb, var(--surface) 88%, transparent); padding: var(--space-2) var(--space-3);",
+    para: "background: color-mix(in srgb, var(--surface) 20%, transparent); padding: var(--space-2) var(--space-3);",
+  },
+  {
     id: "campo-chefao-trick-room-texto-repetido",
     descricao: "TK-33b: regraDeCampoDoChefao volta a repetir o texto 'Trick Room permanente' em vez de usar a constante",
     arquivo: "chefoes.js",
