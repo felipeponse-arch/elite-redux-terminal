@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { carregarRegras } from "../carregar_regras.mjs";
 export function instantaneo() {
   const R = carregarRegras();
-  const g = JSON.parse(readFileSync(new URL("../../../data/gameData_2654.json", import.meta.url), "utf8"));
+  const g = JSON.parse(readFileSync(new URL("../../../data/gameData.json", import.meta.url), "utf8"));
   const nomes = new Set([...g.items.map((i) => i.name), ...Object.keys(R.MEGA_FORMS), ...Object.keys(R.MEGA_PEDRAS_TARDIAS)]);
   const saida = {};
   for (const n of [...nomes].sort()) {
