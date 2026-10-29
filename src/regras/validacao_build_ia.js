@@ -77,14 +77,15 @@
     return typeof p === "string" ? (PAPEIS_VALIDOS[p.trim().toLowerCase()] || null) : null;
   }
   // evs = [hp, atk, def, spa, spd, spe]
-  function conferirPapelDaBuild(papel, evs, moves, sp) {
+  function conferirPapelDaBuild(papel, evs, moves, sp, ctx) {
+    ctx = completarCtx(ctx);
     var bulk = evs[0] + evs[2] + evs[4];
     if (papel === "Tanque") {
       if (evs[5] > 100) return "A build foi declarada Tanque mas tem " + evs[5] + " EVs em Velocidade - tanque investe em HP e defesa, não em Velocidade. Tente gerar de novo.";
       if (bulk < 252) return "A build foi declarada Tanque com só " + bulk + " EVs em HP/Defesa/Def. Especial - tanque precisa de bulk. Tente gerar de novo.";
     }
     // Trick Room inverte a ordem: sweeper lento é o certo lá.
-    if (papel === "Sweeper" && state.archetype.weather !== "Trick Room" && evs[5] < 180) {
+    if (papel === "Sweeper" && ctx.archetype.weather !== "Trick Room" && evs[5] < 180) {
       return "A build foi declarada Sweeper com só " + evs[5] + " EVs em Velocidade - sweeper precisa ser rápido. Tente gerar de novo.";
     }
     if (papel === "Wallbreaker" && Math.max(evs[1], evs[3]) < 200) {
@@ -110,7 +111,8 @@
   // Sweeper fora de Trick Room, é desperdício puro - regra básica de nature
   // (guias de iniciante do Smogon), aqui só a contradição clara reprova.
   var GOLPES_SEM_O_PROPRIO_ATAQUE = ["Body Press", "Foul Play"];
-  function conflitoDeNature(nature, moves, papel) {
+  function conflitoDeNature(nature, moves, papel, ctx) {
+    ctx = completarCtx(ctx);
     var mods = NATURE_MODS[nature];
     if (!mods) return null;
     // Body Press ("maior for o Def do usuário") e Foul Play ("maior o Ataque do
@@ -124,7 +126,7 @@
     var especiais = cats.filter(function (c) { return c === "SPECIAL"; }).length;
     if (fisicos && !especiais && mods[1] === 1) return "A nature " + nature + " reduz o Ataque, mas todos os golpes de dano da build são físicos. Tente gerar de novo.";
     if (especiais && !fisicos && mods[1] === 3) return "A nature " + nature + " reduz o Ataque Especial, mas todos os golpes de dano da build são especiais. Tente gerar de novo.";
-    if (papel === "Sweeper" && mods[1] === 5 && state.archetype.weather !== "Trick Room") return "A nature " + nature + " reduz a Velocidade de um Sweeper. Tente gerar de novo.";
+    if (papel === "Sweeper" && mods[1] === 5 && ctx.archetype.weather !== "Trick Room") return "A nature " + nature + " reduz a Velocidade de um Sweeper. Tente gerar de novo.";
     return null;
   }
   function conflitoDeItem(item, moves, sp) {
@@ -206,6 +208,7 @@
     return ctx;
   }
   function validateAiBuild(sp, raw, motivo, ctx) {
+    ctx = completarCtx(ctx);
     if (!raw || typeof raw !== "object") return null;
     var validAbilities = habilidadesEscolhiveis(sp);
     // Motivo específico em cada rejeição (2026-09-16): a nova tentativa
@@ -323,7 +326,7 @@
     }
     // Item que a run ainda não libera (decisão 10 do usuário, 28/10): a IA recusa como o Modo Motor (time_pelo_motor.js:196).
     // A pedra que a mega temporária impõe fica de fora: o slot já é dela.
-    if (item && !stoneRule && !liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: item })) {
+    if (item && !stoneRule && !liberadoNaRun(ctx.settings.milestone, ctx.cap, { item: item })) {
       return rejeita(item + " ainda não está liberado nesta Etapa da run. Escolha outro item. Tente gerar de novo.", "item-nao-liberado");
     }
     // Habilidade que depende de gastar o item (ver regraItemConsumivelPara).
@@ -343,7 +346,7 @@
     // da mega temporária não entra na conta - o slot é obrigatoriamente dela.
     // Só pra quem está NO time: build feita na Dex pra um Pokémon da caixa não é
     // barrada pelos itens do time (achado no teste da mega permanente).
-    if (item && !stoneRule && state.team.indexOf(sp.x) !== -1) {
+    if (item && !stoneRule && ctx.team.indexOf(sp.x) !== -1) {
       var comEsteItem = itensEmUsoComQuem(sp.x)[item] || [];
       if (itemEsgotadoNoTime(comEsteItem)) {
         return rejeita(item + " já está com " + comEsteItem.join(" e ") + " - no time vale no máximo " + MAX_MESMO_ITEM_NO_TIME +
@@ -399,9 +402,9 @@
     // Papel declarado (2026-09-27): sem papel não há o que conferir (modos
     // antigos de revisão não pedem); com papel, contradição clara reprova.
     var papel = papelNormalizado(raw.papel);
-    var problemaDoPapel = papel ? conferirPapelDaBuild(papel, evs, raw.moves, sp) : null;
+    var problemaDoPapel = papel ? conferirPapelDaBuild(papel, evs, raw.moves, sp, ctx) : null;
     if (problemaDoPapel) return rejeita(problemaDoPapel, "papel-golpe");
-    var problemaDaNature = conflitoDeNature(raw.nature, raw.moves, papel);
+    var problemaDaNature = conflitoDeNature(raw.nature, raw.moves, papel, ctx);
     if (problemaDaNature) return rejeita(problemaDaNature, "natureza-contra-build");
     // Justificativa, 2026-09-10 (revisão da equipe sobre "Gerar build com
     // IA"): uma frase livre, NÃO validada contra dados reais como tudo
@@ -412,7 +415,6 @@
     // válida sem justificativa ainda assim é salva.
     // Validação ESTRATÉGICA (lote C da força-tarefa, 2026-10-02) - a de cima só
     // conferia legalidade. `ctx` (opcional) traz o contexto da luta alvo.
-    ctx = ctx || {};
     // (a) Armador do clima escolhido pelo simulador: tem que levar a habilidade que
     // arma - senão a estratégia de time que o simulador provou deixa de existir.
     if (ctx.habilidadeExigida && raw.ability !== ctx.habilidadeExigida) {
@@ -465,7 +467,7 @@
     // IVs to 0. Use again to set back to 31." (descrição do próprio jogo).
     var ivs = [31, 31, 31, 31, 31, 31];
     var mods = NATURE_MODS[raw.nature];
-    if (state.archetype.weather === "Trick Room" && evs[5] === 0 && mods && mods[1] === 5) {
+    if (ctx.archetype.weather === "Trick Room" && evs[5] === 0 && mods && mods[1] === 5) {
       ivs[5] = 0;
       rationale = ("IV de Velocidade 0 (use a Iron Pill). " + rationale).trim().slice(0, 360);
     }

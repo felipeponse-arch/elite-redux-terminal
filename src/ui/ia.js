@@ -200,7 +200,7 @@
     if (comCand.length) {
       progresso("Escolhendo as " + comCand.length + " builds entre os candidatos do jogo…");
       var respC = await pedirIA({
-        prompt: montarPromptEscolhaDoTime(comCand, optsLote),
+        prompt: montarPromptEscolhaDoTime(comCand, Object.assign({ ctx: ctxDoState() }, optsLote)),
         ferramentas: false,
         tentativas: 1,
         oQue: "Builds do time",
@@ -227,7 +227,7 @@
     if (semCand.length > 1) {
       progresso("Gerando as " + semCand.length + " builds numa consulta só…");
       var resp = await pedirIA({
-        prompt: montarPromptBuildsDoTime(semCand, optsLote),
+        prompt: montarPromptBuildsDoTime(semCand, Object.assign({ ctx: ctxDoState() }, optsLote)),
         ferramentas: false,
         tentativas: 1, // quem falhar vai pelo caminho individual (com a nova tentativa dele)
         oQue: "Builds do time",
@@ -294,7 +294,7 @@
       if (cands) {
         aviso("Consultando o Claude…");
         var respE = await pedirIA({
-          prompt: montarPromptEscolhaDeBuild(sp, cands, opts),
+          prompt: montarPromptEscolhaDeBuild(sp, cands, Object.assign({ ctx: ctxDoState() }, opts)),
           ferramentas: false,
           tentativas: 1, // a escolha inválida não gasta outra chamada: o motor decide
           oQue: "Build",
@@ -314,7 +314,7 @@
       // "tente de novo" ficava com o jogador. Só UMA: cada chamada custa, e se a
       // segunda também falha o problema provavelmente não é azar.
       var resp = await pedirIA({
-        prompt: montarPromptBuild(sp, opts),
+        prompt: montarPromptBuild(sp, Object.assign({ ctx: ctxDoState() }, opts)),
         ferramentas: false, // contexto já vai no prompt (blocoContextoIA): uma chamada só
         // Motivo técnico vai pro modelo na nova tentativa; o jogador vê a versão dele.
         validar: function (bruto) { return validarRespostaDeBuildDaIa(sp, bruto, opts); },

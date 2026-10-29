@@ -189,7 +189,7 @@
       // tentar de novo é "nenhum set aproveitável", não "algum set com defeito"
       // (um set ruim entre 2 bons não derruba os outros 2).
       var resp = await pedirIA({
-        prompt: montarPromptEstrategias(sp),
+        prompt: montarPromptEstrategias(sp, ctxDoState()),
         ferramentas: false, // contexto já vai no prompt (blocoContextoIA)
         validar: function (bruto) {
           var sets = setsValidosDaResposta(sp, bruto);
