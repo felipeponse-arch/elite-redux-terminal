@@ -1,6 +1,6 @@
 // TK-30 (28/10/2026, decisão do usuário): a REGRA é testada aqui com espécie INVENTADA (montada no teste, sem depender do dado);
 // a asserção com espécie real ficou no teste original, marcada "// Depende de dado: espécie real" (hell_no_duelo, contato_tirado_no_duelo,
-// habilidades_novas_2654). Os dois pares cobrem: a regra não quebra com mudança de dado; o caso real não some.
+// habilidades_novas_2654, absorcao_flash_fire_dry_skin). Os dois pares cobrem: a regra não quebra com mudança de dado; o caso real não some.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
@@ -65,4 +65,20 @@ test("Rippling Punch: soco também é som, o Soundproof do alvo barra; golpe que
   assert.ok(dano(iso(f, [], ["Mach Punch"]), alvo).dano > 0, "sem a habilidade o soco passa pelo Soundproof");
   assert.equal(dano(iso(f, ["Rippling Punch"], ["Mach Punch"]), alvo).dano, 0, "com Rippling Punch o soco é som");
   assert.ok(dano(iso(f, ["Rippling Punch"], ["Earthquake"]), alvo).dano > 0, "golpe que não é soco segue passando");
+});
+
+// TK-30 rodada 3 (29/10/2026): mais duas regras separadas de asserção com espécie real (hell_no_duelo:42 e absorcao_flash_fire_dry_skin:77).
+test("Mold Breaker atravessa Flash Fire e Dry Skin do alvo; sem ele a absorção vale (fixture)", () => {
+  const f = fixa("Quebra", ["Normal"]), alvo = fixa("Alvo", ["Normal"]);
+  const comHab = (h) => iso(alvo, [h], ["Tackle"]), semHab = iso(alvo, [], ["Tackle"]);
+  [["Flash Fire", "Ember"], ["Dry Skin", "Water Gun"]].forEach(([hab, golpe]) => {
+    assert.equal(dano(iso(f, [], [golpe]), comHab(hab)).dano, 0, hab + " absorve sem Mold Breaker");
+    assert.equal(dano(iso(f, ["Mold Breaker"], [golpe]), comHab(hab)).dano, dano(iso(f, ["Mold Breaker"], [golpe]), semHab).dano, hab + " é ignorada com Mold Breaker");
+    assert.ok(dano(iso(f, ["Mold Breaker"], [golpe]), comHab(hab)).dano > 0);
+  });
+});
+
+test("Hell: a unidade do jogador não sai marcada como chefão (fixture)", () => {
+  const u = unid(fixa("Terra", ["Ground"]), "Earthquake");
+  assert.equal(u.chefao, undefined);
 });

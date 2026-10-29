@@ -35,6 +35,7 @@ test("H1 Hell vale para os dois lados e não mexe em neutro/resistido", () => {
   assert.ok(Math.abs(lado(unid("Garchomp", "Earthquake"), z) - 0.5625) < 1e-9, "inimigo bate super efetivo (foe usa a mesma conta)");
 });
 
+// Depende de dado: espécie real (a regra, com fixture inventada, está em regras_com_fixture.test.mjs)
 test("H6 Hell: todo inimigo de todo chefão sai marcado (o jogador não), então a paralisia nunca o faz perder o turno", () => {
   let n = 0;
   R.BOSSES.forEach((b) => (b.party || []).forEach((m) => { const f = R.foeDeDuelo(m, NIVEL, null); if (f) { n++; assert.equal(f.chefao, true, b.name + " " + m.n); } }));

@@ -70,6 +70,7 @@ test("razão do dano recebido com a habilidade isolada: Flash Fire Fire x0, Dry 
   assert.equal(razao("Water Absorb", "Water Gun"), 0, "controle: Water Absorb já era imune");
 });
 
+// Depende de dado: espécie real (a regra, com fixture inventada, está em regras_com_fixture.test.mjs)
 test("Mold Breaker atravessa a absorção (Flash Fire e Dry Skin)", () => {
   const molde = iso("Garchomp", ["Mold Breaker"], ["Ember"]);
   assert.ok(dano(molde, iso("Magikarp", ["Flash Fire"], ["Tackle"])) > 0, "Flash Fire");
