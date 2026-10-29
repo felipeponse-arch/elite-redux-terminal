@@ -353,20 +353,11 @@
   // Veredito da luta simulada: o foco do card (ícone + frase + contagem em chip). Sem a luta inteira,
   // o foco é a cobertura do plano (quantos Pokémon dele têm resposta clara).
   function vereditoDaLutaHtml(res, nMembros, cobertos) {
-    var l = res.luta, ok, titulo, chip;
-    if (l) {
-      ok = !!l.venceu;
-      titulo = ok ? "Vence:" : "Derruba:";
-      chip = ok ? l.vivos + " de " + nMembros + " de pé" : l.derrubados + " de " + l.total;
-    } else {
-      ok = cobertos === res.plano.length;
-      titulo = "Respostas claras:";
-      chip = cobertos + " de " + res.plano.length;
-    }
-    return '<div class="plano-veredito ' + (ok ? "plano-veredito-ok" : "plano-veredito-atencao") + '">' +
-      '<span class="plano-veredito-icone" aria-hidden="true">' + (ok ? "✓" : "!") + '</span>' +
-      '<div class="plano-veredito-corpo"><div class="plano-veredito-titulo">' + titulo + ' <span class="plano-chip plano-chip-forte">' + chip + '</span></div>' +
-        (l ? '<div class="plano-veredito-sub">Luta simulada inteira' + (l.dupla ? " em dupla" : "") + ". " +
+    var v = vereditoDaLuta(res, nMembros, cobertos);
+    return '<div class="plano-veredito ' + (v.ok ? "plano-veredito-ok" : "plano-veredito-atencao") + '">' +
+      '<span class="plano-veredito-icone" aria-hidden="true">' + (v.ok ? "✓" : "!") + '</span>' +
+      '<div class="plano-veredito-corpo"><div class="plano-veredito-titulo">' + v.titulo + ' <span class="plano-chip plano-chip-forte">' + v.chip + '</span></div>' +
+        (v.luta ? '<div class="plano-veredito-sub">Luta simulada inteira' + (v.dupla ? " em dupla" : "") + ". " +
           cobertos + ' de ' + res.plano.length + ' Pokémon dele têm resposta clara no seu time.</div>' : "") + '</div></div>';
   }
   // Buffs do ginásio mudaram desde que o time foi montado (debug de 04/10: a linha "na conta" ficava velha).
@@ -390,7 +381,7 @@
     var passosLuta = res.luta ? res.luta.passos.map(function (t, i) {
       var hp = res.luta.hps ? res.luta.hps[i] : null;
       var barra = typeof hp === "number"
-        ? '<span class="plano-hp plano-hp-' + (hp >= 50 ? "alto" : hp >= 25 ? "medio" : "baixo") + '" aria-hidden="true"><span class="plano-hp-cheio" style="--hp:' + hp + '"></span></span>'
+        ? '<span class="plano-hp plano-hp-' + faixaDeHpDaLuta(hp) + '" aria-hidden="true"><span class="plano-hp-cheio" style="--hp:' + hp + '"></span></span>'
         : "";
       return "<li><span class=\"plano-luta-txt\">" + escapeHtml(t) + "</span>" + barra + "</li>";
     }).join("") : "";

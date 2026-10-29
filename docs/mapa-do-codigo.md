@@ -14,7 +14,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **campo.js** - TK-16 (campo, fase 1): FONTE ÚNICA do vocabulário de clima, terreno, telas e hazards, e das durações de campo.
   rotuloDoArquetipoDeCampo:46, hazardCheioNoLado:57, poeHazardNoLado:58
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
-  gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:424, comportamentoDaIADoChefao:451, habilidadesExtrasDoHell:464, regrasDoHell:465, ehRevancheDeLider:472, buffsParaMostrarDoChefao:491, buffsAtivosDoChefao:500, computeSpeedTiers:513
+  gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:424, comportamentoDaIADoChefao:451, habilidadesExtrasDoHell:464, regrasDoHell:465, ehRevancheDeLider:472, buffsParaMostrarDoChefao:491, buffsAtivosDoChefao:500, computeSpeedTiers:513, planoDaLuta:533, resumoDaLuta:546, quemRespondeNoPlano:562 (+2)
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
   descricaoDeHabilidade:85, descricaoDeHabilidadePorId:96, expandirTextoDeHabilidade:107, habilidadeArma:121, nomesDeHabilidades:124, podeTerStatus:132, garantiaDoTime:140, garantiaDaCondicao:154, comoGarantir:170, condicaoDaBuild:189, precisaDeSetter:212, blocoCondicoesIA:237
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
@@ -70,11 +70,11 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 
 ## Interface - src/ui/
 - **aba_chefoes.js** - Aba Chefões: lista, time do chefão por dificuldade, buffs de ginásio e exportação.
-  initBosses:33, getFilteredBosses:148, nomeDaCategoriaDeChefao:175, campoDoChefaoHtml:178, opcionalHtml:185, iaDoChefaoHtml:190, hellDoChefaoHtml:199, bossCatColor:209, renderBossList:211, candidatosDoJogador:248, mesmoConjunto:265, guardarTimeAnterior:266, planoDaLuta:292, resumoDaLuta:305, simularSemTravarATela:324, montarTimeContraEsteChefao:337, selectBoss:437, renderGymSkillsCardHtml:456, bossMonCardHtml:493, renderBossDetail:589
+  initBosses:33, getFilteredBosses:148, nomeDaCategoriaDeChefao:175, campoDoChefaoHtml:178, opcionalHtml:185, iaDoChefaoHtml:190, hellDoChefaoHtml:199, bossCatColor:209, renderBossList:211, candidatosDoJogador:248, mesmoConjunto:265, guardarTimeAnterior:266, simularSemTravarATela:295, montarTimeContraEsteChefao:308, selectBoss:404, renderGymSkillsCardHtml:423, bossMonCardHtml:460, renderBossDetail:556
 - **abas.js** - Navegação entre abas (e o redesenho da aba que abre).
   posicionarProgresso:22, closeMorePanel:32
 - **arquetipo.js** - Arquétipo do time, time sugerido e o Gerador Inteligente de Times.
-  teamKeyFor:14, classeDeEntradaDoCardGerado:41, archetypeChipsHtml:53, resumoDoArquetipo:74, archetypeCardHtml:85, generateTeamForArchetype:153, applyRecommendedTeam:207, generateTeamUsageGuide:260, generateCompleteTeam:292, vereditoDaLutaHtml:355, buffsMudaram:373, planoContraChefaoHtml:377, generatedTeamCardHtml:426, renderTeamStrategy:472, climaQueCombinaHtml:485, monoRunCardHtml:506, renderMonoRun:563, renderTeamAnalysis:589
+  teamKeyFor:14, classeDeEntradaDoCardGerado:41, archetypeChipsHtml:53, resumoDoArquetipo:74, archetypeCardHtml:85, generateTeamForArchetype:153, applyRecommendedTeam:207, generateTeamUsageGuide:260, generateCompleteTeam:292, vereditoDaLutaHtml:355, buffsMudaram:364, planoContraChefaoHtml:368, generatedTeamCardHtml:417, renderTeamStrategy:463, climaQueCombinaHtml:476, monoRunCardHtml:497, renderMonoRun:554, renderTeamAnalysis:580
 - **auto_evolucao.js** - Registro "O que o app fez sozinho" na tela e a auto-evolução do time/caixa pelo level cap.
   renderAutoLog:9, autoEvolveRoster:20
 - **caixa.js** - Aba Caixa (PC Box): grade por páginas, busca e ações de cada Pokémon da caixa.
@@ -412,4 +412,5 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **vaga.test.mjs** - Vaga de verificação pesada (scripts/vaga.mjs, melhoria B de 2026-10-13).
 - **validacao_do_time_gerado.test.mjs** - TK-28: a decisão "quais Pokémon do time ainda estão sem build" mora em src/regras (computeTeamGenerationValidation), não na tela.
 - **validar_dado_cru.test.mjs** - Validação do dado cru do NextDex na ingestão (scripts/validar_dado_cru.mjs, lote 2).
+- **veredito_da_luta.test.mjs** - TK-28: a decisão do veredito da luta e do plano contra o chefão mora em src/regras (chefoes.js), não na tela.
 - **vocabulario_da_etapa.test.mjs** - TK-27: texto da UI usa "Etapa" (GLOSSARY.md), não "marco".
