@@ -528,7 +528,9 @@ test("Mega no modo de mega temporária (milestone 6): o rascunho leva a pedra e 
     const pedras = R6.megaStoneRuleFor(mega).stones;
     r.candidatos.forEach((c) => {
       assert.ok(pedras.includes(c.build.item), nome + " item " + c.build.item);
-      assert.match(c.avisos.join(" "), /precisa segurar a pedra/);
+      // Pedra única já liberada (4ª insígnia, TK-22): o validador põe a pedra sozinho e não há o que avisar.
+      // Com duas pedras (Excadrill) a escolha é da IA, e o rascunho avisa.
+      if (pedras.length > 1) assert.match(c.avisos.join(" "), /precisa segurar a pedra/);
       assert.ok(R6.validateAiBuild(mega, c.build, {}, {}));
     });
   });

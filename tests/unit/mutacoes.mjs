@@ -44,16 +44,16 @@ export const MUTACOES = [
   {
     id: "mega-dragoninite-x-na-4a",
     descricao: "a Dragoninite X (Sky Pillar, 6ª insígnia) volta a liberar na 4ª",
-    arquivo: "formas_mega.js",
-    de: "    \"Dragoninite X\": 6,\n",
-    para: "",
+    arquivo: "pedras_etapa.json",
+    de: "\"Dragoninite X\": {\n   \"etapa\": 6,",
+    para: "\"Dragoninite X\": {\n   \"etapa\": 4,",
   },
   {
     id: "monochamp-sem-aviso-de-nao-simulado",
     descricao: "o campeão monotype deixa de avisar que o simulador não conta o efeito",
     arquivo: "chefoes.js",
-    de: "{ texto: EFEITO_DO_CAMPEAO_MONOTYPE[tipo], naoSimulado: true }",
-    para: "{ texto: EFEITO_DO_CAMPEAO_MONOTYPE[tipo] }",
+    de: "slice(1).toLowerCase()], naoSimulado: true };",
+    para: "slice(1).toLowerCase()] };",
   },
   {
     id: "botao-avalia-menu-inteiro",
@@ -170,9 +170,9 @@ export const MUTACOES = [
   {
     id: "granbullite-libera-na-4a",
     descricao: "Granbullite libera na 4ª insígnia (antes da Tate & Liza)",
-    arquivo: "formas_mega.js",
-    de: "    \"Granbullite\": 7,\n",
-    para: "",
+    arquivo: "pedras_etapa.json",
+    de: "\"Granbullite\": {\n   \"etapa\": 7,",
+    para: "\"Granbullite\": {\n   \"etapa\": 4,",
   },
   {
     id: "mega-tardia-libera-na-4a",
@@ -2146,9 +2146,9 @@ export const MUTACOES = [
   {
     id: "floettite-antes-do-pos-jogo",
     descricao: "Floettite volta a liberar antes de vencer a Elite 4",
-    arquivo: "formas_mega.js",
-    de: "\"Floettite\": 9,",
-    para: "\"Floettite\": 6,",
+    arquivo: "pedras_etapa.json",
+    de: "\"Floettite\": {\n   \"etapa\": 9,",
+    para: "\"Floettite\": {\n   \"etapa\": 6,",
   },
   {
     id: "technician-no-poder-do-dado",
