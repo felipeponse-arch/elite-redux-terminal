@@ -5,14 +5,15 @@
   // pura (ADR-004): não lê state nem página - quem chama passa a Etapa e o Level cap.
   //
   // alvo (um dos três):
-  //   { pedra: "Charizardite X" }  - pedra mega: etapa em MEGA_PEDRAS_TARDIAS, senão a 4ª insígnia;
+  //   { pedra: "Charizardite X" }  - pedra mega: a maior entre a Etapa do lugar (data/pedras_etapa.json) e a 4ª insígnia (keystone);
   //   { item: "Eviolite" }         - qualquer item; pedra mega cai na regra da pedra; item sem Etapa conhecida fica
   //                                  TRAVADO em toda Etapa (decisão 8 do usuário, 28/10);
   //   { golpe: 36 }                - nível em que o golpe é aprendido; null = tutor/sem nível (livre);
   //                                  levelCap null/undefined = sem limite.
 
-  // Etapa em que a pedra libera (4 por padrão; MEGA_PEDRAS_TARDIAS tem as tardias).
-  function etapaDaPedra(nome) { return MEGA_PEDRAS_TARDIAS[nome] || MEGA_UNLOCK_MILESTONE; }
+  // Etapa em que a pedra libera = a maior entre QUANDO VALE (keystone, MEGA_UNLOCK_MILESTONE) e ONDE SE PEGA (MEGA_PEDRAS_TARDIAS,
+  // do registro data/pedras_etapa.json). Sem lugar registrado, só vale o quandoVale (4ª insígnia).
+  function etapaDaPedra(nome) { return Math.max(MEGA_UNLOCK_MILESTONE, MEGA_PEDRAS_TARDIAS[nome] || 0); }
   // Etapa mais cedo em que o item existe pro jogador; null = sem etapa conhecida.
   function etapaDoItem(nome) {
     if (MEGA_FORMS[nome] !== undefined) return etapaDaPedra(nome);

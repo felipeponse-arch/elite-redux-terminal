@@ -1,0 +1,230 @@
+{
+  "ability_translations_pt.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "b90fb39",
+    "manual": true
+  },
+  "boss_reference_builds.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-15",
+    "commit": "2dd611a",
+    "manual": true
+  },
+  "builds.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-22",
+    "commit": "fa220f7",
+    "manual": true
+  },
+  "builds_pendentes_de_revisao.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "c0043d1",
+    "manual": true
+  },
+  "build_history.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-09-08",
+    "commit": "3e07a22",
+    "manual": true
+  },
+  "changelog.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-21",
+    "commit": "a4aa061",
+    "manual": true
+  },
+  "condition_move_synergy.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-09-23",
+    "commit": "bd96f20",
+    "manual": true
+  },
+  "config_nova.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "cdb28ea",
+    "manual": true
+  },
+  "dex_compact.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "cdb28ea",
+    "manual": true
+  },
+  "disponibilidade_regras.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-02",
+    "commit": "382b685",
+    "manual": true
+  },
+  "golpes_flags_config.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "937db48",
+    "manual": true
+  },
+  "gym_skills.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-04",
+    "commit": "96fb1e5",
+    "manual": true
+  },
+  "how_to_obtain.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-03",
+    "commit": "0d01bb8",
+    "manual": true
+  },
+  "item_descriptions.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-09-14",
+    "commit": "e03b4e3",
+    "manual": true
+  },
+  "item_translations_pt.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-09-14",
+    "commit": "e03b4e3",
+    "manual": true
+  },
+  "itens_config.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "937db48",
+    "manual": true
+  },
+  "levelcaps.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-28",
+    "commit": "a1174d3",
+    "manual": true
+  },
+  "mega_forms.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "a061e56",
+    "manual": true
+  },
+  "meta_rank_adjustments.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-09-19",
+    "commit": "e549977",
+    "manual": true
+  },
+  "mono_disponibilidade.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "cd70593",
+    "manual": true
+  },
+  "move_categorias.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "b90fb39",
+    "manual": true
+  },
+  "move_effects.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-09-22",
+    "commit": "625a615",
+    "manual": true
+  },
+  "move_roles.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-15",
+    "commit": "296ad60",
+    "manual": true
+  },
+  "move_translations_pt.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-15",
+    "commit": "296ad60",
+    "manual": true
+  },
+  "onde_achar_itens.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "b826344",
+    "manual": true
+  },
+  "pacote_inicial.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-08",
+    "commit": "1a54ee5",
+    "manual": true
+  },
+  "pedras_adoption_center.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "b826344",
+    "manual": true
+  },
+  "pedras_etapa.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "b37a2cb",
+    "manual": true
+  },
+  "poder_variavel.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-15",
+    "commit": "bb89185",
+    "manual": true
+  },
+  "rank_disponibilidade.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "cdb28ea",
+    "manual": true
+  },
+  "rank_pendente_ate_10.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "cdb28ea",
+    "manual": true
+  },
+  "saved_teams_seed.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-09-08",
+    "commit": "1797447",
+    "manual": true
+  },
+  "species_ability_synergy.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "83963a0",
+    "manual": true
+  },
+  "species_role.json": {
+    "jogo": "v2.65.4.1",
+    "curadoriaEm": "2026-10-28",
+    "commit": "cdb28ea",
+    "manual": true
+  },
+  "sprite_index.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-15",
+    "commit": "8236439",
+    "manual": true
+  },
+  "sprite_index_por_nome.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-15",
+    "commit": "8236439",
+    "manual": true
+  },
+  "traducoes_novas_por_nome.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-15",
+    "commit": "1345f29",
+    "manual": true
+  },
+  "traducoes_v07_por_nome.json": {
+    "jogo": "desconhecida",
+    "curadoriaEm": "2026-10-15",
+    "commit": "1345f29",
+    "manual": true
+  }
+}

@@ -19,7 +19,7 @@ import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 const repo = process.argv[2];
 if (!repo || !existsSync(repo)) { console.error("uso: node scripts/gerar_onde_achar_itens.mjs <er-repo>"); process.exit(2); }
 const ler = (p) => readFileSync(p, "utf8");
-const gd = JSON.parse(ler("data/gameData_2654.json"));
+const gd = JSON.parse(ler("data/gameData.json"));
 const caps = JSON.parse(ler("data/levelcaps.json")).rows;
 const etapaDoMapa = criarEtapaDoMapa(JSON.parse(ler("data/mono_disponibilidade.json")), JSON.parse(ler("data/disponibilidade_regras.json")), caps.length - 1);
 const nomeDoItem = Object.fromEntries(gd.items.filter(Boolean).map((i) => [i.NAME, i.name]));

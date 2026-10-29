@@ -19,3 +19,10 @@ derivados, pra poder refazer uma integração sem repetir a coleta.
   apóstrofo curvo. Qualquer uso precisa validar contra o dado do jogo e gravar
   a grafia canônica (lição de 2026-09-16: 29 builds inválidas publicadas por
   gravar a grafia do post).
+
+## Onde fica o dado cru ativo (TK-25)
+
+- `data/gameData.json` (sem versão no nome; a versão está em `data/carimbo_dados.json`) é o dado do jogo
+  que o pipeline lê (`transform.ps1`, `extract_bosses.ps1`...) e que `scripts/atualizar_de_config.mjs` atualiza
+  a partir do er-config. Fica em `data/` porque é lido pelo build.
+- `data/raw/` guarda só coletas externas congeladas (Discord, snapshots antigos), nunca lidas pelo app.

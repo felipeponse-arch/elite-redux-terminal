@@ -19,7 +19,7 @@ export const ETAPA_DO_MAPA_DE_TREINADOR = { PETALBURGCITYGYM: 4, MTCHIMNEY: 3 };
 
 export function lutasComunsDaRun(raiz = RAIZ) {
   const ler = (a) => JSON.parse(readFileSync(join(raiz, "data", a), "utf8"));
-  const g = ler("gameData_2654.json"), mono = ler("mono_disponibilidade.json"), caps = ler("levelcaps.json").rows, REGRAS = ler("disponibilidade_regras.json");
+  const g = ler("gameData.json"), mono = ler("mono_disponibilidade.json"), caps = ler("levelcaps.json").rows, REGRAS = ler("disponibilidade_regras.json");
   const POS_JOGO = caps.length - 1;
   const etapaPlanilha = criarEtapaDoMapa(mono, REGRAS, POS_JOGO);
   const etapaDoMapa = (m) => { const k = chaveDoMapa(m); return k in ETAPA_DO_MAPA_DE_TREINADOR ? ETAPA_DO_MAPA_DE_TREINADOR[k] : etapaPlanilha(m); };

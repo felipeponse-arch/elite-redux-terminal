@@ -1,5 +1,5 @@
 // Ponto 7 do rank v2: conferir o rank novo contra referências de fora, sem ajustar peso.
-// - percentil médio dos FORTES / FRACOS da comunidade (mesmas listas do calcular_rank_duelo.mjs)
+// - percentil médio dos FORTES / FRACOS da comunidade (listas próprias, copiadas do rank antigo que saiu em TK-21)
 //   e das espécies com build curada do Discord;
 // - Spearman contra o placar dos vídeos (forte - fraco por espécie), com validação cruzada
 //   em 5 partes (a correlação tem que se manter em cada parte, não só no total);

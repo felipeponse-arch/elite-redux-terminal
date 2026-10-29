@@ -6,7 +6,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { carregarRegras } from "./carregar_regras.mjs";
+import { carregarRegras, lerComMutacao } from "./carregar_regras.mjs";
+import { lerPedrasDoAdoptionCenter } from "../../scripts/extracao/pedras_adoption_center.mjs";
+import { existsSync } from "node:fs";
 
 const ONDE = JSON.parse(readFileSync(new URL("../../data/onde_achar_itens.json", import.meta.url), "utf8"));
 const PACOTE = JSON.parse(readFileSync(new URL("../../data/pacote_inicial.json", import.meta.url), "utf8"));
@@ -38,8 +40,11 @@ test("o pacote não corta fonte antiga: Honey e Ultra Ball mantêm o Poké Mart 
 });
 
 test("pedras do Adoption Center (er-config oficial): compra por BP, no Norman ou na trava que já têm", () => {
-  const ad = JSON.parse(readFileSync(new URL("../../data/pedras_adoption_center.json", import.meta.url), "utf8")).pedras;
-  assert.equal(ad.length, 140); // er-config d1a9a4c (versao-nova/05): sai Arbokite e Skarmorite; entram Duraludite, Raichunite X e Skarmorite Y
+  const ad = JSON.parse(lerComMutacao("data/pedras_adoption_center.json", "pedras_adoption_center.json")).pedras;
+  assert.equal(ad.length, 142); // er-config 486a964 (TK-25): entram Salamencite R e Metagrossite R
+  assert.ok(ad.includes("Salamencite R") && ad.includes("Metagrossite R"));
+  const caminho = [6, 4].map((n) => new URL("../".repeat(n) + "ferramentas/er-config/items/MegaStonesList.textproto", import.meta.url)).find((u) => existsSync(u)); // fora do repo: confere só quando existe
+  if (caminho) assert.deepEqual(ad, lerPedrasDoAdoptionCenter(readFileSync(caminho, "utf8")), "bate com a er-config, na ordem");
   const linha = (n) => ONDE[n].find((x) => x.local === "Adoption Center");
   assert.equal(linha("Garchompite Z").etapa, 4);
   assert.equal(linha("Dragoninite Y").etapa, 7, "trava da 7ª continua");
@@ -48,7 +53,7 @@ test("pedras do Adoption Center (er-config oficial): compra por BP, no Norman ou
 test("item que só sai depois da etapa atual vira aviso; na etapa certa some", () => {
   const R = carregarRegras({ milestone: 1 });
   const av = tardio(R, "Focus Band");
-  assert.ok(av && /6ª insígnia/.test(av.texto) && /Shoal Cave/.test(av.texto), av && av.texto);
+  assert.ok(av && /Etapa 6/.test(av.texto) && /Shoal Cave/.test(av.texto), av && av.texto);
   R.state.settings.milestone = 6;
   assert.equal(tardio(R, "Focus Band"), undefined);
   R.state.settings.milestone = 0;

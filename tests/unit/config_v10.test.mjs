@@ -70,28 +70,28 @@ test("Lumberjack, Fae Hunter, Monster Hunter e Firefighter: x1,5 contra ALVO do 
   assert.equal(R.abilityTypeModFor("Grass", ["Normal"], [idHab("Lumberjack")]).mult, 1, "a tabela de tipos não conta mais o Lumberjack pelo tipo do golpe");
 });
 
-test("Mega Bruxish e Mega Jellicent: no dado (a partir da config) mas PROVISÓRIAS - fora da Dex, das builds, do pipeline, do duelo e do rank até a config ter números reais", () => {
-  assert.equal(R.DATA.species.length, 1933); // v2.65.4.1 (28/10): 1925 + 8 espécies Redux novas da er-config 486a964
+test("Mega Bruxish e Mega Jellicent: no dado a partir da config, como as demais Megas (decisão do usuário, 28/10: entram na Dex, nas builds e no pipeline; a config não traz spe, vale a da base)", () => {
+  // Fixture: a config 486a964 traz as duas sem spe; o usuário mandou trazê-las mesmo assim (spe da espécie base, speDaConfig:false).
+  assert.equal(R.DATA.species.length, 1933);
   const b = R.DATA.species.find((s) => s && s.sname === "SPECIES_BRUXISH_MEGA"), j = R.DATA.species.find((s) => s && s.sname === "SPECIES_JELLICENT_MEGA");
-  assert.ok(b && j, "estão no dado");
-  assert.match(b.provisoria, /falta spe/); assert.match(j.provisoria, /falta spe/);
+  assert.ok(b && j, "estão no dado"); assert.ok(!b.provisoria && !j.provisoria, "sem marca provisoria");
   assert.deepEqual([...b.t].map((i) => R.TYPES[i]), ["Water", "Psychic"]); assert.deepEqual([...j.t].map((i) => R.TYPES[i]), ["Water", "Ghost"]);
   assert.deepEqual([...b.b], [68, 105, 70, 70, 70, 92]); assert.deepEqual([...j.b], [120, 60, 70, 85, 105, 60]);
   assert.deepEqual([...b.ab, ...b.inn].map((i) => R.ABILITIES[i][0]), ["Dazzling", "Defiant", "Predator", "Strong Jaw", "Wonder Skin", "Psychic Mind"]);
   assert.deepEqual(b.lm, sp("Bruxish").lm); assert.deepEqual(j.tu, sp("Jellicent").tu);
   assert.equal(R.MEGA_FORMS["Bruxishite"], "SPECIES_BRUXISH_MEGA"); assert.equal(sp("Bruxish").ev[0][2], b.x);
-  // fora de tudo que lê SPECIES
-  assert.equal(R.SPECIES.length, 1930); // v2.65.4.1 (28/10): as 1933 do dado menos a posição vazia e as duas provisórias
-  assert.equal(sp("Bruxish Mega"), undefined); assert.equal(R.getSpeciesBySname("SPECIES_JELLICENT_MEGA"), null); assert.equal(R.getSpeciesByX(b.x), null);
-  const rank = json("species_rank.json"), role = json("species_role.json");
-  assert.ok(!("SPECIES_BRUXISH_MEGA" in rank) && !("SPECIES_JELLICENT_MEGA" in role));
-  assert.ok(!("SPECIES_BRUXISH_MEGA" in json("rank_disponibilidade.json").etapa));
-  assert.ok(!json("rank_pendente_ate_10.json").novasSemRank.includes("SPECIES_BRUXISH_MEGA"), "a marca provisoria já tira da lista de pendentes");
-  assert.ok(R.BUILDS && !Object.keys(R.BUILDS).some((k) => /BRUXISH_MEGA|JELLICENT_MEGA/.test(k)));
+  assert.equal(R.SPECIES.length, 1932); // as 1933 do dado menos a posição vazia
+  assert.equal(R.getSpeciesBySname("SPECIES_JELLICENT_MEGA").x, j.x); assert.equal(R.getSpeciesByX(b.x).sname, "SPECIES_BRUXISH_MEGA");
+  const role = json("species_role.json"), disp = json("rank_disponibilidade.json").etapa;
+  assert.ok("SPECIES_BRUXISH_MEGA" in role && "SPECIES_JELLICENT_MEGA" in role);
+  assert.equal(disp.SPECIES_BRUXISH_MEGA, 7); assert.equal(disp.SPECIES_JELLICENT_MEGA, 7); // pedra na Etapa 7 (sala do totem)
+  assert.ok(json("rank_pendente_ate_10.json").novasSemRank.includes("SPECIES_BRUXISH_MEGA"), "rank real sai no rank completo da integração");
 });
 
 test("conferirProvisorias: avisa quando a config passa a ter os 6 atributos (ou sumir) e fica quieta enquanto está incompleta", () => {
   const dex = json("dex_compact.json");
+  // Fixture: o dado real não tem mais provisórias (as 2 Megas entraram, 28/10); o conferidor segue valendo para a próxima, então marca as duas só em memória.
+  dex.species.forEach((s) => { if (s && /^SPECIES_(BRUXISH|JELLICENT)_MEGA$/.test(s.sname)) s.provisoria = "fixture"; });
   const bloco = (sname, stats) => "species {\n  id: " + sname + "\n" + stats + "  type: TYPE_WATER\n}\n";
   const b = dex.species.find((s) => s && s.sname === "SPECIES_BRUXISH_MEGA").b;
   const cheio = (b2) => ["hp", "atk", "def", "spatk", "spdef", "spe"].map((k, i) => "  " + k + ": " + b2[i] + "\n").join("");

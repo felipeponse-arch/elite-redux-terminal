@@ -25,7 +25,9 @@ import { Worker, isMainThread, parentPort, workerData } from "node:worker_thread
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 import { melhoresPelaSoma, notaDosEixos, escolherPelaNotaFinal } from "./rank_escolha.mjs";
 import { lutasComunsDaRun } from "./estudo/lutas_comuns.mjs";
-import { notasComFatia, comunsMaisPerigosas, FATIA_DOS_CHEFOES, COMUNS_POR_ETAPA } from "./rank_fatia.mjs";
+import { percentis, tierDe, unidadeComItemLiberado, camposHerdados } from "./rank_comum.mjs";
+import { carimbarDerivado } from "./carimbo_derivado.mjs";
+import { notasComFatia, comunsMaisPerigosas, COMUNS_POR_ETAPA } from "./rank_fatia.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const R = carregarRegras({ milestone: 9 });
@@ -60,9 +62,9 @@ for (const d of DIFICULDADES) {
 const ARG = (k) => (process.argv.find((x) => x.startsWith(k + "=")) || "").slice(k.length + 1) || null;
 const LUTAS_EXTRA = ARG("--lutas-extra");
 const SO_CHEFOES = process.argv.includes("--so-chefoes");
-const FATIA = ARG("--fatia") ? Number(ARG("--fatia")) : FATIA_DOS_CHEFOES;
+const FATIA = ARG("--fatia") ? Number(ARG("--fatia")) : R.FATIA_DOS_CHEFOES;
 // A fatia 60/40 é decisão do usuário (16/10/2026): o rank GRAVADO não aceita outra fatia nem outra lista de lutas.
-if (process.argv.includes("--gravar") && (FATIA !== FATIA_DOS_CHEFOES || LUTAS_EXTRA || SO_CHEFOES)) throw new Error("--gravar exige a fatia " + FATIA_DOS_CHEFOES + " e a lista oficial de lutas (sem --fatia diferente, --lutas-extra ou --so-chefoes)");
+if (process.argv.includes("--gravar") && (FATIA !== R.FATIA_DOS_CHEFOES || LUTAS_EXTRA || SO_CHEFOES)) throw new Error("--gravar exige a fatia " + R.FATIA_DOS_CHEFOES + " e a lista oficial de lutas (sem --fatia diferente, --lutas-extra ou --so-chefoes)");
 if (!SO_CHEFOES) {
   const extra = LUTAS_EXTRA ? JSON.parse(readFileSync(LUTAS_EXTRA, "utf8")).lutas : lutasComunsDaRun(RAIZ).lutas;
   for (const d of DIFICULDADES) {
@@ -93,13 +95,14 @@ function avaliar(sp) {
   for (const d of DIFICULDADES) {
     const cobertas = lutas[d.chave].filter((l) => l.etapa >= etapa);
     if (!cobertas.length) { out[d.chave] = null; continue; }
-    const nivelRef = cobertas[Math.floor(cobertas.length / 2)].nivel;
+    const lutaRef = cobertas[Math.floor(cobertas.length / 2)], nivelRef = lutaRef.nivel;
     const todosFoes = cobertas.flatMap((l) => l.foes);
     const golpes = R.golpesDeDueloAte(sp, nivelRef);
     const candidatos = [];
     for (const set of R.SETS_DE_DUELO) {
       for (const ab of R.uniqueIds(sp.ab || []).length ? R.uniqueIds(sp.ab) : [null]) {
-        const u = R.unidadeDeDuelo(sp, set, ab, nivelRef, golpes, null);
+        const u0 = R.unidadeDeDuelo(sp, set, ab, nivelRef, golpes, null);
+        const u = unidadeComItemLiberado(R, u0, lutaRef.etapa, nivelRef, (it) => R.unidadeDeDuelo(sp, set, ab, nivelRef, golpes, null, it));
         let s = 0;
         for (const f of todosFoes) s += R.resultadoDoDuelo(u, f, nivelRef);
         candidatos.push({ s, set, ab, u });
@@ -113,7 +116,9 @@ function avaliar(sp) {
       const comStatus = R.comQuatroGolpes({ set: melhor.set.nome, unidade: melhor.u }, sp, todosFoes, nivelRef, null);
       const receita = (comStatus && comStatus.unidade.receita) || { golpes: dano, status: [] };
       const montar = (l, golpes, status) => {
-        const u = R.unidadeDeDuelo(sp, melhor.set, melhor.ab, l.nivel, golpes, null);
+        const u0 = R.unidadeDeDuelo(sp, melhor.set, melhor.ab, l.nivel, golpes, null);
+        // Item do set só vale se já existe na Etapa da luta (TK-21 / D5.2).
+        const u = unidadeComItemLiberado(R, u0, l.etapa, l.nivel, (it) => R.unidadeDeDuelo(sp, melhor.set, melhor.ab, l.nivel, golpes, null, it));
         u.statusIds = (u.statusIds || []).filter((id) => status.indexOf(id) !== -1);
         return u;
       };
@@ -203,12 +208,6 @@ function notas(dif, eixo) {
   const r = notasComFatia(L.map((l) => ({ comum: !!l.comum })), validos, lista, FATIA);
   return { nota: r.nota, pesoLuta: Object.fromEntries(L.map((l, i) => [l.nome, r.pesoLuta[i]])) };
 }
-function percentis(obj) {
-  const ks = Object.keys(obj).sort((a, b) => obj[a] - obj[b]), n = ks.length, p = {};
-  ks.forEach((k, i) => { p[k] = Math.round(((i + 1) / n) * 10000) / 100; });
-  return p;
-}
-const tierDe = (p) => (p >= 97 ? "SS" : p >= 90 ? "S" : p >= 75 ? "A" : p >= 50 ? "B" : p >= 20 ? "C" : "D");
 const final = {};
 const relatorio = {};
 for (const d of DIFICULDADES) {
@@ -284,7 +283,7 @@ if (process.argv.includes("--gravar")) {
   const novo = {};
   for (const s of Object.keys(antigo)) {
     if (!final[s]) { novo[s] = { foraDoRank: (DISP && DISP.motivoFora[s]) || "sem-fonte" }; continue; }
-    const e = Object.assign({}, antigo[s], { etapa: final[s].etapa, porDificuldade: {} });
+    const e = Object.assign({}, camposHerdados(antigo[s]), { etapa: final[s].etapa, porDificuldade: {} });
     for (const d of DIFICULDADES) {
       const f = final[s][d.chave];
       if (!f) continue;
@@ -297,6 +296,8 @@ if (process.argv.includes("--gravar")) {
     novo[s] = e;
   }
   writeFileSync(join(RAIZ, "data", "species_rank.json"), JSON.stringify(novo));
+  carimbarDerivado("species_rank.json");
   if (!SO_CHEFOES) writeFileSync(join(RAIZ, "data", "lutas_comuns_run.json"), JSON.stringify(lutasComunsParaOMeuTime(extraPorNome)));
+  if (!SO_CHEFOES) carimbarDerivado("lutas_comuns_run.json");
   console.log("gravado: data/species_rank.json (rank v2 por dificuldade; fora do rank: " + Object.values(novo).filter((x) => x.foraDoRank).length + ")");
 }

@@ -70,11 +70,7 @@
     "terreno toxico": /toxic terrain on entry/i
   };
   // Clima e campo do arquétipo -> condição que o time inteiro joga.
-  var CONDICAO_DO_ARQUETIPO = {
-    "Rain": "chuva", "Sun": "sol", "Sand": "areia", "Hail": "granizo", "Eerie Fog": "nevoa",
-    "Electric Terrain": "terreno eletrico", "Grassy Terrain": "terreno de grama",
-    "Misty Terrain": "terreno nevoento", "Toxic Terrain": "terreno toxico"
-  };
+  var CONDICAO_DO_ARQUETIPO = CONDICAO_DO_ARQUETIPO_CAMPO; // mapa único em campo.js (TK-16)
   // Orbe que causa o status no próprio Pokémon (texto do jogo: Toxic Orb
   // "badly poisons the holder", Flame Orb "inflicts a burn on holder").
   var ORBES_DE_STATUS = { "veneno": "Toxic Orb", "queimadura": "Flame Orb" };

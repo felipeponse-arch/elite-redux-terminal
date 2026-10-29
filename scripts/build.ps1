@@ -49,6 +49,9 @@ if (-not $SkipExtract) {
     Write-Output "--- regenerating dex_compact.json and bosses.json from raw source ---"
     & (Join-Path $PSScriptRoot "transform.ps1")
     & (Join-Path $PSScriptRoot "extract_bosses.ps1")
+    # Regerar o bosses.json apaga o campo de batalha (Trick Room, Gravity, Monochamp); regrava dos scripts de mapa do jogo.
+    $erRepo = if ($env:ER_REPO) { $env:ER_REPO } else { Join-Path $PSScriptRoot "..\..\ferramentas\er-repo" }
+    if (Test-Path $erRepo) { & node (Join-Path $PSScriptRoot "extrair_campo_chefoes.mjs") $erRepo --aplicar } else { throw "er-repo nao encontrado em $erRepo (defina ER_REPO): sem ele o bosses.json perde o campo dos chefoes" }
     Write-Output "--- extracting boss reference builds ---"
     & (Join-Path $PSScriptRoot "extract_boss_builds.ps1")
     # These used to be manual, run-by-hand steps, which meant a fresh
@@ -82,9 +85,8 @@ if (-not $SkipExtract) {
     Write-Output "--- categorias de golpe do NextDex (extrair_categorias_golpes.mjs) ---"
     node (Join-Path $PSScriptRoot "extrair_categorias_golpes.mjs")
     if ($LASTEXITCODE -ne 0) { throw "extrair_categorias_golpes.mjs falhou" }
-    Write-Output "--- rank por duelo contra os chefoes (calcular_rank_duelo.mjs) ---"
-    node (Join-Path $PSScriptRoot "calcular_rank_duelo.mjs") --gravar
-    if ($LASTEXITCODE -ne 0) { throw "calcular_rank_duelo.mjs falhou" }
+    # O rank por duelo (scripts/calcular_rank_v2.mjs --gravar, ~40 min) NAO roda no build: e passo manual, depois do compute_species_rank.ps1
+    # (TK-21, 28/10/2026: o rank antigo de nivel 50 saiu; um script so grava o species_rank.json).
     # Papel de cada golpe de status (cura/setup/pivo...) a partir do efeito
     # real do jogo - usado pela coerencia papel x golpe da build por IA.
     Write-Output "--- classificando golpes de status pelo efeito real ---"

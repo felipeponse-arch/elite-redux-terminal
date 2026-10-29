@@ -35,7 +35,6 @@ function iso(especie, habs, golpes) {
 // ---------- conferência final: nenhuma das 38 esquecida ----------
 const SEM_REGRA_NOVAS = {
   "Grimace": "Mean Look na entrada (abilities.cc:10720): impede a troca do alvo; o duelo não modela troca (como Tag e Arena Trap)",
-  "Blinking Flash": "golpe de luz tem 10% de chance de -1 de precisão do alvo (abilities.cc:12907): o motor não modela estágio de precisão",
 };
 const NOVAS_DO_DELTA = ["Photokinesis", "Photon Burst", "Rippling Punch", "Cackling", "Fresh Snowfall", "Sticky Situation", "Bioluminescent", "Blinking Flash", "Brain Freeze"];
 
@@ -180,7 +179,7 @@ test("Mana Coat: golpe físico x1,3 com Psychic Terrain no campo; o especial e o
 
 test("Light Wield: Light Screen de 3 turnos do lado do dono na entrada: o golpe especial que o enfrenta rende menos; o físico não; Infiltrator atravessa", () => {
   const wield = unid(["Light Wield"], ["Normal"], [golpe("F")]);
-  assert.equal(efDe(["Light Wield"]).telaE, 3);
+  assert.equal(efDe(["Light Wield"]).telaLuz, 3);
   const luta = (atq) => R.danoComStatusNoDuelo(atq, wield, R.danoNoDuelo(atq, wield, NIVEL), R.danoNoDuelo(wield, atq, NIVEL), 3, true).meu;
   const semTela = unid([], ["Normal"], [golpe("F")]);
   const luta0 = (atq) => R.danoComStatusNoDuelo(atq, semTela, R.danoNoDuelo(atq, semTela, NIVEL), R.danoNoDuelo(semTela, atq, NIVEL), 3, true).meu;

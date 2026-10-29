@@ -11,16 +11,18 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   entradaDeBuild:23, stripNote:49, showdownName:54, showdownSet:58, evsToShowdownText:75, teamItemsInUse:90, comecarLoteDeBuilds:118, concluirBuildDoLote:119, encerrarLoteDeBuilds:120, contaNoTime:121, teamMovesInUse:123, itemEsgotadoNoTime:152, itensEmUsoComQuem:153, teamRolesInUse:165, golpesFuturosDe:179, effectiveBuild:202
 - **calc_stat.js** - Fórmula de status final (base+IV+EV+nível+nature+item) e o que deriva
   especiePorNomeDoItem:135, regraCasaComEspecie:139, itemRuleFor:149, calcFinalStat:160, minEvSameStat:200, nextEvBreakpoint:210, priorityOrderForEvs:235, trimAndReallocateEvs:238
+- **campo.js** - TK-16 (campo, fase 1): FONTE ÚNICA do vocabulário de clima, terreno, telas e hazards, e das durações de campo.
+  rotuloDoArquetipoDeCampo:46, hazardCheioNoLado:57, poeHazardNoLado:58
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
-  gymLeaderBaseName:45, getRemainingBossEntries:51, computeSharedRisks:109, bossSpeedSummary:132, computeBossAttackTypes:147, bossSafetyScore:171, bestBoxCandidateForBoss:183, confrontoUnitOf:233, confrontoFoesDe:258, confrontoMelhorUnidade:269, confrontoMinhasUnidades:279, confrontoUnidadesDaCaixa:289, confrontoParaParty:298, bossPartyPorDificuldade:327, bestRankForm:333, nextFightCx:351, varianteDoChefao:358, gymSkillsSummaryFor:367, regraDeCampoDoChefao:416, comportamentoDaIADoChefao:433, habilidadesExtrasDoHell:446, regrasDoHell:447, ehRevancheDeLider:454, buffsParaMostrarDoChefao:473, buffsAtivosDoChefao:482, computeSpeedTiers:495
+  gymLeaderBaseName:55, getRemainingBossEntries:61, computeSharedRisks:119, bossSpeedSummary:142, computeBossAttackTypes:157, bossSafetyScore:181, bestBoxCandidateForBoss:193, confrontoUnitOf:243, confrontoFoesDe:268, confrontoMelhorUnidade:279, confrontoMinhasUnidades:289, confrontoUnidadesDaCaixa:299, confrontoParaParty:308, bossPartyPorDificuldade:337, bestRankForm:343, nextFightCx:361, varianteDoChefao:368, gymSkillsSummaryFor:377, regraDeCampoDoChefao:422, comportamentoDaIADoChefao:449, habilidadesExtrasDoHell:462, regrasDoHell:463, ehRevancheDeLider:470, buffsParaMostrarDoChefao:489, buffsAtivosDoChefao:498, computeSpeedTiers:511
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
-  descricaoDeHabilidade:89, descricaoDeHabilidadePorId:100, expandirTextoDeHabilidade:111, habilidadeArma:125, nomesDeHabilidades:128, podeTerStatus:136, garantiaDoTime:144, garantiaDaCondicao:158, comoGarantir:174, condicaoDaBuild:193, precisaDeSetter:216, blocoCondicoesIA:241
+  descricaoDeHabilidade:85, descricaoDeHabilidadePorId:96, expandirTextoDeHabilidade:107, habilidadeArma:121, nomesDeHabilidades:124, podeTerStatus:132, garantiaDoTime:140, garantiaDaCondicao:154, comoGarantir:170, condicaoDaBuild:189, precisaDeSetter:212, blocoCondicoesIA:237
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
   confrontoDamagingMoves:29, confrontoMoveType:32, foeAbilityIds:36, foeFromBossMember:49, ofensaContra:59, ameacaDe:91, velocidadeBase:114, confrontoDuelo:126, confrontoTime:146, coberturaSugerida:196, confrontoDuelosDe:243, valorDoTime:249, melhoresTrocas:265, cuidadosDoChefao:302, aberturaEmDupla:319
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
-  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:189
+  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:188
 - **duelo.js** - Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
-  nomeHabDuelo:46, textoHabDuelo:203, bonusDeGolpeLidoDoTextoDuelo:231, acertosDoGolpeDuelo:232, golpeDeRecargaDuelo:239, golpeUtilNoDuelo:253, categoriaNoDuelo:265, temContatoDuelo:271, golpesDeRecargaAte:274, golpesDeDueloAte:281, golpesDeStatusAte:287, tipoDoTextoDuelo:308, fraseFixaDuelo:313, categoriasDoTextoDuelo:328, categoriasDoGolpeDuelo:331, modoHellDuelo:356, statusDoTrechoDuelo:401, presencaDoStatus:408, todosOsStatusDuelo:414, lerStatusDaFraseDuelo:419, chanceDoEstagioCrit:469, lerCriticoDaFraseDuelo:470, lerCondicaoDaFraseDuelo:496, estagioDoTexto:525, multDoEstagio:526, lerEstagioDaFraseDuelo:528, poderDoGolpeDuelo:583, lerExtrasDaFraseDuelo:585, lerCuraDaFraseDuelo:640, filtroDoTextoDuelo:673 (+149)
+  nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:79, acertosDoGolpeDuelo:80, golpeDeRecargaDuelo:87, golpeUtilNoDuelo:101, categoriaNoDuelo:113, temContatoDuelo:119, golpesDeRecargaAte:122, golpesDeDueloAte:129, golpesDeStatusAte:135, tipoDoTextoDuelo:156, fraseFixaDuelo:161, categoriasDoTextoDuelo:178, categoriasDoGolpeDuelo:181, modoHellDuelo:206, statusDoTrechoDuelo:251, presencaDoStatus:258, todosOsStatusDuelo:264, lerStatusDaFraseDuelo:269, chanceDoEstagioCrit:319, lerCriticoDaFraseDuelo:320, lerCondicaoDaFraseDuelo:346, estagioDoTexto:375, multDoEstagio:376, lerEstagioDaFraseDuelo:378, poderDoGolpeDuelo:434, lerExtrasDaFraseDuelo:436, lerCuraDaFraseDuelo:491, filtroDoTextoDuelo:524 (+150)
 - **escolha_ia_candidatos.js** - A IA ESCOLHE ENTRE os candidatos do pipeline de build (passo 4 de docs/pipeline_de_build.md; ticket 03 de
   textoDeCandidatoParaIA:20, blocoDeCandidatosParaIA:33, regrasDaEscolhaIA:40, linhaDePapelNaturalIA:47, linhaDeFraquezasDoTimeIA:51, blocoTimeCurtoIA:55, linhaDoChefaoPorEspecieIA:68, blocoPlanoCurtoIA:72, objetivoDaEscolhaIA:80, montarPromptEscolhaDeBuild:86, montarPromptEscolhaDoTime:103, indiceDaEscolhaIA:126, respostaForaDoCandidato:132, fecharCandidatoDaEscolha:142, textoDaRazaoDaEscolha:150, juntarRazaoNaBuild:158, escolherCandidatoDaIa:168, candidatosParaAEscolhaDaIa:201
 - **evolucao.js** - Builds salvas por espécie, registro "O que o app fez sozinho" e o que acontece
@@ -28,7 +30,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **ferramentas_ia.js** - Ferramentas que a IA consulta (aiTool_*) e a fábrica única delas (buildStandardAiTools).
   aiTool_getTeamWeaknesses:15, aiTool_getSpeciesRank:24, aiTool_getPriorityMoveOptions:51, aiTool_getAbilityMovepoolSynergy:75, aiTool_getConditionMoveSynergy:99, aiTool_getNextBossRoster:120, aiTool_getItemInfo:150, aiTool_getRemainingBosses:159, aiTool_getBoxCandidatesForBoss:182, aiTool_getSpeedBenchmark:204, buildStandardAiTools:249
 - **formas_mega.js** - Família de formas (base <-> mega), modo de Mega Evolução, pedras e unidades de batalha.
-  isMegaEvoKind:22, evoluiAinda:27, evioliteFunciona:32, megaFormsOf:38, formFamilyPromptNote:46, megaModePromptLine:60, formFamilyOf:65, isMegaForm:71, megaMode:82, megaEvolutionUnlocked:95, etapaDaMega:191, megaFormLiberada:196, megaSoNoDebug:197, quandoMega:199, rotuloEtapaDaMega:200, battleFamilyOf:219, usableSpeciesFor:222, megaPromptBlock:226, stonesOf:253, battleUnitsOf:263, unitTypeMult:279
+  isMegaEvoKind:22, evoluiAinda:27, evioliteFunciona:32, megaFormsOf:38, formFamilyPromptNote:46, megaModePromptLine:60, formFamilyOf:65, isMegaForm:71, megaMode:82, megaEvolutionUnlocked:93, etapaDaMega:100, megaFormLiberada:105, megaSoNoDebug:106, quandoMega:108, rotuloEtapaDaMega:109, battleFamilyOf:128, usableSpeciesFor:131, megaPromptBlock:135, megaDaPedra:165, stonesOf:171, battleUnitsOf:181, unitTypeMult:197
 - **golpes.js** - O que cada golpe faz (papel pelo efeito real) e como descrevê-lo pra IA.
   dadoExterno:19, movePromptLine:28, ehGolpeDePivo:41, ehPrioridadeDeDano:49, moveRoleOf:53
 - **gravacao_build_ia.js** - O caminho "resposta da IA -> build validada -> o que gravar", sem tela (ticket 06 da dívida
@@ -38,7 +40,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **level_cap.js** - Level cap atual e golpes liberados por ele.
   levelCapMode:16, levelCapModeFromDifficulty:22, innatesAtivasNoNivel:34, nivelDaHabilidadeNoElite:40, innatesTravadasNoNivel:44, getCurrentCap:49, capOuPadrao:61, nivelDeCalculo:65, availableMovesFor:73, golpesTravadosNoCap:90
 - **liberado_na_run.js** - O que a run libera: UMA função pura (etapa, levelCap, alvo) -> boolean para pedra mega, item e
-  etapaDaPedra:15, etapaDoItem:17, liberadoNaRun:22, entradasDoJogador:33, xsDoJogador:37
+  etapaDaPedra:16, etapaDoItem:18, liberadoNaRun:23, entradasDoJogador:34, xsDoJogador:38
 - **lista_de_builds.js** - As 4 mudanças na lista de builds salvas de uma espécie (state.customBuilds[sname],
   trocarBuildAtivaNaLista:11, acrescentarVarianteNaLista:23, removerBuildDaLista:32, buildQueSaiParaAbrirVaga:43, liberarVagaNaLista:51
 - **mono_run.js** - Mono run: o que dá pra pegar do seu tipo até a etapa atual (2026-09-26,
@@ -57,8 +59,9 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   snamesToXs:15, xsToSnames:24, applySave:47, anteriorSaneado:236, sanitizarStrategySets:255, textoCanonicoDoSave:301, somaDoSave:316, conferirSomaDoSave:326, saveEnviavel:333, buildSave:336, montarSave:341, progressoDoSave:377, saveChegandoTemMenosProgresso:383, syncContentDiffers:397
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
+- **texto_versao_nova.js** - Texto da habilidade que o parser do duelo lê (tabelas de dado, saídas de duelo.js em 28/10/2026, TK-12 estrutura D4.5b).
 - **time_pelo_motor.js** - Modo Motor do Meu Time (ticket time-pelo-motor/01, Fase C, 21/10/2026): monta o time SEM IA, só pelo simulador.
-  motorMedia:61, motorArred:62, criarCacheDoMotor:65, motorGuardar:66, motorNivelDaEtapa:73, motorMontarLuta:79, motorMontarLutaComum:90, motorEspacadas:99, motorLutasComunsDoContexto:108, motorLutasDoContexto:123, motorValorDoObjetivo:135, contextoDoMotor:141, motorRaizDaLinha:151, motorChaveDaBuild:165, motorChaveDoContexto:168, motorBuildDoCandidato:169, motorSecar:204, motorCandidatosEmPassos:205, motorCandidatos:227, motorAquecerBuildsEmPassos:229, motorUnidade:235, motorSimular:247, motorEhMeu:263, motorAvaliar:264, motorMetricas:267, motorTemGolpeDeLado:276, motorBuscar:277, motorBuscarEmPassos:278, motorPlanoB:331, motorItensCandidatos:370 (+4)
+  motorMedia:60, motorArred:61, criarCacheDoMotor:64, motorGuardar:65, motorNivelDaEtapa:72, motorMontarLuta:78, motorMontarLutaComum:89, motorEspacadas:98, motorLutasComunsDoContexto:107, motorLutasDoContexto:122, motorValorDoObjetivo:134, contextoDoMotor:140, motorRaizDaLinha:150, motorChaveDaBuild:164, motorChaveDoContexto:167, motorBuildDoCandidato:168, motorSecar:203, motorCandidatosEmPassos:204, motorCandidatos:226, motorAquecerBuildsEmPassos:228, motorUnidade:234, motorSimular:246, motorEhMeu:262, motorAvaliar:263, motorMetricas:266, motorTemGolpeDeLado:275, motorBuscar:276, motorBuscarEmPassos:277, motorPlanoB:330, motorItensCandidatos:369 (+4)
 - **time_pelo_motor_papeis.js** - Modo Motor do Meu Time, Fase D (papéis por build, tags, sinergia e explicação). Carrega depois de time_pelo_motor.js (mesmo escopo).
   motorMediana:22, motorUnidadeNaLuta:23, motorSemTipos:24, motorSemEsse:25, motorAux:26, motorLutasDeProva:27, motorAssinaturaDasLutas:28, motorCondicoes:33, motorLutaComClima:53, motorGanhoDaCondicao:56, motorSinergia:86, motorAlternativasArmadoras:101, motorExtrasDeSinergia:119, motorLutaDetalhada:136, motorSimularComClima:143, motorFoePorNome:155, motorProvasDosMembros:157, motorDeltaSemMembro:194, motorDeltaSemTipos:198, motorTemTipo:202, motorClassificar:207, motorTextos:306, motorTextosDaClassificacao:329
 - **tipos.js** - Tabela de efetividade de tipos, habilidades que alteram dano recebido por tipo e tipagem de espécie.
@@ -78,7 +81,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **caixa.js** - Aba Caixa (PC Box): grade por páginas, busca e ações de cada Pokémon da caixa.
   renderBox:16
 - **dex_ficha.js** - Dex: ficha do Pokémon (stats, habilidades, golpes, rank, evolução) e o agendamento do resumo do topo.
-  abilityCard:14, buildSynergyHtml:42, conditionMoveSynergyNoteHtml:70, evoConditionText:88, renderMovesTable:111, rankBadgeHtml:169, rankDuplaBadgeHtml:204, rankStageBadgeHtml:212, roleTagsHtml:224, howToObtainText:245, whereToFindText:275, badgeDeTierHtml:293, marcasDoRankHtml:297, rankInfoLineHtml:319, goToDexSpecies:365, goToDexSpeciesStrategies:395, fichaStatsHtml:424, fichaEfetividadeHtml:434, fichaNavHtml:446, fichaEvolucaoHtml:457, fichaFormasHtml:475, fichaComoObterHtml:497, fichaCabecalhoHtml:515, fichaConhecerHtml:569, fichaGolpesHtml:591, fichaNotasHtml:602, selectSpecies:610, scheduleDashboardRefresh:737, updateResetTeamBoxBtn:751
+  abilityCard:14, buildSynergyHtml:42, conditionMoveSynergyNoteHtml:70, evoConditionText:88, renderMovesTable:111, rankBadgeHtml:169, rankStageBadgeHtml:203, roleTagsHtml:215, howToObtainText:236, whereToFindText:266, badgeDeTierHtml:284, marcasDoRankHtml:288, rankInfoLineHtml:310, goToDexSpecies:354, goToDexSpeciesStrategies:384, fichaStatsHtml:413, fichaEfetividadeHtml:423, fichaNavHtml:435, fichaEvolucaoHtml:446, fichaFormasHtml:464, fichaComoObterHtml:486, fichaCabecalhoHtml:504, fichaConhecerHtml:558, fichaGolpesHtml:580, fichaNotasHtml:591, selectSpecies:599, scheduleDashboardRefresh:726, updateResetTeamBoxBtn:740
 - **dex_lista.js** - Dex: filtro de tipo, busca, ordenação, lista em lotes e o modal de troca do time.
   moveListboxCursor:118, bst:152, statPct:163, statTier:164, getFiltered:171, linhaDaListaHtml:212, renderMaisLista:232, renderList:243, preencherListaSeCurta:283, syncRowAddButtons:313, openSwapModal:328, closeSwapModal:367, openConfirmModal:403, closeConfirmModal:411, esconderToast:437, agendarToast:451, flashToast:473
 - **editor_build.js** - Formato Showdown, cópia e o editor "Meu build" da ficha (e os sets de Estratégias).
@@ -111,16 +114,16 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 ## Scripts (.mjs) - scripts/
 - **alarme_upstream.mjs** - Alarme de versão nova do Elite Redux (2026-09-24, pedido do usuário: "faz o
   ultimaVersaoDoDex:35, versaoDaPaginaDeDownload:43, hashDoConteudo:50, baixar:55, main:76
-- **atualizar_de_config.mjs** - Atualiza data/gameData_2654.json a partir do er-config (código/config do jogo é a verdade).
+- **atualizar_de_config.mjs** - Atualiza data/gameData.json a partir do er-config (código/config do jogo é a verdade).
   saida:10, desescapar:14, parse:23, ler:41, enumMap:42, idx:49, porId:54
 - **build.mjs** - Montagem do artifact_final.html em Node (fase 8 da refatoração, 2026-09-24).
-  ler:21, trocarTudo:24, falhar:25
+  ler:22, trocarTudo:25, falhar:26
 - **cache_sabotagem.mjs** - Cache de "arquivo lembrado" da sabotagem (tests/.sabotagem_cache.json, fora do git).
   mesclarCache:9, ler:18, gravarCacheMesclando:26
-- **calcular_rank_duelo.mjs** - Rank por DUELO SIMULADO contra os chefões reais (reunião de 2026-09-28,
-  montarFoe:72, notaDaEspecie:90, percentis:146, tierDe:157, linha:170, med:186
 - **calcular_rank_v2.mjs** - Rank v2 (modelo aprovado pelo usuário em 2026-10-02, depois da pesquisa de método):
-  capDe:38, foe:42, ARG:60, etapaDe:79, br:82, avaliar:89, notas:198, percentis:206, tierDe:211, lutasComunsParaOMeuTime:240
+  capDe:40, foe:44, ARG:62, etapaDe:81, br:84, avaliar:91, notas:203, lutasComunsParaOMeuTime:239
+- **carimbo_derivado.mjs** - TK-24: grava em data/carimbo_derivados.json de que versão do jogo/config cada derivado foi gerado.
+  carimbarDerivado:4, avisosDeFrescor:15, pendentesSemCarimbo:22, problemasDeCarimbo:27
 - **categorias_pela_config.mjs** - Categorias de golpe (soco, mordida, corte...) pelas FLAGS do jogo, não pelo texto da NextDex.
   lerGolpesDaConfig:37, recuoDoEfeito:65, categoriasDasFlags:71
 - **checar_css.mjs** - Travas dos tokens de CSS (fase 7 da refatoração, 2026-09-24). Roda no
@@ -145,8 +148,10 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   git:13, normalizarCaminho:22, lerWorktrees:27, lerStatus:45, avaliarAlertas:66, idade:77, formatarRelatorio:84, coletar:105
 - **etapa_do_mapa.mjs** - Resolvedor único de mapa do jogo -> etapa da run (índice de levelcaps.json), compartilhado pelo rank de
   chaveDoMapa:7, etapaDoLocalDaPlanilha:9, criarEtapaDoMapa:21
+- **extrair_campo_chefoes.mjs** - Grava em data/bosses.json o campo `campo` (efeito de campo da luta) de cada chefão, lido dos
+  arquivos:11, nomeDoChefao:18, extrairCampos:22
 - **extrair_categorias_golpes.mjs** - Categorias de golpe, chance e efeito extra. As categorias que reforçam habilidades (soco, mordida, corte,
-- **gerar_mega_forms.mjs** - Completa data/mega_forms.json (pedra -> forma Mega/Primal) com as evoluções do dado bruto 2.65beta.
+- **gerar_mega_forms.mjs** - Completa data/mega_forms.json (pedra -> forma Mega/Primal) com as evoluções do dado bruto 2.65.4.1.
 - **gerar_onde_achar_itens.mjs** - Gera data/onde_achar_itens.json: onde cada item se consegue na run e a partir de qual etapa (ticket 07,
   ler:21, anotar:32, localLegivel:37, etapaDaPasta:38
 - **gerar_poder_variavel.mjs** - Gera data/poder_variavel.json (ticket 16, 07/10/2026): o que o motor precisa para os golpes de poder 1 no dado,
@@ -176,10 +181,12 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   evsTexto:47, avaliar:49
 - **prototipo_kit_sinergia.mjs** - PROTÓTIPO DESCARTÁVEL (10/10/2026) — fases 1 e 2 do pipeline de build
   nomeHab:16
+- **rank_comum.mjs** - Peças do rank v2 que precisam de teste e de um lugar só (TK-21, 28/10/2026).
+  percentis:5, tierDe:12, unidadeComItemLiberado:16, camposHerdados:23
 - **rank_escolha.mjs** - Escolha do set no rank v2 (ticket 08, 07/10/2026). A soma rápida (nota do duelo contra todos os
   melhoresPelaSoma:9, mediaDoEixo:13, notaDosEixos:18, escolherPelaNotaFinal:22
 - **rank_fatia.mjs** - Rank com fatia fixa de peso (ticket todas-as-lutas/02, decisão do usuário em 16/10/2026): chefões 60% e lutas comuns 40%.
-  notasComFatia:10, comunsMaisPerigosas:37
+  notasComFatia:9, comunsMaisPerigosas:36
 - **remapear_sprite_index.mjs** - Sprites pelo NOME da espécie (15/10/2026). O atlas (data/sprite_atlas.png) foi montado com o índice pelo número da espécie (x) do
   indicePorNumero:8
 - **sabotagem_incremental.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026): no master a sabotagem roda só as
@@ -233,7 +240,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   Log:25, Show-Notification:29
 - **score_abilities.ps1** - >
 - **slim_dex.ps1** - (sem comentário de topo)
-- **transform.ps1** - Generates data/dex_compact.json from data/gameData_2654.json (the raw
+- **transform.ps1** - Generates data/dex_compact.json from data/gameData.json (the raw
 
 ## Testes unitários (o que cobrem) - tests/unit/
 - **absorcao_flash_fire_dry_skin.test.mjs** - Ticket calibracao-2026-10-15/04 (15/10/2026): Flash Fire e Dry Skin absorvem o golpe (código do jogo: abilities.cc:696-706 e
@@ -249,10 +256,14 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **cache_sabotagem.test.mjs** - (sem comentário de topo)
 - **calibracao_calculadora_do_jogo.test.mjs** - Calibração do motor contra a calculadora de dano do próprio jogo (10/10/2026, prints do usuário).
 - **calibracao_simulador_wasm.test.mjs** - Calibração do motor contra o simulador do jogo compilado (WebAssembly, Elite Redux 2.65.3b), 21/10/2026
+- **campo_caracterizacao_tk16.test.mjs** - TK-16 (campo, fase 1): caracterização ANTES da refatoração. Fixa o veredito do motor (R.resultadoDoDuelo) em lutas com
 - **campo_com_lutas_comuns.test.mjs** - todas-as-lutas/03: o alvo { campo: true } mede também as lutas comuns (mesma fatia 60/40 do rank, vinda de data/lutas_comuns_run.json).
 - **campo_do_campeao_monotype.test.mjs** - Efeito do campeão monotype (04/10): o jogo anuncia um efeito por tipo (src/battle_main.c HandleMonoChampSpecialEffects
+- **campo_do_chefao_pelo_dado.test.mjs** - TK-20 D9.5b: a regra de campo do chefão vem do dado (bosses.json `campo`, extraído do script do mapa do jogo),
+- **campo_fonte_unica.test.mjs** - TK-16 (campo, fase 1): src/regras/campo.js é a fonte única de clima, terreno, telas, hazards e durações de campo.
 - **campo_invertido_no_plano.test.mjs** - Achado do vídeo do usuário (02/10): o plano contra a Tate & Liza 1 chamava Axe Kick (Dark) de
 - **campo_no_duelo.test.mjs** - Campo no duelo (2026-09-29): terreno das habilidades (Grassy/Electric/Psychic/
+- **carimbo_derivados.test.mjs** - TK-24: todo derivado gerado (rank, lutas comuns, chefões) deixa carimbo de versão/frescor em
 - **categorias_de_golpe.test.mjs** - Categoria de golpe (soco, mordida, corte...) do NextDex (2026-09-29): antes
 - **categorias_de_golpe_da_config.test.mjs** - Ticket calibracao-2026-10-15/01 (15/10/2026): as categorias de golpe (soco, mordida, corte, martelo, pulso, chifre,
 - **checar_encoding.test.mjs** - A trava de codificação (scripts/checar_encoding.mjs) precisa pegar exatamente
@@ -299,6 +310,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **golpes_novos_2654.test.mjs** - Ticket versao-nova/09 (15/10/2026): os 9 golpes novos do upcoming (er-config d1a9a4c, MoveList.textproto) entram no app, com as espécies ...
 - **gravacao_build_ia.test.mjs** - Caminho "resposta da IA -> build validada -> o que gravar" (src/regras/gravacao_build_ia.js e
 - **guarda_lutas_comuns.test.mjs** - Guardas de todas-as-lutas/02: dado provisório não publica; o rank gravado não aceita outra fatia nem outra lista de lutas.
+- **habilidades_lote3_tk12.test.mjs** - TK-12 (28/10/2026): divergências do lote 3 (pacote onda0_P2_lote3) contra o código do jogo (er-repo f34fc2b), com dado real.
+- **habilidades_lotes_1_2_pelo_codigo.test.mjs** - TK-12, divergências dos lotes 1 e 2 conferidas no código do jogo (er-repo f34fc2b):
 - **habilidades_mudadas_2654.test.mjs** - Ticket versao-nova/06 (15/10/2026): habilidades cujo efeito mudou na versão mais nova (dados-2654/02 e 03). Fonte: abilities.cc (upcoming...
 - **habilidades_novas_2654.test.mjs** - Ticket versao-nova/07 (15/10/2026): as 29 habilidades novas da NextDex 2.65.4 + as 9 do delta da er-config d1a9a4c (upcoming) funcionam n...
 - **habilidades_texto_novo_2654.test.mjs** - TK-00b (28/10): textos de habilidade que a v2.65.4.1 reescreveu. A regra do motor lê o TEXTO; cada teste prova que a redação nova ainda
@@ -318,8 +331,10 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **juiz_do_time.test.mjs** - Ticket time-pelo-motor/01, Fase B2 (21/10/2026): juiz do time pela LUTA COMPLETA (avaliarTimePelaLutaCompleta), ao lado do
 - **lacunas_sem_codigo.test.mjs** - Varredura "habilidades da config sem código" (21/10/2026; relatorios/sem_codigo_varredura_2026-10-21.md).
 - **lado_no_duelo.test.mjs** - Ticket time-pelo-motor/01, Fase B1 (20/10/2026): Reflect, Light Screen, Aurora Veil, Tailwind e Trick Room são
+- **last_stand_no_duelo.test.mjs** - Last Stand (abilities.cc:7959-7965): Def/SpDef x(1 + 0,6 x fração de PV perdido).
 - **level_cap_padrao_unico.test.mjs** - Ticket 04 (divida-tecnica): sem Level cap o padrão é um só (0 = sem limite; nível de cálculo 100).
 - **levelcaps_contra_jogo.test.mjs** - TK-23: data/levelcaps.json tem de bater com GetLevelCap() do código do jogo (pokemon.c); 100 = sem limite.
+- **liberacao_por_etapa_caracterizacao.test.mjs** - TK-22: refatoração do registro da Etapa não pode mudar NENHUM resultado (pedras e itens x Etapas 0-10).
 - **liberado_na_run.test.mjs** - Ticket 05 (divida-tecnica): liberadoNaRun é a única régua de pedra, item e golpe;
 - **lote_a_motor.test.mjs** - Lote A da força-tarefa (2026-10-02): correções do motor provadas na auditoria, cada uma
 - **lote_b_plano_real.test.mjs** - Lote B da força-tarefa (2026-10-02): o plano contra o chefão tem que corresponder ao time
@@ -329,6 +344,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **manual_build.test.mjs** - Manual de build competitivo (reunião de 2026-09-28): regras gerais de nature,
 - **mapa_do_codigo.test.mjs** - Gerador do mapa do código: determinístico e acha função conhecida com a linha certa.
 - **marcas_do_rank.test.mjs** - Marcas sem nota do rank v2 (ponto 6, 2026-10-02): "Precisa de setter"
+- **mega_forms_do_jogo.test.mjs** - TK-22: mega_forms.json segue o jogo (SpeciesList/MegaStonesList do er-config 486a964), inclusive pedras de 2 alvos.
 - **mega_gate.test.mjs** - Trava de Mega Evolução nas SUGESTÕES (achado do usuário, print de 2026-09-24:
 - **modo_motor_sem_ia.test.mjs** - Modo Motor nunca chama a IA (ticket time-pelo-motor/01, Fase F3, 21/10/2026). Duas provas independentes:
 - **mono_run.test.mjs** - Mono run: disponibilidade por tipo e etapa (2026-09-26). O dado vem da
@@ -339,6 +355,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **nivel_da_mudanca.test.mjs** - Testes do gancho por nível (scripts/nivel_da_mudanca.mjs e scripts/verificar.mjs).
 - **numeros_da_versao_nova.test.mjs** - Ticket versao-nova/02 (15/10/2026): o app mira a versão MAIS NOVA do jogo (código/config primeiro, NextDex depois). Três números que a 2....
 - **onde_achar_itens.test.mjs** - Ticket 07 (07/10/2026): onde achar cada item na run, lido do código oficial do jogo (item no chão, escondido,
+- **origem_dado_cru.test.mjs** - TK-25: o dado cru ativo não leva versão no nome, e todo .ps1 que grava/lê dado usa UTF-8 explícito
 - **pedras_etapa_dado.test.mjs** - TK-11 (decisão 3): nenhuma pedra libera ANTES do dado (onde_achar_itens), salvo as que o código do jogo trava mais cedo
 - **perfectionist.test.mjs** - Ticket 08 (07/10/2026): Perfectionist pelo código oficial (abilities.cc Impl<ABILITY_PERFECTIONIST>):
 - **pinnacle_blade_pelo_codigo.test.mjs** - Ticket mecanica-2026-10-22/03 (parte Pinnacle Blade), 22/10/2026. Vale pelo CÓDIGO da versão nova (er-repo upcoming):
@@ -354,6 +371,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **prioridade_e_campo_pelo_codigo.test.mjs** - Ticket calibracao-2026-10-15/06 (15/10/2026): prioridade e campo pelo código do jogo.
 - **prompt_build.test.mjs** - Revisão do prompt de build (2026-09-27, pedido do usuário): habilidade com
 - **prompts_ia.test.mjs** - Peças dos prompts de IA e leitura das respostas (src/regras/prompts_ia.js e
+- **rank_comum.test.mjs** - TK-21 (rank): percentil e tier num lugar só; item do set só vale liberado na Etapa da luta; o rank v2 não herda campos do rank antigo.
 - **rank_da_run.test.mjs** - Rank v2 no app (src/regras/rank_da_run.js): nota pela dificuldade da run, dois eixos,
 - **rank_disponibilidade.test.mjs** - Rank v2, ponto 3: data/rank_disponibilidade.json (gerado por scripts/gerar_rank_disponibilidade.mjs
 - **rank_escolha.test.mjs** - Ticket 08 (07/10/2026): a escolha do set do rank avalia por inteiro os melhores pela soma rápida
@@ -375,6 +393,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **setup_entre_duelos.test.mjs** - Ticket 05 (07/10/2026): os estágios de atributo só zeram para quem entra em campo
 - **shedinja_hp1.test.mjs** - Shedinja HP 1 (decisão 5 do usuário, TK-09): o jogo fixa maxHP em 1 (pokemon.c:1000-1001);
 - **sinergia_habilidade_movepool.test.mjs** - Gerador da sinergia habilidade x movepool (porte Node, lê o INGLÊS do dex). Trava: arquivo gravado == gerador, ids batem com o dex,
+- **sinergia_sem_bonus_por_id.test.mjs** - TK-12 estrutura D4.3 (28/10/2026): SINERGIA_SEM_BONUS_DE_DANO_DUELO virou conjunto por ID, montado dos 7 nomes por ABILITY_ID_BY_NAME.
 - **sono_e_paralisia_champions.test.mjs** - Ticket versao-nova/08 (15/10/2026; dados-2654/07): o código novo liga o sono e a paralisia estilo Pokémon Champions.
 - **sprite_index.test.mjs** - Sprite pelo nome da espécie (15/10/2026): a versão nova do jogo deslocou os números e o Beedrill Mega mostrava o Blastoise Mega.
 - **status_no_duelo.test.mjs** - Status por chance no duelo (2026-09-29, grupo 1 do estudo de habilidades):
@@ -384,6 +403,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sync_soma_errada.test.mjs** - TK-01 (decisão 2 do usuário, 27/10/2026): save com soma errada nunca é regravado nem enviado à nuvem.
 - **telas_efetividade_real.test.mjs** - Ticket 12 (dados-2654): as telas mostram a efetividade REAL contra Solid Rock / Primal Armor e citam a
 - **texto_novo_das_habilidades.test.mjs** - Ticket versao-nova/04 (15/10/2026): o texto das habilidades mudou de redação na 2.65.4 da NextDex (07/10) e o parser do motor lê TEXTO. M...
+- **tier_e_fatia_unicos.test.mjs** - TK-20: dificuldade -> tier e a fatia 60/40 têm UMA fonte (src/regras/chefoes.js), lida por chefões, rank, Meu Time,
 - **time_melhor_no_geral.test.mjs** - Tela do time = melhor time no geral, sem pensar no próximo chefão (usuário, 16/10/2026). As builds do "Montar time completo"
 - **time_pelo_motor.test.mjs** - Modo Motor do Meu Time, Fase C (ticket time-pelo-motor/01, 21/10/2026): montar o time SEM IA, só pelo simulador.
 - **time_pelo_motor_comuns.test.mjs** - Meu Time na mesma régua do rank (ticket todas-as-lutas/02, 21/10/2026): o juiz do Modo Motor pesa as lutas COMUNS mais perigosas de cada
@@ -397,3 +417,4 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **traducoes_alinhadas_por_nome.test.mjs** - Versão 2.65.4 deslocou ids de habilidade (Mighty Horn 391 -> 390; 391 virou Hardened Sheath...). A tradução PT é indexada por id, então
 - **vaga.test.mjs** - Vaga de verificação pesada (scripts/vaga.mjs, melhoria B de 2026-10-13).
 - **validar_dado_cru.test.mjs** - Validação do dado cru do NextDex na ingestão (scripts/validar_dado_cru.mjs, lote 2).
+- **vocabulario_da_etapa.test.mjs** - TK-27: texto da UI usa "Etapa" (GLOSSARY.md), não "marco".

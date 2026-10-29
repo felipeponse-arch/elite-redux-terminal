@@ -61,9 +61,9 @@
   function conflitoDeProgresso(remote, local) {
     if (!saveChegandoTemMenosProgresso(local, remote)) return false;
     remotoPendente = remote;
-    var marco = function (sv) { return sv && sv.settings && typeof sv.settings.milestone === "number" ? sv.settings.milestone : 0; };
+    var etapaDe = function (sv) { return sv && sv.settings && typeof sv.settings.milestone === "number" ? sv.settings.milestone : 0; };
     document.getElementById("progresso-banner-text").textContent =
-      "Chegou de outro aparelho um save com MENOS progresso (marco " + marco(remote) + ") que o deste aparelho (marco " + marco(local) + "). " +
+      "Chegou de outro aparelho um save com MENOS progresso (Etapa " + etapaDe(remote) + ") que o deste aparelho (Etapa " + etapaDe(local) + "). " +
       "Nada foi trocado ainda. Qual vale?";
     document.getElementById("progresso-banner").hidden = false;
     return true;

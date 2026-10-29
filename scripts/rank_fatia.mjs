@@ -1,7 +1,6 @@
 // Rank com fatia fixa de peso (ticket todas-as-lutas/02, decisão do usuário em 16/10/2026): chefões 60% e lutas comuns 40%.
 // Sem a fatia as 538 lutas comuns pesariam 95% da nota e os 29 chefões 5% (estudo.md §4). Cada fatia mantém o peso por ameaça
 // (PvPoke, iterado) DENTRO dela. Funções puras: calcular_rank_v2.mjs e o estudo de fatias leem daqui, então não há dois cálculos.
-export const FATIA_DOS_CHEFOES = 0.6;
 export const COMUNS_POR_ETAPA = 30; // Meu Time: as mais perigosas de cada etapa (pela ameaça medida no rank)
 
 // lutas: [{ comum: bool }]; validos: [sname]; lista(s) -> [[índice da luta, média do Battle Rating]] (só as lutas cobertas).

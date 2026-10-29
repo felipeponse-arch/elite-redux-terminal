@@ -129,7 +129,7 @@
   // (battle_util.c: clima de habilidade ou golpe dura 8 turnos e reforça 1,5x; o 1,2x é só
   // do clima permanente de mapa). O Full Features (+20%, infinito) ficou desatualizado.
   // A duração (duracaoTurnos) entra na luta inteira junto com "o armador precisa entrar".
-  var CLIMA_OFICIAL = { reforcoSolChuva: 1.5, duracaoTurnos: 8, defesaIceNoGranizo: 1.5, spdRockNaAreia: 1.5, ataqueContraGhostNaNevoa: 0.8 };
+  // CLIMA_OFICIAL mora em campo.js (TK-16), com a duração vinda de DURACAO_CAMPO.
   var pctClima = function (mult) { return Math.round(Math.abs(mult - 1) * 100) + "%"; };
   var CLIMA_QUE_COMBINA = {
     Fire: { clima: "Sun", curto: "+" + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " em golpes Fire", porque: "golpes Fire causam " + pctClima(CLIMA_OFICIAL.reforcoSolChuva) + " a mais no sol" },
@@ -184,7 +184,7 @@
       var rank = rankDe(e.s);
       var mono = rank && rank.monoRanks && rank.monoRanks[tipo];
       return {
-        sp: sp, local: e.l, etapa: e.e,
+        sp: sp, local: e.l, etapa: e.eApp !== undefined ? e.eApp : e.e, // eApp = Etapa do rank_disponibilidade (D8-4)
         marcas: (e.m || "").split("").filter(function (m) { return MONO_MARCAS[m]; }),
         tier: mono ? mono.tier : null, score: mono ? mono.score : -1,
         cobre: cobreFraquezas(sp, fraquezasDoTipo(tipo)),

@@ -180,7 +180,7 @@
         "Potencial " + r.potencial.tier + " (com golpe de status/setup) e viabilidade " + r.viabilidade.tier + " (só os 4 golpes de dano).";
       return '<span class="rank-badge ' + (RANK_TIER_CLASS[r.tier] || "tier-C") + '" title="' + escapeHtml(titulo) + '">' + r.tier + '</span>';
     }
-    // Rank por duelo simulado desde 2026-09-28 (scripts/calcular_rank_duelo.mjs):
+    // Rank por duelo simulado desde 2026-09-28 (rank antigo, nível 50; hoje scripts/calcular_rank_v2.mjs):
     // o método antigo media só a tipagem defensiva e deixava Garchomp em C.
     var title = r.duelo
       ? "Rank " + r.tier + " de SS (melhor) a D (pior) — score " + r.score + "/100. Duelo simulado 1x1 contra cada Pokémon " +
@@ -199,15 +199,6 @@
   // Mega/Primal-only lineages like most box legendaries - see
   // compute_species_rank.ps1) has no stageTier and renders nothing, same
   // safe-degrade as everywhere else.
-  // Nota em dupla (2026-09-29, decisão do usuário: duas notas): o mesmo duelo
-  // contra os chefões em dupla, com golpe de área e suporte ao parceiro.
-  function rankDuplaBadgeHtml(sname) {
-    var r = rankDe(sname);
-    if (!r || !r.dupla) return "";
-    var title = "Rank " + r.dupla.tier + " em batalha em dupla (score " + r.dupla.score + "/100): duelo contra os Pokémon dos chefões em dupla, " +
-      "com golpe de área acertando os dois (0,75x cada) e o que a habilidade faz pelo parceiro (Friend Guard, Power Spot, Intimidate nos dois…).";
-    return '<span class="rank-badge-stage ' + (RANK_TIER_CLASS[r.dupla.tier] || "tier-C") + '" title="' + escapeHtml(title) + '">' + r.dupla.tier + '</span>';
-  }
   var STAGE_LABEL = { 1: "1º estágio", 2: "2º estágio", 3: "3º estágio", 4: "4º estágio" };
   function rankStageBadgeHtml(sname) {
     var r = rankDe(sname);
@@ -330,8 +321,6 @@
       var label = STAGE_LABEL[r.stage] || (r.stage + "º estágio");
       items += '<span class="rank-info-item"><span class="rank-info-label">Rank no ' + label + '</span>' + rankStageBadgeHtml(sp.sname) + '</span>';
     }
-    var duplaBadge = rankDuplaBadgeHtml(sp.sname);
-    if (duplaBadge) items += '<span class="rank-info-item"><span class="rank-info-label">Rank em dupla</span>' + duplaBadge + '</span>';
     // Rank v2: os dois eixos lado a lado e o rank por tipo SEMPRE (decisão do usuário, 02/10).
     if (r.potencial && r.viabilidade) {
       items += '<span class="rank-info-item"><span class="rank-info-label">Potencial</span>' +

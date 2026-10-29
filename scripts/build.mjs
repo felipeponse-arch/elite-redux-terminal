@@ -12,6 +12,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from "
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { problemasDeCarimbo } from "./carimbo_derivado.mjs";
 import { validarBuilds, validarInvariantes } from "./validar_dados.mjs";
 import { problemaDasLutasComuns } from "./guarda_lutas_comuns.mjs";
 
@@ -44,6 +45,7 @@ const ARQUIVOS_DE_DADOS = {
   __ABILITY_SYNERGY_JSON__: "species_ability_synergy.json",
   __CONDITION_MOVE_SYNERGY_JSON__: "condition_move_synergy.json",
   __MEGA_FORMS_JSON__: "mega_forms.json",
+  __PEDRAS_ETAPA_JSON__: "pedras_etapa.json",
   __MOVE_ROLES_JSON__: "move_roles.json",
   __CHANGELOG_JSON__: "changelog.json",
   __HOW_TO_OBTAIN_JSON__: "how_to_obtain.json",
@@ -68,6 +70,13 @@ if (!existsSync(atlas)) falhar("falta data/sprite_atlas.png - gere com scripts/b
 if (process.env.ER_PUBLICAR === "1") {
   const p = problemaDasLutasComuns(JSON.parse(ler(join(DADOS, "lutas_comuns_run.json"))));
   if (p) falhar(p);
+}
+
+// Carimbos de versão (TK-24): derivado velho ou sem carimbo avisa; com ER_PUBLICAR=1 barra.
+{
+  const { avisos, barra } = problemasDeCarimbo(JSON.parse(ler(join(DADOS, "carimbo_derivados.json"))), JSON.parse(ler(join(DADOS, "carimbo_dados.json"))), process.env.ER_PUBLICAR === "1");
+  for (const a of avisos) console.warn("  aviso: " + a);
+  if (barra) falhar("derivado velho ou sem carimbo: " + avisos.join("; "));
 }
 
 // ---- travas de dado ----

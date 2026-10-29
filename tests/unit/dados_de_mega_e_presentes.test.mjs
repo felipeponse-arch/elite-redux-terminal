@@ -8,7 +8,7 @@ import { carregarRegras } from "./carregar_regras.mjs";
 
 const R = carregarRegras({ milestone: 9 });
 const lerJson = (n) => JSON.parse(readFileSync(new URL("../../data/" + n, import.meta.url), "utf8"));
-const jogo = lerJson("gameData_2654.json");
+const jogo = lerJson("gameData.json");
 
 function pedrasDoJogo() {
   const itens = Object.fromEntries(jogo.items.map((i) => [i.NAME, i.name]));
