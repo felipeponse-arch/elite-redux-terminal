@@ -54,7 +54,7 @@
   }
   function blocoTimeCurtoIA(sp, ctx) {
     ctx = ctx || ctxDoState();
-    var itens = itensEmUsoComQuem(sp.x), nomes = Object.keys(itens);
+    var itens = itensEmUsoComQuem(sp.x, ctx), nomes = Object.keys(itens);
     var esg = nomes.filter(function (i) { return itemEsgotadoNoTime(itens[i]); });
     var golpes = teamMovesInUse(sp.x), papeis = teamRolesInUse(sp.x);
     var membros = ctx.team.map(getSpeciesByX).filter(function (m) { return m && m.x !== sp.x; });

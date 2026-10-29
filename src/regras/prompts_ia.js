@@ -10,8 +10,8 @@
 
   // ctx explícito das regras puras (TK-19): { archetype, team, settings, cap }. Este é o ÚNICO ponto das regras de IA que lê o
   // state; quem chama monta o ctx aqui e passa adiante. Sem ctx, as entradas públicas usam o do state (compatível com os testes).
-  function ctxDoState() { return { archetype: state.archetype, team: state.team, settings: state.settings, cap: getCurrentCap() }; }
-  function completarCtx(ctx) { return ctx && ctx.settings && ctx.archetype && ctx.team ? ctx : Object.assign(ctxDoState(), ctx || {}); }
+  function ctxDoState() { return { archetype: state.archetype, team: state.team, box: state.box, settings: state.settings, cap: getCurrentCap() }; }
+  function completarCtx(ctx) { return ctx && ctx.settings && ctx.archetype && ctx.team && ctx.cap !== undefined ? ctx : Object.assign(ctxDoState(), ctx || {}); }
 
   // Orientação real de build por Ritmo/Clima do time (achado do usuário,
   // 2026-09-13, com print do time montado via "Montar melhor time": a
@@ -205,7 +205,7 @@
     var a = ABILITIES[id];
     return "- " + a[0] + ": " + dadoExterno(ABILITY_PT[String(id)] || a[1] || "sem descricao");
   }
-  function blocoEspecieIA(sp, plural) {
+  function blocoEspecieIA(sp, plural, ctx) {
     var abiIds = uniqueIds(sp.ab);
     var abiNames = abiIds.map(function (id) { return ABILITIES[id][0]; });
     return "Tipo: " + speciesTypeNames(sp).join("/") + "\n" +
@@ -215,7 +215,7 @@
       "Innates SEMPRE ativas (nao escolhiveis, mas contam na sinergia - a build deve aproveitar o maximo delas):\n" +
       "<dados_do_jogo>\n" + uniqueIds(sp.inn).map(function (id) {
         // Elite: a innate que o nível do cap ainda não liberou (level_cap.js) vai marcada.
-        var travada = innatesTravadasNoNivel(sp, nivelDeCalculo()).indexOf(id) !== -1;
+        var travada = innatesTravadasNoNivel(sp, (ctx || ctxDoState()).cap || NIVEL_DE_CALCULO_SEM_CAP).indexOf(id) !== -1;
         return linhaHabilidadeIA(id) + (travada ? " [TRAVADA no Elite ate o Pokemon chegar ao nivel " + NIVEL_DA_INNATE_ELITE[(sp.inn || []).indexOf(id)] + " - nao conte com ela agora]" : "");
       }).join("\n") + "\n</dados_do_jogo>\n";
   }
@@ -235,7 +235,7 @@
   function blocoPapelIA(sp, plural, comTime, ctx) {
     ctx = completarCtx(ctx);
     var natural = SPECIES_ROLE[sp.sname];
-    var golpes = availableMovesFor(sp).names;
+    var golpes = availableMovesFor(sp, ctx).names;
     var prioridade = golpes.filter(ehPrioridadeDeDano);
     var pivos = golpes.filter(ehGolpeDePivo);
     var linhas = [];
@@ -263,8 +263,8 @@
   }
   // Movepool liberado no cap (mesma trava do editor manual - golpe de tutor
   // nunca trava), dentro de UM bloco <dados_do_jogo>.
-  function blocoMovepoolIA(sp, plural) {
-    var linhas = availableMovesFor(sp).ids.map(movePromptLine);
+  function blocoMovepoolIA(sp, plural, ctx) {
+    var linhas = availableMovesFor(sp, ctx).ids.map(movePromptLine);
     return "Movepool real - " + (plural ? "cada set escolhe" : "escolha") + " exatamente 4 desta lista, nenhum golpe fora dela. Cada linha traz o que o golpe " +
       "FAZ NESTE HACK (tipo, categoria, poder, prioridade, papel e descricao do proprio jogo) - leia a descricao, " +
       "nao assuma pelo nome, golpes deste hack podem ser diferentes do jogo original. " + LEGENDA_GOLPE + "\n<dados_do_jogo>\n" + linhas.join("\n") + "\n</dados_do_jogo>\n";
@@ -353,14 +353,14 @@
   }
   // O que o resto do time já usa (só a build de 1 membro recebe: as Estratégias
   // são leitura exploratória da espécie, não do time).
-  function blocoTimeEmUsoIA(sp) {
+  function blocoTimeEmUsoIA(sp, ctx) {
     // Item pode repetir no time (2026-09-27, pedido do usuário: "cada Pokémon
     // pode ter um item e esse item pode ser repetido pelo time") - a lista de
     // itens em uso saiu do prompt; golpes e papéis continuam como preferência.
     var golpes = teamMovesInUse(sp.x), papeis = teamRolesInUse(sp.x);
     // Itens em uso de volta ao prompt (2026-09-29): sem isso a IA não sabia o que
     // os outros seguravam e todo Hyper Offense saía com Life Orb.
-    var itens = itensEmUsoComQuem(sp.x);
+    var itens = itensEmUsoComQuem(sp.x, ctx);
     var nomesItens = Object.keys(itens);
     var esgotados = nomesItens.filter(function (i) { return itemEsgotadoNoTime(itens[i]); });
     return "" +
@@ -437,8 +437,8 @@
   }
   // `chefao` ({ boss, party }): luta escolhida pelo jogador no botão "Montar
   // time contra este chefão" (2026-09-29) - sem ele, a próxima luta que falta.
-  function linhasProximaLutaIA(sp, chefao) {
-    var boss = chefao ? chefao.boss : getRemainingBossEntries()[0];
+  function linhasProximaLutaIA(sp, chefao, ctx) {
+    var boss = chefao ? chefao.boss : getRemainingBossEntries(ctx)[0];
     if (!boss) return [];
     var party = chefao ? chefao.party : bossPartyPorDificuldade(boss);
     var cx = confrontoParaParty(party, false);
@@ -518,7 +518,7 @@
   function linhasContextoComumIA(sp, chefao, ctx) {
     ctx = completarCtx(ctx);
     var linhas = avisoInnatesEliteIA(ctx) ? [avisoInnatesEliteIA(ctx)] : [];
-    var faltam = getRemainingBossEntries();
+    var faltam = getRemainingBossEntries(ctx);
     if (faltam.length) {
       var contagem = {};
       faltam.forEach(function (b) {
@@ -530,7 +530,7 @@
       linhas.push("Chefoes que faltam: " + faltam.map(function (b) { return b.name; }).join(", ") + ". Tipos mais comuns neles: " +
         Object.keys(contagem).sort(function (a, b) { return contagem[b] - contagem[a]; }).slice(0, 6).join(", ") + ".");
     }
-    return linhas.concat(linhasProximaLutaIA(sp, chefao));
+    return linhas.concat(linhasProximaLutaIA(sp, chefao, ctx));
   }
 
   // Set que o simulador provou contra o chefão (lote B): a IA mantém a habilidade e os
@@ -553,15 +553,15 @@
     return cabecalhoIA() +
       "Monte um set competitivo, formato Pokemon Showdown, para o Pokemon " + sp.n +
       " (build " + versaoDosDados() + ").\n" +
-      blocoEspecieIA(sp, false) +
-      blocoMovepoolIA(sp, false) +
+      blocoEspecieIA(sp, false, ctx) +
+      blocoMovepoolIA(sp, false, ctx) +
       blocoPapelIA(sp, false, true, ctx) +
       blocoCondicoesIA(sp) +
       blocoManualIA(sp) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, false) +
       blocoItensIA(sp, false, ctx) +
-      blocoTimeEmUsoIA(sp) +
+      blocoTimeEmUsoIA(sp, ctx) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
       blocoContextoIA(sp, opts.chefao, ctx) +
@@ -620,8 +620,8 @@
     var especies = members.map(function (sp, i) {
       var resp = (opts.responde && opts.responde[sp.sname]) || [];
       return "=== POKEMON " + (i + 1) + " de " + members.length + ": " + sp.n + " (chave \"" + sp.sname + "\") ===\n" +
-        blocoEspecieIA(sp, false) +
-        blocoMovepoolIA(sp, false) +
+        blocoEspecieIA(sp, false, ctx) +
+        blocoMovepoolIA(sp, false, ctx) +
         blocoPapelIA(sp, false, true, ctx) +
         blocoCondicoesIA(sp) +
         blocoManualIA(sp) +
@@ -673,8 +673,8 @@
       sp.n + " (build " + versaoDosDados() + "). Cada set precisa ter um PAPEL real e diferente " +
       "dos outros (ex: wallbreaker especial, sweeper físico, suporte/tanque, setup...) - só inclua um papel se ele " +
       "genuinamente fizer sentido pra esta espécie neste hack; 2 sets bons valem mais que 3 forçados.\n" +
-      blocoEspecieIA(sp, true) +
-      blocoMovepoolIA(sp, true) +
+      blocoEspecieIA(sp, true, ctx) +
+      blocoMovepoolIA(sp, true, ctx) +
       blocoPapelIA(sp, true, false, ctx) +
       blocoCondicoesIA(sp) +
       blocoManualIA(sp) +

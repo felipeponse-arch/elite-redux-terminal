@@ -70,9 +70,9 @@
   // filtro estava copiado em 4 lugares - editor "Meu build", validação da
   // build por IA, golpes de prioridade e prompt da IA - e já tinha divergido
   // uma vez (2026-09-12: a validação ficou sem o filtro que o editor tinha).
-  function availableMovesFor(sp) {
-    var cap = getCurrentCap();
-    var allowedLm = sp.lm.filter(function (pair) { return liberadoNaRun(state.settings.milestone, cap, { golpe: pair[0] }); });
+  function availableMovesFor(sp, ctx) {
+    var cap = ctx ? ctx.cap : getCurrentCap();
+    var allowedLm = sp.lm.filter(function (pair) { return liberadoNaRun((ctx ? ctx.settings : state.settings).milestone, cap, { golpe: pair[0] }); });
     var ids = uniqueIds(allowedLm.map(function (pair) { return pair[1]; }).concat(sp.tu));
     return {
       cap: cap,

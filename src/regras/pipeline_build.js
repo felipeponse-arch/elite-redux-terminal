@@ -68,8 +68,9 @@
   // ---- alvo ----
   // Devolve { info, foes, clima, nivel } ou { info: null, foes: [] } (com o motivo em `aviso`).
   // `foes` são os Pokémon medidos: o que foi pedido, ou o primeiro e o ás (o último) do chefão.
-  function pipelineResolverAlvo(alvo) {
-    var nivel = nivelDeCalculo();
+  function pipelineResolverAlvo(alvo, ctx) {
+    ctx = ctx || ctxDoState();
+    var nivel = ctx.cap || NIVEL_DE_CALCULO_SEM_CAP;
     var saida = { info: null, foes: [], clima: null, nivel: nivel, aviso: null };
     if (alvo && alvo.foe) {
       saida.foes = [alvo.foe];
@@ -93,12 +94,12 @@
       // cada etapa (data/lutas_comuns_run.json, a mesma lista do rank). nChefoes separa os dois grupos; a fatia vem do próprio arquivo.
       saida.nChefoes = saida.foes.length; saida.pesosComuns = []; saida.fatia = 1;
       var dadoComum = typeof LUTAS_COMUNS_RUN !== "undefined" && LUTAS_COMUNS_RUN ? LUTAS_COMUNS_RUN : null;
-      var listaComum = dadoComum && dadoComum.lutas ? (dadoComum.lutas[DIFF_TO_BOSSKEY[state.settings.difficulty] || "party"] || []) : [];
+      var listaComum = dadoComum && dadoComum.lutas ? (dadoComum.lutas[DIFF_TO_BOSSKEY[ctx.settings.difficulty] || "party"] || []) : [];
       var porEtapa = {};
       listaComum.slice().sort(function (a, b) { return b.peso - a.peso || (a.nome < b.nome ? -1 : 1); }).forEach(function (c) {
         porEtapa[c.etapa] = (porEtapa[c.etapa] || 0) + 1;
         if (porEtapa[c.etapa] > PIPELINE_COMUNS_POR_ETAPA) return;
-        var tm = dadoComum.times[c.nome] || {}, tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party", pt = (tm[tier] && tm[tier].length ? tm[tier] : tm.party) || [];
+        var tm = dadoComum.times[c.nome] || {}, tier = DIFF_TO_BOSSKEY[ctx.settings.difficulty] || "party", pt = (tm[tier] && tm[tier].length ? tm[tier] : tm.party) || [];
         for (var k = pt.length - 1; k >= 0; k--) {
           var fc = foeDeDuelo(pt[k], nivel, null);
           if (fc) { saida.foes.push(fc); saida.pesosComuns.push(c.peso); return; }
@@ -115,7 +116,7 @@
       if (!boss) { saida.invalido = true; saida.aviso = "chefão não encontrado: " + (typeof alvo.chefao === "string" ? alvo.chefao : "sem nome"); return saida; }
     } else if (!alvo) {
       // Decisão do usuário (14/10): sem alvo, o próximo LÍDER DE GINÁSIO da Etapa (mapa GYM_LEADER_MILESTONE).
-      boss = getRemainingBossEntries().filter(function (b) { return b.cat === "Lider de Ginasio"; })[0] || null;
+      boss = getRemainingBossEntries(ctx).filter(function (b) { return b.cat === "Lider de Ginasio"; })[0] || null;
       origem = "proximo-lider";
       if (!boss) { saida.aviso = "sem chefão adiante"; return saida; }
     } else { saida.invalido = true; saida.aviso = "alvo inválido: use { foe } ou { chefao, indice }"; return saida; }
@@ -485,19 +486,19 @@
   }
   // Item "por evolução pendente": Eviolite, se o jogo o dá até a Etapa atual (primeiroLugarDoItem) e a espécie ainda evolui (evoluiAinda: a
   // mesma regra de validateAiBuild, sem Mega).
-  function pipelineEvioliteServe(sp) {
+  function pipelineEvioliteServe(sp, ctx) {
     if (ITEMS.indexOf("Eviolite") === -1 || !evioliteFunciona(sp)) return false;
     // Eviolite sem local com etapa no jogo (etapaDoItem null) não conta como disponível aqui.
-    return etapaDoItem("Eviolite") !== null && liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: "Eviolite" });
+    return etapaDoItem("Eviolite") !== null && liberadoNaRun(ctx.settings.milestone, ctx.cap, { item: "Eviolite" });
   }
-  function pipelineValidarRascunho(sp, g) {
+  function pipelineValidarRascunho(sp, g, ctx) {
     var bruto = { ability: g.hab, nature: g.fin.nome, item: "", evs: g.fin.evs.slice(), moves: g.av.golpes.slice() };
     // Mesmo contexto da IA (contextoDeValidacao; sem opts.chefao = {}, igual ao que era) - TK-18, 10.5.
-    var ctx = contextoDeValidacao(sp, null), recusa = {}, v = validateAiBuild(sp, bruto, recusa, ctx);
+    var cv = Object.assign({}, ctx, contextoDeValidacao(sp, null)), recusa = {}, v = validateAiBuild(sp, bruto, recusa, cv);
     if (v) {
       // Espécie que ainda evolui leva Eviolite (o motor já usa Eviolite nesses casos, itemDoSetDuelo). Item recusado (limite do time) = fica sem item.
-      if (!v.item && pipelineEvioliteServe(sp)) {
-        var comEv = validateAiBuild(sp, Object.assign({}, bruto, { item: "Eviolite" }), {}, ctx);
+      if (!v.item && pipelineEvioliteServe(sp, ctx)) {
+        var comEv = validateAiBuild(sp, Object.assign({}, bruto, { item: "Eviolite" }), {}, cv);
         if (comEv && comEv.item === "Eviolite") return { v: comEv, itemDeRascunho: "Eviolite", tipoDoItem: "eviolite" };
       }
       return { v: v, itemDeRascunho: null };
@@ -508,7 +509,7 @@
     if (!item) return { v: null, motivo: recusa.txt };
     bruto.item = item;
     var recusa2 = {};
-    v = validateAiBuild(sp, bruto, recusa2, ctx);
+    v = validateAiBuild(sp, bruto, recusa2, cv);
     if (!v) return { v: null, motivo: recusa2.txt };
     return { v: v, itemDeRascunho: v.item === item ? item : null, tipoDoItem: tipo, pedras: regra ? regra.stones.slice() : [] };
   }
@@ -516,10 +517,12 @@
   // ---- 1. do Pokémon para a build (caso A) ----
   // Devolve { alvo, candidatos, aviso, avisos }. `aviso` é o aviso principal (ou null); `avisos` traz todos.
   function candidatosDeBuild(sp, opts) {
-    var alvo = pipelineResolverAlvo(opts && opts.alvo);
-    return pipelineCandidatos(sp, alvo);
+    var ctx = (opts && opts.ctx) || ctxDoState();
+    var alvo = pipelineResolverAlvo(opts && opts.alvo, ctx);
+    return pipelineCandidatos(sp, alvo, ctx);
   }
-  function pipelineCandidatos(spEntrada, alvo) {
+  function pipelineCandidatos(spEntrada, alvo, ctx) {
+    ctx = ctx || ctxDoState();
     var saida = { alvo: alvo.info, candidatos: [], aviso: alvo.aviso || null, avisos: [] };
     if (alvo.aviso) saida.avisos.push(alvo.aviso);
     if (alvo.invalido) return saida; // pediram um alvo que não existe: nada de candidatos às cegas
@@ -527,8 +530,8 @@
     var sp = pipelineEspecie(spEntrada);
     if (!sp) { saida.aviso = saida.aviso || "espécie não encontrada"; saida.avisos.push("espécie não encontrada"); return saida; }
     try {
-      var cap = getCurrentCap();
-      var liberados = availableMovesFor(sp).names.filter(function (n) { return GOLPES_SEM_TIPO_DEFINIDO.indexOf(n) === -1; });
+      var cap = ctx.cap;
+      var liberados = availableMovesFor(sp, ctx).names.filter(function (n) { return GOLPES_SEM_TIPO_DEFINIDO.indexOf(n) === -1; });
       var kit = golpesDeDueloAte(sp, cap).map(function (id) { return MOVES[id][0]; })
         .filter(function (n, i, a) { return a.indexOf(n) === i && liberados.indexOf(n) !== -1 && moveRoleOf(n) !== "dupla" && GOLPES_QUE_DEPENDEM_DE_ITEM.indexOf(n) === -1 && GOLPES_QUE_FALHAM_SE_LEVAR_DANO.indexOf(n) === -1; });
       if (!kit.length) { saida.aviso = saida.aviso || sp.n + " não tem golpe de dano liberado nesta Etapa"; saida.avisos.push(sp.n + " não tem golpe de dano liberado nesta Etapa"); return saida; }
@@ -574,7 +577,7 @@
       ordenadas.forEach(function (variantes) {
         for (var vi = 0; vi < variantes.length; vi++) {
           var g = variantes[vi];
-          var r = pipelineValidarRascunho(sp, g);
+          var r = pipelineValidarRascunho(sp, g, ctx);
           if (r.v) { validos.push({ g: g, v: r.v, itemDeRascunho: r.itemDeRascunho, tipoDoItem: r.tipoDoItem, pedras: r.pedras }); return; }
           if (r.motivo && motivosDescartados.indexOf(r.motivo) === -1) motivosDescartados.push(r.motivo);
         }
@@ -638,7 +641,8 @@
   // mais dano antes. Padrão: time e caixa (as mesmas formas de batalha do botão do chefão); opts.especies troca a lista.
   function especiesQueResolvem(alvoPedido, opts) {
     opts = opts || {};
-    var alvo = pipelineResolverAlvo(alvoPedido);
+    var ctx = opts.ctx || ctxDoState();
+    var alvo = pipelineResolverAlvo(alvoPedido, ctx);
     if (!alvo.foes.length) return [];
     var lista = [], origem = {};
     if (opts.especies && opts.especies.length) {
@@ -646,7 +650,7 @@
       lista.forEach(function (s) { if (!origem[s.sname]) origem[s.sname] = "informada"; });
     } else {
       var vistosX = {};
-      [["time", state.team], ["caixa", state.box]].forEach(function (grupo) {
+      [["time", ctx.team], ["caixa", ctx.box]].forEach(function (grupo) {
         grupo[1].forEach(function (x) {
           if (vistosX[x]) return;
           vistosX[x] = true;
@@ -658,7 +662,7 @@
       // Os demais (ticket 04): as N melhores do rank que já dá para pegar na Etapa, fora o time e a caixa. Simular o dex
       // inteiro custa minutos, então a lista é cortada pelo rank antes de simular.
       if (typeof opts.demais === "number" && opts.demais > 0) {
-        var etapa = state.settings.milestone;
+        var etapa = ctx.settings.milestone;
         SPECIES.filter(function (s) {
           var rk = s && !origem[s.sname] ? rankDe(s.sname) : null;
           return rk && typeof rk.etapa === "number" && rk.etapa <= etapa && serveProMono(s);
@@ -671,7 +675,7 @@
     lista = lista.filter(function (s) { if (vistos[s.sname]) return false; vistos[s.sname] = true; return true; });
     var achados = [];
     lista.forEach(function (s) {
-      var r = pipelineCandidatos(s, alvo);
+      var r = pipelineCandidatos(s, alvo, ctx);
       var melhor = r.candidatos.filter(function (c) { return c.hitKill > 0; })[0];
       if (melhor) achados.push({ sp: s, candidato: melhor, origem: origem[s.sname] });
     });

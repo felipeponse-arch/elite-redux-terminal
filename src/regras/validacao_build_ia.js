@@ -92,7 +92,7 @@
       return "A build foi declarada Wallbreaker sem investir no ataque (máx. " + Math.max(evs[1], evs[3]) + " EVs) - wallbreaker maximiza dano. Tente gerar de novo.";
     }
     if (papel === "Pivô") {
-      var disponiveis = availableMovesFor(sp).names.filter(ehGolpeDePivo);
+      var disponiveis = availableMovesFor(sp, ctx).names.filter(ehGolpeDePivo);
       if (disponiveis.length && !moves.some(ehGolpeDePivo)) {
         return "A build foi declarada Pivô sem golpe de troca, mas esta forma tem " + disponiveis.join(", ") + ". Tente gerar de novo.";
       }
@@ -228,7 +228,7 @@
     // recebeu o mesmo filtro, então uma build por IA sugerindo um golpe só
     // aprendido num nível acima do cap atual passava direto). Mesmo
     // critério de myBuildEditorHtml: golpe de tutor nunca trava por nível.
-    var validMoves = availableMovesFor(sp).names;
+    var validMoves = availableMovesFor(sp, ctx).names;
     if (!Array.isArray(raw.moves) || raw.moves.length !== 4) return rejeita("A build precisa de exatamente 4 golpes.", "golpes-invalidos");
     for (var i = 0; i < 4; i++) {
       if (validMoves.indexOf(raw.moves[i]) === -1) {
@@ -347,7 +347,7 @@
     // Só pra quem está NO time: build feita na Dex pra um Pokémon da caixa não é
     // barrada pelos itens do time (achado no teste da mega permanente).
     if (item && !stoneRule && ctx.team.indexOf(sp.x) !== -1) {
-      var comEsteItem = itensEmUsoComQuem(sp.x)[item] || [];
+      var comEsteItem = itensEmUsoComQuem(sp.x, ctx)[item] || [];
       if (itemEsgotadoNoTime(comEsteItem)) {
         return rejeita(item + " já está com " + comEsteItem.join(" e ") + " - no time vale no máximo " + MAX_MESMO_ITEM_NO_TIME +
           " com o mesmo item. Escolha outro item que reforce o papel deste Pokémon. Tente gerar de novo.", "item-esgotado");
@@ -460,7 +460,7 @@
     // "100% ofensiva" e escapando da checagem de Roost-em-build-ofensiva -
     // a classificação tem que julgar a INTENÇÃO original da IA, só o número
     // final salvo é otimizado).
-    evs = trimAndReallocateEvs(sp, evs, nivelDeCalculo(), raw.nature, item);
+    evs = trimAndReallocateEvs(sp, evs, ctx.cap || NIVEL_DE_CALCULO_SEM_CAP, raw.nature, item);
     // Trick Room (2026-09-28): quem é mais lento age primeiro, então a build
     // lenta de propósito (0 EV em Velocidade, nature que reduz Velocidade)
     // também zera o IV - o jogo tem o item pra isso, Iron Pill: "Sets Speed
