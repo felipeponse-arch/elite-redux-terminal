@@ -26,6 +26,7 @@ import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 import { melhoresPelaSoma, notaDosEixos, escolherPelaNotaFinal } from "./rank_escolha.mjs";
 import { lutasComunsDaRun } from "./estudo/lutas_comuns.mjs";
 import { percentis, tierDe, unidadeComItemLiberado, camposHerdados } from "./rank_comum.mjs";
+import { carimbarDerivado } from "./carimbo_derivado.mjs";
 import { notasComFatia, comunsMaisPerigosas, COMUNS_POR_ETAPA } from "./rank_fatia.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -295,6 +296,8 @@ if (process.argv.includes("--gravar")) {
     novo[s] = e;
   }
   writeFileSync(join(RAIZ, "data", "species_rank.json"), JSON.stringify(novo));
+  carimbarDerivado("species_rank.json");
   if (!SO_CHEFOES) writeFileSync(join(RAIZ, "data", "lutas_comuns_run.json"), JSON.stringify(lutasComunsParaOMeuTime(extraPorNome)));
+  if (!SO_CHEFOES) carimbarDerivado("lutas_comuns_run.json");
   console.log("gravado: data/species_rank.json (rank v2 por dificuldade; fora do rank: " + Object.values(novo).filter((x) => x.foraDoRank).length + ")");
 }

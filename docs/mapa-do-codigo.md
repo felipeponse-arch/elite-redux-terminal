@@ -117,11 +117,13 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **atualizar_de_config.mjs** - Atualiza data/gameData.json a partir do er-config (código/config do jogo é a verdade).
   saida:10, desescapar:14, parse:23, ler:41, enumMap:42, idx:49, porId:54
 - **build.mjs** - Montagem do artifact_final.html em Node (fase 8 da refatoração, 2026-09-24).
-  ler:21, trocarTudo:24, falhar:25
+  ler:22, trocarTudo:25, falhar:26
 - **cache_sabotagem.mjs** - Cache de "arquivo lembrado" da sabotagem (tests/.sabotagem_cache.json, fora do git).
   mesclarCache:9, ler:18, gravarCacheMesclando:26
 - **calcular_rank_v2.mjs** - Rank v2 (modelo aprovado pelo usuário em 2026-10-02, depois da pesquisa de método):
-  capDe:39, foe:43, ARG:61, etapaDe:80, br:83, avaliar:90, notas:202, lutasComunsParaOMeuTime:238
+  capDe:40, foe:44, ARG:62, etapaDe:81, br:84, avaliar:91, notas:203, lutasComunsParaOMeuTime:239
+- **carimbo_derivado.mjs** - TK-24: grava em data/carimbo_derivados.json de que versão do jogo/config cada derivado foi gerado.
+  carimbarDerivado:4, avisosDeFrescor:15, pendentesSemCarimbo:22, problemasDeCarimbo:27
 - **categorias_pela_config.mjs** - Categorias de golpe (soco, mordida, corte...) pelas FLAGS do jogo, não pelo texto da NextDex.
   lerGolpesDaConfig:37, recuoDoEfeito:65, categoriasDasFlags:71
 - **checar_css.mjs** - Travas dos tokens de CSS (fase 7 da refatoração, 2026-09-24). Roda no
@@ -261,6 +263,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **campo_fonte_unica.test.mjs** - TK-16 (campo, fase 1): src/regras/campo.js é a fonte única de clima, terreno, telas, hazards e durações de campo.
 - **campo_invertido_no_plano.test.mjs** - Achado do vídeo do usuário (02/10): o plano contra a Tate & Liza 1 chamava Axe Kick (Dark) de
 - **campo_no_duelo.test.mjs** - Campo no duelo (2026-09-29): terreno das habilidades (Grassy/Electric/Psychic/
+- **carimbo_derivados.test.mjs** - TK-24: todo derivado gerado (rank, lutas comuns, chefões) deixa carimbo de versão/frescor em
 - **categorias_de_golpe.test.mjs** - Categoria de golpe (soco, mordida, corte...) do NextDex (2026-09-29): antes
 - **categorias_de_golpe_da_config.test.mjs** - Ticket calibracao-2026-10-15/01 (15/10/2026): as categorias de golpe (soco, mordida, corte, martelo, pulso, chifre,
 - **checar_encoding.test.mjs** - A trava de codificação (scripts/checar_encoding.mjs) precisa pegar exatamente
