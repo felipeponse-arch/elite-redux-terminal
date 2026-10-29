@@ -1,6 +1,7 @@
 // Porte de scripts/extract_bosses.ps1 e scripts/extract_boss_builds.ps1 (ticket versao-nova/05). Gera data/bosses.json e data/boss_reference_builds.json.
 // Uso: node scripts/extracao/chefoes.mjs <gameData.json> <dex_compact.json> <bosses.json saída> <boss_reference_builds.json saída>
 import { readFileSync, writeFileSync } from "node:fs";
+import { carimbarDerivado } from "../carimbo_derivado.mjs";
 
 const CATEGORIAS = { 34: "Lider de Ginasio", 33: "Alto Comando", 38: "Campeao", 11: "Equipe Aqua", 9: "Equipe Aqua (Admin)", 57: "Equipe Magma", 16: "Equipe Magma (Admin)",
   62: "Superchefao (Monotype)", 49: "Superchefao", 46: "Superchefao", 26: "Frontier Brain" };
@@ -71,6 +72,7 @@ if ((process.argv[1] || "").endsWith("chefoes.mjs")) {
   if (!saidaBuilds) { console.error("uso: node scripts/extracao/chefoes.mjs <gameData.json> <dex_compact.json> <bosses.json> <boss_reference_builds.json>"); process.exit(2); }
   const bosses = extrairChefoes(JSON.parse(readFileSync(gd, "utf8")));
   writeFileSync(saidaBosses, JSON.stringify(bosses));
+  carimbarDerivado("bosses.json");
   const refs = extrairBuildsDeReferencia(bosses, JSON.parse(readFileSync(dexArq, "utf8")));
   writeFileSync(saidaBuilds, JSON.stringify(refs));
   console.log("chefoes.mjs: OK (" + bosses.length + " chefões, " + Object.keys(refs).length + " espécies com build de referência)");

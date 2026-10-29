@@ -4695,4 +4695,11 @@ export const MUTACOES = [
     de: "7: \"Etapa 7 (Tate & Liza)\"",
     para: "7: \"7ª insígnia (Tate & Liza)\"",
   },
+  {
+    id: "tk24-rank-sem-carimbo",
+    descricao: "o gerador do rank deixa de carimbar species_rank.json com a versão dos dados",
+    arquivo: "calcular_rank_v2.mjs",
+    de: "carimbarDerivado(\"species_rank.json\");",
+    para: "",
+  },
 ];
