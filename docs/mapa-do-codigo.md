@@ -22,7 +22,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
   dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:187
 - **duelo.js** - Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
-  nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:79, acertosDoGolpeDuelo:80, golpeDeRecargaDuelo:87, golpeUtilNoDuelo:101, categoriaNoDuelo:113, temContatoDuelo:119, golpesDeRecargaAte:122, golpesDeDueloAte:129, golpesDeStatusAte:135, tipoDoTextoDuelo:156, fraseFixaDuelo:161, categoriasDoTextoDuelo:178, categoriasDoGolpeDuelo:181, modoHellDuelo:206, statusDoTrechoDuelo:251, presencaDoStatus:258, todosOsStatusDuelo:264, lerStatusDaFraseDuelo:269, chanceDoEstagioCrit:319, lerCriticoDaFraseDuelo:320, lerCondicaoDaFraseDuelo:346, estagioDoTexto:375, multDoEstagio:376, lerEstagioDaFraseDuelo:378, poderDoGolpeDuelo:434, lerExtrasDaFraseDuelo:436, lerCuraDaFraseDuelo:490, filtroDoTextoDuelo:523 (+149)
+  nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:85, acertosDoGolpeDuelo:86, golpeDeRecargaDuelo:93, golpeUtilNoDuelo:107, categoriaNoDuelo:119, temContatoDuelo:125, golpesDeRecargaAte:128, golpesDeDueloAte:135, golpesDeStatusAte:141, tipoDoTextoDuelo:162, fraseFixaDuelo:167, categoriasDoTextoDuelo:184, categoriasDoGolpeDuelo:187, modoHellDuelo:212, statusDoTrechoDuelo:257, presencaDoStatus:264, todosOsStatusDuelo:270, lerStatusDaFraseDuelo:275, chanceDoEstagioCrit:325, lerCriticoDaFraseDuelo:326, lerCondicaoDaFraseDuelo:352, estagioDoTexto:381, multDoEstagio:382, lerEstagioDaFraseDuelo:384, poderDoGolpeDuelo:440, lerExtrasDaFraseDuelo:442, lerCuraDaFraseDuelo:496, filtroDoTextoDuelo:529 (+149)
 - **escolha_ia_candidatos.js** - A IA ESCOLHE ENTRE os candidatos do pipeline de build (passo 4 de docs/pipeline_de_build.md; ticket 03 de
   textoDeCandidatoParaIA:20, blocoDeCandidatosParaIA:33, regrasDaEscolhaIA:40, linhaDePapelNaturalIA:47, linhaDeFraquezasDoTimeIA:51, blocoTimeCurtoIA:55, linhaDoChefaoPorEspecieIA:68, blocoPlanoCurtoIA:72, objetivoDaEscolhaIA:80, montarPromptEscolhaDeBuild:86, montarPromptEscolhaDoTime:103, indiceDaEscolhaIA:126, respostaForaDoCandidato:132, fecharCandidatoDaEscolha:142, textoDaRazaoDaEscolha:150, juntarRazaoNaBuild:158, escolherCandidatoDaIa:168, candidatosParaAEscolhaDaIa:201
 - **evolucao.js** - Builds salvas por espécie, registro "O que o app fez sozinho" e o que acontece
@@ -219,7 +219,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   Get-FlagMatches:56, Get-UnmappedHit:66, Get-TypeMatches:73
 - **compute_condition_move_synergy.ps1** - (sem comentário de topo)
 - **compute_move_effects.ps1** - (sem comentário de topo)
-  Get-MoveEffects:85
+  Get-MoveEffects:87
 - **compute_move_roles.ps1** - (sem comentário de topo)
 - **compute_species_rank.ps1** - (sem comentário de topo)
   Get-AbilityScore:164, Get-BossDefenseScore:211, Get-MovepoolScore:237, Get-TypeScore:274, Get-Stage:337, Get-PercentileRanks:387, Get-Tier:412, Compute-Tiers:430
@@ -311,6 +311,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **golpe_chave_imposto.test.mjs** - Relato da Tate & Liza (03/10): o plano dizia Dragon Claw e a build da IA tinha Dragon Pulse. Agora a validação
 - **golpe_duplo.test.mjs** - Habilidades de golpe duplo (10/10/2026). O usuário testou no jogo: o Mega Punch do Ledian (Raging Boxer, Iron
 - **golpes_de_status.test.mjs** - Golpes de status no duelo (2026-09-29, decisão do usuário: "com regras
+- **golpes_fonte_unica.test.mjs** - TK-15 (29/10/2026): golpes - acertos com fonte, vocabulário cat/categoria/ef, e o caminho de move_effects.json.
 - **golpes_novos_2654.test.mjs** - Ticket versao-nova/09 (15/10/2026): os 9 golpes novos do upcoming (er-config d1a9a4c, MoveList.textproto) entram no app, com as espécies ...
 - **gravacao_build_ia.test.mjs** - Caminho "resposta da IA -> build validada -> o que gravar" (src/regras/gravacao_build_ia.js e
 - **guarda_lutas_comuns.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).

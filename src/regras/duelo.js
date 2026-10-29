@@ -59,9 +59,15 @@
   // média. Exceções provadas pelo texto em inglês do NextDex 2.65beta, onde o efeito do dado
   // é outro (Poison Hit, Drench Hit...) mas o golpe acerta mais de uma vez:
   var ACERTOS_POR_EFEITO_DUELO = { "Multi Hit": 3, "Double Hit": 2, "Triple Kick": 3, "Ten Hits": 6 };
-  var ACERTOS_PELO_TEXTO_DUELO = { "Twineedle": 2, "Cross Poison": 2, "Double Iron Bash": 2, "Rapid River": 2,
-    "Chiller": 3, "Surging Strikes": 3, "Sparkling Barrage": 3,
-    "Double Shock": 2 }; // hit_count: 2 na er-config (o efeito do dado é Burn Up; o texto "two strong shocks" não casava)
+  // Vocabulário do motor (TK-15 D3.4): "cat" = divisão do golpe, "F" físico / "E" especial / "S" status (g.cat, a.cat do aoGolpear);
+  // "categoria" = grupo por palavra do golpe (mordida, corte, soco...; filtro.categoria, bonusCategoria); "ef" = efeito do dado do golpe
+  // (MOVE_CATEGORIAS[id].ef, MOVES[id][11]). Um nome, um sentido.
+  // Golpes com hit_count > 1 na er-config (MoveList.textproto:734 Twineedle, :7347 Cross Poison, :11438 Double Iron Bash, :15041 Double Shock,
+  // :16057 Rapid River, :17335 Chiller); o efeito do dado deles é outro (Poison Hit, Burn Up...). Espelha data/golpes_flags_config.json.acertos.
+  var ACERTOS_DA_CONFIG_DUELO = { "Twineedle": 2, "Cross Poison": 2, "Double Iron Bash": 2, "Rapid River": 2, "Chiller": 3, "Double Shock": 2 };
+  // SEM fonte confirmada no código do jogo (decisão do usuário, 29/10/2026, TK-15 D3.5): a er-config não traz hit_count destes; ficam
+  // por nome, pela descrição do dado, até o battle_moves.h sair. Quando a config ou o battle_moves.h os trouxer, saem daqui.
+  var ACERTOS_SEM_FONTE_DUELO = { "Surging Strikes": 3, "Sparkling Barrage": 3 };
   // Dupla contagem (ticket versao-01, 15/10/2026): o código do jogo multiplica o bônus de golpe de uma habilidade UMA vez
   // (abilities.cc, `onModifyDamage`). Se o texto da habilidade já virou bônus no motor (tipo, categoria, flag do golpe ou contato), a
   // "sinergia por golpe" da espécie (species_ability_synergy.json -> bonusGolpes, a aproximação antiga) não soma de novo.
@@ -80,7 +86,7 @@
   function acertosDoGolpeDuelo(id) {
     var m = MOVES[id];
     if (!m) return 1;
-    return ACERTOS_PELO_TEXTO_DUELO[m[0]] || ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;
+    return ACERTOS_DA_CONFIG_DUELO[m[0]] || ACERTOS_SEM_FONTE_DUELO[m[0]] || ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;
   }
   // Recarga pelo EFEITO do dado, não pela tradução PT (TK-06; decisão 7 do usuário, 28/10). Só Hyper Beam e Giga Impact são
   // EFFECT_RECHARGE (MOVE_EFFECT_RECHARGE, battle_script_commands.c:2828): o x0,5 (x0,75 com Rampage) é deles.
@@ -295,9 +301,9 @@
       var cada = porTipo ? p : p / todos.length; // "Burn or Poison": a chance se divide
       var ignoraGenero = /ignoring gender/i.test(f);
       var filtro = {};
-      if (/Biting moves/i.test(f)) filtro.cat = "mordida";
-      else if (/Slashing moves|Keen Edge moves|Sharpness moves/i.test(f)) filtro.cat = "corte";
-      else if (/with punches|punching moves/i.test(f)) filtro.cat = "soco";
+      if (/Biting moves/i.test(f)) filtro.categoria = "mordida";
+      else if (/Slashing moves|Keen Edge moves|Sharpness moves/i.test(f)) filtro.categoria = "corte";
+      else if (/with punches|punching moves/i.test(f)) filtro.categoria = "soco";
       else if (/Sound(?:-based)? moves/i.test(f)) filtro.som = true;
       else if (/Contact moves|with contact moves/i.test(f)) filtro.contato = true;
       else if ((x = f.match(/^(\w+) moves have/i)) && tipoDoTextoDuelo(x[1])) filtro.tipo = tipoDoTextoDuelo(x[1]);
@@ -470,7 +476,7 @@
     // "Sound moves cause bleeding" (Piercing Solo): status certo, sem chance.
     if ((x = f.match(/^(Sound|Contact|Biting|Slashing|Punching) moves cause (\w+)/i))) {
       var sts = statusDoTrechoDuelo(x[2]).filter(function (s) { return s !== "sono"; });
-      var filtro = /sound/i.test(x[1]) ? { som: true } : /contact/i.test(x[1]) ? { contato: true } : { cat: categoriasDoTextoDuelo(x[1])[0] };
+      var filtro = /sound/i.test(x[1]) ? { som: true } : /contact/i.test(x[1]) ? { contato: true } : { categoria: categoriasDoTextoDuelo(x[1])[0] };
       if (sts.length) ef.statusAtaque.push({ st: sts, pContato: 1, pOutro: 1, filtro: filtro, porTipo: false, ignoraGenero: false });
     }
     // Status encadeado (Poison Puppeteer, Entrance).
@@ -528,7 +534,7 @@
     var tp = tipoDoTextoDuelo(palavra);
     if (tp) return { tipo: tp };
     var c = categoriasDoTextoDuelo(palavra);
-    return c.length ? { cat: c[0] } : null;
+    return c.length ? { categoria: c[0] } : null;
   }
   function empurraStatusDuelo(ef, lista, sts, p, filtro, pOutro) {
     if (sts.length && filtro) lista.push({ st: sts, pContato: p / sts.length, pOutro: (pOutro === undefined ? p : pOutro) / sts.length, filtro: filtro, porTipo: false, ignoraGenero: false });
@@ -1209,7 +1215,7 @@
     }
     u.ef.statusAtaque.forEach(function (a) {
       var fl = a.filtro;
-      if (fl.cat && cats.indexOf(fl.cat) === -1) return;
+      if (fl.categoria && cats.indexOf(fl.categoria) === -1) return;
       if (fl.som && !g.som) return;
       if (fl.contato && !g.contato) return;
       if (fl.tipo && fl.tipo !== g.tipo) return;
@@ -1287,7 +1293,7 @@
     Object.keys(ef.prioCheioCategoria).concat(Object.keys(ef.prioPrimeiroCategoria)).forEach(function (cat) { add(cat, "prioridade no primeiro golpe"); });
     Object.keys(ef.categoriaEspecial).forEach(function (cat) { add(cat, "golpe especial"); });
     Object.keys(ef.categoriaNaSpDef).forEach(function (cat) { add(cat, "alvo na Defesa Especial"); });
-    ef.statusAtaque.forEach(function (a) { add(a.filtro && a.filtro.cat, motivoDoStatusSinergia(a)); });
+    ef.statusAtaque.forEach(function (a) { add(a.filtro && a.filtro.categoria, motivoDoStatusSinergia(a)); });
     Object.keys(porCat).forEach(function (cat) { porCat[cat] = porCat[cat].filter(function (m, i, a) { return a.indexOf(m) === i; }); });
     return porCat;
   }
@@ -1723,14 +1729,14 @@
       // False Swipe/Hold Back (120 de poder neste hack) deixam o alvo com 1 HP: numa
       // luta por nocaute não fecham nada (revisão de 2026-09-30 - o False Swipe
       // aparecia entre os golpes mais fortes do Garchomp).
-      var cat = typeof MOVE_CATEGORIAS !== "undefined" ? MOVE_CATEGORIAS[id] : null;
-      if (cat && cat.ef === "False Swipe") return false;
+      var dadoDoGolpe = typeof MOVE_CATEGORIAS !== "undefined" ? MOVE_CATEGORIAS[id] : null;
+      if (dadoDoGolpe && dadoDoGolpe.ef === "False Swipe") return false;
       // Grupo do Fake Out não carrega - só vale no 1º turno (regra própria em danoNoDuelo).
       // O "Só funciona no primeiro turno" da tradução do First Impression caía no filtro de carga.
-      if (cat && cat.ef === "Fake Out") return true;
+      if (dadoDoGolpe && dadoDoGolpe.ef === "Fake Out") return true;
       // Electro Shot (ticket 19; battle_scripts_1.s BattleScript_EffectElectroShot): carrega um turno subindo
       // +1 de Sp. Atk; na chuva dispara na hora. Accelerate e Power Herb também (twoturnmoveacceleratecheck).
-      if (cat && cat.ef === "Electro Shot") return clima === "chuva" || u.ef.cargaInstantanea || !!(u.it && u.it.cargaUmaVez);
+      if (dadoDoGolpe && dadoDoGolpe.ef === "Electro Shot") return clima === "chuva" || u.ef.cargaInstantanea || !!(u.it && u.it.cargaUmaVez);
       // Recarga não é carga: Hyper Beam e parecidos ficam (com a penalidade de recarga em danoNoDuelo).
       // Golpe de dois turnos: pelo EFEITO do dado (TK-06), não pela tradução PT.
       var efeito = MOVES[id][11];
