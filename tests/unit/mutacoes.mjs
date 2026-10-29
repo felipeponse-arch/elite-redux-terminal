@@ -1195,7 +1195,7 @@ export const MUTACOES = [
     id: "duelo-terreno-sem-reforco",
     descricao: "o terreno armado pela habilidade deixa de reforçar o tipo",
     arquivo: "duelo.js",
-    de: "if (terreno && TIPO_DO_TERRENO_DUELO[terreno] === g.tipo && terreno !== \"nevoa\" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;",
+    de: "if (terreno && TIPO_DO_TERRENO_DUELO[terreno] === g.tipo && terreno !== \"nevoento\" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;",
     para: "",
   },
   {
@@ -3523,7 +3523,7 @@ export const MUTACOES = [
     descricao: "o Misty Terrain volta a cortar pela metade o Dragon contra alvo no chão (o código do jogo não tem isso)",
     arquivo: "duelo.js",
     de: "// (Misty Terrain não corta Dragon: battle_util.c:7088-7112 só dá o x1,3 do tipo do terreno. O x0,5 que ficava aqui era só do motor.)",
-    para: "if (terreno === \"nevoa\" && g.tipo === \"Dragon\" && aterradoDuelo(def)) noCampo *= 0.5;",
+    para: "if (terreno === \"nevoento\" && g.tipo === \"Dragon\" && aterradoDuelo(def)) noCampo *= 0.5;",
   },
   {
     id: "campo-nevoa-psychic-volta",
@@ -3807,7 +3807,7 @@ export const MUTACOES = [
     id: "versao-lawnmower-sempre-def",
     descricao: "o Lawnmower sobe sempre a Def, nunca a Sp. Def",
     arquivo: "duelo.js",
-    de: "function estagioDoLawnmowerDuelo(terreno) { return terreno === \"toxico\" || terreno === \"psiquico\" || terreno === \"nevoa\" ? \"spd\" : \"def\"; }",
+    de: "function estagioDoLawnmowerDuelo(terreno) { return terreno === \"toxico\" || terreno === \"psiquico\" || terreno === \"nevoento\" ? \"spd\" : \"def\"; }",
     para: "function estagioDoLawnmowerDuelo(terreno) { return \"def\"; }",
   },
   {
@@ -4855,6 +4855,55 @@ export const MUTACOES = [
     arquivo: "prompts_ia.js",
     de: '"Technician (golpe de " + TECHNICIAN_LIMITE + " de poder',
     para: '"Technician (golpe de 50 de poder',
+  },
+  {
+    id: "tk33a-hell-insignia-do-nivel-errada",
+    descricao: "TK-33a: a insígnia que dá +5 níveis no Hell (chefoes.js) vira a 4ª em vez da 3ª",
+    arquivo: "chefoes.js",
+    de: "HELL_NIVEIS_EXTRAS_A_PARTIR_DA_INSIGNIA = 3;",
+    para: "HELL_NIVEIS_EXTRAS_A_PARTIR_DA_INSIGNIA = 4;",
+  },
+  {
+    id: "tk33a-hell-iv-literal-no-duelo",
+    descricao: "TK-33a: o IV 0 do Hell volta a ter a insígnia escrita à mão no duelo.js",
+    arquivo: "duelo.js",
+    de: "state.settings.milestone >= HELL_IV_ZERO_A_PARTIR_DA_INSIGNIA",
+    para: "state.settings.milestone >= 5",
+  },
+  {
+    id: "tk33a-hazard-teia-camadas-erradas",
+    descricao: "TK-33a: o lado novo nasce de CAMADAS_DE_HAZARD; a teia passa a ter 2 camadas",
+    arquivo: "campo.js",
+    de: "teia: 1, espinhoVerde: 1",
+    para: "teia: 2, espinhoVerde: 1",
+  },
+  {
+    id: "tk33a-lista-de-climas-a-mao",
+    descricao: "TK-33a: o detector sem regra volta a ter a lista de climas escrita à mão",
+    arquivo: "duelo.js",
+    de: "&& !CLIMAS_DO_CAMPO.some(",
+    para: "&& ![\"chuva\", \"sol\", \"areia\", \"granizo\", \"nevoa\"].some(",
+  },
+  {
+    id: "tk33a-alias-terreno-volta",
+    descricao: "TK-33a: o alias de migração TERRENO_DO_TEXTO_DUELO volta ao duelo.js",
+    arquivo: "duelo.js",
+    de: "var REFORCO_DO_TERRENO_DUELO = 1.3;",
+    para: "var TERRENO_DO_TEXTO_DUELO = TERRENO_DO_TEXTO; var REFORCO_DO_TERRENO_DUELO = 1.3;",
+  },
+  {
+    id: "tk33a-terreno-nevoa-colide-com-clima",
+    descricao: "TK-33a: o terreno Misty volta a usar o mesmo id do clima Eerie Fog (nevoa)",
+    arquivo: "campo.js",
+    de: "misty: \"nevoento\"",
+    para: "misty: \"nevoa\"",
+  },
+  {
+    id: "tk33a-rks-system-sem-stab-em-todos",
+    descricao: "TK-33a: o RKS System perde o STAB em todos os golpes (omniStab do jogo)",
+    arquivo: "duelo.js",
+    de: "before use|Also has Protean/i.test(f)) ef.stabTodos = true;",
+    para: "before use/i.test(f)) ef.stabTodos = true;",
   },
 ];
 

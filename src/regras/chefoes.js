@@ -456,7 +456,11 @@
   // insígnia (FLAG_BADGE03_GET, include/constants/pokemon_config.h). A tabela de habilidades extras do código público só cobre
   // até o Wattson; os líderes seguintes, a Elite 4 e o campeão não estão nela (seus `hellSkills` ficam nos dados de treinador,
   // que o repositório público não traz) - por isso o app só mostra o que o código confirma.
-  var HELL_NIVEIS_EXTRAS = 5, HELL_NIVEIS_EXTRAS_A_PARTIR_DA_INSIGNIA = 3;
+  var HELL_NIVEIS_EXTRAS = 5;
+  var HELL_NIVEIS_EXTRAS_A_PARTIR_DA_INSIGNIA = 3;
+  // Outros limiares de insígnia do Hell que o motor usa (duelo.js): dano x0,9 do inimigo a partir da 2ª; IV do jogador 0 a partir da 5ª.
+  var HELL_DANO_EXTRA_A_PARTIR_DA_INSIGNIA = 2;
+  var HELL_IV_ZERO_A_PARTIR_DA_INSIGNIA = 5;
   var HELL_HABILIDADES_EXTRAS_DO_CHEFAO = {
     "Roxanne 1": ["Pressure", "Shed Skin", "Self Sufficient"],
     "Wattson 1": ["Surge Surfer"]

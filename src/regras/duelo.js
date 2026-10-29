@@ -623,7 +623,7 @@
     if (/Heal 1\/4 of max HP whenever below 1\/2/i.test(f)) ef.reviveHP = Math.max(ef.reviveHP, 0.25);
     if (/Changes type to a resist or an immunity before getting hit/i.test(f)) ef.sempreResiste = 1;
     if ((x = f.match(/Resists all attacks for (\w+) turns on first entry/i))) ef.sempreResiste = NUM_DO_TEXTO_DUELO[x[1].toLowerCase()] || 3;
-    if (/Changes type depending on the move it's about to use|changes its type to the move's type|Changes type to move's type before use/i.test(f)) ef.stabTodos = true;
+    if (/Changes type depending on the move it's about to use|changes its type to the move's type|Changes type to move's type before use|Also has Protean/i.test(f)) ef.stabTodos = true; // RKS System: omniStab (abilities.cc:3111-3126, Protean sem a limitação de uma vez; STAB x2 vem do Adaptability)
     // Redução de dano geral.
     if ((x = f.match(/Takes (\d+)% reduced damage/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
     if ((x = f.match(/Reduces damage taken by (\d+)%, but lowers speed by (\d+)%/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.speMult *= 1 - parseInt(x[2], 10) / 100; }
@@ -769,8 +769,7 @@
   // status. O quanto fortalece o dado não diz: 1,3x, o valor atual da série. Misty
   // também corta Dragon pela metade em quem está no chão (série). Trick Room,
   // Tailwind e Inverse Room das habilidades duram o que o texto diz.
-  var TERRENO_DO_TEXTO_DUELO = TERRENO_DO_TEXTO; // tabelas únicas em campo.js (TK-16)
-  var TIPO_DO_TERRENO_DUELO = TIPO_DO_TERRENO;
+    var TIPO_DO_TERRENO_DUELO = TIPO_DO_TERRENO;
   var REFORCO_DO_TERRENO_DUELO = 1.3;
   // Multiplicadores de habilidade (er-repo f34fc2b, abilities.cc: SERENE_GRACE :861, TECHNICIAN :1595, SHEER_FORCE :1851).
   // O prompt da IA (prompts_ia.js) lê daqui; o motor lê Technician e Sheer Force do texto do jogo, e o teste confere que batem.
@@ -783,7 +782,7 @@
   function lerCampoDaFraseDuelo(f, ef) {
     var x;
     if ((x = f.match(/Casts (Electric|Grassy|Psychic|Misty) Terrain on entry|When hit, sets? up (Electric|Grassy|Psychic|Misty) Terrain|Sets (Electric|Grassy|Psychic|Misty) Terrain when hit/i))) {
-      ef.armaTerreno = TERRENO_DO_TEXTO_DUELO[(x[1] || x[2] || x[3]).toLowerCase()];
+      ef.armaTerreno = TERRENO_DO_TEXTO[(x[1] || x[2] || x[3]).toLowerCase()];
     }
     if (/^Field becomes Electric/i.test(f)) ef.armaTerreno = "eletrico";
     if (/sets Toxic Terrain on entry/i.test(f)) ef.armaTerreno = "toxico"; // Toxic Surge
@@ -802,7 +801,7 @@
     if ((x = f.match(/(\d+)% more damage to (\w+)-types/i)) && tipoDoTextoDuelo(x[2])) ef.vsTipo[tipoDoTextoDuelo(x[2])] = 1 + parseInt(x[1], 10) / 100;
     if ((x = f.match(/deals ([\d.]+)x more damage to (\w+)-types/i)) && tipoDoTextoDuelo(x[2])) ef.vsTipo[tipoDoTextoDuelo(x[2])] = parseFloat(x[1]);
     // Habilidade que depende do terreno.
-    var ter = function (w) { return TERRENO_DO_TEXTO_DUELO[w.toLowerCase()]; };
+    var ter = function (w) { return TERRENO_DO_TEXTO[w.toLowerCase()]; };
     if ((x = f.match(/(Defense|SpDef) gets a ([\d.]+)x boost in (Electric|Grassy|Psychic|Misty) Terrain/i))) ef.noTerreno.push({ terreno: ter(x[3]), stat: /sp/i.test(x[1]) ? "spd" : "def", mult: parseFloat(x[2]) });
     if ((x = f.match(/If (Electric|Grassy|Psychic|Misty) Terrain is active, gets a ([\d.]+)x Speed boost/i))) ef.noTerreno.push({ terreno: ter(x[1]), stat: "spe", mult: parseFloat(x[2]) });
     if ((x = f.match(/Boosts highest stat in (Electric|Grassy|Psychic|Misty) Terrain/i))) ef.noTerreno.push({ terreno: ter(x[1]), stat: "maior", mult: 1.3 });
@@ -1247,7 +1246,7 @@
     // o Unnerve do rival barra - o sono por chance já desconta a Lum (itemAtivoDuelo
     // em "fica"), e o plano de sono usa podeDormirDuelo.
     if (s === "sono" && CAMPO_DUELO && CAMPO_DUELO.terreno === "eletrico" && aterradoDuelo(u)) return false;
-    if (CAMPO_DUELO && CAMPO_DUELO.terreno === "nevoa" && s !== "recuar" && aterradoDuelo(u)) return false; // Misty Terrain
+    if (CAMPO_DUELO && CAMPO_DUELO.terreno === "nevoento" && s !== "recuar" && aterradoDuelo(u)) return false; // Misty Terrain
     if (ignoraTipo || (s === "queimar" && quemCausa && quemCausa.queimaQualquerTipo)) return true; // Eerie Laugh (ignora o tipo); Third-Degree Burn (onCanStatusType)
     return !(STATUS_DUELO[s].imunes || []).some(function (tp) { return u.tipos.indexOf(tp) !== -1; });
   }
@@ -1417,7 +1416,7 @@
       receptor: false, ladrao: false, recuperaItem: false, semEncharcar: false, encharcaAgua: 0 };
     var nomes = ids.map(nomeHabDuelo);
     var climaProprio = {};
-    ["chuva", "sol", "areia", "granizo", "nevoa"].forEach(function (c) {
+    CLIMAS_DO_CAMPO.forEach(function (c) {
       if (nomes.some(function (n) { return habilidadeArma(n, c); })) climaProprio[c] = true;
     });
     function climaOk(palavra) {
@@ -1670,9 +1669,8 @@
     }
     var texto = textoHabDuelo(id);
     // Condicional de clima conta ligada no clima que o próprio texto pede.
-    var CLIMA = { rain: "chuva", sun: "sol", sand: "areia", sandstorm: "areia", hail: "granizo", fog: "nevoa" };
-    var c = ((texto.match(/\b(rain|rains|sun|sunny|sand|sandstorm|hail|fog)\b/i) || [])[1] || "").toLowerCase().replace(/s$|ny$/, "");
-    var ef = efeitoDasHabilidadesNoDuelo([id], "SEMREGRA_" + id, CLIMA[c] || null);
+        var c = ((texto.match(/\b(rain|rains|sun|sunny|sand|sandstorm|hail|fog)\b/i) || [])[1] || "").toLowerCase().replace(/s$|ny$/, "");
+    var ef = efeitoDasHabilidadesNoDuelo([id], "SEMREGRA_" + id, CLIMA_DO_TEXTO_DUELO[c] || null);
     var campos = Object.keys(ef).filter(function (k) { return k !== "climasProprios" && JSON.stringify(ef[k]) !== JSON.stringify(baseSemRegraDuelo[k]); });
     cacheCamposDuelo[id] = campos;
     return campos;
@@ -1684,7 +1682,7 @@
     if (id === undefined || id === null || id < 0 || !ABILITIES[id]) return false;
     var campos = camposLidosDaHabilidade(id), nome = ABILITIES[id][0];
     return campos.length === 0 && !TYPE_MOD_ABILITIES[id] && !nomesComSinergiaDuelo[nome]
-      && !["chuva", "sol", "areia", "granizo", "nevoa"].some(function (cl) { return habilidadeArma(nome, cl); });
+      && !CLIMAS_DO_CAMPO.some(function (cl) { return habilidadeArma(nome, cl); });
   }
   // Clima no campo entre os dois lados: o que cada um arma (habilidade) ou o do
   // time (u.clima). Se os dois armam climas diferentes, depende de quem entra por
@@ -1808,7 +1806,7 @@
       var porPoder = variavel ? { tecnico: u.ef.tecnico, somas: [] } : null;
       if (u.ef.tecnico && !variavel && poder <= u.ef.tecnico.limite) hab *= u.ef.tecnico.mult;
       if ((m[7] || 0) > 0) hab *= u.ef.prioMult;
-      if (reforcado && tipo === reforcado) base *= CLIMA_OFICIAL.reforcoSolChuva; // NextDex 2.65beta + código oficial: 1,5x (mono_run.js)
+      if (reforcado && tipo === reforcado) base *= CLIMA_OFICIAL.reforcoSolChuva; // código oficial (battle_util.c): 1,5x, em CLIMA_OFICIAL (campo.js)
       // Série: Water no sol e Fire na chuva saem pela metade (Catastrophe: reforçam; Nika: Water normal no sol).
       var enfraquecido = { sol: "Water", chuva: "Fire" }[climaDoDano];
       if (enfraquecido && tipo === enfraquecido && !(climaDoDano === "sol" && u.ef.aguaNoSol)) base *= u.ef.catastrofe ? CLIMA_OFICIAL.reforcoSolChuva : 0.5; // Catastrophe: o mesmo reforço do clima
@@ -2016,8 +2014,8 @@
       if (abreDef && def.ef.soSuperEf && efTipo < 2) return; // Wonder Guard
       var quebraAqui = atq.ef.quebraHabilidade || quebraDoTipo || (atq.ef.seQuebra && efTipo >= 2); // Deadly Precision
       var terreno = CAMPO_DUELO && CAMPO_DUELO.terreno, noCampo = 1, prioAqui = g.prio;
-      if (terreno && TIPO_DO_TERRENO_DUELO[terreno] === g.tipo && terreno !== "nevoa" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
-      if (terreno === "nevoa" && g.tipo === "Fairy" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
+      if (terreno && TIPO_DO_TERRENO_DUELO[terreno] === g.tipo && terreno !== "nevoento" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
+      if (terreno === "nevoento" && g.tipo === "Fairy" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
       // (Misty Terrain não corta Dragon: battle_util.c:7088-7112 só dá o x1,3 do tipo do terreno. O x0,5 que ficava aqui era só do motor.)
       // Grassy Glide: +1 de prioridade no Grassy Terrain (battle_main.c:4276-4278, só para quem está no chão).
       if (g.nome === "Grassy Glide" && terreno === "grama" && aterradoDuelo(atq)) prioAqui += 1;
@@ -2702,7 +2700,7 @@
   }
   function resultadoNoCampoDuelo(eu, foe, nivel, ini) {
     // Mimicry: o tipo vira o do terreno em campo.
-    var TIPO_MIMICRY = { eletrico: "Electric", grama: "Grass", psiquico: "Psychic", nevoa: "Fairy" };
+    var TIPO_MIMICRY = { eletrico: "Electric", grama: "Grass", psiquico: "Psychic", nevoento: "Fairy" };
     if (CAMPO_DUELO && CAMPO_DUELO.terreno) {
       if (eu.ef.mimetismo) eu = Object.assign({}, eu, { tipos: [TIPO_MIMICRY[CAMPO_DUELO.terreno]] });
       if (foe.ef.mimetismo) foe = Object.assign({}, foe, { tipos: [TIPO_MIMICRY[CAMPO_DUELO.terreno]] });
@@ -2949,9 +2947,9 @@
   }
   // Pokémon de chefão (linha de bosses.json) no nível pedido.
   // Hell (battle_util.c:7544-7551): todo golpe x0,75; quando o defensor é inimigo e o 2º badge já veio (milestone >= 2), mais x0,9.
-  function fDanoGlobalHell(def) { return 0.75 * (def.chefao && state.settings.milestone >= 2 ? 0.9 : 1); }
+  function fDanoGlobalHell(def) { return 0.75 * (def.chefao && state.settings.milestone >= HELL_DANO_EXTRA_A_PARTIR_DA_INSIGNIA ? 0.9 : 1); }
   // Hell: com o 3º badge (milestone >= 3) o treinador ganha +5 níveis (battle_main.c:1807; pokemon_config.h:34-35), no máximo 100.
-  function nivelDoInimigoHell(nivel) { return modoHellDuelo() && state.settings.milestone >= 3 ? Math.min(100, nivel + 5) : nivel; }
+  function nivelDoInimigoHell(nivel) { return modoHellDuelo() && state.settings.milestone >= HELL_NIVEIS_EXTRAS_A_PARTIR_DA_INSIGNIA ? Math.min(100, nivel + HELL_NIVEIS_EXTRAS) : nivel; }
   function foeDeDuelo(m, nivel, clima) {
     nivel = nivelDoInimigoHell(nivel);
     var megaSname = megaDaPedra(m.item, getSpeciesByX(m.x));
@@ -2990,7 +2988,7 @@
   }
   // item: o da build, quando há; sem ele, o que combina com o set e a habilidade (itemDoSetDuelo).
   // Hell: o jogador joga com IV 0 depois da 5ª insígnia (pokemon.c:986-992, HELL_MODE_0_IVS_FLAG = FLAG_BADGE05_GET); o inimigo é sempre 31 (foeDeDuelo).
-  function ivDoJogadorDuelo() { return modoHellDuelo() && state.settings.milestone >= 5 ? 0 : 31; }
+  function ivDoJogadorDuelo() { return modoHellDuelo() && state.settings.milestone >= HELL_IV_ZERO_A_PARTIR_DA_INSIGNIA ? 0 : 31; }
   // Hell: item repetido no time do jogador só vale para o primeiro que o segura (pokemon.c:6294-6310, GetHeldItemIfNotDuplicate).
   function semItemDuplicadoNoHell(meus) {
     if (!modoHellDuelo()) return meus;
@@ -3159,8 +3157,7 @@
   // todo mundo (inclusive o chefão) é avaliado com o clima ligado, e fica a
   // estratégia que cobre melhor - só se ganhar com folga (GANHO_MINIMO), pra
   // não trocar um time bom por um truque marginal.
-  var CLIMAS_DE_ESTRATEGIA = CLIMAS_DO_CAMPO;
-  var GANHO_MINIMO_ESTRATEGIA = 0.5;
+    var GANHO_MINIMO_ESTRATEGIA = 0.5;
   function armadoresDeClima(candidatos) {
     var out = [];
     candidatos.forEach(function (c) {
@@ -3168,7 +3165,7 @@
       inn.map(function (id) { return { id: id, innate: true }; }).concat(esc.map(function (id) { return { id: id, innate: false }; })).forEach(function (h) {
         var nome = nomeHabDuelo(h.id), texto = textoHabDuelo(h.id);
         if (!/on entry|until switched out/i.test(texto)) return; // só quem arma ao entrar (não "quando atingido")
-        CLIMAS_DE_ESTRATEGIA.forEach(function (w) {
+        CLIMAS_DO_CAMPO.forEach(function (w) {
           if (habilidadeArma(nome, w)) out.push({ cand: c, clima: w, habilidade: nome, abForcada: h.innate ? undefined : h.id });
         });
       });
@@ -3217,7 +3214,7 @@
     if (se === "Defog") return { tipo: "defog" }; // só limpa as telas do rival na luta contra o time (poeEfeitoDeLadoComGolpe); no 1x1 não muda nada
     if (se === "Trick Room") return { tipo: "sala" };
     if (se === "Protect") return { tipo: "protege" };
-    if (se === "Stealth Rock" || se === "Spikes" || se === "Toxic Spikes" || se === "Sticky Web") return { tipo: "hazard", hazard: HAZARD_DO_GOLPE[se] };
+    if (HAZARD_DO_GOLPE.hasOwnProperty(se)) return { tipo: "hazard", hazard: HAZARD_DO_GOLPE[se] };
     if (se === "Substitute") return { tipo: "substituto" };
     var CLIMA_DO_GOLPE = { "Rain Dance": "chuva", "Sunny Day": "sol", "Sandstorm": "areia", "Hail": "granizo", "Snowscape": "granizo" };
     if (CLIMA_DO_GOLPE[se] || /Fog$/.test(se)) return { tipo: "clima", clima: CLIMA_DO_GOLPE[se] || "nevoa" };
@@ -3882,7 +3879,7 @@
     return Math.max(t(a, b), t(b, a));
   }
   // Lawnmower (abilities.cc:7626): o stat que sobe é Sp. Def se o terreno limpo era Toxic, Psychic ou Misty; nos outros, Def.
-  function estagioDoLawnmowerDuelo(terreno) { return terreno === "toxico" || terreno === "psiquico" || terreno === "nevoa" ? "spd" : "def"; }
+  function estagioDoLawnmowerDuelo(terreno) { return terreno === "toxico" || terreno === "psiquico" || terreno === "nevoento" ? "spd" : "def"; }
   // Nocaute na dupla: os mesmos bônus da luta inteira (Moxie, Predator...).
   function nocauteNaDupla(vence, cai, nivel) {
     var ef = vence.u.ef;
@@ -3912,8 +3909,13 @@
   var DURACAO_LADO_DUELO = { // vem de DURACAO_CAMPO (campo.js, TK-16)
     sala: DURACAO_CAMPO.sala, tela: DURACAO_CAMPO.tela, telaLightClay: DURACAO_CAMPO.telaLightClay, vento: DURACAO_CAMPO.vento
   };
-  function novoLadoDuelo() { return { rocha: false, espinho: 0, toxico: 0, teia: false, reflect: 0, luz: 0, veu: 0, vento: 0 }; }
-  var TIMERS_DO_LADO_DUELO = ["reflect", "luz", "veu", "vento"];
+  var TIMERS_DO_LADO_DUELO = Object.keys(TELAS_DO_LADO).concat("vento");
+  function novoLadoDuelo() {
+    var l = {};
+    Object.keys(CAMADAS_DE_HAZARD).forEach(function (h) { if (h !== "espinhoVerde") l[h] = CAMADAS_DE_HAZARD[h] === 1 ? false : 0; }); // espinhoVerde só nasce por habilidade (poeHazardNoLado)
+    TIMERS_DO_LADO_DUELO.forEach(function (k) { l[k] = 0; });
+    return l;
+  }
   // Defog na entrada limpa os hazards do lado e deixa as telas e o Tailwind dele como estão.
   function ladoSemHazardsDuelo(velho) {
     var novo = novoLadoDuelo();

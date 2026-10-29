@@ -14,7 +14,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **campo.js** - TK-16 (campo, fase 1): FONTE ÚNICA do vocabulário de clima, terreno, telas e hazards, e das durações de campo.
   rotuloDoArquetipoDeCampo:46, hazardCheioNoLado:57, poeHazardNoLado:58
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
-  gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:424, comportamentoDaIADoChefao:451, habilidadesExtrasDoHell:464, regrasDoHell:465, ehRevancheDeLider:472, buffsParaMostrarDoChefao:491, buffsAtivosDoChefao:500, computeSpeedTiers:513, planoDaLuta:533, resumoDaLuta:546, quemRespondeNoPlano:562 (+2)
+  gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:424, comportamentoDaIADoChefao:451, habilidadesExtrasDoHell:468, regrasDoHell:469, ehRevancheDeLider:476, buffsParaMostrarDoChefao:495, buffsAtivosDoChefao:504, computeSpeedTiers:517, planoDaLuta:537, resumoDaLuta:550, quemRespondeNoPlano:566 (+2)
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
   descricaoDeHabilidade:85, descricaoDeHabilidadePorId:96, expandirTextoDeHabilidade:107, habilidadeArma:121, nomesDeHabilidades:124, podeTerStatus:132, garantiaDoTime:140, garantiaDaCondicao:154, comoGarantir:170, condicaoDaBuild:189, precisaDeSetter:212, blocoCondicoesIA:237
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
@@ -336,6 +336,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **levelcaps_contra_jogo.test.mjs** - TK-23: data/levelcaps.json tem de bater com GetLevelCap() do código do jogo (pokemon.c); 100 = sem limite.
 - **liberacao_por_etapa_caracterizacao.test.mjs** - TK-22: refatoração do registro da Etapa não pode mudar NENHUM resultado (pedras e itens x Etapas 0-10).
 - **liberado_na_run.test.mjs** - Ticket 05 (divida-tecnica): liberadoNaRun é a única régua de pedra, item e golpe;
+- **limpeza_motor_tk33a.test.mjs** - TK-33a (limpeza do motor, 29/10/2026): comportamento igual, fontes únicas. Itens 1-4.
 - **lote_a_motor.test.mjs** - Lote A da força-tarefa (2026-10-02): correções do motor provadas na auditoria, cada uma
 - **lote_b_plano_real.test.mjs** - Lote B da força-tarefa (2026-10-02): o plano contra o chefão tem que corresponder ao time
 - **lote_c_validacao.test.mjs** - Lote C da força-tarefa (2026-10-02): validação estratégica das builds da IA e o que a

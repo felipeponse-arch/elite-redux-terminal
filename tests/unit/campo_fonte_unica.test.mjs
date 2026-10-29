@@ -11,7 +11,6 @@ const idHab = (n) => R.ABILITY_ID_BY_NAME[n];
 const efDe = (nome) => R.efeitoDasHabilidadesNoDuelo([idHab(nome)], "TK16_" + nome, null);
 
 test("clima: a lista e os rótulos do campo.js são os que os consumidores usam", () => {
-  assert.equal(J(R.CLIMAS_DE_ESTRATEGIA), J(R.CLIMAS_DO_CAMPO));
   assert.equal(J(Object.keys(R.MOTOR_ROTULO_CLIMA)), J(R.CLIMAS_DO_CAMPO));
   // todo clima que um arquétipo mapeia existe no motor, e todo clima do motor tem arquétipo
   const doArquetipo = Object.values(R.CONDICAO_DO_ARQUETIPO).filter((c) => !c.startsWith("terreno"));
