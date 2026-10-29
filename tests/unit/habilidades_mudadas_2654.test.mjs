@@ -106,7 +106,7 @@ test("Lawnmower: limpa o terreno e sobe Def (+1) ou, se o terreno era Toxic, Psy
   assert.equal(R.estagioDoLawnmowerDuelo("eletrico"), "def");
   assert.equal(R.estagioDoLawnmowerDuelo("toxico"), "spd");
   assert.equal(R.estagioDoLawnmowerDuelo("psiquico"), "spd");
-  assert.equal(R.estagioDoLawnmowerDuelo("nevoa"), "spd");
+  assert.equal(R.estagioDoLawnmowerDuelo("nevoento"), "spd");
   // na luta: o estágio médio do dono sobe quando o rival arma terreno
   const g = golpe("Normal");
   const com = (habRival, habDono = ["Lawnmower"]) => R.estagiosMediosDuelo(sintetica(habDono, ["Normal"], [g]), sintetica(habRival, ["Normal"], [g]), g, g, 3);

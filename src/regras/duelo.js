@@ -445,7 +445,6 @@
     if (/Moves that need a charge turn are now used instantly/i.test(f)) ef.cargaInstantanea = true;
     if (/Can't use attacking moves twice in a row/i.test(f)) ef.truant = true;
     if (/Protects once against an attack/i.test(f)) ef.bloqueiaUmGolpe = true;
-    if ((x = f.match(/Counters contact with (\d+)\s?BP/i))) ef.contraAtaque = { poder: parseInt(x[1], 10) };
     // Golpe de graça na entrada (Cheap Tactics, Low Blow, Jumpscare).
     if ((x = f.match(/Attacks with (?:(\d+)\s?BP )?([A-Z][\w-]+(?: [A-Z][\w-]+)?) on (?:first )?switch-in/))) ef.ataqueNaEntrada = x[1] ? parseInt(x[1], 10) : poderDoGolpeDuelo(x[2]);
     // Seguimento por categoria (Two Step, Pyro Shells, Chunky Bass Line, Aftershock).
@@ -574,10 +573,6 @@
     }
     if ((x = f.match(/^(\w+) moves inflict (\w+)/i)) && (fl = filtroDoTextoDuelo(x[1]))) empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[2]), 1, fl);
     if ((x = f.match(/(\d+)% to inflict ([\w/]+) when hit by contact/i))) empurraStatusDuelo(ef, ef.statusDefesa, statusDoTrechoDuelo(x[2]), parseInt(x[1], 10) / 100, {}, 0);
-    if ((x = f.match(/Inflicts (\w+) and lowers Speed on contact/i))) {
-      empurraStatusDuelo(ef, ef.statusDefesa, statusDoTrechoDuelo(x[1]), 1, {}, 0);
-      ef.aoApanharAtacante.push({ stat: "spe", n: -1, contato: true });
-    }
     if ((x = f.match(/^(Burns|Poisons|Paralyzes|Frostbites) the foe on contact/i))) {
       empurraStatusDuelo(ef, ef.statusDefesa, statusDoTrechoDuelo(x[1]), 1, {}, 0);
       if (/works on offense/i.test(f)) empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[1]), 1, {}, 0);
@@ -586,7 +581,6 @@
       var para = statusDoTrechoDuelo(x[2]).filter(function (s) { return s !== "sono"; })[0];
       if (para) statusDoTrechoDuelo(x[1]).forEach(function (s) { ef.encadeiaStatus[s] = para; });
     }
-    if ((x = f.match(/^(\w+) causes flinching/i))) statusDoTrechoDuelo(x[1]).forEach(function (s) { ef.encadeiaStatus[s] = "recuar"; });
     if (/Is always bleeding if not immune/i.test(f)) {
       ef.campoResiduo.push({ pct: 1 / 16, exceto: ["Rock", "Ghost"], soProprio: true });
       if (/Spreads on contact/i.test(f)) { empurraStatusDuelo(ef, ef.statusDefesa, ["sangrar"], 1, {}, 0); empurraStatusDuelo(ef, ef.statusAtaque, ["sangrar"], 1, { contato: true }); }
@@ -594,7 +588,6 @@
     if (/Uses Teeter Dance on entry/i.test(f)) ef.statusNaEntrada.confundir = 1;
     // Evasão (Sand Veil, Snow Cloak, Rain Shroud, Olé!).
     if ((x = f.match(/Evasion is boosted by ([\d.]+)x (?:while a |under |in )(sandstorm|sand|hail|fog|rain)/i)) && climaOk(x[2] === "sandstorm" ? "sand" : x[2])) ef.evasao *= parseFloat(x[1]);
-    if ((x = f.match(/Ups evasion by (\d+)% in (rain|sun|sand|hail|fog)/i)) && climaOk(x[2])) ef.evasao *= 1 + parseInt(x[1], 10) / 100;
     if ((x = f.match(/(\d+)% chance to evade single-target moves/i))) ef.evasao /= 1 - parseInt(x[1], 10) / 100;
     if ((x = f.match(/In (fog|rain|sun|sand|hail), deal (\d+)% more damage and never miss/i)) && climaOk(x[1])) { ef.danoMult *= 1 + parseInt(x[2], 10) / 100; ef.semErrar = true; }
     // Imunidade a golpes por marcação (Bulletproof, Soundproof).
@@ -625,7 +618,6 @@
     if ((x = f.match(/Resists all attacks for (\w+) turns on first entry/i))) ef.sempreResiste = NUM_DO_TEXTO_DUELO[x[1].toLowerCase()] || 3;
     if (/Changes type depending on the move it's about to use|changes its type to the move's type|Changes type to move's type before use|Also has Protean/i.test(f)) ef.stabTodos = true; // RKS System: omniStab (abilities.cc:3111-3126, Protean sem a limitação de uma vez; STAB x2 vem do Adaptability)
     // Redução de dano geral.
-    if ((x = f.match(/Takes (\d+)% reduced damage/i))) ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100;
     if ((x = f.match(/Reduces damage taken by (\d+)%, but lowers speed by (\d+)%/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.speMult *= 1 - parseInt(x[2], 10) / 100; }
     // Feathercoat (abilities.cc:12377-12386): x(1 - a%) em todo golpe e x(1 - b%) NO TOTAL se o golpe é resistido (não soma: o jogo troca o fator).
     if ((x = f.match(/Takes (\d+)% less damage from attacks, (\d+)% if resisted/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.reducao.resistido *= (1 - parseInt(x[2], 10) / 100) / (1 - parseInt(x[1], 10) / 100); }
@@ -679,7 +671,6 @@
     if ((x = f.match(/^(\w+ ?\w*) moves are special and use \+(\d+)% (?:Sp\. Def|Def)/i))) categoriasDoTextoDuelo(x[1]).forEach(function (c) {
       ef.categoriaEspecial[c] = true; ef.ataqueExtra.push({ fonte: "def", pct: parseInt(x[2], 10) / 100, categoria: c });
     });
-    if ((x = f.match(/use (\d+)% of (spdef|def|speed) during moves/i))) ef.ataqueExtra.push({ fonte: /speed/i.test(x[2]) ? "spe" : /spdef/i.test(x[2]) ? "spd" : "def", pct: parseInt(x[1], 10) / 100 });
     if ((x = f.match(/uses \+(\d+)% of its Speed when defending/i))) ef.defesaExtraVel = parseInt(x[1], 10) / 100;
     if (/Boosts Atk or SpAtk to match the higher value/i.test(f)) ef.equinox = true;
     // Protosynthesis e Quark Drive (abilities.cc:6917-6970): o maior atributo sobe x1,3 (Speed x1,5), pelo clima OU pelo Booster Energy
@@ -799,7 +790,6 @@
     if (/Clears screens from both sides on entry/i.test(f)) ef.limpaTelas = true;
     if (/Can reset screens/i.test(f)) ef.telaRepete = true; // Screen Cleaner: pode pôr a tela de novo com ela ativa (battle_script_commands.c:9345, 10278, 7776-7777 @217dd0f)
     if ((x = f.match(/(\d+)% more damage to (\w+)-types/i)) && tipoDoTextoDuelo(x[2])) ef.vsTipo[tipoDoTextoDuelo(x[2])] = 1 + parseInt(x[1], 10) / 100;
-    if ((x = f.match(/deals ([\d.]+)x more damage to (\w+)-types/i)) && tipoDoTextoDuelo(x[2])) ef.vsTipo[tipoDoTextoDuelo(x[2])] = parseFloat(x[1]);
     // Habilidade que depende do terreno.
     var ter = function (w) { return TERRENO_DO_TEXTO[w.toLowerCase()]; };
     if ((x = f.match(/(Defense|SpDef) gets a ([\d.]+)x boost in (Electric|Grassy|Psychic|Misty) Terrain/i))) ef.noTerreno.push({ terreno: ter(x[3]), stat: /sp/i.test(x[1]) ? "spd" : "def", mult: parseFloat(x[2]) });
@@ -992,7 +982,6 @@
       });
     }
     if ((x = f.match(/Dealing a KO heals 1\/(\d+)/i)) || (x = f.match(/heals 1\/(\d+) HP when defeating an enemy/i))) ef.curaAoNocautear = 1 / parseInt(x[1], 10);
-    if ((x = f.match(/Devours 1\/(\d+) of the foe when defeating it/i))) ef.devora = 1 / parseInt(x[1], 10);
     // Jaws of Carnage (abilities.cc:5545): nocaute cura 1/4 do HP máximo, 1/2 se o golpe é de mordida (o texto da 2.65beta "devora 1/2 do alvo" era outra coisa).
     if ((x = f.match(/KOs heal 1\/(\d+) of max HP, 1\/(\d+) if using a biting move/i))) { ef.curaNocaute = 1 / parseInt(x[1], 10); ef.curaNocauteMordida = 1 / parseInt(x[2], 10); }
     if ((x = f.match(/Fainted Pokemon increase your offenses and spdef by (\d+)%/i))) ef.porDesmaio = parseInt(x[1], 10) / 100;
@@ -1004,7 +993,6 @@
     if (/When this Pok\S+ is KO'd, casts a Curse on the attacker/i.test(f)) ef.aoDesmaiarMaldicao = true;
     if (/Sharply lowers attacker's Attack and SpAtk when fainting/i.test(f)) ef.aoDesmaiarQueda = 2;
     if (/Deletes the PP of the move that faints this Pokemon/i.test(f)) ef.aoDesmaiarTiraGolpe = true;
-    if (/If hit, casts Perish Song/i.test(f)) ef.perecer = 3;
     if (/Uses Perish Song when hit by a contact move/i.test(f)) { ef.perecer = 3; ef.perecerContato = true; } // versão nova: só com contato (abilities.cc:3444)
     // Hazards (do lado do outro): Stealth Rock, Spikes, Toxic Spikes, Sticky Web.
     if (/Deploys Stealth Rocks when hit by contact/i.test(f)) ef.hazards.push({ tipo: "rocha", quando: "contato" });
@@ -1460,12 +1448,10 @@
         if ((y = f.match(/(?:Raises|Boosts|Ups) own (?:Atk|Attack) by ([\d.]+)x/i))) ef.atkMult *= parseFloat(y[1]);
         if ((y = f.match(/(?:Raises|Boosts|Ups) own (?:Sp\.? ?Atk|SpAtk|Special Attack) by ([\d.]+)x/i))) ef.spaMult *= parseFloat(y[1]);
         if ((y = f.match(/Ups (?:Special Attack|Sp\.? ?Atk|SpAtk) by (\d+)%/i))) ef.spaMult *= 1 + parseInt(y[1], 10) / 100;
-        if ((y = f.match(/Ups (?:Attack|Atk) by (\d+)%/i))) ef.atkMult *= 1 + parseInt(y[1], 10) / 100;
         if ((y = f.match(/([\d.]+)x Attack boost/i))) ef.atkMult *= parseFloat(y[1]);
         if ((y = f.match(/Boosts damage by ([\d.]+)x/i))) ef.danoMult *= parseFloat(y[1]);
         if ((y = f.match(/Does (\d+)% more damage but/i))) ef.danoMult *= 1 + parseInt(y[1], 10) / 100;
         if ((y = f.match(/Physical moves get a ([\d.]+)x (?:bonus|boost)/i))) ef.fisicoMult *= parseFloat(y[1]);
-        if ((y = f.match(/Special moves get a ([\d.]+)x (?:bonus|boost)/i))) ef.especialMult *= parseFloat(y[1]);
         if ((y = f.match(/Boosts Speed by ([\d.]+)x/i))) ef.speMult *= parseFloat(y[1]);
         if ((y = f.match(/Speed is ([\d.]+)x/i))) ef.speMult *= parseFloat(y[1]);
         if ((y = f.match(/decreases Speed by (\d+)%/i))) ef.speMult *= 1 - parseInt(y[1], 10) / 100;
@@ -1565,7 +1551,6 @@
       if ((x = t.match(/Triggers (\d+) BP \w+ after using a (\w+)-type move/i)) && tipoDoTextoDuelo(x[2])) ef.seguimento = { tipo: x[2], poder: parseInt(x[1], 10) };
       if (/Multi-hit moves always hit the maximum/i.test(t)) ef.skillLink = true;
       if ((x = t.match(/Grants a ([\d.]+)x accuracy boost/i)) || (x = t.match(/(?:^|[.;] )([\d.]+)x accuracy/i))) ef.precisaoMult *= parseFloat(x[1]);
-      if ((x = t.match(/\+(\d+)% accuracy/i))) ef.precisaoMult *= 1 + parseInt(x[1], 10) / 100;
       if (/(?:^|[.;]\s+)Moves always hit/i.test(t)) ef.semErrar = true; // só Sighting System (onAccuracy sem CHECK); "X moves always hit" é por grupo (semErrarCategoria)
       // Plasma Lamp (abilities.cc:6056): onAccuracy x1,2 só em golpe Fire/Electric, antes de estágios e Wide Lens (o poder x1,2 entra pelo texto, ver "Boost accuracy & power").
       if ((x = t.match(/^Boost accuracy & power of (\w+) & (\w+) type moves by ([\d.]+)x/i))) [x[1], x[2]].forEach(function (p) { if (tipoDoTextoDuelo(p)) ef.precisaoPorTipo[tipoDoTextoDuelo(p)] = parseFloat(x[3]); });
@@ -3286,7 +3271,6 @@
     if (/Then ignores Defense & accuracy checks/i.test(f)) { ef.semErrar = true; ef.ignoraDefesa = 0.5; } // Grip Pincer: depois de prender (50%)
     if (/Trapping deals 1\/6 HP/i.test(f)) ef.prisaoForte = true; // Grappler
     if (/Lowers foe's speed at the end of turns/i.test(f)) ef.quedaPorTurno = { spe: -1 }; // Sap Trap
-    if (/then drop the their speed by -1 each turn/i.test(f)) ef.quedaPorTurno = { spe: -1 }; // Serpent Bind
     if (/Binding moves lower speed and paralyze/i.test(f)) ef.prisaoParalisa = true; // Chokehold
     if ((x = f.match(/(\d+)% flinch chance when moving first/i))) ef.recuoSePrimeiro = parseInt(x[1], 10) / 100; // From the Shadows
     // Troca forçada e saída.

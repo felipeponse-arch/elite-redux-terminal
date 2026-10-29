@@ -52,3 +52,19 @@ test("TK-33a.5: RKS System dá STAB (x2, Adaptability) também em golpe fora do 
   dentroDoEfeito(dano("RKS System") / dano("Pressure"), 2, "RKS System x sem habilidade", 0.1);
   assert.deepEqual(Array.from(RC.camposLidosDaHabilidade(RC.ABILITY_ID_BY_NAME["RKS System"])).sort(), ["stabMult", "stabTodos"]);
 });
+
+// ---- omniStab (abilities.cc: Protean 2317, RKS 3125, Libero 3224, Mystic Power 3815, Prismatic Fur 5711, Arcane Force 6401, Pattern Change 8308, Unown Power 9511) ----
+test("TK-33a.6: as 8 habilidades com omniStab dão STAB em todo tipo (x1,5; só RKS System, com Adaptability, x2)", () => {
+  const alvo = chefao("Snorlax", { hab: "Thick Fat", golpes: ["Body Slam"], evs: [252, 252, 0, 0, 252, 0], nat: "Adamant" });
+  const dano = (hab) => RC.danoNoDuelo(eu("Garchomp", { hab, golpes: ["Flamethrower"], evs: EV.nenhum, nat: "Hardy" }), alvo, NIVEL).melhor.dano;
+  const base = dano("Pressure");
+  for (const h of ["Protean", "Libero", "Mystic Power", "Prismatic Fur", "Arcane Force", "Pattern Change", "Unown Power"]) dentroDoEfeito(dano(h) / base, 1.5, h, 0.1);
+  dentroDoEfeito(dano("RKS System") / base, 2, "RKS System", 0.1);
+});
+
+// ---- P2 (comitê 29/10): Psychic Terrain como arquétipo de campo ----
+test("TK-33a.7: o arquétipo Psychic Terrain tem condição 'terreno psiquico' (as 5 condições de terreno do select)", () => {
+  const R = carregarRegras();
+  assert.equal(R.CONDICAO_DO_ARQUETIPO_CAMPO["Psychic Terrain"], "terreno psiquico");
+  for (const a of ["Electric Terrain", "Grassy Terrain", "Misty Terrain", "Toxic Terrain"]) assert.ok(R.CONDICAO_DO_ARQUETIPO_CAMPO[a], a);
+});

@@ -25,16 +25,16 @@
   var CLIMAS_DO_CAMPO = ["sol", "chuva", "areia", "granizo", "nevoa"];
   var ROTULO_CLIMA = { sol: "sol", chuva: "chuva", areia: "areia", granizo: "granizo", nevoa: "névoa" };
   // Terrenos do motor: id, tipo reforçado, texto do jogo -> id.
-  var TERRENOS_DO_CAMPO = ["eletrico", "grama", "psiquico", "nevoa", "toxico"];
-  var TERRENO_DO_TEXTO = { electric: "eletrico", grassy: "grama", psychic: "psiquico", misty: "nevoa", toxic: "toxico" };
-  var TIPO_DO_TERRENO = { eletrico: "Electric", grama: "Grass", psiquico: "Psychic", nevoa: "Fairy", toxico: "Poison" };
+  var TERRENOS_DO_CAMPO = ["eletrico", "grama", "psiquico", "nevoento", "toxico"]; // "nevoento" (Misty), distinto do clima "nevoa" (Eerie Fog)
+  var TERRENO_DO_TEXTO = { electric: "eletrico", grassy: "grama", psychic: "psiquico", misty: "nevoento", toxic: "toxico" };
+  var TIPO_DO_TERRENO = { eletrico: "Electric", grama: "Grass", psiquico: "Psychic", nevoento: "Fairy", toxico: "Poison" };
   // Arquétipo "Clima e campo" do time (chave do select, em inglês porque é o nome do jogo) -> condição do motor.
   // Trick Room é sala, não condição de clima nem de terreno: fica fora do mapa, mas na lista (ordem do select).
   var ARQUETIPOS_DE_CAMPO = ["Sand", "Rain", "Sun", "Hail", "Eerie Fog", "Trick Room",
     "Electric Terrain", "Psychic Terrain", "Grassy Terrain", "Misty Terrain", "Toxic Terrain"];
   var CONDICAO_DO_ARQUETIPO_CAMPO = {
     "Rain": "chuva", "Sun": "sol", "Sand": "areia", "Hail": "granizo", "Eerie Fog": "nevoa",
-    "Electric Terrain": "terreno eletrico", "Grassy Terrain": "terreno de grama",
+    "Electric Terrain": "terreno eletrico", "Psychic Terrain": "terreno psiquico", "Grassy Terrain": "terreno de grama",
     "Misty Terrain": "terreno nevoento", "Toxic Terrain": "terreno toxico"
   };
   // O que a IA e a tela mostram do arquétipo (nunca a chave inglesa crua).

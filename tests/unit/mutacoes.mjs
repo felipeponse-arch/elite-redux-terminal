@@ -4558,8 +4558,8 @@ export const MUTACOES = [
     id: "hell-iv-zero-jogador-sem-regra",
     descricao: "o jogador em Hell não fica com IV 0 depois do 5º badge (H4)",
     arquivo: "duelo.js",
-    de: "return modoHellDuelo() && state.settings.milestone >= 5 ? 0 : 31;",
-    para: "return 31;",
+    de: "state.settings.milestone >= HELL_IV_ZERO_A_PARTIR_DA_INSIGNIA ? 0 : 31;",
+    para: "false ? 0 : 31;",
   },
   {
     id: "hell-item-duplicado-vale",
@@ -4586,15 +4586,15 @@ export const MUTACOES = [
     id: "hell-dano-inimigo-sem-0-9",
     descricao: "o inimigo com o 2º badge não leva o x0,9 extra no Hell (R14)",
     arquivo: "duelo.js",
-    de: "def.chefao && state.settings.milestone >= 2 ? 0.9 : 1",
+    de: "def.chefao && state.settings.milestone >= HELL_DANO_EXTRA_A_PARTIR_DA_INSIGNIA ? 0.9 : 1",
     para: "false ? 0.9 : 1",
   },
   {
     id: "hell-niveis-extras-sem-regra",
     descricao: "o inimigo do Hell não ganha +5 níveis com o 3º badge (R7)",
     arquivo: "duelo.js",
-    de: "return modoHellDuelo() && state.settings.milestone >= 3 ? Math.min(100, nivel + 5) : nivel;",
-    para: "return nivel;",
+    de: "state.settings.milestone >= HELL_NIVEIS_EXTRAS_A_PARTIR_DA_INSIGNIA ? Math.min(100, nivel + HELL_NIVEIS_EXTRAS",
+    para: "false ? Math.min(100, nivel + HELL_NIVEIS_EXTRAS",
   },
   {
     id: "hell-dano-ignora-nivel-extra",
@@ -4729,6 +4729,13 @@ export const MUTACOES = [
     arquivo: "prompts_ia.js",
     de: "(exceto \" + GOLPES_QUE_PASSAM_ITEM.join(\"/\") + \", que passam o item)",
     para: "(exceto Trick/Switcheroo, que passam o item)",
+  },
+  {
+    id: "campo-arquetipo-psiquico-some",
+    descricao: "campo.js: o arquétipo Psychic Terrain perde sua condição (volta a ficar fora do mapa)",
+    arquivo: "campo.js",
+    de: '"Psychic Terrain": "terreno psiquico", ',
+    para: "",
   },
   {
     id: "campo-clima-dura-pouco",

@@ -23,8 +23,8 @@ test("terreno: id, tipo reforçado e arquétipo batem entre campo.js, condiçõe
   assert.equal(J(Object.values(R.TERRENO_DO_TEXTO).sort()), J([...R.TERRENOS_DO_CAMPO].sort()));
   assert.equal(J(Object.keys(R.TIPO_DO_TERRENO).sort()), J([...R.TERRENOS_DO_CAMPO].sort()));
   const condTerreno = Object.values(R.CONDICAO_DO_ARQUETIPO).filter((c) => c.startsWith("terreno"));
-  // Psychic Terrain não tem condição de habilidade no mapa (comportamento existente, fora do TK-16): 4 de 5.
-  assert.equal(condTerreno.length, R.TERRENOS_DO_CAMPO.length - 1);
+  // Os 5 terrenos têm condição de habilidade no mapa (Psychic Terrain entrou no TK-33a, comitê 29/10).
+  assert.equal(condTerreno.length, R.TERRENOS_DO_CAMPO.length);
   assert.equal(R.WEATHER_ARCHETYPES.length, R.ARQUETIPOS_DE_CAMPO.length);
   // cada habilidade que arma terreno resolve para um id do campo.js
   ["Electro Surge", "Grassy Surge", "Psychic Surge", "Misty Surge", "Toxic Surge"].forEach((h) => {
