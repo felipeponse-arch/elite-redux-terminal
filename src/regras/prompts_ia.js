@@ -762,7 +762,7 @@
       "SOMENTE espécies desta lista real que o jogador já possui (time + caixa) - nunca invente nem sugira " +
       "algo fora dela:\n" + rosterDesc + "\n\n" +
       "Foco pedido: " + focusDesc + ".\n" +
-      (megaEvolutionUnlocked() ? "" : "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da 4a insignia (Flannery). NAO sugira nenhuma forma mega nem conte com mega no time; use so as formas base da lista.\n") +
+      (megaEvolutionUnlocked() ? "" : "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da " + rotuloDaEtapaDaMegaLiberada() + ". NAO sugira nenhuma forma mega nem conte com mega no time; use so as formas base da lista.\n") +
       (avisoInnatesEliteIA() ? avisoInnatesEliteIA() + "\n" : "") +
       (monotype ? "A lista acima JÁ está filtrada só pro tipo " + monotype + " (Monotype) - todos servem, escolha pela sinergia entre eles.\n" +
         "Na " + orientacaoMono(monotype) + " Entre candidatos parecidos, prefira quem cobre mais dessas fraquezas.\n" +

@@ -30,7 +30,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **ferramentas_ia.js** - Ferramentas que a IA consulta (aiTool_*) e a fábrica única delas (buildStandardAiTools).
   aiTool_getTeamWeaknesses:15, aiTool_getSpeciesRank:24, aiTool_getPriorityMoveOptions:51, aiTool_getAbilityMovepoolSynergy:75, aiTool_getConditionMoveSynergy:99, aiTool_getNextBossRoster:120, aiTool_getItemInfo:150, aiTool_getRemainingBosses:159, aiTool_getBoxCandidatesForBoss:182, aiTool_getSpeedBenchmark:204, buildStandardAiTools:249
 - **formas_mega.js** - Família de formas (base <-> mega), modo de Mega Evolução, pedras e unidades de batalha.
-  isMegaEvoKind:22, evoluiAinda:27, evioliteFunciona:32, megaFormsOf:38, formFamilyPromptNote:46, megaModePromptLine:60, formFamilyOf:65, isMegaForm:71, megaMode:82, megaEvolutionUnlocked:93, etapaDaMega:100, megaFormLiberada:105, megaSoNoDebug:106, quandoMega:108, rotuloEtapaDaMega:109, battleFamilyOf:128, usableSpeciesFor:131, megaPromptBlock:135, megaDaPedra:165, stonesOf:171, battleUnitsOf:181, unitTypeMult:197
+  isMegaEvoKind:22, evoluiAinda:27, evioliteFunciona:32, megaFormsOf:38, formFamilyPromptNote:46, megaModePromptLine:60, formFamilyOf:65, isMegaForm:71, megaMode:82, megaEvolutionUnlocked:93, rotuloDaEtapaDaMegaLiberada:102, etapaDaMega:104, megaFormLiberada:109, megaSoNoDebug:110, quandoMega:112, rotuloEtapaDaMega:113, battleFamilyOf:132, usableSpeciesFor:135, megaPromptBlock:139, megaDaPedra:169, stonesOf:175, battleUnitsOf:185, unitTypeMult:201
 - **golpes.js** - O que cada golpe faz (papel pelo efeito real) e como descrevê-lo pra IA.
   dadoExterno:19, movePromptLine:28, ehGolpeDePivo:41, ehPrioridadeDeDano:49, moveRoleOf:53
 - **gravacao_build_ia.js** - O caminho "resposta da IA -> build validada -> o que gravar", sem tela (ticket 06 da dívida
@@ -297,6 +297,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **escolha_ia_candidatos.test.mjs** - A IA escolhe ENTRE os candidatos do pipeline de build (ticket 03 do pipeline; src/regras/escolha_ia_candidatos.js).
 - **estado_do_app.test.mjs** - Testes das regras que saíram do template na fase 3 da refatoração (2026-09-24):
 - **estagios_no_duelo.test.mjs** - Estágios de atributo no duelo (2026-09-29): entrada (Intrepid Sword), ao
+- **etapa_mega_fonte_unica.test.mjs** - TK-33b item 6: a Etapa/líder da Mega nos textos vem de data/pedras_etapa.json (quandoVale + lideres),
 - **extracao_transform.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **extras_no_duelo.test.mjs** - Golpes extras, bloqueio e entrada no duelo (2026-09-29): Readied Action,
 - **ferramentas_ia.test.mjs** - Ferramentas que a IA consulta (src/regras/ferramentas_ia.js), testadas no Node sem navegador

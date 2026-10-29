@@ -95,7 +95,11 @@
   Object.keys(PEDRAS_ETAPA.ondeSePega).forEach(function (p) { MEGA_PEDRAS_TARDIAS[p] = PEDRAS_ETAPA.ondeSePega[p].etapa; });
   var PEDRAS_SO_DEBUG = {};
   PEDRAS_ETAPA.soNoDebug.forEach(function (p) { PEDRAS_SO_DEBUG[p] = true; });
-  var ROTULO_ETAPA_MEGA = { 4: "Etapa 4 (Flannery)", 5: "Etapa 5 (Norman)", 6: "Etapa 6 (Winona)", 7: "Etapa 7 (Tate & Liza)", 10: "sem Etapa conhecida (pedra sem fonte de obtenção)" };
+  // Rótulo "Etapa n (líder)" vem de PEDRAS_ETAPA.lideres (TK-33b item 6): nenhuma Etapa/ginásio escrito aqui.
+  var ROTULO_ETAPA_MEGA = { 10: "sem Etapa conhecida (pedra sem fonte de obtenção)" };
+  Object.keys(PEDRAS_ETAPA.lideres).forEach(function (et) { ROTULO_ETAPA_MEGA[et] = "Etapa " + et + " (" + PEDRAS_ETAPA.lideres[et] + ")"; });
+  // Etapa em que a Mega passa a valer pro jogador (4 hoje), no mesmo formato, pros avisos fixos.
+  function rotuloDaEtapaDaMegaLiberada() { return ROTULO_ETAPA_MEGA[MEGA_UNLOCK_MILESTONE]; }
   // Etapa em que esta forma Mega fica disponível: a da pedra, se for tardia.
   function etapaDaMega(megaSp) {
     return stonesOf(megaSp).reduce(function (et, pedra) {
@@ -136,7 +140,7 @@
     var megas = megaFormsOf(sp);
     if (!megas.length && !isMegaForm(sp)) return "";
     if (!megaEvolutionUnlocked() && !isMegaForm(sp)) {
-      return "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da 4a insignia (Flannery) e agora NAO tem essa opcao. " +
+      return "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da " + rotuloDaEtapaDaMegaLiberada() + " e agora NAO tem essa opcao. " +
         "NAO considere, cite nem recomende nenhuma forma mega nem pedra mega nesta resposta; avalie so a forma base.";
     }
     var travadas = isMegaForm(sp) ? [] : megas.filter(function (m) { return !megaFormLiberada(m); });

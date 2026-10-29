@@ -7,6 +7,27 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "etapa-mega-texto-fixo-mono-run",
+    descricao: "TK-33b: a loja de iniciais volta a citar 'Flannery' em texto fixo em vez do líder da Etapa da Mega (pedras_etapa.json)",
+    arquivo: "mono_run.js",
+    de: "\"depois de vencer a \" + PEDRAS_ETAPA.lideres[PEDRAS_ETAPA.quandoVale.etapa] + \", por 15 BP \"",
+    para: "\"depois de vencer a Flannery, por 15 BP \"",
+  },
+  {
+    id: "etapa-mega-texto-fixo-prompt-time",
+    descricao: "TK-33b: o prompt de time volta a dizer '4a insignia (Flannery)' em texto fixo",
+    arquivo: "prompts_ia.js",
+    de: "depois da \" + rotuloDaEtapaDaMegaLiberada() + \". NAO sugira",
+    para: "depois da 4a insignia (Flannery). NAO sugira",
+  },
+  {
+    id: "etapa-mega-texto-fixo-aviso-especie",
+    descricao: "TK-33b: o aviso de Mega por espécie volta a dizer '4a insignia (Flannery)' em texto fixo",
+    arquivo: "formas_mega.js",
+    de: "depois da \" + rotuloDaEtapaDaMegaLiberada() + \" e agora",
+    para: "depois da 4a insignia (Flannery) e agora",
+  },
+  {
     id: "validacao-time-gerado-inverte-sem-build",
     descricao: "TK-28: a validação do time gerado lista quem TEM build como se não tivesse",
     arquivo: "builds.js",
@@ -4755,8 +4776,8 @@ export const MUTACOES = [
     id: "tk27-rotulo-mega-volta-a-insignia",
     descricao: "o rótulo da Mega tardia volta a dizer \"7ª insígnia\" em vez de Etapa 7",
     arquivo: "formas_mega.js",
-    de: "7: \"Etapa 7 (Tate & Liza)\"",
-    para: "7: \"7ª insígnia (Tate & Liza)\"",
+    de: "ROTULO_ETAPA_MEGA[et] = \"Etapa \" + et + \" (\"",
+    para: "ROTULO_ETAPA_MEGA[et] = \"\" + et + \"ª insígnia (\"",
   },
   {
     id: "last-stand-sem-fracao-de-pv",
