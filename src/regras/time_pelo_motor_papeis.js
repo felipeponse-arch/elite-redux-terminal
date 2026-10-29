@@ -191,10 +191,6 @@
     });
   }
   // Contrafactuais da luta completa (com e sem o membro / sem os golpes dele de um tipo).
-  function motorDeltaSemMembro(ctx, time, c, luta) {
-    var cheio = motorSimular(ctx, time, luta), sem = motorSimular(ctx, time.filter(function (x) { return x !== c; }), luta);
-    return motorArred(cheio.p - sem.p, 2);
-  }
   function motorDeltaSemTipos(ctx, time, c, luta, tipos) {
     var cheio = motorSimular(ctx, time, luta), sem = motorSimular(ctx, motorSemEsse(time, c, motorSemTipos(c, tipos)), luta);
     return motorArred(cheio.p - sem.p, 2);

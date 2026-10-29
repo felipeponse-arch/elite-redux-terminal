@@ -1484,10 +1484,6 @@
   // Golpe cujo efeito extra o Sheer Force troca por força (não os que sobem os
   // atributos do próprio usuário).
   function temEfeitoExtraDuelo(e) { return !!e.ch && /Hit$|Fang$|Status$|Tri Attack/.test(e.ef) && !/ Up/.test(e.ef); }
-  // Categorias que uma habilidade reforça, pelo texto (sem depender de espécie).
-  function categoriasDaHabilidade(id) {
-    return Object.keys(motivosDasCategoriasDaHabilidade(id));
-  }
   // `climaDaLuta` (2026-09-29, usuário: "no time temos um Poke que seta sol e no
   // mesmo time um que usa Solar Beam, logo a estratégia do time é feita"): o
   // clima é do CAMPO - armado pelo próprio Pokémon, por alguém do time ou pelo
