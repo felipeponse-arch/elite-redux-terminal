@@ -4709,4 +4709,25 @@ export const MUTACOES = [
     de: "\"builds.json\": {",
     para: "\"builds_x.json\": {",
   },
+  {
+    id: "tk24-frescor-sem-aviso",
+    descricao: "o aviso de frescor deixa de comparar dadosDe com a data dos dados (derivado velho passa em silêncio)",
+    arquivo: "carimbo_derivado.mjs",
+    de: "e.dadosDe < carimboDados.data",
+    para: "false",
+  },
+  {
+    id: "tk24-pendente-eterno",
+    descricao: "a isenção dos pendentes do gerador volta a ser eterna (pendente sem carimbo não avisa nem barra)",
+    arquivo: "carimbo_derivado.mjs",
+    de: "PENDENTES_DO_GERADOR.filter((f) => !reg[f])",
+    para: "[].filter((f) => !reg[f])",
+  },
+  {
+    id: "tk24-build-sem-checagem",
+    descricao: "o build deixa de checar carimbos (frescor e pendentes) antes de publicar",
+    arquivo: "build.mjs",
+    de: "if (barra) falhar(",
+    para: "if (false) falhar(",
+  },
 ];
