@@ -269,7 +269,7 @@
     // visual: clicar duas vezes criava dois "Antes de Flannery 1" e gastava as
     // 3 vagas); só então usa uma vaga livre.
     var idx = -1;
-    state.savedTeams.forEach(function (t, i) { if (idx === -1 && /^Antes de /.test(t.name || "")) idx = i; });
+    state.savedTeams.forEach(function (t, i) { if (idx === -1 && ehBackupDeTime(t)) idx = i; });
     // O time atual é o que o próprio botão montou antes (outro chefão ou o mesmo
     // de novo): o backup do time do JOGADOR fica como está (revisão de 2026-09-30:
     // antes ele era sobrescrito pelo time do botão e o time original se perdia).
@@ -285,7 +285,7 @@
     if (!state.team.length) return { salvo: false, snames: [] };
     if (idx === -1 && state.savedTeams.length < 3) idx = state.savedTeams.length;
     if (idx === -1) return { salvo: false, snames: snames };
-    acao(["timesSalvos"], function () { state.savedTeams[idx] = { name: "Antes de " + bossName, team: snames, depois: novo.slice() }; });
+    acao(["timesSalvos"], function () { state.savedTeams[idx] = { name: "Antes de " + bossName, team: snames, depois: novo.slice(), backup: true }; });
     return { salvo: true, snames: snames };
   }
   // Plano da luta em texto curto, por Pokémon do chefão, na ordem em que ele entra.
@@ -616,7 +616,7 @@
     document.getElementById("boss-detail").innerHTML =
       '<button class="back-btn" id="boss-back-to-list">&larr; Voltar para a lista</button>' +
       // Cabeçalho com a arte da equipe (ticket 14): só Aqua e Magma têm arte; os outros seguem sem fundo.
-      '<div class="detail-head' + (/Aqua/.test(boss.cat) ? ' chefao-heroi chefao-aqua' : /Magma/.test(boss.cat) ? ' chefao-heroi chefao-magma' : '') + '"><div class="detail-titles">' +
+      '<div class="detail-head' + classeDoCabecalhoDoChefao(boss.cat) + '"><div class="detail-titles">' +
         '<h2>' + escapeHtml(boss.name) + '</h2>' +
         '<div class="detail-dexno mono">' + escapeHtml(nomeDaCategoriaDeChefao(boss.cat)) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
       '</div></div>' +

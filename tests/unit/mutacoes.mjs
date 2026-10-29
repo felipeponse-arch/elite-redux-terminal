@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "backup-de-time-so-pelo-nome",
+    descricao: "TK-28: o backup do time volta a ser reconhecido só pelo prefixo do nome, ignorando o campo backup",
+    arquivo: "save.js",
+    de: "t.backup === true || (t.backup === undefined && /^Antes de /.test(t.name || \"\"))",
+    para: "/^Antes de /.test(t.name || \"\")",
+  },
+  {
+    id: "cabecalho-chefao-sem-arte-magma",
+    descricao: "TK-28: o cabeçalho do chefão da Magma perde a classe de arte",
+    arquivo: "chefoes.js",
+    de: "/Magma/.test(cat) ? \" chefao-heroi chefao-magma\"",
+    para: "/nunca-casa/.test(cat) ? \" chefao-heroi chefao-magma\"",
+  },
+  {
     id: "clueless-nao-anula-salas",
     descricao: "Clueless (Negates Weather, Rooms and Terrains) deixa de anular Trick Room/Inverse Room/gravidade",
     arquivo: "duelo.js",

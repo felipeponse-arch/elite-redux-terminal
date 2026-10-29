@@ -53,6 +53,8 @@
   // rebatalha abaixo e na chave de GYM_SKILLS.leaders - promovido a funcao
   // pra nao divergir entre os dois lugares que precisam dele.
   function gymLeaderBaseName(name) { return String(name || "").replace(/\s+\d+$/, "").trim(); }
+  // Classe extra do cabeçalho do chefão (TK-28): só Aqua e Magma têm arte.
+  function classeDoCabecalhoDoChefao(cat) { return /Aqua/.test(cat) ? " chefao-heroi chefao-aqua" : /Magma/.test(cat) ? " chefao-heroi chefao-magma" : ""; }
 
   // Cada líder aparece várias vezes em bosses.json (Wattson 1, 2, 3...) -
   // são rebatalhas em pontos diferentes do jogo, não dificuldades; só a
