@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "time-salvo-sprite-sem-nome-acessivel",
+    descricao: "TK-28: o sprite do time salvo perde o aria-label (leitor de tela lê só um botão sem nome)",
+    arquivo: "time.js",
+    de: "title=\"Ver na Dex\" aria-label=\"Ver ' + escapeHtml(sp.n) + ' na Dex\">",
+    para: "title=\"Ver na Dex\">",
+  },
+  {
+    id: "time-salvo-renomear-sem-rotulo",
+    descricao: "TK-28: o campo de renomear o time salvo perde o aria-label",
+    arquivo: "time.js",
+    de: " aria-label=\"Nome do time\"",
+    para: "",
+  },
+  {
     id: "backup-de-time-so-pelo-nome",
     descricao: "TK-28: o backup do time volta a ser reconhecido só pelo prefixo do nome, ignorando o campo backup",
     arquivo: "save.js",

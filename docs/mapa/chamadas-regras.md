@@ -462,7 +462,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - sanitizarStrategySets:258 - chama: clampInt (dados_base.js:103), getSpeciesBySname (dados_base.js:79) | chamado por: generateStrategySets (revisao_automatica.js:182)
 - saveChegandoTemMenosProgresso:386 - chamado por: conflitoDeProgresso (sync.js:61)
 - saveEnviavel:336 - chamado por: connectSync (sync.js:179), remotoComSomaErrada (sync.js:88)
-- snamesToXs:15 - chama: SPECIES_BY_SNAME (dados_base.js:72) | chamado por: carregarTimeSalvo (time.js:245), renderSavedTeams (time.js:206)
+- snamesToXs:15 - chama: SPECIES_BY_SNAME (dados_base.js:72) | chamado por: carregarTimeSalvo (time.js:251), renderSavedTeams (time.js:227)
 - syncContentDiffers:400 - chamado por: connectSync (sync.js:179)
 - xsToSnames:24 - chama: snameOf (dados_base.js:80) | chamado por: guardarTimeAnterior (aba_chefoes.js:266)
 

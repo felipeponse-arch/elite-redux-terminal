@@ -17,7 +17,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - initBosses:33 - chama: showdownSet (builds.js:58), getSpeciesByX (dados_base.js:78), flashToast (dex_lista.js:473), copyText (editor_build.js:11), acao (nucleo.js:243), +3
 - montarTimeContraEsteChefao:337 - chama: comecarLoteDeBuilds (builds.js:118), encerrarLoteDeBuilds (builds.js:120), buffsAtivosDoChefao (chefoes.js:500), buffsParaMostrarDoChefao (chefoes.js:491), regraDeCampoDoChefao (chefoes.js:424), +16
 - myBuildLevel:19 - chamado por: myBuildEditorHtml (editor_build.js:223), updateMyBuildStatus (editor_build.js:362), wireMyBuildEditor (editor_build.js:465)
-- myBuildLevelIsCustom:31 - chamado por: myBuildEditorHtml (editor_build.js:223), wireMyBuildEditor (editor_build.js:465), initProgress (progresso.js:105), zerarRun (time.js:356)
+- myBuildLevelIsCustom:31 - chamado por: myBuildEditorHtml (editor_build.js:223), wireMyBuildEditor (editor_build.js:465), initProgress (progresso.js:105), zerarRun (time.js:362)
 - renderBossDetail:589 - chama: classeDoCabecalhoDoChefao (chefoes.js:57), nivelDeCalculo (level_cap.js:65), monotypeAtivo (mono_run.js:72), quemResolveCardHtml (quem_resolve.js:83), quemResolveRestaurar (quem_resolve.js:103), +1
 - renderGymSkillsCardHtml:456 - chama: ehRevancheDeLider (chefoes.js:472), gymLeaderBaseName (chefoes.js:55), gymSkillsSummaryFor (chefoes.js:379)
 - selectBoss:437 - chama: varianteDoChefao (chefoes.js:370)
@@ -32,7 +32,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - generateCompleteTeam:302 - chama: comecarLoteDeBuilds (builds.js:118), concluirBuildDoLote (builds.js:119), encerrarLoteDeBuilds (builds.js:120), getSpeciesByX (dados_base.js:78), flashToast (dex_lista.js:473), +4
 - generateTeamForArchetype:153 - chama: getSpeciesByX (dados_base.js:78), montarPromptTimeArquetipo (prompts_ia.js:743), rosterParaTimeIA (prompts_ia.js:697), snamesValidosDoTime (prompts_ia.js:783), flashToast (dex_lista.js:473), +2
 - generateTeamUsageGuide:270 - chama: guiaDaResposta (prompts_ia.js:828), montarPromptGuia (prompts_ia.js:805), pedirIA (ia.js:80)
-- generatedTeamResult:35 - chamado por: guardarTimeAnterior (aba_chefoes.js:266), montarTimeContraEsteChefao (aba_chefoes.js:337), zerarRun (time.js:356)
+- generatedTeamResult:35 - chamado por: guardarTimeAnterior (aba_chefoes.js:266), montarTimeContraEsteChefao (aba_chefoes.js:337), zerarRun (time.js:362)
 - monoRunCardHtml:516 - chama: entradasDoJogador (liberado_na_run.js:34), MONO_MARCAS (mono_run.js:11), avisoProximoLider (mono_run.js:158), fraquezasDoTipo (mono_run.js:80), monoDisponibilidade (mono_run.js:176), +2
 - planoContraChefaoHtml:387 - chama: NOME_DA_CONDICAO (condicoes_habilidade.js:42)
 - renderMonoRun:573 - chama: state (nucleo.js:8) | chamado por: renderTeam (time.js:8)
@@ -40,14 +40,14 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderTeamStrategy:482 - chama: modoDeMontagem (modo_motor.js:9), modoMotorAquecer (modo_motor.js:40), modoMotorResultadoHtml (modo_motor.js:233) | chamado por: modoMotorFicarComVariante (modo_motor.js:119), modoMotorMontar (modo_motor.js:68), renderTeam (time.js:8)
 - resumoDoArquetipo:74 - chama: state (nucleo.js:8)
 - teamKeyFor:14 - chamado por: guardarTimeAnterior (aba_chefoes.js:266), montarTimeContraEsteChefao (aba_chefoes.js:337)
-- teamRecommendation:30 - chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorFicarComVariante (modo_motor.js:119), zerarRun (time.js:356)
+- teamRecommendation:30 - chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorFicarComVariante (modo_motor.js:119), zerarRun (time.js:362)
 
 ## ui/auto_evolucao.js
 - autoEvolveRoster:20 - chama: devolveChainByX (evolucao.js:206), evoluirElencoSemDuplicar (evolucao.js:40), evolveChainByX (evolucao.js:66), logAutoAction (evolucao.js:229), podarAutoEvolved (evolucao.js:61), +3 | chamado por: loadSave (nucleo.js:337), initProgress (progresso.js:105)
 - renderAutoLog:9 - chama: state (nucleo.js:8) | chamado por: initProgress (progresso.js:105), registrarTrocasDoPlano (revisao_automatica.js:149)
 
 ## ui/caixa.js
-- pcBoxSelectedX:14 - chamado por: zerarRun (time.js:356)
+- pcBoxSelectedX:14 - chamado por: zerarRun (time.js:362)
 - renderBox:16 - chama: ABILITIES (dados_base.js:10), getSpeciesByX (dados_base.js:78), habilidadesEscolhiveis (dados_base.js:119), speciesTypeNames (tipos.js:253), rankBadgeHtml (dex_ficha.js:169), +4
 
 ## ui/dex_ficha.js
@@ -82,7 +82,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - getFiltered:171 - chama: SPECIES (dados_base.js:52), rankDe (rank_da_run.js:29), speciesTypeNames (tipos.js:253), state (nucleo.js:8)
 - linhaDaListaHtml:212 - chama: speciesTypeNames (tipos.js:253), rankBadgeHtml (dex_ficha.js:169), state (nucleo.js:8)
 - listaAtual:210 - chamado por: fichaNavHtml (dex_ficha.js:435)
-- openConfirmModal:403 - chamado por: excluirTimeSalvo (time.js:273)
+- openConfirmModal:403 - chamado por: excluirTimeSalvo (time.js:279)
 - openSwapModal:328 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8)
 - renderList:243 - chama: getSpeciesByX (dados_base.js:78), fichaNavHtml (dex_ficha.js:435), state (nucleo.js:8)
 - renderMaisLista:232 - chama: state (nucleo.js:8)
@@ -207,7 +207,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## ui/revisao_automatica.js
 - agendarRevisoes:169 - chamado por: concluirAcoes (nucleo.js:266)
-- capRegistrado:148 - chamado por: initProgress (progresso.js:105), aplicarSaveRemoto (sync.js:45), zerarRun (time.js:356)
+- capRegistrado:148 - chamado por: initProgress (progresso.js:105), aplicarSaveRemoto (sync.js:45), zerarRun (time.js:362)
 - generateStrategySets:182 - chama: getCurrentCap (level_cap.js:49), montarPromptEstrategias (prompts_ia.js:633), sanitizarStrategySets (save.js:258), setsValidosDaResposta (validacao_build_ia.js:478), pedirIA (ia.js:80), +2
 - ponteFalhas:22 - chama: lsGet (nucleo.js:84)
 - processarRevisoes:72 - chama: golpesFuturosDe (builds.js:179), getSpeciesByX (dados_base.js:78), getBuildList (evolucao.js:14), logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), +13
@@ -226,15 +226,15 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## ui/time.js
 - TELAS_ELENCO:168 - chamado por: applyRecommendedTeam (arquetipo.js:207), initProgress (progresso.js:105)
-- carregarTimeSalvo:245 - chama: snamesToXs (save.js:15), acao (nucleo.js:243), state (nucleo.js:8)
-- excluirTimeSalvo:273 - chama: openConfirmModal (dex_lista.js:403), acao (nucleo.js:243), state (nucleo.js:8)
-- renderSavedTeams:206 - chama: getSpeciesByX (dados_base.js:78), snamesToXs (save.js:15), state (nucleo.js:8)
+- carregarTimeSalvo:251 - chama: snamesToXs (save.js:15), acao (nucleo.js:243), state (nucleo.js:8)
+- excluirTimeSalvo:279 - chama: openConfirmModal (dex_lista.js:403), acao (nucleo.js:243), state (nucleo.js:8)
+- renderSavedTeams:227 - chama: getSpeciesByX (dados_base.js:78), snamesToXs (save.js:15), state (nucleo.js:8)
 - renderTeam:8 - chama: effectiveBuild (builds.js:202), showdownSet (builds.js:58), ABILITIES (dados_base.js:10), getSpeciesByX (dados_base.js:78), habilidadesEscolhiveis (dados_base.js:119), +20
 - rosterMove:178 - chama: getSpeciesByX (dados_base.js:78), acao (nucleo.js:243), state (nucleo.js:8) | chamado por: initBosses (aba_chefoes.js:33)
-- salvarNomeTimeSalvo:297 - chama: acao (nucleo.js:243), state (nucleo.js:8)
+- salvarNomeTimeSalvo:303 - chama: acao (nucleo.js:243), state (nucleo.js:8)
 - swapPanelHtml:144 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8)
 - telasDeElenco:170 - chama: getSpeciesByX (dados_base.js:78)
-- zerarRun:356 - chama: logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), myBuildLevelIsCustom (aba_chefoes.js:31), generatedTeamResult (arquetipo.js:35), teamRecommendation (arquetipo.js:30), +4
+- zerarRun:362 - chama: logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), myBuildLevelIsCustom (aba_chefoes.js:31), generatedTeamResult (arquetipo.js:35), teamRecommendation (arquetipo.js:30), +4
 
 ## ui/tipos.js
 - computeRoleCompendium:91 - chama: ROLE_LABEL_PT (dados_base.js:182), SPECIES (dados_base.js:52), rankDe (rank_da_run.js:29), speciesTypeNames (tipos.js:253), state (nucleo.js:8)

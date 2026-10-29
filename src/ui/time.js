@@ -203,6 +203,27 @@
     return sa.every(function (v, i) { return v === sb[i]; });
   }
 
+  // HTML de um cartão de time salvo (função pura: facilita o teste de acessibilidade).
+  // Sprite = <button> com aria-label (antes era span role=button só com title); campo de nome com aria-label.
+  function htmlDoCartaoDoTimeSalvo(slot, i, members, isActive, editando) {
+    var nome = slot.name || ("Time " + (i + 1));
+    var nameHtml = editando
+      ? '<input type="text" class="stc-rename-input" id="stc-rename-input" aria-label="Nome do time" value="' + escapeHtml(nome) + '" maxlength="40">'
+      : '<div class="stc-name">' + escapeHtml(nome) + (isActive ? ' <span class="stc-active-badge">● ativo</span>' : '') + '</div>';
+    return '<div class="saved-team-card">' +
+      nameHtml +
+      '<div class="stc-sprites">' + members.map(function (sp) {
+        return '<button type="button" class="goto-species stc-sprite" data-x="' + sp.x + '" title="Ver na Dex" aria-label="Ver ' + escapeHtml(sp.n) + ' na Dex">' + spriteImgHtml(sp.x, sp.n, 32) + '</button>';
+      }).join("") + '</div>' +
+      '<div class="stc-actions">' +
+        (editando
+          ? '<button class="stc-rename-save" data-idx="' + i + '" type="button">Salvar nome</button>'
+          : '<button class="stc-load" data-idx="' + i + '" type="button">Carregar</button>' +
+            '<button class="stc-rename" data-idx="' + i + '" type="button">Renomear</button>' +
+            '<button class="stc-delete" data-idx="' + i + '" type="button">Excluir</button>') +
+      '</div></div>';
+  }
+
   function renderSavedTeams() {
     var grid = document.getElementById("saved-teams-grid");
     var cards = [];
@@ -211,22 +232,7 @@
       if (slot) {
         var slotXs = snamesToXs(slot.team);
         var members = slotXs.map(getSpeciesByX).filter(Boolean);
-        var isActive = teamsMatch(slotXs, state.team);
-        var nameHtml = savedTeamEditingIdx === i
-          ? '<input type="text" class="stc-rename-input" id="stc-rename-input" value="' + escapeHtml(slot.name || ("Time " + (i + 1))) + '" maxlength="40">'
-          : '<div class="stc-name">' + escapeHtml(slot.name || ("Time " + (i + 1))) + (isActive ? ' <span class="stc-active-badge">● ativo</span>' : '') + '</div>';
-        cards.push('<div class="saved-team-card">' +
-          nameHtml +
-          '<div class="stc-sprites">' + members.map(function (sp) {
-            return '<span class="goto-species" tabindex="0" role="button" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 32) + '</span>';
-          }).join("") + '</div>' +
-          '<div class="stc-actions">' +
-            (savedTeamEditingIdx === i
-              ? '<button class="stc-rename-save" data-idx="' + i + '" type="button">Salvar nome</button>'
-              : '<button class="stc-load" data-idx="' + i + '" type="button">Carregar</button>' +
-                '<button class="stc-rename" data-idx="' + i + '" type="button">Renomear</button>' +
-                '<button class="stc-delete" data-idx="' + i + '" type="button">Excluir</button>') +
-          '</div></div>');
+        cards.push(htmlDoCartaoDoTimeSalvo(slot, i, members, teamsMatch(slotXs, state.team), savedTeamEditingIdx === i));
       } else {
         cards.push('<div class="saved-team-card empty">Slot vazio</div>');
       }

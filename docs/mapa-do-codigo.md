@@ -106,7 +106,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sync.js** - Sincronização entre aparelhos (capability db) e os avisos de sync.
   aplicarSaveRemoto:45, conflitoDeProgresso:61, remotoComSomaErrada:88, pushToSync:96, showSyncBanner:105, syncBannerOffset:119, atualizarTituloDoSubtitulo:139, setSyncStatusIndicator:143, scheduleSyncRetry:162, lerSaveLocal:174, connectSync:179
 - **time.js** - Aba Time: cards dos membros, troca com a caixa, times salvos e "Novo jogo".
-  renderTeam:8, swapPanelHtml:144, telasDeElenco:170, rosterMove:178, teamsMatch:199, renderSavedTeams:206, carregarTimeSalvo:245, excluirTimeSalvo:273, comecarRenomearTimeSalvo:291, salvarNomeTimeSalvo:297, zerarRun:356
+  renderTeam:8, swapPanelHtml:144, telasDeElenco:170, rosterMove:178, teamsMatch:199, htmlDoCartaoDoTimeSalvo:208, renderSavedTeams:227, carregarTimeSalvo:251, excluirTimeSalvo:279, comecarRenomearTimeSalvo:297, salvarNomeTimeSalvo:303, zerarRun:362
 - **tipos.js** - Aba Tipos: tabela de efetividade, velocidades e compêndio de papéis.
   renderTypeMatrix:9, renderSpeedTiers:35, wireSpeedTiersOnce:63, computeRoleCompendium:91, renderRoleCompendium:113
 
@@ -402,6 +402,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **time_pelo_motor_papeis.test.mjs** - Modo Motor do Meu Time, Fase D (ticket time-pelo-motor/01, 21/10/2026): papéis por build, tags, sinergia e explicação.
 - **time_pelo_motor_papeis_regras.test.mjs** - Fronteiras das regras de papel e estilo do Modo Motor (TK-03, 27/10/2026): cada teste usa um time real da Etapa 4 que fica DO LADO DE DENTRO
 - **time_pelo_motor_regras.test.mjs** - Regras do Modo Motor que só a sabotagem do TK-03 (27/10/2026) mostrou sem proteção: item liberado e limite de repetição,
+- **times_salvos_acessibilidade.test.mjs** - TK-28 (achados de acessibilidade): o cartão do time salvo gera HTML acessível.
 - **times_salvos_backup.test.mjs** - TK-28: backup do time por CAMPO (backup: true), não pelo prefixo "Antes de " do nome; cabeçalho do chefão por função.
 - **tipo_stellar.test.mjs** - Tipo Stellar (TK-04, achado motor-D1.4; decisão do usuário 28/10): tabela contra battle_util.c:1012-1013 e 1056-1057
 - **tipos_contra_o_jogo.test.mjs** - TK-04 (motor-D1.1, D1.2): a tabela de tipos e TYPE_MOD_ABILITIES travadas contra o código do jogo.
