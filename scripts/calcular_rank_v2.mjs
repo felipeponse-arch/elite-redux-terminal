@@ -113,7 +113,7 @@ function avaliar(sp) {
       // Potencial: o 4º espaço pode virar golpe de status (mesma escolha do montador de time).
       // Viabilidade: só os 4 golpes de dano, sem planos de status/setup.
       const dano = R.quatroGolpesDeDano(melhor.u, todosFoes, nivelRef);
-      const comStatus = R.comQuatroGolpes({ set: melhor.set.nome, unidade: melhor.u }, sp, todosFoes, nivelRef, null);
+      const comStatus = R.comQuatroGolpes({ set: melhor.set.nome, unidade: melhor.u }, sp, todosFoes, nivelRef, null, cobertas.map((l) => l.foes));
       const receita = (comStatus && comStatus.unidade.receita) || { golpes: dano, status: [] };
       const montar = (l, golpes, status) => {
         const u0 = R.unidadeDeDuelo(sp, melhor.set, melhor.ab, l.nivel, golpes, null);
@@ -122,14 +122,16 @@ function avaliar(sp) {
         u.statusIds = (u.statusIds || []).filter((id) => status.indexOf(id) !== -1);
         return u;
       };
+      // TK-32: o hazard escolhido no 4º espaço vale também na viabilidade (o jogador põe hazard na run real); outro status não.
+      const hazards = receita.status.filter((id) => R.idHazardDoDuelo({ statusIds: [id] }) !== undefined);
       const eixos = {};
       for (const [eixo, golpes, status, opc] of [
         ["potencial", receita.golpes, receita.status, { detalhe: true }],
-        ["viabilidade", dano, [], { detalhe: true, semPlanos: true }]
+        ["viabilidade", hazards.length ? receita.golpes : dano, hazards, { detalhe: true, semPlanos: true }]
       ]) {
         eixos[eixo] = cobertas.map((l) => {
           const u = montar(l, golpes, status);
-          return { luta: l.nome, brs: l.foes.map((f) => br(R.resultadoDoDuelo(u, f, l.nivel, opc))) };
+          return { luta: l.nome, brs: R.resultadosDaLutaComHazard(u, l.foes, l.nivel, opc).map(br) };
         });
       }
       const quatro = receita.golpes, statusEscolhido = receita.status;

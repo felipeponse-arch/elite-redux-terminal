@@ -22,7 +22,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
   dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:187
 - **duelo.js** - Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
-  nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:79, acertosDoGolpeDuelo:80, golpeDeRecargaDuelo:87, golpeUtilNoDuelo:101, categoriaNoDuelo:113, temContatoDuelo:119, golpesDeRecargaAte:122, golpesDeDueloAte:129, golpesDeStatusAte:135, tipoDoTextoDuelo:156, fraseFixaDuelo:161, categoriasDoTextoDuelo:178, categoriasDoGolpeDuelo:181, modoHellDuelo:206, statusDoTrechoDuelo:251, presencaDoStatus:258, todosOsStatusDuelo:264, lerStatusDaFraseDuelo:269, chanceDoEstagioCrit:319, lerCriticoDaFraseDuelo:320, lerCondicaoDaFraseDuelo:346, estagioDoTexto:375, multDoEstagio:376, lerEstagioDaFraseDuelo:378, poderDoGolpeDuelo:434, lerExtrasDaFraseDuelo:436, lerCuraDaFraseDuelo:490, filtroDoTextoDuelo:523 (+149)
+  nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:79, acertosDoGolpeDuelo:80, golpeDeRecargaDuelo:87, golpeUtilNoDuelo:101, categoriaNoDuelo:113, temContatoDuelo:119, golpesDeRecargaAte:122, golpesDeDueloAte:129, golpesDeStatusAte:135, tipoDoTextoDuelo:156, fraseFixaDuelo:161, categoriasDoTextoDuelo:178, categoriasDoGolpeDuelo:181, modoHellDuelo:206, statusDoTrechoDuelo:251, presencaDoStatus:258, todosOsStatusDuelo:264, lerStatusDaFraseDuelo:269, chanceDoEstagioCrit:319, lerCriticoDaFraseDuelo:320, lerCondicaoDaFraseDuelo:346, estagioDoTexto:375, multDoEstagio:376, lerEstagioDaFraseDuelo:378, poderDoGolpeDuelo:434, lerExtrasDaFraseDuelo:436, lerCuraDaFraseDuelo:490, filtroDoTextoDuelo:523 (+152)
 - **escolha_ia_candidatos.js** - A IA ESCOLHE ENTRE os candidatos do pipeline de build (passo 4 de docs/pipeline_de_build.md; ticket 03 de
   textoDeCandidatoParaIA:20, blocoDeCandidatosParaIA:33, regrasDaEscolhaIA:40, linhaDePapelNaturalIA:47, linhaDeFraquezasDoTimeIA:51, blocoTimeCurtoIA:55, linhaDoChefaoPorEspecieIA:68, blocoPlanoCurtoIA:72, objetivoDaEscolhaIA:80, montarPromptEscolhaDeBuild:86, montarPromptEscolhaDoTime:103, indiceDaEscolhaIA:126, respostaForaDoCandidato:132, fecharCandidatoDaEscolha:142, textoDaRazaoDaEscolha:150, juntarRazaoNaBuild:158, escolherCandidatoDaIa:168, candidatosParaAEscolhaDaIa:201
 - **evolucao.js** - Builds salvas por espécie, registro "O que o app fez sozinho" e o que acontece
@@ -112,6 +112,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   renderTypeMatrix:9, renderSpeedTiers:35, wireSpeedTiersOnce:63, computeRoleCompendium:91, renderRoleCompendium:113
 
 ## Scripts (.mjs) - scripts/
+- **_amostra32.mjs** - Rank v2 (modelo aprovado pelo usuário em 2026-10-02, depois da pesquisa de método):
+  capDe:40, foe:44, ARG:62, etapaDe:81, br:84, avaliar:91, notas:206, lutasComunsParaOMeuTime:242
 - **alarme_upstream.mjs** - Alarme de versão nova do Elite Redux (2026-09-24, pedido do usuário: "faz o
   ultimaVersaoDoDex:35, versaoDaPaginaDeDownload:43, hashDoConteudo:50, baixar:55, main:76
 - **atualizar_de_config.mjs** - Atualiza data/gameData.json a partir do er-config (código/config do jogo é a verdade).
@@ -121,7 +123,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **cache_sabotagem.mjs** - Cache de "arquivo lembrado" da sabotagem (tests/.sabotagem_cache.json, fora do git).
   mesclarCache:9, ler:18, gravarCacheMesclando:26
 - **calcular_rank_v2.mjs** - Rank v2 (modelo aprovado pelo usuário em 2026-10-02, depois da pesquisa de método):
-  capDe:40, foe:44, ARG:62, etapaDe:81, br:84, avaliar:91, notas:203, lutasComunsParaOMeuTime:239
+  capDe:40, foe:44, ARG:62, etapaDe:81, br:84, avaliar:91, notas:205, lutasComunsParaOMeuTime:241
 - **carimbo_derivado.mjs** - TK-24: grava em data/carimbo_derivados.json de que versão do jogo/config cada derivado foi gerado.
   carimbarDerivado:4, avisosDeFrescor:15, pendentesSemCarimbo:22, problemasDeCarimbo:27
 - **categorias_pela_config.mjs** - Categorias de golpe (soco, mordida, corte...) pelas FLAGS do jogo, não pelo texto da NextDex.
@@ -384,6 +386,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **rank_disponibilidade.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **rank_escolha.test.mjs** - Ticket 08 (07/10/2026): a escolha do set do rank avalia por inteiro os melhores pela soma rápida
 - **rank_fatia.test.mjs** - Fatia fixa de peso do rank (ticket todas-as-lutas/02, 21/10/2026): chefões 60% e lutas comuns 40%, com a composição REAL da run
+- **rank_premia_hazard.test.mjs** - TK-32 (decisão do usuário de 29/10/2026): o rank premia suporte, só hazard. Dado real: Forretress no nível 40
 - **rank_so_por_rankde.test.mjs** - ADR-003 (ticket 01): o dado do Rank só é lido por rankDe(); SPECIES_RANK não é reescrito depois da carga.
 - **recarga_e_dois_turnos.test.mjs** - TK-06 (decisão 7 do usuário, 28/10): recarga e golpe de 2 turnos lidos do EFEITO do dado, não da tradução PT.
 - **reconciliar_build.test.mjs** - Build salva que muda de espécie (auto-evolução) ou chega de um save antigo precisa
