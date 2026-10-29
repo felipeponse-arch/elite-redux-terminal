@@ -22,7 +22,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
   dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:188
 - **duelo.js** - Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
-  nomeHabDuelo:46, textoHabDuelo:203, bonusDeGolpeLidoDoTextoDuelo:231, acertosDoGolpeDuelo:232, golpeDeRecargaDuelo:239, golpeUtilNoDuelo:253, categoriaNoDuelo:265, temContatoDuelo:271, golpesDeRecargaAte:274, golpesDeDueloAte:281, golpesDeStatusAte:287, tipoDoTextoDuelo:308, fraseFixaDuelo:313, categoriasDoTextoDuelo:328, categoriasDoGolpeDuelo:331, modoHellDuelo:356, statusDoTrechoDuelo:401, presencaDoStatus:408, todosOsStatusDuelo:414, lerStatusDaFraseDuelo:419, chanceDoEstagioCrit:469, lerCriticoDaFraseDuelo:470, lerCondicaoDaFraseDuelo:496, estagioDoTexto:525, multDoEstagio:526, lerEstagioDaFraseDuelo:528, poderDoGolpeDuelo:583, lerExtrasDaFraseDuelo:585, lerCuraDaFraseDuelo:640, filtroDoTextoDuelo:673 (+148)
+  nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:79, acertosDoGolpeDuelo:80, golpeDeRecargaDuelo:87, golpeUtilNoDuelo:101, categoriaNoDuelo:113, temContatoDuelo:119, golpesDeRecargaAte:122, golpesDeDueloAte:129, golpesDeStatusAte:135, tipoDoTextoDuelo:156, fraseFixaDuelo:161, categoriasDoTextoDuelo:178, categoriasDoGolpeDuelo:181, modoHellDuelo:206, statusDoTrechoDuelo:251, presencaDoStatus:258, todosOsStatusDuelo:264, lerStatusDaFraseDuelo:269, chanceDoEstagioCrit:319, lerCriticoDaFraseDuelo:320, lerCondicaoDaFraseDuelo:346, estagioDoTexto:375, multDoEstagio:376, lerEstagioDaFraseDuelo:378, poderDoGolpeDuelo:434, lerExtrasDaFraseDuelo:436, lerCuraDaFraseDuelo:491, filtroDoTextoDuelo:524 (+150)
 - **escolha_ia_candidatos.js** - A IA ESCOLHE ENTRE os candidatos do pipeline de build (passo 4 de docs/pipeline_de_build.md; ticket 03 de
   textoDeCandidatoParaIA:20, blocoDeCandidatosParaIA:33, regrasDaEscolhaIA:40, linhaDePapelNaturalIA:47, linhaDeFraquezasDoTimeIA:51, blocoTimeCurtoIA:55, linhaDoChefaoPorEspecieIA:68, blocoPlanoCurtoIA:72, objetivoDaEscolhaIA:80, montarPromptEscolhaDeBuild:86, montarPromptEscolhaDoTime:103, indiceDaEscolhaIA:126, respostaForaDoCandidato:132, fecharCandidatoDaEscolha:142, textoDaRazaoDaEscolha:150, juntarRazaoNaBuild:158, escolherCandidatoDaIa:168, candidatosParaAEscolhaDaIa:201
 - **evolucao.js** - Builds salvas por espécie, registro "O que o app fez sozinho" e o que acontece
@@ -59,6 +59,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   snamesToXs:15, xsToSnames:24, applySave:47, anteriorSaneado:236, sanitizarStrategySets:255, textoCanonicoDoSave:301, somaDoSave:316, conferirSomaDoSave:326, saveEnviavel:333, buildSave:336, montarSave:341, progressoDoSave:377, saveChegandoTemMenosProgresso:383, syncContentDiffers:397
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
+- **texto_versao_nova.js** - Texto da habilidade que o parser do duelo lê (tabelas de dado, saídas de duelo.js em 28/10/2026, TK-12 estrutura D4.5b).
 - **time_pelo_motor.js** - Modo Motor do Meu Time (ticket time-pelo-motor/01, Fase C, 21/10/2026): monta o time SEM IA, só pelo simulador.
   motorMedia:60, motorArred:61, criarCacheDoMotor:64, motorGuardar:65, motorNivelDaEtapa:72, motorMontarLuta:78, motorMontarLutaComum:89, motorEspacadas:98, motorLutasComunsDoContexto:107, motorLutasDoContexto:122, motorValorDoObjetivo:134, contextoDoMotor:140, motorRaizDaLinha:150, motorChaveDaBuild:164, motorChaveDoContexto:167, motorBuildDoCandidato:168, motorSecar:203, motorCandidatosEmPassos:204, motorCandidatos:226, motorAquecerBuildsEmPassos:228, motorUnidade:234, motorSimular:246, motorEhMeu:262, motorAvaliar:263, motorMetricas:266, motorTemGolpeDeLado:275, motorBuscar:276, motorBuscarEmPassos:277, motorPlanoB:330, motorItensCandidatos:369 (+4)
 - **time_pelo_motor_papeis.js** - Modo Motor do Meu Time, Fase D (papéis por build, tags, sinergia e explicação). Carrega depois de time_pelo_motor.js (mesmo escopo).
@@ -306,6 +307,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **golpes_novos_2654.test.mjs** - Ticket versao-nova/09 (15/10/2026): os 9 golpes novos do upcoming (er-config d1a9a4c, MoveList.textproto) entram no app, com as espécies ...
 - **gravacao_build_ia.test.mjs** - Caminho "resposta da IA -> build validada -> o que gravar" (src/regras/gravacao_build_ia.js e
 - **guarda_lutas_comuns.test.mjs** - Guardas de todas-as-lutas/02: dado provisório não publica; o rank gravado não aceita outra fatia nem outra lista de lutas.
+- **habilidades_lote3_tk12.test.mjs** - TK-12 (28/10/2026): divergências do lote 3 (pacote onda0_P2_lote3) contra o código do jogo (er-repo f34fc2b), com dado real.
+- **habilidades_lotes_1_2_pelo_codigo.test.mjs** - TK-12, divergências dos lotes 1 e 2 conferidas no código do jogo (er-repo f34fc2b):
 - **habilidades_mudadas_2654.test.mjs** - Ticket versao-nova/06 (15/10/2026): habilidades cujo efeito mudou na versão mais nova (dados-2654/02 e 03). Fonte: abilities.cc (upcoming...
 - **habilidades_novas_2654.test.mjs** - Ticket versao-nova/07 (15/10/2026): as 29 habilidades novas da NextDex 2.65.4 + as 9 do delta da er-config d1a9a4c (upcoming) funcionam n...
 - **habilidades_texto_novo_2654.test.mjs** - TK-00b (28/10): textos de habilidade que a v2.65.4.1 reescreveu. A regra do motor lê o TEXTO; cada teste prova que a redação nova ainda
@@ -325,6 +328,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **juiz_do_time.test.mjs** - Ticket time-pelo-motor/01, Fase B2 (21/10/2026): juiz do time pela LUTA COMPLETA (avaliarTimePelaLutaCompleta), ao lado do
 - **lacunas_sem_codigo.test.mjs** - Varredura "habilidades da config sem código" (21/10/2026; relatorios/sem_codigo_varredura_2026-10-21.md).
 - **lado_no_duelo.test.mjs** - Ticket time-pelo-motor/01, Fase B1 (20/10/2026): Reflect, Light Screen, Aurora Veil, Tailwind e Trick Room são
+- **last_stand_no_duelo.test.mjs** - Last Stand (abilities.cc:7959-7965): Def/SpDef x(1 + 0,6 x fração de PV perdido).
 - **level_cap_padrao_unico.test.mjs** - Ticket 04 (divida-tecnica): sem Level cap o padrão é um só (0 = sem limite; nível de cálculo 100).
 - **levelcaps_contra_jogo.test.mjs** - TK-23: data/levelcaps.json tem de bater com GetLevelCap() do código do jogo (pokemon.c); 100 = sem limite.
 - **liberacao_por_etapa_caracterizacao.test.mjs** - TK-22: refatoração do registro da Etapa não pode mudar NENHUM resultado (pedras e itens x Etapas 0-10).
@@ -386,6 +390,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **setup_entre_duelos.test.mjs** - Ticket 05 (07/10/2026): os estágios de atributo só zeram para quem entra em campo
 - **shedinja_hp1.test.mjs** - Shedinja HP 1 (decisão 5 do usuário, TK-09): o jogo fixa maxHP em 1 (pokemon.c:1000-1001);
 - **sinergia_habilidade_movepool.test.mjs** - Gerador da sinergia habilidade x movepool (porte Node, lê o INGLÊS do dex). Trava: arquivo gravado == gerador, ids batem com o dex,
+- **sinergia_sem_bonus_por_id.test.mjs** - TK-12 estrutura D4.3 (28/10/2026): SINERGIA_SEM_BONUS_DE_DANO_DUELO virou conjunto por ID, montado dos 7 nomes por ABILITY_ID_BY_NAME.
 - **sono_e_paralisia_champions.test.mjs** - Ticket versao-nova/08 (15/10/2026; dados-2654/07): o código novo liga o sono e a paralisia estilo Pokémon Champions.
 - **sprite_index.test.mjs** - Sprite pelo nome da espécie (15/10/2026): a versão nova do jogo deslocou os números e o Beedrill Mega mostrava o Blastoise Mega.
 - **status_no_duelo.test.mjs** - Status por chance no duelo (2026-09-29, grupo 1 do estudo de habilidades):

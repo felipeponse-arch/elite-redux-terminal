@@ -44,162 +44,7 @@
   var TIPO_REFORCADO_PELO_CLIMA = { sol: "Fire", chuva: "Water" };
 
   function nomeHabDuelo(id) { return ABILITIES[id] ? ABILITIES[id][0] : ""; }
-  // Texto que o parser lê no lugar do texto do dado, por NOME, quando o código do jogo (a regra do Felipe de 15/10/2026: o código manda) diz outra coisa que o texto
-  // da NextDex. Hoje só Best Offense e Magus Blades (P2). Madness Enhancement (x0,8) e Feathercoat (x0,85/x0,7) saíram daqui no ticket versao-nova/05: o dado
-  // 2.65.4 já traz o texto novo e os leitores de texto dão o número do código.
-  var TEXTO_DA_VERSAO_NOVA_DUELO = {
-    // P2 do Felipe (15/10): Best Offense e Magus Blades pelo CÓDIGO (abilities.cc:10208-10214 e 10230-10237): corte vira especial, +20% da DEFESA física no ataque.
-    "Best Offense": "Keen Edge moves are special and use +20% Sp. Def.",
-    "Magus Blades": "Best Offense + Keen Edge moves hit twice for 60%." };
-  // Redação nova x parser (ticket versao-nova/04, 15/10/2026). O parser do motor lê TEXTO, e a NextDex 2.65.4 (07/10) reescreveu o texto curto de
-  // centenas de habilidades: com a redação nova, 43 habilidades em uso perdem o efeito inteiro (Guts, Marvel Scale, Rough Skin, Fluffy, Stamina...) e
-  // 9 leem outro efeito. O código do jogo não mudou o efeito delas (`git diff 7d85acd..486026e` em abilities.cc e battle_util.c: só Madness Enhancement,
-  // Feathercoat e Friend Guard/Caretaker/Food Lovers têm número novo), então basta o parser continuar lendo a redação que conhece. Quando o texto do dado é
-  // exatamente o `novo`, lê-se o `lido` (o texto da 2.65beta); o índice é o texto novo, então vale também para a parte de uma composta. A er-config não serve de fonte: ela só tem `description` e `expanded_description`
-  // (texto livre; a expandida casa com o parser em 94 de 848 habilidades). Medido com scripts/medir_texto_novo.mjs.
-  var TEXTO_LIDO_DA_VERSAO_NOVA_DUELO = [
-    ["Guts", "Ups Attack by 1.5x if statused.",
-      "Ups Atk by 1.5x if suffering from a status condition."],
-    ["Grass Pelt", "Boosts Defense by 50% in Grassy Terrain.",
-      "This Pokémon's Defense gets a 1.5x boost in Grassy Terrain."],
-    ["Biofilm", "Boosts Special Defense by 50% in Toxic Terrain.",
-      "50% spdef boost under Toxic Terrain."],
-    ["Toxic Surge", "Casts Toxic Terrain on entry. Lasts 8 turns.",
-      "sets Toxic Terrain on entry."],
-    ["Toxic Debris", "Sets a layer of Toxic Spikes when hit by a contact move.",
-      "Sets a layer of Toxic Spikes when hit by contact moves."],
-    ["Weather Control", "Immune to all weather-based moves.",
-      "Negates all weather based moves from enemies."],
-    ["Fluffy", "Halves contact damage taken. 2x weak to Fire-type moves.",
-      "Takes 1/2 dmg from contact moves but Fire moves hurt it 2x more."],
-    ["Loose Rocks", "Deploys Stealth Rocks when hit by a contact move.",
-      "Deploys Stealth Rocks when hit by contact."],
-    ["Rough Skin", "Enemies lose 1/8 of max HP if they hit user with contact move.",
-      "Enemies lose 1/8 of max HP if they use a contact move."],
-    ["Aftermath", "100BP Explosion / Outburst when KOed. Explosion moves flinch.",
-      "After fainting uses 100 BP Explosion or Outburst."],
-    ["Marvel Scale", "Ups Defense by 1.5x when statused.",
-      "Ups Def by 1.5x when statused."],
-    ["Lead Coat", "Take 40% less phys. dmg, but Speed x0.9. Triple user's weight.",
-      "Takes 40% less from Phys. moves. This Pokémon's Speed is 0.9x."],
-    ["Freezing Point", "20% frostbite chance on contact, 30% chance on non-contact.",
-      "20% chance to get frostbitten on contact and 30% non-contact."],
-    ["Elude", "Uses Speed as defensive stat when hit by non-contact.",
-      "Uses Speed as defense stat when hit by non-contact."],
-    ["Blur", "Uses Speed as defensive stat when hit by contact.",
-      "Uses Speed as defense stat when hit by contact."],
-    ["Determination", "Ups Special Attack by 50% if statused.",
-      "Ups Special Attack by 50% if suffering."],
-    ["Chrome Coat", "Take 40% less spec. dmg, but Speed x0.9. Triple user's weight.",
-      "Reduces special damage taken by 40%, but decreases Speed by 10%."],
-    ["Pyro Shells", "Uses 50BP Explosion or Outburst after using Mega Launcher move.",
-      "Triggers 50 BP Outburst after using a Mega Launcher move."],
-    ["Chuckster", "Once per entry, halves contact dmg then forces attacker out.",
-      "Once per entry, take 1/2 damage and force-switch the target."],
-    ["Hemotoxin", "Suppresses abilities of the target when they're poisoned.",
-      "Supresses abilities of the target when they're poisoned."],
-    ["Dragonslayer", "Deal 1.5x dmg to Dragon-types. Take 0.5x dmg from Dragon-types.",
-      "Deals 1.5x damage to Dragons. Takes 0.5x damage from Dragons."],
-    ["Rage Point", "Deals 1.5x damage while statused. Raises offenses when crit.",
-      "Gets a 1.5x boost while statused. Raises offenses when crit."],
-    ["Sharp Edges", "Enemies lose 1/6 of max HP if they hit user with contact move.",
-      "1/6 HP damage when touched."],
-    ["Chokehold", "Trapping moves paralyze and lower speed by -1 each turn.",
-      "Binding moves lower speed and paralyze."],
-    ["Devious Present", "Boosts the power of Ice-type and throwing moves by 50%.",
-      "Boosts Ice and throwing moves by 50%."],
-    ["Soul Harvest", "Fainted Pokemon increase Atk, Sp. Atk, and Sp. Def by 5%.",
-      "Fainted Pokemon increase your offenses and spdef by 5%."],
-    ["Higher Rank", "Boosts the power of priority moves by 1.2x.",
-      "Priority moves get a 1.2x boost."],
-    ["Know Your Place", "Contact moves make target move last for 5 turns.",
-      "Contact attacks make foes move last for 5 turns."],
-    ["Power Outage", "Boosts first Electric attack by 2x but user loses Electric-type.",
-      "Boosts first Electric attack by 2x then loses Electric type."],
-    ["Acid Reflux", "Uses 20BP Acid when taking any damage.",
-      "Uses 20BP Acid when it takes damage."],
-    ["Drakelp Head", "First hit taken deals 35% less damage, then lowers Atk by -1.",
-      "Weakens first move taken and drops opponent's attack."],
-    ["Break it Down", "Triggers 20BP Rapid Spin after using a damaging move.",
-      "After using an attack, follow up with a 20BP Rapid Spin."],
-    ["Flower Necklace", "Boosts Special Defense by 50% in Grassy Terrain.",
-      "This Pokémon's SpDef gets a 1.5x boost in Grassy Terrain."],
-    ["JunshiSanda", "Punching moves also become Kicking moves and vice versa.",
-      "Punches and Kicks are both Punches and Kicks."],
-    ["Corrupted Mind", "Psychic moves ignore resists / immunities, x1.4 effect chance.",
-      "Psychic moves ignore resists and get 1.4x effect chance."],
-    ["Swamp Thing", "Summons the Swamp Pledge effect on entry.",
-      "Sets the Swamp Pledge effect on entry."],
-    ["Deep Fried", "Summons the Sea of Fire Pledge effect on entry.",
-      "Summons a sea of fire on entry."],
-    ["Thick Blubber", "Take 1/4 damage from Fire and Ice attacks. Speed is halved.",
-      "Take 1/4 damage from fire and ice in return for having 1/2 speed."],
-    ["Zen Garden", "Sets Grassy or Psychic Terrain on entry with respective seed.",
-      "Sets up Grassy or Psychic Terrain at random."],
-    ["Purple Haze", "Triggers a 20BP Poison Gas after using a damaging move.",
-      "Triggers a 20BP Poison Gas after using a move."],
-    ["Festivities", "Sound moves also become Dance moves and vice versa.",
-      "Sound moves become dance moves and vice versa."],
-    ["Oblivious", "Immune to infatuation, Scare, Intimidate and disabling.",
-      "Immune to infatuation, Scare, Intimidate and Taunt."],
-    ["Poison Puppeteer", "Inflicting poison also inflicts confusion.",
-      "Poison also inflicts confusion."],
-    ["Deep Freeze", "Boosts Water and Ice moves by 1.25x. Halves Fire damage taken.",
-      "Boosts Water and Ice by 1.25x. Halves Fire damage taken."],
-    ["Glacial Rage", "Triggers 50 BP Blizzard after using an Ice-type move.",
-      "Triggers 50 BP Blizzard after using a Ice-type move."],
-    ["Backflip", "Triggers 50BP Chip Away after using a Dance move.",
-      "After using a Dance move, follow up with a 50BP Chip Away."],
-    ["Parry", "Uses 20BP Mach Punch when hit by contact. Takes 20% less damage.",
-      "Counters contact with Mach Punch. Takes 20% less damage."],
-    ["Infernal Rage", "Fire-type moves deal 1.35x damage but have 5% recoil.",
-      "Fire-type moves are boosted by 35% with 5% recoil."],
-    ["Petrify", "Clears stat buffs then lowers foes' Speed one stage on entry.",
-      "Clears stat buffs then lowers speed by one stage on entry."],
-    ["Lunar Wrath", "Triggers 50BP Moongeist Beam after using a Ghost-type move.",
-      "After using a Ghost move, follow up with a 50BP Moongeist Beam."],
-    ["Stamina", "Boosts Defense by +1 when hit. Critical hits maximize Defense.",
-      "Getting hit raises Def by +1. Critical hits maximize Defense."],
-    ["Fortitude", "Boosts Sp. Def +1 when hit. Critical hits maximize Sp. Def.",
-      "Boosts SpDef +1 when hit. Maxes SpDef on crit."],
-    ["Growing Tooth", "Raises Attack by +1 when the user's biting moves hit.",
-      "Raises Attack by one stage after using a biting move."],
-    ["Weak Armor", "If hit by a contact move: -1 Defense and +2 Speed.",
-      "If hit by a contact attack: -1 Defense and +2 Speed."],
-    ["Blitz Boxer", "Punching moves get +1 priority at full HP.",
-      "At full HP, gives +1 priority to this Pokémon's punching moves."],
-    ["Triage", "Moves that restore HP gain +3 priority.",
-      "Moves that have a healing effect gain +3 priority."],
-    ["Berserk DNA", "On entry, ups highest attacking stat by +2 but enrages.",
-      "Sharply ups highest attacking stat but enrages on entry."],
-    ["Headstrong", "On entry, raises Special Defense by one stage.",
-      "+1 Spdef on entry."],
-    ["Cryo Architect", "+1 Atk when hit by Water, +1 Def next turn. Ice +1 both turn 1.",
-      "Boosts Attack and Def when hit by Water or Ice."],
-    ["Wrestle Showman", "Flying Press gains +10BP and inflicts Taunt.",
-      "Flying Press gains +10BP and causes Taunt."],
-    ["Hardened Sheath", "Raises Attack by +1 when the user's horn moves hit.",
-      "Ups Attack by +1 when using horn moves."],
-    ["Galeforce Wings", "Flying-type moves get +1 priority.",
-      "Flying moves get +1 Priority."],
-    ["Daredevil", "Ups Attack by +1 when using recoil move. Halves recoil dmg.",
-      "+1 Atk after using recoil move. 1/2 recoil damage."],
-    ["Petal Shield", "Enters with +6 Defense, reduces Defense by -1 after each hit.",
-      "Maxes Def on entry. -1 Def when hit."],
-    ["Fire's Wrath", "Intimidate + Scare; 10% chance to inflict burn on non contact.",
-      "Intimidate + Scare; 10% burn chance on non contact moves."],
-    ["Yuki Onna", "Intimidate + Scare. 30% chance to infatuate on contact.",
-      "Scare + Intimidate. 30% chance to infatuate on hit."],
-    ["Atomic Punch", "Iron Fist + boosts the power of Steel-type moves by 1.3x.",
-      "Iron Fist + 30% Steel type damage."],
-    ["Komodo", "Adds Dragon-type. Attacks have a 30% chance to badly poison.",
-      "Adds Dragon-type + moves have 30% Bad Poison chance."],
-    ["Impaler", "Mighty Horn + horn moves have a 30% chance to bleed.",
-      "Mighty Horn + 30% Bleed chance on horn moves."]
-  ];
-  // índice pelo texto novo: vale para o texto da habilidade e para a parte de uma composta
-  var LIDO_PELO_TEXTO_NOVO_DUELO = {};
-  TEXTO_LIDO_DA_VERSAO_NOVA_DUELO.forEach(function (t) { LIDO_PELO_TEXTO_NOVO_DUELO[t[1]] = t[2]; });
+  // Tabelas TEXTO_DA_VERSAO_NOVA_DUELO, TEXTO_LIDO_DA_VERSAO_NOVA_DUELO e LIDO_PELO_TEXTO_NOVO_DUELO: src/regras/texto_versao_nova.js.
   function textoHabDuelo(id) { // pelo número: nomes repetidos (As One)
     var nome = nomeHabDuelo(id), novo = TEXTO_DA_VERSAO_NOVA_DUELO[nome];
     if (novo !== undefined) return expandirTextoDeHabilidade(novo, nome, 0);
@@ -227,7 +72,10 @@
   // nos golpes de ar/asa etc.; o simulador do jogo (2.65.3b) mostra o Aerial Ace do Ledian sem esse x1,3 (calibracao-simulador/01, 21/10/2026).
   // Flash Fire e Elemental Vortex (B4, 21/10): o x1,5 em Fire só liga depois de absorver um golpe Fire (abilities.cc:695-706 e 8262-8264); o gatilho já
   // é modelado em danoComStatusNoDuelo (`absorveReforca`), então a sinergia sempre ligada contava o bônus duas vezes.
-  var SINERGIA_SEM_BONUS_DE_DANO_DUELO = { "Aerodynamics": 1, "Motor Drive": 1, "Well Baked Body": 1, "Justified": 1, "Inflatable": 1, "Flash Fire": 1, "Elemental Vortex": 1 };
+  // TK-12 D4.3: lista de NOMES (nenhum campo do texto distingue essas 7) vira conjunto por ID (a chave que o motor mais usa), montado uma vez de ABILITY_ID_BY_NAME.
+  var NOMES_SINERGIA_SEM_BONUS_DE_DANO_DUELO = ["Aerodynamics", "Motor Drive", "Well Baked Body", "Justified", "Inflatable", "Flash Fire", "Elemental Vortex"];
+  var SINERGIA_SEM_BONUS_DE_DANO_DUELO = {};
+  NOMES_SINERGIA_SEM_BONUS_DE_DANO_DUELO.forEach(function (nome) { SINERGIA_SEM_BONUS_DE_DANO_DUELO[ABILITY_ID_BY_NAME[nome]] = 1; });
   function bonusDeGolpeLidoDoTextoDuelo(ef) { return Object.keys(ef.bonusTipo).length > 0 || Object.keys(ef.bonusCategoria).length > 0 || Object.keys(ef.flagMult).length > 0 || ef.contatoMult !== 1; }
   function acertosDoGolpeDuelo(id) {
     var m = MOVES[id];
@@ -314,16 +162,18 @@
     return !/\bif\b|\bwhen\b|\bwhile\b|\buntil\b|\bin (rain|sun|sand|hail|fog|a sandstorm|grassy|electric|misty|psychic|toxic)\b|below|under \d|at (full|max) hp|first turn|after|statused|poisoned|burned|suffering|terrain|tailwind/i.test(f);
   }
   var ESTAGIOS_DUELO = { one: 1, two: 2 };
-  // Palavras do texto da habilidade -> categoria de golpe marcada no NextDex.
+  // Palavras do texto da habilidade -> categoria de golpe. `flag` é a flag do golpe na er-config que origina a categoria (a tradução flag -> categoria mora em
+  // scripts/categorias_pela_config.mjs, FLAG_PARA_CATEGORIA; tests/unit/categorias_de_golpe_da_config.test.mjs confere que as duas tabelas batem). Todas as
+  // categorias lidas aqui têm flag na config; só o texto (`re`) é do app, porque a habilidade descreve a flag em linguagem livre.
   var PALAVRAS_DE_CATEGORIA = [
-    { nome: "soco", re: /punch|iron fist/i }, { nome: "mordida", re: /bit(?:e|ing)|fang|strong jaw/i },
-    { nome: "corte", re: /slash|slicing|keen edge|sharpness/i }, { nome: "pulso", re: /mega launcher|beam\/pump|cannon|pulse/i },
-    { nome: "chifre", re: /horn/i }, { nome: "broca", re: /drill/i }, { nome: "chute", re: /kick/i },
-    { nome: "flecha", re: /arrow/i }, { nome: "martelo", re: /hammer|slamm/i },
-    // Rocky Payload e Devious Present: "Rock-type and throwing moves" (flag `throwing` do golpe na er-config).
-    { nome: "arremesso", re: /\bthrow/i },
-    // Photokinesis, Photon Burst, Blinking Flash: "light moves" (flag `light` do golpe na er-config; categoria "luz" em move_categorias.json).
-    { nome: "luz", re: /\blight\b/i }
+    { nome: "soco", flag: "iron_fist", re: /punch|iron fist/i }, { nome: "mordida", flag: "strong_jaw", re: /bit(?:e|ing)|fang|strong jaw/i },
+    { nome: "corte", flag: "keen_edge", re: /slash|slicing|keen edge|sharpness/i }, { nome: "pulso", flag: "mega_launcher", re: /mega launcher|beam\/pump|cannon|pulse/i },
+    { nome: "chifre", flag: "horn", re: /\bhorn/i }, { nome: "broca", flag: "drill", re: /drill/i }, { nome: "chute", flag: "striker", re: /kick/i },
+    { nome: "flecha", flag: "arrow", re: /arrow/i }, { nome: "martelo", flag: "hammer", re: /hammer|slamm/i },
+    // Rocky Payload e Devious Present: "Rock-type and throwing moves".
+    { nome: "arremesso", flag: "throwing", re: /\bthrow/i },
+    // Photokinesis, Photon Burst, Blinking Flash: "light moves" (categoria "luz" em move_categorias.json).
+    { nome: "luz", flag: "light", re: /\blight\b/i }
   ];
   function categoriasDoTextoDuelo(trecho) {
     return PALAVRAS_DE_CATEGORIA.filter(function (p) { return p.re.test(trecho); }).map(function (p) { return p.nome; });
@@ -562,7 +412,8 @@
     }
     // Quando o rival reduz os atributos: Competitive, Defiant, Run Away.
     if ((x = f.match(/Raises (Sp\. Atk|Attack) by two stages if stats are lowered by an enemy/i))) ef.aoSerReduzido[estagioDoTexto(x[1])] = 2;
-    if (/Raises Speed if stats lowered by an enemy/i.test(f)) ef.aoSerReduzido.spe = 1;
+    // Run Away: +2 de Speed (abilities.cc:11827 SetStatChanger(STAT_SPEED, 2)); o texto não traz o número.
+    if (/Raises Speed if stats lowered by an enemy/i.test(f)) ef.aoSerReduzido.spe = 2;
     // Imunidade a quedas (também barra Intimidate/Scare, como na série).
     if (/Immune to stat drops|Bounces back any stat drops/i.test(f)) { ["atk", "def", "spa", "spd", "spe"].forEach(function (s) { ef.imuneQuedas[s] = true; }); ef.imuneIntimida = true; ef.imuneAssusta = true; }
     if (/Enemies can't lower Atk\/SpAtk/i.test(f)) { ef.imuneQuedas.atk = true; ef.imuneQuedas.spa = true; ef.imuneIntimida = true; ef.imuneAssusta = true; }
@@ -572,8 +423,8 @@
     re = /Lowers the (Attack|Defense|Special Attack|Special Defense) of other Pokemon by (\d+)%/gi;
     while ((x = re.exec(f))) ef.ruina[estagioDoTexto(x[1])] = 1 - parseInt(x[2], 10) / 100;
     if (/Boosts highest attack by \+1 when at 1\/2 of max HP/i.test(f)) ef.berserk = true;
-    // Last Stand: cresce até o máximo conforme o HP cai - na média da luta, metade do caminho.
-    if (/Def and SpDef increase as HP drops/i.test(f) && (x = t.match(/increase as HP drops\. Max ([\d.]+)x/i))) { ef.defMult *= (1 + parseFloat(x[1])) / 2; ef.spdMult *= (1 + parseFloat(x[1])) / 2; }
+    // Last Stand (abilities.cc:7959-7965): Def/SpDef x(1 + 0,6 x fração de PV perdido). Guarda só o teto; o fator sai da fração média de cada luta (ultimaResistenciaDuelo).
+    if (/Def and SpDef increase as HP drops/i.test(f) && (x = t.match(/increase as HP drops\. Max ([\d.]+)x/i))) ef.lastStand = parseFloat(x[1]) - 1;
     if ((x = f.match(/Does (\d+)% more damage if the target has any lowered stat/i))) ef.bonusContraReduzido = 1 + parseInt(x[1], 10) / 100;
     if ((x = f.match(/Raises Atk by ([\d.]+)x in (sun|rain|sand|hail|fog)/i)) && climaOk(x[2])) ef.atkMult *= parseFloat(x[1]);
     // Primeiro golpe da categoria com prioridade (Coil Up, Cutthroat, Sidewinder): vale no 1º golpe.
@@ -812,6 +663,7 @@
     if ((x = f.match(/(\d+) turns Aurora Veil on entry/i))) ef.telaVeuNaEntrada = DURACAO_CAMPO.telaCurta; // abilities.cc:4488-4490
     if (/Uses Magnet Rise on entry/i.test(f)) ef.imuneTipoNaEntrada = "Ground";
     if (/gains \+2 Speed when when hit by rocks|gains \+2 Speed when hit by rocks/i.test(f)) ef.aoApanhar.push({ stat: "spe", n: 2, tipos: ["Rock"] });
+    if ((x = f.match(/^Light moves have a (\d+)% chance to lower accuracy/i))) ef.luzReduzPrecisao = parseInt(x[1], 10) / 100; // Blinking Flash
     // Rivalry: gênero desconhecido - vale metade das vezes, nos dois sentidos.
     if (/^Deals 1\.25x to same gender/i.test(f)) ef.danoMult *= 1.125;
     if (/^Takes \.75x from opposite gender/i.test(f)) ef.reducao.todos *= 0.875;
@@ -893,7 +745,9 @@
     if ((x = f.match(/Ups Special Attack by (\d+)% if suffering/i))) ef.statusProprio.push({ stat: "spa", mult: 1 + parseInt(x[1], 10) / 100, quais: null });
     if (/Halves Atk and Sp\. Atk stats if user is below 1\/3/i.test(f)) { ef.atkMult *= 1 - 0.5 / 3; ef.spaMult *= 1 - 0.5 / 3; } // último terço da luta
     if ((x = f.match(/Deals (\d+)% more damage for each repeated move use/i))) ef.ritmico = parseInt(x[1], 10) / 100;
+    // Cosmic Daze/Cosmic Dust (abilities.cc:6758-6763): x2 se o alvo está confuso OU enfurecido (um MUL(2) só, não acumula).
     if (/Deals 2x damage vs confused/i.test(f)) ef.bonusVsStatus.confundir = 2;
+    if (/Deals 2x damage vs confused and enraged/i.test(f)) ef.bonusVsEnfurecido = 2;
     if ((x = f.match(/Drain moves recover \+(\d+)% HP & apply Leech Seed/i))) { ef.drenoMult = 1 + parseInt(x[1], 10) / 100; ef.sementeNoDreno = true; }
     if (/Charges up when getting hit/i.test(f)) ef.carregaAoApanhar = true;
     if (/Contact attacks make foes move last/i.test(f)) ef.forcaUltimo = true;
@@ -1222,7 +1076,7 @@
     return soma / n;
   }
   function estagiosMediosDuelo(u, outro, gU, gOutro, n) {
-    var s = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, acumula = Math.max(0, (n - 1) / 2);
+    var s = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0 }, acumula = Math.max(0, (n - 1) / 2);
     var mult = u.ef.estagioMult;
     function soma(stat, delta, doRival) {
       if (doRival && delta < 0 && (u.ef.imuneQuedas[stat] || (u.it && u.it.imuneQuedas))) return;
@@ -1287,6 +1141,9 @@
       u.ef.aoUsar.forEach(function (a) { if ((a.categoria === "recuo" ? gU.recuo > 0 : (gU.cats || []).indexOf(a.categoria) !== -1)) soma(a.stat, a.n * acumula, false); });
     }
     Object.keys(u.ef.porTurno).forEach(function (k) { soma(k, u.ef.porTurno[k] * acumula, false); });
+    // Blinking Flash do rival (abilities.cc:12919-12928): golpe de luz acertado tem 10% de chance de -1 ACC no alvo.
+    // shortcut: valor esperado, 10% x chance de acerto por turno acumulado (igual aos outros estágios), sem sortear nem limitar em -6; quem não pode ter ACC reduzida (Clear Amulet) fica de fora.
+    if (outro.ef.luzReduzPrecisao && gOutro && (gOutro.cats || []).indexOf("luz") !== -1 && !(u.it && u.it.imuneQuedas)) s.acc -= outro.ef.luzReduzPrecisao * (gOutro.precisao || 1) * acumula;
     // Item: subida uma vez por gatilho (Weakness Policy, Throat Spray, Kee Berry...) e baga de aperto.
     var ativo = itemAtivoDuelo(u, outro, gOutro ? gOutro.contato : undefined);
     if (u.it && ativo > 0) {
@@ -1502,7 +1359,7 @@
       prioridadeNoPrimeiro: false, prioTipoCheio: [], prioMult: 1,
       bonusTipo: {}, bonusGolpes: {}, golpeExtra: 1, seguimento: null, contraTipo: {},
       tecnico: null, resistidoX2: false, seBonus: 1, skillLink: false,
-      precisaoMult: 1, semErrar: false, semErrarContraMim: false,
+      precisaoMult: 1, luzReduzPrecisao: 0, semErrar: false, semErrarContraMim: false,
       quebraHabilidade: false, quebraTipo: null, queimaQualquerTipo: false, socoSom: false, hemorragia: false, resisteFortKnox: false, resistDeAtacante: {},
       bloqueiaBonus: false, aguenta: false,
       somMult: 1, somVira: null, ataqueExtra: [], defesaPelaVelocidade: null,
@@ -1516,7 +1373,7 @@
       statusProprio: [], ultimoMult: 1, critUltimo: 0, antesReducao: 0, prioNoFinal: false,
       prioCheioCategoria: {}, prioPrimeiroCategoria: {}, prioCheioSom: false, teraShell: false, reviveHP: 0, curaStatus: 0,
       estagioEntrada: {}, download: false, aoApanhar: [], aoApanharAtacante: [], porTurno: {}, aoGolpear: [],
-      aoSerReduzido: {}, imuneQuedas: {}, ignoraEstagios: false, estagioMult: 1, ruina: {}, berserk: false,
+      aoSerReduzido: {}, imuneQuedas: {}, ignoraEstagios: false, estagioMult: 1, ruina: {}, berserk: false, lastStand: 0,
       bonusContraReduzido: 1,
       primeiroTurnoMult: 1, cargaInstantanea: false, truant: false, bloqueiaUmGolpe: false, contraAtaque: null,
       ataqueNaEntrada: 0, seguimentoCategoria: [], aoUsar: [], limpaBuffsNaEntrada: false, quedaNaEntrada: {},
@@ -1527,7 +1384,7 @@
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
       bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {}, precisaoPorTipo: {},
       menorDefesaCategoria: {}, menorDefesaSeStatus: false, flagMult: {}, prioTipoSempre: [], drenoTipo: {}, malicious: false,
-      equinox: false, maiorMult: 0, maiorVel: 0, paradoxoItem: false, ritmico: 0, bonusVsStatus: {}, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
+      equinox: false, maiorMult: 0, maiorVel: 0, paradoxoItem: false, ritmico: 0, bonusVsStatus: {}, bonusVsEnfurecido: 0, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
       campoResiduo: [], statusNaEntrada: {}, forcaUltimo: false, semStabOutros: false, recuoFrac: 1,
       seQuebra: false, venenoReduz: false, mudaTipoNoContato: null, telaVeuNaEntrada: 0, imuneTipoNaEntrada: null,
       sincroniza: false, almaLigada: false, drenoCategoria: {},
@@ -1779,7 +1636,7 @@
     (ABILITY_SYNERGY[sname] || []).forEach(function (h) {
       var id = ids.filter(function (i) { return nomeHabDuelo(i) === h.name; })[0];
       if (id === undefined) return;
-      if (SINERGIA_SEM_BONUS_DE_DANO_DUELO[h.name]) return; // o jogo não dá bônus de dano a ela (lista acima de bonusDeGolpeLidoDoTextoDuelo)
+      if (SINERGIA_SEM_BONUS_DE_DANO_DUELO[id]) return; // o jogo não dá bônus de dano a ela (lista acima de bonusDeGolpeLidoDoTextoDuelo)
       // Habilidade cujo bônus de golpe o texto já ensina: a leitura do texto vale para todo golpe e a sinergia por golpe da espécie
       // contaria o mesmo bônus duas vezes (Tough Claws x1,3 x 1,3 = 1,69; Nocturnal x1,25 x 1,25 = 1,54).
       if (bonusDeGolpeLidoDoTextoDuelo(efeitoDasHabilidadesNoDuelo([id], "solo#" + id, null))) return;
@@ -1798,25 +1655,34 @@
   // Habilidade que o motor NÃO lê: sozinha, o efeito dela é igual ao de nenhuma habilidade, e ela não está na tabela de tipos, nem na
   // sinergia por golpe, nem arma clima. É a conta da auditoria permanente (tests/unit/auditoria_do_motor.test.mjs, lista
   // HABILIDADES_SEM_REGRA) e do selo "estimada" do pipeline de build (ticket versao-nova/03): o número do motor não conta o efeito dela.
-  var cacheSemRegraDuelo = {}, baseSemRegraDuelo = null, nomesComSinergiaDuelo = null;
-  function habilidadeSemRegraNoDuelo(id) {
-    if (id === undefined || id === null || id < 0 || !ABILITIES[id]) return false;
-    if (cacheSemRegraDuelo[id] !== undefined) return cacheSemRegraDuelo[id];
-    var semClimas = function (k, v) { return k === "climasProprios" ? undefined : v; };
+  // Campos do efeito (efeitoDasHabilidadesNoDuelo) que a habilidade muda em relação a nenhuma habilidade; "climasProprios" fica de fora (o clima que ela arma
+  // entra por habilidadeArma). Lista vazia = o parser não leu efeito nenhum. Serve de diagnóstico: diz QUAL campo a habilidade mexe.
+  var baseSemRegraDuelo = null, nomesComSinergiaDuelo = null, cacheCamposDuelo = {};
+  function camposLidosDaHabilidade(id) {
+    if (id === undefined || id === null || id < 0 || !ABILITIES[id]) return [];
+    if (cacheCamposDuelo[id] !== undefined) return cacheCamposDuelo[id];
     if (baseSemRegraDuelo === null) {
-      baseSemRegraDuelo = JSON.stringify(efeitoDasHabilidadesNoDuelo([], "SEMREGRA_BASE", null), semClimas);
+      baseSemRegraDuelo = efeitoDasHabilidadesNoDuelo([], "SEMREGRA_BASE", null);
       nomesComSinergiaDuelo = {};
       Object.keys(ABILITY_SYNERGY).forEach(function (sn) { ABILITY_SYNERGY[sn].forEach(function (h) { nomesComSinergiaDuelo[h.name] = true; }); });
     }
-    var nome = ABILITIES[id][0], texto = textoHabDuelo(id);
+    var texto = textoHabDuelo(id);
     // Condicional de clima conta ligada no clima que o próprio texto pede.
     var CLIMA = { rain: "chuva", sun: "sol", sand: "areia", sandstorm: "areia", hail: "granizo", fog: "nevoa" };
     var c = ((texto.match(/\b(rain|rains|sun|sunny|sand|sandstorm|hail|fog)\b/i) || [])[1] || "").toLowerCase().replace(/s$|ny$/, "");
     var ef = efeitoDasHabilidadesNoDuelo([id], "SEMREGRA_" + id, CLIMA[c] || null);
-    var semRegra = JSON.stringify(ef, semClimas) === baseSemRegraDuelo && !TYPE_MOD_ABILITIES[id] && !nomesComSinergiaDuelo[nome]
+    var campos = Object.keys(ef).filter(function (k) { return k !== "climasProprios" && JSON.stringify(ef[k]) !== JSON.stringify(baseSemRegraDuelo[k]); });
+    cacheCamposDuelo[id] = campos;
+    return campos;
+  }
+  // Habilidade que o motor NÃO lê: sozinha, o efeito dela é igual ao de nenhuma habilidade, e ela não está na tabela de tipos, nem na
+  // sinergia por golpe, nem arma clima. É a conta da auditoria permanente (tests/unit/auditoria_do_motor.test.mjs, lista
+  // HABILIDADES_SEM_REGRA, que guarda o motivo de cada uma) e do selo "estimada" do pipeline de build (ticket versao-nova/03).
+  function habilidadeSemRegraNoDuelo(id) {
+    if (id === undefined || id === null || id < 0 || !ABILITIES[id]) return false;
+    var campos = camposLidosDaHabilidade(id), nome = ABILITIES[id][0];
+    return campos.length === 0 && !TYPE_MOD_ABILITIES[id] && !nomesComSinergiaDuelo[nome]
       && !["chuva", "sol", "areia", "granizo", "nevoa"].some(function (cl) { return habilidadeArma(nome, cl); });
-    cacheSemRegraDuelo[id] = semRegra;
-    return semRegra;
   }
   // Clima no campo entre os dois lados: o que cada um arma (habilidade) ou o do
   // time (u.clima). Se os dois armam climas diferentes, depende de quem entra por
@@ -2287,6 +2153,13 @@
     if (efeito === "Electro Ball") { var r = Math.floor(velocidadeBaseDuelo(atq) / velocidadeBaseDuelo(def)); return r >= PODER_ELECTRO_BALL.length ? PODER_ELECTRO_BALL.length - 1 : PODER_ELECTRO_BALL[r]; }
     return 1; // Sky Drop / Level Damage: dano fixo, tratado no danoNoDuelo
   }
+  // Last Stand: fração média de PV perdida = metade do que ele perde até vencer (n golpes x dano / PV, teto 1).
+  // shortcut: aproxima o dano recebido por 1/fator (Def e SpDef, sem laço por turno) e ignora ordem de golpe e cura; trocar por laço por turno se precisar de exatidão.
+  function ultimaResistenciaDuelo(u, nVencer, danoLevado, hp) {
+    if (!u.ef.lastStand) return 1;
+    if (!(hp > 0) || nVencer === Infinity) return 1 + u.ef.lastStand / 2;
+    return 1 + u.ef.lastStand * Math.min(1, nVencer * danoLevado / hp) / 2;
+  }
   function golpesNecessariosDuelo(hp, d) { return d > 0 ? Math.ceil(hp / d) : Infinity; }
   // Quantos golpes de dano `d` derrubam `hp` quando o 1º golpe sai multiplicado por `pm` (Multiscale: 0,5) e os outros saem inteiros.
   function golpesNecessariosComPrimeiroDuelo(hp, d, pm) {
@@ -2493,6 +2366,10 @@
       var rDef = atq.ef.ruina[defF ? "def" : "spd"], rAtq = g.fonteAtk === "alvoAtk" ? 0 : def.ef.ruina[g.fonteAtk === "def" ? "def" : fisico ? "atk" : "spa"];
       if (rDef) f /= rDef;
       if (rAtq) f *= rAtq;
+      if (estAtq.acc && !atq.ef.semErrar && !def.ef.semErrarContraMim) { // estágio de precisão do jogo: (3+n)/3, n<0 = 3/(3-n)
+        var p0 = g.precisao || 1, fa = estAtq.acc >= 0 ? (3 + estAtq.acc) / 3 : 3 / (3 - estAtq.acc);
+        f *= Math.min(1, p0 * fa) / p0;
+      }
       if (atq.ef.bonusContraReduzido > 1) {
         var caiu = Object.keys(estDef).reduce(function (sm, k) { return sm + Math.max(0, -estDef[k]); }, 0);
         if ((atq.ef.intimida && !def.ef.imuneIntimida) || (atq.ef.assusta && !def.ef.imuneAssusta)) caiu = 1;
@@ -2542,7 +2419,9 @@
       // Power Outage: o 1º golpe Electric sai 2x, depois perde o tipo (e o STAB).
       if (u.ef.apagao && g && g.tipo === "Electric" && turnos > 0) f *= (2 + (turnos - 1) / (g.stab ? 1.5 : 1)) / turnos;
       if (u.ef.ventoCarga && g && g.tipo === "Electric" && turnos > 0 && outroU.golpesProntos && outroU.golpesProntos.some(function (x) { return (x.flags || []).indexOf("Air/Wing Based") !== -1; })) f *= (2 * turnos - 1) / turnos; // Wind Power
-      Object.keys(u.ef.bonusVsStatus).forEach(function (s) { f *= 1 + (presNoAlvo[s] || 0) * (u.ef.bonusVsStatus[s] - 1); }); // Cosmic Daze
+      // Cosmic Daze: alvo enfurecido (Berserk DNA, névoa) leva x2 certo; o x2 de confuso não soma por cima.
+      if (u.ef.bonusVsEnfurecido && outroU.ef.enfurecido) f *= u.ef.bonusVsEnfurecido;
+      else Object.keys(u.ef.bonusVsStatus).forEach(function (s) { f *= 1 + (presNoAlvo[s] || 0) * (u.ef.bonusVsStatus[s] - 1); }); // Cosmic Daze
       // Exploit Weakness: contra alvo com status, bate na defesa mais fraca.
       if (u.ef.menorDefesaSeStatus && melhor && melhor.razaoMenorDef > 1) {
         var pres = Object.keys(presNoAlvo).reduce(function (mx, s) { return /recuar|medo|confundir|paixao/.test(s) ? mx : Math.max(mx, presNoAlvo[s]); }, 0);
@@ -3025,6 +2904,9 @@
         if (inverte) { a = -a; b = -b; }
         primeiro = a > b ? true : a < b ? false : null;
       }
+      // Last Stand: o dano que o dono leva cai pelo fator da fração média de PV perdida até ele vencer (ou cair).
+      dD /= ultimaResistenciaDuelo(eu, golpesNecessariosDuelo(hpF, dM), dD, hpE);
+      dM /= ultimaResistenciaDuelo(foe, golpesNecessariosDuelo(hpE, dD), dM, hpF);
       var nE = golpesNecessariosDuelo(hpF, dM), nD = golpesNecessariosDuelo(hpE, dD);
       if (nE !== Infinity) nE += nec - euPreciso + (euPreciso - golpesNecessariosDuelo(hpFoe, st.meu)); // Focus Sash, bloqueios
       if (nD !== Infinity) nD += elePrecisa - golpesNecessariosDuelo(hpEu, st.dele);
@@ -3596,9 +3478,10 @@
   }
   // Pode usar golpe de status contra o alvo? Magic Bounce devolve, Good As Gold
   // é imune; Prankster ganha prioridade mas falha em Dark.
-  function statusPassaDuelo(x, y) {
+  // campo: golpe de alvo USER/OPPONENTS_FIELD (tela, vento, hazard) - o Prankster não o barra (battle_util.c:8651-8657, BlocksPrankster).
+  function statusPassaDuelo(x, y, campo) {
     if (y.ef.refleteStatus || y.ef.imuneGolpeStatus) return false;
-    if (x.ef.pranksterStatus && (y.tipos || []).indexOf("Dark") !== -1) return false;
+    if (!campo && x.ef.pranksterStatus && (y.tipos || []).indexOf("Dark") !== -1) return false;
     if (x.ef.statusSom && y.ef.imuneFlag["Sound Based"]) return false; // Musical Notes contra Soundproof
     return true;
   }
@@ -3625,7 +3508,7 @@
       ["atk", "def", "spa", "spd", "spe"].forEach(function (k) { if (e[k]) r.estagiosGanhos[k] = e[k] * mult; });
       return r;
     }
-    if (!statusPassaDuelo(x, y)) return null;
+    if (!statusPassaDuelo(x, y, /^(tela|vento|hazard)$/.test(p.tipo))) return null;
     if (p.tipo === "queda") {
       var q = p.estagios;
       if (y.ef.imuneQuedas && Object.keys(q).some(function (k) { return y.ef.imuneQuedas[k]; })) return null;
