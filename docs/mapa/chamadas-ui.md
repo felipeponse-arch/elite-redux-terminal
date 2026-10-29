@@ -21,7 +21,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderBossDetail:589 - chama: nivelDeCalculo (level_cap.js:65), monotypeAtivo (mono_run.js:72), quemResolveCardHtml (quem_resolve.js:83), quemResolveRestaurar (quem_resolve.js:103), bossConfrontoHtml (resumo_luta.js:96)
 - renderGymSkillsCardHtml:456 - chama: ehRevancheDeLider (chefoes.js:470), gymLeaderBaseName (chefoes.js:55), gymSkillsSummaryFor (chefoes.js:377)
 - selectBoss:437 - chama: varianteDoChefao (chefoes.js:368)
-- simularSemTravarATela:324 - chama: montarTimeContraChefaoEmPassos (duelo.js:4624), totalDePassosContraChefao (duelo.js:4623)
+- simularSemTravarATela:324 - chama: montarTimeContraChefaoEmPassos (duelo.js:4630), totalDePassosContraChefao (duelo.js:4629)
 
 ## ui/arquetipo.js
 - applyRecommendedTeam:207 - chama: getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), formFamilyOf (formas_mega.js:65), entradasDoJogador (liberado_na_run.js:34), flashToast (dex_lista.js:473), +4 | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:337), modoMotorFicarComVariante (modo_motor.js:119)
@@ -53,11 +53,11 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/dex_ficha.js
 - RANK_TIER_CLASS:154 - chamado por: monoRunCardHtml (arquetipo.js:516)
 - abilityCard:14 - chama: ABILITIES (dados_base.js:10)
-- buildSynergyHtml:42 - chama: sinergiasDaEspecie (duelo.js:1301) | chamado por: buildEntryHtml (editor_build.js:182), strategySetsHtml (editor_build.js:432), renderTeam (time.js:8)
+- buildSynergyHtml:42 - chama: sinergiasDaEspecie (duelo.js:1307) | chamado por: buildEntryHtml (editor_build.js:182), strategySetsHtml (editor_build.js:432), renderTeam (time.js:8)
 - conditionMoveSynergyNoteHtml:70 - chama: buildNoteHtml (editor_build.js:155)
 - evoConditionText:88 - chama: EVOKINDS (dados_base.js:13), EVO_LEVEL_FEMALE (dados_base.js:32), EVO_LEVEL_MALE (dados_base.js:31), EVO_MEGA_KINDS (dados_base.js:34), EVO_PRIMAL (dados_base.js:33)
 - fichaCabecalhoHtml:504 - chama: descricaoDaEspecie (dados_base.js:188), compraDeInicialTexto (mono_run.js:47), speciesTypeNames (tipos.js:253), state (nucleo.js:8)
-- fichaConhecerHtml:558 - chama: uniqueIds (dados_base.js:122), sinergiasDaEspecie (duelo.js:1301), bst (dex_lista.js:152)
+- fichaConhecerHtml:558 - chama: uniqueIds (dados_base.js:122), sinergiasDaEspecie (duelo.js:1307), bst (dex_lista.js:152)
 - fichaEfetividadeHtml:423 - chama: perfilDefensivoDaEspecie (tipos.js:178)
 - fichaEvolucaoHtml:446 - chama: getSpeciesByX (dados_base.js:78)
 - fichaFormasHtml:464 - chama: getSpeciesByX (dados_base.js:78)

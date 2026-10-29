@@ -4793,4 +4793,18 @@ export const MUTACOES = [
     de: "if (barra) falhar(",
     para: "if (false) falhar(",
   },
+  {
+    id: "tk17-constante-sheer-force-errada",
+    descricao: "SHEER_FORCE_MULT do motor diverge do texto/código do jogo (1,4 em vez de 1,3)",
+    arquivo: "duelo.js",
+    de: "var SHEER_FORCE_MULT = 1.3;",
+    para: "var SHEER_FORCE_MULT = 1.4;",
+  },
+  {
+    id: "tk17-prompt-technician-a-mao",
+    descricao: "o prompt da Technician volta a ter o limite escrito à mão (50 em vez da constante)",
+    arquivo: "prompts_ia.js",
+    de: '"Technician (golpe de " + TECHNICIAN_LIMITE + " de poder',
+    para: '"Technician (golpe de 50 de poder',
+  },
 ];

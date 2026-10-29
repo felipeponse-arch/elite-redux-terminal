@@ -148,3 +148,14 @@ test("TK-17: lista REJEITADOS do prompt sai de ITENS_CHOICE/ITENS_VEST/GOLPES_QU
     R.ITENS_CHOICE.pop(); R.ITENS_VEST.pop(); R.GOLPES_QUE_PASSAM_ITEM.pop();
   }
 });
+
+test("TK-17: constantes do motor (abilities.cc f34fc2b) batem com o texto do jogo e o prompt as usa", () => {
+  const ef = (n) => R.efeitoDasHabilidadesNoDuelo([R.ABILITY_ID_BY_NAME[n]], "TK17|" + n, null);
+  assert.equal(ef("Serene Grace").chanceMult, R.SERENE_GRACE_MULT);
+  const tc = ef("Technician").tecnico; assert.equal(tc.limite, R.TECHNICIAN_LIMITE); assert.equal(tc.mult, R.TECHNICIAN_MULT);
+  assert.equal(ef("Sheer Force").semEfeitoExtra, R.SHEER_FORCE_MULT);
+  const m = R.MANUAL_POR_HABILIDADE;
+  assert.ok(m["Technician"].startsWith("Technician (golpe de " + R.TECHNICIAN_LIMITE + " de poder ou menos x1,5)"));
+  assert.ok(m["Sheer Force"].startsWith("Sheer Force (x1,3 em golpe"));
+  assert.ok(m["Serene Grace"].startsWith("Serene Grace (dobra a chance"));
+});
