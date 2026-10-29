@@ -6,7 +6,7 @@
       "milestone": 1,
       "buffs": [
         { "id": "roxanne_laststand", "label": "Resistência de virada", "detail": "Quando 5 Pokémon dela já tiverem caído, o último dela entra com Ataque, Defesa, Atq. Esp., Def. Esp. e Velocidade +100% de uma vez (o jogo avisa: \"não vou aceitar a derrota\"). Só vale se o time dela tem 6." },
-        { "id": "roxanne_hazard_bleed", "label": "Stealth Rock + sangramento", "detail": "Pedras pontiagudas cercam seu time (dano ao trocar de Pokémon), e os 2 últimos Pokémon do SEU time começam a luta sangrando." },
+        { "id": "roxanne_hazard_bleed", "label": "Stealth Rock + sangramento", "detail": "Pedras pontiagudas cercam seu time (dano ao trocar de Pokémon), e os 2 últimos Pokémon do SEU time começam a luta sangrando; só pega quem ainda está sem status, e nunca o 1º do time." },
         { "id": "roxanne_defense", "label": "Defesa reforçada", "detail": "A Defesa do Pokémon ativo dela sobe de uma vez ao entrar em campo, e continua subindo um pouco a cada turno." }
       ]
     },
@@ -14,7 +14,7 @@
       "milestone": 2,
       "buffs": [
         { "id": "brawly_foresight", "label": "Foresight no seu ativo", "detail": "Depois de 1 turno do seu Pokémon em campo, ele recebe Foresight: perde o bônus de esquiva e a imunidade Fantasma contra golpes Normal/Lutador." },
-        { "id": "brawly_paralysis", "label": "Paralisia nos últimos 2", "detail": "Os 2 últimos Pokémon do seu time começam a luta paralisados." },
+        { "id": "brawly_paralysis", "label": "Paralisia nos últimos 2", "detail": "Os 2 últimos Pokémon do seu time começam a luta paralisados; só pega quem ainda está sem status, e nunca o 1º do time." },
         { "id": "brawly_spikes", "label": "Spikes (2 camadas)", "detail": "2 camadas de Spikes cercam seu time, causando dano toda vez que você troca de Pokémon." },
         { "id": "brawly_matblock", "label": "Mat Block no 1º Pokémon", "detail": "Só o primeiro Pokémon dele entra com Mat Block: bloqueia os golpes que causam dano no primeiro turno da luta (os que entram depois não têm)." },
         { "id": "brawly_attack", "label": "Ataque reforçado", "detail": "O Ataque do Pokémon ativo dele sobe de uma vez, numa porcentagem, ao entrar em campo." }
@@ -23,7 +23,7 @@
     "Wattson": {
       "milestone": 3,
       "buffs": [
-        { "id": "wattson_burn", "label": "Queimadura nos últimos 3", "detail": "Os 3 últimos Pokémon do seu time começam a luta queimados." },
+        { "id": "wattson_burn", "label": "Queimadura nos últimos 3", "detail": "Os 3 últimos Pokémon do seu time começam a luta queimados; só pega quem ainda está sem status, e nunca o 1º do time." },
         { "id": "wattson_stickyweb", "label": "Sticky Web", "detail": "Uma teia gruda no chão do seu lado do campo, baixando a Velocidade de quem entra." },
         { "id": "wattson_speed", "label": "Velocidade sobe aos poucos", "detail": "A Velocidade do Pokémon ativo dele aumenta um pouco a cada turno." },
         { "id": "wattson_magnetrise_spdef", "label": "Magnet Rise + Def. Especial", "detail": "A Defesa Especial do Pokémon dele sobe 80% ao entrar e, depois de 2 turnos em campo, ele fica imune a golpes de Terra (Magnet Rise)." }
@@ -33,10 +33,10 @@
       "milestone": 4,
       "buffs": [
         { "id": "flannery_spatk_steady", "label": "Atq. Especial sobe aos poucos", "detail": "O Ataque Especial do Pokémon ativo dela aumenta um pouco a cada turno." },
-        { "id": "flannery_toxic", "label": "Veneno grave nos últimos 2", "detail": "Os 2 últimos Pokémon do seu time começam a luta com veneno grave (piora a cada turno)." },
+        { "id": "flannery_toxic", "label": "Veneno grave nos últimos 2", "detail": "Os 2 últimos Pokémon do seu time começam a luta com veneno grave (piora a cada turno); só pega quem ainda está sem status, e nunca o 1º do time." },
         { "id": "flannery_healblock", "label": "Heal Block permanente", "detail": "Seus Pokémon não conseguem usar golpes nem itens de cura a luta inteira." },
         { "id": "flannery_accuracy", "label": "Precisão sobe aos poucos", "detail": "A Precisão do Pokémon ativo dela aumenta um pouco a cada turno." },
-        { "id": "flannery_burn", "label": "Queimadura nos últimos 2", "detail": "Os 2 últimos Pokémon do seu time começam a luta queimados." },
+        { "id": "flannery_burn", "label": "Queimadura nos últimos 2", "detail": "Os 2 últimos Pokémon do seu time começam a luta queimados; só pega quem ainda está sem status, e nunca o 1º do time." },
         { "id": "flannery_defense", "label": "Defesa reforçada", "detail": "A Defesa do Pokémon ativo dela sobe de uma vez, numa porcentagem, ao entrar em campo." },
         { "id": "flannery_copystats", "label": "Herda status ao entrar", "detail": "Quando um Pokémon dela desmaia, o substituto já entra com os mesmos status de batalha (stat stages) dele." },
         { "id": "flannery_spatk_posture", "label": "Atq. Especial reforçado", "detail": "O Ataque Especial do Pokémon ativo dela sobe de uma vez, numa porcentagem, ao entrar em campo." }
@@ -58,8 +58,8 @@
       "milestone": 6,
       "buffs": [
         { "id": "winona_spdef", "label": "Def. Especial reforçada", "detail": "A Defesa Especial do Pokémon ativo dela sobe de uma vez, numa porcentagem, ao entrar em campo." },
-        { "id": "winona_frostbite", "label": "Frostbite nos últimos 4", "detail": "Os 4 últimos Pokémon do seu time começam a luta com frostbite: perdem HP por turno e ficam com Ataque Especial reduzido." },
-        { "id": "winona_embargo", "label": "Embargo", "detail": "Seus Pokémon ficam impedidos de usar o item que seguram por 4 turnos." },
+        { "id": "winona_frostbite", "label": "Frostbite nos últimos 4", "detail": "Os 4 últimos Pokémon do seu time começam a luta com frostbite: perdem HP por turno e ficam com Ataque Especial reduzido; só pega quem ainda está sem status, e nunca o 1º do time." },
+        { "id": "winona_embargo", "label": "Embargo", "detail": "Seu Pokémon ativo (e o 2º, em luta dupla) fica impedido de usar o item que segura por 4 turnos." },
         { "id": "winona_defense", "label": "Defesa reforçada", "detail": "A Defesa do Pokémon ativo dela sobe de uma vez, numa porcentagem, ao entrar em campo." }
       ]
     },
