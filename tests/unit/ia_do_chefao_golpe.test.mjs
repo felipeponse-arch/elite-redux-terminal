@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket 03 (07/10/2026): o chefão escolhe o golpe pelos pontos da IA do jogo (battle_ai_main.c AI_TryToFaint,
 // battle_ai_util.c GetMoveDamageResult), não pelo maior dano. Sem nocaute, super efetivo (+2) ganha do golpe de
 // mais dano (+1) quando o dano dos dois é parecido; golpe que nocauteia vale mais que tudo. O jogador continua

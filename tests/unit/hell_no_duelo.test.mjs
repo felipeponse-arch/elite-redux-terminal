@@ -12,6 +12,7 @@ const unid = (nome, golpe) => R.unidadeDeDuelo(sp(nome), R.SETS_DE_DUELO[0], nul
 const dano = (a, d) => R.danoNoDuelo(a, d, NIVEL).melhor;
 const noModo = (dif, f) => { R.state.settings.difficulty = dif; try { return f(); } finally { R.state.settings.difficulty = "ace"; } };
 
+// Depende de dado: espécie real (a regra, com fixture inventada, está em regras_com_fixture.test.mjs)
 test("H1 Hell: Water x Charizard-like 2x vira 1,5x e Ground x Magnezone 4x vira 2,5x; Ace/Elite intactos", () => {
   const casos = [["Vaporeon", "Surf", "Charizard", 2, 1.5], ["Garchomp", "Earthquake", "Magnezone", 4, 2.5]];
   casos.forEach(([a, g, d, tab, hell]) => {
@@ -23,6 +24,7 @@ test("H1 Hell: Water x Charizard-like 2x vira 1,5x e Ground x Magnezone 4x vira 
   });
 });
 
+// Depende de dado: espécie real (a regra, com fixture inventada, está em regras_com_fixture.test.mjs)
 test("H1 Hell vale para os dois lados e não mexe em neutro/resistido", () => {
   const x = unid("Vaporeon", "Surf"), y = unid("Charizard", "Flamethrower"); // y bate em x só neutro/resistido? Fire x Water = 0,5
   const a = noModo("ace", () => dano(y, x)), h = noModo("hell", () => dano(y, x));
@@ -33,6 +35,7 @@ test("H1 Hell vale para os dois lados e não mexe em neutro/resistido", () => {
   assert.ok(Math.abs(lado(unid("Garchomp", "Earthquake"), z) - 0.5625) < 1e-9, "inimigo bate super efetivo (foe usa a mesma conta)");
 });
 
+// Depende de dado: espécie real (a regra, com fixture inventada, está em regras_com_fixture.test.mjs)
 test("H6 Hell: todo inimigo de todo chefão sai marcado (o jogador não), então a paralisia nunca o faz perder o turno", () => {
   let n = 0;
   R.BOSSES.forEach((b) => (b.party || []).forEach((m) => { const f = R.foeDeDuelo(m, NIVEL, null); if (f) { n++; assert.equal(f.chefao, true, b.name + " " + m.n); } }));
@@ -75,6 +78,7 @@ test("H2: Double Team e Minimize não têm plano no motor (nada a vetar no Hell)
 
 const comItem = (nome, golpe, item) => R.unidadeDeDuelo(sp(nome), R.SETS_DE_DUELO[0], null, NIVEL, [R.MOVE_ID_BY_NAME[golpe]], null, item);
 // Expert Belt: o jogo compara o modificador já reduzido (battle_util.c:7677): em Hell o 2x (1,5) não ativa, só o 4x (2,5).
+// Depende de dado: espécie real (a regra, com fixture inventada, está em regras_com_fixture.test.mjs)
 test("Expert Belt em Hell: 2x não ativa, 4x ativa; no Ace ativa nos dois", () => {
   const razao = (a, g, d, dg, dif) => noModo(dif, () => dano(comItem(a, g, "Expert Belt"), unid(d, dg)).dano / dano(comItem(a, g, "Leftovers"), unid(d, dg)).dano);
   assert.ok(Math.abs(razao("Vaporeon", "Surf", "Charizard", "Flamethrower", "ace") - 1.2) < 1e-9);

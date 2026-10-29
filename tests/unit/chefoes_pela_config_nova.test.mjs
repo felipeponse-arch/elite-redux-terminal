@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket versao-nova/05 (15/10/2026): os chefões contra o TrainerList da versão MAIS NOVA (er-config d1a9a4c, 14/10/2026). A comparação achou
 // 6 diferenças nos chefões que o app já tem (Matt, Drake, Archie); `--aplicar-tudo` as corrigiu e `diferenças: 0`. O TrainerList não está no repo,
 // então o teste confere (1) a função de correção num recorte e (2) os 6 mons de bosses.json com os valores do TrainerList d1a9a4c.

@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket calibracao-2026-10-15/04 (15/10/2026): Flash Fire e Dry Skin absorvem o golpe (código do jogo: abilities.cc:696-706 e
 // 1471-1487, `onAbsorb`; a er-config diz "complete immunity to Fire-type moves"). Antes a tabela de tipos deixava as duas de fora porque
 // o texto curto ("Powers up Fire-type moves by 1.5x if hit by a Fire-type move", "Water/Rain heals") não diz "imune", e o Fire contra um
@@ -69,6 +70,7 @@ test("razão do dano recebido com a habilidade isolada: Flash Fire Fire x0, Dry 
   assert.equal(razao("Water Absorb", "Water Gun"), 0, "controle: Water Absorb já era imune");
 });
 
+// Depende de dado: espécie real (a regra, com fixture inventada, está em regras_com_fixture.test.mjs)
 test("Mold Breaker atravessa a absorção (Flash Fire e Dry Skin)", () => {
   const molde = iso("Garchomp", ["Mold Breaker"], ["Ember"]);
   assert.ok(dano(molde, iso("Magikarp", ["Flash Fire"], ["Tackle"])) > 0, "Flash Fire");

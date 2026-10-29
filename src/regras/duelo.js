@@ -792,8 +792,8 @@
     if (/Removes terrain on switch-in|Destroys terrain|Eats terrain|Negates Weather, Rooms and Terrains/i.test(f)) ef.limpaTerreno = true;
     if (/Removes Terrain on switch-in, then ups Def or Sp\. Def/i.test(f)) ef.lawnmower = true; // sobe o stat conforme o terreno limpo
     if (/Negates Weather, Rooms and Terrains/i.test(f)) ef.anulaSalas = true;
-    if ((x = f.match(/Sets up Trick Room on entry, lasts (\d+) turns/i))) ef.sala = DURACAO_CAMPO.salaCurta; // o texto só confirma; o número vem do código (abilities.cc:4463)
-    if ((x = f.match(/Sets up Inverse Room on entry, lasts (\d+) turns/i))) ef.inversa = DURACAO_CAMPO.inversaCurta; // abilities.cc:6138
+    if (/Sets up Trick Room on entry, lasts (\d+) turns/i.test(f)) ef.sala = DURACAO_CAMPO.salaCurta; // o texto só confirma; o número vem do código (abilities.cc:4463)
+    if (/Sets up Inverse Room on entry, lasts (\d+) turns/i.test(f)) ef.inversa = DURACAO_CAMPO.inversaCurta; // abilities.cc:6138
     if ((x = f.match(/Casts a (\d+)-turn Tailwind on entry/i))) ef.vento = parseInt(x[1], 10);
     if (/Sets Gravity on entry/i.test(f)) ef.gravidade = true;
     if (/bypass Substitutes and damage reduction screens/i.test(f)) ef.infiltra = true;
@@ -1347,10 +1347,6 @@
   // Golpe cujo efeito extra o Sheer Force troca por força (não os que sobem os
   // atributos do próprio usuário).
   function temEfeitoExtraDuelo(e) { return !!e.ch && /Hit$|Fang$|Status$|Tri Attack/.test(e.ef) && !/ Up/.test(e.ef); }
-  // Categorias que uma habilidade reforça, pelo texto (sem depender de espécie).
-  function categoriasDaHabilidade(id) {
-    return Object.keys(motivosDasCategoriasDaHabilidade(id));
-  }
   // `climaDaLuta` (2026-09-29, usuário: "no time temos um Poke que seta sol e no
   // mesmo time um que usa Solar Beam, logo a estratégia do time é feita"): o
   // clima é do CAMPO - armado pelo próprio Pokémon, por alguém do time ou pelo

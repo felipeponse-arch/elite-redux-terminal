@@ -71,7 +71,6 @@
         state.customBuilds[p.sname] = lista; gravadas++; return;
       }
       if (lista.length >= 3) removerBuildDaLista(p.sname, indiceQueSaiParaSugestao(lista));
-      lista = getBuildList(p.sname).slice();
       if (acrescentarVarianteNaLista(p.sname, p.build, "sugestao")) gravadas++; else semVaga.push(p.nome);
     });
     return { gravadas: gravadas, semVaga: semVaga };

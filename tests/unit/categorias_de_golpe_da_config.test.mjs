@@ -1,9 +1,11 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket calibracao-2026-10-15/01 (15/10/2026): as categorias de golpe (soco, mordida, corte, martelo, pulso, chifre,
 // flecha, chute, arremesso...) vêm das FLAGS do MoveList da er-config (como o código do jogo as lê: abilities.cc
 // DoesMoveMatchFlag e gBattleMoves[move].hammerBased/hornBased/arrowBased/throwingBased), não do texto da NextDex.
 // Antes, 98 golpes (Crunch, Stone Edge, Brick Break, Wood Hammer, Sludge Bomb...) ficavam sem categoria e Strong Jaw,
 // Keen Edge, Iron Fist, Super Slammer e Mega Launcher não os reforçavam.
 // Chefões e espécies reais do app. Sabotagem controlada (tests/run_sabotage.mjs) também nos arquivos fora de src/regras.
+import { N_GOLPES } from "./contagens_versao.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -88,7 +90,7 @@ test("move_categorias.json: o campo `c` de TODOS os 1041 golpes é exatamente o 
     assert.deepEqual((categorias[id] && categorias[id].c) || [], esperado, m[0]);
     conferidos++;
   });
-  assert.equal(conferidos, 1041);
+  assert.equal(conferidos, N_GOLPES);
 });
 
 test("os golpes que o relatório de calibração achou sem categoria (99 pares golpe+categoria) agora têm a categoria do jogo", () => {

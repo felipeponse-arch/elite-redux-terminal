@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // TK-21 (rank): percentil e tier num lugar só; item do set só vale liberado na Etapa da luta; o rank v2 não herda campos do rank antigo.
 import { test } from "node:test";
 import assert from "node:assert/strict";

@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket 02 (07/10/2026): times dos chefões conferidos contra a config oficial do jogo (er-config
 // TrainerList.textproto, commit 7be1617 = versão do nosso dado). Resultado: 0 diferenças depois de
 // preencher 11 Eviolites que a NextDex perdeu; as habilidades "diferentes" eram a regra da posição 0.

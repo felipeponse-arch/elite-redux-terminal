@@ -1,3 +1,4 @@
+// Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 // Ticket calibracao-2026-10-15/02 (15/10/2026): os parâmetros dos itens vêm do `hold_effect_strength` da er-config, como o
 // jogo os lê (battle_util.c:7005-7034: modificador = 1 + força/100), e não de números soltos no motor. Antes: item de tipo
 // e Plate x1,2, Muscle Band e Wise Glasses x1,1, gema x1,3, Wide Lens +10%; Soul Dew, Quick Claw e Utility Umbrella não

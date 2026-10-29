@@ -1,6 +1,7 @@
 // Ticket versao-nova/07 (15/10/2026): as 29 habilidades novas da NextDex 2.65.4 + as 9 do delta da er-config d1a9a4c (upcoming) funcionam no duelo,
 // cada uma pelo CÓDIGO do jogo (abilities.cc de 486026e; linhas no docs/tickets/versao-nova/07-habilidades-novas.md), ou ficam como "sem regra" com motivo.
 // Dado real: data/dex_compact.json (2.65.4 + data/config_nova.json). Unidades sintéticas quando o que importa é a regra, não a espécie.
+import { N_HABILIDADES } from "./contagens_versao.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
@@ -39,7 +40,7 @@ const SEM_REGRA_NOVAS = {
 const NOVAS_DO_DELTA = ["Photokinesis", "Photon Burst", "Rippling Punch", "Cackling", "Fresh Snowfall", "Sticky Situation", "Bioluminescent", "Blinking Flash", "Brain Freeze"];
 
 test("as 38 habilidades novas (29 da NextDex 2.65.4, ids 1034-1062, + 9 da config d1a9a4c, ids 1063-1071): cada uma é lida pelo motor ou está registrada como sem regra, com o motivo", () => {
-  assert.equal(R.ABILITIES.length, 1075); // v2.65.4.1 (28/10): 1072 + 3 habilidades novas da er-config 486a964
+  assert.equal(R.ABILITIES.length, N_HABILIDADES); // v2.65.4.1 (28/10): 1072 + 3 habilidades novas da er-config 486a964
   const novas = [];
   for (let id = 1034; id <= 1071; id++) novas.push(R.ABILITIES[id][0]);
   assert.equal(novas.length, 38);
@@ -96,6 +97,7 @@ test("Photon Burst: luz x1,3 e o golpe, mesmo especial, é calculado contra a De
 });
 
 // ---------- som: Rippling Punch ----------
+// Depende de dado: espécie real (a regra, com fixture inventada, está em regras_com_fixture.test.mjs)
 test("Rippling Punch: golpe de soco também é de som (abilities.cc:12854): o Soundproof do alvo barra o soco; sem a habilidade o soco passa", () => {
   const alvo = iso("Magikarp", ["Soundproof"], ["Tackle"]);
   assert.ok(dano(iso("Garchomp", [], ["Mach Punch"]), alvo) > 0, "sem a habilidade, o soco passa pelo Soundproof");
