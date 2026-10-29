@@ -98,6 +98,7 @@ test("Photon Burst: luz x1,3 e o golpe, mesmo especial, é calculado contra a De
 });
 
 // ---------- som: Rippling Punch ----------
+// Depende de dado: espécie real (a regra, com fixture inventada, está em regras_com_fixture.test.mjs)
 test("Rippling Punch: golpe de soco também é de som (abilities.cc:12854): o Soundproof do alvo barra o soco; sem a habilidade o soco passa", () => {
   const alvo = iso("Magikarp", ["Soundproof"], ["Tackle"]);
   assert.ok(dano(iso("Garchomp", [], ["Mach Punch"]), alvo) > 0, "sem a habilidade, o soco passa pelo Soundproof");

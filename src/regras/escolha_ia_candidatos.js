@@ -168,7 +168,7 @@
   function escolherCandidatoDaIa(sp, r, bruto, opts, semResposta) {
     var cands = (r && r.candidatos || []).slice(0, MAX_CANDIDATOS_NO_PROMPT);
     if (!cands.length) return { build: null, indice: null, origem: null, motivo: "sem candidatos" };
-    var motivo = null, idx = null;
+    var motivo, idx = null;
     try {
       if (semResposta) motivo = MOTIVO_SEM_RESPOSTA;
       else if (!bruto || typeof bruto !== "object") motivo = "a resposta nao veio como objeto";

@@ -365,6 +365,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **prioridade_e_campo_pelo_codigo.test.mjs** - Ticket calibracao-2026-10-15/06 (15/10/2026): prioridade e campo pelo código do jogo.
 - **prompt_build.test.mjs** - Revisão do prompt de build (2026-09-27, pedido do usuário): habilidade com
 - **prompts_ia.test.mjs** - Peças dos prompts de IA e leitura das respostas (src/regras/prompts_ia.js e
+- **propriedades_do_motor.test.mjs** - TK-30 (29/10/2026, decisão do usuário): testes por propriedade (fast-check) do motor de duelo, com espécies INVENTADAS e golpes reais de ...
 - **rank_comum.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **rank_da_run.test.mjs** - Rank v2 no app (src/regras/rank_da_run.js): nota pela dificuldade da run, dois eixos,
 - **rank_disponibilidade.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
@@ -374,6 +375,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **recarga_e_dois_turnos.test.mjs** - TK-06 (decisão 7 do usuário, 28/10): recarga e golpe de 2 turnos lidos do EFEITO do dado, não da tradução PT.
 - **reconciliar_build.test.mjs** - Build salva que muda de espécie (auto-evolução) ou chega de um save antigo precisa
 - **regras.test.mjs** - Testes unitários das regras do jogo (item Q3 da pauta técnica, 2026-09-16).
+- **regras_com_fixture.test.mjs** - TK-30 (28/10/2026, decisão do usuário): a REGRA é testada aqui com espécie INVENTADA (montada no teste, sem depender do dado);
 - **regras_oficiais_fase4.test.mjs** - Fase 4 da reunião de 30/09/2026: o motor conferido contra o FAQ oficial, o
 - **respostas_do_usuario_08_10.test.mjs** - Ticket dados-2654/11 (08/10/2026): as 13 decisões que o usuário tomou sobre as dúvidas acumuladas.
 - **resto_das_habilidades.test.mjs** - O resto das habilidades (2026-09-29, pedido do usuário: "não quero que fique

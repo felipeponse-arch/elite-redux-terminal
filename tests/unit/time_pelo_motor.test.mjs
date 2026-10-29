@@ -235,7 +235,7 @@ test("F1: o gerador cede a vez várias vezes, termina no mesmo time do síncrono
   const { R, ctx } = run({ nomes: ELENCO });
   const aq = R.motorAquecerBuildsEmPassos(ctx);
   let passosAq = 0, r;
-  while (!(r = aq.next()).done) passosAq++;
+  while (!aq.next().done) passosAq++;
   assert.ok(passosAq >= 10, "uma cedida de vez por build calculada (pool de 10): " + passosAq);
   const falhasBuilds = Object.keys(ctx.cache.build).length;
   assert.ok(falhasBuilds >= 10, "as builds top-1 ficaram no cache");

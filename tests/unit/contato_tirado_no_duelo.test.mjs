@@ -25,6 +25,7 @@ const forcar = (u, c) => Object.assign({}, u, { golpesProntos: u.golpesProntos.m
 const semContatoForcado = (u) => forcar(u, false);
 const igual = (a, b) => assert.deepEqual(a, b);
 
+// Depende de dado: espécie real (a regra, com fixture inventada, está em regras_com_fixture.test.mjs)
 test("Long Reach: o golpe de contato sai sem contato (g.contato falso)", () => {
   assert.equal(iso("Garchomp", [], ["Body Slam"]).golpesProntos[0].contato, true);
   assert.equal(iso("Garchomp", ["Long Reach"], ["Body Slam"]).golpesProntos[0].contato, false);
