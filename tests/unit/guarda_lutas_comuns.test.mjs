@@ -17,7 +17,8 @@ test("guarda de publicação: só o rank completo (amostra 1) passa; amostra e a
 
 test("o build de publicação (ER_PUBLICAR=1) falha enquanto o arquivo real for de amostra; sem ER_PUBLICAR o build não olha", () => {
   const r = spawnSync(process.execPath, ["scripts/build.mjs"], { cwd: RAIZ, encoding: "utf8", env: { ...process.env, ER_PUBLICAR: "1" } });
-  if (dado.amostra === 1) assert.equal(r.status, 0, "arquivo completo: a publicação segue");
+  // arquivo completo: a guarda das lutas não barra (outra guarda, como o carimbo do TK-24, pode barrar sozinha)
+  if (dado.amostra === 1) assert.doesNotMatch(r.stderr + r.stdout, /provisório/, "arquivo completo: a guarda das lutas deixa seguir");
   else { assert.notEqual(r.status, 0); assert.match(r.stderr + r.stdout, /provisório/); }
 });
 
