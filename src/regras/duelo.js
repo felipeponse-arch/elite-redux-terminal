@@ -1394,7 +1394,7 @@
       ataqueNaEntrada: 0, seguimentoCategoria: [], aoUsar: [], limpaBuffsNaEntrada: false, quedaNaEntrada: {},
       maiorNaEntrada: 0, maiorAtaqueNaEntrada: 0, shellSmashNaMetade: false, inverteIntimida: false, dobraQuedas: false,
       encadeiaStatus: {},
-      hemolise: false, sempreDormindo: false, trocaStatusDoTipo: {}, curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
+      hemolise: false, sempreDormindo: false, imunePo: false, limpaNaEntrada: false, trocaStatusDoTipo: {}, curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
       semRecuo: false, recuoMult: 1, custoPorAtaque: 0, custoTipo: {}, bloqueiaCura: false, liquidOoze: false,
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
       bloqueios: 0, sempreResiste: 0, corCamaleao: false, tipoDoGolpe: false, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {}, precisaoPorTipo: {},
@@ -1645,6 +1645,10 @@
       });
       // alwaysSleeping (abilities.cc:2954 Comatose, :10439 Dreamscape): conta como dormindo para o Dream Eater (battle_scripts_1.s:3568).
       if (nomeHabDuelo(id) === "Comatose" || nomeHabDuelo(id) === "Dreamscape") ef.sempreDormindo = true;
+      // powderImmune (abilities.cc:706 Shield Dust, :816 Effect Spore, :2062 Overcoat, :10188 Guardian Coat, :12962 Charge Spores): IsPowderImmune barra Spore e Sleep Powder.
+      // Cleanse (abilities.cc:12991-13001): onEntry usa Heal Bell (até 2x por batalha); no 1x1 vale a 1ª entrada, que limpa o status do próprio usuário (Toxic Spikes, maldição de luta anterior).
+      if (nomeHabDuelo(id) === "Cleanse") ef.limpaNaEntrada = true;
+      if (/^(Shield Dust|Effect Spore|Overcoat|Guardian Coat|Charge Spores)$/.test(nomeHabDuelo(id))) ef.imunePo = true;
       if (imuneAntes) { ef.imuneStatus = imuneAntes; IMUNE_STATUS_POR_HABILIDADE[nomeHabDuelo(id)].forEach(function (s) { ef.imuneStatus[s] = true; }); }
     });
     ef.stabExtra = ef.stabExtra.filter(function (tp, i, a) { return a.indexOf(tp) === i; });
@@ -1965,6 +1969,10 @@
     });
     return A;
   }
+  // Constantes do sono do alvo (TK-43): declaradas antes do uso em danoNoDuelo.
+  var SONO_DO_ALVO_DUELO = { "Dream Eater": 1, "Nightmare": 1, "Wake-Up Slap": 1, "Dream Invasion": 1 };
+  var GOLPES_DE_PO_DO_SONO_DUELO = { "Spore": 1, "Sleep Powder": 1 };
+  var MAXHP_PESADELO_DUELO = 1 / 4; // ENDTURN_NIGHTMARES (battle_util.c:2619-2621)
   function danoNoDuelo(atq, def, nivel) {
     // Wide Guard permanente do ginásio (Tate & Liza): golpe em área não chega no time dele; sobram os de alvo único.
     if (def.ef.bloqueiaArea && (atq.golpesProntos || []).some(emAreaDuelo)) {
@@ -2108,7 +2116,15 @@
       // um golpe só; a média cai com os golpes que a luta pede.
       if (g.efeito === "Fake Out" && dano > 0) dano /= Math.min(6, golpesNecessariosDuelo(def.stats[0], dano));
       // Dream Eater (battle_scripts_1.s:3564-3573): sem sono nem Comatose/Dreamscape no alvo o golpe falha. O motor não carrega sono entre turnos: só vale contra quem dorme sempre.
-      if (g.nome === "Dream Eater" && !def.ef.sempreDormindo) dano = 0;
+      // TK-43: sono do alvo como valor esperado. dormindo = fração da luta com o alvo em STATUS1_SLEEP (golpe de sono do set); Comatose/Dreamscape (alwaysSleeping) contam à parte.
+      if (dano > 0 && SONO_DO_ALVO_DUELO[g.nome]) {
+        var dormindo = fracaoDormindoDuelo(atq, def, dano, nivelAtq), pSono = Math.max(dormindo, def.ef.sempreDormindo ? 1 : 0);
+        // sono OU Comatose: Dream Eater (battle_scripts_1.s:3568), Nightmare (:4909), Wake-Up Slap (battle_util.c:6886)
+        if (g.nome === "Dream Eater") dano *= pSono;
+        else if (g.nome === "Nightmare") dano = dano * pSono + MAXHP_PESADELO_DUELO * def.stats[0] * dormindo; // o golpe exige sono OU Comatose; o residual de 1/4 só tica em STATUS1_SLEEP (battle_util.c:2619)
+        else if (g.nome === "Wake-Up Slap") dano *= 1 + pSono; // poder x2 em sono OU Comatose
+        else dano *= 1 + dormindo; // Dream Invasion (MOVE_DREAM_INVERSION, battle_util.c:6944): x2 só em STATUS1_SLEEP
+      }
       // Segundo melhor golpe (outro golpe): o que sobra com Disable/Torment.
       if (dano > melhor.dano) { if (melhor.golpe) segundo = { dano: melhor.dano }; } else if (dano > segundo.dano) segundo = { dano: dano };
       var este = { dano: dano, prio: prioAqui, golpe: g, efTipo: efTipo, crit: crit, razaoMenorDef: razaoMenorDef };
@@ -2179,6 +2195,21 @@
     if (!u.ef.lastStand) return 1;
     if (!(hp > 0) || nVencer === Infinity) return 1 + u.ef.lastStand / 2;
     return 1 + u.ef.lastStand * Math.min(1, nVencer * danoLevado / hp) / 2;
+  }
+  // TK-43. Golpes que dependem de o alvo estar dormindo (poder x2, falha sem sono, pesadelo). O motor não carrega sono entre golpes:
+  // a aproximação é a fração da luta com o alvo dormindo = min(1, turnos de sono que o golpe de sono do set tira / golpes que a luta pede).
+  // Os turnos vêm de efeitoDoPlanoDuelo (precisão, imunidades, terreno, baga, Shed Skin, Early Bird, Sleep Talk) + pó (Grass, Overcoat, Safety Goggles).
+  // shortcut: sem laço por turno; Wake-Up Slap acordar o alvo e o golpe de sono repetido não entram. Subir se o rank pedir sono em sequência.
+  function fracaoDormindoDuelo(atq, def, danoCheio, nivel) {
+    var n = Math.max(1, golpesNecessariosDuelo(def.stats[0], danoCheio)), melhor = 0;
+    (atq.statusIds || []).forEach(function (id) {
+      var p = planoDoGolpeStatus(id);
+      if (!p || p.tipo !== "status" || p.status !== "sono") return;
+      if (GOLPES_DE_PO_DO_SONO_DUELO[MOVES[id][0]] && !atq.ef.statusIgnoraImune && (def.tipos.indexOf("Grass") !== -1 || def.ef.imunePo || (def.it && def.it.nome === "Safety Goggles"))) return; // IsPowderImmune (battle_util.c:3197)
+      var r = efeitoDoPlanoDuelo(atq, def, id, { nX: n, hpY: def.stats[0], dY: 0 }, nivel);
+      if (r) melhor = Math.max(melhor, Math.min(1, r.perdeY / n));
+    });
+    return melhor;
   }
   function golpesNecessariosDuelo(hp, d) { return d > 0 ? Math.ceil(hp / d) : Infinity; }
   // Quantos golpes de dano `d` derrubam `hp` quando o 1º golpe sai multiplicado por `pm` (Multiscale: 0,5) e os outros saem inteiros.
@@ -2283,7 +2314,7 @@
     sincronizar(foe, eu, sobreEle, sobreMim);
     sincronizar(eu, foe, sobreMim, sobreEle);
     // Status que já entra com ele (Toxic Spikes, maldição de uma luta anterior).
-    function jaTem(u, sobre) { Object.keys(u.statusInicial || {}).forEach(function (st) { if (podeSofrerStatusDuelo(u, st)) sobre[st] = 1; }); }
+    function jaTem(u, sobre) { if (u.ef.limpaNaEntrada) return; Object.keys(u.statusInicial || {}).forEach(function (st) { if (podeSofrerStatusDuelo(u, st)) sobre[st] = 1; }); }
     jaTem(foe, sobreEle); jaTem(eu, sobreMim);
     // Orbe do próprio Pokémon (Flame Orb, Toxic Orb): o status entra no fim do 1º
     // turno - vale (n-1)/n da luta. Cura do próprio status (Shed Skin, Leaf Guard
@@ -3419,6 +3450,7 @@
     if (/30% chance of adding a type related effect to each move/i.test(f)) ef.arquimago = 0.3; // Archmage
     if (/Sharply raises a stat based on foe's strong point/i.test(f)) ef.espiao = true; // Spyware
     if (ef.arquimago) {
+      ef.aoGolpear.push({ stat: "atk", n: -1, p: ef.arquimago, tipo: "Dragon" }); // Archmage Dragon (abilities.cc:5969): AbilityStatusEffect(MOVE_EFFECT_ATK_MINUS_1), valor esperado
       var EFEITO_DO_TIPO = { Fire: "queimar", Electric: "paralisar", Ice: "congelar", Poison: "envenenar", Psychic: "confundir", Dark: "medo", Fairy: "paixao", Water: "recuar" };
       Object.keys(EFEITO_DO_TIPO).forEach(function (tp) { empurraStatusDuelo(ef, ef.statusAtaque, [EFEITO_DO_TIPO[tp]], ef.arquimago, { tipo: tp }); });
       ef.arquimago = 0;
