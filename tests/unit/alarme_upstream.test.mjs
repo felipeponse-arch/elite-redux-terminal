@@ -1,7 +1,7 @@
 // Leitura das páginas oficiais pelo alarme de versão nova (sem rede).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ultimaVersaoDoDex, versaoDaPaginaDeDownload, hashDoConteudo } from "../../scripts/alarme_upstream.mjs";
+import { ultimaVersaoDoDex, versaoDaPaginaDeDownload, hashDoConteudo, VERSAO_DEX, VERSAO_JOGO } from "../../scripts/alarme_upstream.mjs";
 
 test("versão padrão do NextDex é o último item de allVersions", () => {
   const js = 'const allVersions = [\n  "2.5",\n  "2.6",\n  "2.65beta"\n]\nexport default allVersions';
@@ -31,4 +31,9 @@ test("baixar: 4xx marca enderecoSumiu e não fica tentando de novo; 5xx é falha
     await assert.rejects(baixar("https://exemplo/x.json"), (e) => e.enderecoSumiu === true);
     assert.equal(chamadas, 1, "404 não repete");
   } finally { globalThis.fetch = original; }
+});
+
+test("TK-36: o alarme compara com o NextDex 2.65.5 e com a versão do site oficial 2.65.4.1b", () => {
+  assert.equal(VERSAO_DEX, "2.65.5");
+  assert.equal(VERSAO_JOGO, "2.65.4.1b");
 });
