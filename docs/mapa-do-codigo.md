@@ -22,7 +22,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
   dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:187
 - **duelo.js** - Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
-  nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:85, acertosDoGolpeDuelo:86, golpeDeRecargaDuelo:93, golpeUtilNoDuelo:107, categoriaNoDuelo:119, temContatoDuelo:125, golpesDeRecargaAte:128, golpesDeDueloAte:135, golpesDeStatusAte:141, tipoDoTextoDuelo:162, fraseFixaDuelo:167, categoriasDoTextoDuelo:184, categoriasDoGolpeDuelo:187, modoHellDuelo:212, statusDoTrechoDuelo:271, presencaDoStatus:278, todosOsStatusDuelo:284, lerStatusDaFraseDuelo:289, chanceDoEstagioCrit:339, lerCriticoDaFraseDuelo:340, lerCondicaoDaFraseDuelo:366, estagioDoTexto:395, multDoEstagio:396, lerEstagioDaFraseDuelo:398, poderDoGolpeDuelo:454, lerExtrasDaFraseDuelo:456, lerCuraDaFraseDuelo:510, filtroDoTextoDuelo:543 (+154)
+  nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:85, acertosDoGolpeDuelo:86, golpeDeRecargaDuelo:93, golpeUtilNoDuelo:107, categoriaNoDuelo:119, temContatoDuelo:125, golpesDeRecargaAte:128, golpesDeDueloAte:135, golpesDeStatusAte:141, tipoDoTextoDuelo:162, fraseFixaDuelo:167, categoriasDoTextoDuelo:184, categoriasDoGolpeDuelo:187, modoHellDuelo:212, statusDoTrechoDuelo:271, presencaDoStatus:278, todosOsStatusDuelo:284, lerStatusDaFraseDuelo:289, chanceDoEstagioCrit:339, lerCriticoDaFraseDuelo:340, lerCondicaoDaFraseDuelo:366, estagioDoTexto:395, multDoEstagio:396, lerEstagioDaFraseDuelo:398, poderDoGolpeDuelo:458, lerExtrasDaFraseDuelo:460, lerCuraDaFraseDuelo:514, filtroDoTextoDuelo:547 (+154)
 - **escolha_ia_candidatos.js** - A IA ESCOLHE ENTRE os candidatos do pipeline de build (passo 4 de docs/pipeline_de_build.md; ticket 03 de
   textoDeCandidatoParaIA:20, blocoDeCandidatosParaIA:33, regrasDaEscolhaIA:40, linhaDePapelNaturalIA:47, linhaDeFraquezasDoTimeIA:51, blocoTimeCurtoIA:55, linhaDoChefaoPorEspecieIA:69, blocoPlanoCurtoIA:73, objetivoDaEscolhaIA:81, montarPromptEscolhaDeBuild:87, montarPromptEscolhaDoTime:105, indiceDaEscolhaIA:129, respostaForaDoCandidato:135, fecharCandidatoDaEscolha:145, textoDaRazaoDaEscolha:153, juntarRazaoNaBuild:161, escolherCandidatoDaIa:171, candidatosParaAEscolhaDaIa:204
 - **evolucao.js** - Builds salvas por espécie, registro "O que o app fez sozinho" e o que acontece
@@ -290,6 +290,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **diff_versoes.test.mjs** - Diff entre versões do gameData: detecta o que mudou e o que do app cita isso
 - **dificuldade_hell.test.mjs** - TK-10a: a Dificuldade Hell existe no save e no seletor; Dificuldade do jogador e tier do chefão são mapas separados.
 - **diversos_no_duelo.test.mjs** - Habilidades "diversas" no duelo (2026-09-29): o resto que muda um 1x1 -
+- **dream_eater_no_duelo.test.mjs** - TK-40: Dream Eater só age em alvo dormindo ou Comatose e cura metade do dano.
 - **drench.test.mjs** - Ticket 17 (07/10/2026): status drench pelo código oficial (er-repo 217dd0f). Encharcado age por
 - **duelo_pela_interface.test.mjs** - Ticket 07 da dívida técnica (08/10/2026), 1ª metade: o duelo testado pela entrada pública.
 - **dupla_contagem_da_sinergia.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
@@ -386,6 +387,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **prompt_build.test.mjs** - Revisão do prompt de build (2026-09-27, pedido do usuário): habilidade com
 - **prompts_ia.test.mjs** - Peças dos prompts de IA e leitura das respostas (src/regras/prompts_ia.js e
 - **propriedades_do_motor.test.mjs** - TK-30 (29/10/2026, decisão do usuário): testes por propriedade (fast-check) do motor de duelo, com espécies INVENTADAS e golpes reais de ...
+- **queda_por_habilidade_no_duelo.test.mjs** - Depende de dado: o texto das habilidades no NextDex (gameData.json) - "Biting moves have a 50% chance to lower defense", "slashing moves ...
 - **rank_comum.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **rank_da_run.test.mjs** - Rank v2 no app (src/regras/rank_da_run.js): nota pela dificuldade da run, dois eixos,
 - **rank_disponibilidade.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
