@@ -29,8 +29,8 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - buffsMudaram:364 - chama: buffsParaMostrarDoChefao (chefoes.js:503)
 - climaQueCombinaHtml:476 - chama: climaQueCombina (mono_run.js:141), state (nucleo.js:8)
 - generateCompleteTeam:292 - chama: comecarLoteDeBuilds (builds.js:118), computeTeamGenerationValidation (builds.js:240), concluirBuildDoLote (builds.js:119), encerrarLoteDeBuilds (builds.js:120), getSpeciesByX (dados_base.js:78), +5
-- generateTeamForArchetype:153 - chama: getSpeciesByX (dados_base.js:78), ctxDoState (prompts_ia.js:13), montarPromptTimeArquetipo (prompts_ia.js:764), rosterParaTimeIA (prompts_ia.js:718), snamesValidosDoTime (prompts_ia.js:805), +3
-- generateTeamUsageGuide:260 - chama: guiaDaResposta (prompts_ia.js:850), montarPromptGuia (prompts_ia.js:827), pedirIA (ia.js:80)
+- generateTeamForArchetype:153 - chama: getSpeciesByX (dados_base.js:78), ctxDoState (prompts_ia.js:16), montarPromptTimeArquetipo (prompts_ia.js:767), rosterParaTimeIA (prompts_ia.js:721), snamesValidosDoTime (prompts_ia.js:808), +3
+- generateTeamUsageGuide:260 - chama: guiaDaResposta (prompts_ia.js:853), montarPromptGuia (prompts_ia.js:830), pedirIA (ia.js:80)
 - generatedTeamCardHtml:417 - chama: computeTeamGenerationValidation (builds.js:240)
 - generatedTeamResult:35 - chamado por: guardarTimeAnterior (aba_chefoes.js:266), montarTimeContraEsteChefao (aba_chefoes.js:308), zerarRun (time.js:362)
 - monoRunCardHtml:497 - chama: entradasDoJogador (liberado_na_run.js:34), MONO_MARCAS (mono_run.js:11), avisoProximoLider (mono_run.js:158), fraquezasDoTipo (mono_run.js:80), monoDisponibilidade (mono_run.js:176), +2
@@ -125,11 +125,11 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - aplicarCuradaNoTimeNovo:153 - chama: getActiveBuild (evolucao.js:16), getBuildList (evolucao.js:14), logAutoAction (evolucao.js:229), curadaParaEstilo (plano_build.js:160), estiloDoRitmo (plano_build.js:48), +6 | chamado por: generateCompleteTeam (arquetipo.js:292)
 - generateBuildWithAI:278 - chama: candidatosParaAEscolhaDaIa (escolha_ia_candidatos.js:204), escolherCandidatoDaIa (escolha_ia_candidatos.js:171), montarPromptEscolhaDeBuild (escolha_ia_candidatos.js:87), motivoDeNaoGerarBuild (gravacao_build_ia.js:18), textoDaRetentativaDeBuild (gravacao_build_ia.js:35), +4 | chamado por: processarRevisoes (revisao_automatica.js:72)
 - gerarBuildsDoTimeComIA:176 - chama: concluirBuildDoLote (builds.js:119), candidatosParaAEscolhaDaIa (escolha_ia_candidatos.js:204), escolherCandidatoDaIa (escolha_ia_candidatos.js:171), montarPromptEscolhaDoTime (escolha_ia_candidatos.js:105), getBuildList (evolucao.js:14), +7 | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:308), generateCompleteTeam (arquetipo.js:292)
-- gerarPlanoParaBuild:342 - chama: gravarPlanoDaIa (gravacao_build_ia.js:134), getCurrentCap (level_cap.js:49), montarPromptPlano (prompts_ia.js:706), acao (nucleo.js:243), telasDeBuild (nucleo.js:237) | chamado por: processarRevisoes (revisao_automatica.js:72)
+- gerarPlanoParaBuild:342 - chama: gravarPlanoDaIa (gravacao_build_ia.js:134), getCurrentCap (level_cap.js:49), montarPromptPlano (prompts_ia.js:709), acao (nucleo.js:243), telasDeBuild (nucleo.js:237) | chamado por: processarRevisoes (revisao_automatica.js:72)
 - gravarBuildValidadaDaIa:141 - chama: gravarRespostaValidadaDaIa (gravacao_build_ia.js:105), flashToast (dex_lista.js:473), acao (nucleo.js:243), telasDeBuild (nucleo.js:237)
 - opcoesDaIA:72 - chama: buildStandardAiTools (ferramentas_ia.js:249)
 - pedirIA:80 - chamado por: generateTeamForArchetype (arquetipo.js:153), generateTeamUsageGuide (arquetipo.js:260), generateStrategySets (revisao_automatica.js:182)
-- pedirIAAgora:109 - chama: sampleErrorMessage (prompts_ia.js:153)
+- pedirIAAgora:109 - chama: sampleErrorMessage (prompts_ia.js:156)
 
 ## ui/modo_motor.js
 - modoDeMontagem:9 - chamado por: archetypeCardHtml (arquetipo.js:85), renderTeamStrategy (arquetipo.js:463)
@@ -176,7 +176,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - pipelineDesenharFicha:113 - chamado por: wireMyBuildEditor (editor_build.js:465)
 - pipelineDesenharTime:125 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8) | chamado por: renderTeam (time.js:8)
 - pipelineGolpeHtml:71 - chama: MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9)
-- pipelineResultado:14 - chama: getCurrentCap (level_cap.js:49), candidatosDeBuild (pipeline_build.js:521), state (nucleo.js:8)
+- pipelineResultado:14 - chama: getCurrentCap (level_cap.js:49), candidatosDeBuild (pipeline_build.js:530), state (nucleo.js:8)
 - pipelineSeletorDeAlvoHtml:32 - chama: getRemainingBossEntries (chefoes.js:63)
 
 ## ui/progresso.js
@@ -187,7 +187,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderRunStatus:9 - chama: state (nucleo.js:8)
 
 ## ui/quem_resolve.js
-- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:644)
+- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:653)
 - quemResolveCardHtml:83 - chama: DIFF_TO_BOSSKEY (chefoes.js:25), DIFF_LABELS (aba_chefoes.js:233), state (nucleo.js:8) | chamado por: renderBossDetail (aba_chefoes.js:556)
 - quemResolveChave:17 - chama: getCurrentCap (level_cap.js:49), state (nucleo.js:8)
 - quemResolveItemHtml:43 - chama: pipelineCandidatoHtml (pipeline_tela.js:77)
@@ -209,7 +209,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/revisao_automatica.js
 - agendarRevisoes:169 - chamado por: concluirAcoes (nucleo.js:266)
 - capRegistrado:148 - chamado por: initProgress (progresso.js:105), aplicarSaveRemoto (sync.js:45), zerarRun (time.js:362)
-- generateStrategySets:182 - chama: getCurrentCap (level_cap.js:49), ctxDoState (prompts_ia.js:13), montarPromptEstrategias (prompts_ia.js:653), sanitizarStrategySets (save.js:258), setsValidosDaResposta (validacao_build_ia.js:480), +3
+- generateStrategySets:182 - chama: getCurrentCap (level_cap.js:49), ctxDoState (prompts_ia.js:16), montarPromptEstrategias (prompts_ia.js:656), sanitizarStrategySets (save.js:258), setsValidosDaResposta (validacao_build_ia.js:480), +3
 - ponteFalhas:22 - chama: lsGet (nucleo.js:84)
 - processarRevisoes:72 - chama: golpesFuturosDe (builds.js:179), getSpeciesByX (dados_base.js:78), getBuildList (evolucao.js:14), logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), +13
 - registrarFalhaPonte:23 - chama: lsSet (nucleo.js:85)
