@@ -23,3 +23,12 @@ test("build.ps1 extrai o dex pelo transform.mjs com a versão do alarme, não pe
 test("nenhum script de build grava a versão 2.65beta", () => {
   for (const p of ["scripts/build.ps1", "scripts/check_upstream.ps1"]) assert.doesNotMatch(codigo(p), /2\.65beta/, p);
 });
+
+test("a versão do dado tem fonte única (VERSAO_DEX no alarme): nenhum outro arquivo a repete à mão", async () => {
+  const { VERSAO_DEX } = await import("../../scripts/alarme_upstream.mjs");
+  const { VERSAO_DADO } = await import("./contagens_versao.mjs");
+  assert.equal(VERSAO_DADO, VERSAO_DEX);
+  const ps = codigo("scripts/check_upstream.ps1");
+  assert.match(ps, /alarme_upstream\.mjs/);
+  assert.doesNotMatch(ps, new RegExp(VERSAO_DEX.replace(/\./g, "\.")), "check_upstream.ps1 não pode citar a versão literal");
+});

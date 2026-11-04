@@ -2,7 +2,7 @@
 Compares our local game-data snapshot against the live NextDex, so a new Elite
 Redux build does not go unnoticed. Checks two things:
 
-  1. Is 2.65.5 still the version the official dex defaults to? (the dex picks
+  1. Is our version (VERSAO_DEX in scripts/alarme_upstream.mjs, the single source) still the version the official dex defaults to? (the dex picks
      the LAST entry of allVersions in static/js/data_version.js)
   2. Is our snapshot byte-identical to the remote file for that version?
 
@@ -16,7 +16,10 @@ then re-run expand_combo_abilities.ps1.
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"
 $localPath = Join-Path $dataDir "gameData.json"
-$OUR_VERSION = "2.65.5"
+# Version: single source is VERSAO_DEX in alarme_upstream.mjs (path relative to this script, not to the current directory).
+$OUR_VERSION = (& node --input-type=module -e "import { pathToFileURL } from 'node:url'; const m = await import(pathToFileURL(process.argv[1]).href); console.log(m.VERSAO_DEX)" (Join-Path $PSScriptRoot "alarme_upstream.mjs") | Select-Object -First 1)
+if ($LASTEXITCODE -ne 0 -or -not $OUR_VERSION) { throw "could not read VERSAO_DEX from scripts/alarme_upstream.mjs" }
+$OUR_VERSION = "$OUR_VERSION".Trim()
 $base = "https://raw.githubusercontent.com/ForwardFeed/ER-nextdex/main"
 
 $drift = $false
