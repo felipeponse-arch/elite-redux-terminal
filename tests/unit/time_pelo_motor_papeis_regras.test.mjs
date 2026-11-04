@@ -56,7 +56,7 @@ test("estilo: Hyper Offense pede 4 ofensivos (com 3 e sem tanque é Balance) e S
   assert.deepEqual([tres.estiloProva.ofensivos, tres.estiloProva.tanques], [3, 0], "caso na fronteira: 3 ofensivos e nenhum tanque");
   assert.equal(tres.estilo, estiloDaRegra(tres.estiloProva));
   assert.equal(tres.estilo, "Balance");
-  const dois = monta(["Corviknight", "Clefable", "Chansey", "Blissey", "Tentacruel", "Cresselia"]).classifica();
+  const dois = monta(["Corviknight", "Slowbro", "Chansey", "Blissey", "Tentacruel", "Cresselia"]).classifica();
   assert.deepEqual([dois.estiloProva.ofensivos, dois.estiloProva.tanques + dois.estiloProva.apoio], [2, 3], "caso na fronteira: 2 ofensivos e 3 de tanque/apoio");
   assert.equal(dois.estilo, estiloDaRegra(dois.estiloProva));
   assert.equal(dois.estilo, "Balance");
