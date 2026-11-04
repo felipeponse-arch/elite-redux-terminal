@@ -111,7 +111,8 @@ test("risco 8: ter o golpe NÃO dá o papel (setup sem ganho medido, U-turn sem 
 });
 
 test("wallbreaker e tanque com prova (Etapa 2, elenco do pipeline) e abstenção de quem não prova nada", () => {
-  const r = run({ milestone: 2, nomes: ["Blissey", "Ferrothorn", "Clefable", "Dragonite", "Corviknight", "Cresselia"] });
+  // Cresselia com build montada à mão que só faz Splash/Protect/Rest/Sleep Talk: não nocauteia nem aguenta o ritmo, por construção não prova papel.
+  const r = run({ milestone: 2, nomes: ["Blissey", "Ferrothorn", "Clefable", "Dragonite", "Corviknight", "Cresselia"], builds: { Cresselia: ["Levitate", ["Splash", "Protect", "Rest", "Sleep Talk"], "Bold", [252, 0, 252, 0, 4, 0]] } });
   const out = r.R.montarTimePeloMotor(r.ctx, { variantes: ["ofensivo"] });
   const v = out.variantes[0];
   const m = (n) => v.membros.find((x) => x.nome === n);
@@ -119,7 +120,7 @@ test("wallbreaker e tanque com prova (Etapa 2, elenco do pipeline) e abstenção
   assert.ok(wall && wall.prova.nocautesEmRobustos >= 2 && wall.prova.nocautesEmRobustos * 2 >= wall.prova.nocautes, JSON.stringify(m("Ferrothorn").papeis));
   const tan = m("Blissey").papeis.find((p) => p.papel === "tanque");
   assert.ok(tan && tan.prova.confrontos >= 2 && tan.prova.exemplos.every((e) => e.turnos >= 3 && e.hpFinal >= 0.4), JSON.stringify(m("Blissey").papeis));
-  // Abstenção: Cresselia não prova nada nas lutas da amostra (dados 2.65.5: os movesets de Meowscarada, Infernape Redux e Lanturn dos chefões mudaram e a Mandibuzz passou a provar wallbreaker e revenge killer). Sem papel, com o motivo, e o texto diz isso.
+  // Abstenção: a Cresselia montada sem golpe de dano não prova nada. Sem papel, com o motivo, e o texto diz isso.
   assert.equal(m("Cresselia").papeis.length, 0);
   assert.match(m("Cresselia").abstencao, /nenhuma prova/);
   assert.ok(v.explicacao.some((t) => t.startsWith("Cresselia: sem papel provado")));
@@ -169,7 +170,8 @@ test("3ª variante (sinergia): escolhe o par armador + beneficiários que o ofen
 });
 
 test("risco 4: armador sem DOIS beneficiários medidos NÃO ganha a tag (zero e um beneficiário, no mesmo elenco)", () => {
-  const { R, ctx, cand } = clima;
+  // Metagross e Garchomp entram com build montada à mão (só Splash): não causam dano, logo não podem virar 2º beneficiário do sol, seja qual for o dado.
+  const { R, ctx, cand } = run({ milestone: 3, nomes: POOL_CLIMA, builds: { Metagross: ["Clear Body", ["Splash", "Protect", "Rest", "Sleep Talk"], "Bold", [252, 0, 252, 0, 4, 0]], Garchomp: ["Rough Skin", ["Splash", "Protect", "Rest", "Sleep Talk"], "Bold", [252, 0, 252, 0, 4, 0]] } });
   const base = cand([]).filter((c) => c.sp.x === c.base.x);
   const pega = (...ns) => ns.map((n) => base.find((c) => c.nome === n));
   const itensDoSol = (time) => R.motorSinergia(ctx, time).itens.filter((i) => i.cond.id === "clima:sol");
@@ -178,7 +180,6 @@ test("risco 4: armador sem DOIS beneficiários medidos NÃO ganha a tag (zero e 
   assert.equal(itensDoSol(zero).length, 0);
   assert.equal(R.motorClassificar(ctx, zero).tags.filter((t) => t.armador).length, 0);
   // Um beneficiário (Lilligant): o time até faz pontos a mais com o sol, então SÓ a regra dos dois beneficiários segura a tag.
-  // Dados 2.65.5: com o Scizor o sol passou a render 0,056 também para ele (2 beneficiários, a tag é legítima); o Garchomp mantém 1 só.
   const um = pega("Torkoal", "Lilligant", "Kingdra", "Pelipper", "Metagross", "Garchomp");
   assert.equal(itensDoSol(um).length, 1);
   assert.equal(itensDoSol(um)[0].beneficiarios.length, 1);
