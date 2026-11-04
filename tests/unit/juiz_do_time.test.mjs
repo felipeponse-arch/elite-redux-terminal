@@ -34,11 +34,14 @@ test("suporte útil: o Tailwind que vira a luta recebe contribuição positiva c
   assert.ok(p.contribuicao > 5, "tirar o Pidgeot do time custa a luta: " + p.contribuicao);
 });
 
-test("suporte útil: Reflect e Light Screen do Klefki seguram um nocaute a mais contra o Sidney", () => {
-  const atk = () => [meu(70, "Metagross", ["Meteor Mash", "Earthquake"], { evs: EV.fisico, nat: "Adamant" }), meu(70, "Conkeldurr", ["Mach Punch", "Drain Punch"], { evs: EV.fisico, nat: "Adamant" })];
+// 04/11/2026 (TK-35f): nos dados 2.65.5 o Sidney ganhou Beedrill (stats maiores) e Absol (tipo e habilidades novos) e a dupla
+// Metagross+Conkeldurr deixou de render nocaute com as telas; a mesma regra (telas seguram um nocaute a mais) é medida com o
+// Garchomp na base contra o Sidney 4 (mesmo nível 70).
+test("suporte útil: Reflect e Light Screen do Klefki seguram um nocaute a mais contra o Sidney 4", () => {
+  const atk = () => [meu(70, "Metagross", ["Meteor Mash", "Earthquake"], { evs: EV.fisico, nat: "Adamant" }), meu(70, "Conkeldurr", ["Mach Punch", "Drain Punch"], { evs: EV.fisico, nat: "Adamant" }), meu(70, "Garchomp", ["Earthquake", "Dragon Claw"], { evs: EV.fisico, nat: "Jolly" })];
   const klefki = () => meu(70, "Klefki", ["Reflect", "Light Screen", "Dazzling Gleam"], { evs: EV.tanqueF });
-  assert.equal(juiz(atk(), "Sidney", 70).venceu, false, "fixture: a base não vence sozinha");
-  const k = membro(juiz([klefki(), ...atk()], "Sidney", 70), "Klefki");
+  assert.equal(juiz(atk(), "Sidney 4", 70).venceu, false, "fixture: a base não vence sozinha");
+  const k = membro(juiz([klefki(), ...atk()], "Sidney 4", 70), "Klefki");
   assert.ok(k.contribuicaoSuporte >= 1, "as telas valem pelo menos um nocaute: " + k.contribuicaoSuporte);
 });
 
