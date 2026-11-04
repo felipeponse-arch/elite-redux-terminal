@@ -122,6 +122,8 @@
   // battle_util.c:5088, chamado pelo Flame Orb em :6289; Toxic Orb idem). A imunidade de habilidade vem do duelo
   // (efeitoDasHabilidadesNoDuelo: texto + IMUNE_STATUS_POR_HABILIDADE), a mesma fonte do motor.
   // contexto (opcional, estado da luta): { status1: já tem status, misty: Terreno Nevoento sobre ele no chão, safeguard: Safeguard no lado }
+  // Chamadores atuais (garantiaDoTime/orbes/Rest, linhas abaixo) só planejam build e não têm luta: nenhum passa contexto, de propósito.
+  // O 4º parâmetro fica para quem tiver estado de luta; o ramo está coberto em tests/unit/imunidade_status_habilidade.test.mjs:46-53.
   // = IsStatusImmune (battle_util.c:5051-5058) e CanBe* (:5085). Mycelium Might (:5090) ignora habilidade, campo e tipo, mas não o status1.
   function podeTerStatus(sp, cond, habilidades, contexto) {
     var s = STATUS_DUELO_DA_CONDICAO[cond], ctx = contexto || {};
