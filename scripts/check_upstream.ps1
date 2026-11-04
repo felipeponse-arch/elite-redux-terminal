@@ -16,8 +16,8 @@ then re-run expand_combo_abilities.ps1.
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"
 $localPath = Join-Path $dataDir "gameData.json"
-# Version: single source is VERSAO_DEX in alarme_upstream.mjs (path relative to this script, not to the current directory).
-$OUR_VERSION = (& node --input-type=module -e "import { pathToFileURL } from 'node:url'; const m = await import(pathToFileURL(process.argv[1]).href); console.log(m.VERSAO_DEX)" (Join-Path $PSScriptRoot "alarme_upstream.mjs") | Select-Object -First 1)
+# Version: single source is VERSAO_DEX in alarme_upstream.mjs (path relative to this script). Pass a file:// URI, not the plain path: the alarme runs its main() when argv[1] is its own path.
+$OUR_VERSION = (& node --input-type=module -e "const m = await import(process.argv[1]); console.log(m.VERSAO_DEX)" ([System.Uri](Join-Path $PSScriptRoot "alarme_upstream.mjs")).AbsoluteUri | Select-Object -First 1)
 if ($LASTEXITCODE -ne 0 -or -not $OUR_VERSION) { throw "could not read VERSAO_DEX from scripts/alarme_upstream.mjs" }
 $OUR_VERSION = "$OUR_VERSION".Trim()
 $base = "https://raw.githubusercontent.com/ForwardFeed/ER-nextdex/main"

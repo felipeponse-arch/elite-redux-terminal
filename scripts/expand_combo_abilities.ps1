@@ -12,6 +12,9 @@ Run after ability_translations_pt.json exists; it edits that file in place and i
 idempotent (already-expanded entries are rebuilt from scratch each run).
 #>
 
+# GUARDA (TK-41): script antigo, fora do fluxo. Substituto: scripts/extracao/expandir_compostas.mjs (build.ps1 chama).
+if ($args -notcontains "-Forcar") { Write-Error "expand_combo_abilities.ps1 esta aposentado. Use scripts/extracao/expandir_compostas.mjs via build.ps1. Para rodar mesmo assim, passe -Forcar."; exit 1 }
+
 . (Join-Path $PSScriptRoot "common.ps1")
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"

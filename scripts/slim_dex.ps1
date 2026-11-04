@@ -18,8 +18,12 @@ Deliberately KEPT:
 Idempotent: re-running on an already-slimmed file is a no-op.
 #>
 param(
-    [switch]$DropFlavor
+    [switch]$DropFlavor,
+    [switch]$Forcar
 )
+
+# GUARDA (TK-41): script antigo, fora do fluxo. Substituto: scripts/extracao/transform.mjs (ja faz o corte do slim_dex).
+if (-not $Forcar) { Write-Error "slim_dex.ps1 esta aposentado: o transform.mjs ja faz o corte. Para rodar mesmo assim, passe -Forcar."; exit 1 }
 
 . (Join-Path $PSScriptRoot "common.ps1")
 

@@ -221,13 +221,13 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   Get-MoveEffects:73
 - **compute_move_roles.ps1** - (sem comentário de topo)
 - **compute_species_rank.ps1** - (sem comentário de topo)
-  Get-AbilityScore:164, Get-BossDefenseScore:211, Get-MovepoolScore:237, Get-TypeScore:274, Get-Stage:337, Get-PercentileRanks:387, Get-Tier:412, Compute-Tiers:430
+  Get-AbilityScore:167, Get-BossDefenseScore:214, Get-MovepoolScore:240, Get-TypeScore:277, Get-Stage:340, Get-PercentileRanks:390, Get-Tier:415, Compute-Tiers:433
 - **compute_species_role.ps1** - (sem comentário de topo)
   Get-MoveIdSet:56, Get-PercentileRanks:70
 - **dev_server.ps1** - Injecao de mock de sincronizacao (db), 2026-09-11: exclusiva deste servidor
   Get-MockDbScript:13
 - **expand_combo_abilities.ps1** - >
-  Get-ComboParts:30, Flatten-Combo:45
+  Get-ComboParts:33, Flatten-Combo:48
 - **extract_boss_builds.ps1** - (sem comentário de topo)
 - **extract_bosses.ps1** - Generates data/bosses.json (boss trainers + their difficulty variants) from
   ResolveAbility:29, ResolveAbilityId:39, ResolveParty:46
