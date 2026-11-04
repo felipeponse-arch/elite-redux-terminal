@@ -47,8 +47,8 @@ test("scripts .ps1 aposentados abortam sem -Forcar, apontando o substituto Node,
     const c = codigo("scripts/" + nome), i = c.indexOf("GUARDA") === -1 ? c.indexOf("-Forcar") : c.indexOf("-Forcar");
     assert.ok(i !== -1, nome + " sem -Forcar");
     assert.match(c, /exit 1/, nome);
-    assert.match(c.slice(0, c.indexOf('common.ps1')), substituto, nome + " não aponta o substituto antes de carregar o common.ps1");
-    assert.ok(i < c.indexOf('common.ps1'), nome + ": guarda tem que vir antes do common.ps1");
+    assert.match(c.slice(0, c.indexOf('"common.ps1"')), substituto, nome + " não aponta o substituto antes de carregar o common.ps1");
+    assert.ok(i < c.indexOf('"common.ps1"'), nome + ": guarda tem que vir antes do common.ps1");
   }
   assert.match(ler("scripts/compute_species_rank.ps1"), /SOBRESCREVE data\/species_rank\.json/);
 });
