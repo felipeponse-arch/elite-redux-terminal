@@ -341,7 +341,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **last_stand_no_duelo.test.mjs** - Last Stand (abilities.cc:7959-7965): Def/SpDef x(1 + 0,6 x fração de PV perdido).
 - **level_cap_padrao_unico.test.mjs** - Ticket 04 (divida-tecnica): sem Level cap o padrão é um só (0 = sem limite; nível de cálculo 100).
 - **levelcaps_contra_jogo.test.mjs** - TK-23: data/levelcaps.json tem de bater com GetLevelCap() do código do jogo (pokemon.c); 100 = sem limite.
-- **liberacao_por_etapa_caracterizacao.test.mjs** - TK-35c: único ajuste do instantâneo - Granbullite (item sem espécie desde que a Granbull Mega saiu da NextDex 2.65.5): etapaItem 7 -> nul...
+- **liberacao_por_etapa_caracterizacao.test.mjs** - TK-35: segundo ajuste do instantâneo - Arcanite H Etapa 4 -> 7 (er-config MegaStonesList.textproto:2215-2226, mega_badge_requirement 7; d...
 - **liberado_na_run.test.mjs** - Ticket 05 (divida-tecnica): liberadoNaRun é a única régua de pedra, item e golpe;
 - **limpeza_motor_tk33a.test.mjs** - TK-33a (limpeza do motor, 29/10/2026): comportamento igual, fontes únicas. Itens 1-4.
 - **lote_a_motor.test.mjs** - Lote A da força-tarefa (2026-10-02): correções do motor provadas na auditoria, cada uma

@@ -1,3 +1,4 @@
+// TK-35: segundo ajuste do instantâneo - Arcanite H Etapa 4 -> 7 (er-config MegaStonesList.textproto:2215-2226, mega_badge_requirement 7; decisão do comitê).
 // TK-35c: único ajuste do instantâneo - Granbullite (item sem espécie desde que a Granbull Mega saiu da NextDex 2.65.5): etapaItem 7 -> null; a pedra segue na Etapa 7 (data/pedras_etapa.json, decisão do comitê).
 // TK-22: refatoração do registro da Etapa não pode mudar NENHUM resultado (pedras e itens x Etapas 0-10).
 import test from "node:test";
