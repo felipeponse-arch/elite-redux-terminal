@@ -85,13 +85,14 @@ test.describe("Enter e Espaço abrem a espécie", () => {
     expect(impedido, "o atalho consumiu o Espaço (sem rolagem junto)").toBe(true);
   });
 
-  test("todo atalho para espécie do app é alcançável pelo teclado (tabindex + role=button)", async ({ page }) => {
+  test("todo atalho para espécie do app é alcançável pelo teclado (tabindex + papel de botão)", async ({ page }) => {
     await abrirApp(page);
+    // Decisão do usuário (04/11/2026): <button> nativo já cumpre o papel de botão (docs/decisoes_mecanicas.md).
     // Percorre as telas que mostram atalhos e confere cada um que existe na tela.
     const falhas = [];
     const conferir = async (onde) => {
       const f = await page.evaluate(() => [...document.querySelectorAll(".goto-species, .goto-species-strategies")]
-        .filter((el) => el.tabIndex !== 0 || el.getAttribute("role") !== "button")
+        .filter((el) => el.tabIndex !== 0 || !(el.tagName === "BUTTON" || el.getAttribute("role") === "button"))
         .map((el) => el.className));
       falhas.push(...f.map((c) => `${onde}: ${c}`));
     };

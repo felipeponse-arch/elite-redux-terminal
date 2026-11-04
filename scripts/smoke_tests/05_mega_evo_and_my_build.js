@@ -209,7 +209,8 @@ async function section05() {
       await wait(50);
       const savedChar = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").customBuilds;
       const charList2 = savedChar && savedChar.SPECIES_CHARIZARD;
-      const char = charList2 && charList2[0]; // customBuilds[sname] is a list now (Fase-3 multi-build)
+      // a cópia vai para a build ATIVA (trocarBuildAtivaNaLista), que não é necessariamente a [0]
+      const char = charList2 && (charList2.find(function (b) { return b.active; }) || charList2[0]);
       check("boss-reference 'usar como meu build' copies ability/item/nature",
         char && char.ability && char.item && char.nature, char && JSON.stringify(char));
       check("boss-reference EVs string is correctly parsed into the raw array (evsTextoParaArray)",
