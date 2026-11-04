@@ -166,7 +166,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **importar_dex_strategy.mjs** - Importa para data/builds.json as estratégias oficiais por espécie do arquivo src/data/dex-strategy.md do código do jogo
   norm:16, lerBlocos:21, montarIndice:44, resolverEspecie:70, primeiroDe:84, converter:86, assinatura:150, juntar:151, main:171
 - **importar_mono.mjs** - Importa a planilha oficial "Mono earliest locations" (índice oficial:
-  lerCsv:38, lerNome:60, chave:69, distancia:70, variantes:88, casarNomes:101, lerAba:121, main:140
+  lerCsv:38, lerNome:60, chave:69, distancia:70, variantes:88, casarNomes:101, lerAba:121, cruzarComDex:144, preservarEApp:169, main:179
 - **itens_pela_config.mjs** - Parâmetros de item pelo código do jogo, não por números soltos no motor.
   lerItensDaConfig:18, TIPO_EN:46, efeitoDoItem:49, itensDeBatalha:55
 - **mapa_chamadas.mjs** - Chamadas entre arquivos do app (src/regras + src/ui) pela API do TypeScript.
