@@ -4,7 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { carregarRegras } from "./carregar_regras.mjs";
-import { percentis, tierDe, unidadeComItemLiberado, camposHerdados } from "../../scripts/rank_comum.mjs";
+import { percentis, tierDe, unidadeComItemLiberado, camposHerdados, chavesDoRankNovo } from "../../scripts/rank_comum.mjs";
 
 const R = carregarRegras({ milestone: 9 });
 
@@ -38,4 +38,9 @@ test("um script só grava species_rank.json: o rank antigo de nível 50 saiu", (
   assert.deepEqual(gravadores, ["calcular_rank_v2.mjs"]);
   assert.throws(() => readFileSync(new URL("calcular_rank_duelo.mjs", raiz)), /ENOENT/);
   assert.doesNotMatch(readFileSync(new URL("build.ps1", raiz), "utf8"), /calcular_rank_duelo\.mjs"\)/);
+});
+
+test("chavesDoRankNovo: espécie nova avaliada entra no rank gravado, a antiga fica", () => {
+  const k = chavesDoRankNovo({ A: {}, B: {} }, { B: {}, NOVA: {} });
+  assert.deepEqual(k.sort(), ["A", "B", "NOVA"]);
 });

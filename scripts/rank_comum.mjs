@@ -18,6 +18,12 @@ export function unidadeComItemLiberado(R, u, etapa, cap, montar) {
   return montar("");
 }
 
+// Espécies do rank novo: as do arquivo anterior + as que acabaram de ser avaliadas. Iterar só o anterior descartava em silêncio toda espécie
+// nova do jogo (TK-35e: Numberg, Amicabull etc. da 2.65.5 sumiram do species_rank.json).
+export function chavesDoRankNovo(antigo, avaliadas) {
+  return Array.from(new Set(Object.keys(antigo).concat(Object.keys(avaliadas))));
+}
+
 // Campos que a nova nota herda da linha anterior de species_rank.json: estágio (vem de compute_species_rank.ps1). A nota em dupla saiu
 // (decisão do usuário, 28/10/2026). Nenhum campo bst/duelo/habilidade do rank antigo passa para o rank v2.
 export function camposHerdados(antigo) {

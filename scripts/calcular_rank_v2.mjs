@@ -25,7 +25,7 @@ import { Worker, isMainThread, parentPort, workerData } from "node:worker_thread
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 import { melhoresPelaSoma, notaDosEixos, escolherPelaNotaFinal } from "./rank_escolha.mjs";
 import { lutasComunsDaRun } from "./estudo/lutas_comuns.mjs";
-import { percentis, tierDe, unidadeComItemLiberado, camposHerdados } from "./rank_comum.mjs";
+import { percentis, tierDe, unidadeComItemLiberado, camposHerdados, chavesDoRankNovo } from "./rank_comum.mjs";
 import { carimbarDerivado } from "./carimbo_derivado.mjs";
 import { notasComFatia, comunsMaisPerigosas, COMUNS_POR_ETAPA } from "./rank_fatia.mjs";
 
@@ -281,7 +281,7 @@ if (process.argv.includes("--gravar")) {
     blocos[d.chave] = { mono, estagio, dominado };
   }
   const novo = {};
-  for (const s of Object.keys(antigo)) {
+  for (const s of chavesDoRankNovo(antigo, final)) {
     if (!final[s]) { novo[s] = { foraDoRank: (DISP && DISP.motivoFora[s]) || "sem-fonte" }; continue; }
     const e = Object.assign({}, camposHerdados(antigo[s]), { etapa: final[s].etapa, porDificuldade: {} });
     for (const d of DIFICULDADES) {
