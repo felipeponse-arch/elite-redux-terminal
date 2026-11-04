@@ -53,7 +53,7 @@ if (-not $SkipExtract) {
     # gravava a versao "2.65beta" fixa e deixava de fora o patch da er-config. Equivalencia: tests/unit/extracao_transform.test.mjs.
     if (-not $Versao) { $Versao = (& node -e "import('./scripts/alarme_upstream.mjs').then(m => console.log(m.VERSAO_DEX))" | Select-Object -First 1).Trim() }
     if (-not $Versao) { throw "nao consegui ler VERSAO_DEX de scripts/alarme_upstream.mjs; passe -Versao" }
-    & node (Join-Path $PSScriptRoot "extracao	ransform.mjs") (Join-Path $dataDir "gameData.json") (Join-Path $dataDir "dex_compact.json") "--versao=$Versao" "--config-nova=$(Join-Path $dataDir 'config_nova.json')" "--traducoes=$(Join-Path $dataDir 'move_translations_pt.json')"
+    & node (Join-Path $PSScriptRoot "extracao/transform.mjs") (Join-Path $dataDir "gameData.json") (Join-Path $dataDir "dex_compact.json") "--versao=$Versao" "--config-nova=$(Join-Path $dataDir 'config_nova.json')" "--traducoes=$(Join-Path $dataDir 'move_translations_pt.json')"
     if ($LASTEXITCODE -ne 0) { throw "extracao/transform.mjs falhou" }
     & (Join-Path $PSScriptRoot "extract_bosses.ps1")
     # Regerar o bosses.json apaga o campo de batalha (Trick Room, Gravity, Monochamp); regrava dos scripts de mapa do jogo.
@@ -68,7 +68,7 @@ if (-not $SkipExtract) {
     # in place and are idempotent, so they're safe to always run here.
     # (slim_dex.ps1 e expand_combo_abilities.ps1 viraram transform.mjs e extracao/expandir_compostas.mjs; saida igual, provada em teste.)
     Write-Output "--- expanding combo abilities ---"
-    & node (Join-Path $PSScriptRoot "extracaoexpandir_compostas.mjs") (Join-Path $dataDir "dex_compact.json") (Join-Path $dataDir "ability_translations_pt.json")
+    & node (Join-Path $PSScriptRoot "extracao/expandir_compostas.mjs") (Join-Path $dataDir "dex_compact.json") (Join-Path $dataDir "ability_translations_pt.json")
     if ($LASTEXITCODE -ne 0) { throw "extracao/expandir_compostas.mjs falhou" }
     # Must run AFTER expand_combo_abilities.ps1: it scores each ability's
     # translated text (including combo abilities), so it needs the final

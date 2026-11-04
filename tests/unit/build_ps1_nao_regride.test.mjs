@@ -15,7 +15,8 @@ test("build.ps1 não chama o rank antigo que sobrescreve species_rank.json", () 
 test("build.ps1 extrai o dex pelo transform.mjs com a versão do alarme, não pelo transform.ps1 fixo em 2.65beta", () => {
   const c = codigo("scripts/build.ps1");
   assert.doesNotMatch(c, /transform\.ps1/);
-  assert.match(c, /extracao[\/"' ]+transform\.mjs/);
+  assert.match(c, /Join-Path \$PSScriptRoot "extracao\/transform\.mjs"/);
+  assert.match(c, /Join-Path \$PSScriptRoot "extracao\/expandir_compostas\.mjs"/);
   assert.match(c, /--versao=/);
 });
 
