@@ -1,3 +1,4 @@
+// Depende de dado: nomes de habilidade de chefões/lutas (muda quando a config renomeia).
 // TK-35: nome de habilidade guardado em dado lido POR NOME (chefões, lutas comuns, builds de referência) tem que existir no dex.
 // Causa: a config renomeou "Sun Basking" para "Basking" (AbilityList.textproto:3507) e o nome antigo virava undefined em silêncio.
 import { test } from "node:test";

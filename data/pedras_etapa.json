@@ -269,6 +269,10 @@
   "Tera Orb": {
    "etapa": 10,
    "fonte": "Tera Orb só existe no modo debug do jogo (er-repo data/scripts/debug.inc:203); decisão do usuário 28/10 (TK-04, motor-D1.4)"
+  },
+  "Arcanite H": {
+   "etapa": 7,
+   "fonte": "er-config items/MegaStonesList.textproto:2215-2226 (Arcanite H: mega_badge_requirement 7; unique_mega_location Defeat Lady Amelia on Route 123); TK-35, 04/11/2026"
   }
  }
 }
