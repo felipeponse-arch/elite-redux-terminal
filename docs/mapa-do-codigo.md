@@ -282,6 +282,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **contato_tirado_no_duelo.test.mjs** - Ticket mecanica-2026-10-22/02: Long Reach e Punching Glove (num soco) tiram o contato INTEIRO (IsMoveMakingContact, battle_util.c:6579-65...
 - **critico_no_duelo.test.mjs** - Crítico no duelo (2026-09-29): antes o motor não tinha crítico nenhum - Super
 - **cura_recuo_no_duelo.test.mjs** - Cura, recuo e dano por contato no duelo (2026-09-29): recuo e dreno dos golpes
+- **dado_habilidade_por_nome.test.mjs** - TK-35: nome de habilidade guardado em dado lido POR NOME (chefões, lutas comuns, builds de referência) tem que existir no dex.
 - **dados_de_mega_e_presentes.test.mjs** - Achados de 03/10 na revisão das lutas: mega_forms.json (feito à mão em 09/2026) estava 36 pedras
 - **demolitionist_pelo_codigo.test.mjs** - Ticket mecanica-2026-10-22/03 (parte Demolitionist), 22/10/2026. Valem pelo CÓDIGO da versão nova (er-repo upcoming):
 - **descricao_especie.test.mjs** - Descrição de teste do jogo escondida na ficha (15/10/2026): o Noxislash mostrava "Hi i use this for implementing.".
