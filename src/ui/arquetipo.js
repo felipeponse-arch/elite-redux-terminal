@@ -169,7 +169,7 @@
         return false;
       }
       var resp = await pedirIA({
-        prompt: montarPromptTimeArquetipo(r.roster, pace, weather, monotype),
+        prompt: montarPromptTimeArquetipo(r.roster, pace, weather, monotype, ctxDoState()),
         tentativas: 1,
         oQue: "Montagem",
         aviso: function (texto) { if (statusEl) statusEl.textContent = texto; },

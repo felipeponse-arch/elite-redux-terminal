@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "tk19-pipeline-le-state-em-vez-do-ctx",
+    descricao: "TK-19: o pipeline de build volta a pegar o nível de cálculo do state global em vez do cap do ctx recebido",
+    arquivo: "pipeline_build.js",
+    de: "var nivel = ctx.cap || NIVEL_DE_CALCULO_SEM_CAP;",
+    para: "var nivel = nivelDeCalculo();",
+  },
+  {
+    id: "tk19-prompt-le-state-em-vez-do-ctx",
+    descricao: "TK-19: o texto do clima do prompt volta a ler o state global em vez do ctx recebido",
+    arquivo: "prompts_ia.js",
+    de: "rotuloDoArquetipoDeCampo(ctx.archetype.weather) + \" - \" + WEATHER_BUILD_GUIDANCE[ctx.archetype.weather]);",
+    para: "rotuloDoArquetipoDeCampo(state.archetype.weather) + \" - \" + WEATHER_BUILD_GUIDANCE[state.archetype.weather]);",
+  },
+  {
     id: "veu-do-chefao-some",
     descricao: "TK-33b: o véu atrás do texto do cabeçalho do chefão (Aqua/Magma) some: arte crua atrás do texto",
     arquivo: "time_caixa.css",
@@ -936,7 +950,7 @@ export const MUTACOES = [
     id: "cap-ignorado",
     descricao: "golpes liberados ignoram o level cap",
     arquivo: "level_cap.js",
-    de: "return liberadoNaRun(state.settings.milestone, cap, { golpe: pair[0] });",
+    de: "return liberadoNaRun((ctx ? ctx.settings : state.settings).milestone, cap, { golpe: pair[0] });",
     para: "return true;",
   },
   {
@@ -1525,8 +1539,8 @@ export const MUTACOES = [
     id: "lote-sem-item-da-especie",
     descricao: "no lote de builds, o item exclusivo da espécie some do bloco dela",
     arquivo: "prompts_ia.js",
-    de: "        blocoItensDaEspecieIA(sp) +\n        envelopeContextoIA(linhasContextoDaEspecieIA(sp)) +",
-    para: "        envelopeContextoIA(linhasContextoDaEspecieIA(sp)) +",
+    de: "        blocoItensDaEspecieIA(sp) +\n        envelopeContextoIA(linhasContextoDaEspecieIA(sp, ctx)) +",
+    para: "        envelopeContextoIA(linhasContextoDaEspecieIA(sp, ctx)) +",
   },
   {
     id: "lote-sem-quem-responde",
@@ -2683,7 +2697,7 @@ export const MUTACOES = [
     id: "pipeline-filtro-de-validacao-some",
     descricao: "candidato que não passa em validateAiBuild deixa de ser descartado",
     arquivo: "pipeline_build.js",
-    de: "var r = pipelineValidarRascunho(sp, g);",
+    de: "var r = pipelineValidarRascunho(sp, g, ctx);",
     para: "var r = { v: { moves: g.av.golpes.slice(), ability: g.hab, nature: g.nat.nome, item: \"\", evs: g.nat.evs.slice() }, itemDeRascunho: null };",
   },
   {
@@ -2718,8 +2732,8 @@ export const MUTACOES = [
     id: "pipeline-alvo-padrao-qualquer-chefao",
     descricao: "sem alvo, o pipeline mira o próximo chefão qualquer (Alto Comando incluso) em vez do próximo líder de ginásio",
     arquivo: "pipeline_build.js",
-    de: "getRemainingBossEntries().filter(function (b) { return b.cat === \"Lider de Ginasio\"; })[0] || null;",
-    para: "getRemainingBossEntries()[0] || null;",
+    de: "getRemainingBossEntries(ctx).filter(function (b) { return b.cat === \"Lider de Ginasio\"; })[0] || null;",
+    para: "getRemainingBossEntries(ctx)[0] || null;",
   },
   {
     id: "pipeline-referencia-com-life-orb",
@@ -4221,7 +4235,7 @@ export const MUTACOES = [
     id: "escolha-ia-sem-contexto-do-time",
     descricao: "o prompt individual perde o time em uso e as fraquezas",
     arquivo: "escolha_ia_candidatos.js",
-    de: "blocoTimeCurtoIA(sp) + GUIA_DE_PAPEL_CURTO + \"\\n\" +",
+    de: "blocoTimeCurtoIA(sp, ctx) + GUIA_DE_PAPEL_CURTO + \"\\n\" +",
     para: "\"\" +",
   },
   {
@@ -4257,14 +4271,14 @@ export const MUTACOES = [
     id: "pipeline-rascunho-sem-eviolite",
     descricao: "espécie que ainda evolui deixa de levar Eviolite no rascunho",
     arquivo: "pipeline_build.js",
-    de: "if (!v.item && pipelineEvioliteServe(sp)) {",
+    de: "if (!v.item && pipelineEvioliteServe(sp, ctx)) {",
     para: "if (false) {",
   },
   {
     id: "pipeline-rascunho-eviolite-sem-olhar-a-etapa",
     descricao: "o rascunho leva Eviolite mesmo antes da Etapa em que o jogador consegue o item",
     arquivo: "pipeline_build.js",
-    de: "return etapaDoItem(\"Eviolite\") !== null && liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: \"Eviolite\" });",
+    de: "return etapaDoItem(\"Eviolite\") !== null && liberadoNaRun(ctx.settings.milestone, ctx.cap, { item: \"Eviolite\" });",
     para: "return etapaDoItem(\"Eviolite\") !== null;",
   },
   {
@@ -4720,7 +4734,7 @@ export const MUTACOES = [
     id: "tk18-ia-aceita-item-nao-liberado",
     descricao: "a IA volta a aceitar item que a run ainda não libera (decisão 10)",
     arquivo: "validacao_build_ia.js",
-    de: "if (item && !stoneRule && !liberadoNaRun(state.settings.milestone, getCurrentCap(), { item: item })) {",
+    de: "if (item && !stoneRule && !liberadoNaRun(ctx.settings.milestone, ctx.cap, { item: item })) {",
     para: "if (false) {",
   },
   {
@@ -4790,7 +4804,7 @@ export const MUTACOES = [
     id: "tk14-indisponiveis-ia-propria-lista",
     descricao: "o aviso de itens ainda indisponiveis da IA deixa de ler a lista unica (itensDoTime) e trata o pool inteiro como liberado",
     arquivo: "prompts_ia.js",
-    de: "var liberados = itensDoTime(state.settings.milestone, getCurrentCap());",
+    de: "var liberados = itensDoTime(ctx.settings.milestone, ctx.cap);",
     para: "var liberados = AI_ITEM_POOL;",
   },
   {

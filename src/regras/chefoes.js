@@ -60,8 +60,8 @@
   // são rebatalhas em pontos diferentes do jogo, não dificuldades; só a
   // PRIMEIRA ocorrência de cada nome-base é o encontro real que concede o
   // badge, então só ela entra na lista de "o que falta".
-  function getRemainingBossEntries() {
-    var curMilestone = state.settings.milestone;
+  function getRemainingBossEntries(ctx) {
+    var curMilestone = (ctx ? ctx.settings : state.settings).milestone;
     var seenLeader = {};
     var seenEliteFour = {};
     var champIncluded = false;

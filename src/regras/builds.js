@@ -150,9 +150,9 @@
   var MAX_MESMO_ITEM_NO_TIME = 2;
   // Item esgotado: quem já tem MAX_MESMO_ITEM_NO_TIME donos no time (TK-18, 10.7). donos = lista de quem segura.
   function itemEsgotadoNoTime(donos) { return (donos || []).length >= MAX_MESMO_ITEM_NO_TIME; }
-  function itensEmUsoComQuem(excludeX) {
+  function itensEmUsoComQuem(excludeX, ctx) {
     var usados = {};
-    state.team.forEach(function (x) {
+    (ctx ? ctx.team : state.team).forEach(function (x) {
       if (!contaNoTime(x, excludeX)) return;
       var otherSp = getSpeciesByX(x);
       if (!otherSp) return;

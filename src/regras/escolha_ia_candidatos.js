@@ -52,11 +52,12 @@
     var riscos = membros.length ? computeSharedRisks(membros) : [];
     return riscos.length ? "Fraquezas que o time divide: " + riscos.map(function (r) { return r.t + " (" + r.n + ")"; }).join(", ") + " - resistir/cobrir isso vale mais.\n" : "";
   }
-  function blocoTimeCurtoIA(sp) {
-    var itens = itensEmUsoComQuem(sp.x), nomes = Object.keys(itens);
+  function blocoTimeCurtoIA(sp, ctx) {
+    ctx = ctx || ctxDoState();
+    var itens = itensEmUsoComQuem(sp.x, ctx), nomes = Object.keys(itens);
     var esg = nomes.filter(function (i) { return itemEsgotadoNoTime(itens[i]); });
     var golpes = teamMovesInUse(sp.x), papeis = teamRolesInUse(sp.x);
-    var membros = state.team.map(getSpeciesByX).filter(function (m) { return m && m.x !== sp.x; });
+    var membros = ctx.team.map(getSpeciesByX).filter(function (m) { return m && m.x !== sp.x; });
     return linhaDePapelNaturalIA(sp) +
       (nomes.length ? "Itens em uso no time: " + nomes.map(function (i) { return dadoExterno(i) + " (" + itens[i].map(dadoExterno).join(", ") + ")"; }).join("; ") + "." +
         (esg.length ? " ESGOTADOS (qualquer outro igual e REJEITADO): " + esg.map(dadoExterno).join(", ") + "." : "") + "\n" : "") +
@@ -85,15 +86,16 @@
   // Prompt da build de UM membro. `r` = candidatosDeBuild(sp, ...) (com candidatos).
   function montarPromptEscolhaDeBuild(sp, r, opts) {
     opts = opts || {};
-    var cap = getCurrentCap();
-    var arq = archetypeBuildGuidance();
+    var ctx = completarCtx(opts.ctx);
+    var cap = ctx.cap;
+    var arq = archetypeBuildGuidance(ctx);
     return cabecalhoIA() +
       "ESCOLHA a build do Pokemon " + sp.n + " (build " + versaoDosDados() + ") ENTRE os candidatos abaixo, que o app ja calculou e validou.\n" +
       blocoDeCandidatosParaIA(sp, r) +
-      blocoItensIA(sp, false) +
+      blocoItensIA(sp, false, ctx) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (arq.length ? arq.join("\n") + "\n" : "") +
-      blocoTimeCurtoIA(sp) + GUIA_DE_PAPEL_CURTO + "\n" +
+      blocoTimeCurtoIA(sp, ctx) + GUIA_DE_PAPEL_CURTO + "\n" +
       objetivoDaEscolhaIA(opts) +
       (opts.chefao ? linhaDoChefaoPorEspecieIA(sp, opts.chefao.responde, opts.chefao.provado) : "") +
       blocoPlanoCurtoIA(sp) +
@@ -102,8 +104,9 @@
   // Prompt do lote: `itens` = [{ sp, r }] (só quem tem candidatos). O que vale pro time todo vai UMA vez.
   function montarPromptEscolhaDoTime(itens, opts) {
     opts = opts || {};
-    var cap = getCurrentCap();
-    var arq = archetypeBuildGuidance();
+    var ctx = completarCtx(opts.ctx);
+    var cap = ctx.cap;
+    var arq = archetypeBuildGuidance(ctx);
     var pokes = itens.map(function (it, i) {
       return "=== POKEMON " + (i + 1) + " de " + itens.length + ": " + it.sp.n + " (chave \"" + it.sp.sname + "\") ===\n" +
         blocoDeCandidatosParaIA(it.sp, it.r) + linhaDePapelNaturalIA(it.sp) + blocoItensDaEspecieIA(it.sp) +
@@ -112,10 +115,10 @@
     return cabecalhoIA() +
       "ESCOLHA a build de CADA um dos " + itens.length + " Pokemon deste time (build " + versaoDosDados() + ") ENTRE os candidatos de cada um, que o app ja calculou e validou. " +
       "Eles jogam JUNTOS: varie papeis, e no MAXIMO " + MAX_MESMO_ITEM_NO_TIME + " do time com o mesmo item.\n" +
-      blocoItensComunsIA(true, "") +
+      blocoItensComunsIA(true, "", ctx) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (arq.length ? arq.join("\n") + "\n" : "") +
-      linhaDeFraquezasDoTimeIA(state.team.map(getSpeciesByX).filter(Boolean)) + GUIA_DE_PAPEL_CURTO + "\n" +
+      linhaDeFraquezasDoTimeIA(ctx.team.map(getSpeciesByX).filter(Boolean)) + GUIA_DE_PAPEL_CURTO + "\n" +
       objetivoDaEscolhaIA(opts) +
       pokes +
       "Responda SOMENTE com um objeto JSON neste formato exato, sem texto ao redor: " +
