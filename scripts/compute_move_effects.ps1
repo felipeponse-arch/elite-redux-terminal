@@ -1,4 +1,6 @@
 ﻿<#
+TK-15 D3.1: data/move_effects.json é INTERMEDIÁRIO do build, não dado do app em execução. Único consumidor: compute_condition_move_synergy.ps1
+(gera species_ability_synergy.json, que o motor lê). Nada em src/ lê este arquivo; tests/unit/golpes_fonte_unica.test.mjs guarda isso.
 Catálogo sistemático do efeito REAL de cada golpe (pedido do usuário,
 2026-09-20/21: "mesma pesquisa que fez com as habilidades, agora nos golpes,
 depois juntamos os dois"). Mesma disciplina de compute_ability_movepool_

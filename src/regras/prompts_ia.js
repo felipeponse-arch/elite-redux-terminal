@@ -8,6 +8,11 @@
   // fase 4 da refatoração (2026-09-24).
 
 
+  // ctx explícito das regras puras (TK-19): { archetype, team, settings, cap }. Este é o ÚNICO ponto das regras de IA que lê o
+  // state; quem chama monta o ctx aqui e passa adiante. Sem ctx, as entradas públicas usam o do state (compatível com os testes).
+  function ctxDoState() { return { archetype: state.archetype, team: state.team, box: state.box, settings: state.settings, cap: getCurrentCap() }; }
+  function completarCtx(ctx) { return ctx && ctx.settings && ctx.archetype && ctx.team && ctx.cap !== undefined ? ctx : Object.assign(ctxDoState(), ctx || {}); }
+
   // Orientação real de build por Ritmo/Clima do time (achado do usuário,
   // 2026-09-13, com print do time montado via "Montar melhor time": a
   // build gerada por IA pra um membro do time nunca considerava o
@@ -55,20 +60,21 @@
   };
 
   // Rótulos que a IA lê (2026-09-26): "Estilo", "Clima e campo", "Tática".
-  function archetypeBuildGuidance() {
+  function archetypeBuildGuidance(ctx) {
+    ctx = completarCtx(ctx);
     var parts = [];
-    if (state.archetype.pace && PACE_BUILD_GUIDANCE[state.archetype.pace]) {
-      parts.push("Estilo do time: " + state.archetype.pace + " - " + PACE_BUILD_GUIDANCE[state.archetype.pace]);
+    if (ctx.archetype.pace && PACE_BUILD_GUIDANCE[ctx.archetype.pace]) {
+      parts.push("Estilo do time: " + ctx.archetype.pace + " - " + PACE_BUILD_GUIDANCE[ctx.archetype.pace]);
     }
-    if (state.archetype.weather && WEATHER_BUILD_GUIDANCE[state.archetype.weather]) {
-      parts.push("Clima e campo do time: " + rotuloDoArquetipoDeCampo(state.archetype.weather) + " - " + WEATHER_BUILD_GUIDANCE[state.archetype.weather]);
+    if (ctx.archetype.weather && WEATHER_BUILD_GUIDANCE[ctx.archetype.weather]) {
+      parts.push("Clima e campo do time: " + rotuloDoArquetipoDeCampo(ctx.archetype.weather) + " - " + WEATHER_BUILD_GUIDANCE[ctx.archetype.weather]);
     }
-    if (state.archetype.tatica && TATICA_BUILD_GUIDANCE[state.archetype.tatica]) {
-      parts.push("Tatica do time: " + state.archetype.tatica + " - " + TATICA_BUILD_GUIDANCE[state.archetype.tatica]);
+    if (ctx.archetype.tatica && TATICA_BUILD_GUIDANCE[ctx.archetype.tatica]) {
+      parts.push("Tatica do time: " + ctx.archetype.tatica + " - " + TATICA_BUILD_GUIDANCE[ctx.archetype.tatica]);
     }
     // Monotype (2026-09-26): antes só o gerador de time sabia; a build e as
     // Estratégias agora cobrem as fraquezas que o time inteiro divide.
-    if (state.archetype.monotype) parts.push("Monotype do time: " + orientacaoMono(state.archetype.monotype));
+    if (ctx.archetype.monotype) parts.push("Monotype do time: " + orientacaoMono(ctx.archetype.monotype));
     return parts;
   }
 
@@ -199,7 +205,7 @@
     var a = ABILITIES[id];
     return "- " + a[0] + ": " + dadoExterno(ABILITY_PT[String(id)] || a[1] || "sem descricao");
   }
-  function blocoEspecieIA(sp, plural) {
+  function blocoEspecieIA(sp, plural, ctx) {
     var abiIds = uniqueIds(sp.ab);
     var abiNames = abiIds.map(function (id) { return ABILITIES[id][0]; });
     return "Tipo: " + speciesTypeNames(sp).join("/") + "\n" +
@@ -209,7 +215,7 @@
       "Innates SEMPRE ativas (nao escolhiveis, mas contam na sinergia - a build deve aproveitar o maximo delas):\n" +
       "<dados_do_jogo>\n" + uniqueIds(sp.inn).map(function (id) {
         // Elite: a innate que o nível do cap ainda não liberou (level_cap.js) vai marcada.
-        var travada = innatesTravadasNoNivel(sp, nivelDeCalculo()).indexOf(id) !== -1;
+        var travada = innatesTravadasNoNivel(sp, (ctx || ctxDoState()).cap || NIVEL_DE_CALCULO_SEM_CAP).indexOf(id) !== -1;
         return linhaHabilidadeIA(id) + (travada ? " [TRAVADA no Elite ate o Pokemon chegar ao nivel " + NIVEL_DA_INNATE_ELITE[(sp.inn || []).indexOf(id)] + " - nao conte com ela agora]" : "");
       }).join("\n") + "\n</dados_do_jogo>\n";
   }
@@ -226,9 +232,10 @@
     "Sweeper": "ataque + Velocidade (252/252); golpe de setup quando tiver; prioridade pra fechar; item que ajude a varrer (Life Orb, Choice Scarf, berry de panico, Weakness Policy, Focus Sash)."
   };
   function nomePapel(r) { return ROLE_LABEL_PT[r] || r; }
-  function blocoPapelIA(sp, plural, comTime) {
+  function blocoPapelIA(sp, plural, comTime, ctx) {
+    ctx = completarCtx(ctx);
     var natural = SPECIES_ROLE[sp.sname];
-    var golpes = availableMovesFor(sp).names;
+    var golpes = availableMovesFor(sp, ctx).names;
     var prioridade = golpes.filter(ehPrioridadeDeDano);
     var pivos = golpes.filter(ehGolpeDePivo);
     var linhas = [];
@@ -248,7 +255,7 @@
       linhas.push("Esta forma AINDA EVOLUI: Eviolite (aumenta Def e Def. Especial de quem ainda evolui) costuma ser o item defensivo mais forte aqui - considere.");
     }
     if (comTime) {
-      var membros = state.team.map(getSpeciesByX).filter(function (m) { return m && m.x !== sp.x; });
+      var membros = ctx.team.map(getSpeciesByX).filter(function (m) { return m && m.x !== sp.x; });
       var riscos = computeSharedRisks(membros);
       if (riscos.length) linhas.push("Fraquezas que o resto do time divide: " + riscos.map(function (r) { return r.t + " (" + r.n + " membros)"; }).join(", ") + " - resistir/cobrir isso vale mais.");
     }
@@ -256,8 +263,8 @@
   }
   // Movepool liberado no cap (mesma trava do editor manual - golpe de tutor
   // nunca trava), dentro de UM bloco <dados_do_jogo>.
-  function blocoMovepoolIA(sp, plural) {
-    var linhas = availableMovesFor(sp).ids.map(movePromptLine);
+  function blocoMovepoolIA(sp, plural, ctx) {
+    var linhas = availableMovesFor(sp, ctx).ids.map(movePromptLine);
     return "Movepool real - " + (plural ? "cada set escolhe" : "escolha") + " exatamente 4 desta lista, nenhum golpe fora dela. Cada linha traz o que o golpe " +
       "FAZ NESTE HACK (tipo, categoria, poder, prioridade, papel e descricao do proprio jogo) - leia a descricao, " +
       "nao assuma pelo nome, golpes deste hack podem ser diferentes do jogo original. " + LEGENDA_GOLPE + "\n<dados_do_jogo>\n" + linhas.join("\n") + "\n</dados_do_jogo>\n";
@@ -289,28 +296,32 @@
     return (daEspecie.length ? "Exclusivo desta especie:\n<dados_do_jogo>\n" + daEspecie.map(comDescricaoIA).join("\n") + "\n</dados_do_jogo>\n" : "") +
       regraItemConsumivelPrompt(sp);
   }
-  function blocoItensIA(sp, plural) {
-    return blocoItensComunsIA(plural, blocoItensDaEspecieIA(sp));
+  function blocoItensIA(sp, plural, ctx) {
+    ctx = completarCtx(ctx);
+    return blocoItensComunsIA(plural, blocoItensDaEspecieIA(sp), ctx);
   }
   // `meio`: o que entra entre a lista de utilidade e as travas (a parte da
   // espécie no prompt de 1 build; vazio no lote, onde ela vai em cada espécie).
   // Itens da lista que só saem DEPOIS da Etapa atual (decisão do usuário, 08/10): a IA evita,
   // mas pode usar com motivo claro. Vem de ONDE_ACHAR_ITENS (código oficial do jogo).
-  function itensAindaIndisponiveisParaIA() {
+  function itensAindaIndisponiveisParaIA(ctx) {
+    ctx = completarCtx(ctx);
     // Lista única do time (itens_do_time.js): o que não está liberado nesta Etapa é o que falta nela.
-    var liberados = itensDoTime(state.settings.milestone, getCurrentCap());
+    var liberados = itensDoTime(ctx.settings.milestone, ctx.cap);
     return AI_ITEM_POOL.filter(function (n) { return liberados.indexOf(n) === -1; })
       .map(function (n) { return { n: n, p: primeiroLugarDoItem(n) }; })
       .filter(function (x) { return x.p; })
       .sort(function (a, b) { return a.p.etapa - b.p.etapa; });
   }
-  function blocoItensAindaIndisponiveisIA() {
-    var lista = itensAindaIndisponiveisParaIA();
+  function blocoItensAindaIndisponiveisIA(ctx) {
+    ctx = completarCtx(ctx);
+    var lista = itensAindaIndisponiveisParaIA(ctx);
     if (!lista.length) return "";
     return "AINDA NAO DISPONIVEIS nesta Etapa (o jogador ainda nao consegue obter; evite, e so use com motivo claro na rationale): " +
       lista.map(function (x) { return x.n + " (a partir da " + rotuloDaEtapaDoItem(x.p.etapa) + ")"; }).join(", ") + ".\n";
   }
-  function blocoItensComunsIA(plural, meio) {
+  function blocoItensComunsIA(plural, meio, ctx) {
+    ctx = completarCtx(ctx);
     var tipo = Object.keys(ITENS_IA_TIPO).filter(function (n) { return ITEMS.indexOf(n) !== -1; })
       .map(function (n) { return n + "=" + ITENS_IA_TIPO[n]; });
     var comDescricao = comDescricaoIA;
@@ -331,7 +342,7 @@
       "Utilidade (efeito deste jogo - leia, nao assuma pelo nome; pedra de clima so se a especie arma aquele clima):\n<dados_do_jogo>\n" +
       ITENS_IA_UTILIDADE.map(comDescricao).join("\n") + "\n</dados_do_jogo>\n" +
       meio +
-      blocoItensAindaIndisponiveisIA() +
+      blocoItensAindaIndisponiveisIA(ctx) +
       // Item que reforça + travas (2026-09-27; travas pela descrição do jogo,
       // conferidas em conflitoDeItem, validacao_build_ia.js).
       "ITEM x BUILD: o item precisa reforcar o papel, a habilidade ou os golpes escolhidos - diga na rationale o que ele reforca. " +
@@ -342,14 +353,14 @@
   }
   // O que o resto do time já usa (só a build de 1 membro recebe: as Estratégias
   // são leitura exploratória da espécie, não do time).
-  function blocoTimeEmUsoIA(sp) {
+  function blocoTimeEmUsoIA(sp, ctx) {
     // Item pode repetir no time (2026-09-27, pedido do usuário: "cada Pokémon
     // pode ter um item e esse item pode ser repetido pelo time") - a lista de
     // itens em uso saiu do prompt; golpes e papéis continuam como preferência.
     var golpes = teamMovesInUse(sp.x), papeis = teamRolesInUse(sp.x);
     // Itens em uso de volta ao prompt (2026-09-29): sem isso a IA não sabia o que
     // os outros seguravam e todo Hyper Offense saía com Life Orb.
-    var itens = itensEmUsoComQuem(sp.x);
+    var itens = itensEmUsoComQuem(sp.x, ctx);
     var nomesItens = Object.keys(itens);
     var esgotados = nomesItens.filter(function (i) { return itemEsgotadoNoTime(itens[i]); });
     return "" +
@@ -409,7 +420,8 @@
   // prompt mandava usar umas 6. Os mesmos dados das ferramentas (mesmas
   // funções: SPECIES_RANK, ABILITY_SYNERGY, computeSpeedTiers,
   // confrontoParaParty...) entram aqui e a build sai numa chamada só.
-  function linhaVelocidadeIA(sp) {
+  function linhaVelocidadeIA(sp, ctx) {
+    ctx = completarCtx(ctx);
     var st = computeSpeedTiers("");
     var idx = st.rows.findIndex(function (r) { return r.sp.sname === sp.sname; });
     if (idx === -1) return "";
@@ -417,7 +429,7 @@
     var txt = "Velocidade no nivel " + st.level + " (base " + row.base + "): sem EV " + row.neutral +
       "; 252 EV + nature que sobe Velocidade " + row.invested + " (passa " + (st.rows.length - idx - 1) + " de " + st.rows.length +
       " especies tambem investidas); com Choice Scarf " + row.scarf + ".";
-    if (state.archetype.weather === "Trick Room") {
+    if (ctx.archetype.weather === "Trick Room") {
       txt += " Minima pra Trick Room (0 EV, IV 0 com Iron Pill, nature que reduz Velocidade): " +
         calcFinalStat(row.base, 0, 0, st.level, 5, "Brave", null, sp.n) + ".";
     }
@@ -425,8 +437,8 @@
   }
   // `chefao` ({ boss, party }): luta escolhida pelo jogador no botão "Montar
   // time contra este chefão" (2026-09-29) - sem ele, a próxima luta que falta.
-  function linhasProximaLutaIA(sp, chefao) {
-    var boss = chefao ? chefao.boss : getRemainingBossEntries()[0];
+  function linhasProximaLutaIA(sp, chefao, ctx) {
+    var boss = chefao ? chefao.boss : getRemainingBossEntries(ctx)[0];
     if (!boss) return [];
     var party = chefao ? chefao.party : bossPartyPorDificuldade(boss);
     var cx = confrontoParaParty(party, false);
@@ -461,8 +473,9 @@
     }
     return linhas;
   }
-  function blocoContextoIA(sp, chefao) {
-    return envelopeContextoIA(linhasContextoDaEspecieIA(sp).concat(linhasContextoComumIA(sp, chefao)));
+  function blocoContextoIA(sp, chefao, ctx) {
+    ctx = completarCtx(ctx);
+    return envelopeContextoIA(linhasContextoDaEspecieIA(sp, ctx).concat(linhasContextoComumIA(sp, chefao, ctx)));
   }
   function envelopeContextoIA(linhas) {
     return "CONTEXTO JA CALCULADO PELO APP (dado real do jogo e do seu progresso - use direto; nesta consulta nao ha ferramentas):\n" +
@@ -471,7 +484,8 @@
   // Contexto em duas partes (2026-09-30, lote de builds do time): o que é da
   // espécie (rank, sinergia, velocidade) e o que é igual pro time todo (chefões
   // que faltam, time da próxima luta) - no lote, a parte comum vai uma vez só.
-  function linhasContextoDaEspecieIA(sp) {
+  function linhasContextoDaEspecieIA(sp, ctx) {
+    ctx = completarCtx(ctx);
     var linhas = [];
     var rank = rankDe(sp.sname);
     if (rank) linhas.push("Rank desta especie neste hack: tier " + rank.tier + " (pontuacao " + rank.score + ").");
@@ -488,21 +502,23 @@
           (c.tipo === "clima" ? " (arma o clima " + c.clima + ")" : " (recuo baixa o HP)");
       }).join("; ") + ".");
     }
-    var vel = linhaVelocidadeIA(sp);
+    var vel = linhaVelocidadeIA(sp, ctx);
     if (vel) linhas.push(vel);
     return linhas;
   }
   // `sp` opcional: com ele, entra a linha "o app sugere ESTA espécie" da próxima luta.
   // Dificuldade Elite (código oficial): innates do jogador liberam pelo nível do Pokémon.
-  function avisoInnatesEliteIA() {
-    if (state.settings.difficulty !== "elite") return "";
-    var cap = getCurrentCap();
+  function avisoInnatesEliteIA(ctx) {
+    ctx = completarCtx(ctx);
+    if (ctx.settings.difficulty !== "elite") return "";
+    var cap = ctx.cap;
     return "INNATES NO ELITE: no jogador, a habilidade escolhida vale sempre; a 1a innate vale desde o nivel 1, a 2a so a partir do nivel 17 " +
       "e a 3a so a partir do nivel 24 do Pokemon" + (cap ? " (cap atual " + cap + ")" : "") + ". Nao conte com innate que o nivel ainda nao liberou.";
   }
-  function linhasContextoComumIA(sp, chefao) {
-    var linhas = avisoInnatesEliteIA() ? [avisoInnatesEliteIA()] : [];
-    var faltam = getRemainingBossEntries();
+  function linhasContextoComumIA(sp, chefao, ctx) {
+    ctx = completarCtx(ctx);
+    var linhas = avisoInnatesEliteIA(ctx) ? [avisoInnatesEliteIA(ctx)] : [];
+    var faltam = getRemainingBossEntries(ctx);
     if (faltam.length) {
       var contagem = {};
       faltam.forEach(function (b) {
@@ -514,7 +530,7 @@
       linhas.push("Chefoes que faltam: " + faltam.map(function (b) { return b.name; }).join(", ") + ". Tipos mais comuns neles: " +
         Object.keys(contagem).sort(function (a, b) { return contagem[b] - contagem[a]; }).slice(0, 6).join(", ") + ".");
     }
-    return linhas.concat(linhasProximaLutaIA(sp, chefao));
+    return linhas.concat(linhasProximaLutaIA(sp, chefao, ctx));
   }
 
   // Set que o simulador provou contra o chefão (lote B): a IA mantém a habilidade e os
@@ -531,23 +547,24 @@
   // golpe-ponte da curada). Texto e dados só - quem pede é pedirIA().
   function montarPromptBuild(sp, opts) {
     opts = opts || {};
-    var cap = getCurrentCap();
-    var archetypeParts = archetypeBuildGuidance();
+    var ctx = completarCtx(opts.ctx);
+    var cap = ctx.cap;
+    var archetypeParts = archetypeBuildGuidance(ctx);
     return cabecalhoIA() +
       "Monte um set competitivo, formato Pokemon Showdown, para o Pokemon " + sp.n +
       " (build " + versaoDosDados() + ").\n" +
-      blocoEspecieIA(sp, false) +
-      blocoMovepoolIA(sp, false) +
-      blocoPapelIA(sp, false, true) +
+      blocoEspecieIA(sp, false, ctx) +
+      blocoMovepoolIA(sp, false, ctx) +
+      blocoPapelIA(sp, false, true, ctx) +
       blocoCondicoesIA(sp) +
       blocoManualIA(sp) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, false) +
-      blocoItensIA(sp, false) +
-      blocoTimeEmUsoIA(sp) +
+      blocoItensIA(sp, false, ctx) +
+      blocoTimeEmUsoIA(sp, ctx) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
-      blocoContextoIA(sp, opts.chefao) +
+      blocoContextoIA(sp, opts.chefao, ctx) +
       contextoDoModoPrompt(sp, opts, cap) +
       planoPromptBlock(sp, cap) +
       textoOrdemDeDecisaoIA(archetypeParts) +
@@ -586,8 +603,9 @@
   // opts: { chefao: { boss, party, clima, estrategia }, responde: { sname: [nomes] } }.
   function montarPromptBuildsDoTime(members, opts) {
     opts = opts || {};
-    var cap = getCurrentCap();
-    var archetypeParts = archetypeBuildGuidance();
+    var ctx = completarCtx(opts.ctx);
+    var cap = ctx.cap;
+    var archetypeParts = archetypeBuildGuidance(ctx);
     var c = opts.chefao;
     var objetivo = c
       ? "OBJETIVO DESTE TIME: vencer " + dadoExterno(c.boss.name) + " (time dele no CONTEXTO). O time foi escolhido pelo simulador de duelo do app; " +
@@ -602,14 +620,14 @@
     var especies = members.map(function (sp, i) {
       var resp = (opts.responde && opts.responde[sp.sname]) || [];
       return "=== POKEMON " + (i + 1) + " de " + members.length + ": " + sp.n + " (chave \"" + sp.sname + "\") ===\n" +
-        blocoEspecieIA(sp, false) +
-        blocoMovepoolIA(sp, false) +
-        blocoPapelIA(sp, false, true) +
+        blocoEspecieIA(sp, false, ctx) +
+        blocoMovepoolIA(sp, false, ctx) +
+        blocoPapelIA(sp, false, true, ctx) +
         blocoCondicoesIA(sp) +
         blocoManualIA(sp) +
         blocoMegaIA(sp, false) +
         blocoItensDaEspecieIA(sp) +
-        envelopeContextoIA(linhasContextoDaEspecieIA(sp)) +
+        envelopeContextoIA(linhasContextoDaEspecieIA(sp, ctx)) +
         (c && resp.length ? "Este Pokemon e a resposta do time para: " + resp.map(dadoExterno).join(", ") + ".\n" : "") +
         (opts.provado && opts.provado[sp.sname] ? linhaProvadoIA(opts.provado[sp.sname]) + "\n" : "") +
         planoPromptBlock(sp, cap);
@@ -619,10 +637,10 @@
       "Eles jogam JUNTOS: varie papeis e golpes entre eles, cubra as fraquezas uns dos outros e no MAXIMO " + MAX_MESMO_ITEM_NO_TIME +
       " do time com o mesmo item. Primeiro o que vale pro time todo; depois, os dados de cada Pokemon.\n" +
       blocoRegrasDePapelIA() +
-      blocoItensComunsIA(false, "") +
+      blocoItensComunsIA(false, "", ctx) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       (archetypeParts.length ? (archetypeParts.join("\n") + "\n") : "") +
-      envelopeContextoIA(linhasContextoComumIA(null, c)) +
+      envelopeContextoIA(linhasContextoComumIA(null, c, ctx)) +
       objetivo +
       especies +
       textoOrdemDeDecisaoIA(archetypeParts) + "Faca isso para CADA Pokemon.\n" +
@@ -632,8 +650,9 @@
   }
 
   // Prompt das Estratégias (2 a 3 sets de papéis diferentes da espécie).
-  function montarPromptEstrategias(sp) {
-    var cap = getCurrentCap();
+  function montarPromptEstrategias(sp, ctx) {
+    ctx = completarCtx(ctx);
+    var cap = ctx.cap;
     // Achado em auditoria, 2026-09-18: "Estratégias" gerava sets sem NUNCA
     // olhar se já existe um build curado real (data/builds.json) pra esta
     // espécie - risco de redundância (ou pior, contradição) com um set que
@@ -654,17 +673,17 @@
       sp.n + " (build " + versaoDosDados() + "). Cada set precisa ter um PAPEL real e diferente " +
       "dos outros (ex: wallbreaker especial, sweeper físico, suporte/tanque, setup...) - só inclua um papel se ele " +
       "genuinamente fizer sentido pra esta espécie neste hack; 2 sets bons valem mais que 3 forçados.\n" +
-      blocoEspecieIA(sp, true) +
-      blocoMovepoolIA(sp, true) +
-      blocoPapelIA(sp, true, false) +
+      blocoEspecieIA(sp, true, ctx) +
+      blocoMovepoolIA(sp, true, ctx) +
+      blocoPapelIA(sp, true, false, ctx) +
       blocoCondicoesIA(sp) +
       blocoManualIA(sp) +
       blocoRegrasDePapelIA() +
       blocoMegaIA(sp, true) +
-      blocoItensIA(sp, true) +
+      blocoItensIA(sp, true, ctx) +
       (cap ? ("Level cap atual do jogador: " + cap + "\n") : "") +
       curadoPromptLine +
-      blocoContextoIA(sp) +
+      blocoContextoIA(sp, undefined, ctx) +
       "Fundamente os papeis no rank e na sinergia do CONTEXTO - " +
       "se houver sinergia habilidade x golpe confirmada, PELO MENOS UM dos sets precisa usar um golpe dela com " +
       "a habilidade que ativa a sinergia (innate conta sempre). Se o CONTEXTO trouxer um combo que a propria " +
@@ -742,7 +761,8 @@
     return viram.length ? "O jogador tambem tem, ainda fora do tipo " + tipo + " mas que viram " + tipo + ": " + viram.join(", ") +
       " - NAO entram no time agora; se valer a pena esperar a evolucao, diga no reasoning.\n" : "";
   }
-  function montarPromptTimeArquetipo(roster, pace, weather, monotype) {
+  function montarPromptTimeArquetipo(roster, pace, weather, monotype, ctx) {
+    ctx = completarCtx(ctx);
     var rosterDesc = roster.map(function (sp) {
       var role = SPECIES_ROLE[sp.sname];
       var roleNames = (role && role.roles || []).map(function (r) { return ROLE_LABEL_PT[r] || r; });
@@ -756,14 +776,14 @@
         (build ? ", habilidade escolhida: " + build.ability : ", habilidades escolhíveis: " + abiNames.join(", ")) +
         (monotype ? notaMonoDoCandidato(sp, monotype) : "");
     }).join("\n");
-    var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + rotuloDoArquetipoDeCampo(weather) : "", state.archetype.tatica ? "Tatica: " + state.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
+    var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + rotuloDoArquetipoDeCampo(weather) : "", ctx.archetype.tatica ? "Tatica: " + ctx.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
     return "Você é o especialista em meta do Pokemon Elite Redux (ROM hack), build " +
       versaoDosDados() + ". Monte o MELHOR time possível de até 6 Pokémon, usando " +
       "SOMENTE espécies desta lista real que o jogador já possui (time + caixa) - nunca invente nem sugira " +
       "algo fora dela:\n" + rosterDesc + "\n\n" +
       "Foco pedido: " + focusDesc + ".\n" +
       (megaEvolutionUnlocked() ? "" : "MEGA EVOLUCAO: AINDA NAO DISPONIVEL - o jogador so consegue Mega Evolucao depois da " + rotuloDaEtapaDaMegaLiberada() + ". NAO sugira nenhuma forma mega nem conte com mega no time; use so as formas base da lista.\n") +
-      (avisoInnatesEliteIA() ? avisoInnatesEliteIA() + "\n" : "") +
+      (avisoInnatesEliteIA(ctx) ? avisoInnatesEliteIA(ctx) + "\n" : "") +
       (monotype ? "A lista acima JÁ está filtrada só pro tipo " + monotype + " (Monotype) - todos servem, escolha pela sinergia entre eles.\n" +
         "Na " + orientacaoMono(monotype) + " Entre candidatos parecidos, prefira quem cobre mais dessas fraquezas.\n" +
         viramDoTipoPrompt(monotype) : "") +

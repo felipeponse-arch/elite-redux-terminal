@@ -50,7 +50,7 @@ test("TK-33a.5: RKS System dá STAB (x2, Adaptability) também em golpe fora do 
   const alvo = chefao("Snorlax", { hab: "Thick Fat", golpes: ["Body Slam"], evs: [252, 252, 0, 0, 252, 0], nat: "Adamant" });
   const dano = (hab) => RC.danoNoDuelo(eu("Garchomp", { hab, golpes: ["Flamethrower"], evs: EV.nenhum, nat: "Hardy" }), alvo, NIVEL).melhor.dano;
   dentroDoEfeito(dano("RKS System") / dano("Pressure"), 2, "RKS System x sem habilidade", 0.1);
-  assert.deepEqual(Array.from(RC.camposLidosDaHabilidade(RC.ABILITY_ID_BY_NAME["RKS System"])).sort(), ["stabMult", "stabTodos"]);
+  assert.deepEqual(Array.from(RC.camposLidosDaHabilidade(RC.ABILITY_ID_BY_NAME["RKS System"])).sort(), ["stabMult", "stabTodos", "tipoDoGolpe"]);
 });
 
 // ---- omniStab (abilities.cc: Protean 2317, RKS 3125, Libero 3224, Mystic Power 3815, Prismatic Fur 5711, Arcane Force 6401, Pattern Change 8308, Unown Power 9511) ----

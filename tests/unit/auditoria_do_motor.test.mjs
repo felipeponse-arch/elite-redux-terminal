@@ -69,10 +69,11 @@ const EFEITOS_DE_GOLPE_SEM_REGRA_EXPLICITA = ["Accuracy Down Hit", "Argument Hit
   "Creeping Thorns Hit", "Curse Hit", "Fairy Terrain Hit", "Feint",
   "Flame Burst", "Flinch Recoil 33", "Fling", "Freeze Dry", "Grassy Terrain Hit", "Grav Apple", "Hit",
   "Hit Prevent Escape", "Hyperspace Fury", "Incinerate", "Leech Seed Hit",
-  "Mind Blown", "Misc Hit", "Mortal Spin", "Natural Gift", "Nightmare", "Pay Day", "Rain Hit",
+  "Mind Blown", "Misc Hit", "Natural Gift", "Nightmare", "Pay Day", "Rain Hit",
   "Recoil 33", "Remove Terrain No Fail", "Rip And Tear", "Round", "Sandstorm Hit", "Sleep Hit",
   "Smack Down", "Snap Jaw", "Snore", "Sparkling Aria", "Spike Hit", "Stealth Rock Hit", "Sticky Web Hit", "Tailwind Hit",
   "Thief", "Trepidation", "Wake Up Slap"];
+// TK-32: Mortal Spin saiu da lista porque o rank o cita como removedor de hazard (REMOVEDORES_DE_HAZARD_DUELO); o veneno dele em todos segue sem regra.
 
 test("efeitos de golpe sem regra explícita: só os já conhecidos", () => {
   const src = readdirSync("src/regras").map((f) => readFileSync("src/regras/" + f, "utf8")).join("\n");

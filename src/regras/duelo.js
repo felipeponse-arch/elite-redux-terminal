@@ -59,9 +59,15 @@
   // média. Exceções provadas pelo texto em inglês do NextDex 2.65beta, onde o efeito do dado
   // é outro (Poison Hit, Drench Hit...) mas o golpe acerta mais de uma vez:
   var ACERTOS_POR_EFEITO_DUELO = { "Multi Hit": 3, "Double Hit": 2, "Triple Kick": 3, "Ten Hits": 6 };
-  var ACERTOS_PELO_TEXTO_DUELO = { "Twineedle": 2, "Cross Poison": 2, "Double Iron Bash": 2, "Rapid River": 2,
-    "Chiller": 3, "Surging Strikes": 3, "Sparkling Barrage": 3,
-    "Double Shock": 2 }; // hit_count: 2 na er-config (o efeito do dado é Burn Up; o texto "two strong shocks" não casava)
+  // Vocabulário do motor (TK-15 D3.4): "cat" = divisão do golpe, "F" físico / "E" especial / "S" status (g.cat, a.cat do aoGolpear);
+  // "categoria" = grupo por palavra do golpe (mordida, corte, soco...; filtro.categoria, bonusCategoria); "ef" = efeito do dado do golpe
+  // (MOVE_CATEGORIAS[id].ef, MOVES[id][11]). Um nome, um sentido.
+  // Golpes com hit_count > 1 na er-config (MoveList.textproto:734 Twineedle, :7347 Cross Poison, :11438 Double Iron Bash, :15041 Double Shock,
+  // :16057 Rapid River, :17335 Chiller); o efeito do dado deles é outro (Poison Hit, Burn Up...). Espelha data/golpes_flags_config.json.acertos.
+  var ACERTOS_DA_CONFIG_DUELO = { "Twineedle": 2, "Cross Poison": 2, "Double Iron Bash": 2, "Rapid River": 2, "Chiller": 3, "Double Shock": 2 };
+  // SEM fonte confirmada no código do jogo (decisão do usuário, 29/10/2026, TK-15 D3.5): a er-config não traz hit_count destes; ficam
+  // por nome, pela descrição do dado, até o battle_moves.h sair. Quando a config ou o battle_moves.h os trouxer, saem daqui.
+  var ACERTOS_SEM_FONTE_DUELO = { "Surging Strikes": 3, "Sparkling Barrage": 3 };
   // Dupla contagem (ticket versao-01, 15/10/2026): o código do jogo multiplica o bônus de golpe de uma habilidade UMA vez
   // (abilities.cc, `onModifyDamage`). Se o texto da habilidade já virou bônus no motor (tipo, categoria, flag do golpe ou contato), a
   // "sinergia por golpe" da espécie (species_ability_synergy.json -> bonusGolpes, a aproximação antiga) não soma de novo.
@@ -80,7 +86,7 @@
   function acertosDoGolpeDuelo(id) {
     var m = MOVES[id];
     if (!m) return 1;
-    return ACERTOS_PELO_TEXTO_DUELO[m[0]] || ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;
+    return ACERTOS_DA_CONFIG_DUELO[m[0]] || ACERTOS_SEM_FONTE_DUELO[m[0]] || ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;
   }
   // Recarga pelo EFEITO do dado, não pela tradução PT (TK-06; decisão 7 do usuário, 28/10). Só Hyper Beam e Giga Impact são
   // EFFECT_RECHARGE (MOVE_EFFECT_RECHARGE, battle_script_commands.c:2828): o x0,5 (x0,75 com Rampage) é deles.
@@ -226,6 +232,20 @@
     // Sono (Champions): contador 2 (1/3) ou 3 (2/3), -1 a cada tentativa de agir, e acorda no turno em que zera: perde 1 turno (1/3) ou 2 (2/3).
     sono: { corte: 0.5, imunes: [] }
   };
+  // Imunidade a status por HABILIDADE, como o código do jogo decide (fonte única de condicoes_habilidade e do duelo).
+  // abilities.cc: onStatusImmune com CHECK_STATUS1 = sono, veneno, queimadura, paralisia, congelar e sangrar
+  // (include/abilities.hh:103-110); NÃO inclui confusão, paixão, recuo, medo, semente etc. O texto "Immune to status"
+  // do NextDex dizia mais que o código; estas 7 seguem o código (decisão do usuário, 29/10, TK-13b).
+  var STATUS1_DUELO = ["sono", "envenenar", "envenenarForte", "queimar", "paralisar", "congelar", "sangrar"];
+  var IMUNE_STATUS_POR_HABILIDADE = {
+    "Purifying Salt": STATUS1_DUELO, // abilities.cc:6921
+    "Comatose": STATUS1_DUELO, // :2948
+    "Hyper Cleanse": STATUS1_DUELO, // :10337
+    "Petroleum Jelly": STATUS1_DUELO, // :12694 (usa o onStatusImmune do Hyper Cleanse)
+    "Blood Stigma": STATUS1_DUELO, // :8409
+    "Blood Stain": STATUS1_DUELO, // :8395
+    "Immunity": STATUS1_DUELO.filter(function (s) { return s !== "sono"; }) // :682-686 (CHECK_STATUS1 & ~CHECK_SLEEP)
+  };
   // Efeito extra do golpe no NextDex (effT) -> status do duelo.
   var STATUS_DO_EFEITO_DUELO = {
     "Burn Hit": ["queimar"], "Frostbite Hit": ["congelar"], "Paralyze Hit": ["paralisar"], "Bleed Hit": ["sangrar"],
@@ -295,9 +315,9 @@
       var cada = porTipo ? p : p / todos.length; // "Burn or Poison": a chance se divide
       var ignoraGenero = /ignoring gender/i.test(f);
       var filtro = {};
-      if (/Biting moves/i.test(f)) filtro.cat = "mordida";
-      else if (/Slashing moves|Keen Edge moves|Sharpness moves/i.test(f)) filtro.cat = "corte";
-      else if (/with punches|punching moves/i.test(f)) filtro.cat = "soco";
+      if (/Biting moves/i.test(f)) filtro.categoria = "mordida";
+      else if (/Slashing moves|Keen Edge moves|Sharpness moves/i.test(f)) filtro.categoria = "corte";
+      else if (/with punches|punching moves/i.test(f)) filtro.categoria = "soco";
       else if (/Sound(?:-based)? moves/i.test(f)) filtro.som = true;
       else if (/Contact moves|with contact moves/i.test(f)) filtro.contato = true;
       else if ((x = f.match(/^(\w+) moves have/i)) && tipoDoTextoDuelo(x[1])) filtro.tipo = tipoDoTextoDuelo(x[1]);
@@ -470,7 +490,7 @@
     // "Sound moves cause bleeding" (Piercing Solo): status certo, sem chance.
     if ((x = f.match(/^(Sound|Contact|Biting|Slashing|Punching) moves cause (\w+)/i))) {
       var sts = statusDoTrechoDuelo(x[2]).filter(function (s) { return s !== "sono"; });
-      var filtro = /sound/i.test(x[1]) ? { som: true } : /contact/i.test(x[1]) ? { contato: true } : { cat: categoriasDoTextoDuelo(x[1])[0] };
+      var filtro = /sound/i.test(x[1]) ? { som: true } : /contact/i.test(x[1]) ? { contato: true } : { categoria: categoriasDoTextoDuelo(x[1])[0] };
       if (sts.length) ef.statusAtaque.push({ st: sts, pContato: 1, pOutro: 1, filtro: filtro, porTipo: false, ignoraGenero: false });
     }
     // Status encadeado (Poison Puppeteer, Entrance).
@@ -528,7 +548,7 @@
     var tp = tipoDoTextoDuelo(palavra);
     if (tp) return { tipo: tp };
     var c = categoriasDoTextoDuelo(palavra);
-    return c.length ? { cat: c[0] } : null;
+    return c.length ? { categoria: c[0] } : null;
   }
   function empurraStatusDuelo(ef, lista, sts, p, filtro, pOutro) {
     if (sts.length && filtro) lista.push({ st: sts, pContato: p / sts.length, pOutro: (pOutro === undefined ? p : pOutro) / sts.length, filtro: filtro, porTipo: false, ignoraGenero: false });
@@ -565,7 +585,7 @@
     // Packed Ice (sem código no upcoming 217dd0f; pela descrição): +2 de Defesa em vez do golpe do tipo (a imunidade vem de TYPE_MOD_ABILITIES).
     if ((x = f.match(/^Boosts Defense sharply instead of being hit by (\w+)-type moves/i)) && tipoDoTextoDuelo(x[1])) ef.aoApanhar.push({ stat: "def", n: 2, tipos: [tipoDoTextoDuelo(x[1])] });
     // Lightsaber (Impl<ABILITY_LIGHT_SABER>, abilities.cc:10991-11011): golpe Keen Edge, 50% de disparar e então 1/4 queima, 1/4 paralisa, 1/2 nada = 12,5% de cada (os "25% de queimar ou paralisar" da descrição).
-    if ((x = f.match(/^(?:Keen Edge|Slashing|Sharpness) moves have (\d+)% burn or paralysis/i))) empurraStatusDuelo(ef, ef.statusAtaque, ["queimar", "paralisar"], parseInt(x[1], 10) / 100, { cat: "corte" });
+    if ((x = f.match(/^(?:Keen Edge|Slashing|Sharpness) moves have (\d+)% burn or paralysis/i))) empurraStatusDuelo(ef, ef.statusAtaque, ["queimar", "paralisar"], parseInt(x[1], 10) / 100, { categoria: "corte" });
     if ((x = f.match(/Every attack has an? (\d+)% (\w+) chance(?: and (\d+)% (\w+) chance)?/i))) {
       empurraStatusDuelo(ef, ef.statusAtaque, statusDoTrechoDuelo(x[2]), parseInt(x[1], 10) / 100, {});
       // Malediction (sem código no upcoming 217dd0f; pela descrição "20% Bleed chance and 10% Curse chance"): a Maldição é o status do motor (1/4 do HP por turno).
@@ -614,9 +634,9 @@
     if (/Sets up Protect on switch-in/i.test(f)) ef.bloqueios = Math.max(ef.bloqueios, 1);
     if (/Endures the? a single KO|Endures a single KO/i.test(f)) ef.aguenta = true;
     if (/Heal 1\/4 of max HP whenever below 1\/2/i.test(f)) ef.reviveHP = Math.max(ef.reviveHP, 0.25);
-    if (/Changes type to a resist or an immunity before getting hit/i.test(f)) ef.sempreResiste = 1;
+    if (/Changes type to a resist or an immunity before getting hit/i.test(f)) ef.corCamaleao = true; // Color Change (abilities.cc:649-672): vira o tipo que mais resiste ao golpe, 1x por turno
     if ((x = f.match(/Resists all attacks for (\w+) turns on first entry/i))) ef.sempreResiste = NUM_DO_TEXTO_DUELO[x[1].toLowerCase()] || 3;
-    if (/Changes type depending on the move it's about to use|changes its type to the move's type|Changes type to move's type before use|Also has Protean/i.test(f)) ef.stabTodos = true; // RKS System: omniStab (abilities.cc:3111-3126, Protean sem a limitação de uma vez; STAB x2 vem do Adaptability)
+    if (/Changes type depending on the move it's about to use|changes its type to the move's type|Changes type to move's type before use|Also has Protean/i.test(f)) ef.stabTodos = ef.tipoDoGolpe = true; // tipoDoGolpe: o tipo vira o do golpe (TK-34; Protean/Libero 1x por entrada, RKS/Pattern Change/Prismatic Fur 1x por turno). RKS System: omniStab (abilities.cc:3111-3126, Protean sem a limitação de uma vez; STAB x2 vem do Adaptability)
     // Redução de dano geral.
     if ((x = f.match(/Reduces damage taken by (\d+)%, but lowers speed by (\d+)%/i))) { ef.reducao.todos *= 1 - parseInt(x[1], 10) / 100; ef.speMult *= 1 - parseInt(x[2], 10) / 100; }
     // Feathercoat (abilities.cc:12377-12386): x(1 - a%) em todo golpe e x(1 - b%) NO TOTAL se o golpe é resistido (não soma: o jogo troca o fator).
@@ -1211,7 +1231,7 @@
     }
     u.ef.statusAtaque.forEach(function (a) {
       var fl = a.filtro;
-      if (fl.cat && cats.indexOf(fl.cat) === -1) return;
+      if (fl.categoria && cats.indexOf(fl.categoria) === -1) return;
       if (fl.som && !g.som) return;
       if (fl.contato && !g.contato) return;
       if (fl.tipo && fl.tipo !== g.tipo) return;
@@ -1289,7 +1309,7 @@
     Object.keys(ef.prioCheioCategoria).concat(Object.keys(ef.prioPrimeiroCategoria)).forEach(function (cat) { add(cat, "prioridade no primeiro golpe"); });
     Object.keys(ef.categoriaEspecial).forEach(function (cat) { add(cat, "golpe especial"); });
     Object.keys(ef.categoriaNaSpDef).forEach(function (cat) { add(cat, "alvo na Defesa Especial"); });
-    ef.statusAtaque.forEach(function (a) { add(a.filtro && a.filtro.cat, motivoDoStatusSinergia(a)); });
+    ef.statusAtaque.forEach(function (a) { add(a.filtro && a.filtro.categoria, motivoDoStatusSinergia(a)); });
     Object.keys(porCat).forEach(function (cat) { porCat[cat] = porCat[cat].filter(function (m, i, a) { return a.indexOf(m) === i; }); });
     return porCat;
   }
@@ -1373,7 +1393,7 @@
       hemolise: false, trocaStatusDoTipo: {}, curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
       semRecuo: false, recuoMult: 1, custoPorAtaque: 0, custoTipo: {}, bloqueiaCura: false, liquidOoze: false,
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
-      bloqueios: 0, sempreResiste: 0, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {}, precisaoPorTipo: {},
+      bloqueios: 0, sempreResiste: 0, corCamaleao: false, tipoDoGolpe: false, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {}, precisaoPorTipo: {},
       menorDefesaCategoria: {}, menorDefesaSeStatus: false, flagMult: {}, prioTipoSempre: [], drenoTipo: {}, malicious: false,
       equinox: false, maiorMult: 0, maiorVel: 0, paradoxoItem: false, ritmico: 0, bonusVsStatus: {}, bonusVsEnfurecido: 0, drenoMult: 1, sementeNoDreno: false, carregaAoApanhar: false,
       campoResiduo: [], statusNaEntrada: {}, forcaUltimo: false, semStabOutros: false, recuoFrac: 1,
@@ -1608,6 +1628,7 @@
         ef.speMult *= 1 + parseInt(x[1], 10) / 100;
         if (/Attack/i.test(x[2]) && !/Sp/i.test(x[2])) ef.atkMult *= 1 + parseInt(x[3], 10) / 100; else ef.spaMult *= 1 + parseInt(x[3], 10) / 100;
       }
+      var imuneAntes = IMUNE_STATUS_POR_HABILIDADE[nomeHabDuelo(id)] ? Object.assign({}, ef.imuneStatus) : null; // o texto não manda nestas (tabela acima)
       // --- status por chance: quem causa (ataque/defesa) e quem é imune ---
       if (/Doubles chance of secondary effects/i.test(t)) ef.chanceMult = SERENE_GRACE_MULT;
       if ((x = t.match(/Exchanges added effects on its moves for ([\d.]+)x/i))) ef.semEfeitoExtra = parseFloat(x[1]);
@@ -1618,6 +1639,7 @@
         lerExtrasDaFraseDuelo(f, ef, climaOk); lerCuraDaFraseDuelo(f, ef, climaOk); lerDiversosDaFraseDuelo(f, ef, climaOk);
         lerCampoDaFraseDuelo(f, ef); lerItemDaFraseDuelo(f, ef, climaOk); lerSequenciaDaFraseDuelo(f, ef); lerDuplaDaFraseDuelo(f, ef, climaOk); lerStatusGolpeDaFraseDuelo(f, ef); lerRestoDaFraseDuelo(f, ef, climaOk); lerFormaDaFraseDuelo(f, ef); lerSupressaoDaFraseDuelo(f, ef); lerLote4DaFraseDuelo(f, ef);
       });
+      if (imuneAntes) { ef.imuneStatus = imuneAntes; IMUNE_STATUS_POR_HABILIDADE[nomeHabDuelo(id)].forEach(function (s) { ef.imuneStatus[s] = true; }); }
     });
     ef.stabExtra = ef.stabExtra.filter(function (tp, i, a) { return a.indexOf(tp) === i; });
     ef.tipoExtra = ef.tipoExtra.filter(function (tp, i, a) { return a.indexOf(tp) === i; });
@@ -1725,14 +1747,14 @@
       // False Swipe/Hold Back (120 de poder neste hack) deixam o alvo com 1 HP: numa
       // luta por nocaute não fecham nada (revisão de 2026-09-30 - o False Swipe
       // aparecia entre os golpes mais fortes do Garchomp).
-      var cat = typeof MOVE_CATEGORIAS !== "undefined" ? MOVE_CATEGORIAS[id] : null;
-      if (cat && cat.ef === "False Swipe") return false;
+      var dadoDoGolpe = typeof MOVE_CATEGORIAS !== "undefined" ? MOVE_CATEGORIAS[id] : null;
+      if (dadoDoGolpe && dadoDoGolpe.ef === "False Swipe") return false;
       // Grupo do Fake Out não carrega - só vale no 1º turno (regra própria em danoNoDuelo).
       // O "Só funciona no primeiro turno" da tradução do First Impression caía no filtro de carga.
-      if (cat && cat.ef === "Fake Out") return true;
+      if (dadoDoGolpe && dadoDoGolpe.ef === "Fake Out") return true;
       // Electro Shot (ticket 19; battle_scripts_1.s BattleScript_EffectElectroShot): carrega um turno subindo
       // +1 de Sp. Atk; na chuva dispara na hora. Accelerate e Power Herb também (twoturnmoveacceleratecheck).
-      if (cat && cat.ef === "Electro Shot") return clima === "chuva" || u.ef.cargaInstantanea || !!(u.it && u.it.cargaUmaVez);
+      if (dadoDoGolpe && dadoDoGolpe.ef === "Electro Shot") return clima === "chuva" || u.ef.cargaInstantanea || !!(u.it && u.it.cargaUmaVez);
       // Recarga não é carga: Hyper Beam e parecidos ficam (com a penalidade de recarga em danoNoDuelo).
       // Golpe de dois turnos: pelo EFEITO do dado (TK-06), não pela tradução PT.
       var efeito = MOVES[id][11];
@@ -2009,7 +2031,9 @@
       if (g.nome === "Grassy Glide" && terreno === "grama" && aterradoDuelo(atq)) prioAqui += 1;
       if (terreno === "psiquico" && prioAqui > 0 && aterradoDuelo(def)) return; // Psychic Terrain: o golpe com prioridade falha inteiro (CANCELLER_PSYCHIC_TERRAIN)
       if (def.ef.barraPrioridade && prioAqui > 0) prioAqui = 0; // Surprise! na névoa
-      if (abreDef && def.ef.sempreResiste && efTipo > 0.5) efTipo = 0.5; // Color Change, Soothsayer
+      if (abreDef && def.ef.sempreResiste && efTipo > 0.5) efTipo = 0.5; // Soothsayer
+      // Color Change: antes do dano vira o tipo (único) que mais resiste ao golpe, e só se ainda não o tem (abilities.cc:649-672; 1x por turno = todo golpe do 1x1).
+      if (abreDef && def.ef.corCamaleao && !g.tipo2) efTipo = efetividadeComColorChange(atq, g.tipo, def, efTipo);
       var fisico = g.cat === "F", defF = g.defNaDef || (fisico && !g.defEspecial);
       var A = ataqueNoDuelo(atq, g, def) * (fisico ? intim : assus) * ataqueNaNevoa;
       A *= noTerrenoDuelo(atq, fisico ? "atk" : "spa");
@@ -2583,6 +2607,24 @@
     for (var t = 1; t < n; t++) est = [est[0] * (1 - p) + est[1], est[2], est[3] + est[0] * p / 2, est[0] * p / 2];
     return 1 - est[0];
   }
+  // Color Change: empate fica com o tipo atual (strict <, bestType começa em type1) e a ordem dos tipos é a do jogo.
+  function efetividadeComColorChange(atq, tipo, def, efAtual) {
+    var mono = function (t) { return efetividadeNoDuelo(atq, tipo, Object.assign({}, def, { tipos: [t] })); };
+    var melhorT = def.tipos[0], melhorM = mono(melhorT);
+    for (var i = 0; i < TYPES.length && melhorM !== 0; i++) { var m = mono(TYPES[i]); if (m < melhorM) { melhorM = m; melhorT = TYPES[i]; } }
+    return def.tipos.indexOf(melhorT) !== -1 ? efAtual : melhorM; // já tem o tipo: não muda
+  }
+  // Protean, Libero, RKS System, Pattern Change, Prismatic Fur (TK-34): depois do 1º golpe de quem tem a habilidade, ele vira mono do tipo do golpe
+  // e o outro bate nele pela tabela nova (battle.h:759-764). Retorna o dano que o outro faz em "u".
+  // shortcut: o 1º golpe do outro sempre pega o tipo original (o outro age antes) e os seguintes o tipo novo, sem olhar velocidade; trocar por ordem real se o motor ganhar turno.
+  function comTipoDoGolpe(u, outro, danoDeU, danoSobreU, nivel) {
+    var gU = danoDeU.melhor.golpe;
+    if (!u.ef.tipoDoGolpe || !gU || !gU.tipo || (u.tipos.length === 1 && u.tipos[0] === gU.tipo)) return danoSobreU;
+    var depois = comoIADuelo(danoNoDuelo(outro, Object.assign({}, u, { tipos: [gU.tipo] }), nivel));
+    var n = Math.max(1, Math.min(TURNOS_MAX_STATUS, golpesNecessariosDuelo(u.stats[0], danoSobreU.melhor.dano)));
+    var misto = (danoSobreU.melhor.dano + (n - 1) * depois.melhor.dano) / n;
+    return { melhor: Object.assign({}, danoSobreU.melhor, { dano: misto }), melhorPrio: danoSobreU.melhorPrio, segundo: danoSobreU.segundo };
+  }
   function comTipoMudado(atq, def, danoAtq, danoDef, nivel) {
     var novo = def.ef.mudaTipoNoContato ? null : atq.ef.mudaTipoNoContato; // quem tem a habilidade muda o OUTRO
     var gA = danoAtq.melhor.golpe;
@@ -2721,6 +2763,9 @@
     // Damp/Magical Dust: depois do 1º contato o outro vira do tipo - o resto da luta usa a tabela nova.
     meu = comTipoMudado(eu, foe, meu, dele, nivel);
     dele = comoIADuelo(comTipoMudado(foe, eu, dele, meu, nivel));
+    // Protean e afins: o tipo de quem usa vira o do golpe (TK-34).
+    dele = comoIADuelo(comTipoDoGolpe(eu, foe, meu, dele, nivel));
+    meu = comTipoDoGolpe(foe, eu, dele, meu, nivel);
     var trocaHab = comHabilidadeTrocada(eu, foe, meu, dele, nivel);
     meu = trocaHab.meu; dele = comoIADuelo(trocaHab.dele);
     var turnos = Math.min(TURNOS_MAX_STATUS, golpesNecessariosDuelo(hpFoe, meu.melhor.dano), golpesNecessariosDuelo(hpEu, dele.melhor.dano));
@@ -2914,6 +2959,8 @@
     var semMeuPlano = corridaCom(null, planoEle);
     var vale = (ini.detalhe || semMeuPlano.nota < 1) && !(euPrimeiro === false && elePrecisa <= 1);
     var planoEu = vale ? melhorPlanoDuelo(eu, foe, baseEu, nivel, function (ef) { var r = corridaCom(ef, planoEle); return { nota: r.nota, fracEu: r.restoEu / eu.stats[0] }; }) : null;
+    // ini.poeHazard (TK-32): o rank força o turno do hazard no 1º rival da luta, mesmo sem ele "render" no 1x1.
+    if (ini.poeHazard !== undefined) planoEu = efeitoDoPlanoDuelo(eu, foe, ini.poeHazard, baseEu, nivel) || planoEu;
     if (planoEu) planoEle = planoDele(planoEu);
     planosQueValeram = { eu: null, ele: null };
     var final = planoEu || planoEle ? corridaCom(planoEu, planoEle) : semPlanos;
@@ -3109,7 +3156,37 @@
     u.semClimaMemo = x;
     return x;
   }
-  function comQuatroGolpes(melhor, sp, foes, nivel, clima) {
+  // ---------- hazard no rank (TK-32, decisão do usuário de 29/10/2026) ----------
+  // Só hazard (Stealth Rock, Spikes, Toxic Spikes, Sticky Web) premia suporte: nos eixos potencial e viabilidade, em chefões e comuns.
+  // O 1º Pokémon da luta enfrenta o lado limpo e quem põe o hazard gasta o turno (plano com atraso 1); do 2º em diante cada um entra
+  // no lado com 1 camada por uso (entrarNoLadoDuelo: Spikes 1/8 como no jogo, Rock pela tabela, Boots e Magic Guard respeitados).
+  // Defog na entrada (limpaHazards) entra sem dano e limpa; golpe removedor no set do rival limpa depois de ele entrar.
+  var REMOVEDORES_DE_HAZARD_DUELO = ["Rapid Spin", "Mortal Spin", "Defog", "Tidy Up", "Court Change"];
+  function idHazardDoDuelo(u) {
+    return (u.statusIds || []).filter(function (id) { var p = planoDoGolpeStatus(id); return p && p.tipo === "hazard"; })[0];
+  }
+  function removeHazardDuelo(f) {
+    return (f.golpeIds || []).concat(f.statusIds || []).some(function (id) { return MOVES[id] && REMOVEDORES_DE_HAZARD_DUELO.indexOf(MOVES[id][0]) !== -1; });
+  }
+  // Os duelos de "u" contra os Pokémon de UMA luta, na ordem em que entram; devolve o detalhe de cada um.
+  function resultadosDaLutaComHazard(u, foes, nivel, ini) {
+    var id = idHazardDoDuelo(u), base = Object.assign({}, ini || {}, { detalhe: true });
+    if (id === undefined) return foes.map(function (f) { return resultadoDoDuelo(u, f, nivel, base); });
+    delete base.semPlanos; // o hazard é o único plano da unidade; sem isto o turno dele não entra
+    var lado = novoLadoDuelo(), limpo = false;
+    poeHazardNoLado(lado, HAZARD_DO_GOLPE[MOVES[id][0]]);
+    return foes.map(function (f, i) {
+      if (i === 0) { limpo = !!f.ef.limpaHazards || removeHazardDuelo(f); return resultadoDoDuelo(u, f, nivel, Object.assign({}, base, { poeHazard: id })); }
+      if (limpo || f.ef.limpaHazards) { limpo = true; return resultadoDoDuelo(u, f, nivel, base); }
+      var c = participanteDuelo(f);
+      entrarNoLadoDuelo(c, lado, false);
+      if (removeHazardDuelo(f)) limpo = true;
+      if (c.frac <= 0) return { nota: 1, venceu: true, fracEu: 1, fracFoe: 0, turnos: 0 }; // caiu ao entrar
+      return resultadoDoDuelo(u, comoEstaDuelo(c), nivel, Object.assign({}, base, { fracFoe: c.frac }));
+    });
+  }
+  // lutas (opcional, só o rank): [[foe, ...], ...] na ordem das lutas; sem ele os foes são independentes, como antes.
+  function comQuatroGolpes(melhor, sp, foes, nivel, clima, lutas) {
     if (!melhor || !melhor.unidade) return melhor;
     var u0 = melhor.unidade, set = SETS_DE_DUELO.filter(function (s) { return s.nome === melhor.set; })[0];
     if (!set || !u0.golpeIds) return melhor;
@@ -3125,7 +3202,9 @@
       u.statusIds = (u.statusIds || []).filter(function (id) { return op.status.indexOf(id) !== -1; });
       u.golpesDoSet = op.golpes.concat(op.status);
       u.receita = { sp: sp, set: set, abId: u0.abId, nivel: nivel, golpes: op.golpes, status: op.status, item: u0.item };
-      var porFoe = foes.map(function (f) { return resultadoDoDuelo(u, f, nivel); });
+      var porFoe = lutas && idHazardDoDuelo(u) !== undefined
+        ? lutas.reduce(function (a, l) { return a.concat(resultadosDaLutaComHazard(u, l, nivel).map(function (r) { return r.nota; })); }, [])
+        : foes.map(function (f) { return resultadoDoDuelo(u, f, nivel); });
       var nota = porFoe.reduce(function (a, v) { return a + v; }, 0);
       if (!vencedor || nota > vencedor.nota + 1e-9) vencedor = { nota: nota, set: melhor.set, ab: u.ab, porFoe: porFoe, unidade: u };
     });
@@ -3596,7 +3675,10 @@
       r.atraso = 1; r.curaX = (base.hpY - base.hpX) / 2; r.residuoY = 0; r.danoUmaVezY = (base.hpY - base.hpX) / 2;
       return r;
     }
-    return null; // proteção e hazard: valem na luta inteira, não no 1x1
+    // Hazard (TK-32): o 1x1 só enxerga o turno gasto (atraso 1); o ganho está nos rivais seguintes (resultadosDaLutaComHazard) e
+    // nunca vence sozinho aqui (melhorPlanoDuelo só escolhe plano que rende mais).
+    if (p.tipo === "hazard") { r.hazard = p.hazard; return r; }
+    return null; // proteção: vale na luta inteira, não no 1x1
   }
   // O melhor plano de "x" (ou atacar direto, se nenhum rende mais).
   function melhorPlanoDuelo(x, y, base, nivel, corrida) {
