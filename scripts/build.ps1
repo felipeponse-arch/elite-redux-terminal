@@ -14,7 +14,9 @@ Usage:
                                               # builds.json or levelcaps.json)
 #>
 param(
-    [switch]$SkipExtract
+    [switch]$SkipExtract,
+    # Versao gravada em dex_compact.json (meta.version). Padrao: VERSAO_DEX de scripts/alarme_upstream.mjs (TK-36: antes ficava fixa em "2.65beta").
+    [string]$Versao = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -47,7 +49,12 @@ if (-not $SkipExtract) {
         Write-Output "  em dia."
     }
     Write-Output "--- regenerating dex_compact.json and bosses.json from raw source ---"
-    & (Join-Path $PSScriptRoot "transform.ps1")
+    # TK-36 (04/11/2026): o dex sai do porte em Node (transform.mjs: ja com o corte do slim_dex, mais o patch config_nova.json); o transform.ps1
+    # gravava a versao "2.65beta" fixa e deixava de fora o patch da er-config. Equivalencia: tests/unit/extracao_transform.test.mjs.
+    if (-not $Versao) { $Versao = (& node -e "import('./scripts/alarme_upstream.mjs').then(m => console.log(m.VERSAO_DEX))" | Select-Object -First 1).Trim() }
+    if (-not $Versao) { throw "nao consegui ler VERSAO_DEX de scripts/alarme_upstream.mjs; passe -Versao" }
+    & node (Join-Path $PSScriptRoot "extracao	ransform.mjs") (Join-Path $dataDir "gameData.json") (Join-Path $dataDir "dex_compact.json") "--versao=$Versao" "--config-nova=$(Join-Path $dataDir 'config_nova.json')" "--traducoes=$(Join-Path $dataDir 'move_translations_pt.json')"
+    if ($LASTEXITCODE -ne 0) { throw "extracao/transform.mjs falhou" }
     & (Join-Path $PSScriptRoot "extract_bosses.ps1")
     # Regerar o bosses.json apaga o campo de batalha (Trick Room, Gravity, Monochamp); regrava dos scripts de mapa do jogo.
     $erRepo = if ($env:ER_REPO) { $env:ER_REPO } else { Join-Path $PSScriptRoot "..\..\ferramentas\er-repo" }
@@ -59,15 +66,15 @@ if (-not $SkipExtract) {
     # expand_combo_abilities.ps1's "A + B" expansions back to their raw
     # state (see AUDITORIA-DOSSIE.md 1.3). Both edit their target file
     # in place and are idempotent, so they're safe to always run here.
-    Write-Output "--- slimming dex_compact.json ---"
-    & (Join-Path $PSScriptRoot "slim_dex.ps1")
+    # (slim_dex.ps1 e expand_combo_abilities.ps1 viraram transform.mjs e extracao/expandir_compostas.mjs; saida igual, provada em teste.)
     Write-Output "--- expanding combo abilities ---"
-    & (Join-Path $PSScriptRoot "expand_combo_abilities.ps1")
+    & node (Join-Path $PSScriptRoot "extracaoexpandir_compostas.mjs") (Join-Path $dataDir "dex_compact.json") (Join-Path $dataDir "ability_translations_pt.json")
+    if ($LASTEXITCODE -ne 0) { throw "extracao/expandir_compostas.mjs falhou" }
     # Must run AFTER expand_combo_abilities.ps1: it scores each ability's
     # translated text (including combo abilities), so it needs the final
     # expanded description, not the raw "A + B" placeholder.
-    Write-Output "--- computing species ranks ---"
-    & (Join-Path $PSScriptRoot "compute_species_rank.ps1")
+    # TK-36: o compute_species_rank.ps1 (rank antigo de nivel 50) NAO roda mais aqui: ele sobrescrevia data/species_rank.json, que e do rank por duelo
+    # (calcular_rank_v2.mjs --gravar, passo manual no fim). O build nunca toca no rank.
     Write-Output "--- computing species roles (Pivo/Tanque/Wallbreaker/Sweeper) ---"
     & (Join-Path $PSScriptRoot "compute_species_role.ps1")
     # Fase 3 do roadmap de sinergia (2026-09-11): precisa dos flags de golpe

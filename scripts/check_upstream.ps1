@@ -2,7 +2,7 @@
 Compares our local game-data snapshot against the live NextDex, so a new Elite
 Redux build does not go unnoticed. Checks two things:
 
-  1. Is 2.65beta still the version the official dex defaults to? (the dex picks
+  1. Is 2.65.5 still the version the official dex defaults to? (the dex picks
      the LAST entry of allVersions in static/js/data_version.js)
   2. Is our snapshot byte-identical to the remote file for that version?
 
@@ -16,7 +16,7 @@ then re-run expand_combo_abilities.ps1.
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"
 $localPath = Join-Path $dataDir "gameData.json"
-$OUR_VERSION = "2.65beta"
+$OUR_VERSION = "2.65.5"
 $base = "https://raw.githubusercontent.com/ForwardFeed/ER-nextdex/main"
 
 $drift = $false
