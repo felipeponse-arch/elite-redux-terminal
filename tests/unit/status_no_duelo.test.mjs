@@ -29,7 +29,7 @@ test("texto do jogo: Flame Body queima na defesa E no ataque (contato 30%, sem c
 });
 
 test("texto do jogo: filtro de categoria, divisão de chance e partes (Arc Flash)", () => {
-  assert.equal(efDe(["Solenoglyphs"]).statusAtaque[0].filtro.cat, "mordida");
+  assert.equal(efDe(["Solenoglyphs"]).statusAtaque[0].filtro.categoria, "mordida");
   const stun = efDe(["Stun Shock"]).statusAtaque[0];
   assert.deepEqual([...stun.st], ["paralisar", "envenenar"]);
   assert.ok(perto(stun.pContato, 0.3), "60% dividido entre os dois");

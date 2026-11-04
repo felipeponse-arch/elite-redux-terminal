@@ -642,7 +642,7 @@ export const MUTACOES = [
     id: "loteA-acertos-sem-excecao",
     descricao: "Twineedle e parecidos perdem o 2º acerto (só o efeito do dado)",
     arquivo: "duelo.js",
-    de: "return ACERTOS_PELO_TEXTO_DUELO[m[0]] || ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;",
+    de: "return ACERTOS_DA_CONFIG_DUELO[m[0]] || ACERTOS_SEM_FONTE_DUELO[m[0]] || ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;",
     para: "return ACERTOS_POR_EFEITO_DUELO[m[11]] || 1;",
   },
   {
@@ -1575,7 +1575,7 @@ export const MUTACOES = [
     id: "f4-false-swipe-volta",
     descricao: "False Swipe volta a contar como golpe de nocaute",
     arquivo: "duelo.js",
-    de: "if (cat && cat.ef === \"False Swipe\") return false;",
+    de: "if (dadoDoGolpe && dadoDoGolpe.ef === \"False Swipe\") return false;",
     para: "",
   },
   {
@@ -2014,8 +2014,8 @@ export const MUTACOES = [
     id: "electro-shot-sem-carga",
     descricao: "Electro Shot dispara na hora sem chuva",
     arquivo: "duelo.js",
-    de: "if (cat && cat.ef === \"Electro Shot\") return clima === \"chuva\" ||",
-    para: "if (cat && cat.ef === \"Electro Shot\") return true ||",
+    de: "if (dadoDoGolpe && dadoDoGolpe.ef === \"Electro Shot\") return clima === \"chuva\" ||",
+    para: "if (dadoDoGolpe && dadoDoGolpe.ef === \"Electro Shot\") return true ||",
   },
   {
     id: "electro-shot-sem-bonus",
@@ -3339,8 +3339,8 @@ export const MUTACOES = [
     id: "habilidades-double-shock-um-acerto",
     descricao: "o Double Shock volta a bater uma vez só (hit_count: 2 na config)",
     arquivo: "duelo.js",
-    de: "\"Sparkling Barrage\": 3,\n    \"Double Shock\": 2 };",
-    para: "\"Sparkling Barrage\": 3 };",
+    de: "\"Chiller\": 3, \"Double Shock\": 2 };",
+    para: "\"Chiller\": 3 };",
   },
   {
     id: "habilidades-dado-atomic-fire-50",
@@ -4996,5 +4996,39 @@ export const MUTACOES = [
     de: "before use|Also has Protean/i.test(f)) ef.stabTodos = true;",
     para: "before use/i.test(f)) ef.stabTodos = true;",
   },
+  {
+    id: "tk15-acertos-sem-fonte-surging-some",
+    descricao: "TK-15 D3.5: o Surging Strikes sai da tabela sem fonte e volta a bater uma vez",
+    arquivo: "duelo.js",
+    de: "var ACERTOS_SEM_FONTE_DUELO = { \"Surging Strikes\": 3, \"Sparkling Barrage\": 3 };",
+    para: "var ACERTOS_SEM_FONTE_DUELO = { \"Sparkling Barrage\": 3 };",
+  },
+  {
+    id: "tk15-acertos-config-chiller-some",
+    descricao: "TK-15 D3.5: o Chiller (hit_count 3 na config) sai da tabela da config",
+    arquivo: "duelo.js",
+    de: "\"Rapid River\": 2, \"Chiller\": 3, \"Double Shock\": 2 };",
+    para: "\"Rapid River\": 2, \"Double Shock\": 2 };",
+  },
+  {
+    id: "tk15-acertos-ordem-invertida",
+    descricao: "TK-15 D3.5: a tabela sem fonte passa a valer antes da config (quebra a prioridade)",
+    arquivo: "duelo.js",
+    de: "return ACERTOS_DA_CONFIG_DUELO[m[0]] || ACERTOS_SEM_FONTE_DUELO[m[0]] ||",
+    para: "return ACERTOS_SEM_FONTE_DUELO[m[0]] + 1 || ACERTOS_DA_CONFIG_DUELO[m[0]] ||",
+  },
+  {
+    id: "tk15-filtro-volta-a-cat",
+    descricao: "TK-15 D3.4: o filtro de status por palavra volta a se chamar cat (sentido misturado com F/E)",
+    arquivo: "duelo.js",
+    de: "filtro.categoria = \"mordida\"",
+    para: "filtro.cat = \"mordida\"",
+  },
+  {
+    id: "tk15-move-effects-orfao",
+    descricao: "TK-15 D3.1: o único consumidor deixa de ler move_effects.json",
+    arquivo: "compute_condition_move_synergy.ps1",
+    de: "(Join-Path $dataDir \"move_effects.json\")",
+    para: "(Join-Path $dataDir \"move_efeitos_outro.json\")",
+  },
 ];
-
