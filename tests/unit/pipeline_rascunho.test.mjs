@@ -74,8 +74,10 @@ test("natureza física só com maioria física, especial só com maioria especia
   });
 });
 
-test("atributo fraco: Butterfree (Atk 55 x SpA 110) abre com o set especial, mesmo havendo set físico que bate mais forte", () => {
-  const lista = cands("SPECIES_BUTTERFREE");
+// 04/11/2026 (TK-35f): nos dados 2.65.5 o Butterfree ganhou Emanate (Normal vira Psychic x1,3) e o Return físico passou a bater 25 pontos acima do
+// especial (a penalidade é 15): abre físico. O caso do atributo fraco fica no Alakazam (Atk 50 x SpA 135), com físico mais forte (152,6 x 138,6) e abertura especial.
+test("atributo fraco: Alakazam (Atk 50 x SpA 135) abre com o set especial, mesmo havendo set físico que bate mais forte", () => {
+  const lista = cands("SPECIES_ALAKAZAM");
   const fisico = lista.find((c) => FISICAS.includes(c.build.nature));
   assert.ok(fisico, "premissa: o set físico existe (o motor o mede mais forte)");
   assert.ok(fisico.dano.max > lista[0].dano.max, "premissa: o físico bate mais forte");
