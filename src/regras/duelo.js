@@ -430,6 +430,10 @@
     if ((x = f.match(/^(Keen edge|Sharpness|Slashing|Hammer|Slicing|Biting|Punching) (?:attacks|moves) lower Defense(?: by -?(\d))?/i))) {
       categoriasDoTextoDuelo(/keen|sharpness/i.test(x[1]) ? "slicing" : x[1]).forEach(function (c) { ef.aoGolpear.push({ stat: "def", n: -(x[2] ? parseInt(x[2], 10) : 1), categoria: c }); });
     }
+    // Crushing Jaw / Gnawing Away (abilities.cc:11635-11645, 13004): mordida (FLAG_STRONG_JAW_BOOST) tem 50% (Random() % 2) de Defesa -1 no alvo.
+    if ((x = f.match(/Biting moves have a (\d+)% chance to lower defense/i))) ef.aoGolpear.push({ stat: "def", n: -1, p: parseInt(x[1], 10) / 100, categoria: "mordida" });
+    // Sinister Claws (abilities.cc:12467-12477): golpe Keen Edge baixa a SpDef do alvo (o texto traz "Mystic Blades + slashing moves lower SpDef").
+    if (/slashing moves lower SpDef/i.test(f)) categoriasDoTextoDuelo("slicing").forEach(function (c) { ef.aoGolpear.push({ stat: "spd", n: -1, categoria: c }); });
     // Quando o rival reduz os atributos: Competitive, Defiant, Run Away.
     if ((x = f.match(/Raises (Sp\. Atk|Attack) by two stages if stats are lowered by an enemy/i))) ef.aoSerReduzido[estagioDoTexto(x[1])] = 2;
     // Run Away: +2 de Speed (abilities.cc:11827 SetStatChanger(STAT_SPEED, 2)); o texto não traz o número.
@@ -1144,7 +1148,7 @@
         if (a.cat && gOutro.cat !== a.cat) return;
         if (a.categoria && (gOutro.cats || []).indexOf(a.categoria) === -1) return;
         if (a.tipo && gOutro.tipo !== a.tipo) return;
-        soma(a.stat, a.n * acumula, true);
+        soma(a.stat, a.n * (a.p || 1) * acumula, true); // p: chance do efeito (Crushing Jaw 50%), valor esperado
       });
       if (gOutro.estagios && gOutro.estagios.alvo && !u.ef.imuneEfeitoDeGolpe) {
         Object.keys(gOutro.estagios.alvo).forEach(function (k) { soma(k, gOutro.estagios.alvo[k] * gOutro.estagios.p * acumula, true); });
@@ -1390,7 +1394,7 @@
       ataqueNaEntrada: 0, seguimentoCategoria: [], aoUsar: [], limpaBuffsNaEntrada: false, quedaNaEntrada: {},
       maiorNaEntrada: 0, maiorAtaqueNaEntrada: 0, shellSmashNaMetade: false, inverteIntimida: false, dobraQuedas: false,
       encadeiaStatus: {},
-      hemolise: false, trocaStatusDoTipo: {}, curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
+      hemolise: false, sempreDormindo: false, trocaStatusDoTipo: {}, curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
       semRecuo: false, recuoMult: 1, custoPorAtaque: 0, custoTipo: {}, bloqueiaCura: false, liquidOoze: false,
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
       bloqueios: 0, sempreResiste: 0, corCamaleao: false, tipoDoGolpe: false, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {}, precisaoPorTipo: {},
@@ -1639,6 +1643,8 @@
         lerExtrasDaFraseDuelo(f, ef, climaOk); lerCuraDaFraseDuelo(f, ef, climaOk); lerDiversosDaFraseDuelo(f, ef, climaOk);
         lerCampoDaFraseDuelo(f, ef); lerItemDaFraseDuelo(f, ef, climaOk); lerSequenciaDaFraseDuelo(f, ef); lerDuplaDaFraseDuelo(f, ef, climaOk); lerStatusGolpeDaFraseDuelo(f, ef); lerRestoDaFraseDuelo(f, ef, climaOk); lerFormaDaFraseDuelo(f, ef); lerSupressaoDaFraseDuelo(f, ef); lerLote4DaFraseDuelo(f, ef);
       });
+      // alwaysSleeping (abilities.cc:2954 Comatose, :10439 Dreamscape): conta como dormindo para o Dream Eater (battle_scripts_1.s:3568).
+      if (nomeHabDuelo(id) === "Comatose" || nomeHabDuelo(id) === "Dreamscape") ef.sempreDormindo = true;
       if (imuneAntes) { ef.imuneStatus = imuneAntes; IMUNE_STATUS_POR_HABILIDADE[nomeHabDuelo(id)].forEach(function (s) { ef.imuneStatus[s] = true; }); }
     });
     ef.stabExtra = ef.stabExtra.filter(function (tp, i, a) { return a.indexOf(tp) === i; });
@@ -1869,7 +1875,7 @@
       g.recuo = extra && extra.rc && !u.ef.semRecuo ? extra.rc / 100 : 0;
       g.custoHP = u.ef.custoPorAtaque + (u.ef.custoTipo[tipo] || 0);
       // Matcha Gotcha (NextDex 2.65beta: "heals 50% dmg dealt") - o dado não traz o dreno.
-      g.dreno = (extra && extra.dr ? extra.dr / 100 * u.ef.drenoMult : extra && extra.ef === "Matcha Gotcha" ? 0.5 * u.ef.drenoMult : 0) + u.ef.drenoPct + (contato ? u.ef.drenoContato : 0) + (u.ef.drenoTipo[tipo] || 0) +
+      g.dreno = (extra && extra.dr ? extra.dr / 100 * u.ef.drenoMult : extra && extra.ef === "Matcha Gotcha" ? 0.5 * u.ef.drenoMult : m[0] === "Dream Eater" ? 0.5 * u.ef.drenoMult : 0) + u.ef.drenoPct + (contato ? u.ef.drenoContato : 0) + (u.ef.drenoTipo[tipo] || 0) +
         cats.reduce(function (mx, c) { return Math.max(mx, u.ef.drenoCategoria[c] || 0); }, 0); // Vitality Strike
       g.recuo *= u.ef.recuoFrac; // Daredevil: metade do recuo
       if (u.ef.sementeNoDreno && extra && extra.dr) g.status.push({ st: "semente", p: 1, doGolpe: false, ignoraGenero: false }); // Absorbant
@@ -2101,6 +2107,8 @@
       // Fake Out/Astonish/First Impression: "usable only on 1st turn" (NextDex) - vale
       // um golpe só; a média cai com os golpes que a luta pede.
       if (g.efeito === "Fake Out" && dano > 0) dano /= Math.min(6, golpesNecessariosDuelo(def.stats[0], dano));
+      // Dream Eater (battle_scripts_1.s:3564-3573): sem sono nem Comatose/Dreamscape no alvo o golpe falha. O motor não carrega sono entre turnos: só vale contra quem dorme sempre.
+      if (g.nome === "Dream Eater" && !def.ef.sempreDormindo) dano = 0;
       // Segundo melhor golpe (outro golpe): o que sobra com Disable/Torment.
       if (dano > melhor.dano) { if (melhor.golpe) segundo = { dano: melhor.dano }; } else if (dano > segundo.dano) segundo = { dano: dano };
       var este = { dano: dano, prio: prioAqui, golpe: g, efTipo: efTipo, crit: crit, razaoMenorDef: razaoMenorDef };
