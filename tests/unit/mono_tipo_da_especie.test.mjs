@@ -9,7 +9,7 @@ const dex = lerJson("dex_compact.json");
 const porSname = new Map(dex.species.filter(Boolean).map((s) => [s.sname, s]));
 
 // Divergências antigas, ainda sem decisão do usuário (levadas como dúvida no TK-36): não entram na regra até alguém decidir.
-const PENDENTES = new Set(["Electric:SPECIES_VOLBEAT", "Electric:SPECIES_IRON_EXO", "Fairy:SPECIES_ILLUMISE", "Fairy:SPECIES_ABSOL"]);
+const PENDENTES = new Set();
 
 test("Snubbull não está em Ground (é Fada pura na 2.65.5)", () => {
   assert.ok(!mono.porTipo.Ground.some((x) => x.s === "SPECIES_SNUBBULL"));
