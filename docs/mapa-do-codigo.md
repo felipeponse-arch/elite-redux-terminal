@@ -437,6 +437,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **tipos_habilidade_id_nome.test.mjs** - TK-00: trava id x nome de TYPE_MOD_ABILITIES. O id é do dex_compact do app (NextDex), NÃO o do enum do jogo
 - **tira_setup.test.mjs** - Ticket 18 (07/10/2026): golpes que tiram setup, pelo código oficial (er-repo 217dd0f,
 - **traducoes_alinhadas_por_nome.test.mjs** - Versão 2.65.4 deslocou ids de habilidade (Mighty Horn 391 -> 390; 391 virou Hardened Sheath...). A tradução PT é indexada por id, então
+- **traducoes_cobertura.test.mjs** - Toda habilidade do dex tem descrição PT (a 2.65.5 acrescentou ids sem tradução e ninguém notou).
 - **troca_de_tipo_na_defesa_no_duelo.test.mjs** - TK-34: a troca de tipo (Protean, Libero, RKS System, Pattern Change, Prismatic Fur, Color Change) vale para a DEFESA.
 - **vaga.test.mjs** - Vaga de verificação pesada (scripts/vaga.mjs, melhoria B de 2026-10-13).
 - **validacao_do_time_gerado.test.mjs** - TK-28: a decisão "quais Pokémon do time ainda estão sem build" mora em src/regras (computeTeamGenerationValidation), não na tela.
