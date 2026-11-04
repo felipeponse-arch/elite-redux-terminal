@@ -1,0 +1,1 @@
+- 04/11 (engenheira-de-codigo, branch ticket/39): D3.1 fundido. move_effects.json e compute_move_effects.ps1 saíram; compute_condition_move_synergy.ps1 calcula os efeitos sozinho. Prova: efeitos recalculados são byte a byte iguais ao move_effects.json anterior; condition_move_synergy.json idêntico. Pergunta aberta do 29/10 resolvida.
