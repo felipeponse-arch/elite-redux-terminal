@@ -43,10 +43,12 @@ const SUPORTES = {
   Hatterene: ["Magic Bounce", ["Trick Room", "Dazzling Gleam", "Psychic", "Mystical Fire"], "Quiet", [252, 0, 0, 252, 4, 0]]
 };
 
-test("armador: Tailwind do Whimsicott vale pontos medidos na luta completa (Archie Mt Pyre, Etapa 4); a mesma build sem o golpe faz menos", () => {
+test("armador: Tailwind do Whimsicott vale pontos medidos na luta completa (Matt Mt Pyre, Etapa 4); a mesma build sem o golpe faz menos", () => {
   const r = run({ milestone: 4, nomes: ["Whimsicott", "Hatterene", "Garchomp", "Scizor", "Metagross", "Gyarados"], builds: SUPORTES });
   const cands = r.cand(["Whimsicott", "Hatterene"]).filter((c) => c.sp.x === c.base.x);
   const time = [cands.find((c) => c.nome === "Whimsicott")].concat(cands.filter((c) => !c.travado).slice(0, 3), cands.filter((c) => c.nome === "Hatterene"));
+  // Dados 2.65.5: na amostra padrão da Etapa 4 o Tailwind rende 0 em todas as lutas (o Meowscarada do chefão trocou Magic Bounce por Magician); Matt Mt Pyre, da mesma Etapa, rende 1,18.
+  r.usaLutas(...r.ctx.lutas.amostra.map((l) => l.nome), "Matt Mt Pyre");
   const cl = r.R.motorClassificar(r.ctx, time);
   const arm = papeisDe(cl, "Whimsicott").find((p) => p.papel === "armador");
   assert.ok(arm, JSON.stringify(papeisDe(cl, "Whimsicott")));
@@ -109,7 +111,7 @@ test("risco 8: ter o golpe NÃO dá o papel (setup sem ganho medido, U-turn sem 
 });
 
 test("wallbreaker e tanque com prova (Etapa 2, elenco do pipeline) e abstenção de quem não prova nada", () => {
-  const r = run({ milestone: 2, nomes: ["Blissey", "Ferrothorn", "Clefable", "Dragonite", "Corviknight", "Mandibuzz"] });
+  const r = run({ milestone: 2, nomes: ["Blissey", "Ferrothorn", "Clefable", "Dragonite", "Corviknight", "Cresselia"] });
   const out = r.R.montarTimePeloMotor(r.ctx, { variantes: ["ofensivo"] });
   const v = out.variantes[0];
   const m = (n) => v.membros.find((x) => x.nome === n);
@@ -117,10 +119,10 @@ test("wallbreaker e tanque com prova (Etapa 2, elenco do pipeline) e abstenção
   assert.ok(wall && wall.prova.nocautesEmRobustos >= 2 && wall.prova.nocautesEmRobustos * 2 >= wall.prova.nocautes, JSON.stringify(m("Ferrothorn").papeis));
   const tan = m("Blissey").papeis.find((p) => p.papel === "tanque");
   assert.ok(tan && tan.prova.confrontos >= 2 && tan.prova.exemplos.every((e) => e.turnos >= 3 && e.hpFinal >= 0.4), JSON.stringify(m("Blissey").papeis));
-  // Abstenção: Mandibuzz não prova nada nas lutas da amostra. Sem papel, com o motivo, e o texto diz isso.
-  assert.equal(m("Mandibuzz").papeis.length, 0);
-  assert.match(m("Mandibuzz").abstencao, /nenhuma prova/);
-  assert.ok(v.explicacao.some((t) => t.startsWith("Mandibuzz: sem papel provado")));
+  // Abstenção: Cresselia não prova nada nas lutas da amostra (dados 2.65.5: os movesets de Meowscarada, Infernape Redux e Lanturn dos chefões mudaram e a Mandibuzz passou a provar wallbreaker e revenge killer). Sem papel, com o motivo, e o texto diz isso.
+  assert.equal(m("Cresselia").papeis.length, 0);
+  assert.match(m("Cresselia").abstencao, /nenhuma prova/);
+  assert.ok(v.explicacao.some((t) => t.startsWith("Cresselia: sem papel provado")));
   // Multirrótulo: a Blissey tem DOIS papéis no mesmo time, cada um com a sua prova.
   const blis = m("Blissey").papeis.map((p) => p.papel).sort();
   assert.deepEqual([...blis], ["tanque", "wallbreaker"]);
@@ -176,7 +178,8 @@ test("risco 4: armador sem DOIS beneficiários medidos NÃO ganha a tag (zero e 
   assert.equal(itensDoSol(zero).length, 0);
   assert.equal(R.motorClassificar(ctx, zero).tags.filter((t) => t.armador).length, 0);
   // Um beneficiário (Lilligant): o time até faz pontos a mais com o sol, então SÓ a regra dos dois beneficiários segura a tag.
-  const um = pega("Torkoal", "Lilligant", "Kingdra", "Pelipper", "Metagross", "Scizor");
+  // Dados 2.65.5: com o Scizor o sol passou a render 0,056 também para ele (2 beneficiários, a tag é legítima); o Garchomp mantém 1 só.
+  const um = pega("Torkoal", "Lilligant", "Kingdra", "Pelipper", "Metagross", "Garchomp");
   assert.equal(itensDoSol(um).length, 1);
   assert.equal(itensDoSol(um)[0].beneficiarios.length, 1);
   let com = 0, sem = 0, entrou = false;

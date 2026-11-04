@@ -160,3 +160,8 @@ Nunca usar como fonte de mecânica: a tradução PT (`move_translations_pt.json`
 - Jogo (er-repo `src/abilities.cc:7959-7965`, onStat): só Def e SpDef, x(1 + 0,6 x fração de PV perdido), com o PV do momento. Não é bônus de dano.
 - Motor (`duelo.js`, `ultimaResistenciaDuelo`): usa a fração MÉDIA de PV perdida na luta = min(1, golpes que o dono precisa para vencer x dano levado / PV) / 2. Luta até cair = x1,3; vence cedo ganha menos. Aproximação sem laço por turno (comentário `shortcut:` no código).
 - Berserk (`abilities.cc:2734`) fica como está (+1 de estágio ao cruzar 1/2 PV, média de 0,5); poderia usar a mesma fração média no futuro.
+
+## Butterfree e Dream Eater no pipeline (04/11/2026, engenheira-do-motor)
+- Butterfree (Emanate, Atk 111 x SpA 310 no nível 85) abrir com set FÍSICO contra Tate & Liza 1 está certo: Return vira Psíquico (STAB, `abilities.cc:6016-6029`), a batalha é invertida (Psychic x2 em Delphox e Lunatone) e Return tira 105,8% / 106,0% do HP; o Lunatone tem Scare (SpA -1, x0,667), que corta só o golpe especial (82,8% em vez de ~125%).
+- Defeito achado: Dream Eater só age em alvo dormindo ou com Comatose (er-repo `data/battle_scripts_1.s` BattleScript_EffectDreamEater); o motor o lê como poder 120 + dreno, sem checar sono. Corrigido SÓ no pipeline (`GOLPES_QUE_PEDEM_ALVO_DORMINDO`: fora do kit); o motor/rank não mudou. Sem Dream Eater o set especial do Butterfree cai para 71,4% (físico 114,4% segue na frente).
+- Pendente (decisão do usuário): o motor de duelo ainda mede Dream Eater como golpe comum em quem o usa no rank (mexeria no rank).

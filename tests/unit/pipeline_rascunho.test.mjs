@@ -114,3 +114,13 @@ test("o rascunho coerente passa em validateAiBuild e fecharBuild nas espécies d
     });
   });
 });
+
+// ---------- 6. Dream Eater ----------
+// O jogo só deixa o Dream Eater agir em alvo dormindo (ou com Comatose): ferramentas/er-repo/data/battle_scripts_1.s
+// BattleScript_EffectDreamEater (jumpifstatus SLEEP / jumpifabilityflag COMATOSE, senão BattleScript_DreamEaterNoEffect).
+// O motor lê só poder 120 + dreno e mediria dano num alvo acordado: o pipeline não propõe o golpe (Butterfree abria o set especial por ele).
+test("nenhum candidato leva Dream Eater (só funciona em alvo dormindo e o motor o mede como golpe comum)", () => {
+  ["SPECIES_BUTTERFREE", "SPECIES_GENGAR", "SPECIES_HYPNO"].forEach((s) => {
+    cands(s).forEach((c) => assert.ok(!c.golpes.includes("Dream Eater"), s + " " + c.golpes.join("/")));
+  });
+});

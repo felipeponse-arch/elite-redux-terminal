@@ -40,6 +40,8 @@
   // Golpes que falham se o atacante leva dano antes de agir (Focus Punch, prioridade -3): o motor lê só o poder e a
   // simulação não os modela, então ficam fora do kit em vez de prometer dano que o alvo impede.
   var GOLPES_QUE_FALHAM_SE_LEVAR_DANO = ['Focus Punch'];
+  // Dream Eater só age em alvo dormindo ou com Comatose (er-repo battle_scripts_1.s, BattleScript_EffectDreamEater); o motor o lê como poder 120 + dreno.
+  var GOLPES_QUE_PEDEM_ALVO_DORMINDO = ['Dream Eater'];
   // Rascunho coerente com a espécie (ticket pipeline-build-2026-10-14/05, revisão de metagame de 15/10/2026 sobre 17 builds do pipeline).
   // Golpe sem tipo definido: o Hidden Power só ganha tipo no chefão (hpType do dado); numa build do jogador o motor lê Normal 80 sem STAB.
   // Fora do kit e do preenchimento: o pipeline não propõe golpe que o motor não consegue medir direito. (Aspas simples: ver a nota acima.)
@@ -528,7 +530,7 @@
     if (!sp) { saida.aviso = saida.aviso || "espécie não encontrada"; saida.avisos.push("espécie não encontrada"); return saida; }
     try {
       var cap = getCurrentCap();
-      var liberados = availableMovesFor(sp).names.filter(function (n) { return GOLPES_SEM_TIPO_DEFINIDO.indexOf(n) === -1; });
+      var liberados = availableMovesFor(sp).names.filter(function (n) { return GOLPES_SEM_TIPO_DEFINIDO.indexOf(n) === -1 && GOLPES_QUE_PEDEM_ALVO_DORMINDO.indexOf(n) === -1; });
       var kit = golpesDeDueloAte(sp, cap).map(function (id) { return MOVES[id][0]; })
         .filter(function (n, i, a) { return a.indexOf(n) === i && liberados.indexOf(n) !== -1 && moveRoleOf(n) !== "dupla" && GOLPES_QUE_DEPENDEM_DE_ITEM.indexOf(n) === -1 && GOLPES_QUE_FALHAM_SE_LEVAR_DANO.indexOf(n) === -1; });
       if (!kit.length) { saida.aviso = saida.aviso || sp.n + " não tem golpe de dano liberado nesta Etapa"; saida.avisos.push(sp.n + " não tem golpe de dano liberado nesta Etapa"); return saida; }
