@@ -1,3 +1,4 @@
+// Depende de dado: nome de habilidade das lutas comuns e versão gravada pelo build (muda quando o jogo troca de versão).
 // TK-36: o gerador de lutas comuns lia "Sun Basking" do gameData.json e o rank regravava o nome velho em data/lutas_comuns_run.json.
 import test from "node:test";
 import assert from "node:assert/strict";

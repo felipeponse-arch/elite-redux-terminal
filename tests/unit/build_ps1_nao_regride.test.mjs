@@ -1,3 +1,4 @@
+// Depende de dado: nome de habilidade das lutas comuns e versão gravada pelo build (muda quando o jogo troca de versão).
 // TK-36: o build.ps1 regerava o dado com versão "2.65beta" e sobrescrevia data/species_rank.json (rank do duelo, só se grava no fim, à mão).
 import test from "node:test";
 import assert from "node:assert/strict";
