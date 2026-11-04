@@ -5115,4 +5115,32 @@ export const MUTACOES = [
     de: "\"paralisia\": \"paralisar\", ",
     para: "",
   },
+  {
+    id: "tk32-hazard-plano-volta-null",
+    descricao: "TK-32: o hazard volta a não ter plano no 1x1 (o 1º rival não paga o turno do hazard)",
+    arquivo: "duelo.js",
+    de: "if (p.tipo === \"hazard\") { r.hazard = p.hazard; return r; }",
+    para: "if (p.tipo === \"hazard\") return null;",
+  },
+  {
+    id: "tk32-hazard-sem-dano-de-entrada",
+    descricao: "TK-32: o rival que entra depois não leva o hazard (dano, veneno, Sticky Web)",
+    arquivo: "duelo.js",
+    de: "entrarNoLadoDuelo(c, lado, false);",
+    para: "",
+  },
+  {
+    id: "tk32-hazard-ignora-removedor",
+    descricao: "TK-32: Rapid Spin/Defog/Tidy Up no time do rival deixam de limpar o hazard",
+    arquivo: "duelo.js",
+    de: "if (removeHazardDuelo(f)) limpo = true;",
+    para: "",
+  },
+  {
+    id: "tk32-rank-sem-estrutura-de-luta",
+    descricao: "TK-32: o 4º espaço do rank volta a avaliar cada rival sozinho (hazard nunca vence)",
+    arquivo: "duelo.js",
+    de: "lutas && idHazardDoDuelo(u) !== undefined",
+    para: "false && idHazardDoDuelo(u) !== undefined",
+  },
 ];

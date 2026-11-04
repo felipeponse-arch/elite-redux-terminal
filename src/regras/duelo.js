@@ -2959,6 +2959,8 @@
     var semMeuPlano = corridaCom(null, planoEle);
     var vale = (ini.detalhe || semMeuPlano.nota < 1) && !(euPrimeiro === false && elePrecisa <= 1);
     var planoEu = vale ? melhorPlanoDuelo(eu, foe, baseEu, nivel, function (ef) { var r = corridaCom(ef, planoEle); return { nota: r.nota, fracEu: r.restoEu / eu.stats[0] }; }) : null;
+    // ini.poeHazard (TK-32): o rank força o turno do hazard no 1º rival da luta, mesmo sem ele "render" no 1x1.
+    if (ini.poeHazard !== undefined) planoEu = efeitoDoPlanoDuelo(eu, foe, ini.poeHazard, baseEu, nivel) || planoEu;
     if (planoEu) planoEle = planoDele(planoEu);
     planosQueValeram = { eu: null, ele: null };
     var final = planoEu || planoEle ? corridaCom(planoEu, planoEle) : semPlanos;
@@ -3154,7 +3156,37 @@
     u.semClimaMemo = x;
     return x;
   }
-  function comQuatroGolpes(melhor, sp, foes, nivel, clima) {
+  // ---------- hazard no rank (TK-32, decisão do usuário de 29/10/2026) ----------
+  // Só hazard (Stealth Rock, Spikes, Toxic Spikes, Sticky Web) premia suporte: nos eixos potencial e viabilidade, em chefões e comuns.
+  // O 1º Pokémon da luta enfrenta o lado limpo e quem põe o hazard gasta o turno (plano com atraso 1); do 2º em diante cada um entra
+  // no lado com 1 camada por uso (entrarNoLadoDuelo: Spikes 1/8 como no jogo, Rock pela tabela, Boots e Magic Guard respeitados).
+  // Defog na entrada (limpaHazards) entra sem dano e limpa; golpe removedor no set do rival limpa depois de ele entrar.
+  var REMOVEDORES_DE_HAZARD_DUELO = ["Rapid Spin", "Mortal Spin", "Defog", "Tidy Up", "Court Change"];
+  function idHazardDoDuelo(u) {
+    return (u.statusIds || []).filter(function (id) { var p = planoDoGolpeStatus(id); return p && p.tipo === "hazard"; })[0];
+  }
+  function removeHazardDuelo(f) {
+    return (f.golpeIds || []).concat(f.statusIds || []).some(function (id) { return MOVES[id] && REMOVEDORES_DE_HAZARD_DUELO.indexOf(MOVES[id][0]) !== -1; });
+  }
+  // Os duelos de "u" contra os Pokémon de UMA luta, na ordem em que entram; devolve o detalhe de cada um.
+  function resultadosDaLutaComHazard(u, foes, nivel, ini) {
+    var id = idHazardDoDuelo(u), base = Object.assign({}, ini || {}, { detalhe: true });
+    if (id === undefined) return foes.map(function (f) { return resultadoDoDuelo(u, f, nivel, base); });
+    delete base.semPlanos; // o hazard é o único plano da unidade; sem isto o turno dele não entra
+    var lado = novoLadoDuelo(), limpo = false;
+    poeHazardNoLado(lado, HAZARD_DO_GOLPE[MOVES[id][0]]);
+    return foes.map(function (f, i) {
+      if (i === 0) { limpo = !!f.ef.limpaHazards || removeHazardDuelo(f); return resultadoDoDuelo(u, f, nivel, Object.assign({}, base, { poeHazard: id })); }
+      if (limpo || f.ef.limpaHazards) { limpo = true; return resultadoDoDuelo(u, f, nivel, base); }
+      var c = participanteDuelo(f);
+      entrarNoLadoDuelo(c, lado, false);
+      if (removeHazardDuelo(f)) limpo = true;
+      if (c.frac <= 0) return { nota: 1, venceu: true, fracEu: 1, fracFoe: 0, turnos: 0 }; // caiu ao entrar
+      return resultadoDoDuelo(u, comoEstaDuelo(c), nivel, Object.assign({}, base, { fracFoe: c.frac }));
+    });
+  }
+  // lutas (opcional, só o rank): [[foe, ...], ...] na ordem das lutas; sem ele os foes são independentes, como antes.
+  function comQuatroGolpes(melhor, sp, foes, nivel, clima, lutas) {
     if (!melhor || !melhor.unidade) return melhor;
     var u0 = melhor.unidade, set = SETS_DE_DUELO.filter(function (s) { return s.nome === melhor.set; })[0];
     if (!set || !u0.golpeIds) return melhor;
@@ -3170,7 +3202,9 @@
       u.statusIds = (u.statusIds || []).filter(function (id) { return op.status.indexOf(id) !== -1; });
       u.golpesDoSet = op.golpes.concat(op.status);
       u.receita = { sp: sp, set: set, abId: u0.abId, nivel: nivel, golpes: op.golpes, status: op.status, item: u0.item };
-      var porFoe = foes.map(function (f) { return resultadoDoDuelo(u, f, nivel); });
+      var porFoe = lutas && idHazardDoDuelo(u) !== undefined
+        ? lutas.reduce(function (a, l) { return a.concat(resultadosDaLutaComHazard(u, l, nivel).map(function (r) { return r.nota; })); }, [])
+        : foes.map(function (f) { return resultadoDoDuelo(u, f, nivel); });
       var nota = porFoe.reduce(function (a, v) { return a + v; }, 0);
       if (!vencedor || nota > vencedor.nota + 1e-9) vencedor = { nota: nota, set: melhor.set, ab: u.ab, porFoe: porFoe, unidade: u };
     });
@@ -3641,7 +3675,10 @@
       r.atraso = 1; r.curaX = (base.hpY - base.hpX) / 2; r.residuoY = 0; r.danoUmaVezY = (base.hpY - base.hpX) / 2;
       return r;
     }
-    return null; // proteção e hazard: valem na luta inteira, não no 1x1
+    // Hazard (TK-32): o 1x1 só enxerga o turno gasto (atraso 1); o ganho está nos rivais seguintes (resultadosDaLutaComHazard) e
+    // nunca vence sozinho aqui (melhorPlanoDuelo só escolhe plano que rende mais).
+    if (p.tipo === "hazard") { r.hazard = p.hazard; return r; }
+    return null; // proteção: vale na luta inteira, não no 1x1
   }
   // O melhor plano de "x" (ou atacar direto, se nenhum rende mais).
   function melhorPlanoDuelo(x, y, base, nivel, corrida) {
