@@ -60,3 +60,21 @@ test("o 4º espaço do potencial: com a estrutura das lutas o hazard vence o Pai
   assert.equal(nome(R.comQuatroGolpes({ set: set.nome, unidade: u0 }, sp, foes, NIVEL, null)), "Pain Split", "sem a estrutura, como antes");
   assert.equal(nome(R.comQuatroGolpes({ set: set.nome, unidade: u0 }, sp, foes, NIVEL, null, [foes])), "Toxic Spikes");
 });
+
+// TK-42: Court Change TROCA os efeitos de campo (swapsideeffects, er-repo battle_scripts_1.s:24-32), não remove hazard;
+// Rapid Spin/Mortal Spin/Tidy Up (Cmd_rapidspinfree, battle_script_commands.c:11404) e Defog (defogclear) removem.
+test("TK-42: Court Change no time do rival NÃO limpa o hazard; Mortal Spin e Defog limpam", () => {
+  const u = comHazard("Spikes");
+  const com = (golpe) => foesDe((m, i) => (i === 1 ? Object.assign({}, m, { mv: [golpe].concat((m.mv || []).slice(0, 3)) }) : m));
+  assert.equal(R.resultadosDaLutaComHazard(u, com("Court Change"), NIVEL)[2].venceu, true, "Court Change não limpa: o 3º entra ferido como sem removedor");
+  ["Mortal Spin", "Defog"].forEach((g) => assert.equal(R.resultadosDaLutaComHazard(u, com(g), NIVEL)[2].venceu, false, g + " limpa"));
+});
+
+test("TK-42: Court Change é plano de troca e troca os hazards dos dois lados (swapsideeffects)", () => {
+  assert.equal(R.planoDoGolpeStatus(idDo("Court Change")).tipo, "troca");
+  const a = R.novoLadoDuelo(), b = R.novoLadoDuelo();
+  a.espinho = 2; a.rocha = true; b.teia = true;
+  assert.equal(R.temHazardDuelo(a), true);
+  R.trocaHazardsDosLadosDuelo(a, b);
+  assert.deepEqual([b.espinho, b.rocha, a.teia, a.espinho, a.rocha], [2, true, true, 0, false]);
+});

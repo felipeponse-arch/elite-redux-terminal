@@ -3173,11 +3173,17 @@
   // O 1º Pokémon da luta enfrenta o lado limpo e quem põe o hazard gasta o turno (plano com atraso 1); do 2º em diante cada um entra
   // no lado com 1 camada por uso (entrarNoLadoDuelo: Spikes 1/8 como no jogo, Rock pela tabela, Boots e Magic Guard respeitados).
   // Defog na entrada (limpaHazards) entra sem dano e limpa; golpe removedor no set do rival limpa depois de ele entrar.
-  var REMOVEDORES_DE_HAZARD_DUELO = ["Rapid Spin", "Mortal Spin", "Defog", "Tidy Up", "Court Change"];
+  // Golpes que limpam hazard (er-repo): Rapid Spin, Mortal Spin e Tidy Up usam MOVE_EFFECT_RAPIDSPIN -> Cmd_rapidspinfree limpa os hazards
+  // do lado do usuário (battle_script_commands.c:11404-11467; scripts battle_scripts_1.s:5402, 5440, 5468); Defog usa defogclear
+  // (battle_scripts_1.s:1559-1592). Court Change NÃO entra: BattleScript_EffectCourtChange só TROCA os efeitos de campo (swapsideeffects,
+  // battle_scripts_1.s:24-32), não remove; o motor ignora o golpe quanto a hazards (a troca não é simulada).
+  var REMOVEDORES_DE_HAZARD_DUELO = ["Rapid Spin", "Mortal Spin", "Defog", "Tidy Up"];
   function idHazardDoDuelo(u) {
     return (u.statusIds || []).filter(function (id) { var p = planoDoGolpeStatus(id); return p && p.tipo === "hazard"; })[0];
   }
+  // Fonte única de "limpa hazard": a habilidade que limpa na entrada (ef.limpaHazards) ou um golpe da lista acima.
   function removeHazardDuelo(f) {
+    if (f.ef && f.ef.limpaHazards) return true;
     return (f.golpeIds || []).concat(f.statusIds || []).some(function (id) { return MOVES[id] && REMOVEDORES_DE_HAZARD_DUELO.indexOf(MOVES[id][0]) !== -1; });
   }
   // Os duelos de "u" contra os Pokémon de UMA luta, na ordem em que entram; devolve o detalhe de cada um.
@@ -3188,7 +3194,7 @@
     var lado = novoLadoDuelo(), limpo = false;
     poeHazardNoLado(lado, HAZARD_DO_GOLPE[MOVES[id][0]]);
     return foes.map(function (f, i) {
-      if (i === 0) { limpo = !!f.ef.limpaHazards || removeHazardDuelo(f); return resultadoDoDuelo(u, f, nivel, Object.assign({}, base, { poeHazard: id })); }
+      if (i === 0) { limpo = removeHazardDuelo(f); return resultadoDoDuelo(u, f, nivel, Object.assign({}, base, { poeHazard: id })); }
       if (limpo || f.ef.limpaHazards) { limpo = true; return resultadoDoDuelo(u, f, nivel, base); }
       var c = participanteDuelo(f);
       entrarNoLadoDuelo(c, lado, false);
@@ -3292,6 +3298,7 @@
     if (se === "Tailwind") return { tipo: "vento" };
     if (se === "Defog") return { tipo: "defog" }; // só limpa as telas do rival na luta contra o time (poeEfeitoDeLadoComGolpe); no 1x1 não muda nada
     if (se === "Trick Room") return { tipo: "sala" };
+    if (se === "Court Change") return { tipo: "troca" }; // TROCA os hazards dos dois lados (swapsideeffects, battle_scripts_1.s:24-32); poeEfeitoDeLadoComGolpe
     if (se === "Protect") return { tipo: "protege" };
     if (HAZARD_DO_GOLPE.hasOwnProperty(se)) return { tipo: "hazard", hazard: HAZARD_DO_GOLPE[se] };
     if (se === "Substitute") return { tipo: "substituto" };
@@ -4011,6 +4018,11 @@
   }
   function duracaoTelaDuelo(u) { return itemDeCampoAtivo(u, "argilaLeve") ? DURACAO_LADO_DUELO.telaLightClay : DURACAO_LADO_DUELO.tela; }
   function temTelaDuelo(l) { return l.reflect > 0 || l.luz > 0 || l.veu > 0; }
+  function temHazardDuelo(l) { return Object.keys(CAMADAS_DE_HAZARD).some(function (h) { return !!l[h]; }); }
+  // Court Change: os hazards (Spikes, Toxic Spikes, Stealth Rock, Sticky Web...) trocam de lado, nos dois sentidos (swapsideeffects).
+  function trocaHazardsDosLadosDuelo(a, b) {
+    Object.keys(CAMADAS_DE_HAZARD).forEach(function (h) { var t = a[h]; a[h] = b[h] === undefined ? (CAMADAS_DE_HAZARD[h] === 1 ? false : 0) : b[h]; b[h] = t === undefined ? (CAMADAS_DE_HAZARD[h] === 1 ? false : 0) : t; });
+  }
   function limpaTelasDoLadoDuelo(l) { l.reflect = 0; l.luz = 0; l.veu = 0; }
   // Fim do turno: cada timer cai 1 (battle_util.c:1799, 1930, 2053). O turno do uso não conta (`started`,
   // battle_main.c:4603-4605): quem usa gasta esse turno fora da conta e só os turnos seguintes descontam.
@@ -4426,6 +4438,11 @@
           nsala = alternaSalaDuelo(campo.sala, salaPermanente());
           if (nsala === campo.sala) return;
           soSePrecisa = campo.sala > 0;
+        } else if (p && p.tipo === "troca") {
+          // Court Change: só vale quando o lado de quem usa tem hazard (o motor não escolhe uma troca que o prejudica). shortcut: troca só os
+          // hazards; telas e Tailwind, que o jogo também troca, ficam; upgrade se o rank medir Court Change com tela.
+          if (!temHazardDuelo(lq)) return;
+          trocaHazardsDosLadosDuelo(nlq, nlc);
         } else if (p && p.tipo === "defog") {
           if (!temTelaDuelo(lc)) return;
           limpaTelasDoLadoDuelo(nlc);
@@ -4681,7 +4698,7 @@
   //  - contribuicaoSuporte: nota - nota do time com o membro SEM os golpes de lado (tela, Tailwind, Trick Room, Defog);
   //    isola só o efeito do suporte, sem o dano do próprio membro. null quando ele não tem golpe de lado.
   // Custo: 1 + membros + suportes simulações da luta completa.
-  var TIPOS_DE_GOLPE_DE_LADO_DUELO = ["tela", "vento", "sala", "defog"];
+  var TIPOS_DE_GOLPE_DE_LADO_DUELO = ["tela", "vento", "sala", "defog", "troca"];
   function semGolpesDeLadoDuelo(u) {
     var fica = (u.statusIds || []).filter(function (id) { var p = planoDoGolpeStatus(id); return !(p && TIPOS_DE_GOLPE_DE_LADO_DUELO.indexOf(p.tipo) !== -1); });
     return fica.length === (u.statusIds || []).length ? null : Object.assign({}, u, { statusIds: fica });
