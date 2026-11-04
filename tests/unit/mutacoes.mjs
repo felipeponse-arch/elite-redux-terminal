@@ -5011,25 +5011,11 @@ export const MUTACOES = [
     para: "return def.tipos.indexOf(melhorT) !== -1 ? efAtual : Math.max(melhorM, efAtual > 0.5 ? 0.5 : efAtual);",
   },
   {
-    id: "tk34-color-change-empate-troca-de-tipo",
-    descricao: "TK-34: o Color Change troca de tipo no empate (<=), em vez de ficar com o tipo atual",
-    arquivo: "duelo.js",
-    de: "if (m < melhorM) { melhorM = m; melhorT = TYPES[i]; }",
-    para: "if (m <= melhorM) { melhorM = m; melhorT = TYPES[i]; }",
-  },
-  {
     id: "tk34-color-change-volta-a-sempre-resiste",
     descricao: "TK-34: o Color Change volta a cair no teto sempreResiste, sem corCamaleao",
     arquivo: "duelo.js",
     de: "ef.corCamaleao = true;",
     para: "ef.sempreResiste = 1;",
-  },
-  {
-    id: "tk34-protean-mesmo-tipo-troca-de-novo",
-    descricao: "TK-34: quem já é mono do tipo do golpe volta a ser tratado como troca (sem o atalho do mesmo tipo)",
-    arquivo: "duelo.js",
-    de: "(u.tipos.length === 1 && u.tipos[0] === gU.tipo)",
-    para: "false",
   },
   {
     id: "tk15-acertos-sem-fonte-surging-some",
