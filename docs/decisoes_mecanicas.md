@@ -197,3 +197,8 @@ Decisões do usuário (04/11): todas SIM. Código do jogo (er-repo) é a verdade
 - Decisão: o rank fica como está (não corrigir agora, para não mudar o rank). Quem depende de Spore ou Sleep Powder pode estar potencialmente SUBESTIMADO ou SUPERESTIMADO no rank (contra alvo imune a pó o golpe falha no jogo e aqui ainda dorme).
 - Sem aviso ao usuário final: nada na tela do app. O lembrete vale para quem mexer no rank, no Meu Time e nas builds: ao revisar espécies com Spore ou Sleep Powder (e Stun Spore/Poison Powder se um dia entrarem), lembrar que o valor medido pode divergir do jogo.
 - Para corrigir no futuro: aplicar a imunidade em `efeitoDoPlanoDuelo` e refazer o rank completo (2h45).
+
+## Atalhos para espécie: <button> nativo cumpre o papel de botão (04/11/2026, decisão do usuário, qa-processo)
+
+- Os atalhos `.goto-species` / `.goto-species-strategies` (ex.: `src/ui/time.js`) são `<button type="button">` nativos: focáveis (tabIndex 0) e com papel de botão implícito. Não precisam de `role="button"` explícito.
+- O teste `tests/e2e/teclado_e_toque.spec.mjs` aceita `tagName === "BUTTON"` ou `role="button"`; continua exigindo tabIndex 0 e Enter/Espaço.
