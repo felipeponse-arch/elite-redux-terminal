@@ -51,3 +51,23 @@ test("TK-34: caso real - Cinderace (Libero) com Surf apanha mais de Electric do 
   const a = R.danoNoDuelo(foe, m, NIVEL);
   assert.ok(R.comTipoDoGolpe(m, foe, R.danoNoDuelo(m, foe, NIVEL), a, NIVEL).melhor.dano > a.melhor.dano * 1.2);
 });
+
+// Caminho alcançável: o rival com Damp já pintou o Protean mono-Fire de Water (comTipoMudado) e o golpe é Fire (Flare Blitz, contato).
+// O atalho do mesmo tipo tem que devolver o dano já ajustado, sem refazer a conta com o tipo Fire de antes.
+test("TK-34: Protean mono-Fire que usa Fire mantém o dano já ajustado pelo Damp do rival (atalho do mesmo tipo)", () => {
+  const meu = monoFire(eu("Arcanine", { hab: "Protean", golpes: ["Flare Blitz"], evs: EV.nenhum, nat: "Hardy" }));
+  const foe = chefao("Raichu", { hab: "Damp", golpes: ["Thunderbolt"], evs: EV.nenhum, nat: "Hardy" });
+  const dele = R.danoNoDuelo(foe, meu, NIVEL), ganho = R.danoNoDuelo(meu, foe, NIVEL);
+  const ajustado = R.comTipoMudado(foe, meu, dele, ganho, NIVEL);
+  assert.ok(ajustado.melhor.dano > dele.melhor.dano, "Damp piora o dano sobre o Fire: Electric x1 -> x2 no Water");
+  assert.equal(R.comTipoDoGolpe(meu, foe, ganho, ajustado, NIVEL).melhor.dano, ajustado.melhor.dano);
+});
+
+
+// Empate no menor valor: Fire/Grass leva x0,5 de Fire pelo Fire e há outros tipos que também dão x0,5 (Water, Rock, Dragon).
+// Strict <: fica com o tipo atual e mantém a efetividade do par (x1); trocar no empate a derrubaria para x0,5 sem ganho real.
+test("TK-34: Color Change empatado com o tipo atual não troca (Fire/Grass x Fire fica x1, não x0,5)", () => {
+  const def = Object.assign({}, eu("Arcanine", { hab: "Color Change", golpes: ["Flamethrower"], evs: EV.nenhum, nat: "Hardy" }), { tipos: ["Fire", "Grass"] });
+  const atq = chefao("Arcanine", { hab: "Intimidate", golpes: ["Flamethrower"], evs: EV.nenhum, nat: "Hardy" });
+  assert.equal(R.efetividadeComColorChange(atq, "Fire", def, 1), 1);
+});
