@@ -218,8 +218,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **compute_ability_movepool_synergy.ps1** - (sem comentário de topo)
   Get-FlagMatches:56, Get-UnmappedHit:66, Get-TypeMatches:73
 - **compute_condition_move_synergy.ps1** - (sem comentário de topo)
-- **compute_move_effects.ps1** - (sem comentário de topo)
-  Get-MoveEffects:87
+  Get-MoveEffects:73
 - **compute_move_roles.ps1** - (sem comentário de topo)
 - **compute_species_rank.ps1** - (sem comentário de topo)
   Get-AbilityScore:164, Get-BossDefenseScore:211, Get-MovepoolScore:237, Get-TypeScore:274, Get-Stage:337, Get-PercentileRanks:387, Get-Tier:412, Compute-Tiers:430
@@ -313,7 +312,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **golpe_chave_imposto.test.mjs** - Relato da Tate & Liza (03/10): o plano dizia Dragon Claw e a build da IA tinha Dragon Pulse. Agora a validação
 - **golpe_duplo.test.mjs** - Habilidades de golpe duplo (10/10/2026). O usuário testou no jogo: o Mega Punch do Ledian (Raging Boxer, Iron
 - **golpes_de_status.test.mjs** - Golpes de status no duelo (2026-09-29, decisão do usuário: "com regras
-- **golpes_fonte_unica.test.mjs** - TK-15 (29/10/2026): golpes - acertos com fonte, vocabulário cat/categoria/ef, e o caminho de move_effects.json.
+- **golpes_fonte_unica.test.mjs** - TK-15 (29/10/2026): golpes - acertos com fonte, vocabulário cat/categoria/ef, e a fusão de move_effects.json no passo de sinergia.
 - **golpes_novos_2654.test.mjs** - Ticket versao-nova/09 (15/10/2026): os 9 golpes novos do upcoming (er-config d1a9a4c, MoveList.textproto) entram no app, com as espécies ...
 - **gravacao_build_ia.test.mjs** - Caminho "resposta da IA -> build validada -> o que gravar" (src/regras/gravacao_build_ia.js e
 - **guarda_lutas_comuns.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).

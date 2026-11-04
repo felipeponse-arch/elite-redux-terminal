@@ -125,12 +125,6 @@
     "commit": "b90fb39",
     "manual": true
   },
-  "move_effects.json": {
-    "jogo": "desconhecida",
-    "curadoriaEm": "2026-09-22",
-    "commit": "625a615",
-    "manual": true
-  },
   "move_roles.json": {
     "jogo": "desconhecida",
     "curadoriaEm": "2026-10-15",

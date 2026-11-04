@@ -99,13 +99,11 @@ if (-not $SkipExtract) {
     Write-Output "--- classificando golpes de status pelo efeito real ---"
     & (Join-Path $PSScriptRoot "compute_move_roles.ps1")
     # Pesquisa de sinergia habilidade x golpe (pedido do usuario, 2026-09-20/
-    # 21): catalogo sistematico do efeito real de cada golpe (precisa de
-    # move_translations_pt.json ja atualo, por isso roda depois do transform
-    # principal), depois cruza com habilidades condicionais que a propria
+    # 21): cruza o efeito real de cada golpe (calculado no proprio passo; precisa de
+    # move_translations_pt.json ja atualizado, por isso roda depois do transform
+    # principal) com habilidades condicionais que a propria
     # especie consegue satisfazer sozinha (clima, HP baixo) - roda por
-    # ultimo porque depende do arquivo que o passo anterior acabou de gerar.
-    Write-Output "--- catalogando efeito real de cada golpe ---"
-    & (Join-Path $PSScriptRoot "compute_move_effects.ps1")
+    # ultimo porque depende de dex_compact.json e das traducoes ja gerados.
     Write-Output "--- cruzando habilidades condicionais com golpes que ativam a condicao ---"
     & (Join-Path $PSScriptRoot "compute_condition_move_synergy.ps1")
 } else {

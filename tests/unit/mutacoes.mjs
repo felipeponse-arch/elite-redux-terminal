@@ -5075,10 +5075,10 @@ export const MUTACOES = [
   },
   {
     id: "tk15-move-effects-orfao",
-    descricao: "TK-15 D3.1: o único consumidor deixa de ler move_effects.json",
+    descricao: "TK-15 D3.1: o passo de sinergia volta a depender do intermediário data/move_effects.json",
     arquivo: "compute_condition_move_synergy.ps1",
-    de: "(Join-Path $dataDir \"move_effects.json\")",
-    para: "(Join-Path $dataDir \"move_efeitos_outro.json\")",
+    de: "$pt = $ser.DeserializeObject((Get-Content (Join-Path $dataDir \"move_translations_pt.json\")",
+    para: "$moveEffects = $ser.DeserializeObject((Get-Content (Join-Path $dataDir \"move_effects.json\")",
   },
   {
     id: "tk13b-purifying-salt-sem-tabela",
