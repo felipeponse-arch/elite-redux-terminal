@@ -28,3 +28,8 @@ for (const [arquivo, chaves] of [["bosses.json", ["abi"]], ["lutas_comuns_run.js
     assert.deepEqual(faltam, [], `nomes sem habilidade no dex: ${faltam.join(", ")}`);
   });
 }
+
+// TK-36: o texto das builds também não pode citar o nome velho (a nota de uma build dizia "virou Sun Basking").
+test("builds.json não cita Sun Basking (agora Basking)", () => {
+  assert.ok(!readFileSync(join(raiz, "builds.json"), "utf8").includes("Sun Basking"));
+});
