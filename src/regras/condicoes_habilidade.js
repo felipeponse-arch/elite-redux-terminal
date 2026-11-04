@@ -23,7 +23,7 @@
     "Swift Swim": ["chuva"], "Rain Dish": ["chuva"], "Hydration": ["chuva"], "Raging Storm": ["chuva"],
     "Rain Shroud": ["chuva"], "Sea Guardian": ["chuva"],
     "Chlorophyll": ["sol"], "Solar Power": ["sol"], "Leaf Guard": ["sol"], "Flower Gift": ["sol"],
-    "Sun Worship": ["sol"], "Sun Basking": ["sol"], "Protosynthesis": ["sol", "Booster Energy"],
+    "Sun Worship": ["sol"], "Basking": ["sol"], "Protosynthesis": ["sol", "Booster Energy"],
     "Thermal Slide": ["sol", "granizo"],
     "Sand Veil": ["areia"], "Sand Rush": ["areia"], "Sand Force": ["areia"], "Sand Guard": ["areia"],
     "Dune Terror": ["areia"], "Desert Cloak": ["areia"], "Sand Fiend": ["areia"],

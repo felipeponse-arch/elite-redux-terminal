@@ -2,7 +2,7 @@
 // M3) Grassy Glide sai com +1 de prioridade no Grassy Terrain (battle_main.c:4276-4278).
 // M4) Misty Terrain só reforça o tipo Fairy x1,3; o x0,5 em Dragon era só do motor (battle_util.c:7088-7112).
 // M7) Eerie Fog: o Atk de quem ataca um alvo Ghost sai x0,8; Psychic não entra e o corte é no ataque (battle_util.c:7275-7277).
-// N4) Sand Guard (areia) e Sun Basking (sol) barram golpe com prioridade como a Queenly Majesty (abilities.cc:6238-6241, 7437-7440,
+// N4) (Sun Basking se chama Basking desde o er-config b58ea4d, AbilityList.textproto:3507; abilities.cc: Impl<ABILITY_SUN_BASKING>) Sand Guard (areia) e Sun Basking (sol) barram golpe com prioridade como a Queenly Majesty (abilities.cc:6238-6241, 7437-7440,
 //     delegando ao onImmune de 2957-2967); o Utility Umbrella do dono desliga o do sol (battle_util.c:8674-8683).
 // A decisão de 14/10 (o golpe com prioridade barrado FALHA inteiro) vale aqui também; este arquivo não a reabre.
 import { test } from "node:test";
@@ -83,8 +83,8 @@ test("os textos de Sand Guard e Sun Basking armam bloqueiaPrioClima só sob o cl
   assert.equal(ef("Sand Guard", "areia").bloqueiaPrioClima, "areia");
   assert.equal(ef("Sand Guard", null).bloqueiaPrioClima, null, "sem areia");
   assert.equal(ef("Sand Guard", "sol").bloqueiaPrioClima, null, "no sol não");
-  assert.equal(ef("Sun Basking", "sol").bloqueiaPrioClima, "sol");
-  assert.equal(ef("Sun Basking", "areia").bloqueiaPrioClima, null, "na areia não");
+  assert.equal(ef("Basking", "sol").bloqueiaPrioClima, "sol");
+  assert.equal(ef("Basking", "areia").bloqueiaPrioClima, null, "na areia não");
   assert.equal(ef("Queenly Majesty", null).bloqueiaPrioLado, true, "controle: a Queenly Majesty segue sempre");
   for (const n of ["Sepia Lens", "Sand Fiend"]) assert.equal(ef(n, "areia").bloqueiaPrioClima, "areia", n + " (soma com Sand Guard)");
 });
@@ -100,19 +100,19 @@ test("golpe com prioridade FALHA contra Sand Guard na areia e Sun Basking no sol
   assert.equal(R.prioFalhaDuelo(rapido(["Mold Breaker"]), alvo("Sand Guard", "areia")), false, "Mold Breaker atravessa");
   assert.equal(R.prioFalhaDuelo(rapido([]), alvo("Sand Guard", "sol")), false, "Sand Guard no sol não bloqueia");
   // sol
-  assert.equal(R.prioFalhaDuelo(rapido([]), alvo("Sun Basking", "sol")), true);
-  assert.equal(melhor(rapido([]), alvo("Sun Basking", "sol")).golpe.nome, "Comum");
-  assert.equal(R.prioFalhaDuelo(rapido([]), alvo("Sun Basking", "areia")), false, "Sun Basking na areia não bloqueia");
-  assert.equal(R.prioFalhaDuelo(rapido([]), alvo("Sun Basking", null)), false);
+  assert.equal(R.prioFalhaDuelo(rapido([]), alvo("Basking", "sol")), true);
+  assert.equal(melhor(rapido([]), alvo("Basking", "sol")).golpe.nome, "Comum");
+  assert.equal(R.prioFalhaDuelo(rapido([]), alvo("Basking", "areia")), false, "Sun Basking na areia não bloqueia");
+  assert.equal(R.prioFalhaDuelo(rapido([]), alvo("Basking", null)), false);
 });
 
 test("Utility Umbrella do dono desliga o bloqueio do Sun Basking no sol, mas não o do Sand Guard na areia; Klutz desliga o guarda-chuva", () => {
   const rapido = sintetica([], [golpe("Fire", "F", { prio: 1 })]);
   const comItem = (u, item) => Object.assign({}, u, { item, it: R.itemDoDuelo(item, u.sp) });
-  const sunBasking = sintetica(["Sun Basking"], [golpe("Normal")], {}, "sol");
+  const sunBasking = sintetica(["Basking"], [golpe("Normal")], {}, "sol");
   assert.equal(R.prioFalhaDuelo(rapido, sunBasking), true);
   assert.equal(R.prioFalhaDuelo(rapido, comItem(sunBasking, "Utility Umbrella")), false, "guarda-chuva: o sol não vale para o dono");
-  const klutz = sintetica(["Sun Basking", "Klutz"], [golpe("Normal")], {}, "sol");
+  const klutz = sintetica(["Basking", "Klutz"], [golpe("Normal")], {}, "sol");
   assert.equal(R.prioFalhaDuelo(rapido, comItem(klutz, "Utility Umbrella")), true, "Klutz desliga o item");
   const sandGuard = sintetica(["Sand Guard"], [golpe("Normal")], {}, "areia");
   assert.equal(R.prioFalhaDuelo(rapido, comItem(sandGuard, "Utility Umbrella")), true, "o guarda-chuva não mexe na areia");

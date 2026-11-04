@@ -36,22 +36,23 @@ test("a regra de campo da revanche (só Trick Room) não inverte nada", () => {
   assert.equal(foe.ef.inversa < 99, true);
 });
 
-test("Granbull Mega (Granbullite) só libera depois da Tate & Liza", () => {
-  const mega = R.getSpeciesBySname("SPECIES_GRANBULL_MEGA");
-  assert.ok(mega, "fixture: Granbull Mega no dado");
+// Granbull Mega saiu da NextDex 2.65.5 (a Granbullite segue como item na config e em data/pedras_etapa.json); a prova usa outra Mega de Etapa 7, Swampert.
+test("Swampert Mega (Swampertite) só libera depois da Tate & Liza", () => {
+  const mega = R.getSpeciesBySname("SPECIES_SWAMPERT_MEGA");
+  assert.ok(mega, "fixture: Swampert Mega no dado");
   assert.equal(R.etapaDaMega(mega), 7);
   const antes = R.state.settings.milestone;
   try {
     R.state.settings.milestone = 6; // luta contra a Tate & Liza 1
-    assert.ok(!R.battleFamilyOf(R.getSpeciesBySname("SPECIES_GRANBULL")).some((s) => s.sname === "SPECIES_GRANBULL_MEGA"));
+    assert.ok(!R.battleFamilyOf(R.getSpeciesBySname("SPECIES_SWAMPERT")).some((s) => s.sname === "SPECIES_SWAMPERT_MEGA"));
     R.state.settings.milestone = 7;
-    assert.ok(R.battleFamilyOf(R.getSpeciesBySname("SPECIES_GRANBULL")).some((s) => s.sname === "SPECIES_GRANBULL_MEGA"));
+    assert.ok(R.battleFamilyOf(R.getSpeciesBySname("SPECIES_SWAMPERT")).some((s) => s.sname === "SPECIES_SWAMPERT_MEGA"));
   } finally { R.state.settings.milestone = antes; }
 });
 
 test("conferência com as builds: o plano refeito mostra o golpe da build e a luta segue a ordem da party", () => {
   const tl = R.BOSSES.find((b) => b.name === "Tate And Liza 1");
-  const nomes = ["SPECIES_AZUMARILL", "SPECIES_HYDREIGON", "SPECIES_BEWEAR", "SPECIES_GRANBULL"];
+  const nomes = ["SPECIES_AZUMARILL", "SPECIES_HYDREIGON", "SPECIES_BEWEAR", "SPECIES_SWAMPERT"];
   const time = nomes.map((n) => R.getSpeciesBySname(n)).filter(Boolean);
   assert.ok(time.length >= 3, "fixture: espécies no dado");
   const antes = R.state.customBuilds;
