@@ -81,7 +81,7 @@ test("flag -> categoria: as 8 que reforçam habilidades mais arremesso, luz, lun
 });
 
 // ---------- o dado ----------
-test("move_categorias.json: o campo `c` de TODOS os 1041 golpes é exatamente o que as flags da config mandam", () => {
+test("move_categorias.json: o campo `c` de TODOS os golpes (1042 na 2.65.5) é exatamente o que as flags da config mandam", () => {
   assert.equal(flagsDaConfig.meta.golpesDoApp, dex.moves.filter(Boolean).length, "golpes_flags_config.json foi gerado para este dex_compact");
   let conferidos = 0;
   dex.moves.forEach((m, id) => {

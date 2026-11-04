@@ -1,1 +1,272 @@
-{"fonte":"Elite-Redux/er-config AbilityList, SpeciesList e MoveList.textproto","commit":"486a964","renomeadas":[["Keen Edge","Sharpness"]],"descricoes":{"Power Fists":"Punching moves target Special Defense and get a 1.3x boost.","Sweeping Edge":"Slashing moves always hit and hit both foes.","Dual Wield":"Mega Launcher and Sharpness moves hit twice for 70% damage.","Mystic Blades":"Sharpness moves become special and deal 30% more damage.","Blade's Essence":"Sharpness + Mystic Blades.","Blademaster":"Sweeping Edge + Sharpness.","Molten Blades":"Sharpness + Slashing moves have a 20% chance to burn.","Power Edge":"Slashing moves target Special Defense and get a 1.3x boost.","Cutthroat":"First slashing move each entry gets +1 priority.","Best Offense":"Slashing moves are special and use +20% Sp. Def.","Magus Blades":"Best Offense + Slashing moves hit twice for 60%.","Edgelord":"First slashing move each entry gets +1 priority. Resets on KO.","Lightsaber":"Adds Fire-type. Slashing moves have 25% burn or paralysis.","Chainsaw":"Slashing moves lower defense by one stage.","Chestnut Axe":"Sharpness + Grass moves become Sharpness boosted.","Sinister Claws":"Mystic Blades + slashing moves lower SpDef."},"novas":[{"nome":"Photokinesis","desc":"Boost the power of light moves by 1.3x"},{"nome":"Photon Burst","desc":"Light moves target Defense and get a 1.3x boost."},{"nome":"Rippling Punch","desc":"Punching moves are also Sound moves as well."},{"nome":"Cackling","desc":"Uses Eerie Laugh on entry. Works only twice per battle."},{"nome":"Fresh Snowfall","desc":"Launches a 30 BP Powder Snow when hit by a special attack."},{"nome":"Sticky Situation","desc":"Bug type moves lower speed."},{"nome":"Bioluminescent","desc":"Adds Electric Type to the user + Illuminate."},{"nome":"Blinking Flash","desc":"Light moves have a 10% chance to lower accuracy."},{"nome":"Brain Freeze","desc":"Psychic moves have a 30% chance to cause frostbite."}],"especies":{"SPECIES_SHARPEDO":{"ab":["Speed Force","Rain Shroud","Speed Boost"]},"SPECIES_CRAWDAUNT":{"ab":["Rain Shroud","Hyper Aggressive","Adaptability"]},"SPECIES_SWOOBAT":{"ab":["Echolocation","Unaware","Simple"]},"SPECIES_WHIRLIPEDE":{"inn":["Curlipede","Neurotoxin","Shell Armor"]},"SPECIES_NOIVERN":{"ab":["Echolocation","Aerilate","Loud Bang"]},"SPECIES_BARRASKEWDA":{"ab":["Propeller Tail","Rain Shroud","Accelerate"]},"SPECIES_SALAZARUS":{"ab":["Neurotoxin","Greedy","Subdue"]},"SPECIES_ORCHESTOT":{"ab":["Musical Notes","Prankster","Parroting"]},"SPECIES_RATIKING":{"inn":["Minion Control","Fort Knox","Tangled Tails"]},"SPECIES_RATFIOSO":{"inn":["Turf War","Unnerve","Greedy"]},"SPECIES_BENICCINO":{"inn":["Massive Pelt","Skill Link","Overcoat"]},"SPECIES_TORRENTULA":{"ab":["Foamy Web","Storm Drain","Purifying Waters"]},"SPECIES_HIPPOTATON":{"inn":["Mashed Potato","Earth Eater","Seed Sower"]},"SPECIES_HARVESTING_TYRANT":{"inn":["Protosynthesis","Loose Thorns","Seed Sower"]},"SPECIES_IRON_SPIRALS":{"inn":["Quark Drive","Energy Horns","Laser Drill"]},"SPECIES_IRON_SABER":{"inn":["Quark Drive","Dual Wield","Lightsaber"]},"SPECIES_HYPNOCROAK":{"inn":["Clear Body","Dreamcatcher","Hypnotic Touch"]},"SPECIES_MORPEKYLL_HANGRY":{"ab":["Gluttony","Greedy","Bad Omen"],"inn":["Two-Faced","Overcoat","Foul Energy"]},"SPECIES_SCRAFTY_MEGA":{"ab":["Backstreet Boy","Backstreet Boy","Backstreet Boy"],"inn":["Wonder Scale","Backflip","Overcoat"]},"SPECIES_FALINKS_MEGA":{"inn":["Voltron","Warrior's Spear","Vital Spirit"]},"SPECIES_PYROAR_MEGA":{"ab":["Adaptability","Hubris","Fire's Wrath"],"inn":["Emperor's Wrath","Rivalry","Predator"]},"SPECIES_CHESNAUGHT_MEGA":{"ab":["King's Wrath","Chestnut Shield","Chestnut Axe"]},"SPECIES_DELPHOX_MEGA":{"inn":["Hellblaze","Witch Broom","Magic Guard"]},"SPECIES_GRENINJA_MEGA":{"ab":["Fatal Precision","Rain Shroud","Protean"],"inn":["Riptide","Giant Shuriken","Anticipation"]},"SPECIES_EELEKTROSS_MEGA":{"ab":["Electromorphosis","Nosferatu","Polarity"],"inn":["Mucus Membrane","Levitate","Amphibious"]},"SPECIES_MALAMAR_MEGA":{"inn":["Hypnotic Trance","Brain Overload","Brain Mass"]},"SPECIES_VICTREEBEL_MEGA":{"inn":["Tummyache","Acid Reflux","Wonder Skin"]},"SPECIES_DRAGALGE_MEGA":{"inn":["Waterborne","Toxic Spill","Drakelp Head"]},"SPECIES_HAWLUCHA_MEGA":{"ab":["Good As Gold","Combat Specialist","Wrestle Showman"],"inn":["Lucha Libre","Stamina","Vital Spirit"]},"SPECIES_CLEFABLE_MEGA_Y":{"ab":["Lepidopteran","Lepidopteran","Lepidopteran"]},"SPECIES_DRAGONITE_MEGA_Y":{"inn":["Angelic Wings","Mystic Power","Inner Focus"]},"SPECIES_EXCADRILL_MEGA":{"inn":["Mega Drill","Steelworker","Aftershock"]},"SPECIES_SCOLIPEDE_MEGA":{"inn":["Toxic Shell","Hemotoxin","Mighty Horn"]},"SPECIES_CHANDELURE_MEGA_Y":{"ab":["Purgatory","Shadow Shield","Foggy Eye"]},"SPECIES_FLOETTE_ETERNAL_FLOWER_MEGA":{"inn":["Eternal Flower","Magic Guard","Fairy Aura"]},"SPECIES_ZYGARDE_COMPLETE_MEGA":{"ab":["Nihil Blaster","Nihil Blaster","Nihil Blaster"]},"SPECIES_BARBARACLE_MEGA":{"inn":["Hand Barnacles","Tough Claws","Solid Rock"]},"SPECIES_DRAMPA_MEGA":{"ab":["Storm Cloud","Storm Cloud","Storm Cloud"]},"SPECIES_STARMIE_MEGA":{"inn":["Break it Down","Own Tempo","Mystic Power"]},"SPECIES_SKARMORY_MEGA_Y":{"ab":["Talon Trap","Talon Trap","Talon Trap"]},"SPECIES_ABSOL_MEGA_Z":{"ab":["Reaper's Embarce","Reaper's Embarce","Reaper's Embarce"]},"SPECIES_CRABOMINABLE_MEGA":{"ab":["Pressure","Abominable Monster","Hyper Aggressive"],"inn":["Icicle Fist","Anger Point","Arctic Fur"]},"SPECIES_FERALIGATR_MEGA_X":{"ab":["Crushing Jaw","Crushing Jaw","Crushing Jaw"]},"SPECIES_MEGANIUM_MEGA":{"inn":["Forest Rage","Flower Necklace","Triage"]},"SPECIES_FROSLASS_MEGA":{"ab":["Rejection","Frisk","Overcast"],"inn":["Hollow Ice Zone","Cryostasis","Aurora Borealis"]},"SPECIES_EMBOAR_MEGA":{"ab":["Fire Ruler","Fire Ruler","Fire Ruler"]},"SPECIES_CHANDELURE_MEGA":{"inn":["Chandelier","Multi-Headed","Flame Body"]},"SPECIES_ARTICUNO_EX_MEGA":{"ab":["Aurora's Gale","Aurora's Gale","Aurora's Gale"],"inn":["Ice Plumes","Winter Throne","Antarctic Bird"]},"SPECIES_MOLTRES_EX_MEGA":{"ab":["Blistering Sun","Blistering Sun","Blistering Sun"],"inn":["Fire Aspect","Molten Core","Majestic Bird"]},"SPECIES_CETODDLE_REDUX":{"inn":["Monster Hunter","Steelworker","Chainsaw"]},"SPECIES_CETITAN_REDUX":{"inn":["Monster Hunter","Deep Cuts","Chainsaw"]},"SPECIES_TALONFLAME_MEGA":{"ab":["Galeforce Wings","Galeforce Wings","Galeforce Wings"]},"SPECIES_SANDSLASH_ALOLAN_MEGA":{"inn":["Ice Picks","Battle Armor","Sharp Edges"]},"SPECIES_HYDREIGON_MEGA":{"ab":["Malediction","Malediction","Malediction"],"inn":["Hydra","Mind Crunch","Merciless"]},"SPECIES_VANILLUXE_MEGA":{"inn":["Multi-Headed","Sundae","Slush Rush"]},"SPECIES_EXCADRILL_REDUX":{"inn":["Rocky Exterior","Thick Fat","Dragon's Maw"]},"SPECIES_SNEASLER_MEGA":{"inn":["Lead Claws","Rocky Exterior","Overcoat"]},"SPECIES_TSAREENA_MEGA":{"inn":["Empress","Striker","Deadly Precision"]},"SPECIES_ALTARIA_REDUX":{"inn":["Taste the Rainbow","Levitate","Overcoat"]},"SPECIES_ALTARIA_REDUX_MEGA":{"inn":["Rainbow Scales","Aerialist","Serene Grace"]},"SPECIES_EXEGGUTOR_REDUX":{"ab":["Triage","Stamina","Zen Garden"]},"SPECIES_CRABOMINABLE_REDUX":{"inn":["Spike Armor","Hammer Fist","Shed Skin"]},"SPECIES_SPEAROW_REDUX":{"ab":["Defiant","Sharp Talons","Scare"]},"SPECIES_FEAROW_REDUX":{"ab":["Violent Rush","Sharp Talons","Hyper Aggressive"]},"SPECIES_FEAROW_REDUX_EVO":{"inn":["Striker","Sharp Talons","Scare"]}},"golpes":[{"enum":"MOVE_EERIE_LAUGH","nome":"Eerie Laugh","tipo":"DARK","split":"STATUS","poder":0,"precisao":100,"pp":20,"prio":0,"efeito":"Paralyze Ignore Type","chance":0,"light":false,"tutor":null,"flags":["Sound Based"]},{"enum":"MOVE_BANEFUL_KICK","nome":"Baneful Kick","tipo":"POISON","split":"PHYSICAL","poder":85,"precisao":100,"pp":10,"prio":0,"efeito":"Poison Hit","chance":10,"light":false,"tutor":null,"flags":["Makes Contact","Kick Based"]},{"enum":"MOVE_CHEAP_STAB","nome":"Cheap Stab","tipo":"DARK","split":"PHYSICAL","poder":85,"precisao":100,"pp":15,"prio":0,"efeito":"Hit","chance":0,"light":false,"tutor":"TUTOR_ATTACK","flags":["Makes Contact","Horn Based"]},{"enum":"MOVE_ARC_BLAST","nome":"Arc Blast","tipo":"ELECTRIC","split":"SPECIAL","poder":95,"precisao":95,"pp":10,"prio":0,"efeito":"Special Defense Down Hit","chance":20,"light":true,"tutor":null,"flags":[]},{"enum":"MOVE_GHOULISH_GORE","nome":"Ghoulish Gore","tipo":"GHOST","split":"PHYSICAL","poder":85,"precisao":100,"pp":10,"prio":0,"efeito":"Hit","chance":0,"light":false,"tutor":null,"flags":["Makes Contact","Horn Based"]},{"enum":"MOVE_GLITTER_BEAM","nome":"Glitter Beam","tipo":"FAIRY","split":"SPECIAL","poder":85,"precisao":100,"pp":15,"prio":0,"efeito":"Accuracy Down Hit","chance":20,"light":true,"tutor":null,"flags":[]},{"enum":"MOVE_LUSTER_GLOW","nome":"Luster Glow","tipo":"PSYCHIC","split":"SPECIAL","poder":85,"precisao":90,"pp":10,"prio":0,"efeito":"Attack Down Hit","chance":40,"light":true,"tutor":null,"flags":[]},{"enum":"MOVE_SPARKLE_BLAST","nome":"Sparkling Blast","tipo":"WATER","split":"SPECIAL","poder":90,"precisao":100,"pp":10,"prio":0,"efeito":"Hit","chance":0,"light":true,"tutor":null,"flags":[]},{"enum":"MOVE_SCORCHING_RAY","nome":"Scorching Ray","tipo":"FIRE","split":"SPECIAL","poder":85,"precisao":100,"pp":10,"prio":0,"efeito":"Burn Hit","chance":20,"light":true,"tutor":null,"flags":[]}],"aprende":{"SPECIES_WARTORTLE":{"lm":[[51,"Sparkling Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BLASTOISE":{"lm":[[51,"Sparkling Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_ARBOK":{"lm":[],"lmRem":[[61,"Baneful Bunker"]],"tu":[],"tuRem":[]},"SPECIES_CLEFAIRY":{"lm":[[17,"Party Favors"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_CLEFABLE":{"lm":[[17,"Party Favors"]],"lmRem":[],"tu":["Tailwind"],"tuRem":[]},"SPECIES_JIGGLYPUFF":{"lm":[],"lmRem":[],"tu":["Foresight"],"tuRem":[]},"SPECIES_WIGGLYTUFF":{"lm":[],"lmRem":[],"tu":["Focus Punch"],"tuRem":[]},"SPECIES_VENOMOTH":{"lm":[],"lmRem":[],"tu":["Reflect","Light Screen"],"tuRem":[]},"SPECIES_MEOWTH":{"lm":[[24,"Ball Toss"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_PERSIAN":{"lm":[[24,"Ball Toss"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_PSYDUCK":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_GOLDUCK":{"lm":[],"lmRem":[],"tu":["Clear Skies","Ice Wall"],"tuRem":[]},"SPECIES_POLIWAG":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_POLIWHIRL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_POLIWRATH":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ALAKAZAM":{"lm":[[51,"Luster Glow"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_TENTACOOL":{"lm":[[46,"Sparkling Blast"]],"lmRem":[],"tu":[],"tuRem":["Acid Armor"]},"SPECIES_TENTACRUEL":{"lm":[[46,"Sparkling Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SLOWPOKE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SLOWBRO":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SEEL":{"lm":[[56,"Sparkling Blast"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DEWGONG":{"lm":[[56,"Sparkling Blast"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SHELLDER":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_CLOYSTER":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_HAUNTER":{"lm":[],"lmRem":[],"tu":["Clear Smog"],"tuRem":[]},"SPECIES_GENGAR":{"lm":[],"lmRem":[],"tu":["Clear Smog"],"tuRem":[]},"SPECIES_ELECTRODE":{"lm":[[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_HITMONLEE":{"lm":[[46,"Baneful Kick"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_RHYHORN":{"lm":[],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_RHYDON":{"lm":[],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_TANGELA":{"lm":[],"lmRem":[],"tu":["Aura Sphere","Earthquake","Earth Power","Sludge Bomb"],"tuRem":[]},"SPECIES_HORSEA":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SEADRA":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_JYNX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_MAGIKARP":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_GYARADOS":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_LAPRAS":{"lm":[[37,"Sparkling Blast"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARTICUNO":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_MOLTRES":{"lm":[[24,"Scorching Ray"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_DRAGONITE":{"lm":[],"lmRem":[],"tu":["Clear Skies"],"tuRem":[]},"SPECIES_CHINCHOU":{"lm":[[37,"Merculight"],[51,"Sparkling Blast"],[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_LANTURN":{"lm":[[37,"Merculight"],[51,"Sparkling Blast"],[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_TOGETIC":{"lm":[],"lmRem":[],"tu":["Life Dew"],"tuRem":[]},"SPECIES_NATU":{"lm":[[56,"Luster Glow"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_XATU":{"lm":[[56,"Luster Glow"]],"lmRem":[],"tu":["Clear Skies"],"tuRem":[]},"SPECIES_MAREEP":{"lm":[[37,"Merculight"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_FLAAFFY":{"lm":[[37,"Merculight"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_AMPHAROS":{"lm":[[37,"Merculight"],[46,"Glitter Beam"],[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MARILL":{"lm":[[56,"Sparkling Blast"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_AZUMARILL":{"lm":[[56,"Sparkling Blast"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_POLITOED":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_AIPOM":{"lm":[[24,"Ball Toss"],[46,"Fetch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SUNFLORA":{"lm":[[24,"Scorching Ray"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SLOWKING":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SCIZOR":{"lm":[[17,"Aerial Ace"],[24,"Air Cutter"],[24,"Sacred Sword"],[37,"Dual Wingbeat"],[46,"Fury Swipes"],[56,"Fury Cutter"]],"lmRem":[],"tu":["Karate Chop"],"tuRem":[]},"SPECIES_SNEASEL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SWINUB":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_PILOSWINE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_CORSOLA":{"lm":[[37,"Sparkling Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_REMORAID":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_OCTILLERY":{"lm":[[24,"Pocket Sand"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DELIBIRD":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SKARMORY":{"lm":[[17,"Shot Put"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_KINGDRA":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SMEARGLE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SMOOCHUM":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_RAIKOU":{"lm":[[24,"Sparkling Blast"],[37,"Arc Blast"],[46,"Luster Glow"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SHIFTRY":{"lm":[[17,"undefined"]],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_WINGULL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_PELIPPER":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_AZURILL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SKITTY":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DELCATTY":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SABLEYE":{"lm":[[1,"Obscured Shot"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_ELECTRIKE":{"lm":[[37,"Scorching Ray"],[46,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MANECTRIC":{"lm":[[37,"Scorching Ray"],[46,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_ROSELIA":{"lm":[],"lmRem":[],"tu":["Life Dew"],"tuRem":[]},"SPECIES_CACTURNE":{"lm":[],"lmRem":[],"tu":["Fluttering Leaf"],"tuRem":[]},"SPECIES_SOLROCK":{"lm":[[24,"Scorching Ray"],[56,"Luster Glow"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_CLAYDOL":{"lm":[],"lmRem":[],"tu":["Clear Skies"],"tuRem":[]},"SPECIES_MILOTIC":{"lm":[[24,"Sparkling Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_CASTFORM":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DUSKULL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DUSCLOPS":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SNORUNT":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":["Shadow Claw","Trick"]},"SPECIES_GLALIE":{"lm":[],"lmRem":[],"tu":["Draining Kiss","Power Gem","Ice Wall"],"tuRem":[]},"SPECIES_SPHEAL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SEALEO":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_WALREIN":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_LUVDISC":{"lm":[[24,"Sparkling Blast"],[24,"Party Favors"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BAGON":{"lm":[],"lmRem":[],"tu":[],"tuRem":["Take Flight"]},"SPECIES_METANG":{"lm":[[24,"Hacksaw"],[37,"Shot Put"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_METAGROSS":{"lm":[[24,"Hacksaw"],[37,"Shot Put"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_REGICE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_LATIAS":{"lm":[[37,"Luster Glow"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_LATIOS":{"lm":[[46,"Luster Glow"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_PIPLUP":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_PRINPLUP":{"lm":[[37,"Sparkling Blast"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_EMPOLEON":{"lm":[[37,"Sparkling Blast"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SHINX":{"lm":[],"lmRem":[],"tu":[],"tuRem":["Knock Off"]},"SPECIES_LUXIO":{"lm":[[51,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":["Knock Off"]},"SPECIES_LUXRAY":{"lm":[[51,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_ROSERADE":{"lm":[],"lmRem":[],"tu":["Life Dew"],"tuRem":[]},"SPECIES_BURMY":{"lm":[],"lmRem":[],"tu":[],"tuRem":["Nasty Plot","Razor Leaf"]},"SPECIES_BUIZEL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_FLOATZEL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_AMBIPOM":{"lm":[[24,"Ball Toss"],[46,"Fetch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MIME_JR":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_LUMINEON":{"lm":[[37,"Sparkling Blast"],[46,"Glitter Beam"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SNOVER":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ABOMASNOW":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_WEAVILE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_RHYPERIOR":{"lm":[],"lmRem":[],"tu":["Stealth Rock","Cheap Stab"],"tuRem":[]},"SPECIES_TANGROWTH":{"lm":[],"lmRem":[],"tu":["Aura Sphere","Earthquake","Earth Power","Sludge Bomb"],"tuRem":[]},"SPECIES_ELECTIVIRE":{"lm":[],"lmRem":[],"tu":["Earth Power","Flamethrower"],"tuRem":[]},"SPECIES_TOGEKISS":{"lm":[],"lmRem":[],"tu":["Clear Skies","Life Dew"],"tuRem":[]},"SPECIES_GLACEON":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_MAMOSWINE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DUSKNOIR":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_FROSLASS":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_REGIGIGAS":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_PATRAT":{"lm":[],"lmRem":[[56,"Baton Pass"]],"tu":[],"tuRem":[]},"SPECIES_WATCHOG":{"lm":[[17,"Crunch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_LILLIPUP":{"lm":[[24,"Jagged Fangs"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_HERDIER":{"lm":[[24,"Jagged Fangs"],[46,"Crunch"]],"lmRem":[],"tu":["Earthquake","Stone Edge"],"tuRem":[]},"SPECIES_STOUTLAND":{"lm":[[24,"Jagged Fangs"],[46,"Crunch"],[56,"Close Combat"]],"lmRem":[],"tu":["Earthquake","Stone Edge"],"tuRem":[]},"SPECIES_BLITZLE":{"lm":[[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_ZEBSTRIKA":{"lm":[[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SEISMITOAD":{"lm":[[46,"Mega Punch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SCRAFTY":{"lm":[[51,"Baneful Kick"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_ZOROARK":{"lm":[[24,"Obscured Shot"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_VANILLITE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_VANILLISH":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_VANILLUXE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_AMOONGUSS":{"lm":[],"lmRem":[],"tu":["Rain Dance","Toxic Terrain"],"tuRem":[]},"SPECIES_FERROTHORN":{"lm":[],"lmRem":[],"tu":["Rapid Spin"],"tuRem":[]},"SPECIES_LITWICK":{"lm":[[24,"Scorching Ray"]],"lmRem":[[24,"Trailblaze"]],"tu":[],"tuRem":[]},"SPECIES_LAMPENT":{"lm":[[24,"Scorching Ray"]],"lmRem":[[24,"Trailblaze"]],"tu":[],"tuRem":[]},"SPECIES_CHANDELURE":{"lm":[[24,"Scorching Ray"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_CUBCHOO":{"lm":[],"lmRem":[],"tu":["Earth Power","Hydro Pump","Ice Wall"],"tuRem":[]},"SPECIES_BEARTIC":{"lm":[],"lmRem":[],"tu":["Earthquake","Earth Power","Hydro Pump","Ice Wall"],"tuRem":[]},"SPECIES_CRYOGONAL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_STUNFISK":{"lm":[[24,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MIENSHAO":{"lm":[[46,"Baneful Kick"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_PAWNIARD":{"lm":[],"lmRem":[],"tu":[],"tuRem":["Nasty Plot"]},"SPECIES_BISHARP":{"lm":[],"lmRem":[],"tu":[],"tuRem":["Nasty Plot"]},"SPECIES_VOLCARONA":{"lm":[[24,"Scorching Ray"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_LANDORUS":{"lm":[[1,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_KYUREM":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ESPURR":{"lm":[],"lmRem":[],"tu":[],"tuRem":["Spikes","Stealth Rock"]},"SPECIES_SLURPUFF":{"lm":[[17,"Party Favors"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_INKAY":{"lm":[[51,"Luster Glow"]],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_MALAMAR":{"lm":[[51,"Luster Glow"]],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_HELIOPTILE":{"lm":[[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_HELIOLISK":{"lm":[[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_AMAURA":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_AURORUS":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_PHANTUMP":{"lm":[[17,"Ghoulish Gore"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_TREVENANT":{"lm":[[17,"Ghoulish Gore"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BERGMITE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_AVALUGG":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_CRABRAWLER":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_CRABOMINABLE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DEWPIDER":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARAQUANID":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SALANDIT":{"lm":[],"lmRem":[],"tu":[],"tuRem":["Tearful Look"]},"SPECIES_PASSIMIAN":{"lm":[[1,"Ball Toss"],[1,"Fetch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SANDYGAST":{"lm":[[1,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_PALOSSAND":{"lm":[[1,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MINIOR":{"lm":[[46,"Glitter Beam"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BRUXISH":{"lm":[[24,"Sparkling Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_DHELMISE":{"lm":[[24,"Ghoulish Gore"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_TAPU_KOKO":{"lm":[[46,"Glitter Beam"],[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_PHEROMOSA":{"lm":[[36,"Baneful Kick"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_XURKITREE":{"lm":[[17,"Glitter Beam"],[46,"Arc Blast"],[46,"Luster Glow"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MARSHADOW":{"lm":[[17,"Baneful Kick"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BLACEPHALON":{"lm":[[24,"Scorching Ray"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MELMETAL":{"lm":[[17,"Shot Put"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_DOTTLER":{"lm":[[56,"Luster Glow"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_ORBEETLE":{"lm":[[56,"Luster Glow"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_YAMPER":{"lm":[[37,"Fetch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BOLTUND":{"lm":[[37,"Fetch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_APPLIN":{"lm":[],"lmRem":[],"tu":[],"tuRem":["Weather Ball"]},"SPECIES_SILICOBRA":{"lm":[[1,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SANDACONDA":{"lm":[[1,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MR_RIME":{"lm":[[24,"Chiller"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_RUNERIGUS":{"lm":[[24,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SNOM":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_FROSMOTH":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_EISCUE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_INDEEDEE":{"lm":[[51,"Ghoulish Gore"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_COPPERAJAH":{"lm":[[17,"Shot Put"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_ARCTOZOLT":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCTOVISH":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DRAGAPULT":{"lm":[],"lmRem":[],"tu":["Dive"],"tuRem":[]},"SPECIES_GLASTRIER":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_WYRDEER":{"lm":[[56,"Luster Glow"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_KLEAVOR":{"lm":[[17,"Aerial Ace"],[24,"Air Cutter"],[24,"Sacred Sword"],[37,"Dual Wingbeat"],[37,"Reversal"],[46,"Fury Swipes"],[56,"Fury Cutter"]],"lmRem":[],"tu":["Karate Chop","Tailwind","Pluck","Wing Attack","Fly"],"tuRem":[]},"SPECIES_OVERQWIL":{"lm":[],"lmRem":[],"tu":["Cheap Stab","Toxic Terrain"],"tuRem":[]},"SPECIES_MEOWSCARADA":{"lm":[[51,"Showtime"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_QUAXWELL":{"lm":[],"lmRem":[],"tu":["Water Pulse","Whirlpool","Wing Attack"],"tuRem":[]},"SPECIES_QUAQUAVAL":{"lm":[],"lmRem":[],"tu":["Rapid Spin","Water Pulse","Whirlpool","Wing Attack"],"tuRem":[]},"SPECIES_FIDOUGH":{"lm":[[17,"Party Favors"],[24,"Fetch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_DACHSBUN":{"lm":[[17,"Party Favors"],[24,"Fetch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BELLIBOLT":{"lm":[[51,"Merculight"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_GRAFAIAI":{"lm":[[24,"Ball Toss"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BOMBIRDIER":{"lm":[[1,"Ball Toss"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_CYCLIZAR":{"lm":[[51,"Fetch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_GLIMMORA":{"lm":[],"lmRem":[],"tu":["Pebble Shower"],"tuRem":[]},"SPECIES_CETODDLE":{"lm":[[37,"Chiller"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_CETITAN":{"lm":[[37,"Chiller"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ANNIHILAPE":{"lm":[],"lmRem":[],"tu":["Stone Edge"],"tuRem":[]},"SPECIES_SANDY_SHOCKS":{"lm":[[17,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_IRON_BUNDLE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_FRIGIBAX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCTIBAX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_BAXCALIBUR":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_TING_LU":{"lm":[],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_POLARTIC":{"lm":[[37,"Brine"],[51,"Sheer Cold"]],"lmRem":[],"tu":["Earthquake","Earth Power","Hydro Pump","Ice Wall"],"tuRem":[]},"SPECIES_DREADNAUT":{"lm":[[24,"Ghoulish Gore"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BOARLOCK":{"lm":[],"lmRem":[],"tu":["Clear Skies"],"tuRem":[]},"SPECIES_HELIOSUNNY":{"lm":[[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SOPRANICE":{"lm":[],"lmRem":[],"tu":["Covet","Ice Wall"],"tuRem":[]},"SPECIES_SALAZARUS":{"lm":[],"lmRem":[],"tu":[],"tuRem":["Tearful Look"]},"SPECIES_LEPASTRY":{"lm":[[17,"Party Favors"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_GYARADEATH":{"lm":[],"lmRem":[],"tu":["Take Flight"],"tuRem":[]},"SPECIES_DREDWOOD":{"lm":[[17,"Ghoulish Gore"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BLIZZARD_MAW":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_BARIONG":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_VELOZEL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_BEWARDEN_REDUX":{"lm":[[37,"Party Favors"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_LUMINOSITEON":{"lm":[[37,"Sparkling Blast"],[46,"Glitter Beam"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SCRAFSTER":{"lm":[[51,"Baneful Kick"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_FROSTULA":{"lm":[[46,"Chiller"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SEERKAT":{"lm":[[17,"Crunch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_TENTAGREWL":{"lm":[[46,"Sparkling Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_DEDELIBIRD":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_KRAMPIRD":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_HERACREUS":{"lm":[],"lmRem":[],"tu":["Pixie Beam","Terrain Pulse","Solar Blade","Solar Beam"],"tuRem":[]},"SPECIES_GROTOM":{"lm":[[46,"Fetch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_ABYSSAND":{"lm":[[1,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_GUARDOZEL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_TORRENTULA":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_PLUNDERTOW":{"lm":[[24,"Ghoulish Gore"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_SANDSHREW_ALOLAN":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SANDSLASH_ALOLAN":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_VULPIX_ALOLAN":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_NINETALES_ALOLAN":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_MEOWTH_ALOLAN":{"lm":[[17,"Obscured Shot"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_PERSIAN_ALOLAN":{"lm":[[17,"Obscured Shot"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_WEEZING_GALARIAN":{"lm":[],"lmRem":[],"tu":["Toxic Terrain"],"tuRem":[]},"SPECIES_MR_MIME_GALARIAN":{"lm":[[24,"Chiller"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DARUMAKA_GALARIAN":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DARMANITAN_GALARIAN":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_YAMASK_GALARIAN":{"lm":[[24,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_CASTFORM_SUNNY":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_CASTFORM_RAINY":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_CASTFORM_SNOWY":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_WORMADAM_SANDY_CLOAK":{"lm":[[56,"Silk Trap"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_WORMADAM_TRASH_CLOAK":{"lm":[[56,"Silk Trap"]],"lmRem":[],"tu":["Nasty Plot"],"tuRem":[]},"SPECIES_ARCEUS_FIGHTING":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_FLYING":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_POISON":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_GROUND":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_ROCK":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_BUG":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_GHOST":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_STEEL":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_FIRE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_WATER":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_GRASS":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_ELECTRIC":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_PSYCHIC":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_ICE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_DRAGON":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_DARK":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARCEUS_FAIRY":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_KYUREM_WHITE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_KYUREM_BLACK":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_MEOWSTIC_FEMALE":{"lm":[],"lmRem":[],"tu":["Taunt"],"tuRem":[]},"SPECIES_MINIOR_CORE_RED":{"lm":[[46,"Glitter Beam"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MINIOR_CORE_ORANGE":{"lm":[[46,"Glitter Beam"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MINIOR_CORE_YELLOW":{"lm":[[46,"Glitter Beam"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MINIOR_CORE_GREEN":{"lm":[[46,"Glitter Beam"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MINIOR_CORE_BLUE":{"lm":[[46,"Glitter Beam"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MINIOR_CORE_INDIGO":{"lm":[[46,"Glitter Beam"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_MINIOR_CORE_VIOLET":{"lm":[[46,"Glitter Beam"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_EISCUE_NOICE_FACE":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_CALYREX_ICE_RIDER":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_QWILFISH_HISUIAN":{"lm":[],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_AVALUGG_HISUIAN":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DECIDUEYE_HISUIAN":{"lm":[[24,"Blitz Arrow"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_CASTFORM_SANDY":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_POLARTIC_BLUEMOON":{"lm":[[1,"Muddy Water"],[1,"Water Gun"],[17,"Chilling Water"],[17,"Frost Breath"],[37,"Brine"],[51,"Sheer Cold"]],"lmRem":[],"tu":["Earth Power","Hydro Pump"],"tuRem":[]},"SPECIES_CASTFORM_FOGGY":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SKARMORY_MEGA":{"lm":[[17,"Shot Put"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_EMPOLEON_MEGA":{"lm":[[37,"Sparkling Blast"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DRAGONITE_MEGA":{"lm":[],"lmRem":[],"tu":["Clear Skies"],"tuRem":[]},"SPECIES_MINCCINO_REDUX":{"lm":[],"lmRem":[],"tu":["Energy Wave","Ice Wall"],"tuRem":[]},"SPECIES_CINCCINO_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_FROSTUCCINO":{"lm":[],"lmRem":[],"tu":["Energy Wave","Ice Wall"],"tuRem":[]},"SPECIES_CETODDLE_REDUX":{"lm":[[24,"Hacksaw"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_CETITAN_REDUX":{"lm":[[24,"Hacksaw"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_GROTOM_GLASS":{"lm":[[51,"Septic Switch"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_GROTOM_ROLL":{"lm":[[1,"Rollout"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_GROTOM_KICK":{"lm":[[1,"Baneful Kick"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_LITWICK_REDUX":{"lm":[[37,"Scorching Ray"],[46,"Glitter Beam"],[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_LAMPENT_REDUX":{"lm":[[37,"Scorching Ray"],[46,"Glitter Beam"],[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_CHANDELURE_REDUX":{"lm":[[37,"Scorching Ray"],[46,"Glitter Beam"],[56,"Arc Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BELLSPROUT_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_WEEPINBELL_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_VICTREEBEL_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_MASTOPHAN":{"lm":[],"lmRem":[[37,"Grassy Glide"]],"tu":[],"tuRem":[]},"SPECIES_VOLBEEP":{"lm":[[51,"Arc Blast"]],"lmRem":[[71,"Zippy Zap"]],"tu":[],"tuRem":[]},"SPECIES_ASTROBEEP":{"lm":[[24,"Eerie Impulse"],[51,"Arc Blast"]],"lmRem":[[71,"Zippy Zap"]],"tu":[],"tuRem":[]},"SPECIES_ILLUMARS":{"lm":[[37,"Glitter Beam"],[51,"Luster Glow"]],"lmRem":[],"tu":["Dazzling Gleam"],"tuRem":[]},"SPECIES_ILLUMINAUT":{"lm":[[37,"Glitter Beam"],[51,"Luster Glow"]],"lmRem":[],"tu":["Dazzling Gleam"],"tuRem":[]},"SPECIES_RUFFLET_REDUX":{"lm":[[17,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BRAVIARY_REDUX":{"lm":[[17,"Pocket Sand"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_NOXISLASH":{"lm":[],"lmRem":[[56,"Burning Bulwark"]],"tu":[],"tuRem":[]},"SPECIES_KECLEONG":{"lm":[[null,"Aqua Fang"],[null,"Sheer Cold"]],"lmRem":[[0,"Aqua Fang"],[0,"Sheer Cold"]],"tu":[],"tuRem":[]},"SPECIES_LUXZERO":{"lm":[[51,"Arc Blast"]],"lmRem":[],"tu":["Play Rough","Cut"],"tuRem":[]},"SPECIES_WEEDLE_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_KAKUNA_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_BEEDRILL_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_BEWEAR_REDUX":{"lm":[[37,"Party Favors"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BUIZEL_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_FLOATZEL_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ZWEILOUS_REDUX":{"lm":[],"lmRem":[],"tu":["Moonblast"],"tuRem":[]},"SPECIES_HYDREIGON_REDUX":{"lm":[],"lmRem":[],"tu":["Moonblast"],"tuRem":[]},"SPECIES_PIPLUP_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_PRINPLUP_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_EMPOLEON_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_STEENEE_REDUX":{"lm":[[24,"Sparkling Blast"],[37,"Party Favors"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_TSAREENA_REDUX":{"lm":[[24,"Sparkling Blast"],[37,"Party Favors"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_TRAPINCH_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_VIBRAVA_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_FLYGON_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_SEEL_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DEWGONG_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_DEWPIDER_REDUX":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_ARAQUANID_REDUX":{"lm":[[46,"Chiller"]],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_TINKATINK_REDUX":{"lm":[],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_TINKATUFF_REDUX":{"lm":[],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_TINKATON_REDUX":{"lm":[],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_LUXRAY_REDUX":{"lm":[],"lmRem":[],"tu":["Pluck"],"tuRem":[]},"SPECIES_ARON_REDUX":{"lm":[[24,"Hacksaw"]],"lmRem":[],"tu":["Giga Impact"],"tuRem":[]},"SPECIES_LAIRON_REDUX":{"lm":[[24,"Hacksaw"]],"lmRem":[],"tu":["Hyper Beam","Giga Impact"],"tuRem":[]},"SPECIES_AGGRON_REDUX":{"lm":[[24,"Hacksaw"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_FOGGING":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_BREEZING":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_STORMING":{"lm":[],"lmRem":[],"tu":["Ice Wall"],"tuRem":[]},"SPECIES_GARDEVOIR_REDUX":{"lm":[[37,"Ghoulish Gore"]],"lmRem":[],"tu":["Cheap Stab"],"tuRem":[]},"SPECIES_GALLADE_REDUX":{"lm":[[24,"Beat Up"],[24,"Sparkling Blast"]],"lmRem":[],"tu":[],"tuRem":[]},"SPECIES_BAGON_REDUX":{"lm":[],"lmRem":[],"tu":["Toxic Terrain"],"tuRem":["Jetstream Burst"]},"SPECIES_SHELGON_REDUX":{"lm":[],"lmRem":[],"tu":["Toxic Terrain"],"tuRem":["Jetstream Burst"]},"SPECIES_SALAMENCE_REDUX":{"lm":[],"lmRem":[],"tu":["Toxic Terrain"],"tuRem":["Jetstream Burst"]},"SPECIES_SALAMENCE_MEGA_REDUX":{"lm":[],"lmRem":[],"tu":["Toxic Terrain"],"tuRem":["Jetstream Burst"]}},"especiesNovas":[{"sname":"SPECIES_BRUXISH_MEGA","base":"SPECIES_BRUXISH","pedraEnum":"ITEM_BRUXISHITE","tipos":["WATER","PSYCHIC"],"b":[68,105,70,70,70,92],"speDaConfig":false,"ab":["Dazzling","Defiant","Predator"],"inn":["Strong Jaw","Wonder Skin","Psychic Mind"],"usaLearnset":"SPECIES_BRUXISH"},{"sname":"SPECIES_JELLICENT_MEGA","base":"SPECIES_JELLICENT","pedraEnum":"ITEM_JELLICENTITE","tipos":["WATER","GHOST"],"b":[120,60,70,85,105,60],"speDaConfig":false,"ab":["Cursed Body","Clear Body","Immunity"],"inn":["Water Bubble","Soul Eater","Poison Touch"],"usaLearnset":"SPECIES_JELLICENT"}]}
+{
+ "fonte": "Elite-Redux/er-config AbilityList, SpeciesList e MoveList.textproto",
+ "commit": "b58ea4d",
+ "renomeadas": [
+  [
+   "Sun Basking",
+   "Basking"
+  ]
+ ],
+ "descricoes": {},
+ "novas": [],
+ "especies": {
+  "SPECIES_BUTTERFREE": {
+   "ab": [
+    "Tinted Lens",
+    "Emanate",
+    "Giant Wings"
+   ],
+   "inn": [
+    "Shield Dust",
+    "Compound Eyes",
+    "Swarm"
+   ],
+   "b": [
+    99,
+    55,
+    72,
+    116,
+    95,
+    90
+   ]
+  },
+  "SPECIES_BEEDRILL": {
+   "b": [
+    87,
+    120,
+    55,
+    50,
+    80,
+    135
+   ]
+  },
+  "SPECIES_WAILORD": {
+   "ab": [
+    "Wonder Skin",
+    "Echolocation",
+    "Drizzle"
+   ],
+   "inn": [
+    "Liquid Voice",
+    "Pressure",
+    "Thick Blubber"
+   ],
+   "b": [
+    180,
+    90,
+    55,
+    103,
+    55,
+    72
+   ]
+  },
+  "SPECIES_SAWSBUCK": {
+   "ab": [
+    "Run Away",
+    "Rain Shroud",
+    "Grass Pelt"
+   ],
+   "inn": [
+    "Mighty Horn",
+    "Violent Rush",
+    "Seed Sower"
+   ]
+  },
+  "SPECIES_BEEDRILL_MEGA": {
+   "b": [
+    87,
+    158,
+    80,
+    45,
+    82,
+    175
+   ]
+  },
+  "SPECIES_STARAPTOR_MEGA": {
+   "ab": [
+    "Brute Force",
+    "Fearless",
+    "Blur"
+   ]
+  },
+  "SPECIES_BUTTERFREE_MEGA": {
+   "b": [
+    99,
+    32,
+    76,
+    165,
+    140,
+    115
+   ]
+  },
+  "SPECIES_BEEDRILL_MEGA_REDUX": {
+   "ab": [
+    "Permanence",
+    "Permanence",
+    "Permanence"
+   ],
+   "inn": [
+    "Skill Link",
+    "Clear Body",
+    "Big Pecks"
+   ],
+   "b": [
+    87,
+    150,
+    68,
+    57,
+    90,
+    175
+   ]
+  },
+  "SPECIES_ASUDEM": {
+   "ab": [
+    "Coil Up",
+    "Pattern Change",
+    "Neurotoxin"
+   ],
+   "inn": [
+    "Merciless",
+    "Petrify",
+    "Mind Crunch"
+   ]
+  },
+  "SPECIES_BEEDRILL_REDUX": {
+   "b": [
+    87,
+    110,
+    55,
+    55,
+    80,
+    135
+   ]
+  }
+ },
+ "golpes": [
+  {
+   "enum": "MOVE_METEOROPATH_BALL",
+   "nome": "Meteoropath Ball",
+   "tipo": "NORMAL",
+   "split": "PHYSICAL",
+   "poder": 50,
+   "precisao": 100,
+   "pp": 16,
+   "prio": 0,
+   "efeito": "Weather Ball",
+   "chance": 0,
+   "light": false,
+   "tutor": "TUTOR_ATTACK",
+   "flags": []
+  }
+ ],
+ "aprende": {
+  "SPECIES_NINETALES": {
+   "lm": [
+    [
+     17,
+     "Hypnosis"
+    ]
+   ],
+   "lmRem": [],
+   "tu": [],
+   "tuRem": []
+  },
+  "SPECIES_KECLEON": {
+   "lm": [],
+   "lmRem": [
+    [
+     37,
+     "Strength"
+    ]
+   ],
+   "tu": [],
+   "tuRem": [
+    "Thief"
+   ]
+  },
+  "SPECIES_KECLEONG": {
+   "lm": [
+    [
+     null,
+     "Aqua Fang"
+    ],
+    [
+     null,
+     "Sheer Cold"
+    ]
+   ],
+   "lmRem": [
+    [
+     0,
+     "Aqua Fang"
+    ],
+    [
+     0,
+     "Sheer Cold"
+    ]
+   ],
+   "tu": [],
+   "tuRem": []
+  }
+ },
+ "especiesNovas": [
+  {
+   "sname": "SPECIES_BRUXISH_MEGA",
+   "base": "SPECIES_BRUXISH",
+   "pedraEnum": "ITEM_BRUXISHITE",
+   "tipos": [
+    "WATER",
+    "PSYCHIC"
+   ],
+   "b": [
+    68,
+    105,
+    70,
+    70,
+    70,
+    92
+   ],
+   "speDaConfig": false,
+   "ab": [
+    "Dazzling",
+    "Defiant",
+    "Predator"
+   ],
+   "inn": [
+    "Strong Jaw",
+    "Wonder Skin",
+    "Psychic Mind"
+   ],
+   "usaLearnset": "SPECIES_BRUXISH"
+  },
+  {
+   "sname": "SPECIES_JELLICENT_MEGA",
+   "base": "SPECIES_JELLICENT",
+   "pedraEnum": "ITEM_JELLICENTITE",
+   "tipos": [
+    "WATER",
+    "GHOST"
+   ],
+   "b": [
+    120,
+    60,
+    70,
+    85,
+    105,
+    60
+   ],
+   "speDaConfig": false,
+   "ab": [
+    "Cursed Body",
+    "Clear Body",
+    "Immunity"
+   ],
+   "inn": [
+    "Water Bubble",
+    "Soul Eater",
+    "Poison Touch"
+   ],
+   "usaLearnset": "SPECIES_JELLICENT"
+  }
+ ]
+}

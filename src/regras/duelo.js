@@ -792,6 +792,8 @@
     if ((x = f.match(/(\d+)% more damage to (\w+)-types/i)) && tipoDoTextoDuelo(x[2])) ef.vsTipo[tipoDoTextoDuelo(x[2])] = 1 + parseInt(x[1], 10) / 100;
     // Habilidade que depende do terreno.
     var ter = function (w) { return TERRENO_DO_TEXTO[w.toLowerCase()]; };
+    // Static Bloom: "Boosts Electric moves by 50% in Electric Terrain" - x1,5 no golpe do tipo, só para quem está no chão (abilities.cc:12967-12972).
+    if ((x = f.match(/^Boosts (\w+) moves by (\d+)% in (Electric|Grassy|Psychic|Misty) Terrain/i)) && tipoDoTextoDuelo(x[1])) ef.tipoNoTerreno = { terreno: ter(x[3]), tipo: tipoDoTextoDuelo(x[1]), mult: 1 + parseInt(x[2], 10) / 100 };
     if ((x = f.match(/(Defense|SpDef) gets a ([\d.]+)x boost in (Electric|Grassy|Psychic|Misty) Terrain/i))) ef.noTerreno.push({ terreno: ter(x[3]), stat: /sp/i.test(x[1]) ? "spd" : "def", mult: parseFloat(x[2]) });
     if ((x = f.match(/If (Electric|Grassy|Psychic|Misty) Terrain is active, gets a ([\d.]+)x Speed boost/i))) ef.noTerreno.push({ terreno: ter(x[1]), stat: "spe", mult: parseFloat(x[2]) });
     if ((x = f.match(/Boosts highest stat in (Electric|Grassy|Psychic|Misty) Terrain/i))) ef.noTerreno.push({ terreno: ter(x[1]), stat: "maior", mult: 1.3 });
@@ -1394,7 +1396,7 @@
       primeiroGolpeRecebido: 1, golpeCheio: 1, expulsaAoApanhar: false, expulsaQuemEnrola: false, naoSaiForcado: false, fogeNaMetade: false,
       fogeAoCair: false, ultimaCartada: false, brasas: false, tocaia: 0, anulaClima: false, ventoForte: false,
       bloqueiaGolpeClima: false, catastrofe: false, aguaNoSol: false, disableAoContato: 0, disableSom: 0, disableComGelo: false,
-      saque: 0, barraPrioridade: false, bloqueiaPrioClima: null, firmeza: false, contraMega: 1, apagao: false, resistSeTipo: null, arquimago: 0,
+      saque: 0, tipoNoTerreno: null, barraPrioridade: false, bloqueiaPrioClima: null, firmeza: false, contraMega: 1, apagao: false, resistSeTipo: null, arquimago: 0,
       espiao: false, pintaAlvo: null, golpeAlterado: {}, golpeTaunt: null, curaComLuta: false, sonoCura: 0,
       curaTimeNaEntrada: false, mimetismo: false, ventoAtaque: false, ventoCarga: false,
       forma: null, cuspe: false, critMetade: false,
@@ -1417,7 +1419,7 @@
       // Drench (ticket 17): Amphibious não fica encharcado; Hydrate encharca 10% num golpe Water de usuário
       // Water - só no código (abilities.cc Impl<ABILITY_HYDRATE>), o texto da habilidade não diz.
       if (/Can't become drenched/i.test(t)) ef.semEncharcar = true;
-      if (nomeHabDuelo(id) === "Hydrate") ef.encharcaAgua = 0.1;
+      if (nomeHabDuelo(id) === "Hydrate" || nomeHabDuelo(id) === "Waterborne") ef.encharcaAgua = 0.1; // Waterborne: .onAttacker = Hydrate (abilities.cc:11795)
       // Frases: corta em ". " seguido de maiúscula, mas não em abreviação do
       // próprio texto do jogo ("Sp. Atk", "Phys. moves", "vs. Steel").
       var frases = t.split(/(?<!\b(?:Sp|Phys|vs|Elec|Fight)\.)(?<=[.!])\s+(?=[A-Z])|\n/).filter(Boolean);
@@ -2001,6 +2003,7 @@
       var terreno = CAMPO_DUELO && CAMPO_DUELO.terreno, noCampo = 1, prioAqui = g.prio;
       if (terreno && TIPO_DO_TERRENO_DUELO[terreno] === g.tipo && terreno !== "nevoento" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
       if (terreno === "nevoento" && g.tipo === "Fairy" && aterradoDuelo(atq)) noCampo *= REFORCO_DO_TERRENO_DUELO;
+      if (atq.ef.tipoNoTerreno && atq.ef.tipoNoTerreno.terreno === terreno && atq.ef.tipoNoTerreno.tipo === g.tipo && aterradoDuelo(atq)) noCampo *= atq.ef.tipoNoTerreno.mult; // Static Bloom
       // (Misty Terrain não corta Dragon: battle_util.c:7088-7112 só dá o x1,3 do tipo do terreno. O x0,5 que ficava aqui era só do motor.)
       // Grassy Glide: +1 de prioridade no Grassy Terrain (battle_main.c:4276-4278, só para quem está no chão).
       if (g.nome === "Grassy Glide" && terreno === "grama" && aterradoDuelo(atq)) prioAqui += 1;

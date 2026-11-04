@@ -24,6 +24,8 @@ const HABILIDADES_SEM_REGRA = {
   "Honey Gather": "acha item fora de batalha",
   "Tag": "Pursuit em quem troca; o jogador não troca contra o chefão no modelo",
   "Multitype": "cada placa é uma espécie própria no dado",
+  "Cleanse": "Heal Bell na entrada, 2x por batalha (abilities.cc:12991-13001); cura status do time, que o 1x1 não carrega entre lutas",
+  "Gnawing Away": "50% de Defense -1 no alvo ao morder (Impl<ABILITY_CRUSHING_JAW>.onAttacker, abilities.cc:13004-13006); o motor não modela queda de atributo por habilidade (o Crushing Jaw também só lê o Strong Jaw)",
   "Gifted Mind": "onAccuracy só de golpe de status (código oficial); o motor não tem acerto de status",
 };
 

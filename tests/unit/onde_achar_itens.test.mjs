@@ -42,8 +42,9 @@ test("o pacote não corta fonte antiga: Honey e Ultra Ball mantêm o Poké Mart 
 
 test("pedras do Adoption Center (er-config oficial): compra por BP, no Norman ou na trava que já têm", () => {
   const ad = JSON.parse(lerComMutacao("data/pedras_adoption_center.json", "pedras_adoption_center.json")).pedras;
-  assert.equal(ad.length, N_PEDRAS_ADOPTION); // er-config 486a964 (TK-25): entram Salamencite R e Metagrossite R
+  assert.equal(ad.length, N_PEDRAS_ADOPTION); // er-config b58ea4d (TK-35): 141; entram Salamencite R e Metagrossite R (TK-25) e sai a Arcanite H (agora só presente na Route 123)
   assert.ok(ad.includes("Salamencite R") && ad.includes("Metagrossite R"));
+  assert.ok(!ad.includes("Arcanite H") && ONDE["Arcanite H"].every((x) => x.local !== "Adoption Center"), "Arcanite H saiu do Adoption Center na b58ea4d");
   const caminho = [6, 4].map((n) => new URL("../".repeat(n) + "ferramentas/er-config/items/MegaStonesList.textproto", import.meta.url)).find((u) => existsSync(u)); // fora do repo: confere só quando existe
   if (caminho) assert.deepEqual(ad, lerPedrasDoAdoptionCenter(readFileSync(caminho, "utf8")), "bate com a er-config, na ordem");
   const linha = (n) => ONDE[n].find((x) => x.local === "Adoption Center");

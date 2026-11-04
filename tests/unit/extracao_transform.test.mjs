@@ -21,13 +21,13 @@ const ler = (a) => readFileSync(join(RAIZ, a), "utf8");
 const bruto = JSON.parse(ler("data/gameData.json"));
 const dexGravado = JSON.parse(ler("data/dex_compact.json"));
 
-test("dex_compact.json gravado == extração do dado bruto (2.65.4) + o delta da config d1a9a4c (data/config_nova.json), byte a byte", () => {
+test("dex_compact.json gravado == extração do dado bruto (2.65.5) + o delta da config b58ea4d (data/config_nova.json), byte a byte", () => {
   const dex = extrairDex(bruto, { versao: dexGravado.meta.version, gerado: dexGravado.meta.generated, traducoesDeGolpe: JSON.parse(ler("data/move_translations_pt.json")) });
   aplicarPatch(dex, JSON.parse(ler("data/config_nova.json")));
   assert.equal(JSON.stringify(dex), ler("data/dex_compact.json"));
-  assert.equal(dexGravado.meta.version, "2.65.4.1"); // v2.65.4.1 (28/10)
-  assert.equal(dexGravado.species.length, N_ESPECIES, "v2.65.4.1 (28/10): 1925 + 8 espécies Redux novas da er-config 486a964");
-  assert.equal(dexGravado.abilities.length, N_HABILIDADES, "v2.65.4.1 (28/10): 1072 + 3 da er-config 486a964");
+  assert.equal(dexGravado.meta.version, "2.65.5"); // v2.65.5 (03/11/2026, TK-35)
+  assert.equal(dexGravado.species.length, N_ESPECIES, "v2.65.5 (03/11): 1933 - Granbull Mega - Infernape Redux B + 10 novas da NextDex (diff_2655.md)");
+  assert.equal(dexGravado.abilities.length, N_HABILIDADES, "v2.65.5 (03/11): 1075 + 9 novas da NextDex (as 9 que eram da config d1a9a4c)");
 });
 
 test("ability_translations_pt.json gravado == compostas expandidas de novo (idempotente)", () => {

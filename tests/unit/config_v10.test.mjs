@@ -21,11 +21,12 @@ const golpe = (cat, extra) => Object.assign({ nome: "T", tipo: "Normal", cat, co
 const unid = (habs, tipos) => { const ids = habs.map(idHab); return { sp: { n: "T", sname: "S", inn: [], t: [0, 0] }, tipos, ids, abId: ids[0] ?? null, ab: habs[0] || "", ef: R.efeitoDasHabilidadesNoDuelo(ids, "V10_" + habs.join("+"), null), item: "", it: R.itemDoDuelo("", null), stats: [320, 100, 100, 100, 100, 100], golpesProntos: [golpe("F")], statusIds: [] }; };
 const dano = (a, d) => R.danoNoDuelo(a, d, NIVEL).melhor.dano;
 
-test("aprendizado pela config: 359 espécies mudam (level-up +218/-10, tutor +262/-19), config 486a964; retiradas valem; os tutores universais ficam como a NextDex", () => {
+test("aprendizado pela config: 3 espécies mudam (level-up +3/-3, tutor +0/-1), config b58ea4d; retiradas valem; os tutores universais ficam como a NextDex", () => {
   const soma = { lm: 0, lmRem: 0, tu: 0, tuRem: 0 };
   for (const a of Object.values(patch.aprende)) for (const k of Object.keys(soma)) soma[k] += a[k].length;
-  assert.equal(Object.keys(patch.aprende).length, 359);
-  assert.deepEqual(soma, { lm: 218, lmRem: 10, tu: 262, tuRem: 19 });
+  // 2.65.5 (03/11/2026): a NextDex já traz o aprendizado da config 486a964 (eram 359 espécies); o delta da b58ea4d sobra em Ninetales, Kecleon e Kecleong (data/config_nova.json)
+  assert.deepEqual(Object.keys(patch.aprende), ["SPECIES_NINETALES", "SPECIES_KECLEON", "SPECIES_KECLEONG"]);
+  assert.deepEqual(soma, { lm: 3, lmRem: 3, tu: 0, tuRem: 1 });
   assert.ok(!sp("Arbok").lm.some((e) => e[0] === 61 && e[1] === id("Baneful Bunker")), "Arbok perdeu o Baneful Bunker no 61");
   assert.ok(!sp("Tentacool").tu.includes(id("Acid Armor")), "Tentacool perdeu o tutor Acid Armor");
   assert.ok(sp("Luxio").lm.some((e) => e[0] === 51 && e[1] === id("Arc Blast")), "Luxio ganhou o Arc Blast no 51");
@@ -36,7 +37,7 @@ test("aprendizado pela config: 359 espécies mudam (level-up +218/-10, tutor +26
 test("builds: nenhuma build de data/builds.json perdeu golpe por causa do aprendizado novo (a validação não acha golpe fora da espécie)", () => {
   const r = validarBuilds();
   assert.deepEqual(r.problemas, []);
-  assert.equal(r.pendentes.length, 247, "v2.65.4.1 (28/10): lista regerada com a versão 2.65.4.1 (toda build validada antes volta a pedir revisão + 5 de habilidade perdida na config nova). Histórico: 259 antes de saírem as 14 builds da curadoria do projeto; 244 depois; 230 quando dados-2654/08 corrigiu as 14 da tabela A; 211 quando os 19 sets revisados (14 + Breezing, Exeggutor Redux, Arbok, Heliosunny, Victreebel Redux) passaram a versão 2.65.4; nenhuma nova");
+  assert.equal(r.pendentes.length, 252, "v2.65.5 (03/11): 247 + 5 builds sem habilidade/golpe na NextDex 2.65.5 foram para pendentes (commit 122f827). v2.65.4.1 (28/10): lista regerada com a versão 2.65.4.1 (toda build validada antes volta a pedir revisão + 5 de habilidade perdida na config nova). Histórico: 259 antes de saírem as 14 builds da curadoria do projeto; 244 depois; 230 quando dados-2654/08 corrigiu as 14 da tabela A; 211 quando os 19 sets revisados (14 + Breezing, Exeggutor Redux, Arbok, Heliosunny, Victreebel Redux) passaram a versão 2.65.4; nenhuma nova");
 });
 
 test("aplicarPatch: retira e põe golpe de level-up e de tutor; cria a Mega a partir da base e aponta a evolução da base para ela", () => {
@@ -82,7 +83,7 @@ test("Mega Bruxish e Mega Jellicent: no dado a partir da config, como as demais 
   assert.deepEqual([...b.ab, ...b.inn].map((i) => R.ABILITIES[i][0]), ["Dazzling", "Defiant", "Predator", "Strong Jaw", "Wonder Skin", "Psychic Mind"]);
   assert.deepEqual(b.lm, sp("Bruxish").lm); assert.deepEqual(j.tu, sp("Jellicent").tu);
   assert.equal(R.MEGA_FORMS["Bruxishite"], "SPECIES_BRUXISH_MEGA"); assert.equal(sp("Bruxish").ev[0][2], b.x);
-  assert.equal(R.SPECIES.length, N_ESPECIES - 1); // as 1933 do dado menos a posição vazia
+  assert.equal(R.SPECIES.length, N_ESPECIES - 1); // as 1941 do dado menos a posição vazia
   assert.equal(R.getSpeciesBySname("SPECIES_JELLICENT_MEGA").x, j.x); assert.equal(R.getSpeciesByX(b.x).sname, "SPECIES_BRUXISH_MEGA");
   const role = json("species_role.json"), disp = json("rank_disponibilidade.json").etapa;
   assert.ok("SPECIES_BRUXISH_MEGA" in role && "SPECIES_JELLICENT_MEGA" in role);
