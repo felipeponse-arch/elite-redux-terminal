@@ -190,3 +190,10 @@ Decisões do usuário (04/11): todas SIM. Código do jogo (er-repo) é a verdade
 - Archmage Dragon (`abilities.cc:5969`, Atk -1, 30% por golpe, igual ao texto): `ef.aoGolpear` com `p` e `tipo: Dragon`, valor esperado.
 - Cleanse (`abilities.cc:12991-13001`): onEntry usa Heal Bell, até 2x por batalha (contador < 2). O 1x1 representa a 1ª entrada: remove o `statusInicial` do próprio usuário (Toxic Spikes, maldição de luta anterior). Não representa: cura do time, a 2ª entrada, nem o status de Flame/Toxic Orb (entra no fim do 1º turno, depois do onEntry).
 - Efeito esperado no rank (sem rodar): quem tinha Dream Eater como melhor golpe sem golpe de sono cai (já era TK-40); com golpe de sono volta parcialmente. Wake-Up Slap, Nightmare e Dream Invasion sobem só em sets com golpe de sono. Cleanse sobe só onde há status inicial.
+
+## Lembrete: imunidade a pó no plano de sono comum (04/11/2026, decisão do usuário)
+
+- O plano de sono comum (`efeitoDoPlanoDuelo`, duelo.js) NÃO aplica a imunidade a pó do jogo (`IsPowderImmune`, `battle_util.c:3197`: Grass, Overcoat, Shield Dust, Effect Spore, Guardian Coat, Charge Spores, Safety Goggles) a Spore e Sleep Powder. Só `fracaoDormindoDuelo` (TK-43) respeita.
+- Decisão: o rank fica como está (não corrigir agora, para não mudar o rank). Quem depende de Spore ou Sleep Powder pode estar potencialmente SUBESTIMADO ou SUPERESTIMADO no rank (contra alvo imune a pó o golpe falha no jogo e aqui ainda dorme).
+- Sem aviso ao usuário final: nada na tela do app. O lembrete vale para quem mexer no rank, no Meu Time e nas builds: ao revisar espécies com Spore ou Sleep Powder (e Stun Spore/Poison Powder se um dia entrarem), lembrar que o valor medido pode divergir do jogo.
+- Para corrigir no futuro: aplicar a imunidade em `efeitoDoPlanoDuelo` e refazer o rank completo (2h45).
