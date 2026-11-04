@@ -17,6 +17,11 @@ const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 // SS Tidal fica sem etapa de propósito: nenhuma fonte diz em que ponto da run o navio abre.
 export const ETAPA_DO_MAPA_DE_TREINADOR = { PETALBURGCITYGYM: 4, MTCHIMNEY: 3 };
 
+// Habilidades que a config renomeou: o gameData.json (NextDex) ainda traz o nome velho e o rank/lutas_comuns_run.json precisam do atual (TK-36).
+// Basking: AbilityList.textproto:3507 da er-config (antes "Sun Basking"). Só o nome muda; o resto do membro fica como está.
+export const HABILIDADE_RENOMEADA = { "Sun Basking": "Basking" };
+export const comNomeAtualDeHabilidade = (membros) => membros.map((m) => (m && HABILIDADE_RENOMEADA[m.abi] ? { ...m, abi: HABILIDADE_RENOMEADA[m.abi] } : m));
+
 export function lutasComunsDaRun(raiz = RAIZ) {
   const ler = (a) => JSON.parse(readFileSync(join(raiz, "data", a), "utf8"));
   const g = ler("gameData.json"), mono = ler("mono_disponibilidade.json"), caps = ler("levelcaps.json").rows, REGRAS = ler("disponibilidade_regras.json");
@@ -37,9 +42,9 @@ export function lutasComunsDaRun(raiz = RAIZ) {
     const etapa = etapaDoMapa(mapas[t.map]);
     if (etapa === undefined || etapa === null) { motivos.semEtapa++; semEtapa[mapas[t.map]] = (semEtapa[mapas[t.map]] || 0) + 1; continue; }
     if (etapa >= POS_JOGO) { motivos.posJogo++; continue; }
-    const party = [].concat(timeDoTreinador(g, t.party) || []);
+    const party = comNomeAtualDeHabilidade([].concat(timeDoTreinador(g, t.party) || []));
     if (!party.length) { motivos.semTime++; continue; }
-    lutas.push({ nome: t.name + " #" + t.id, etapa, mapa: mapas[t.map], db: !!t.db, party, insane: [].concat(timeDoTreinador(g, t.insane) || []) });
+    lutas.push({ nome: t.name + " #" + t.id, etapa, mapa: mapas[t.map], db: !!t.db, party, insane: comNomeAtualDeHabilidade([].concat(timeDoTreinador(g, t.insane) || [])) });
   }
   return { lutas, motivos, semEtapa };
 }
