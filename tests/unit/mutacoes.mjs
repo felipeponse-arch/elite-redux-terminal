@@ -5151,6 +5151,13 @@ export const MUTACOES = [
     para: "",
   },
   {
+    id: "tk42-court-change-limpa-hazard",
+    descricao: "TK-42: Court Change volta a limpar o hazard (o jogo só TROCA os efeitos de campo, swapsideeffects)",
+    arquivo: "duelo.js",
+    de: 'var REMOVEDORES_DE_HAZARD_DUELO = ["Rapid Spin", "Mortal Spin", "Defog", "Tidy Up"];',
+    para: 'var REMOVEDORES_DE_HAZARD_DUELO = ["Rapid Spin", "Mortal Spin", "Defog", "Tidy Up", "Court Change"];',
+  },
+  {
     id: "tk32-rank-sem-estrutura-de-luta",
     descricao: "TK-32: o 4º espaço do rank volta a avaliar cada rival sozinho (hazard nunca vence)",
     arquivo: "duelo.js",
