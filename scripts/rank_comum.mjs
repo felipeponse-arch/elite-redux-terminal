@@ -20,8 +20,10 @@ export function unidadeComItemLiberado(R, u, etapa, cap, montar) {
 
 // Espécies do rank novo: as do arquivo anterior + as que acabaram de ser avaliadas. Iterar só o anterior descartava em silêncio toda espécie
 // nova do jogo (TK-35e: Numberg, Amicabull etc. da 2.65.5 sumiram do species_rank.json).
-export function chavesDoRankNovo(antigo, avaliadas) {
-  return Array.from(new Set(Object.keys(antigo).concat(Object.keys(avaliadas))));
+// doDex (opcional): sinames que existem no dex; espécie que saiu do jogo (Granbull Mega na 2.65.5) deixa de ser citada no rank gravado.
+export function chavesDoRankNovo(antigo, avaliadas, doDex) {
+  const todas = Array.from(new Set(Object.keys(antigo).concat(Object.keys(avaliadas))));
+  return doDex ? todas.filter((s) => doDex.has(s)) : todas;
 }
 
 // Campos que a nova nota herda da linha anterior de species_rank.json: estágio (vem de compute_species_rank.ps1). A nota em dupla saiu

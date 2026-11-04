@@ -182,7 +182,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **prototipo_kit_sinergia.mjs** - PROTÓTIPO DESCARTÁVEL (10/10/2026) — fases 1 e 2 do pipeline de build
   nomeHab:16
 - **rank_comum.mjs** - Peças do rank v2 que precisam de teste e de um lugar só (TK-21, 28/10/2026).
-  percentis:5, tierDe:12, unidadeComItemLiberado:16, chavesDoRankNovo:23, camposHerdados:29
+  percentis:5, tierDe:12, unidadeComItemLiberado:16, chavesDoRankNovo:24, camposHerdados:31
 - **rank_escolha.mjs** - Escolha do set no rank v2 (ticket 08, 07/10/2026). A soma rápida (nota do duelo contra todos os
   melhoresPelaSoma:9, mediaDoEixo:13, notaDosEixos:18, escolherPelaNotaFinal:22
 - **rank_fatia.mjs** - Rank com fatia fixa de peso (ticket todas-as-lutas/02, decisão do usuário em 16/10/2026): chefões 60% e lutas comuns 40%.

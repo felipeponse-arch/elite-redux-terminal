@@ -283,7 +283,7 @@ if (process.argv.includes("--gravar")) {
     blocos[d.chave] = { mono, estagio, dominado };
   }
   const novo = {};
-  for (const s of chavesDoRankNovo(antigo, final)) {
+  for (const s of chavesDoRankNovo(antigo, final, new Set(R.SPECIES.filter((sp) => sp && sp.sname).map((sp) => sp.sname)))) {
     if (!final[s]) { novo[s] = { foraDoRank: (DISP && DISP.motivoFora[s]) || "sem-fonte" }; continue; }
     const e = Object.assign({}, camposHerdados(antigo[s]), { etapa: final[s].etapa, porDificuldade: {} });
     for (const d of DIFICULDADES) {

@@ -44,3 +44,8 @@ test("chavesDoRankNovo: espécie nova avaliada entra no rank gravado, a antiga f
   const k = chavesDoRankNovo({ A: {}, B: {} }, { B: {}, NOVA: {} });
   assert.deepEqual(k.sort(), ["A", "B", "NOVA"]);
 });
+
+test("chavesDoRankNovo: espécie que saiu do dex deixa de ser citada no rank gravado (Granbull Mega, 2.65.5)", () => {
+  const k = chavesDoRankNovo({ A: {}, SAIU: {} }, { A: {}, NOVA: {} }, new Set(["A", "NOVA"]));
+  assert.deepEqual(k.sort(), ["A", "NOVA"]);
+});
