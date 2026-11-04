@@ -24,7 +24,6 @@ const HABILIDADES_SEM_REGRA = {
   "Honey Gather": "acha item fora de batalha",
   "Tag": "Pursuit em quem troca; o jogador não troca contra o chefão no modelo",
   "Multitype": "cada placa é uma espécie própria no dado",
-  "Cleanse": "Heal Bell na entrada, 2x por batalha (abilities.cc:12991-13001); cura status do time, que o 1x1 não carrega entre lutas",
   "Gifted Mind": "onAccuracy só de golpe de status (código oficial); o motor não tem acerto de status",
 };
 
@@ -68,10 +67,11 @@ const EFEITOS_DE_GOLPE_SEM_REGRA_EXPLICITA = ["Accuracy Down Hit", "Argument Hit
   "Creeping Thorns Hit", "Curse Hit", "Fairy Terrain Hit", "Feint",
   "Flame Burst", "Flinch Recoil 33", "Fling", "Freeze Dry", "Grassy Terrain Hit", "Grav Apple", "Hit",
   "Hit Prevent Escape", "Hyperspace Fury", "Incinerate", "Leech Seed Hit",
-  "Mind Blown", "Misc Hit", "Natural Gift", "Nightmare", "Pay Day", "Rain Hit",
+  "Mind Blown", "Misc Hit", "Natural Gift", "Pay Day", "Rain Hit",
   "Recoil 33", "Remove Terrain No Fail", "Rip And Tear", "Round", "Sandstorm Hit", "Sleep Hit",
   "Smack Down", "Snap Jaw", "Snore", "Sparkling Aria", "Spike Hit", "Stealth Rock Hit", "Sticky Web Hit", "Tailwind Hit",
   "Thief", "Trepidation", "Wake Up Slap"];
+// TK-43: Nightmare saiu da lista (regra de sono do alvo); Wake Up Slap também tem regra, pelo NOME do golpe (SONO_DO_ALVO_DUELO), por isso o teste de citação não o vê.
 // TK-32: Mortal Spin saiu da lista porque o rank o cita como removedor de hazard (REMOVEDORES_DE_HAZARD_DUELO); o veneno dele em todos segue sem regra.
 
 test("efeitos de golpe sem regra explícita: só os já conhecidos", () => {
