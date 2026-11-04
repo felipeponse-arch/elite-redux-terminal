@@ -2201,7 +2201,7 @@
   // a atingem como atingem a de base. Sem `def` o chamador diz que o alvo não bloqueia nada.
   function prioCondicionalBarradaDuelo(atq, def) {
     if (!def || !def.ef) return false;
-    if (prioBloqueadaPelaHabilidadeDuelo(def, atq)) return true; // Queenly Majesty, Dazzling, Armor Tail, Sand Guard, Basking (Mold Breaker ignora)
+    if (prioBloqueadaPelaHabilidadeDuelo(def, atq)) return true; // Queenly Majesty, Dazzling, Armor Tail, Sand Guard, Sun Basking (Mold Breaker ignora)
     if (def.ef.barraPrioridade) return true; // Surprise! na névoa
     return !!(CAMPO_DUELO && CAMPO_DUELO.terreno === "psiquico" && aterradoDuelo(def)); // Psychic Terrain protege quem está no chão
   }
