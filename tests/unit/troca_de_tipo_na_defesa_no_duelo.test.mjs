@@ -71,3 +71,18 @@ test("TK-34: Color Change empatado com o tipo atual não troca (Fire/Grass x Fir
   const atq = chefao("Arcanine", { hab: "Intimidate", golpes: ["Flamethrower"], evs: EV.nenhum, nat: "Hardy" });
   assert.equal(R.efetividadeComColorChange(atq, "Fire", def, 1), 1);
 });
+
+// TK-41.9: o laço do jogo (abilities.cc:649-672) anda de TYPE_NORMAL até NUMBER_OF_MON_TYPES (20) na ORDEM NUMÉRICA do jogo
+// (include/constants/pokemon.h:6-28: Normal, Fighting, Flying, Poison, Ground, Rock, Bug, Ghost, Steel, Mystery, Fire, Water, Grass, Electric,
+// Psychic, Ice, Dragon, Dark, Fairy, Stellar), não na ordem do dex. Em empate no menor valor, o PRIMEIRO da ordem do jogo vence.
+// Grass/Fire x Fire: o tipo atual (Grass) leva x2; o 1º que ganha dele é Normal (x1) e depois Rock (x0,5), que vem ANTES de Fire na ordem do jogo:
+// o jogo vira Rock (não é dos tipos dela) e a efetividade cai para x0,5. Na ordem do dex, Fire (já dela) vencia e ficava x1.
+test("TK-41.9: Color Change desempata pela ordem de tipos do jogo (Grass/Fire x Fire vira Rock, x0,5)", () => {
+  const def = Object.assign({}, eu("Arcanine", { hab: "Color Change", golpes: ["Flamethrower"], evs: EV.nenhum, nat: "Hardy" }), { tipos: ["Grass", "Fire"] });
+  const atq = chefao("Arcanine", { hab: "Intimidate", golpes: ["Flamethrower"], evs: EV.nenhum, nat: "Hardy" });
+  assert.equal(R.efetividadeComColorChange(atq, "Fire", def, 1), 0.5);
+  assert.deepEqual(R.ORDEM_DE_TIPOS_DO_JOGO.length, 20);
+  assert.equal(R.ORDEM_DE_TIPOS_DO_JOGO[0], "Normal");
+  assert.equal(R.ORDEM_DE_TIPOS_DO_JOGO[9], "Mystery");
+  assert.equal(R.ORDEM_DE_TIPOS_DO_JOGO[19], "Stellar");
+});
