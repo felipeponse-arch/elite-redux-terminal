@@ -137,6 +137,45 @@ export function lerAba(texto) {
   return saida;
 }
 
+// Cruza a lista com o tipo do dex (decisão do usuário, TK-38: vale o tipo do dex; dupla tipagem aparece em cada run mono):
+//  - entrada sem marca #/%/M cujo tipo a espécie não tem sai (tipo errado da planilha, feita pra 2.5);
+//  - espécie que aparece em alguma lista entra em TODOS os tipos dela, com a etapa/local da entrada mais cedo (sem marca: o tipo é dela).
+// Marcas e demais campos (inclusive eApp) das entradas que ficam não são tocados. Devolve { porTipo, removidas, acrescentadas }.
+export function cruzarComDex(porTipo, dex) {
+  const porSname = new Map(dex.species.filter(Boolean).map((s) => [s.sname, s]));
+  const tiposDe = (s) => ((porSname.get(s) || {}).t || []).map((i) => dex.types[i]);
+  const removidas = [], acrescentadas = [], saida = {};
+  for (const [tipo, lista] of Object.entries(porTipo)) {
+    saida[tipo] = lista.filter((x) => {
+      const ok = /[#%M]/.test(x.m || "") || !porSname.has(x.s) || tiposDe(x.s).includes(tipo);
+      if (!ok) removidas.push(tipo + ":" + x.s);
+      return ok;
+    });
+  }
+  const fonte = new Map(); // sname -> entrada mais cedo, mesmo a removida (a planilha diz onde pegar; o tipo é que estava errado). Primeira vence o empate.
+  for (const lista of Object.values(porTipo)) for (const x of lista) if (!fonte.has(x.s) || x.e < fonte.get(x.s).e) fonte.set(x.s, x);
+  for (const [s, x] of fonte) for (const tipo of tiposDe(s)) {
+    if (!saida[tipo] || saida[tipo].some((y) => y.s === s)) continue;
+    const nova = { s, e: x.e, l: x.l };
+    if (x.eApp !== undefined) nova.eApp = x.eApp;
+    saida[tipo].push(nova);
+    acrescentadas.push(tipo + ":" + s);
+  }
+  return { porTipo: saida, removidas, acrescentadas };
+}
+
+// eApp (Etapa do rank_disponibilidade, escrita por gerar_rank_disponibilidade.mjs) não vem da planilha: reaproveita do arquivo anterior,
+// por (tipo, espécie) e, na falta, pela espécie (a Etapa por espécie é uma só).
+export function preservarEApp(novo, antigo) {
+  const porTipoEsp = new Map(), porEsp = new Map();
+  for (const [tipo, lista] of Object.entries((antigo && antigo.porTipo) || {})) for (const x of lista) if (x.eApp !== undefined) { porTipoEsp.set(tipo + ":" + x.s, x.eApp); porEsp.set(x.s, x.eApp); }
+  for (const [tipo, lista] of Object.entries(novo)) for (const x of lista) {
+    const v = porTipoEsp.has(tipo + ":" + x.s) ? porTipoEsp.get(tipo + ":" + x.s) : porEsp.get(x.s);
+    if (v !== undefined && x.eApp === undefined) x.eApp = v;
+  }
+  return novo;
+}
+
 async function main() {
   const pasta = process.argv[2];
   const dex = JSON.parse(readFileSync(path.join(RAIZ, "data", "dex_compact.json"), "utf8"));
@@ -198,17 +237,22 @@ async function main() {
       porTipo[e.tipo].push({ s: sp.sname, e: aba.etapa, l: e.local, m: marcas || undefined });
     }
   }
+  const cruz = cruzarComDex(porTipo, dex);
+  let antigo = null;
+  try { antigo = JSON.parse(readFileSync(path.join(RAIZ, "data", "mono_disponibilidade.json"), "utf8")); } catch { /* primeira importação */ }
+  preservarEApp(cruz.porTipo, antigo);
   const saida = {
     fonte: `https://docs.google.com/spreadsheets/d/${PLANILHA}`,
     nota: "Planilha da comunidade 'Mono earliest locations' (listada no índice oficial eliteredux.net/full-documentation). Feita pra 2.5 e atualizada com o NextDex; cada nome foi casado com o dado 2.65 do app e o que divergiu ficou de fora. e = etapa do app (índice de levelcaps.json) desde quando dá pra pegar; m: # uma evolução ganha o tipo, * evolui pra fora do tipo, % precisa de evolução/forma especial.",
     importadoEm: new Date().toISOString().slice(0, 10),
     lideres: ABAS.map((a) => a.lider),
-    porTipo,
+    porTipo: cruz.porTipo,
   };
   writeFileSync(path.join(RAIZ, "data", "mono_disponibilidade.json"), JSON.stringify(saida) + "\n", "utf8");
-  const total = Object.values(porTipo).reduce((a, l) => a + l.length, 0);
+  console.log(`cruzado com o dex: ${cruz.removidas.length} removidas (${cruz.removidas.join(", ")}), ${cruz.acrescentadas.length} acrescentadas (${cruz.acrescentadas.join(", ")})`);
+  const total = Object.values(cruz.porTipo).reduce((a, l) => a + l.length, 0);
   console.log(`importado: ${total} entradas em ${TIPOS.length} tipos`);
-  console.log("por tipo (até a 1ª insígnia / total):", TIPOS.map((t) => `${t} ${porTipo[t].filter((x) => x.e === 0).length}/${porTipo[t].length}`).join(", "));
+  console.log("por tipo (até a 1ª insígnia / total):", TIPOS.map((t) => `${t} ${cruz.porTipo[t].filter((x) => x.e === 0).length}/${cruz.porTipo[t].length}`).join(", "));
   console.log(`\ncasados por aproximação (${aproximados.size}):`, [...aproximados].map(([a, b]) => `${a} -> ${b}`).join("; "));
   console.log(`\nsem espécie no dado (${semCasar.size}):`, [...semCasar].join("; "));
   console.log(`\ntipo diferente no jogo atual (${tipoDivergente.length}):`, tipoDivergente.join("; "));

@@ -124,3 +124,10 @@ test("nenhum candidato leva Dream Eater (só funciona em alvo dormindo e o motor
     cands(s).forEach((c) => assert.ok(!c.golpes.includes("Dream Eater"), s + " " + c.golpes.join("/")));
   });
 });
+
+test("mesclarContextos: junta ctx do mundo e contexto da validação; chave repetida é erro, não sobrescrita", () => {
+  const m = R.mesclarContextos({ cap: 30, team: [] }, { buffs: ["x"], golpesChave: ["y"] });
+  assert.deepEqual(Object.keys(m).sort(), ["buffs", "cap", "golpesChave", "team"]);
+  assert.throws(() => R.mesclarContextos({ cap: 30 }, { cap: 99 }), /contexto repetido: cap/);
+  assert.deepEqual(Object.keys(R.mesclarContextos({ cap: 30 }, {})), ["cap"]);
+});

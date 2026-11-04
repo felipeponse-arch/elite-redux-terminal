@@ -85,6 +85,9 @@ vira número, fica de fora até confirmar, exatamente a regra 3 do charter
 ("sem fonte confiável, dizer isso, não preencher com um achado plausível").
 #>
 
+# GUARDA (TK-41): script antigo, fora do fluxo. Substituto: scripts/calcular_rank_v2.mjs --gravar (passo manual do usuario). ESTE SOBRESCREVE data/species_rank.json com o rank antigo.
+if ($args -notcontains "-Forcar") { Write-Error "compute_species_rank.ps1 esta aposentado e SOBRESCREVE data/species_rank.json (o rank por duelo). Use scripts/calcular_rank_v2.mjs --gravar. Para rodar mesmo assim, passe -Forcar."; exit 1 }
+
 . (Join-Path $PSScriptRoot "common.ps1")
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"

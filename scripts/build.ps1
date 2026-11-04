@@ -51,8 +51,12 @@ if (-not $SkipExtract) {
     Write-Output "--- regenerating dex_compact.json and bosses.json from raw source ---"
     # TK-36 (04/11/2026): o dex sai do porte em Node (transform.mjs: ja com o corte do slim_dex, mais o patch config_nova.json); o transform.ps1
     # gravava a versao "2.65beta" fixa e deixava de fora o patch da er-config. Equivalencia: tests/unit/extracao_transform.test.mjs.
-    if (-not $Versao) { $Versao = (& node -e "import('./scripts/alarme_upstream.mjs').then(m => console.log(m.VERSAO_DEX))" | Select-Object -First 1).Trim() }
-    if (-not $Versao) { throw "nao consegui ler VERSAO_DEX de scripts/alarme_upstream.mjs; passe -Versao" }
+    # Caminho relativo ao script (nao ao diretorio atual), como file:// (o alarme roda o main() se argv[1] for o proprio arquivo); valida antes do Trim.
+    if (-not $Versao) {
+        $lido = & node --input-type=module -e "const m = await import(process.argv[1]); console.log(m.VERSAO_DEX)" ([System.Uri](Join-Path $PSScriptRoot "alarme_upstream.mjs")).AbsoluteUri | Select-Object -First 1
+        if ($LASTEXITCODE -ne 0 -or -not $lido) { throw "nao consegui ler VERSAO_DEX de scripts/alarme_upstream.mjs; passe -Versao" }
+        $Versao = "$lido".Trim()
+    }
     & node (Join-Path $PSScriptRoot "extracao/transform.mjs") (Join-Path $dataDir "gameData.json") (Join-Path $dataDir "dex_compact.json") "--versao=$Versao" "--config-nova=$(Join-Path $dataDir 'config_nova.json')" "--traducoes=$(Join-Path $dataDir 'move_translations_pt.json')"
     if ($LASTEXITCODE -ne 0) { throw "extracao/transform.mjs falhou" }
     & (Join-Path $PSScriptRoot "extract_bosses.ps1")

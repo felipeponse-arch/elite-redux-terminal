@@ -1726,7 +1726,7 @@
     return { atributo: melhor, mult: melhor === 5 ? vel : mult };
   }
   // A habilidade do alvo barra o golpe com prioridade de quem ataca (o golpe falha inteiro): Queenly Majesty, Dazzling e Armor Tail sempre;
-  // Sand Guard na areia e Sun Basking no sol (abilities.cc:6238-6241 e 7437-7440 delegam ao onImmune da Queenly Majesty sob o clima).
+  // Sand Guard na areia e Basking (ex-Sun Basking) no sol (abilities.cc:6238-6241 e 7437-7440 delegam ao onImmune da Queenly Majesty sob o clima).
   // O Utility Umbrella do dono desliga o do sol (IsBattlerWeatherAffected, battle_util.c:8674-8683). Mold Breaker atravessa.
   function prioBloqueadaPelaHabilidadeDuelo(def, atq) {
     if (atq.ef.quebraHabilidade) return false;
@@ -2615,8 +2615,12 @@
     for (var t = 1; t < n; t++) est = [est[0] * (1 - p) + est[1], est[2], est[3] + est[0] * p / 2, est[0] * p / 2];
     return 1 - est[0];
   }
-  // Color Change: empate fica com o tipo atual (strict <, bestType começa em type1) e a ordem dos tipos é a do jogo.
+  // Ordem NUMÉRICA dos tipos no jogo (include/constants/pokemon.h:6-28, NUMBER_OF_MON_TYPES = 20), que NÃO é a do dex (TYPES). Mystery e Stellar
+  // entram porque o laço do jogo passa por eles (abilities.cc:649-672); neutros (x1) na tabela, nunca vencem um empate na prática.
+  var ORDEM_DE_TIPOS_DO_JOGO = ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel", "Mystery", "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy", "Stellar"];
+  // Color Change: empate fica com o tipo atual (strict <, bestType começa em type1) e o laço anda na ordem dos tipos do JOGO (ORDEM_DE_TIPOS_DO_JOGO).
   function efetividadeComColorChange(atq, tipo, def, efAtual) {
+    var TYPES = ORDEM_DE_TIPOS_DO_JOGO; // local de propósito: a sabotagem tk34-color-change-empate casa o texto "TYPES[i]" do laço
     var mono = function (t) { return efetividadeNoDuelo(atq, tipo, Object.assign({}, def, { tipos: [t] })); };
     var melhorT = def.tipos[0], melhorM = mono(melhorT);
     for (var i = 0; i < TYPES.length && melhorM !== 0; i++) { var m = mono(TYPES[i]); if (m < melhorM) { melhorM = m; melhorT = TYPES[i]; } }
@@ -3387,7 +3391,7 @@
     // Sorte na ordem.
     if ((x = f.match(/(\d+)% chance to move first/i))) ef.saque = parseInt(x[1], 10) / 100; // Quick Draw
     if (/Astonishes enemy priority users in fog/i.test(f) && climaOk("fog")) ef.barraPrioridade = true; // Surprise!
-    // Sand Guard e Sun Basking: "Blocks priority and reduces special damage by 1/2 in sand" - sob o clima, golpe com prioridade do outro lado falha.
+    // Sand Guard e Basking: "Blocks priority and reduces special damage by 1/2 in sand" - sob o clima, golpe com prioridade do outro lado falha.
     if ((x = f.match(/^Blocks priority and reduces \w+ damage by 1\/2 in (sand|sun)/i)) && climaOk(x[1])) ef.bloqueiaPrioClima = CLIMA_DO_TEXTO_DUELO[x[1].toLowerCase()] === "areia" ? "areia" : "sol";
     // "Enraged" (código oficial do jogo, src/abilities.cc, lido em 2026-10-01): Madness
     // Enhancement enfurece na névoa; Berserk DNA, na entrada. O NextDex 2.65beta dizia "halves damage when enraged" (x0,5); a versão

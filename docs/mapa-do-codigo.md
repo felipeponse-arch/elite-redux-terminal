@@ -16,7 +16,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
   gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:426, comportamentoDaIADoChefao:459, habilidadesExtrasDoHell:476, regrasDoHell:477, ehRevancheDeLider:484, buffsParaMostrarDoChefao:503, buffsAtivosDoChefao:512, computeSpeedTiers:525, planoDaLuta:545, resumoDaLuta:558, quemRespondeNoPlano:574 (+2)
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
-  descricaoDeHabilidade:77, descricaoDeHabilidadePorId:88, expandirTextoDeHabilidade:99, habilidadeArma:113, nomesDeHabilidades:116, podeTerStatus:126, garantiaDoTime:139, garantiaDaCondicao:153, comoGarantir:169, condicaoDaBuild:188, precisaDeSetter:211, blocoCondicoesIA:236
+  descricaoDeHabilidade:77, descricaoDeHabilidadePorId:88, expandirTextoDeHabilidade:99, habilidadeArma:113, nomesDeHabilidades:116, podeTerStatus:128, garantiaDoTime:141, garantiaDaCondicao:155, comoGarantir:171, condicaoDaBuild:190, precisaDeSetter:213, blocoCondicoesIA:238
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
   confrontoDamagingMoves:29, confrontoMoveType:32, foeAbilityIds:36, foeFromBossMember:49, ofensaContra:59, ameacaDe:91, velocidadeBase:114, confrontoDuelo:126, confrontoTime:146, coberturaSugerida:196, confrontoDuelosDe:243, valorDoTime:249, melhoresTrocas:265, cuidadosDoChefao:302, aberturaEmDupla:319
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
@@ -46,11 +46,11 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **mono_run.js** - Mono run: o que dá pra pegar do seu tipo até a etapa atual (2026-09-26,
   linhaEvolutivaDe:20, compraDeInicialTexto:47, monotypeAtivo:72, serveProMono:74, fraquezasDoTipo:80, resistemAoTipo:83, cobreFraquezas:88, mudancaDeTipo:95, pctClima:133, climaQueCombina:141, orientacaoMono:144, avisoProximoLider:158, monoDisponibilidade:176
 - **pipeline_build.js** - Pipeline de build com intenção (ticket 20 da dívida, desenho de 14/10/2026; docs/pipeline_de_build.md).
-  pipelineEspecie:61, pipelineResolverAlvo:73, pipelineAmeacasDePrioridade:150, pipelineSemFuga:176, pipelineDuelo:177, pipelineLinhaDoGolpe:187, pipelineTierDaLinha:226, pipelineChaveDaLinha:231, pipelineSinergiasAtivas:236, pipelinePesoDoGolpe:241, pipelinePesoDoConjunto:244, pipelineTabela:250, pipelineValorDoGolpe:276, pipelineAvaliarConjunto:281, pipelineMontarConjunto:331, pipelineHabilidadesSemRegra:384, pipelineTierDoCandidato:392, pipelineVelocidade:395, pipelineMotivos:401, pipelineTiposExtraDeStab:428, pipelineSplitDoConjunto:443, pipelineNaturezaServe:453, pipelineAtributoFraco:457, pipelineNaturezaEEvs:463, pipelineGolpesComRecuo:477, pipelineSemRecuo:484, pipelineEvioliteServe:491, pipelineValidarRascunho:496, candidatosDeBuild:521, pipelineCandidatos:526 (+2)
+  pipelineEspecie:61, pipelineResolverAlvo:73, pipelineAmeacasDePrioridade:150, pipelineSemFuga:176, pipelineDuelo:177, pipelineLinhaDoGolpe:187, pipelineTierDaLinha:226, pipelineChaveDaLinha:231, pipelineSinergiasAtivas:236, pipelinePesoDoGolpe:241, pipelinePesoDoConjunto:244, pipelineTabela:250, pipelineValorDoGolpe:276, pipelineAvaliarConjunto:281, pipelineMontarConjunto:331, pipelineHabilidadesSemRegra:384, pipelineTierDoCandidato:392, pipelineVelocidade:395, pipelineMotivos:401, pipelineTiposExtraDeStab:428, pipelineSplitDoConjunto:443, pipelineNaturezaServe:453, pipelineAtributoFraco:457, pipelineNaturezaEEvs:463, pipelineGolpesComRecuo:477, pipelineSemRecuo:484, pipelineEvioliteServe:491, mesclarContextos:497, pipelineValidarRascunho:505, candidatosDeBuild:530 (+3)
 - **plano_build.js** - Build que acompanha o jogador: plano de golpes por slot, estilo da build e
   evsTextoParaArray:24, estiloDeEvs:37, estiloDoRitmo:48, nivelDoGolpe:56, nivelDeEvolucaoDaForma:68, validarPlano:80, planoSaneado:107, golpesNoCap:123, trocasEntreCaps:141, curadasDe:153, curadaParaEstilo:160
 - **prompts_ia.js** - Peças dos prompts de IA (o que vai pro modelo) e a tradução dos erros da IA pro
-  ctxDoState:13, completarCtx:14, archetypeBuildGuidance:63, planoPromptBlock:81, contextoDoModoPrompt:91, anexarPlanoDaIa:131, sampleErrorMessage:153, versaoDosDados:196, cabecalhoIA:197, linhaHabilidadeIA:204, blocoEspecieIA:208, nomePapel:234, blocoPapelIA:235, blocoMovepoolIA:266, blocoRegrasDePapelIA:272, blocoMegaIA:278, comDescricaoIA:291, blocoItensDaEspecieIA:294, blocoItensIA:299, itensAindaIndisponiveisParaIA:307, blocoItensAindaIndisponiveisIA:316, blocoItensComunsIA:323, blocoTimeEmUsoIA:356, blocoManualIA:402, linhaVelocidadeIA:423, linhasProximaLutaIA:440, blocoContextoIA:476, envelopeContextoIA:480, linhasContextoDaEspecieIA:487, avisoInnatesEliteIA:511 (+16)
+  ctxDoState:16, completarCtx:17, archetypeBuildGuidance:66, planoPromptBlock:84, contextoDoModoPrompt:94, anexarPlanoDaIa:134, sampleErrorMessage:156, versaoDosDados:199, cabecalhoIA:200, linhaHabilidadeIA:207, blocoEspecieIA:211, nomePapel:237, blocoPapelIA:238, blocoMovepoolIA:269, blocoRegrasDePapelIA:275, blocoMegaIA:281, comDescricaoIA:294, blocoItensDaEspecieIA:297, blocoItensIA:302, itensAindaIndisponiveisParaIA:310, blocoItensAindaIndisponiveisIA:319, blocoItensComunsIA:326, blocoTimeEmUsoIA:359, blocoManualIA:405, linhaVelocidadeIA:426, linhasProximaLutaIA:443, blocoContextoIA:479, envelopeContextoIA:483, linhasContextoDaEspecieIA:490, avisoInnatesEliteIA:514 (+16)
 - **rank_da_run.js** - Rank v2 (2026-10-02, modelo aprovado pelo usuário - scripts/calcular_rank_v2.mjs):
   chaveDoRankDaDificuldade:23, rankDe:29, dominantesNoTipo:51, rankDaDificuldadeDe:69
 - **reconciliar_build.js** - Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
@@ -166,7 +166,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **importar_dex_strategy.mjs** - Importa para data/builds.json as estratégias oficiais por espécie do arquivo src/data/dex-strategy.md do código do jogo
   norm:16, lerBlocos:21, montarIndice:44, resolverEspecie:70, primeiroDe:84, converter:86, assinatura:150, juntar:151, main:171
 - **importar_mono.mjs** - Importa a planilha oficial "Mono earliest locations" (índice oficial:
-  lerCsv:38, lerNome:60, chave:69, distancia:70, variantes:88, casarNomes:101, lerAba:121, main:140
+  lerCsv:38, lerNome:60, chave:69, distancia:70, variantes:88, casarNomes:101, lerAba:121, cruzarComDex:144, preservarEApp:169, main:179
 - **itens_pela_config.mjs** - Parâmetros de item pelo código do jogo, não por números soltos no motor.
   lerItensDaConfig:18, TIPO_EN:46, efeitoDoItem:49, itensDeBatalha:55
 - **mapa_chamadas.mjs** - Chamadas entre arquivos do app (src/regras + src/ui) pela API do TypeScript.
@@ -221,13 +221,13 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   Get-MoveEffects:73
 - **compute_move_roles.ps1** - (sem comentário de topo)
 - **compute_species_rank.ps1** - (sem comentário de topo)
-  Get-AbilityScore:164, Get-BossDefenseScore:211, Get-MovepoolScore:237, Get-TypeScore:274, Get-Stage:337, Get-PercentileRanks:387, Get-Tier:412, Compute-Tiers:430
+  Get-AbilityScore:167, Get-BossDefenseScore:214, Get-MovepoolScore:240, Get-TypeScore:277, Get-Stage:340, Get-PercentileRanks:390, Get-Tier:415, Compute-Tiers:433
 - **compute_species_role.ps1** - (sem comentário de topo)
   Get-MoveIdSet:56, Get-PercentileRanks:70
 - **dev_server.ps1** - Injecao de mock de sincronizacao (db), 2026-09-11: exclusiva deste servidor
   Get-MockDbScript:13
 - **expand_combo_abilities.ps1** - >
-  Get-ComboParts:30, Flatten-Combo:45
+  Get-ComboParts:33, Flatten-Combo:48
 - **extract_boss_builds.ps1** - (sem comentário de topo)
 - **extract_bosses.ps1** - Generates data/bosses.json (boss trainers + their difficulty variants) from
   ResolveAbility:29, ResolveAbilityId:39, ResolveParty:46
@@ -437,6 +437,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **tipos_habilidade_id_nome.test.mjs** - TK-00: trava id x nome de TYPE_MOD_ABILITIES. O id é do dex_compact do app (NextDex), NÃO o do enum do jogo
 - **tira_setup.test.mjs** - Ticket 18 (07/10/2026): golpes que tiram setup, pelo código oficial (er-repo 217dd0f,
 - **traducoes_alinhadas_por_nome.test.mjs** - Versão 2.65.4 deslocou ids de habilidade (Mighty Horn 391 -> 390; 391 virou Hardened Sheath...). A tradução PT é indexada por id, então
+- **traducoes_cobertura.test.mjs** - Toda habilidade do dex tem descrição PT (a 2.65.5 acrescentou ids sem tradução e ninguém notou).
 - **troca_de_tipo_na_defesa_no_duelo.test.mjs** - TK-34: a troca de tipo (Protean, Libero, RKS System, Pattern Change, Prismatic Fur, Color Change) vale para a DEFESA.
 - **vaga.test.mjs** - Vaga de verificação pesada (scripts/vaga.mjs, melhoria B de 2026-10-13).
 - **validacao_do_time_gerado.test.mjs** - TK-28: a decisão "quais Pokémon do time ainda estão sem build" mora em src/regras (computeTeamGenerationValidation), não na tela.

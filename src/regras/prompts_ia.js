@@ -8,8 +8,11 @@
   // fase 4 da refatoração (2026-09-24).
 
 
-  // ctx explícito das regras puras (TK-19): { archetype, team, settings, cap }. Este é o ÚNICO ponto das regras de IA que lê o
-  // state; quem chama monta o ctx aqui e passa adiante. Sem ctx, as entradas públicas usam o do state (compatível com os testes).
+  // ctx explícito das regras puras (TK-19): { archetype, team, settings, cap }. Nestes arquivos de IA (prompts_ia, validacao_build_ia,
+  // escolha_ia_candidatos, pipeline_build) este é o ÚNICO ponto que lê o state (travado em regras_puras_ctx_explicito.test.mjs). Fora deles,
+  // level_cap.js (availableMovesFor), builds.js (itensEmUsoComQuem) e chefoes.js (getRemainingBossEntries) ainda usam o state quando o
+  // chamador não passa ctx (ferramentas_ia, mono_run, avisos_build, pipeline_tela): o ctx é opcional ali, de propósito.
+  // Quem chama monta o ctx aqui e passa adiante. Sem ctx, as entradas públicas usam o do state (compatível com os testes).
   function ctxDoState() { return { archetype: state.archetype, team: state.team, box: state.box, settings: state.settings, cap: getCurrentCap() }; }
   function completarCtx(ctx) { return ctx && ctx.settings && ctx.archetype && ctx.team && ctx.cap !== undefined ? ctx : Object.assign(ctxDoState(), ctx || {}); }
 

@@ -493,10 +493,19 @@
     // Eviolite sem local com etapa no jogo (etapaDoItem null) não conta como disponível aqui.
     return etapaDoItem("Eviolite") !== null && liberadoNaRun(ctx.settings.milestone, ctx.cap, { item: "Eviolite" });
   }
+  // Junta o ctx do mundo com o contexto da validação sem deixar um sobrescrever o outro em silêncio: chave repetida é erro.
+  function mesclarContextos(base, extra) {
+    var out = Object.assign({}, base);
+    Object.keys(extra || {}).forEach(function (k) {
+      if (Object.prototype.hasOwnProperty.call(out, k)) throw new Error("contexto repetido: " + k);
+      out[k] = extra[k];
+    });
+    return out;
+  }
   function pipelineValidarRascunho(sp, g, ctx) {
     var bruto = { ability: g.hab, nature: g.fin.nome, item: "", evs: g.fin.evs.slice(), moves: g.av.golpes.slice() };
     // Mesmo contexto da IA (contextoDeValidacao; sem opts.chefao = {}, igual ao que era) - TK-18, 10.5.
-    var cv = Object.assign({}, ctx, contextoDeValidacao(sp, null)), recusa = {}, v = validateAiBuild(sp, bruto, recusa, cv);
+    var cv = mesclarContextos(ctx, contextoDeValidacao(sp, null)), recusa = {}, v = validateAiBuild(sp, bruto, recusa, cv);
     if (v) {
       // Espécie que ainda evolui leva Eviolite (o motor já usa Eviolite nesses casos, itemDoSetDuelo). Item recusado (limite do time) = fica sem item.
       if (!v.item && pipelineEvioliteServe(sp, ctx)) {

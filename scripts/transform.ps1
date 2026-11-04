@@ -1,6 +1,9 @@
 ﻿# Generates data/dex_compact.json from data/gameData.json (the raw
 # Elite Redux NextDex export). Run via build.ps1, or standalone for debugging.
 
+# GUARDA (TK-41): script antigo, fora do fluxo. Substituto: scripts/extracao/transform.mjs (build.ps1 chama).
+if ($args -notcontains "-Forcar") { Write-Error "transform.ps1 esta aposentado (grava a versao 2.65beta fixa e nao aplica o patch da er-config). Use scripts/extracao/transform.mjs via build.ps1. Para rodar mesmo assim, passe -Forcar."; exit 1 }
+
 . (Join-Path $PSScriptRoot "common.ps1")
 
 $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"
