@@ -772,7 +772,7 @@
     "versao": "2.65beta"
   },
   "SPECIES_KECLEON": {
-    "ability": "Klutz",
+    "ability": "Prankster",
     "nature": "Impish",
     "evs": "252 HP / 252 Def / 6 SpD",
     "item": "Toxic Orb",
@@ -782,9 +782,9 @@
       "Trick",
       "Zen Headbutt"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Toxic Orb / Iron Ball / Lagging Tail / Any Orb / Any Choice Item.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Toxic Orb / Iron Ball / Lagging Tail / Any Orb / Any Choice Item. Ticket 44 (04/11/2026, 2.65.5): a espécie perdeu a Klutz; a Prankster (golpe de status com +1 de prioridade) faz o Trick sair primeiro, e o set é o mesmo (Fake Out, Lick, Trick, Zen Headbutt; Toxic Orb é o item que se passa ao alvo). O Trick falha contra tipo Dark.",
     "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
+    "versao": "2.65.5"
   },
   "SPECIES_SNEASLER": {
     "ability": "Unburden",
@@ -939,19 +939,19 @@
     "versao": "2.65beta"
   },
   "SPECIES_SAWSBUCK": {
-    "ability": "Skill Link",
+    "ability": "Grass Pelt",
     "nature": "Jolly",
     "evs": "252 Atk / 6 SpD / 252 Spe",
-    "item": "Silk Scarf",
+    "item": "Loaded Dice",
     "moves": [
       "Fury Attack",
       "Bullet Seed",
       "Peck",
       "Rock Slide"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Silk Scarf / Shell Bell / Loaded Dice.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Silk Scarf / Shell Bell / Loaded Dice. Ticket 44 (04/11/2026, 2.65.5): a espécie perdeu a Skill Link; o Loaded Dice (alternativa que o próprio post cita) assume os golpes de vários acertos; a Grass Pelt combina com a inata Seed Sower (Grassy Terrain ao ser atingido) e a inata Mighty Horn dá x1,3 em Fury Attack e Peck. Golpes mantidos.",
     "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
+    "versao": "2.65.5"
   },
   "SPECIES_WHIMSICOTT": [
     {
@@ -1632,7 +1632,7 @@
     "versao": "2.65beta"
   },
   "SPECIES_GRENINJA_MEGA": {
-    "ability": "Protean",
+    "ability": "Versatile",
     "nature": "Modest",
     "evs": "252 SpA / 6 SpD or Atk / 252 Spe",
     "item": "Greninjite",
@@ -1642,9 +1642,9 @@
       "Ice Beam",
       "Spikes"
     ],
-    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Greninjite / Shell Bell / Choice Specs / Life Orb / Focus Sash.",
+    "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Greninjite / Shell Bell / Choice Specs / Life Orb / Focus Sash. Ticket 44 (04/11/2026, 2.65.5): a espécie perdeu a Protean; a Versatile faz o mesmo (muda para o tipo do golpe antes de usá-lo) e vale em todo golpe, não só uma vez por entrada. Set mantido.",
     "fonte": "discord-build-workshop-2.65",
-    "versao": "2.65beta"
+    "versao": "2.65.5"
   },
   "SPECIES_BRONTONANA": {
     "ability": "Dragon's Maw",
@@ -2124,11 +2124,11 @@
         "Wave Crash",
         "Guillotine",
         "Shadow Claw",
-        "Dragon Dance"
+        "Swords Dance"
       ],
-      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell (Ω) / King's Rock (Ω). Vídeo \"RANKING Every Garchomp Form!\" (MegaFidough, 30/08/2026; um vídeo só, confiança baixa) cita para esta forma Swords Dance (dobra o ataque depois do primeiro nocaute, que o Haunting Frenzy acelera) e Last Respects (mais forte a cada aliado caído); não diz que troca o Dragon Dance. Build não alterada: trocar golpe fica para decisão do usuário.",
+      "note": "Curada da thread \"Build Workshop for 2.65\" do Discord oficial (fonte indicada pelo usuário). Habilidade, golpes e forma conferidos contra os dados reais do jogo 2.65beta; onde o post dava várias opções por slot, ficou a primeira que esta espécie realmente aprende. Alternativas de item citadas no post: Shell Bell (Ω) / King's Rock (Ω). Vídeo \"RANKING Every Garchomp Form!\" (MegaFidough, 30/08/2026; um vídeo só, confiança baixa) cita para esta forma Swords Dance (dobra o ataque depois do primeiro nocaute, que o Haunting Frenzy acelera) e Last Respects (mais forte a cada aliado caído); não diz que troca o Dragon Dance. Ticket 44 (04/11/2026, 2.65.5; decisão do usuário: Swords Dance, aceitando ficar parecida com a 2ª Build): a espécie não aprende mais o Dragon Dance; entra o Swords Dance (dobra o Ataque), o setup que o vídeo da MegaFidough cita para esta forma e que o Haunting Frenzy acelera. A parte de Velocidade do Dragon Dance fica por conta do Haunting Frenzy. Ficou parecida com a 2ª Build (só muda Shadow Claw por Last Respects).",
       "fonte": "discord-build-workshop-2.65",
-      "versao": "2.65beta"
+      "versao": "2.65.5"
     },
     {
       "ability": "Haunting Frenzy",
@@ -3666,7 +3666,7 @@
     "origem": "ia"
   },
   "SPECIES_DURALUDON_PARTNER_MEGA": {
-    "ability": "Draco Morale",
+    "ability": "Mega Launcher",
     "nature": "Modest",
     "evs": "8 HP / 248 SpA / 248 Spe",
     "item": "Duraludite",
@@ -3676,9 +3676,9 @@
       "Return",
       "Aura Sphere"
     ],
-    "note": "Aparece na Etapa 4 (Heat Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade.",
+    "note": "Aparece na Etapa 4 (Heat Badge). Build gerada pelo pipeline do app (melhor set contra o campo inteiro da run) e conferida por validateAiBuild; ainda sem confirmação da comunidade. Ticket 44 (04/11/2026, 2.65.5): a espécie perdeu a Draco Morale; a Mega Launcher (x1,3 em golpes de feixe/canhão/pulso) potencializa 3 dos 4 golpes do set (Flash Cannon, Dark Pulse, Aura Sphere; sinergia confirmada pelo app). Set mantido.",
     "fonte": "ia-curada-playtester",
-    "versao": "2.65.4",
+    "versao": "2.65.5",
     "estilo": "ofensivo",
     "origem": "ia"
   },

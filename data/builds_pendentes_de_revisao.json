@@ -1,5 +1,5 @@
 {
- "nota": "Builds curadas que o dado novo (NextDex 2.65.4, ticket versao-nova/05) deixou com problema: versao validada antiga (244) ou habilidade/golpe que a especie nao tem mais (14, +1 do delta da er-config d1a9a4c: Lanturn/Drizzle, a especie ganhou Photon Burst - ticket versao-nova/07). NAO foram mexidas: o ticket dados-2654/08 revisa e esvazia esta lista (a Construcao revisa antes). Qualquer problema fora da lista continua derrubando a validacao. v2.65.4.1 (28/10): lista regerada com a versao 2.65.4.1 (toda build validada em versao anterior volta a pedir revisao) + 5 builds cuja habilidade a especie perdeu na config nova (Torrentula Foamy Web, Scrafty Mega Backstreet Boy, Hawlucha Mega Wrestle Showman, Chesnaught Mega Chestnut Shield, Talonflame Mega Galeforce Wings). Nada de build foi mexido. TK-35 (NextDex 2.65.5, 03/11/2026): lista reescrita com o dado novo; +5 builds com habilidade/golpe que a especie perdeu (Kecleon/Klutz, Sawsbuck/Skill Link, Greninja Mega/Protean, Garchomp Mega Redux/Dragon Dance, Duraludon Partner Mega/Draco Morale) - decisao de design, NAO corrigidas.",
+ "nota": "Builds curadas que o dado novo (NextDex 2.65.4, ticket versao-nova/05) deixou com problema: versao validada antiga (244) ou habilidade/golpe que a especie nao tem mais (14, +1 do delta da er-config d1a9a4c: Lanturn/Drizzle, a especie ganhou Photon Burst - ticket versao-nova/07). NAO foram mexidas: o ticket dados-2654/08 revisa e esvazia esta lista (a Construcao revisa antes). Qualquer problema fora da lista continua derrubando a validacao. v2.65.4.1 (28/10): lista regerada com a versao 2.65.4.1 (toda build validada em versao anterior volta a pedir revisao) + 5 builds cuja habilidade a especie perdeu na config nova (Torrentula Foamy Web, Scrafty Mega Backstreet Boy, Hawlucha Mega Wrestle Showman, Chesnaught Mega Chestnut Shield, Talonflame Mega Galeforce Wings). Nada de build foi mexido. TK-35 (NextDex 2.65.5, 03/11/2026): lista reescrita com o dado novo; +5 builds com habilidade/golpe que a especie perdeu (Kecleon/Klutz, Sawsbuck/Skill Link, Greninja Mega/Protean, Garchomp Mega Redux/Dragon Dance, Duraludon Partner Mega/Draco Morale) - decisao de design, NAO corrigidas. Ticket 44 (04/11/2026): as 5 builds acima (Kecleon, Sawsbuck, Greninja Mega, Garchomp Mega Redux, Duraludon Partner Mega) foram refeitas com habilidade/golpe/item validos na 2.65.5 e sairam da lista.",
  "ate": "dados-2654/08",
  "problemas": [
   "SPECIES_TYRANITAR_MEGA_REDUX : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
@@ -53,7 +53,6 @@
   "SPECIES_SALAMENCE : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_SAWK_REDUX : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_GOODRA_MEGA : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
-  "SPECIES_KECLEON : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_SNEASLER : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_ALTARIA_REDUX : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_TYRANITAR : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
@@ -64,7 +63,6 @@
   "SPECIES_WOOLY_WORM : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_SWANNA : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_UNFEZANT : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
-  "SPECIES_SAWSBUCK : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_WHIMSICOTT : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_WHIMSICOTT : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_PINSIR_MEGA : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
@@ -110,7 +108,6 @@
   "SPECIES_AUDINO_MEGA : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_DRAGONITE : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_DRAMPA : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
-  "SPECIES_GRENINJA_MEGA : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_BRONTONANA : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_GARCHOMP_MEGA : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_SNEASLER_MEGA : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
@@ -142,8 +139,6 @@
   "SPECIES_SNORLAX : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_KOMMO_O : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_LANTURN : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
-  "SPECIES_GARCHOMP_MEGA_REDUX : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
-  "SPECIES_GARCHOMP_MEGA_REDUX : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_SIGILYPH : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_SIGILYPH : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_LUCARIO : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
@@ -240,7 +235,6 @@
   "SPECIES_ILLUMINAUT : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_NOXISLASH : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_ASUDEM : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
-  "SPECIES_DURALUDON_PARTNER_MEGA : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_GRIMER_REDUX : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_MUK_REDUX : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_MORAVINE : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
@@ -249,10 +243,6 @@
   "SPECIES_RUFFLET_REDUX : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_BRAVIARY_REDUX : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
   "SPECIES_MASTOPHAN : validada contra 2.65.4, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo",
-  "SPECIES_KECLEON : habilidade 'Klutz' nao pertence a esta especie",
-  "SPECIES_SAWSBUCK : habilidade 'Skill Link' nao pertence a esta especie",
-  "SPECIES_GRENINJA_MEGA : habilidade 'Protean' nao pertence a esta especie",
-  "SPECIES_DURALUDON_PARTNER_MEGA : habilidade 'Draco Morale' nao pertence a esta especie",
-  "SPECIES_GARCHOMP_MEGA_REDUX : golpe 'Dragon Dance' nao e aprendido por esta especie"
+  "SPECIES_GARCHOMP_MEGA_REDUX : validada contra 2.65beta, mas o dado atual e 2.65.5 - revisar a build antes de atualizar o campo"
  ]
 }
