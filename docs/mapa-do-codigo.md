@@ -315,6 +315,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **gravacao_build_ia.test.mjs** - Caminho "resposta da IA -> build validada -> o que gravar" (src/regras/gravacao_build_ia.js e
 - **guarda_lutas_comuns.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **gym_skills_texto_do_jogo.test.mjs** - Texto dos buffs de ginásio conferido contra o código do jogo (er-repo f34fc2b, src/battle_events.c; comitê 29/10, TK-33b).
+- **habilidades_2655.test.mjs** - TK-35c: habilidades novas da NextDex 2.65.5, lidas no código do jogo (ferramentas/er-repo, 4a2f6cfc).
 - **habilidades_lote3_tk12.test.mjs** - TK-12 (28/10/2026): divergências do lote 3 (pacote onda0_P2_lote3) contra o código do jogo (er-repo f34fc2b), com dado real.
 - **habilidades_lotes_1_2_pelo_codigo.test.mjs** - TK-12, divergências dos lotes 1 e 2 conferidas no código do jogo (er-repo f34fc2b):
 - **habilidades_mudadas_2654.test.mjs** - Ticket versao-nova/06 (15/10/2026): habilidades cujo efeito mudou na versão mais nova (dados-2654/02 e 03). Fonte: abilities.cc (upcoming...
@@ -339,7 +340,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **last_stand_no_duelo.test.mjs** - Last Stand (abilities.cc:7959-7965): Def/SpDef x(1 + 0,6 x fração de PV perdido).
 - **level_cap_padrao_unico.test.mjs** - Ticket 04 (divida-tecnica): sem Level cap o padrão é um só (0 = sem limite; nível de cálculo 100).
 - **levelcaps_contra_jogo.test.mjs** - TK-23: data/levelcaps.json tem de bater com GetLevelCap() do código do jogo (pokemon.c); 100 = sem limite.
-- **liberacao_por_etapa_caracterizacao.test.mjs** - TK-22: refatoração do registro da Etapa não pode mudar NENHUM resultado (pedras e itens x Etapas 0-10).
+- **liberacao_por_etapa_caracterizacao.test.mjs** - TK-35c: único ajuste do instantâneo - Granbullite (item sem espécie desde que a Granbull Mega saiu da NextDex 2.65.5): etapaItem 7 -> nul...
 - **liberado_na_run.test.mjs** - Ticket 05 (divida-tecnica): liberadoNaRun é a única régua de pedra, item e golpe;
 - **limpeza_motor_tk33a.test.mjs** - TK-33a (limpeza do motor, 29/10/2026): comportamento igual, fontes únicas. Itens 1-4.
 - **lote_a_motor.test.mjs** - Lote A da força-tarefa (2026-10-02): correções do motor provadas na auditoria, cada uma

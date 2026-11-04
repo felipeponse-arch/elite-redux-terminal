@@ -1,5 +1,14 @@
 [
   {
+    "date": "2026-11-03",
+    "items": [
+      "Dados da versão 2.65.5 do Elite Redux: 10 espécies novas (Amicabull, Wingull Redux, Pelipper Redux, Cauldrican, Numberg, Cameberg, Maniberg, Swarmos, Camoudon e Clawed Mimic), 9 habilidades novas e o golpe Meteoropath Ball",
+      "A Granbull Mega e a Infernape Redux B saíram do jogo e do app; 12 espécies mudaram de tipo (Snubbull e Granbull deixam de ser Fada/Terra, por exemplo) e o Sparkling Blast agora tem 90 de precisão e 30% de baixar a precisão",
+      "A Arcanite H deixou de ser vendida no Adoption Center: só vem como presente na Route 123",
+      "O rank e a lista de builds ainda valem para a versão anterior e serão recalculados"
+    ]
+  },
+  {
     "date": "2026-10-21",
     "items": [
       "Meu Time monta o time pelo Motor, sem IA: o simulador de duelo do app escolhe os 6 (você pode marcar quem nunca sai), mostra três variantes (mais ofensiva, mais segura e de sinergia) com a build, o papel provado de cada um, o plano B e o porquê, e não gasta a sua conta de IA. A IA continua no chip \"IA (Claude)\"",

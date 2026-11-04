@@ -23,13 +23,15 @@ const ESPERADO = [
   ["Ghoulish Gore", "Ghost", "PHYSICAL", 85, 100, 0, "Hit", ["chifre"], 0],
   ["Glitter Beam", "Fairy", "SPECIAL", 85, 100, 0, "Accuracy Down Hit", ["luz"], 20],
   ["Luster Glow", "Psychic", "SPECIAL", 85, 90, 0, "Attack Down Hit", ["luz"], 40],
-  ["Sparkling Blast", "Water", "SPECIAL", 90, 100, 0, "Hit", ["luz"], 0],
+  ["Sparkling Blast", "Water", "SPECIAL", 90, 90, 0, "Accuracy Down Hit", ["luz"], 30], // NextDex 2.65.5 e MoveList b58ea4d: precisão 90, baixa a precisão, 30% (na 2.65.4 era Hit 100, sem chance),
   ["Scorching Ray", "Fire", "SPECIAL", 85, 100, 0, "Burn Hit", ["luz"], 20],
 ];
 
 test("os 9 golpes novos estão no dex, em seguida aos 1032 da NextDex, com tipo, split, poder, precisão, efeito, categoria de flag e chance da config", () => {
   assert.equal(R.MOVES.length, N_GOLPES);
-  assert.deepEqual(patch.golpes.map((g) => g.nome), ESPERADO.map((e) => e[0]));
+  // 2.65.5: a NextDex já traz os 9 (posições 1032-1040); a config b58ea4d acrescenta só o Meteoropath Ball (1041)
+  assert.deepEqual(patch.golpes.map((g) => g.nome), ["Meteoropath Ball"]);
+  assert.equal(R.MOVES[1041][0], "Meteoropath Ball");
   ESPERADO.forEach(([nome, tipo, split, poder, prec, prio, efeito, cats, chance], i) => {
     const m = R.MOVES[1032 + i];
     assert.equal(m[0], nome); assert.equal(R.TYPES[m[1]], tipo, nome + " tipo"); assert.equal(R.DATA.splits[m[2]], split, nome + " split");
@@ -43,7 +45,7 @@ test("os 9 golpes novos estão no dex, em seguida aos 1032 da NextDex, com tipo,
   assert.deepEqual(flags("Baneful Kick"), ["Makes Contact", "Kick Based"]);
   assert.deepEqual(flags("Eerie Laugh"), ["Sound Based"]);
   assert.deepEqual(flags("Cheap Stab"), ["Makes Contact", "Horn Based"]);
-  assert.deepEqual(flags("Arc Blast"), []);
+  assert.deepEqual(flags("Arc Blast"), ["Light Based"]); // 2.65.5: a NextDex passou a trazer a flag Light Based no Arc Blast
   assert.equal(R.MOVE_CATEGORIAS[String(id("Eerie Laugh"))].se, "Paralyze Ignore Type");
 });
 
@@ -57,8 +59,9 @@ test("quem aprende os golpes novos: level-up e tutor da config (Alakazam: Luster
   assert.ok(!aprende("Magikarp", "Arc Blast"));
   const lvs = sp("Alakazam").lm.map((e) => e[0]); // a entrada nova entra no lugar do nível, sem quebrar a ordem que a espécie já tinha
   assert.deepEqual(lvs, [...lvs].sort((x, y) => x - y));
-  const comNovos = Object.values(patch.aprende).filter((a) => a.lm.concat(a.tu.map((m) => [0, m])).some(([, m]) => ESPERADO.some((e) => e[0] === m)));
-  assert.equal(comNovos.length, 97, "espécies que ganham algum dos 9 golpes novos (config 486a964; eram 56 na d1a9a4c)");
+  const IDS_NOVOS = ESPERADO.map((e) => id(e[0])); // 2.65.5: a NextDex já traz o aprendizado dos 9; a config deixou de carregá-lo (patch.aprende só tem o delta restante)
+  const comNovos = R.SPECIES.filter((e) => e && (e.lm.some((x) => IDS_NOVOS.includes(x[1])) || e.tu.some((m) => IDS_NOVOS.includes(m))));
+  assert.equal(comNovos.length, 134, "espécies do dex que aprendem algum dos 9 golpes novos (NextDex 2.65.5; eram 97 na config 486a964 e 56 na d1a9a4c)");
 });
 
 test("os golpes de luz novos rendem com Photokinesis (x1,3); Baneful Kick é chute (Striker conta) e Cheap Stab é chifre (Mighty Horn conta)", () => {
