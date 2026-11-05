@@ -202,3 +202,9 @@ Decisões do usuário (04/11): todas SIM. Código do jogo (er-repo) é a verdade
 
 - Os atalhos `.goto-species` / `.goto-species-strategies` (ex.: `src/ui/time.js`) são `<button type="button">` nativos: focáveis (tabIndex 0) e com papel de botão implícito. Não precisam de `role="button"` explícito.
 - O teste `tests/e2e/teclado_e_toque.spec.mjs` aceita `tagName === "BUTTON"` ou `role="button"`; continua exigindo tabIndex 0 e Enter/Espaço.
+
+## Sprites das espécies sem foto (04/11/2026, TK-51)
+
+- Decisão do usuário: sprite OFICIAL da NextDex (`ForwardFeed/ER-nextdex`, pasta `static/sprites`, a mesma fonte que `scripts/build_sprite_atlas.ps1` e `acrescentar_sprites_atlas.ps1` já usavam). Entraram 18 espécies (verificadas pela árvore completa do GitHub, não pela listagem cortada): Amicabull, Bagon/Shelgon/Salamence Redux, Salamence Mega Redux, Beldum/Metang/Metagross Redux, Metagross Mega Redux, Wingull e Pelipper Redux, Cauldrican, Numberg, Cameberg, Maniberg, Swarmos, Camoudon e Clawed Mimic.
+- Sem placeholder (a interface não mudou). Pendente para o usuário: Bruxish Mega e Jellicent Mega não têm sprite oficial; lista comentada `SEM_SPRITE_OFICIAL` em `tests/unit/sprite_index.test.mjs`. Escolher entre placeholder por tipo ou o sprite da forma base.
+- Atribuição: o repositório de origem dos sprites usa GNU GPL v3 (conferido em 04/11/2026 pela API do GitHub). O projeto já embutia esse atlas antes desta rodada.
