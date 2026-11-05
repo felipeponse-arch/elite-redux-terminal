@@ -2,6 +2,7 @@
 // dentro da página não chega: tempo real entre digitar e clicar, tamanho de
 // tela, foco.
 import { test, expect, abrirApp, abrirAba, adicionarAoTimePelaDex } from "./apoio.mjs";
+import { VERSAO_DEX } from "../../scripts/alarme_upstream.mjs";
 
 // Bug achado na fase 6 (2026-09-24): no computador, digitar na busca com uma
 // ficha aberta deixava a ficha congelada - "+ Time" continuava ativo depois
@@ -101,7 +102,7 @@ test("versão do jogo aparece inteira no subtítulo em tela estreita", async ({ 
   await page.setViewportSize({ width: 900, height: 700 });
   await abrirApp(page);
   const versao = page.locator(".brand-sub-versao");
-  await expect(versao).toContainText("2.65.4");
+  await expect(versao).toContainText(VERSAO_DEX);
   const cortada = await versao.evaluate((el) => el.scrollWidth > el.clientWidth + 1 || el.getBoundingClientRect().width < 20);
   expect(cortada, "a versão do jogo foi cortada").toBe(false);
 });
