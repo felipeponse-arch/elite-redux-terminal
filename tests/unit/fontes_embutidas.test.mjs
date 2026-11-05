@@ -25,7 +25,7 @@ test("os pesos declarados de cada família continuam no CSS", () => {
   const css = ler("src/css/fontes.css");
   const esperado = [["Bricolage Grotesque", "500 800"], ["Figtree", "400 700"], ["IBM Plex Mono", "400"], ["IBM Plex Mono", "500"], ["IBM Plex Mono", "600"], ["Potta One", "400"]];
   for (const [familia, peso] of esperado) {
-    const re = new RegExp(String.raw`font-family:s*"${familia}";[^}]*font-weight:s*${peso}s*;`);
+    const re = new RegExp(String.raw`font-family:\s*"${familia}";[^}]*font-weight:\s*${peso}\s*;`);
     assert.match(css, re, `falta o peso ${peso} de ${familia}`);
   }
 });
