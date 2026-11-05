@@ -16,9 +16,14 @@ if (-not $pendentes) { Write-Output "acrescentar_sprites_atlas: nenhuma espécie
 
 $atlasPath = Join-Path $dataDir "sprite_atlas.png"
 $orig = [System.Drawing.Image]::FromFile($atlasPath)
-$bmp = New-Object System.Drawing.Bitmap($orig)
-$orig.Dispose()
 $CELL = 48; $COLS = 44
+# Cresce o atlas em linhas inteiras quando as espécies pendentes não cabem nas casas livres (04/11/2026, TK-51).
+$primeira = [int](@($pendentes)[0] -split " ")[1]
+$linhas = [math]::Max([math]::Floor($orig.Height / $CELL), [math]::Ceiling(($primeira + @($pendentes).Count) / $COLS))
+$bmp = New-Object System.Drawing.Bitmap($orig.Width, ($linhas * $CELL), [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+$g0 = [System.Drawing.Graphics]::FromImage($bmp); $g0.CompositingMode = [System.Drawing.Drawing2D.CompositingMode]::SourceCopy
+$g0.DrawImageUnscaled($orig, 0, 0); $g0.Dispose()
+$orig.Dispose()
 $maxCasas = $COLS * [math]::Floor($bmp.Height / $CELL)
 $g = [System.Drawing.Graphics]::FromImage($bmp)
 $g.CompositingMode = [System.Drawing.Drawing2D.CompositingMode]::SourceCopy
@@ -44,5 +49,5 @@ foreach ($linha in $pendentes) {
 $g.Dispose()
 $bmp.Save($atlasPath, [System.Drawing.Imaging.ImageFormat]::Png)
 $bmp.Dispose()
-node -e "const fs=require('fs'),a=process.argv[1],p=JSON.parse(fs.readFileSync(a,'utf8'));for(const e of process.argv.slice(2)){const [k,v]=e.split('=');p.index[k]=+v}fs.writeFileSync(a,JSON.stringify(p))" (Join-Path $dataDir "sprite_index_por_nome.json") @gravados
+node -e "const fs=require('fs'),a=process.argv[1],p=JSON.parse(fs.readFileSync(a,'utf8'));for(const e of process.argv.slice(2)){const [k,v]=e.split('=');p.index[k]=+v}p.rows=Math.max(p.rows,Math.ceil((Math.max(...Object.values(p.index),0)+1)/p.cols));fs.writeFileSync(a,JSON.stringify(p))" (Join-Path $dataDir "sprite_index_por_nome.json") @gravados
 Write-Output "acrescentar_sprites_atlas: $($gravados.Count) sprites novos no atlas"
