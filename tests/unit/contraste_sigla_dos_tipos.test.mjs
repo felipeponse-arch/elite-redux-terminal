@@ -4,7 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const html = readFileSync(new URL("../../artifact_template.html", import.meta.url), "utf8");
+const html = readFileSync(new URL("../../artifact_template.html", import.meta.url), "utf8").replace(/\r\n/g, "\n"); // checkout Windows vem com CRLF
 const meta = html.match(/var TYPE_META = \{[\s\S]*?\n {2}\};/)[0];
 const fn = html.match(/function tintaDoTipo\(hex\) \{[\s\S]*?\n {2}\}\n/)[0];
 const { TYPE_META, tintaDoTipo } = new Function(meta + "\n" + fn + "\nreturn { TYPE_META, tintaDoTipo };")();

@@ -1,3 +1,4 @@
+// Depende de dado: chefões (bosses.json) e level caps (levelcaps.json) da versão do jogo (muda quando o jogo troca de versão).
 // Ticket time-pelo-motor/01, Fase B2 (21/10/2026): juiz do time pela LUTA COMPLETA (avaliarTimePelaLutaCompleta), ao lado do
 // `pontos` (que não muda). Mede a contribuição de cada membro refazendo a luta inteira contra o time do chefão, com os
 // efeitos de lado da B1 (tela, Tailwind, Trick Room). Dado real: espécies e golpes do 2.65beta contra chefões de verdade,

@@ -340,7 +340,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **itens_indisponiveis_ia_paridade.test.mjs** - TK-14: o aviso "ainda nao disponiveis" da IA usa a lista unica (itensDoTime) e da o mesmo resultado da regra antiga.
 - **itens_no_duelo.test.mjs** - Itens no duelo (2026-09-29, decisão do usuário: "item nos sets do duelo").
 - **itens_registro_14.test.mjs** - TK-14 (estrutura-2026-10-22): itens. Expert Belt 1,2x do código (não o f:30 da config), Knock Off pela regra real do jogo
-- **juiz_do_time.test.mjs** - Ticket time-pelo-motor/01, Fase B2 (21/10/2026): juiz do time pela LUTA COMPLETA (avaliarTimePelaLutaCompleta), ao lado do
+- **juiz_do_time.test.mjs** - Depende de dado: chefões (bosses.json) e level caps (levelcaps.json) da versão do jogo (muda quando o jogo troca de versão).
 - **lacunas_sem_codigo.test.mjs** - Varredura "habilidades da config sem código" (21/10/2026; relatorios/sem_codigo_varredura_2026-10-21.md).
 - **lado_no_duelo.test.mjs** - Ticket time-pelo-motor/01, Fase B1 (20/10/2026): Reflect, Light Screen, Aurora Veil, Tailwind e Trick Room são
 - **last_stand_no_duelo.test.mjs** - Last Stand (abilities.cc:7959-7965): Def/SpDef x(1 + 0,6 x fração de PV perdido).
