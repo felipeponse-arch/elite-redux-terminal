@@ -16,3 +16,12 @@ arquivo em base64 no `@font-face` de `src/css/fontes.css`.
 Fora do subconjunto latin: latin-ext, cirílico, grego, vietnamita e japonês (Potta One). O app só mostra português e
 nomes de espécie (Latin-1); caractere fora cai na fonte de reserva da pilha (`--fonte-*` em `src/css/tokens.css`).
 Para trocar/atualizar: baixar o CSS de fonts.googleapis.com com User-Agent de Chrome, pegar o bloco `/* latin */`.
+
+## Licença conferida (05/11/2026)
+O texto da OFL de cada família está ao lado dos woff2 (`OFL-<familia>.txt`, copiado de
+https://github.com/google/fonts/tree/main/ofl/<pasta>/OFL.txt). Conferido nos próprios arquivos (cabeçalho
+"SIL OPEN FONT LICENSE Version 1.1") e em `METADATA.pb` de cada pasta (`license: "OFL"`):
+- Bricolage Grotesque (`ofl/bricolagegrotesque`): Copyright 2022 The Bricolage Grotesque Project Authors
+- Figtree (`ofl/figtree`): Copyright 2022 The Figtree Project Authors
+- IBM Plex Mono (`ofl/ibmplexmono`): Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"
+- Potta One (`ofl/pottaone`): Copyright 2020 The Potta Project Authors

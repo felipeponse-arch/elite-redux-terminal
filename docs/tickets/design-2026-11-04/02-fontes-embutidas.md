@@ -20,7 +20,8 @@ mesmo contra imagens regravadas minutos antes).
 - [x] `npm run check` e `npm run build` verdes
 - [x] Visual determinístico: 2 rodadas sem update = mesmos 19 desvios, mesmos pixels
 - [x] 19 imagens-base regravadas (1 já passava) em commit separado; rodada seguinte 20/20
-- [ ] Conferir na publicação real se o CSP do claude.ai permite `font-src data:` (não testável localmente)
+- [x] CSP do claude.ai aceita `font-src data:`: o guia do servidor de artifacts (05/11) diz "Fonts: from fonts.gstatic.com (through a Google Fonts stylesheet), or inlined as data: URIs." Confirmar visualmente na primeira publicação.
+- [x] Texto da licença OFL de cada família junto das fontes (`data/fontes/OFL-*.txt`, conferido em METADATA.pb)
 
 ## Fora do escopo / notas
 - Sem latin-ext: caractere fora de Latin-1 cai na fonte de reserva da pilha.

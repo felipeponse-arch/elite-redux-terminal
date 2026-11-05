@@ -21,6 +21,15 @@ test("artifact_final.html tem @font-face em base64 das 4 famílias", () => {
   assert.ok(!/__FONTE_[A-Z0-9_]+_DATAURI__/.test(html), "placeholder de fonte sobrou no arquivo");
 });
 
+test("os pesos declarados de cada família continuam no CSS", () => {
+  const css = ler("src/css/fontes.css");
+  const esperado = [["Bricolage Grotesque", "500 800"], ["Figtree", "400 700"], ["IBM Plex Mono", "400"], ["IBM Plex Mono", "500"], ["IBM Plex Mono", "600"], ["Potta One", "400"]];
+  for (const [familia, peso] of esperado) {
+    const re = new RegExp(String.raw`font-family:s*"${familia}";[^}]*font-weight:s*${peso}s*;`);
+    assert.match(css, re, `falta o peso ${peso} de ${familia}`);
+  }
+});
+
 test("o template não cola base64 (fica legível)", () => {
   assert.ok(!ler("artifact_template.html").includes("base64,"));
 });
