@@ -1,0 +1,26 @@
+// Fontes embutidas (05/11/2026): o app não pode depender do Google Fonts.
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const raiz = new URL("../../", import.meta.url);
+const ler = (p) => readFileSync(new URL(p, raiz), "utf8");
+
+test("artifact_final.html não referencia o Google Fonts", () => {
+  const html = ler("artifact_final.html");
+  assert.ok(!html.includes("fonts.googleapis.com"));
+  assert.ok(!html.includes("fonts.gstatic.com"));
+});
+
+test("artifact_final.html tem @font-face em base64 das 4 famílias", () => {
+  const html = ler("artifact_final.html");
+  for (const familia of ["Bricolage Grotesque", "Figtree", "IBM Plex Mono", "Potta One"]) {
+    const re = new RegExp(String.raw`@font-face\s*\{[^}]*font-family:\s*"${familia}"[^}]*url\(data:font/woff2;base64,[A-Za-z0-9+/=]{1000,}\)`);
+    assert.match(html, re, `falta @font-face embutido de ${familia}`);
+  }
+  assert.ok(!/__FONTE_[A-Z0-9_]+_DATAURI__/.test(html), "placeholder de fonte sobrou no arquivo");
+});
+
+test("o template não cola base64 (fica legível)", () => {
+  assert.ok(!ler("artifact_template.html").includes("base64,"));
+});
