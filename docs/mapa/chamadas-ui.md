@@ -57,7 +57,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - buildSynergyHtml:42 - chama: sinergiasDaEspecie (duelo.js:1320) | chamado por: buildEntryHtml (editor_build.js:182), strategySetsHtml (editor_build.js:432), renderTeam (time.js:8)
 - conditionMoveSynergyNoteHtml:70 - chama: buildNoteHtml (editor_build.js:155)
 - evoConditionText:88 - chama: EVOKINDS (dados_base.js:13), EVO_LEVEL_FEMALE (dados_base.js:32), EVO_LEVEL_MALE (dados_base.js:31), EVO_MEGA_KINDS (dados_base.js:34), EVO_PRIMAL (dados_base.js:33)
-- fichaCabecalhoHtml:504 - chama: descricaoDaEspecie (dados_base.js:187), compraDeInicialTexto (mono_run.js:47), speciesTypeNames (tipos.js:254), state (nucleo.js:8)
+- fichaCabecalhoHtml:504 - chama: avisoSemSpriteHtml (dados_base.js:196), descricaoDaEspecie (dados_base.js:187), compraDeInicialTexto (mono_run.js:47), speciesTypeNames (tipos.js:254), state (nucleo.js:8)
 - fichaConhecerHtml:558 - chama: uniqueIds (dados_base.js:122), sinergiasDaEspecie (duelo.js:1320), bst (dex_lista.js:152)
 - fichaEfetividadeHtml:423 - chama: perfilDefensivoDaEspecie (tipos.js:179)
 - fichaEvolucaoHtml:446 - chama: getSpeciesByX (dados_base.js:78)
@@ -81,7 +81,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - bst:152 - chamado por: fichaConhecerHtml (dex_ficha.js:558), compareResultHtml (ficha_extras.js:22)
 - flashToast:473 - chamado por: initBosses (aba_chefoes.js:33), montarTimeContraEsteChefao (aba_chefoes.js:308), applyRecommendedTeam (arquetipo.js:207), generateCompleteTeam (arquetipo.js:292), generateTeamForArchetype (arquetipo.js:153), +4
 - getFiltered:171 - chama: SPECIES (dados_base.js:52), rankDe (rank_da_run.js:29), speciesTypeNames (tipos.js:254), state (nucleo.js:8)
-- linhaDaListaHtml:212 - chama: speciesTypeNames (tipos.js:254), rankBadgeHtml (dex_ficha.js:169), state (nucleo.js:8)
+- linhaDaListaHtml:212 - chama: avisoSemSpriteHtml (dados_base.js:196), speciesTypeNames (tipos.js:254), rankBadgeHtml (dex_ficha.js:169), state (nucleo.js:8)
 - listaAtual:210 - chamado por: fichaNavHtml (dex_ficha.js:435)
 - openConfirmModal:403 - chamado por: excluirTimeSalvo (time.js:279)
 - openSwapModal:328 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8)

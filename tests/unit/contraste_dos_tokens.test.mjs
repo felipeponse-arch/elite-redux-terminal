@@ -29,7 +29,7 @@ const razao = (a, b) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lu
 const fundos = ["--bg", "--surface", "--surface-2", "--surface-3"];
 const textos = ["--text", "--text-dim", "--badge-text-dim", "--badge-accent", "--badge-accent2", "--badge-resist", "--aviso",
   "--sem-weak", "--sem-resist", "--sem-immune", "--cat-aqua", "--cat-magma", "--cat-frontier", "--cat-elite", "--cat-super"];
-// [texto, fundo, piso, nome]
+// [texto, fundo, piso, nome]  (--text-dim sobre os 4 fundos também cobre o aviso .sem-sprite da ficha e da lista)
 const pares = [];
 for (const t of textos) for (const f of fundos) pares.push([t, f, 4.5, "texto"]);
 for (const f of ["--accent", "--accent-strong", "--badge-accent2"]) pares.push(["--accent-ink", f, 4.5, "botão/chip/banner"]);

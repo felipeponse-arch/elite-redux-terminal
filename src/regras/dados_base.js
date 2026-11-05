@@ -188,3 +188,11 @@
     var d = sp && sp.d ? String(sp.d) : "";
     return DESCRICAO_DE_TESTE_DO_JOGO.test(d) ? "" : d;
   }
+
+  // Espécie sem sprite oficial (usa o da forma base): lista vem de data/sprites_provisorios.json via sprite_index.json.
+  function semSpriteOficial(x, indice) {
+    return !!(indice && indice.provisorio && indice.provisorio.indexOf(Number(x)) !== -1);
+  }
+  function avisoSemSpriteHtml(x, indice) {
+    return semSpriteOficial(x, indice) ? '<span class="sem-sprite" title="Sem sprite oficial: usa o sprite da forma base">sem sprite oficial</span>' : "";
+  }

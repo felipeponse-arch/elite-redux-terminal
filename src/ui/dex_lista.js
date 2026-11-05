@@ -222,7 +222,7 @@
     return '<li class="species-row' + sel + '" data-x="' + sp.x + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
       '<span class="dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</span>' +
       spriteImgHtml(sp.x, sp.n, 28) +
-      '<span class="sname">' + escapeHtml(sp.n) + '</span>' +
+      '<span class="sname">' + escapeHtml(sp.n) + '</span>' + avisoSemSpriteHtml(sp.x, SPRITE_INDEX) +
       rankBadgeHtml(sp.sname) +
       '<span class="pips">' + pips + '</span>' +
       '<button class="row-add-btn' + (!inTeam && teamFull ? ' is-swap' : '') + '" data-add="' + sp.x + '" type="button" title="' + addTitle + '" aria-label="' + addTitle + '"' +

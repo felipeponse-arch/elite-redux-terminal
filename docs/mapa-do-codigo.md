@@ -20,7 +20,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
   confrontoDamagingMoves:29, confrontoMoveType:32, foeAbilityIds:36, foeFromBossMember:49, ofensaContra:59, ameacaDe:91, velocidadeBase:114, confrontoDuelo:126, confrontoTime:146, coberturaSugerida:196, confrontoDuelosDe:243, valorDoTime:249, melhoresTrocas:265, cuidadosDoChefao:302, aberturaEmDupla:319
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
-  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:187
+  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:187, semSpriteOficial:193, avisoSemSpriteHtml:196
 - **duelo.js** - Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
   nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:85, acertosDoGolpeDuelo:86, golpeDeRecargaDuelo:93, golpeUtilNoDuelo:107, categoriaNoDuelo:119, temContatoDuelo:125, golpesDeRecargaAte:128, golpesDeDueloAte:135, golpesDeStatusAte:141, tipoDoTextoDuelo:162, fraseFixaDuelo:167, categoriasDoTextoDuelo:184, categoriasDoGolpeDuelo:187, modoHellDuelo:212, statusDoTrechoDuelo:271, presencaDoStatus:278, todosOsStatusDuelo:284, lerStatusDaFraseDuelo:289, chanceDoEstagioCrit:339, lerCriticoDaFraseDuelo:340, lerCondicaoDaFraseDuelo:366, estagioDoTexto:395, multDoEstagio:396, lerEstagioDaFraseDuelo:398, poderDoGolpeDuelo:458, lerExtrasDaFraseDuelo:460, lerCuraDaFraseDuelo:514, filtroDoTextoDuelo:547 (+157)
 - **escolha_ia_candidatos.js** - A IA ESCOLHE ENTRE os candidatos do pipeline de build (passo 4 de docs/pipeline_de_build.md; ticket 03 de
@@ -188,7 +188,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **rank_fatia.mjs** - Rank com fatia fixa de peso (ticket todas-as-lutas/02, decisão do usuário em 16/10/2026): chefões 60% e lutas comuns 40%.
   notasComFatia:9, comunsMaisPerigosas:36
 - **remapear_sprite_index.mjs** - Sprites pelo NOME da espécie (15/10/2026). O atlas (data/sprite_atlas.png) foi montado com o índice pelo número da espécie (x) do
-  indicePorNumero:8
+  indicePorNumero:10
 - **sabotagem_incremental.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026): no master a sabotagem roda só as
   git:17, caminhoDoVerde:22, lerVerde:28, gravarVerde:40, modoDaSabotagemNoMaster:55, selecionarMutacoes:68
 - **servidor_estatico.mjs** - Servidor estático dos testes (fase 6 da refatoração, 2026-09-24): serve a raiz
@@ -421,6 +421,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sono_do_alvo_no_duelo.test.mjs** - TK-43: alvo dormindo no motor (valor esperado). Fonte: er-repo battle_scripts_1.s:3564-3573 (Dream Eater), :4909-4911 (Nightmare),
 - **sono_e_paralisia_champions.test.mjs** - Ticket versao-nova/08 (15/10/2026; dados-2654/07): o código novo liga o sono e a paralisia estilo Pokémon Champions.
 - **sprite_index.test.mjs** - Sprite pelo nome da espécie (15/10/2026): a versão nova do jogo deslocou os números e o Beedrill Mega mostrava o Blastoise Mega.
+- **sprites_provisorios.test.mjs** - Ticket design-2026-11-04/03 (decisão do usuário, 05/11/2026): espécie sem sprite oficial usa o sprite da base e mostra aviso.
 - **status_no_duelo.test.mjs** - Status por chance no duelo (2026-09-29, grupo 1 do estudo de habilidades):
 - **sugestao_do_motor.test.mjs** - "Ficar com este time" grava as builds como "Sugestão do app" (ticket time-pelo-motor/01, F5, 21/10/2026).
 - **sync_canonico.test.mjs** - TK-02 (S12-2, S12-4, S12-5): comparação canônica no sync, campo v usado, team/box sem duplicata.
