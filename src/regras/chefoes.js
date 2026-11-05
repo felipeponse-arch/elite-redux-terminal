@@ -509,7 +509,11 @@
   }
   // Ids dos buffs do ginásio que o jogador ainda NÃO tirou (vão pro simulador do
   // chefão e pro prompt da IA). Vazio pra quem não é líder com buffs.
+  // TK-48 (DECISÃO DO USUÁRIO 05/11): skill de treinador SÓ do Hell e SÓ do Mauville Game Corner (TRAINER_SINNOH_MEGAS_MAUVILLE_GAME_CORNER,
+  // SKILL_ON_ENTRY_HIGHEST_ATTACK_UP_1 em er-config/TrainerBattleSkillList.textproto:1295). Entra como um "buff" a mais na lista de ids.
+  var TREINADOR_MAIS_UM_MELHOR_ATAQUE = "Sinnoh Megas Mauville Game Corner";
   function buffsAtivosDoChefao(leaderName) {
+    if (leaderName === TREINADOR_MAIS_UM_MELHOR_ATAQUE && typeof state !== "undefined" && state && state.settings && state.settings.difficulty === "hell") return ["mauville_hell_maior_ataque_1"];
     if (ehRevancheDeLider(leaderName)) return [];
     var r = gymSkillsSummaryFor(gymLeaderBaseName(leaderName));
     if (!r || r.gateOnly) return [];

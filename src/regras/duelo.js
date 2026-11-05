@@ -4229,7 +4229,9 @@
     tateliza_luckychant: { abreSemCritico: true },
     tateliza_sleep: { statusNoFim: ["sono", 1] },
     tateliza_wideguard: { bloqueiaArea: true },
-    tateliza_noprotect: { semProtectMeu: true }
+    tateliza_noprotect: { semProtectMeu: true },
+    // TK-48 (Hell, só Mauville Game Corner): +1 no maior entre Atq e Atq. Esp. brutos na entrada (mesma regra do Sharply ups highest attacking stat).
+    mauville_hell_maior_ataque_1: { maiorAtaqueNaEntrada: 1 }
   };
   var INDICE_DO_ATRIBUTO_DUELO = { atk: 1, def: 2, spa: 3, spd: 4, spe: 5 };
   function buffsConhecidosDuelo(ids) {
@@ -4251,6 +4253,7 @@
         if (abre && b.abreBloqueia) efCopia().bloqueiaUmGolpe = true;
         if (abre && b.abreTela) { efCopia(); if (b.abreTela.F) ef.telaReflect = Math.max(ef.telaReflect || 0, b.abreTela.F); if (b.abreTela.E) ef.telaLuz = Math.max(ef.telaLuz || 0, b.abreTela.E); }
         if (abre && b.abreSemCritico) efCopia().imuneCritico = true;
+        if (b.maiorAtaqueNaEntrada) efCopia().maiorAtaqueNaEntrada = Math.max(ef.maiorAtaqueNaEntrada || 0, b.maiorAtaqueNaEntrada);
       });
       var mudouStat = mult.some(function (m) { return m !== 1; });
       if (!ef && !mudouStat) return f;

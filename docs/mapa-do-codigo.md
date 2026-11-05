@@ -14,7 +14,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **campo.js** - TK-16 (campo, fase 1): FONTE ÚNICA do vocabulário de clima, terreno, telas e hazards, e das durações de campo.
   rotuloDoArquetipoDeCampo:46, hazardCheioNoLado:57, poeHazardNoLado:58
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
-  gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:426, comportamentoDaIADoChefao:459, habilidadesExtrasDoHell:476, regrasDoHell:477, ehRevancheDeLider:484, buffsParaMostrarDoChefao:503, buffsAtivosDoChefao:512, computeSpeedTiers:525, planoDaLuta:545, resumoDaLuta:558, quemRespondeNoPlano:574 (+2)
+  gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:426, comportamentoDaIADoChefao:459, habilidadesExtrasDoHell:476, regrasDoHell:477, ehRevancheDeLider:484, buffsParaMostrarDoChefao:503, buffsAtivosDoChefao:515, computeSpeedTiers:529, planoDaLuta:549, resumoDaLuta:562, quemRespondeNoPlano:578 (+2)
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
   descricaoDeHabilidade:77, descricaoDeHabilidadePorId:88, expandirTextoDeHabilidade:99, habilidadeArma:113, nomesDeHabilidades:116, podeTerStatus:128, garantiaDoTime:141, garantiaDaCondicao:155, comoGarantir:171, condicaoDaBuild:190, precisaDeSetter:213, blocoCondicoesIA:238
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
@@ -360,6 +360,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **mapa_do_codigo.test.mjs** - Gerador do mapa do código: determinístico e acha função conhecida com a linha certa.
 - **marca_de_dado.test.mjs** - Gate de processo (TK-30): testes que dependem de dado que muda com a versão/rank/lutas levam marca,
 - **marcas_do_rank.test.mjs** - Marcas sem nota do rank v2 (ponto 6, 2026-10-02): "Precisa de setter"
+- **mauville_mais_um_melhor_ataque.test.mjs** - TK-48 (DECISÃO DO USUÁRIO 05/11): o treinador do Mauville Game Corner (TRAINER_SINNOH_MEGAS_MAUVILLE_GAME_CORNER) ganha +1 estágio no
 - **mega_forms_do_jogo.test.mjs** - TK-22: mega_forms.json segue o jogo (SpeciesList/MegaStonesList do er-config 486a964), inclusive pedras de 2 alvos.
 - **mega_gate.test.mjs** - Trava de Mega Evolução nas SUGESTÕES (achado do usuário, print de 2026-09-24:
 - **modo_motor_sem_ia.test.mjs** - Modo Motor nunca chama a IA (ticket time-pelo-motor/01, Fase F3, 21/10/2026). Duas provas independentes:

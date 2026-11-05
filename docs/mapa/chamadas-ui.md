@@ -15,13 +15,13 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - hellDoChefaoHtml:199 - chama: regrasDoHell (chefoes.js:477)
 - iaDoChefaoHtml:190 - chama: comportamentoDaIADoChefao (chefoes.js:459)
 - initBosses:33 - chama: showdownSet (builds.js:58), getSpeciesByX (dados_base.js:78), flashToast (dex_lista.js:473), copyText (editor_build.js:11), acao (nucleo.js:243), +3
-- montarTimeContraEsteChefao:308 - chama: comecarLoteDeBuilds (builds.js:118), computeTeamGenerationValidation (builds.js:240), encerrarLoteDeBuilds (builds.js:120), buffsAtivosDoChefao (chefoes.js:512), buffsParaMostrarDoChefao (chefoes.js:503), +19
+- montarTimeContraEsteChefao:308 - chama: comecarLoteDeBuilds (builds.js:118), computeTeamGenerationValidation (builds.js:240), encerrarLoteDeBuilds (builds.js:120), buffsAtivosDoChefao (chefoes.js:515), buffsParaMostrarDoChefao (chefoes.js:503), +19
 - myBuildLevel:19 - chamado por: myBuildEditorHtml (editor_build.js:223), updateMyBuildStatus (editor_build.js:362), wireMyBuildEditor (editor_build.js:465)
 - myBuildLevelIsCustom:31 - chamado por: myBuildEditorHtml (editor_build.js:223), wireMyBuildEditor (editor_build.js:465), initProgress (progresso.js:105), zerarRun (time.js:362)
 - renderBossDetail:556 - chama: classeDoCabecalhoDoChefao (chefoes.js:57), nivelDeCalculo (level_cap.js:65), monotypeAtivo (mono_run.js:72), quemResolveCardHtml (quem_resolve.js:83), quemResolveRestaurar (quem_resolve.js:103), +1
 - renderGymSkillsCardHtml:423 - chama: ehRevancheDeLider (chefoes.js:484), gymLeaderBaseName (chefoes.js:55), gymSkillsSummaryFor (chefoes.js:379)
 - selectBoss:404 - chama: varianteDoChefao (chefoes.js:370)
-- simularSemTravarATela:295 - chama: montarTimeContraChefaoEmPassos (duelo.js:4764), totalDePassosContraChefao (duelo.js:4763)
+- simularSemTravarATela:295 - chama: montarTimeContraChefaoEmPassos (duelo.js:4767), totalDePassosContraChefao (duelo.js:4766)
 
 ## ui/arquetipo.js
 - applyRecommendedTeam:207 - chama: getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), formFamilyOf (formas_mega.js:65), entradasDoJogador (liberado_na_run.js:34), flashToast (dex_lista.js:473), +4 | chamado por: montarTimeContraEsteChefao (aba_chefoes.js:308), modoMotorFicarComVariante (modo_motor.js:119)
@@ -34,14 +34,14 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - generatedTeamCardHtml:417 - chama: computeTeamGenerationValidation (builds.js:240)
 - generatedTeamResult:35 - chamado por: guardarTimeAnterior (aba_chefoes.js:266), montarTimeContraEsteChefao (aba_chefoes.js:308), zerarRun (time.js:362)
 - monoRunCardHtml:497 - chama: entradasDoJogador (liberado_na_run.js:34), MONO_MARCAS (mono_run.js:11), avisoProximoLider (mono_run.js:158), fraquezasDoTipo (mono_run.js:80), monoDisponibilidade (mono_run.js:176), +2
-- planoContraChefaoHtml:368 - chama: faixaDeHpDaLuta (chefoes.js:589), NOME_DA_CONDICAO (condicoes_habilidade.js:42)
+- planoContraChefaoHtml:368 - chama: faixaDeHpDaLuta (chefoes.js:593), NOME_DA_CONDICAO (condicoes_habilidade.js:42)
 - renderMonoRun:554 - chama: state (nucleo.js:8) | chamado por: renderTeam (time.js:8)
 - renderTeamAnalysis:580 - chama: computeSharedRisks (chefoes.js:121), USABLE_TYPES (dados_base.js:132), abilityTypeMod (tipos.js:173) | chamado por: renderTeam (time.js:8)
 - renderTeamStrategy:463 - chama: modoDeMontagem (modo_motor.js:9), modoMotorAquecer (modo_motor.js:40), modoMotorResultadoHtml (modo_motor.js:233) | chamado por: modoMotorFicarComVariante (modo_motor.js:119), modoMotorMontar (modo_motor.js:68), renderTeam (time.js:8)
 - resumoDoArquetipo:74 - chama: state (nucleo.js:8)
 - teamKeyFor:14 - chamado por: guardarTimeAnterior (aba_chefoes.js:266), montarTimeContraEsteChefao (aba_chefoes.js:308)
 - teamRecommendation:30 - chamado por: montarTimeContraEsteChefao (aba_chefoes.js:308), modoMotorFicarComVariante (modo_motor.js:119), zerarRun (time.js:362)
-- vereditoDaLutaHtml:355 - chama: vereditoDaLuta (chefoes.js:583)
+- vereditoDaLutaHtml:355 - chama: vereditoDaLuta (chefoes.js:587)
 
 ## ui/auto_evolucao.js
 - autoEvolveRoster:20 - chama: devolveChainByX (evolucao.js:206), evoluirElencoSemDuplicar (evolucao.js:40), evolveChainByX (evolucao.js:66), logAutoAction (evolucao.js:229), podarAutoEvolved (evolucao.js:61), +3 | chamado por: loadSave (nucleo.js:337), initProgress (progresso.js:105)
@@ -167,7 +167,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - setActiveBuildIndex:104 - chama: getBuildList (evolucao.js:14)
 - setOrReplaceActiveBuild:94 - chama: trocarBuildAtivaNaLista (lista_de_builds.js:11) | chamado por: initBosses (aba_chefoes.js:33), aplicarCuradaNoTimeNovo (ia.js:153), processarRevisoes (revisao_automatica.js:72)
 - showStorageBanner:166 - chamado por: remotoComSomaErrada (sync.js:88)
-- state:8 - chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:202), itensEmUsoComQuem (builds.js:153), teamItemsInUse (builds.js:90), teamMovesInUse (builds.js:123), +105
+- state:8 - chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:202), itensEmUsoComQuem (builds.js:153), teamItemsInUse (builds.js:90), teamMovesInUse (builds.js:123), +106
 - telasDeBuild:237 - chamado por: aplicarCuradaNoTimeNovo (ia.js:153), gerarPlanoParaBuild (ia.js:342), gravarBuildValidadaDaIa (ia.js:141), processarRevisoes (revisao_automatica.js:72)
 
 ## ui/pipeline_tela.js
@@ -240,5 +240,5 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/tipos.js
 - computeRoleCompendium:91 - chama: ROLE_LABEL_PT (dados_base.js:181), SPECIES (dados_base.js:52), rankDe (rank_da_run.js:29), speciesTypeNames (tipos.js:254), state (nucleo.js:8)
 - renderRoleCompendium:113 - chama: rankBadgeHtml (dex_ficha.js:169)
-- renderSpeedTiers:35 - chama: SPEEDTIER_NATURE (chefoes.js:523), computeSpeedTiers (chefoes.js:525), speciesTypeNames (tipos.js:254), state (nucleo.js:8)
+- renderSpeedTiers:35 - chama: SPEEDTIER_NATURE (chefoes.js:527), computeSpeedTiers (chefoes.js:529), speciesTypeNames (tipos.js:254), state (nucleo.js:8)
 - renderTypeMatrix:9 - chama: USABLE_TYPES (dados_base.js:132), typeMultiplier (tipos.js:244)
