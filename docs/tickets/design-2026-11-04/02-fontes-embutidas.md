@@ -1,6 +1,6 @@
 # 02 - Fontes embutidas no app
 
-Status: resolvido (aguarda portão pesado/junção)
+Status: resolvido
 
 ## Decisão do usuário (05/11/2026)
 Embutir as fontes para o app não depender do Google Fonts e o teste visual ficar determinístico (o visual falhava 19/20
@@ -26,3 +26,13 @@ mesmo contra imagens regravadas minutos antes).
 ## Fora do escopo / notas
 - Sem latin-ext: caractere fora de Latin-1 cai na fonte de reserva da pilha.
 - Teste e2e de desempenho que atrasava o Google virou "nenhuma requisição externa + fontes disponíveis".
+
+## Imagens-base regravadas (19 de 20)
+As diferenças vêm de três causas somadas: (a) design do TK-60; (b) dado novo (data do cabeçalho 03 para 04/11 e texto
+de habilidade novo do TK-46); (c) fontes embutidas. O usuário VIU os diffs (relatorios/2655b/diff_visual_tk60_ab e
+diff_visual_juncao) e autorizou regravar depois de provado o determinismo (duas rodadas seguidas iguais).
+
+## Proteções restauradas/novas (05/11, decisão do usuário)
+- FCP < 1.500 ms de volta em tests/e2e/desempenho.spec.mjs (era o limite do teste antigo com fonte atrasada), agora sem
+  fonte externa: mediana de 3 cargas; limite não afrouxado.
+- Teto de 10 MB para artifact_final.html no mesmo spec (hoje ~9,08 MB; o servidor aceita até 16 MiB).

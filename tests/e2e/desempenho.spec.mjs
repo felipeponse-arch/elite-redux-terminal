@@ -9,7 +9,7 @@ import { test, expect } from "./apoio.mjs";
 
 test("as fontes são embutidas: nenhuma requisição ao Google e todas disponíveis", async ({ page }) => {
   const externas = [];
-  page.on("request", (r) => { if (/fonts.(googleapis|gstatic).com/.test(r.url())) externas.push(r.url()); });
+  page.on("request", (r) => { if (/fonts\.(googleapis|gstatic)\.com/.test(r.url())) externas.push(r.url()); });
   await page.goto("/artifact_final.html", { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => window.__fontesProntas === true, null, { timeout: 10_000 });
   expect(externas).toEqual([]);
@@ -17,6 +17,31 @@ test("as fontes são embutidas: nenhuma requisição ao Google e todas disponív
   for (const f of ['15px "Figtree"', '15px "Bricolage Grotesque"', '13px "IBM Plex Mono"']) {
     expect(await page.evaluate((x) => document.fonts.check(x), f), f).toBe(true);
   }
+});
+
+// Primeira pintura (FCP) abaixo de 1.500 ms, agora sem fonte externa: mediana de 3 cargas (a máquina oscila).
+// Limite igual ao do teste antigo (fonte atrasada 3 s, metade do atraso); não afrouxar.
+test("a primeira pintura sai em menos de 1.500 ms (mediana de 3 cargas)", async ({ page }) => {
+  const medidas = [];
+  for (let i = 0; i < 3; i++) {
+    await page.goto("/artifact_final.html", { waitUntil: "domcontentloaded" });
+    medidas.push(await page.evaluate(() => new Promise((ok) => {
+      const achar = () => performance.getEntriesByType("paint").find((e) => e.name === "first-contentful-paint");
+      const e = achar();
+      if (e) return ok(e.startTime);
+      new PerformanceObserver(() => { const x = achar(); if (x) ok(x.startTime); }).observe({ type: "paint", buffered: true });
+    })));
+  }
+  const mediana = [...medidas].sort((a, b) => a - b)[1];
+  console.log("FCP (ms):", medidas.map(Math.round).join(", "), "mediana", Math.round(mediana));
+  expect(mediana, `FCP em ms: ${medidas.map(Math.round)}`).toBeLessThan(1500);
+});
+
+// Teto de tamanho: o servidor de artifacts aceita até 16 MiB; o projeto trava em 10 MB.
+test("artifact_final.html não passa de 10 MB", async () => {
+  const { statSync } = await import("node:fs");
+  const bytes = statSync(new URL("../../artifact_final.html", import.meta.url)).size;
+  expect(bytes, `artifact_final.html tem ${(bytes / 1048576).toFixed(2)} MB`).toBeLessThan(10 * 1048576);
 });
 
 // As duas causas do deslocamento, testadas direto (sem depender de o script
