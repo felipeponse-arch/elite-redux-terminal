@@ -315,11 +315,11 @@
     }
     if (!r) return "";
     // Lote 2 do redesenho (04/10): o rank geral é o destaque (selo maior); as outras notas vão numa grade de 2 colunas (rótulo | selo).
-    var geral = '<span class="rank-info-geral"><span class="rank-info-label">Rank geral</span>' + rankBadgeHtml(sp.sname) + '</span>';
+    var geral = '<span class="rank-info-geral"><span class="rank-info-label">Geral</span>' + rankBadgeHtml(sp.sname) + '</span>';
     var items = "";
     if (r.stageTier !== null && r.stageTier !== undefined) {
       var label = STAGE_LABEL[r.stage] || (r.stage + "º estágio");
-      items += '<span class="rank-info-item"><span class="rank-info-label">Rank no ' + label + '</span>' + rankStageBadgeHtml(sp.sname) + '</span>';
+      items += '<span class="rank-info-item"><span class="rank-info-label">Estágio (' + label.replace(" estágio","") + ')</span>' + rankStageBadgeHtml(sp.sname) + '</span>';
     }
     // Rank v2: os dois eixos lado a lado e o rank por tipo SEMPRE (decisão do usuário, 02/10).
     if (r.potencial && r.viabilidade) {
@@ -345,7 +345,7 @@
     var marcas = marcasDoRankHtml(sp, r) + roleTagsHtml(sp.sname);
     return '<div class="rank-info-line">' +
       '<div class="rank-info-notas"><div class="rank-info-topo"><span class="rank-info-titulo">Notas</span>' + geral + legenda + '</div>' +
-        (items ? '<div class="rank-info-grade">' + items + '</div>' : "") + '</div>' +
+        (items ? '<div class="rank-info-grade">' + items + '</div><p class="rank-info-legenda">Geral: força contra os chefões da run. Estágio: nota só entre os Pokémon do mesmo estágio evolutivo.</p>' : "") + '</div>' +
       (marcas ? '<div class="rank-info-grupo rank-info-marcas"><span class="rank-info-titulo" title="' +
         escapeHtml("Avisos que não mexem na nota.") + '">Marcas</span>' + marcas + '</div>' : "") +
       '</div>';

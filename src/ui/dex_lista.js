@@ -211,7 +211,7 @@
   var listaRenderizadas = 0;
   function linhaDaListaHtml(sp, idx, teamFull, hasSelectedRow) {
     var names = speciesTypeNames(sp);
-    var pips = names.map(typePip).join("");
+    var pips = names.map(typeSigla).join("");
     var isSel = state.selected === sp.x;
     var sel = isSel ? " selected" : "";
     var isTabStop = isSel || (!hasSelectedRow && idx === 0);

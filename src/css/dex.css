@@ -79,6 +79,9 @@
 .no-results { padding: 20px 16px; color: var(--text-dim); font-size: var(--fs-texto); }
 
 .type-pip { width: 9px; height: 9px; border-radius: var(--radius-sm); flex: none; }
+/* Sigla de 3 letras no lugar do ponto (WCAG 1.4.1). */
+.type-pip.type-pip-sigla { width: auto; height: auto; padding: 1px 4px; font-size: var(--fs-micro); font-weight: 800; line-height: 1.2; letter-spacing: .02em; font-family: "IBM Plex Mono", monospace; }
+.rank-legenda { margin: 0; padding: 2px 14px 4px; font-size: var(--fs-micro); color: var(--text-dim); }
 .type-pill {
   display: inline-flex;
   align-items: center;

@@ -280,6 +280,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **config_v10.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **confronto.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **contato_tirado_no_duelo.test.mjs** - Ticket mecanica-2026-10-22/02: Long Reach e Punching Glove (num soco) tiram o contato INTEIRO (IsMoveMakingContact, battle_util.c:6579-65...
+- **contraste_dos_tokens.test.mjs** - Ticket design-2026-11-04/01 (TK-60): razões WCAG dos pares principais de tokens nos 3 temas (claro, escuro, alto contraste).
+- **contraste_sigla_dos_tipos.test.mjs** - Ticket design-2026-11-04/01 (TK-60): a sigla de 3 letras sobre a cor de cada tipo exige contraste >= 4,5:1 (WCAG AA).
 - **critico_no_duelo.test.mjs** - Crítico no duelo (2026-09-29): antes o motor não tinha crítico nenhum - Super
 - **cura_recuo_no_duelo.test.mjs** - Cura, recuo e dano por contato no duelo (2026-09-29): recuo e dreno dos golpes
 - **dado_habilidade_por_nome.test.mjs** - Depende de dado: nomes de habilidade de chefões/lutas (muda quando a config renomeia).

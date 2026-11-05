@@ -129,3 +129,16 @@ fica como evolução futura. É a mudança maior e não foi pedida agora.
 **Como conferir.** `npm run check` imprime "checar_fronteira: OK". Uma regra com
 `document.` ou com chamada a uma função da UI quebra o check. Isso foi testado nos dois
 casos em 02/10.
+
+## UX fase 1 "conservador" (ticket 60, 04/11/2026)
+Só tokens, CSS e texto; IDs, data-tab, classes e `<details>` preservados.
+- Banner da run: fundo `--badge-accent2` (era `--accent-2`, 3,82:1 no claro). Razões: #6e5000 sobre #ffffff = 7,47:1; escuro #f3c941 sobre #1a0509 = 12,38:1; alto contraste #00e5ff sobre #000000 = 13,65:1; no celular vira chip de uma linha (detalhe fica no DOM, só visualmente oculto).
+- Tipos na lista: sigla de 3 letras (`typeSigla`, classe `type-pip type-pip-sigla`, ainda aria-hidden por causa do smoke 07). `typePip` (ponto) segue nos golpes do pipeline.
+- Rank: rótulos "Geral" e "Estágio (3º)" + legenda visível (sem depender de hover/title) na ficha e uma linha de legenda acima da lista da Dex.
+- Fonte: `--fs-micro` (10 px) e `--fs-legenda` (11 px) seguem no PC e sobem a 12 px só em `@media (pointer: coarse)` (decisão do usuário 05/11; alcance global recusado).
+- Alvos: `@media (pointer: coarse)` em responsivo.css leva botão/summary/select/linha a 44 px; `.row-add-btn` usa `--alvo-min`.
+- Texto neutro (sem "eu") nos estados vazios/ajuda.
+- Nota: o "2,41:1" de `.boss-cat-tag` era erro de medida (o script não lia `color(srgb ...)` do color-mix); real ~5,4:1. `_medidas60.mjs` já trata.
+Fase 2 (aberta): ficha com abas/índice, cartão "Build sugerida" no topo, Dex vazia com destaque da Etapa, Chefões agrupados por Etapa, Comparar ao lado do "+", rank com foco por teclado nas notas da lista, sigla de tipo também com nome para leitor de tela.
+- Sigla do tipo: tinta por `tintaDoTipo`; pior dos 18 tipos = Normal 4,86:1 (medido; vigiado por `tests/unit/contraste_sigla_dos_tipos.test.mjs`). Ticket: `docs/tickets/design-2026-11-04/01-design-fase-1.md`.
+- Varredura de contraste dos tokens (05/11): `tests/unit/contraste_dos_tokens.test.mjs` cobre texto (4,5:1) e foco (3:1) nos 3 temas. Único ajuste: fundo do `.sync-banner` volta a `--badge-accent2` (antes `--accent-2`, branco sobre #a67c00 = 3,82:1; depois #6e5000 = 7,47:1; escuro 12,38:1; alto contraste 13,65:1). `--border` (1,77 a 2,84:1) FICA: decisão do usuário (05/11), exceção decorativa (cartões); texto e controles passam e o alto contraste passa.

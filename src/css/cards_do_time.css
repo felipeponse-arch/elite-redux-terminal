@@ -23,8 +23,8 @@
   background: none;
   border: 1px solid var(--border);
   color: var(--text-dim);
-  width: 24px;
-  height: 24px;
+  width: var(--alvo-min);
+  height: var(--alvo-min);
   border-radius: var(--radius-sm);
   font-size: var(--fs-destaque);
   line-height: 1;
@@ -82,7 +82,7 @@
 .sync-banner {
   position: fixed; left: 0; right: 0; top: 0; z-index: 200;
   display: flex; align-items: center; justify-content: center; gap: 12px;
-  background: var(--accent-2); color: var(--accent-ink);
+  background: var(--badge-accent2); color: var(--accent-ink);
   font-size: var(--fs-texto); font-weight: 600; box-shadow: var(--shadow);
   /* Fixo no topo, por cima do entalhe: a borda segura entra no padding (o
      syncBannerOffset mede a altura já com ela). */

@@ -168,6 +168,7 @@
             </select>
           </div>
           <div id="type-filter-panel" class="type-filter-panel hidden"></div>
+          <p class="rank-legenda">Rank: SS (melhor) a D (pior). Detalhes na ficha.</p>
           <ul id="species-list" class="species-list" role="listbox" aria-label="Resultados da busca na Dex"></ul>
         </aside>
         <div id="species-detail" class="species-detail">
@@ -216,7 +217,7 @@
 
         <div class="card" id="saved-teams-card">
           <h3>Times salvos (máx. 3)</h3>
-          <p style="color:var(--text-dim);font-size:var(--fs-texto);margin:0 0 10px;max-width:65ch;">Guarde até 3 composições completas — inclusive as que eu recomendar depois de analisar um chefão — e carregue de volta quando quiser sem remontar tudo na mão.</p>
+          <p style="color:var(--text-dim);font-size:var(--fs-texto);margin:0 0 10px;max-width:65ch;">Guarde até 3 composições completas — inclusive as recomendadas depois de analisar um chefão — e carregue de volta quando quiser sem remontar tudo na mão.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
             <input id="save-team-name" type="text" placeholder="Nome do time (opcional)" aria-label="Nome do time a salvar" class="campo campo-texto" style="flex:1;min-width:180px;">
             <button id="save-team-btn" class="add-team-btn" type="button">Salvar time atual</button>
@@ -235,7 +236,7 @@
       <div class="team-shell">
         <div>
           <h3 class="section-title" style="margin-bottom:6px;">PC Box</h3>
-          <p style="color:var(--text-dim);font-size:var(--fs-texto);margin:0 0 12px;max-width:70ch;">Todo Pokémon que você já capturou, sem limite de 6. Use isso pra guardar o panorama geral: quanto mais completo, melhor eu consigo sugerir trocas quando um treinador específico estiver dando trabalho.</p>
+          <p style="color:var(--text-dim);font-size:var(--fs-texto);margin:0 0 12px;max-width:70ch;">Todo Pokémon que você já capturou, sem limite de 6. Use isso pra guardar o panorama geral: quanto mais completa, melhores as sugestões de troca quando um treinador específico estiver dando trabalho.</p>
           <!-- Redesenho da caixa, Fase 2 do roadmap de estratégia (2026-09-11/12,
                pedido do usuário com print de referência do jogo real): grade
                paginada em caixas numeradas + busca, em vez da lista fluida de
@@ -267,7 +268,7 @@
           <ul id="boss-list" class="species-list" role="listbox" aria-label="Resultados da busca de chefões"></ul>
         </aside>
         <div id="boss-detail" class="species-detail">
-          <div class="empty-state">Perdeu pra algum chefão? Escolha ele na lista — eu monto o time completo dele, e você exporta pra mim junto com seu time e sua caixa pra eu bolar a estratégia de vitória.</div>
+          <div class="empty-state">Perdeu pra algum chefão? Escolha-o na lista: o app monta o time completo dele, e você pode exportar junto com seu time e sua caixa para planejar a estratégia de vitória.</div>
         </div>
       </div>
     </section>
@@ -422,7 +423,7 @@
        conferir uma vez. Some quando o jogador confirma no Progresso; o "x"
        só esconde até a próxima abertura. -->
   <div id="run-setup-banner" class="sync-banner" role="status" hidden>
-    <span>Confira sua run: Dificuldade, Level Cap, último badge e Mega Evolução precisam bater com o seu jogo.</span>
+    <span class="run-chip-texto"><b>Confira sua run</b><span class="run-chip-detalhe">: Dificuldade, Level Cap, último badge e Mega Evolução precisam bater com o seu jogo.</span></span>
     <button id="run-setup-open" type="button">Conferir</button>
     <button id="run-setup-dismiss" type="button" aria-label="Lembrar na próxima abertura">&times;</button>
   </div>
@@ -771,6 +772,12 @@
     var meta = TYPE_META[name] || { hex: "#777777" };
     var color = tintaDoTipo(meta.hex);
     return '<span class="type-pill" style="background:' + meta.hex + ';color:' + color + (small ? ';padding:2px 8px;font-size:var(--fs-micro)' : '') + '">' + escapeHtml(name) + '</span>';
+  }
+
+  // Sigla de 3 letras colorida (WCAG 1.4.1: o tipo não depende só da cor). Mantém .type-pip e aria-hidden (smoke 07).
+  function typeSigla(name) {
+    var meta = TYPE_META[name] || { hex: "#777777" };
+    return '<span class="type-pip type-pip-sigla" style="background:' + meta.hex + ';color:' + tintaDoTipo(meta.hex) + '" title="' + escapeHtml(name) + '" aria-hidden="true">' + escapeHtml(String(name).slice(0, 3).toUpperCase()) + '</span>';
   }
 
   function typePip(name) {
