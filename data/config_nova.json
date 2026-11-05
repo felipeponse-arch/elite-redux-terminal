@@ -1,13 +1,19 @@
 {
  "fonte": "Elite-Redux/er-config AbilityList, SpeciesList e MoveList.textproto",
- "commit": "b58ea4d",
+ "commit": "30f0f5a",
  "renomeadas": [
   [
    "Sun Basking",
    "Basking"
   ]
  ],
- "descricoes": {},
+ "descricoes": {
+  "Speed Force": "Physical moves use 20% of its Speed stat additionally.",
+  "Momentum": "Physical moves use the Speed stat for damage calculation.",
+  "Impulse": "Special moves use the Speed stat for damage.",
+  "Blur": "Uses Speed as defensive stat when hit by physical.",
+  "Elude": "Uses Speed as defensive stat when hit by special."
+ },
  "novas": [],
  "especies": {
   "SPECIES_BUTTERFREE": {
@@ -28,6 +34,10 @@
     116,
     95,
     90
+   ],
+   "t": [
+    "Bug",
+    "Flying"
    ]
   },
   "SPECIES_BEEDRILL": {
@@ -38,6 +48,22 @@
     50,
     80,
     135
+   ]
+  },
+  "SPECIES_NINETALES": {
+   "ab": [
+    "Flaming Soul",
+    "Spectralize",
+    "Set Ablaze"
+   ],
+   "inn": [
+    "Drought",
+    "Magic Guard",
+    "Cursed Body"
+   ],
+   "t": [
+    "Fire",
+    "Fire"
    ]
   },
   "SPECIES_WAILORD": {

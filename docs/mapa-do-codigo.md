@@ -443,6 +443,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **vaga.test.mjs** - Vaga de verificação pesada (scripts/vaga.mjs, melhoria B de 2026-10-13).
 - **validacao_do_time_gerado.test.mjs** - TK-28: a decisão "quais Pokémon do time ainda estão sem build" mora em src/regras (computeTeamGenerationValidation), não na tela.
 - **validar_dado_cru.test.mjs** - Validação do dado cru do NextDex na ingestão (scripts/validar_dado_cru.mjs, lote 2).
+- **velocidade_por_categoria_no_duelo.test.mjs** - Speed Force, Momentum, Impulse, Blur e Elude: a config er-config 30f0f5a (04/11/2026) trocou contato/não-contato por Físico/Especial
 - **veredito_da_luta.test.mjs** - TK-28: a decisão do veredito da luta e do plano contra o chefão mora em src/regras (chefoes.js), não na tela.
 - **veu_do_cabecalho_do_chefao.test.mjs** - TK-33b item 11 (TK-28): o véu atrás do texto do cabeçalho do chefão (Aqua/Magma) tem de garantir contraste AA
 - **vocabulario_da_etapa.test.mjs** - TK-27: texto da UI usa "Etapa" (GLOSSARY.md), não "marco".

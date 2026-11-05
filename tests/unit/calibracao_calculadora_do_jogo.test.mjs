@@ -8,9 +8,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
+import { ninetales2653b } from "./fixture_ninetales_2653b.mjs";
 
 const NIVEL = 55;
-const R = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+const R = ninetales2653b(carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" }));
 const ninetales = () => R.foeDeDuelo(R.BOSSES.find((b) => b.name === "Courtney Meteor Falls").party[0], NIVEL, null);
 const ledian = (golpe, item = "Life Orb") => R.unidadeDaBuild(R.SPECIES.find((s) => s && s.n === "Ledian"),
   { ability: "Aerodynamics", nature: "Jolly", evs: [84, 172, 0, 0, 0, 252], item, moves: [golpe] }, NIVEL, null);

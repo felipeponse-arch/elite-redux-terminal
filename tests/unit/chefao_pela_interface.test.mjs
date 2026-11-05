@@ -191,7 +191,8 @@ test("dupla: Earthquake fere o parceiro (Solid Rock leva), Telepathy protege e F
   // Blissey no lugar do Rhyperior (versao-nova/05): a Friend Guard da versão nova corta 25% (battle_util.c:7664; eram 50% na 2.65beta) e com o Rhyperior a luta
   // dava o mesmo placar com qualquer habilidade. A Blissey (Friend Guard no parceiro Garchomp) ainda muda a luta.
   const parceiro = (hab) => meu("Blissey", ["Seismic Toss"], { hab, evs: EV.tanqueF });
-  const pontos = (hab) => lutaEmDupla([meu("Garchomp", ["Earthquake"]), parceiro(hab)], alvo).pontos;
+  // Garchomp sem EVs (05/11/2026): o Speed Force novo (er-config 30f0f5a; duelo.js:1588, por categoria) o deixava forte demais e Friend Guard empatava com Solid Rock.
+  const pontos = (hab) => lutaEmDupla([meu("Garchomp", ["Earthquake"], { evs: EV.nenhum }), parceiro(hab)], alvo).pontos;
   assert.ok(pontos("Telepathy") > pontos("Solid Rock") + 0.5, "Telepathy: " + pontos("Telepathy") + " x " + pontos("Solid Rock"));
   assert.ok(pontos("Friend Guard") > pontos("Solid Rock") + 0.5, "Friend Guard muda a luta: " + pontos("Friend Guard") + " x " + pontos("Solid Rock"));
 });

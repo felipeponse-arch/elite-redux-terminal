@@ -6,8 +6,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
+import { ninetales2653b } from "./fixture_ninetales_2653b.mjs";
 
-const R = carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" });
+const R = ninetales2653b(carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" }));
 const NIVEL = 55;
 const sp = (n) => R.SPECIES.find((s) => s && s.n === n);
 const idHab = (n) => R.ABILITY_ID_BY_NAME[n];

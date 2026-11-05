@@ -5,9 +5,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
+import { ninetales2653b } from "./fixture_ninetales_2653b.mjs";
 
 // Etapa da luta da Meteor Falls: milestone 3, cap 55 no modo fácil (o mesmo da calibração com a calculadora do jogo).
-const R = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+const R = ninetales2653b(carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" }));
 const sp = (n) => R.SPECIES.find((s) => s && s.n === n);
 const courtney = R.BOSSES.find((b) => b.name === "Courtney Meteor Falls");
 const ninetales = { chefao: courtney, indice: 0 };
@@ -19,7 +20,7 @@ const tier = (c) => (c.hitKill === 1 && c.baterPrimeiro ? 3 : c.hitKill === 2 &&
 
 // ---------- caso A: Centiskorch ----------
 function centiskorch(milestone) {
-  const Rm = carregarRegras({ milestone, difficulty: "ace", levelCapMode: "more" });
+  const Rm = ninetales2653b(carregarRegras({ milestone, difficulty: "ace", levelCapMode: "more" }));
   return { Rm, r: Rm.candidatosDeBuild(Rm.SPECIES.find((s) => s && s.n === "Centiskorch"), {}) };
 }
 
@@ -197,9 +198,9 @@ test("prioridade NEGATIVA nunca 'bate primeiro por velocidade' (Avalanche do Van
 });
 
 test("lista vazia inesperada: golpe de sinergia que bate em pelo menos um alvo vale (Aerodactyl, Pinsir Mega, Diancie)", () => {
-  const Ra = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+  const Ra = ninetales2653b(carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" }));
   assert.ok(Ra.candidatosDeBuild(Ra.SPECIES.find((x) => x && x.n === "Aerodactyl"), {}).candidatos.length > 0);
-  const R6 = carregarRegras({ milestone: 6, difficulty: "ace", levelCapMode: "easy" });
+  const R6 = ninetales2653b(carregarRegras({ milestone: 6, difficulty: "ace", levelCapMode: "easy" }));
   const pinsir = R6.candidatosDeBuild(R6.SPECIES.find((x) => x && x.n === "Pinsir Mega"), {});
   assert.ok(pinsir.candidatos.length > 0, pinsir.aviso);
   // a única sinergia de Pinsir Mega é Aerodynamics + Tailwind (golpe de status do movepool)
@@ -300,7 +301,8 @@ test("alvo { foe } já montado pelo motor vale como alvo", () => {
 });
 
 // ---------- invariantes ----------
-const AMOSTRA = ["Ledian", "Accelgor", "Steelix", "Centiskorch", "Scizor", "Diglett", "Vaporeon", "Gulpin", "Lickilicky", "Gigalith", "Fearow", "Ninetales"];
+// Ninetales fora da amostra: o dado novo da er-config 30f0f5a tirou Vengeance e Flash Fire das sinergias dele (species_ability_synergy.json) e ele gera só 2 candidatos; a amostra cobre espécies com 3+.
+const AMOSTRA = ["Ledian", "Accelgor", "Steelix", "Centiskorch", "Scizor", "Diglett", "Vaporeon", "Gulpin", "Lickilicky", "Gigalith", "Fearow"];
 
 test("todo candidato passa em validateAiBuild, tem de 3 a 5 conjuntos distintos e vem na ordem do ranking", () => {
   AMOSTRA.forEach((nome) => {
@@ -346,7 +348,7 @@ test("determinismo: duas chamadas iguais dão o mesmo resultado", () => {
 });
 
 test("não muta o state", () => {
-  const Rx = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+  const Rx = ninetales2653b(carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" }));
   Rx.state.team = [Rx.getSpeciesBySname("SPECIES_LEDIAN").x];
   Rx.state.box = [Rx.getSpeciesBySname("SPECIES_ACCELGOR").x];
   const foto = () => JSON.stringify(Rx.state, (k, v) => (v instanceof Set ? [...v] : v));
@@ -360,12 +362,12 @@ test("não muta o state", () => {
 });
 
 test("sem alvo: o próximo líder de ginásio da Etapa (e o aviso quando não há mais nenhum)", () => {
-  const R0 = carregarRegras({ milestone: 0 });
+  const R0 = ninetales2653b(carregarRegras({ milestone: 0 }));
   assert.equal(R0.candidatosDeBuild(R0.getSpeciesBySname("SPECIES_LEDIAN"), {}).alvo.chefao, "Roxanne 1");
   assert.equal(R0.candidatosDeBuild(R0.getSpeciesBySname("SPECIES_LEDIAN"), {}).alvo.origem, "proximo-lider");
-  const R2 = carregarRegras({ milestone: 2 });
+  const R2 = ninetales2653b(carregarRegras({ milestone: 2 }));
   assert.match(R2.candidatosDeBuild(R2.getSpeciesBySname("SPECIES_LEDIAN")).alvo.chefao, /^Wattson/);
-  const R8 = carregarRegras({ milestone: 8 });
+  const R8 = ninetales2653b(carregarRegras({ milestone: 8 }));
   const r = R8.candidatosDeBuild(R8.getSpeciesBySname("SPECIES_LEDIAN"));
   assert.equal(r.alvo, null);
   assert.match(r.aviso, /sem chefão adiante/);
@@ -461,7 +463,7 @@ test("prioridade condicional do alvo (prioCheio) conta como ameaça: o Ledian re
 // Dado real: Centiskorch (Coil Up) x Indeedee Female no milestone 1 (cap de nível 20). Controle: com Synchronize no lugar do Psychic Surge o
 // mesmo kit bate primeiro por prioridade; com o terreno, o Fire Fang não bate primeiro por prioridade (falharia inteiro no motor).
 test("Coil Up x Indeedee Female (Psychic Surge, alvo no chão): nenhum candidato com Coil Up diz 'bate primeiro por prioridade'; sem o terreno diz", () => {
-  const R1 = carregarRegras({ milestone: 1, difficulty: "ace", levelCapMode: "more" });
+  const R1 = ninetales2653b(carregarRegras({ milestone: 1, difficulty: "ace", levelCapMode: "more" }));
   const base = R1.BOSSES.find((b) => b.name === "Courtney Meteor Falls").party[0];
   const idDe = (nome) => Number(Object.keys(R1.ABILITIES).find((k) => R1.ABILITIES[k][0] === nome));
   const foeCom = (abi) => R1.foeDeDuelo(Object.assign({}, base, { x: 1418, n: "Indeedee Female", abi, abiId: idDe(abi), item: "", nat: "Modest", mv: ["Psychic"] }), 20, null);
@@ -478,7 +480,7 @@ test("Coil Up x Indeedee Female (Psychic Surge, alvo no chão): nenhum candidato
 // e o ramo "Surprise! zera a prioridade do alvo" em pipelineAmeacasDePrioridade é inalcançável pela interface pública.
 test("Surprise! nunca chega a candidata: a validação a recusa sem Eerie Fog e nenhum candidato das espécies que a têm a usa", () => {
   [1, 3, 6].forEach((ms) => {
-    const Rm = carregarRegras({ milestone: ms, difficulty: "ace", levelCapMode: "easy" });
+    const Rm = ninetales2653b(carregarRegras({ milestone: ms, difficulty: "ace", levelCapMode: "easy" }));
     const comSurprise = Rm.SPECIES.filter((x) => x && (x.ab || []).concat(x.inn || []).some((a) => Rm.ABILITIES[a] && Rm.ABILITIES[a][0] === "Surprise!"));
     assert.ok(comSurprise.length >= 10, "premissa: ao menos 10 espécies têm Surprise! (" + comSurprise.length + ")");
     comSurprise.forEach((esp) => {
@@ -501,7 +503,7 @@ test("Surprise! nunca chega a candidata: a validação a recusa sem Eerie Fog e 
 test("fuga no Intimidate (Tactical Retreat): o motor devolve só uma nota e o módulo não lança - Tatsugiri, Deoxys Speed, Chansey e Blissey Redux", () => {
   const nomes = /^(Tatsugiri|Deoxys Speed|Chansey Redux|Blissey Redux)/;
   [1, 4, 6].forEach((ms) => {
-    const Rm = carregarRegras({ milestone: ms, difficulty: "ace", levelCapMode: "more" });
+    const Rm = ninetales2653b(carregarRegras({ milestone: ms, difficulty: "ace", levelCapMode: "more" }));
     const lista = Rm.SPECIES.filter((x) => x && nomes.test(x.n));
     assert.equal(lista.length, 8);
     lista.forEach((x) => {
@@ -511,7 +513,7 @@ test("fuga no Intimidate (Tactical Retreat): o motor devolve só uma nota e o m�
     });
   });
   // Deoxys Speed no milestone 1 (Brawly): um lado foge; o candidato avisa e é estimada, nunca calibrada.
-  const R1 = carregarRegras({ milestone: 1, difficulty: "ace", levelCapMode: "more" });
+  const R1 = ninetales2653b(carregarRegras({ milestone: 1, difficulty: "ace", levelCapMode: "more" }));
   const r = R1.candidatosDeBuild(R1.SPECIES.find((x) => x && x.n === "Deoxys Speed"), {});
   const comAviso = r.candidatos.filter((c) => /foge no Intimidate/.test(c.avisos.join(" ")));
   assert.ok(comAviso.length > 0);
@@ -519,7 +521,7 @@ test("fuga no Intimidate (Tactical Retreat): o motor devolve só uma nota e o m�
 });
 
 test("Mega no modo de mega temporária (milestone 6): o rascunho leva a pedra e o candidato avisa (Abomasnow, Dragalge, Excadrill, Meowstic; o Skarmory saiu da lista no dado 2.65.4: Skarmorite virou X e Y e ficou uma pedra por forma)", () => {
-  const R6 = carregarRegras({ milestone: 6, difficulty: "ace", levelCapMode: "more" });
+  const R6 = ninetales2653b(carregarRegras({ milestone: 6, difficulty: "ace", levelCapMode: "more" }));
   ["Abomasnow Mega", "Dragalge Mega", "Excadrill Mega", "Meowstic Mega"].forEach((nome) => {
     const mega = R6.SPECIES.find((x) => x && x.n === nome);
     assert.ok(mega, nome);
@@ -538,7 +540,7 @@ test("Mega no modo de mega temporária (milestone 6): o rascunho leva a pedra e 
 
 test("lista vazia sempre vem com motivo (varredura por amostra nos milestones 1 e 6)", () => {
   [1, 6].forEach((ms) => {
-    const Rm = carregarRegras({ milestone: ms, difficulty: "ace", levelCapMode: "more" });
+    const Rm = ninetales2653b(carregarRegras({ milestone: ms, difficulty: "ace", levelCapMode: "more" }));
     const todas = Rm.SPECIES.filter(Boolean);
     const amostra = todas.filter((_, i) => i % 9 === 0);
     // espécies que já voltaram vazias antes (com motivo): Alcremie, Pyukumuku, Budew, Castform Sandy
@@ -555,7 +557,7 @@ test("lista vazia sempre vem com motivo (varredura por amostra nos milestones 1 
 
 // ---------- 2. do alvo para os Pokémon ----------
 test("especiesQueResolvem: time e caixa, só quem derruba (hitKill > 0), 1 golpe antes de 2 e quem bate primeiro antes", () => {
-  const Rx = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+  const Rx = ninetales2653b(carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" }));
   const x = (s) => Rx.getSpeciesBySname(s).x;
   Rx.state.team = [x("SPECIES_LEDIAN"), x("SPECIES_ACCELGOR")];
   Rx.state.box = [x("SPECIES_STEELIX"), x("SPECIES_SCIZOR")];
@@ -592,7 +594,7 @@ test("especiesQueResolvem: opts.especies substitui a lista e opts.max corta", ()
 });
 
 test("especiesQueResolvem: opts.demais soma as melhores do rank da Etapa, depois do time e da caixa, com a origem de cada uma", () => {
-  const Rx = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+  const Rx = ninetales2653b(carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" }));
   const x = (s) => Rx.getSpeciesBySname(s).x;
   const alvo = { chefao: Rx.BOSSES.find((b) => b.name === "Courtney Meteor Falls"), indice: 0 };
   Rx.state.team = [x("SPECIES_LEDIAN")];

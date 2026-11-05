@@ -55,8 +55,9 @@ test("kit legal do Ledian inclui as três habilidades e Mega Punch", () => {
 test("kit legal do Ninetales registra habilidades, innates e movepool reais", () => {
   const R = carregarRegras({ milestone: 0, difficulty: "ace", levelCapMode: "more" });
   const k = kit(R, "SPECIES_NINETALES", 18);
-  assert.deepEqual(k.habilidades, ["Flaming Soul", "Vengeance", "Drought"]);
-  assert.deepEqual(k.innates, ["Pyromancy", "Flash Fire", "Queenly Majesty"]);
+  // Fixture: er-config 30f0f5a SpeciesList.textproto:5736 (SPECIES_NINETALES, Ninetales Rework)
+  assert.deepEqual(k.habilidades, ["Flaming Soul", "Spectralize", "Set Ablaze"]);
+  assert.deepEqual(k.innates, ["Drought", "Magic Guard", "Cursed Body"]);
   assert.ok(k.movepool.length > 0);
 });
 

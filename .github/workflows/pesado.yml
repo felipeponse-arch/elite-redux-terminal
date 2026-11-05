@@ -1,0 +1,168 @@
+name: Pesado (sabotagem e rank)
+
+# Trabalho que não cabe no CI normal (limite de 20 min) nem no PC do usuário:
+# a sabotagem completa (tests/unit/mutacoes.mjs) e o rank pelo duelo.
+# Só roda quando o usuário dispara na mão (Actions > "Pesado" > Run workflow).
+# Ticket TK-54. Como usar: docs/pesado_no_github.md.
+#
+# - sabotagem: divide as mutações em N fatias (matriz em paralelo, cada fatia
+#   no seu runner, com limite de 6 h do GitHub) e junta o resultado no fim.
+# - rank: UM job só. O cálculo (scripts/calcular_rank_v2.mjs) itera o peso das
+#   espécies sobre TODAS elas, então dividir por espécie mudaria a nota; por isso
+#   não há fatias aqui. Não grava nada no repositório: só gera os arquivos de saída.
+on:
+  workflow_dispatch:
+    inputs:
+      tipo:
+        description: "O que rodar"
+        type: choice
+        options: [sabotagem, rank]
+        default: sabotagem
+      fatias:
+        description: "Sabotagem: em quantas fatias dividir (1 a 20)"
+        type: string
+        default: "8"
+      filtro:
+        description: "Sabotagem: só estes prefixos de id, separados por espaço (vazio = todas). Rank: ignorado"
+        type: string
+        default: ""
+      amostra:
+        description: "Rank: usa 1 espécie a cada N (1 = rank completo). Sabotagem: ignorado"
+        type: string
+        default: "1"
+
+permissions:
+  contents: read
+
+jobs:
+  # Sabotagem: monta a lista de fatias. Cada fatia é um conjunto de ids de
+  # mutação (o filtro do run_sabotage.mjs aceita prefixo, e o id inteiro serve).
+  planejar:
+    if: ${{ inputs.tipo == 'sabotagem' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matriz: ${{ steps.plano.outputs.matriz }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Divide as mutações em fatias
+        id: plano
+        env:
+          FATIAS: ${{ inputs.fatias }}
+          FILTRO: ${{ inputs.filtro }}
+        run: |
+          cat > plano.mjs <<'JS'
+          import { MUTACOES } from "./tests/unit/mutacoes.mjs";
+          import { appendFileSync } from "node:fs";
+          const n = Math.min(20, Math.max(1, parseInt(process.env.FATIAS, 10) || 8));
+          const filtros = (process.env.FILTRO || "").split(/\s+/).filter(Boolean);
+          const ids = MUTACOES.map((m) => m.id).filter((id) => !filtros.length || filtros.some((f) => id.startsWith(f)));
+          if (!ids.length) throw new Error("nenhuma mutação casa com o filtro");
+          // Round-robin: espalha as famílias grandes (versao, pipeline) entre as fatias.
+          const fatias = Array.from({ length: Math.min(n, ids.length) }, () => []);
+          ids.forEach((id, i) => fatias[i % fatias.length].push(id));
+          const matriz = { include: fatias.map((l, i) => ({ fatia: i + 1, total: fatias.length, ids: l.join(" ") })) };
+          console.log(ids.length + " mutações em " + fatias.length + " fatias");
+          appendFileSync(process.env.GITHUB_OUTPUT, "matriz=" + JSON.stringify(matriz) + "\n");
+          JS
+          node plano.mjs
+
+  sabotagem:
+    needs: planejar
+    runs-on: ubuntu-latest
+    timeout-minutes: 350 # abaixo das 6 h do runner, deixa folga pro upload
+    strategy:
+      fail-fast: false # uma fatia vermelha não mata as outras
+      matrix: ${{ fromJSON(needs.planejar.outputs.matriz) }}
+    name: sabotagem ${{ matrix.fatia }}/${{ matrix.total }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      # ER_SEM_TS=1: sem TypeScript 5.9 no runner, os testes que dependem dele pulam.
+      # --completo: ignora o cache local (não existe no runner, e a fatia é fechada).
+      - name: Sabotagem da fatia
+        env:
+          ER_SEM_TS: "1"
+          IDS: ${{ matrix.ids }}
+        run: |
+          mkdir -p saida
+          set -o pipefail
+          # $IDS sem aspas de propósito: cada id vira um argumento (filtro).
+          node tests/run_sabotage.mjs --completo $IDS 2>&1 | tee saida/sabotagem-${{ matrix.fatia }}.log
+      - name: Guarda o log da fatia
+        if: ${{ !cancelled() }}
+        continue-on-error: true # cota de artefatos já estourou antes (ver ci.yml)
+        uses: actions/upload-artifact@v4
+        with:
+          name: sabotagem-fatia-${{ matrix.fatia }}
+          path: saida/
+          retention-days: 7
+
+  # Junta as fatias: baixa os logs, mostra o resumo e falha se alguma fatia falhou.
+  juntar-sabotagem:
+    needs: sabotagem
+    if: ${{ always() && inputs.tipo == 'sabotagem' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: sabotagem-fatia-*
+          path: logs
+          merge-multiple: true
+      - name: Resumo
+        env:
+          RESULTADO: ${{ needs.sabotagem.result }}
+        run: |
+          {
+            echo "## Sabotagem: $RESULTADO"
+            for f in logs/*.log; do [ -f "$f" ] && echo "- $(basename "$f"): $(tail -n 1 "$f")"; done
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$RESULTADO" = "success" ]
+      - name: Guarda os logs juntos
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: sabotagem-logs
+          path: logs/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  rank:
+    if: ${{ inputs.tipo == 'rank' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      # Sem --gravar: o rank oficial só entra no repositório por commit do usuário.
+      - name: Calcula o rank
+        env:
+          ER_SEM_TS: "1"
+          AMOSTRA: ${{ inputs.amostra }}
+        run: |
+          mkdir -p saida
+          set -o pipefail
+          node scripts/calcular_rank_v2.mjs --amostra="${AMOSTRA:-1}" \
+            --saida=saida/rank_v2_saida.json --relatorio=saida/rank_v2_relatorio.json 2>&1 | tee saida/rank.log
+      - name: Guarda o resultado do rank
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: rank-resultado
+          path: saida/
+          retention-days: 14

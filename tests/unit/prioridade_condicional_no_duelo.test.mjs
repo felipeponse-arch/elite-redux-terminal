@@ -10,9 +10,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
+import { ninetales2653b } from "./fixture_ninetales_2653b.mjs";
 
 const NIVEL = 55;
-const R = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+const R = ninetales2653b(carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" }));
 const sp = (n) => R.SPECIES.find((s) => s && s.n === n);
 const courtney = R.BOSSES.find((b) => b.name === "Courtney Meteor Falls");
 const comEf = (u, extra) => Object.assign({}, u, { ef: Object.assign({}, u.ef, extra) });

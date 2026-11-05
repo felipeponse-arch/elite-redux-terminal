@@ -6,8 +6,9 @@
 // quebra estes testes - só uma mudança de comportamento quebra.
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
+import { ninetales2653b } from "./fixture_ninetales_2653b.mjs";
 
-export const R = carregarRegras({ milestone: 9 });
+export const R = ninetales2653b(carregarRegras({ milestone: 9 }));
 export const NIVEL = 50;
 // EVs por papel (HP, Atk, Def, SpA, SpD, Spe).
 export const EV = { fisico: [0, 252, 0, 0, 0, 252], especial: [0, 0, 0, 252, 0, 252], tanqueF: [252, 0, 252, 0, 0, 4], tanqueE: [252, 0, 4, 0, 252, 0], nenhum: [0, 0, 0, 0, 0, 0] };

@@ -9,8 +9,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
+import { ninetales2653b } from "./fixture_ninetales_2653b.mjs";
 
-const R = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+const R = ninetales2653b(carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" }));
 const CLIMA = { sun: "sol", rain: "chuva", sand: "areia", hail: "granizo" };
 const sp = (n) => R.SPECIES.find((s) => s && s.n === n);
 const P = (nome, ab, na, it, ev, lv) => ({ nome, ab, na, it, ev, lv });

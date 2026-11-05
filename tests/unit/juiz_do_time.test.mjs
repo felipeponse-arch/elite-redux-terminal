@@ -56,13 +56,14 @@ test("suporte que atrapalha não é usado: as telas do Klefki contra o Brawly 1 
   assert.ok(membro(r, "Klefki").contribuicaoSuporte >= 0, "as telas não podem custar a luta: " + membro(r, "Klefki").contribuicaoSuporte);
 });
 
+// Cenário migrado (04/11/2026, dado 2.65.5): o líder do Tabitha Mt Chimney ganhou Taunt (Whimsicott Prankster), que barra o Tailwind. Fixture: er-config TrainerList.textproto:79686 (SPECIES_WHIMSICOTT) e :79696 (MOVE_TAUNT) do TRAINER_TABITHA_MT_CHIMNEY (data/bosses.json igual); a regra e a asserção são as mesmas, contra o Sidney 2.
 test("suporte inútil: o Tailwind que não muda a ordem (atacantes já mais rápidos que o chefão) fica em ~0", () => {
   const rapidos = () => [meu(NV, "Garchomp", ["Earthquake", "Dragon Claw"], { evs: EV.fisico, nat: "Jolly" }), meu(NV, "Dragonite", ["Extreme Speed", "Dragon Claw"], { evs: EV.fisico, nat: "Adamant" })];
   const time = [pidgeot(), ...rapidos()];
-  const foes = boss("Tabitha Mt Chimney").party.map((m) => R.foeDeDuelo(m, NV, null));
-  const aplicou = R.simularLutaContraChefao(time, foes, NV, { statusNoFim: [] }).log.some((l) => l.lados.meu.vento > 0);
+  const foes = boss("Sidney 2").party.map((m) => R.foeDeDuelo(m, NV, null));
+  const aplicou = R.simularLutaContraChefao(time, foes, NV, { statusNoFim: [] }).log.some((l) => l.lados && l.lados.meu.vento > 0);
   assert.ok(aplicou, "fixture: o motor de fato põe o Tailwind (senão o ~0 seria vazio)");
-  const r = juiz(time, "Tabitha Mt Chimney", NV);
+  const r = juiz(time, "Sidney 2", NV);
   assert.ok(Math.abs(membro(r, "Pidgeot").contribuicaoSuporte) < 0.05, "Tailwind sem efeito na ordem: " + membro(r, "Pidgeot").contribuicaoSuporte);
 });
 
@@ -112,8 +113,9 @@ test("Brick Break derruba a tela do rival ao acertar, gastando o turno (battle_s
 
 test("Brick Break não derruba a tela de chefão Fantasma: Fighting não acerta Ghost", () => {
   const breloom = meu(NV, "Breloom", ["Brick Break"], { evs: EV.fisico, nat: "Adamant" });
-  const foes = boss("Courtney Meteor Falls").party.map((m) => R.foeDeDuelo(m, NV, null));
-  assert.ok(foes[0].tipos.includes("Ghost"), "fixture: o primeiro da Courtney é Ghost");
+  // Courtney deixou de abrir com Ghost: o líder dela é o Ninetales, que no Rework é Fire puro. Fixture: er-config TrainerList.textproto:9460 (TRAINER_COURTNEY_METEOR_FALLS, SPECIES_NINETALES) e 30f0f5a SpeciesList.textproto:5736. A Phoebe abre com Ghost.
+  const foes = boss("Phoebe").party.map((m) => R.foeDeDuelo(m, NV, null));
+  assert.ok(foes[0].tipos.includes("Ghost"), "fixture: o primeiro da Phoebe é Ghost");
   const l = R.simularLutaContraChefao([breloom], foes, NV, { statusNoFim: [], ladoDele: ladoComTela() }).log[0];
   assert.equal(l.lados.dele.reflect, 5, "imune: o golpe não acerta e a tela fica");
 });

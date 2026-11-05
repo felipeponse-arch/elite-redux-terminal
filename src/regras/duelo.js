@@ -1585,11 +1585,17 @@
       if ((x = t.match(/uses \+(\d+)% of its Defense or SpDef during moves/i))) ef.ataqueExtra.push({ fonte: "defesa", pct: parseInt(x[1], 10) / 100 });
       if ((x = t.match(/Contact moves add (\d+)% Def to attack/i))) ef.ataqueExtra.push({ fonte: "def", pct: parseInt(x[1], 10) / 100, contato: true });
       if ((x = t.match(/Contact moves use (\d+)% of its Speed stat additionally/i))) ef.ataqueExtra.push({ fonte: "spe", pct: parseInt(x[1], 10) / 100, contato: true });
-      if (/Contact moves use the Speed stat for damage/i.test(t)) ef.ataqueExtra.push({ fonte: "spe", troca: true, contato: true });
-      if (/Non-contact moves use the Speed stat for damage/i.test(t)) ef.ataqueExtra.push({ fonte: "spe", troca: true, contato: false });
+      // Momentum/Impulse: texto antigo por contato; config er-config 30f0f5a (04/11/2026) por categoria (decisoes_mecanicas.md). Aceita os dois enquanto o dado for velho.
+      if ((x = t.match(/^(Contact|Physical|Non-contact|Special) moves use the Speed stat for damage/i))) {
+        var qual = x[1].toLowerCase();
+        ef.ataqueExtra.push(qual === "physical" ? { fonte: "spe", troca: true, cat: "F" } : qual === "special" ? { fonte: "spe", troca: true, cat: "E" } : { fonte: "spe", troca: true, contato: qual === "contact" });
+      }
       if (/Uses Def and Sp\. Def instead of Atk and Sp\. Atk when attacking/i.test(t)) ef.ataqueExtra.push({ fonte: "defesa", troca: true });
-      if (/Uses Speed as defense stat when hit by non-contact/i.test(t)) ef.defesaPelaVelocidade = { contato: false };
-      if (/Uses Speed as defense stat when hit by contact/i.test(t)) ef.defesaPelaVelocidade = { contato: true };
+      // Blur/Elude: contato (antigo) ou categoria (config 30f0f5a); "defensive" é a redação nova da config.
+      if ((x = t.match(/Uses Speed as defens(?:e|ive) stat when hit by (non-contact|contact|physical|special)/i))) {
+        var alvoVel = x[1].toLowerCase();
+        ef.defesaPelaVelocidade = alvoVel === "physical" ? { cat: "F" } : alvoVel === "special" ? { cat: "E" } : { contato: alvoVel === "contact" };
+      }
       // --- entrada em campo e interação entre habilidades ---
       if ((x = t.match(/Lowers foes'? Atk by (one|two) stages? on entry/i))) ef.intimida = Math.max(ef.intimida, ESTAGIOS_DUELO[x[1].toLowerCase()]);
       if ((x = t.match(/Lowers foes'? Sp\.? ?Atk by (one|two) stages? on entry/i))) ef.assusta = Math.max(ef.assusta, ESTAGIOS_DUELO[x[1].toLowerCase()]);
@@ -2061,7 +2067,7 @@
       var dFis = def.stats[2] * def.ef.defMult, dEsp = def.stats[4] * def.ef.spdMult;
       var maiorDef = maiorAtributoDuelo(def);
       if (maiorDef && maiorDef.atributo === (defF ? 2 : 4)) { if (defF) dFis *= maiorDef.mult; else dEsp *= maiorDef.mult; }
-      var D = dv && dv.contato === g.contato && abreDef ? def.stats[5] * def.ef.speMult
+      var D = dv && (dv.cat ? dv.cat === g.cat : dv.contato === g.contato) && abreDef ? def.stats[5] * def.ef.speMult
         : g.menorDefesa ? Math.min(dFis, dEsp) : (defF ? dFis : dEsp);
       if (def.ef.defesaExtraVel && abreDef) D += def.stats[5] * def.ef.defesaExtraVel; // Sleek Scales
       D *= noTerrenoDuelo(def, defF ? "def" : "spd"); // Grass Pelt, Flower Necklace

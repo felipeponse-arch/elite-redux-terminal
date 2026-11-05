@@ -4,8 +4,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
+import { ninetales2653b } from "./fixture_ninetales_2653b.mjs";
 
-const R = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "more" });
+const R = ninetales2653b(carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "more" }));
 const porNome = (n) => { const s = R.SPECIES.find((x) => x && x.n === n); assert.ok(s, n); return s; };
 const flannery = R.BOSSES.find((b) => b.name === "Flannery 1");
 const party = R.bossPartyPorDificuldade(flannery);
@@ -119,7 +120,7 @@ test("estratégia de clima: Brawly 2 com elenco de chuva só declara armador que
 // o Ninetales viraria "armador" da estratégia sem nunca entrar na luta simulada.
 test("estratégia de clima: Courtney (Meteor Falls) com elenco de chuva só declara armador que entra na luta (marco 3)", async () => {
   const { carregarRegras: carregar } = await import("./carregar_regras.mjs");
-  const R3 = carregar({ milestone: 3, difficulty: "ace" });
+  const R3 = ninetales2653b(carregar({ milestone: 3, difficulty: "ace" }));
   const nomes = ["Ninetales", "Politoed", "Pelipper", "Tyranitar", "Hippowdon", "Abomasnow", "Clefable", "Azumarill", "Granbull", "Wigglytuff"];
   const cands = nomes.map((n) => R3.SPECIES.find((s) => s && s.n === n)).filter(Boolean).map((sp) => ({ sp, owned: sp.x }));
   const courtney = R3.BOSSES.find((b) => b.name === "Courtney Meteor Falls");
@@ -182,7 +183,7 @@ for (const [titulo, nomes, chefe] of [
 ]) {
   test("estratégia de clima: " + titulo + " (marco 3) só declara armador que entra na luta", async () => {
     const { carregarRegras: carregar } = await import("./carregar_regras.mjs");
-    const R3 = carregar({ milestone: 3, difficulty: "ace" });
+    const R3 = ninetales2653b(carregar({ milestone: 3, difficulty: "ace" }));
     const cands = nomes.map((n) => R3.SPECIES.find((s) => s && s.n === n)).filter(Boolean).map((sp) => ({ sp, owned: sp.x }));
     const boss = R3.BOSSES.find((b) => b.name === chefe);
     assert.ok(boss, "fixture: chefão " + chefe + " no dado");

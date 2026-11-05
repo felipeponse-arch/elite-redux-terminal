@@ -6,8 +6,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
+import { ninetales2653b } from "./fixture_ninetales_2653b.mjs";
 
-const R = carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" });
+const R = ninetales2653b(carregarRegras({ milestone: 3, difficulty: "ace", levelCapMode: "easy" }));
 const sp = (n) => R.SPECIES.find((s) => s && s.n === n);
 const courtney = R.BOSSES.find((b) => b.name === "Courtney Meteor Falls");
 const ninetales = { chefao: courtney, indice: 0 };
@@ -47,7 +48,7 @@ test("hit-kill garantido: o motivo diz 'derruba no turno 1' em qualquer build ca
 });
 
 test("habilidade sem regra no atacante deixa a build 'estimada' e o aviso nomeia a habilidade (inata: Runerigus/Spiteful; escolhida: conferida na função)", () => {
-  const R8 = carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" });
+  const R8 = ninetales2653b(carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" }));
   const foe = () => R8.foeDeDuelo(Object.assign({}, R8.BOSSES.find((b) => b.name === "Courtney Meteor Falls").party[0], { mv: ["Dazzling Gleam", "Heat Wave", "Ominous Wind", "Shadow Ball"], nat: "Mild" }), 55, null);
   const runerigus = R8.candidatosDeBuild(R8.SPECIES.find((x) => x && x.n === "Runerigus"), { alvo: { foe: foe() } });
   assert.ok(runerigus.candidatos.length > 0);
@@ -78,7 +79,7 @@ test("habilidade sem regra no ALVO deixa a build 'estimada': o motor não conta 
 });
 
 test("o selo é o mesmo no caso A (alvo qualquer: sem alvo nada foi simulado, 'estimada') e no caso B (alvo fixo)", () => {
-  const R8 = carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" });
+  const R8 = ninetales2653b(carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" }));
   const semAlvo = R8.candidatosDeBuild(R8.SPECIES.find((s) => s && s.n === "Centiskorch"), {});
   assert.equal(semAlvo.alvo, null);
   semAlvo.candidatos.forEach((c) => { assert.equal(c.rotulo, "estimada"); assert.match(c.selo, /^Estimado: sem alvo/); });
@@ -92,7 +93,7 @@ test("a prioridade do alvo NÃO tira o selo (o motor a simula e o aviso 'O alvo 
 });
 
 test("fuga no Intimidate (o motor devolve empate) continua 'estimada'", () => {
-  const R1 = carregarRegras({ milestone: 1, difficulty: "ace", levelCapMode: "more" });
+  const R1 = ninetales2653b(carregarRegras({ milestone: 1, difficulty: "ace", levelCapMode: "more" }));
   const r = R1.candidatosDeBuild(R1.SPECIES.find((x) => x && x.n === "Deoxys Speed"), {});
   const comAviso = r.candidatos.filter((c) => /foge no Intimidate/.test(c.avisos.join(" ")));
   assert.ok(comAviso.length > 0);

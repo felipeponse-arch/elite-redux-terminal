@@ -104,6 +104,7 @@ export function lerEspeciesDaConfig(arq) {
   return out;
 }
 
+// Tipo: vale o da config da versão mais nova para TODA espécie que diverge do dado (decisão permanente do usuário, 04/11/2026; Ninetales Fire puro: er-config 79ec422; Butterfree Bug/Flying).
 // Compara a config com o dex e devolve o patch.
 export function gerarPatch(dex, habilidadesDaConfig, especiesDaConfig, commit, golpesDaConfig = [], aprendizado = {}, universais = new Set()) {
   const nomesDex = new Set(dex.abilities.map((a) => a[0]));
@@ -142,6 +143,10 @@ export function gerarPatch(dex, habilidadesDaConfig, especiesDaConfig, commit, g
     if (limpa(innCfg).join("|") !== limpa(innDex).join("|")) e.inn = innCfg;
     if (c.b && Object.keys(c.b).length === 6 && s.b.some((v, k) => v !== c.b[["hp", "atk", "def", "spatk", "spdef", "spe"][k]]) && s.b.some((v) => v > 0)) {
       e.b = ["hp", "atk", "def", "spatk", "spdef", "spe"].map((k) => c.b[k]);
+    }
+    if (c.tipo1) {
+      const cap = (t) => t[0] + t.slice(1).toLowerCase(), tCfg = [cap(c.tipo1), cap(c.tipo2 || c.tipo1)];
+      if (tCfg.join("|") !== s.t.map((i) => dex.types[i]).join("|")) e.t = tCfg;
     }
     if (Object.keys(e).length) especies[s.sname] = e;
   }
@@ -204,6 +209,7 @@ export function aplicarPatch(dex, patch) {
     if (e.ab) s.ab = ids(e.ab);
     if (e.inn) s.inn = ids(e.inn);
     if (e.b) s.b = e.b.slice();
+    if (e.t) s.t = e.t.map((n) => { const i = dex.types.indexOf(n); if (i < 0) throw new Error("tipo desconhecido: " + n); return i; });
     resumo.especies++;
   }
   // golpes novos (ids em seguida aos da NextDex) e onde as espécies os aprendem

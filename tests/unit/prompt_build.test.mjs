@@ -23,7 +23,8 @@ function baseDe(sp, extra) {
   return Object.assign({ ability: ab, nature: "Adamant", item: "", moves: dano.slice(0, 4), evs: [252, 252, 0, 0, 4, 0], rationale: "teste" }, extra);
 }
 const semSinergia = () => R.SPECIES.find((s) => !R.isMegaForm(s) && !R.sinergiasDaEspecie(s).length &&
-  R.availableMovesFor(s).names.filter((m) => R.moveRoleOf(m) === "dano").length >= 8 && !R.evoluiAinda(s));
+  R.availableMovesFor(s).names.filter((m) => R.moveRoleOf(m) === "dano").length >= 8 && !R.evoluiAinda(s) &&
+  R.validateAiBuild(s, baseDe(s, {}), {})); // build base válida: o Ninetales (sem sinergia no dado 30f0f5a, só golpes especiais) caía aqui e a natureza Adamant o reprovava. Fixture: er-config 30f0f5a SpeciesList.textproto:5736
 
 test("o prompt leva a descrição de cada habilidade escolhível e innate", () => {
   const sp = porNome("Garchomp");

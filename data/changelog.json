@@ -2,7 +2,9 @@
   {
     "date": "2026-11-04",
     "items": [
-      "Cinco builds curadas refeitas para a 2.65.5: Kecleon (Prankster no lugar da Klutz), Sawsbuck (Grass Pelt e Loaded Dice no lugar da Skill Link), Greninja Mega (Versatile no lugar da Protean), Garchomp Mega Redux (Swords Dance no lugar do Dragon Dance) e Duraludon Mega (Mega Launcher no lugar da Draco Morale)"
+      "Cinco builds curadas refeitas para a 2.65.5: Kecleon (Prankster no lugar da Klutz), Sawsbuck (Grass Pelt e Loaded Dice no lugar da Skill Link), Greninja Mega (Versatile no lugar da Protean), Garchomp Mega Redux (Swords Dance no lugar do Dragon Dance) e Duraludon Mega (Mega Launcher no lugar da Draco Morale)",
+      "Config do jogo atualizada (er-config 30f0f5a): Momentum e Speed Force agora valem para golpes físicos, Impulse para golpes especiais, Blur e Elude defendem pela Velocidade contra físico e especial (antes contato e sem contato); Ninetales ganhou Spectralize e Set Ablaze como habilidades e Drought, Magic Guard e Cursed Body como inatas; saíram Vengeance e o Drought como habilidade e as inatas Pyromancy, Flash Fire e Queenly Majesty",
+      "Tipos da Dex seguem a config do jogo mais nova: Butterfree passa a Bug/Flying (o dado da NextDex dizia Bug/Psychic) e Ninetales a Fire puro; as outras espécies já batiam com a config"
     ]
   },
   {

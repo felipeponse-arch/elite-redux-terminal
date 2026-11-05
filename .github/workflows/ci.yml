@@ -60,7 +60,7 @@ jobs:
       # Regras do jogo testadas no Node, sem build nem navegador - falha em
       # segundos, antes dos minutos de Chromium.
       - name: Testes unitários das regras (src/regras)
-        run: npm run test:unit
+        run: ER_SEM_TS=1 npm run test:unit
 
       # Cada defeito do catálogo (tests/unit/mutacoes.mjs) tem que derrubar
       # algum teste unitário - defeito que sobrevive = regra sem proteção.

@@ -4,9 +4,9 @@
 import { N_ESPECIES } from "./contagens_versao.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { carregarRegras } from "./carregar_regras.mjs";
-import { aplicarPatch } from "../../scripts/extracao/config_nova.mjs";
+import { aplicarPatch, lerEspeciesDaConfig } from "../../scripts/extracao/config_nova.mjs";
 import { validarBuilds } from "../../scripts/validar_dados.mjs";
 import { conferirProvisorias, PRECISA_REVISAR } from "../../scripts/extracao/provisorias.mjs";
 
@@ -110,4 +110,23 @@ test("conferirProvisorias: avisa quando a config passa a ter os 6 atributos (ou 
     const real = readFileSync("/home/user/elite-redux/er-config/SpeciesList.textproto", "utf8");
     assert.ok(!conferirProvisorias(dex, real).some((e) => PRECISA_REVISAR.has(e.estado)), "a config d1a9a4c segue incompleta para as duas");
   } catch (e) { if (e.code !== "ENOENT") throw e; }
+});
+
+// Decisão permanente do usuário (04/11/2026): vale o tipo da config mais nova para TODA espécie (Ninetales Fire puro, er-config 79ec422; Butterfree Bug/Flying).
+const tiposDoDex = (dex, sn) => dex.species.find((s) => s && s.sname === sn).t.map((i) => dex.types[i]);
+test("tipo da config: o patch carrega tipo onde diverge e o dex final o aplica (Butterfree, Ninetales)", () => {
+  const dex = JSON.parse(readFileSync("data/dex_compact.json", "utf8")), patch = JSON.parse(readFileSync("data/config_nova.json", "utf8"));
+  assert.deepEqual(tiposDoDex(dex, "SPECIES_NINETALES"), ["Fire", "Fire"]);
+  assert.deepEqual(tiposDoDex(dex, "SPECIES_BUTTERFREE"), ["Bug", "Flying"]);
+  for (const [sn, e] of Object.entries(patch.especies)) if (e.t) assert.deepEqual(tiposDoDex(dex, sn), e.t, sn);
+});
+test("tipo da config x dex: nenhuma espécie diverge (type/type2 da SpeciesList; sem type2 = mono)", () => {
+  const dex = JSON.parse(readFileSync("data/dex_compact.json", "utf8"));
+  let cfg;
+  const arq = [process.env.ER_CONFIG_DIR, "../ferramentas/er-config", "../../../../../ferramentas/er-config"].filter(Boolean).map((d) => d + "/SpeciesList.textproto").find((f) => existsSync(f));
+  if (!arq) return; // sem a er-config à mão não há o que conferir
+  cfg = lerEspeciesDaConfig(readFileSync(arq, "utf8"));
+  const cap = (t) => t[0] + t.slice(1).toLowerCase(), div = [];
+  for (const s of dex.species) { const c = s && cfg[s.sname]; if (c && c.tipo1 && [cap(c.tipo1), cap(c.tipo2 || c.tipo1)].join("/") !== s.t.map((i) => dex.types[i]).join("/")) div.push(s.sname); }
+  assert.deepEqual(div, []);
 });
