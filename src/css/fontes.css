@@ -1,0 +1,45 @@
+/* Fontes embutidas (05/11/2026). Os woff2 ficam em data/fontes/ e o build troca cada __FONTE_*_DATAURI__ por
+   data:font/woff2;base64. Só o subconjunto latin (cobre português e nomes de espécie). Licença: SIL OFL 1.1. */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 500 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(__FONTE_BRICOLAGE_DATAURI__) format("woff2");
+}
+@font-face {
+  font-family: "Figtree";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url(__FONTE_FIGTREE_DATAURI__) format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(__FONTE_PLEXMONO_400_DATAURI__) format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(__FONTE_PLEXMONO_500_DATAURI__) format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(__FONTE_PLEXMONO_600_DATAURI__) format("woff2");
+}
+@font-face {
+  font-family: "Potta One";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(__FONTE_POTTAONE_DATAURI__) format("woff2");
+}
