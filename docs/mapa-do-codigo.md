@@ -425,7 +425,9 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sprite_index.test.mjs** - Sprite pelo nome da espécie (15/10/2026): a versão nova do jogo deslocou os números e o Beedrill Mega mostrava o Blastoise Mega.
 - **sprites_provisorios.test.mjs** - Ticket design-2026-11-04/03 (decisão do usuário, 05/11/2026): espécie sem sprite oficial usa o sprite da base e mostra aviso.
 - **status_no_duelo.test.mjs** - Status por chance no duelo (2026-09-29, grupo 1 do estudo de habilidades):
-- **sugestao_do_motor.test.mjs** - "Ficar com este time" grava as builds como "Sugestão do app" (ticket time-pelo-motor/01, F5, 21/10/2026).
+- **sugestao_do_motor.parte1.test.mjs** - Parte 1 de 3 de sugestao_do_motor.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
+- **sugestao_do_motor.parte2.test.mjs** - Parte 2 de 3 de sugestao_do_motor.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
+- **sugestao_do_motor.parte3.test.mjs** - Parte 3 de 3 de sugestao_do_motor.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
 - **sync_canonico.test.mjs** - TK-02 (S12-2, S12-4, S12-5): comparação canônica no sync, campo v usado, team/box sem duplicata.
 - **sync_progresso.test.mjs** - Sincronização não apaga run adiantada com run zerada (relato do usuário, 10/10/2026):
 - **sync_soma_errada.test.mjs** - TK-01 (decisão 2 do usuário, 27/10/2026): save com soma errada nunca é regravado nem enviado à nuvem.
@@ -433,9 +435,16 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **texto_novo_das_habilidades.test.mjs** - Ticket versao-nova/04 (15/10/2026): o texto das habilidades mudou de redação na 2.65.4 da NextDex (07/10) e o parser do motor lê TEXTO. M...
 - **tier_e_fatia_unicos.test.mjs** - TK-20: dificuldade -> tier e a fatia 60/40 têm UMA fonte (src/regras/chefoes.js), lida por chefões, rank, Meu Time,
 - **time_melhor_no_geral.test.mjs** - Tela do time = melhor time no geral, sem pensar no próximo chefão (usuário, 16/10/2026). As builds do "Montar time completo"
-- **time_pelo_motor.test.mjs** - Modo Motor do Meu Time, Fase C (ticket time-pelo-motor/01, 21/10/2026): montar o time SEM IA, só pelo simulador.
+- **time_pelo_motor.parte1.test.mjs** - Parte 1 de 5 de time_pelo_motor.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
+- **time_pelo_motor.parte2.test.mjs** - Parte 2 de 5 de time_pelo_motor.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
+- **time_pelo_motor.parte3.test.mjs** - Parte 3 de 5 de time_pelo_motor.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
+- **time_pelo_motor.parte4.test.mjs** - Parte 4 de 5 de time_pelo_motor.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
+- **time_pelo_motor.parte5.test.mjs** - Parte 5 de 5 de time_pelo_motor.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
 - **time_pelo_motor_comuns.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
-- **time_pelo_motor_papeis.test.mjs** - Modo Motor do Meu Time, Fase D (ticket time-pelo-motor/01, 21/10/2026): papéis por build, tags, sinergia e explicação.
+- **time_pelo_motor_papeis.parte1.test.mjs** - Parte 1 de 4 de time_pelo_motor_papeis.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
+- **time_pelo_motor_papeis.parte2.test.mjs** - Parte 2 de 4 de time_pelo_motor_papeis.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
+- **time_pelo_motor_papeis.parte3.test.mjs** - Parte 3 de 4 de time_pelo_motor_papeis.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
+- **time_pelo_motor_papeis.parte4.test.mjs** - Parte 4 de 4 de time_pelo_motor_papeis.test.mjs (dividido em 06/11/2026 para rodar em paralelo; ver tests/pesados.json).
 - **time_pelo_motor_papeis_regras.test.mjs** - Fronteiras das regras de papel e estilo do Modo Motor (TK-03, 27/10/2026): cada teste usa um time real da Etapa 4 que fica DO LADO DE DENTRO
 - **time_pelo_motor_regras.test.mjs** - Regras do Modo Motor que só a sabotagem do TK-03 (27/10/2026) mostrou sem proteção: item liberado e limite de repetição,
 - **times_salvos_acessibilidade.test.mjs** - TK-28 (achados de acessibilidade): o cartão do time salvo gera HTML acessível.
