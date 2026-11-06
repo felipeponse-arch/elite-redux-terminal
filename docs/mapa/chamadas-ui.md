@@ -37,7 +37,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - planoContraChefaoHtml:368 - chama: faixaDeHpDaLuta (chefoes.js:593), NOME_DA_CONDICAO (condicoes_habilidade.js:42)
 - renderMonoRun:554 - chama: state (nucleo.js:8) | chamado por: renderTeam (time.js:8)
 - renderTeamAnalysis:580 - chama: computeSharedRisks (chefoes.js:121), USABLE_TYPES (dados_base.js:132), abilityTypeMod (tipos.js:173) | chamado por: renderTeam (time.js:8)
-- renderTeamStrategy:463 - chama: modoDeMontagem (modo_motor.js:9), modoMotorAquecer (modo_motor.js:40), modoMotorResultadoHtml (modo_motor.js:233) | chamado por: modoMotorFicarComVariante (modo_motor.js:119), modoMotorMontar (modo_motor.js:68), renderTeam (time.js:8)
+- renderTeamStrategy:463 - chama: modoDeMontagem (modo_motor.js:9), modoMotorAquecer (modo_motor.js:40), modoMotorResultadoHtml (modo_motor.js:232) | chamado por: modoMotorFicarComVariante (modo_motor.js:119), modoMotorMontar (modo_motor.js:68), renderTeam (time.js:8)
 - resumoDoArquetipo:74 - chama: state (nucleo.js:8)
 - teamKeyFor:14 - chamado por: guardarTimeAnterior (aba_chefoes.js:266), montarTimeContraEsteChefao (aba_chefoes.js:308)
 - teamRecommendation:30 - chamado por: montarTimeContraEsteChefao (aba_chefoes.js:308), modoMotorFicarComVariante (modo_motor.js:119), zerarRun (time.js:362)
@@ -141,10 +141,9 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - modoMotorFavoritosHtml:160 - chamado por: archetypeCardHtml (arquetipo.js:85)
 - modoMotorFavoritosValidos:31 - chama: state (nucleo.js:8)
 - modoMotorFicarComVariante:119 - chama: getSpeciesByX (dados_base.js:78), SUGESTAO_ROTULO (sugestao_do_motor.js:11), gravarSugestoesDoMotor (sugestao_do_motor.js:61), planoDeGravarSugestoes (sugestao_do_motor.js:39), applyRecommendedTeam (arquetipo.js:207), +4
-- modoMotorMembroHtml:177 - chama: MOTOR_FRASE_DA_PROVA (time_pelo_motor_papeis.js:317)
 - modoMotorMontar:68 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:185), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:74), contextoDoMotor (time_pelo_motor.js:140), +3
-- modoMotorResultadoHtml:233 - chamado por: renderTeamStrategy (arquetipo.js:463)
-- modoMotorRodapeHtml:190 - chama: SUGESTAO_ROTULO (sugestao_do_motor.js:11)
+- modoMotorResultadoHtml:232 - chamado por: renderTeamStrategy (arquetipo.js:463)
+- modoMotorRodapeHtml:189 - chama: SUGESTAO_ROTULO (sugestao_do_motor.js:11)
 - modoMotorSeletorHtml:152 - chamado por: archetypeCardHtml (arquetipo.js:85)
 
 ## ui/nucleo.js

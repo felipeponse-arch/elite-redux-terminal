@@ -92,20 +92,14 @@ test("o Modo Motor não chama a IA: o fonte não tem claude.use nem pedirIA", ()
   assert.ok(rodada.variantes.length >= 2 && rodada.variantes.every((v) => v.membros.length === 6));
 });
 
-test("risco 8 (Fase D): todo papel e toda tag carregam a prova medida; quem não prova nada fica com a abstenção", () => {
+test("Fase D: papel de cada membro = o do rank; toda tag tem armador com 2+ beneficiários; o texto só cita o que existe", () => {
   rodada.variantes.forEach((v) => {
     v.membros.forEach((m) => {
-      m.papeis.forEach((p) => assert.ok(p.prova && Object.keys(p.prova).length > 0, m.nome + " " + p.papel));
-      assert.equal(m.papeis.length === 0, typeof m.abstencao === "string", m.nome);
-    });
-    v.tags.filter((t) => t.armador).forEach((t) => assert.ok(t.beneficiarios.length >= 2 && t.ganhoDoTime > 0, v.chave + " " + t.tag));
-    // Proteção da Fase C: o texto nunca afirma papel nem tag sem o correspondente medido.
-    const PAPEIS = ["wallbreaker", "sweeper", "revenge killer", "tanque", "armador", "suporte", "pivô"];
-    v.membros.forEach((m) => {
+      m.papeis.forEach((p) => assert.equal(typeof p, "string", m.nome));
       const linha = v.explicacao.find((x) => x.startsWith(m.nome + ":")) || "";
-      const citados = PAPEIS.filter((p) => new RegExp("(^|[ ;(])" + p + " \\(").test(linha));
-      assert.equal(JSON.stringify(citados.sort()), JSON.stringify(m.papeis.map((p) => p.papel).sort()), v.chave + " " + m.nome);
+      assert.equal(linha, m.nome + ": " + (m.papeis.length ? m.papeis.join(", ") : "sem papel definido no rank") + ".");
     });
+    v.tags.filter((t) => t.armador).forEach((t) => assert.ok(t.beneficiarios.length >= 2, v.chave + " " + t.tag));
     const tagsNoTexto = v.explicacao.filter((x) => /^Tag /.test(x)).map((x) => x.slice(4, x.indexOf(":", x.indexOf(":") + 1)));
     assert.equal(JSON.stringify(tagsNoTexto), JSON.stringify(v.tags.map((g) => g.tag)), v.chave);
   });
