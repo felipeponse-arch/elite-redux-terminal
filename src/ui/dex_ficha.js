@@ -647,9 +647,6 @@
       '<details class="detail-group" open><summary>Auto Build</summary>' +
         myBuildEditorHtml(sp) +
       '</details>' +
-      '<details class="detail-group"' + (state.strategySets[sp.sname] ? " open" : "") + '><summary>Estratégias' + (state.strategySets[sp.sname] ? " (" + state.strategySets[sp.sname].sets.length + ")" : "") + '</summary>' +
-        strategySetsHtml(sp) +
-      '</details>' +
       fichaNotasHtml(sp) +
       '<details class="detail-group"><summary>Comparar com outro Pokémon</summary>' +
         compareCardHtml(sp) +

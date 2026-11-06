@@ -83,24 +83,19 @@
     return partes.join("");
   }
   function archetypeCardHtml(members) {
-    var motor = modoDeMontagem === "motor";
     return '<div class="arquetipo-bloco"><details class="card arquetipo"' + (arquetipoAberto ? " open" : "") + '>' +
       '<summary class="arquetipo-resumo"><span class="arquetipo-titulo">Arquétipo</span>' + resumoDoArquetipo() +
         '<span class="arquetipo-ajustar" aria-hidden="true">' + (arquetipoAberto ? "Fechar" : "Ajustar") + '</span></summary>' +
-      modoMotorSeletorHtml() +
-      (motor
-        ? '<p class="mybuild-hint">"Montar meu melhor time" escolhe o melhor time de até 6 só com o simulador de duelo do app: não gasta a sua conta de IA, dá o mesmo resultado para a mesma entrada e mostra a prova de cada papel. Usa só os Pokémon que você já tem (time + caixa). Dos chips abaixo ele respeita o Monotype; Estilo, Clima e campo e Tática valem para a IA e para as builds curadas.</p>'
-        : '<p class="mybuild-hint">Escolha um Estilo, Clima e campo, Tática e/ou Monotype e peça o melhor time de até 6, usando só os Pokémon que você já tem (time + caixa). "Gerar time completo" monta a composição, gera a build de cada um e escreve o guia de como jogar - tudo numa ação só.</p>') +
+      '<p class="mybuild-hint">"Montar meu melhor time" escolhe o melhor time de até 6 só com o simulador de duelo do app: dá o mesmo resultado para a mesma entrada e mostra a prova de cada papel. Usa só os Pokémon que você já tem (time + caixa). Dos chips abaixo ele respeita o Monotype; Estilo, Clima e campo e Tática valem para a IA e para as builds curadas.</p>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Estilo</span>' + archetypeChipsHtml("pace", PACE_ARCHETYPES, state.archetype.pace || "", false) + '</div>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Clima e campo</span>' + archetypeChipsHtml("weather", ARQUETIPOS_DE_CAMPO, state.archetype.weather || "", false) + '</div>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Tática</span>' + archetypeChipsHtml("tatica", TATICA_ARCHETYPES, state.archetype.tatica || "", false) + '</div>' +
       '<div class="archetype-axis"><span class="archetype-axis-label">Monotype</span>' + archetypeChipsHtml("monotype", MONOTYPE_ARCHETYPES, state.archetype.monotype || "", true) + '</div>' +
-      (motor ? modoMotorFavoritosHtml() : "") +
+      modoMotorFavoritosHtml() +
     '</details>' +
     // Botão e status FORA do <details> recolhido: o jogador monta o time sem abrir "Ajustar" (pedido do usuário, 21/10).
     '<div class="archetype-row arquetipo-acao">' +
-        (motor ? modoMotorBotaoHtml()
-          : '<button id="archetype-build-complete" class="add-team-btn" type="button" title="Composição + build de cada um + guia de como jogar, tudo de uma vez">Gerar time completo</button>') +
+        modoMotorBotaoHtml() +
       '</div>' +
     '<span id="archetype-status" class="notes-status arquetipo-status" role="status" aria-live="polite"></span></div>';
   }
@@ -119,7 +114,6 @@
     painel.addEventListener("click", function (e) {
       var alvo = e.target.closest("button");
       if (!alvo || !painel.contains(alvo)) return;
-      if (alvo.id === "archetype-build-complete") { generateCompleteTeam(); return; }
       // Desfaz o "Montar time contra este chefão": volta o time de antes (as
       // builds novas ficam salvas como variantes - nada se perde).
       if (alvo.id === "chefao-restaurar" && generatedTeamResult && generatedTeamResult.anterior) {
@@ -140,64 +134,6 @@
       });
     });
   })();
-
-  // IA monta o MELHOR TIME possível (até 6) usando só espécies que o
-  // jogador realmente possui (time ∪ caixa) - nunca decide sozinha: o
-  // resultado é uma proposta, só vira time real quando o jogador clica
-  // "Usar este time" (applyRecommendedTeam abaixo). Inclui a Velocidade
-  // base de cada um no roster (achado em revisão de código: faltava esse
-  // dado pra julgar Trick Room/Hyper Offense de verdade) e dá acesso real
-  // às mesmas ferramentas que generateBuildWithAI/generateTeamUsageGuide usam
-  // (buildStandardAiTools) - antes esta função não passava tools nenhuma,
-  // inconsistente com as outras duas chamadas de IA do app.
-  async function generateTeamForArchetype() {
-    try {
-      var statusEl = document.getElementById("archetype-status");
-      var pace = state.archetype.pace;
-      var weather = state.archetype.weather;
-      var monotype = state.archetype.monotype;
-      if (!pace && !weather && !monotype && !state.archetype.tatica) {
-        if (statusEl) statusEl.textContent = "Escolha um Estilo, Clima e campo, Tática ou Monotype primeiro, pra eu focar o time em algo.";
-        return false;
-      }
-      if (statusEl) statusEl.textContent = "Consultando o Claude…";
-      var r = rosterParaTimeIA(monotype);
-      if (!r.roster.length) {
-        if (statusEl) statusEl.textContent = monotype
-          ? "Nenhum Pokémon do tipo " + monotype + " capturado ainda - pegue um na Dex primeiro."
-          : "Nenhum Pokémon capturado ainda - pegue algo na Dex primeiro.";
-        return false;
-      }
-      var resp = await pedirIA({
-        prompt: montarPromptTimeArquetipo(r.roster, pace, weather, monotype, ctxDoState()),
-        tentativas: 1,
-        oQue: "Montagem",
-        aviso: function (texto) { if (statusEl) statusEl.textContent = texto; },
-        validar: function (bruto) {
-          var snames = snamesValidosDoTime(bruto, r.validSnames);
-          return snames.length ? { valor: snames } : { motivo: "A resposta não trouxe nenhuma espécie real da sua caixa/time - tente de novo." };
-        }
-      });
-      if (!resp.ok) {
-        if (statusEl) statusEl.textContent = resp.mensagem;
-        return false;
-      }
-      teamRecommendation = {
-        snames: resp.valor,
-        reasoning: (resp.bruto && typeof resp.bruto.reasoning === "string") ? resp.bruto.reasoning.slice(0, 600) : "",
-        forPace: pace, forWeather: weather, forMonotype: monotype
-      };
-      renderTeamStrategy(state.team.map(getSpeciesByX).filter(Boolean));
-      flashToast("Time sugerido - confira e use se fizer sentido.");
-      return true;
-    } catch (e) {
-      // Erro no app (não da IA - esses o pedirIA já trata) ao aplicar a resposta.
-      if (typeof console !== "undefined") console.error(e);
-      var elErro = document.getElementById("archetype-status");
-      if (elErro) elErro.textContent = "Não consegui aplicar a resposta da IA - tente de novo.";
-      return false;
-    }
-  }
 
   // Aplica a recomendação: revalida CADA sname contra o time/caixa ATUAIS no
   // momento do clique (mesma lição do bug de "Aplicar troca" - o jogador
@@ -241,98 +177,6 @@
     });
     flashToast("Time atualizado (" + xs.length + "/6).");
     return true;
-  }
-
-  // Validação determinística da equipe gerada (item 5/10 do pedido do
-  // usuário, 2026-09-17: "verificar sinergia entre os integrantes",
-  // "verificar se a estratégia é executável") - NADA aqui é decidido pela
-  // IA. Reaproveita computeSharedRisks() (já usada em "Riscos
-  // compartilhados do time") e effectiveBuild() (já usada em toda parte
-  // que mostra a build ativa) - nunca afirma "time pronto" se algum
-  // membro ainda não tem build salva de verdade.
-  // Guia de utilização (item 3 do pedido do usuário, 2026-09-17: conceito,
-  // abertura, desenvolvimento, condição de vitória, ameaças/respostas) -
-  // pede pra IA um texto PRÁTICO desta equipe especificamente, com as
-  // builds reais já geradas (não uma descrição genérica do arquétipo).
-  // Mesmas ferramentas reais de generateTeamForArchetype/generateBuildWithAI
-  // (buildStandardAiTools) - sem isso a IA inventaria matchup/ameaça sem
-  // checar o dado real do jogo.
-  async function generateTeamUsageGuide(members, focusDesc, statusElId) {
-    try {
-      var statusEl = document.getElementById(statusElId || "archetype-status");
-      var resp = await pedirIA({
-        prompt: montarPromptGuia(members, focusDesc),
-        tentativas: 1,
-        aviso: function (texto) { if (statusEl) statusEl.textContent = texto; },
-        validar: function (bruto) { var g = guiaDaResposta(bruto, members); return g ? { valor: g } : { motivo: "o guia não veio no formato pedido." }; }
-      });
-      if (!resp.ok) {
-        if (statusEl && !resp.rejeitada) statusEl.textContent = resp.mensagem;
-        return null;
-      }
-      var guide = resp.valor;
-      return guide;
-    } catch (e) {
-      // Erro no app (não da IA - esses o pedirIA já trata) ao aplicar a resposta.
-      if (typeof console !== "undefined") console.error(e);
-      return null;
-    }
-  }
-
-  // Orquestrador do Gerador Inteligente de Times (pedido do usuário,
-  // 2026-09-17): uma única ação que encadeia os módulos que já existiam
-  // soltos - Arquétipo (generateTeamForArchetype), aplica sozinho
-  // (applyRecommendedTeam), Builds (generateBuildWithAI, uma vez por
-  // membro, sempre nova - reaproveita a MESMA função que "Gerar build
-  // com IA" já usa em cada slot do time, então já respeita level cap,
-  // item já em uso por outro membro e sinergia habilidade x movepool),
-  // Guia de uso (generateTeamUsageGuide, novo) e por fim uma validação
-  // determinística (computeTeamGenerationValidation, novo). Nada aqui
-  // reescreve as funções que já existiam - só as encadeia.
-  async function generateCompleteTeam() {
-    function setStatus(msg) {
-      var el = document.getElementById("archetype-status");
-      if (el) el.textContent = msg;
-    }
-    var pace = state.archetype.pace, weather = state.archetype.weather, monotype = state.archetype.monotype;
-    if (!pace && !weather && !monotype && !state.archetype.tatica) {
-      setStatus("Escolha um Estilo, Clima e campo, Tática ou Monotype primeiro, pra eu focar o time em algo.");
-      return;
-    }
-    setStatus("Etapa 1/4 - montando a composição do time…");
-    var composed = await generateTeamForArchetype();
-    if (!composed || !teamRecommendation) return; // generateTeamForArchetype já deixou o motivo no status
-    if (!applyRecommendedTeam()) return; // idem, applyRecommendedTeam já deixou o motivo no status/toast
-    var members = state.team.map(getSpeciesByX).filter(Boolean);
-    // Time novo = build nova pra todos (2026-09-29, pedido do usuário): antes quem
-    // já tinha build era pulado e a antiga continuava na tela. Agora a nova vira
-    // a ativa e a antiga fica de variante no chip da ficha (nada se perde).
-    // Todas numa consulta só (lote, 2026-09-30); quem falhar é pedido sozinho.
-    comecarLoteDeBuilds(members.map(function (m) { return m.x; }));
-    try {
-      // Curada do estilo sem IA (2026-09-30, decisão do usuário: só quando não há
-      // Clima/Tática - a curada não é ajustada a eles).
-      var paraIA = members;
-      if (!weather && !state.archetype.tatica) {
-        paraIA = members.filter(function (sp) {
-          if (!aplicarCuradaNoTimeNovo(sp, pace)) return true;
-          concluirBuildDoLote(sp.x);
-          return false;
-        });
-      }
-      await gerarBuildsDoTimeComIA(paraIA, "archetype-status", function () { return { timeNovo: true, campo: true }; }, {},
-        function (texto) { setStatus("Etapa 2/4 - " + texto.charAt(0).toLowerCase() + texto.slice(1)); });
-    } finally {
-      encerrarLoteDeBuilds();
-    }
-    setStatus("Etapa 3/4 - escrevendo o guia de como jogar este time…");
-    var focusDesc = [pace ? "Estilo: " + pace : "", weather ? "Clima e campo: " + weather : "", state.archetype.tatica ? "Tática: " + state.archetype.tatica : "", monotype ? "Monotype: " + monotype : ""].filter(Boolean).join(" + ");
-    var guide = await generateTeamUsageGuide(members, focusDesc);
-    setStatus("Etapa 4/4 - validando a equipe…");
-    generatedTeamResult = { archetypeLabel: focusDesc, guide: guide, validation: computeTeamGenerationValidation(members), forTeamKey: teamKeyFor(members) };
-    TELAS.time(); // estado de tela (resultado da geração); as builds já foram gravadas pelas ações
-    setStatus(guide ? "Time completo gerado." : "Time e builds gerados - o guia de uso não veio desta vez, pode gerar de novo depois.");
-    flashToast("Time completo gerado: composição, builds" + (guide ? " e guia" : "") + " prontos.");
   }
 
   // Card único "Time gerado: <foco>" (item 4 do pedido do usuário,
@@ -433,31 +277,7 @@
         '<div class="plano-rodape"><span class="plano-chip">' +
           (vc.total - vc.withoutBuild.length) + "/" + vc.total + ' membros com build</span>' + restaurar + '</div></div>';
     }
-    var g = generatedTeamResult.guide;
-    var v = generatedTeamResult.validation;
-    var guideHtml = g
-      ? '<div class="ts-usage-guide">' +
-          '<div class="ts-guide-item"><b>Conceito:</b> ' + escapeHtml(g.concept || "—") + '</div>' +
-          '<div class="ts-guide-item"><b>Abertura:</b> ' + escapeHtml(g.opening || "—") + '</div>' +
-          '<div class="ts-guide-item"><b>Desenvolvimento:</b> ' + escapeHtml(g.development || "—") + '</div>' +
-          '<div class="ts-guide-item"><b>Condição de vitória:</b> ' + escapeHtml(g.winCondition || "—") + '</div>' +
-          '<div class="ts-guide-item"><b>Ameaças e respostas:</b> ' + escapeHtml(g.threats || "—") +
-            (g.threatMemberX !== null && g.threatMemberX !== undefined
-              ? ' <span class="goto-species-strategies" tabindex="0" role="button" data-x="' + g.threatMemberX + '">Ver Estratégias &rarr;</span>'
-              : "") +
-          '</div>' +
-        '</div>'
-      : '<p class="mybuild-hint">O guia de uso não veio desta vez - o time e as builds continuam válidos, só falta o texto de como jogar (pode gerar de novo).</p>';
-    var riskText = v.sharedRisks.length
-      ? v.sharedRisks.map(function (r) { return typePill(r.t, true) + " (" + r.n + "/" + v.total + ")"; }).join(", ")
-      : "nenhum tipo derruba 2 ou mais membros ao mesmo tempo";
-    var validationHtml = '<div class="ts-validation' + (v.allBuilt ? "" : " ts-validation-warn") + '">' +
-      (v.allBuilt
-        ? (v.total === 1 ? "O único membro tem build confirmada." : "Todos os " + v.total + " membros têm build confirmada.")
-        : (v.total - v.withoutBuild.length) + "/" + v.total + " membros com build confirmada - faltou gerar pra: " + escapeHtml(v.withoutBuild.join(", ")) + ".") +
-      ' Riscos compartilhados: ' + riskText + '.' +
-    '</div>';
-    return '<div class="card ts-generated-team' + classeDeEntradaDoCardGerado() + '"><h3>Time gerado: ' + escapeHtml(generatedTeamResult.archetypeLabel) + '</h3>' + guideHtml + validationHtml + '</div>';
+    return "";
   }
 
   function renderTeamStrategy(members) {
@@ -467,8 +287,8 @@
       el.innerHTML = "";
       return;
     }
-    el.innerHTML = generatedTeamCardHtml(members) + (modoDeMontagem === "motor" ? modoMotorResultadoHtml() : "") + archetypeCardHtml(members);
-    if (modoDeMontagem === "motor") modoMotorAquecer();
+    el.innerHTML = generatedTeamCardHtml(members) + modoMotorResultadoHtml() + archetypeCardHtml(members);
+    modoMotorAquecer();
   }
 
   // Clima que combina com o tipo (só bônus confirmado - ver CLIMA_QUE_COMBINA):

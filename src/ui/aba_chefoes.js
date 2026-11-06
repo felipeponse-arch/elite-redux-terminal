@@ -237,13 +237,12 @@
   // Pedido do usuário: no lugar do texto que ele copiava e colava na conversa,
   // um botão que já monta o time, com build e item, na tela Meu time.
   // Decisões dele: troca o time na hora guardando o antigo; gera build nova
-  // mirando este chefão pra todos (vira a ativa, a antiga fica de variante).
+  // (o app não gera builds por IA; vale a build ativa de cada um).
   //  1. escolha dos 6 SEM IA: o simulador de duelo (duelo.js, o mesmo do rank)
   //     testa cada criatura do jogador (time + caixa, Monotype e level cap
   //     respeitados, mega só se já liberada) contra o time real do chefão;
   //  2. o time antigo vai pra "Times salvos" ("Antes de <chefão>");
-  //  3. builds pela IA, uma por membro, em fila, mirando este chefão;
-  //  4. o plano da luta (quem responde a quem) sai do mesmo simulador.
+  //  3. o plano da luta (quem responde a quem) sai do mesmo simulador.
   var montagemContraChefaoRodando = false;
   function candidatosDoJogador() {
     var owned = xsDoJogador();
@@ -336,37 +335,13 @@
       statusChefao("");
       var members = state.team.map(getSpeciesByX).filter(Boolean);
       var plano = planoDaLuta(r);
-      // Quem responde a quem: cada Pokémon do chefão aponta a melhor resposta.
-      var responde = quemRespondeNoPlano(r.plano);
       generatedTeamResult = {
         archetypeLabel: "contra " + boss.name, chefao: boss.name, plano: plano, clima: r.clima, estrategia: r.estrategia, luta: resumoDaLuta(r.simulacao),
-        progresso: "Gerando as builds…", anterior: anterior, buffs: buffsParaMostrarDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name), forTeamKey: teamKeyFor(members)
+        progresso: "", anterior: anterior, buffs: buffsParaMostrarDoChefao(boss.name), campo: regraDeCampoDoChefao(boss.name), forTeamKey: teamKeyFor(members)
       };
       var aba = document.querySelector('.tab-btn[data-tab="team"]');
       if (aba) aba.click();
       TELAS.time();
-      // Economia de IA (2026-09-30): quem já tem build ativa feita pra ESTE chefão
-      // neste level cap fica com ela - clicar de novo não pede as mesmas builds.
-      var capAgora = capOuPadrao();
-      var chaveDoTime = boss.name + "|" + diffKey; // o mesmo chefão tem 3 times (Padrão/Insane/Hell)
-      var jaFeitas = members.filter(function (sp) {
-        var b = getActiveBuild(sp.sname);
-        return !!b && !!b.feitaPara && b.feitaPara.chefao === chaveDoTime && b.feitaPara.cap === capAgora;
-      });
-      members = members.filter(function (sp) { return jaFeitas.indexOf(sp) === -1; });
-      comecarLoteDeBuilds(members.map(function (m) { return m.x; })); // encerrado no finally
-      // As builds numa consulta só (lote, 2026-09-30); quem falhar é pedido sozinho.
-      var chefaoDaBuild = { boss: boss, party: party, clima: r.clima, estrategia: r.estrategia, chave: chaveDoTime };
-      var provado = resumoProvadoPeloSimulador(r); // set/habilidade/golpes que o simulador provou (lote B)
-      var feitas = await gerarBuildsDoTimeComIA(members, "chefao-build-status",
-        function (sp) { return { silencioso: true, chefao: Object.assign({ responde: responde[sp.sname] || [], provado: provado[sp.sname] || null }, chefaoDaBuild) }; },
-        { chefao: chefaoDaBuild, responde: responde, provado: provado },
-        function (texto) {
-          if (!generatedTeamResult || generatedTeamResult.chefao !== boss.name) return; // outra montagem começou por cima
-          generatedTeamResult.progresso = texto;
-          TELAS.time();
-        });
-      var ultimoMotivo = feitas.ultimoMotivo || "";
       // Confere o plano com as builds que de fato ficaram salvas (lote B).
       var conferencia = null;
       try {
@@ -383,12 +358,9 @@
         var faltou = computeTeamGenerationValidation(state.team.map(getSpeciesByX).filter(Boolean)).withoutBuild;
         // O aviso fica à parte (cor de aviso no card); o status mostra o aviso e depois o resto.
         generatedTeamResult.aviso = faltou.length
-          ? "Faltou build pra: " + faltou.join(", ") + (ultimoMotivo ? " (" + ultimoMotivo.replace(/\.$/, "") + ")" : "") +
-            " - use \"Gerar build com IA\" no card de cada um."
+          ? "Faltou build pra: " + faltou.join(", ") + " - monte a build na Dex."
           : "";
-        generatedTeamResult.progresso = (jaFeitas.length ? "Mantidas as builds que já eram contra " + boss.name + " neste level cap: " +
-            jaFeitas.map(function (sp) { return sp.n; }).join(", ") + "." : "") +
-          (conferencia ? (jaFeitas.length ? " " : "") + conferencia.texto : "");
+        generatedTeamResult.progresso = (conferencia ? conferencia.texto : "");
         TELAS.time();
       }
       flashToast("Time contra " + boss.name + " montado" + (anterior.salvo ? " - o anterior ficou em Times salvos." : "."));
@@ -397,7 +369,6 @@
       statusChefao("Não consegui montar o time - tente de novo.");
     } finally {
       montagemContraChefaoRodando = false;
-      encerrarLoteDeBuilds();
     }
   }
 
@@ -574,7 +545,7 @@
     // conversa) em 2026-09-29 - agora o app monta o time sozinho.
     var montarHtml = '<div class="card boss-montar-card"><h3>Montar time contra este chefão</h3>' +
       '<p class="mybuild-hint">Testa cada Pokémon seu (time e caixa' + (monotypeAtivo() ? ", só do tipo " + escapeHtml(monotypeAtivo()) : "") +
-        ') contra o time dele e troca o seu time pelos 6 que mais vencem. Depois gera, com a IA, a build com item de cada um pensando nesta luta. ' +
+        ') contra o time dele e troca o seu time pelos 6 que mais vencem. Usa a build ativa de cada um. ' +
         'O time de agora fica guardado em Times salvos.</p>' +
       '<button id="boss-montar-time" class="add-team-btn" type="button">Montar time contra ' + escapeHtml(boss.name) + '</button>' +
       '<div id="boss-team-status" class="notes-status" role="status" aria-live="polite"></div>' +

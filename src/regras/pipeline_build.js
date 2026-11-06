@@ -1,9 +1,9 @@
   // ===== src/regras/pipeline_build.js =====
   // Pipeline de build com intenção (ticket 20 da dívida, desenho de 14/10/2026; docs/pipeline_de_build.md).
   // Do Pokémon para a build: o código monta de 3 a 5 candidatos (uma das 3 habilidades + as inatas + 4 golpes),
-  // simula cada um contra o alvo com o motor do duelo e marca o hit-kill e quem bate primeiro. A IA do app só
-  // escolhe entre os candidatos e fecha EVs, item e natureza (fecharBuild); a validação é a de sempre.
-  // Três funções públicas: candidatosDeBuild (caso A, do Pokémon), especiesQueResolvem (caso B, do alvo) e fecharBuild.
+  // simula cada um contra o alvo com o motor do duelo e marca o hit-kill e quem bate primeiro. O app mostra os
+  // candidatos na tela do pipeline; item, EVs e natureza ficam para o jogador (a validação é a de sempre).
+  // Funções públicas: candidatosDeBuild (caso A, do Pokémon) e especiesQueResolvem (caso B, do alvo).
   // Testes: tests/unit/pipeline_build.test.mjs. Escopo global, ES5, sem window/document (ADR-004).
   // Função pura: não muda `state` nem grava nada; o único efeito é o cache interno do motor (benigno).
 
@@ -705,32 +705,4 @@
       dosOutros++;
       return dosOutros <= maxDemais;
     }).filter(function (a, i, todos) { return a.origem === "outros" || todos.slice(0, i + 1).filter(function (b) { return b.origem !== "outros"; }).length <= max; });
-  }
-
-  // ---- 3. fechar a build (a IA escolhe EVs, item e natureza) ----
-  // `escolha` = { evs, item, natureza }. Monta a build com os golpes e a habilidade do candidato e passa pela
-  // validação de sempre. Nunca lança: dado ruim vira { ok: false, erros }.
-  function fecharBuild(candidato, escolha) {
-    var erros = [];
-    try {
-      var sp = candidato && candidato.sname ? getSpeciesBySname(candidato.sname) : null;
-      if (!sp || !candidato.build || !Array.isArray(candidato.build.moves)) return { ok: false, build: null, erros: ["candidato inválido: faltam a espécie, os golpes ou a habilidade"] };
-      escolha = escolha || {};
-      var evs = escolha.evs;
-      if (!Array.isArray(evs) || evs.length !== 6 || evs.some(function (v) { return typeof v !== "number" || v % 1 !== 0 || v < 0 || v > 252; })) {
-        erros.push("Os EVs precisam ser 6 números inteiros de 0 a 252 (HP, Atk, Def, SpA, SpD, Spe).");
-      } else if (evs.reduce(function (a, b) { return a + b; }, 0) > 510) erros.push("A soma dos EVs passa de 510.");
-      var item = escolha.item === undefined || escolha.item === null ? "" : escolha.item;
-      if (typeof item !== "string") erros.push("O item precisa ser um texto (vazio = sem item).");
-      if (typeof escolha.natureza !== "string" || ALL_NATURES.indexOf(escolha.natureza) === -1) erros.push("A natureza \"" + String(escolha.natureza).slice(0, 40) + "\" não existe.");
-      if (erros.length) return { ok: false, build: null, erros: erros };
-      var bruto = { ability: candidato.habilidade, moves: candidato.build.moves.slice(), nature: escolha.natureza, item: item, evs: evs.slice() };
-      var r = validarRespostaDeBuildDaIa(sp, bruto, {});
-      if (!r.valor) return { ok: false, build: null, erros: [r.motivo] };
-      // Item fora da lista cai para "sem item" na validação; aqui isso é erro (só a pedra da Mega temporária corrige sozinha).
-      if (item && r.valor.item !== item && !megaStoneRuleFor(sp)) return { ok: false, build: null, erros: ["O item \"" + item + "\" não é permitido para " + sp.n + " nesta build."] };
-      return { ok: true, build: r.valor, erros: [] };
-    } catch (e) {
-      return { ok: false, build: null, erros: ["não consegui fechar a build: " + (e && e.message ? e.message : e)] };
-    }
   }

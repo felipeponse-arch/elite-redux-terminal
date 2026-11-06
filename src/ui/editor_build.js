@@ -1,5 +1,5 @@
   // ===== src/ui/editor_build.js =====
-  // Formato Showdown, cópia e o editor "Meu build" da ficha (e os sets de Estratégias).
+  // Formato Showdown, cópia e o editor "Meu build" da ficha.
   // Interface: lê e desenha a página. Colado no <script> principal por
   // scripts/build.mjs (marcador @ui editor_build.js) no MESMO lugar de onde saiu do
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
@@ -311,19 +311,9 @@
         ? '<div class="mybuild-rationale"><strong>Por que essa escolha:</strong> ' + escapeHtml(b.rationale) + '</div>'
         : '') +
       (hasBuild ? '<pre class="showdown-block">' + escapeHtml(preview) + '</pre><button id="mybuild-copy" class="text-action-btn" type="button">Copiar</button>' : '') +
-      // "Gerar build com IA" - 2026-09-09, user's own rule: quando não tem
-      // build salva (ou quando quer uma diferente das já salvas), chama o
-      // Claude pra montar uma nova, em vez de exigir que o usuário venha
-      // pedir numa conversa separada. Disparado só por clique explícito -
-      // a capacidade `sample` cobra do usuário por chamada e a própria
-      // regra da plataforma proíbe disparo automático sem gesto real.
       '<div class="mybuild-ai-row">' +
-        (list.length >= 3
-          ? '<p class="hint" style="margin:0;">Limite de 3 builds atingido - apague uma antes de gerar outra.</p>'
-          : '<button id="mybuild-ai-generate" class="text-action-btn" type="button">Gerar build com IA</button>') +
         // Sugestões do jogo (pipeline de build, ticket pipeline-build/02): calculadas pelo código, sem IA e sem gravar nada.
         '<button id="mybuild-pipeline-ver" class="text-action-btn" type="button" aria-expanded="false" aria-controls="mybuild-pipeline-painel">Ver sugestões do jogo</button>' +
-        '<span id="mybuild-ai-status" class="notes-status" role="status" aria-live="polite"></span>' +
       '</div>' +
       '<div id="mybuild-pipeline-painel" class="pipe-painel" hidden></div>' +
     '</div>';
@@ -420,45 +410,6 @@
       (movesHtml ? '<div class="mybuild-moves-power">' + movesHtml + '</div>' : "");
   }
 
-  // "Estratégias" (pedido do usuário, 2026-09-18, referência explícita ao
-  // dex do Smogon: "vários sets nomeados por Pokémon, cada um com
-  // parágrafo explicando o porquê"). Diferente de "Meu build" (1 build
-  // ativa, sua build de verdade pra batalha), isto é referência
-  // exploratória - vários papéis possíveis, gerados sob demanda, nunca
-  // persistidos no save (cache efêmero por sname, mesmo espírito de
-  // generatedTeamResult/teamRecommendation - "Gerar de novo" já resolve
-  // se o jogador quiser outra leitura). Cada set passa pela MESMA
-  // validateAiBuild() que "Meu build" usa - nenhuma garantia a menos.
-  function strategySetsHtml(sp) {
-    var cached = state.strategySets[sp.sname];
-    var strategyLevel = nivelDeCalculo();
-    var cardsHtml = cached ? cached.sets.map(function (set, idx) {
-      // showdownSet() quer EVs já formatado ("252 Atk / 4 SpD"), não o
-      // array cru que validateAiBuild devolve - mesma conversão que
-      // effectiveBuild() já faz pra "Meu build" (evsToShowdownText).
-      var forDisplay = { ability: set.ability, nature: set.nature, item: set.item, moves: set.moves, evs: evsToShowdownText(set.evs) };
-      return '<div class="strategy-set">' +
-        '<div class="strategy-set-head"><span class="strategy-set-name">' + escapeHtml(set.name) + '</span>' + seloDaBuildHtml({ origem: "ia" }) +
-          '<button class="text-action-btn strategy-set-copy" data-idx="' + idx + '" type="button">copiar</button></div>' +
-        '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, forDisplay)) + '</pre>' +
-        itemDescHtml(set.item) +
-        megaModeBuildNoteHtml(sp, set) +
-        buildContextNotesHtml(sp, set) +
-        buildEvNotesHtml(sp, [31, 31, 31, 31, 31, 31], set.evs, strategyLevel, set.nature, set.item) +
-        buildSynergyHtml(sp, set) +
-        buildNoteHtml(set.rationale && escapeHtml(set.rationale)) +
-        '<button class="text-action-btn strategy-set-use" data-idx="' + idx + '" type="button" style="margin-top:6px;">+ Usar como meu build</button>' +
-      '</div>';
-    }).join("") : "";
-    return '<p class="mybuild-hint">Referência do Smogon, adaptada: até 3 papéis competitivos distintos pra ' + escapeHtml(sp.n) +
-      ' neste hack, cada um com golpes/item/EVs reais e o porquê. Não é "Meu build" (isso continua acima, sua build de verdade) - é leitura exploratória. Os sets ficam guardados; "Gerar de novo" pede outra leitura.</p>' +
-      (cached && cached.cap ? '<p class="mybuild-hint">Gerados no level cap ' + cached.cap + (cached.geradoEm ? ' em ' + escapeHtml(cached.geradoEm.slice(0, 10).split("-").reverse().join("/")) : "") + '.</p>' : "") +
-      '<button id="strategy-sets-generate" class="text-action-btn" type="button">' + (cached ? "Gerar de novo" : "Gerar sets de estratégia") + '</button> ' +
-      '<span id="strategy-sets-status" class="notes-status" role="status" aria-live="polite"></span>' +
-      cardsHtml;
-  }
-  // (Botões dos sets de Estratégias: ouvinte único do painel da ficha, junto do editor.)
-
   // Sets initial <select>/<input> values from saved state (kept out of the
   // HTML-string generation in myBuildEditorHtml() - easier to set .value
   // directly than to re-walk every option list marking one "selected").
@@ -537,7 +488,7 @@
     });
   }
 
-  // Ouvintes únicos do editor "Meu build" e dos sets de Estratégias, no painel da
+  // Ouvintes únicos do editor "Meu build", no painel da
   // ficha. A espécie é sempre a da ficha aberta (state.selected).
   (function () {
     var painel = document.getElementById("species-detail");
@@ -585,23 +536,6 @@
           evs: evsToShowdownText(saved.evs), moves: saved.moves.filter(Boolean)
         });
         copyText(text, document.getElementById("mybuild-status"), "Copiado!");
-      } else if (alvo.id === "mybuild-ai-generate") {
-        generateBuildWithAI(sp);
-      } else if (alvo.id === "strategy-sets-generate") {
-        generateStrategySets(sp);
-      } else if (alvo.classList.contains("strategy-set-copy") || alvo.classList.contains("strategy-set-use")) {
-        var cache = state.strategySets[sp.sname];
-        var set = cache && cache.sets[parseInt(alvo.dataset.idx, 10)];
-        if (!set) return;
-        if (alvo.classList.contains("strategy-set-copy")) {
-          copyText(showdownSet(sp, { ability: set.ability, nature: set.nature, item: set.item, moves: set.moves, evs: evsToShowdownText(set.evs) }), document.getElementById("strategy-sets-status"), "Copiado!");
-        } else {
-          setOrReplaceActiveBuild(sp.sname, {
-            ability: set.ability, nature: set.nature, item: set.item,
-            moves: set.moves.slice(0, 4), ivs: [31, 31, 31, 31, 31, 31], evs: set.evs, rationale: set.rationale, pedirPlano: true
-          }, "ia");
-          flashToast('"' + set.name + '" virou seu "Meu build" de ' + sp.n);
-        }
       }
     });
   })();
