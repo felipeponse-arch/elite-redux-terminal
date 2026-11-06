@@ -7,8 +7,6 @@ import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
 
 const R = carregarRegras();
-const nomeHab = (id) => (R.ABILITIES[id] ? R.ABILITIES[id][0] : "");
-const comHabilidade = (hab) => R.SPECIES.find((s) => s && R.uniqueIds((s.ab || []).concat(s.inn || [])).some((id) => nomeHab(id) === hab));
 const golpesDe = (sp, split) => R.availableMovesFor(sp).names.filter((m) => R.moveRoleOf(m) === "dano" && R.DATA.splits[R.MOVE_BY_NAME[m][2]] === split);
 
 beforeEach(() => {
@@ -42,19 +40,6 @@ test("Black Sludge fora de tipo Poison é conflito (\"Damages others\")", () => 
   const outro = R.SPECIES.find((s) => s && !R.speciesTypeNames(s).includes("Poison"));
   assert.match(R.conflitoDeItem("Black Sludge", [], outro), /Black Sludge causa dano/);
   assert.equal(R.conflitoDeItem("Black Sludge", [], poison), null);
-});
-
-test("o prompt traz o manual e só as combinações das habilidades da espécie", () => {
-  const tecnico = comHabilidade("Technician");
-  assert.ok(tecnico, "fixture: espécie com Technician");
-  const p = R.montarPromptBuild(tecnico, {});
-  assert.match(p, /MANUAL DE BUILD \(regras gerais\)/);
-  assert.match(p, /- Technician \(golpe de 60 de poder ou menos x1,5\)/);
-  const semCombo = R.SPECIES.find((s) => s && !R.uniqueIds((s.ab || []).concat(s.inn || [])).some((id) => R.MANUAL_POR_HABILIDADE[nomeHab(id)]));
-  const p2 = R.montarPromptBuild(semCombo, {});
-  assert.match(p2, /MANUAL DE BUILD/);
-  assert.doesNotMatch(p2, /COMBINACOES DAS HABILIDADES DESTA ESPECIE/);
-  assert.match(R.montarPromptEstrategias(tecnico), /- Technician/);
 });
 
 test("Body Press e Foul Play não contam como golpe que usa o próprio Ataque (texto do jogo)", () => {

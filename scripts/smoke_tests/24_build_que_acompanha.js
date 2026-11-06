@@ -1,6 +1,6 @@
 // Seção 24 - build que acompanha o jogador (pedido do usuário, 2026-09-24):
 // plano de golpes derivado pelo level cap, Mega herdando a build da base, curada
-// escolhida pelo estilo do time, fila de revisão automática (com a IA simulada) e
+// escolhida pelo estilo do time, fila de revisão automática (sem IA) e
 // as correções da base (build não some na evolução, volta de forma restaura a
 // build, campos novos sobrevivem ao save). Roda no app de verdade
 // (window.__erTest) e SEMPRE devolve o estado como estava (try/finally).
@@ -9,7 +9,6 @@ async function section24() {
   const S = TE.state;
   const snapshot = JSON.parse(JSON.stringify(TE.buildSave()));
   const logAntes = S.autoLog.slice();
-  const claudeAntes = window.claude;
   const nome = (id) => TE.MOVES[id][0];
   const capNoMarco = (m) => { S.settings.milestone = m; return TE.getCurrentCap(); };
   const build = (extra) => Object.assign({ ability: "", nature: "Jolly", item: "", moves: [], ivs: [31, 31, 31, 31, 31, 31], evs: [0, 0, 0, 0, 0, 0], source: "manual", active: true, savedAt: "x", rationale: "" }, extra);
@@ -114,16 +113,7 @@ async function section24() {
       TE.setOrReplaceActiveBuild(fx.sp.sname, build({ nature: "Modest", moves: [fx.t2, fx.t1] }), "manual");
       check("mudar só natureza/EV de build cujo plano já foi consultado não pede plano de novo (custo)",
         !TE.getActiveBuild(fx.sp.sname).revisar && TE.getActiveBuild(fx.sp.sname).planoConsultado === true, TE.getActiveBuild(fx.sp.sname));
-      TE.setOrReplaceActiveBuild(fx.sp.sname, build({ moves: [fx.t2] }), "manual");
-      const semPlano = TE.getActiveBuild(fx.sp.sname);
-      check("golpes mudaram e há golpe por liberar: a build fica marcada pra pedir só o plano", !semPlano.plano && semPlano.revisar === "plano", semPlano);
 
-      // prompt e validação do plano vindo da IA
-      const bloco = TE.planoPromptBlock(fx.sp, capA);
-      check("o prompt da IA lista os golpes futuros com o nível", bloco.indexOf(fx.fut.nome) !== -1 && bloco.indexOf("nivel " + fx.fut.nivel) !== -1);
-      const val = { moves: [fx.t1, fx.t2] };
-      const r = TE.anexarPlanoDaIa(fx.sp, val, { [fx.t1]: fx.fut.nome, [fx.t2]: "Golpe Inventado" }, capA, null);
-      check("plano da IA: passo válido entra, inventado sai com motivo", val.plano && val.plano[fx.t1] === fx.fut.nome && !val.plano[fx.t2] && r.descartados.length === 1, r.descartados);
 
       // sanitizador do save
       const fake = JSON.parse(JSON.stringify(snapshot));
@@ -161,62 +151,11 @@ async function section24() {
       S.team = [claydol.x];
       const bc = TE.effectiveBuild(claydol);
       check("sem build própria, o time mostra a curada com o estilo no rótulo", bc && bc.origem === "curada" && /^Build curada \(/.test(TE.rotuloDaBuild(bc)), bc && TE.rotuloDaBuild(bc));
-      const t = TE.tarefaDeRevisao(claydol);
-      check("curada com golpe travado vira tarefa de golpe-ponte (uma vez, com IA)", t && t.tipo === "ponte" && t.alvo && t.alvo.moves.indexOf("Cosmic Power") !== -1, t && t.tipo);
       S.customBuilds = { SPECIES_CLAYDOL: [build({ moves: ["Earthquake"], source: "curada" })] };
       check("build salva com origem curada mostra o estilo no rótulo", /^Build curada \(Equilibrado\)$|^Build curada$/.test(TE.rotuloDaBuild(TE.effectiveBuild(claydol))), TE.rotuloDaBuild(TE.effectiveBuild(claydol)));
       S.customBuilds = { SPECIES_CLAYDOL: [build({ moves: ["Earthquake"], source: "ia", revisar: "evolucao", tentativasRevisao: 2 })] };
       check("build que já falhou 2 vezes na revisão não entra mais na fila", TE.tarefaDeRevisao(claydol) === null);
 
-      // corrida: o jogador cria a build enquanto a IA responde a ponte
-      S.settings.milestone = 9; // sem cap: a curada inteira é válida como resposta da IA
-      const curBruta = TE.BUILDS.SPECIES_CLAYDOL, cur = Array.isArray(curBruta) ? curBruta[0] : curBruta; // a curada pode ser objeto ou lista
-      const resposta = { ability: cur.ability, nature: cur.nature, item: "", moves: cur.moves.slice(), evs: [252, 252, 0, 0, 4, 0], rationale: "ia" };
-      const minha = build({ moves: ["Earthquake", "Waterfall"] });
-      S.customBuilds = {};
-      window.claude = { use: async (n) => n === "sample" ? { json: async () => { S.customBuilds.SPECIES_CLAYDOL = [minha]; return resposta; } } : null };
-      const r1 = await TE.generateBuildWithAI(claydol, "sem-status", { modo: "ponte", alvo: cur, silencioso: true });
-      check("corrida na ponte: build criada enquanto a IA respondia é preservada e a resposta é descartada",
-        r1 === "obsoleta" && S.customBuilds.SPECIES_CLAYDOL.length === 1 && S.customBuilds.SPECIES_CLAYDOL[0] === minha, r1);
-      // corrida na revisão pós-evolução
-      const marcada = build({ moves: ["Earthquake"], source: "ia", revisar: "evolucao", revisadaDe: "Baltoy" });
-      const editadaNaHora = build({ moves: ["Earthquake", "Waterfall"], nature: "Adamant" });
-      S.customBuilds = { SPECIES_CLAYDOL: [marcada] };
-      window.claude = { use: async (n) => n === "sample" ? { json: async () => { S.customBuilds.SPECIES_CLAYDOL = [editadaNaHora]; return resposta; } } : null };
-      const r2 = await TE.generateBuildWithAI(claydol, "sem-status", { modo: "revisao", anterior: marcada, deNome: "Baltoy", silencioso: true });
-      check("corrida na revisão: edição feita enquanto a IA respondia não é sobrescrita",
-        r2 === "obsoleta" && S.customBuilds.SPECIES_CLAYDOL[0] === editadaNaHora, r2);
-      // revisão sem corrida: a revisada vira ativa e a anterior fica salva
-      S.customBuilds = { SPECIES_CLAYDOL: [marcada] };
-      window.claude = { use: async (n) => n === "sample" ? { json: async () => resposta } : null };
-      const r3 = await TE.generateBuildWithAI(claydol, "sem-status", { modo: "revisao", anterior: marcada, deNome: "Baltoy", silencioso: true });
-      const l3 = S.customBuilds.SPECIES_CLAYDOL;
-      check("revisão pós-evolução: a nova vira a ativa e a anterior continua salva, sem marca de revisão",
-        r3 === true && l3.length === 2 && !l3[0].active && l3[0] === marcada && !marcada.revisar && l3[1].active && l3[1].source === "ia" && l3[1].planoConsultado === true,
-        l3.map((b) => b.moves.join("/") + (b.active ? "*" : "")));
-      // Build NOVA depois da evolução (2026-09-27, pedido do usuário).
-      check("a build de antes fica marcada 'antes de evoluir' e o chip da ficha diz isso",
-        marcada.antesDeEvoluir === "Baltoy" && /Antes de evoluir/.test(TE.buildChipsHtml(l3)), marcada.antesDeEvoluir);
-      check("o pedido à IA é de build NOVA do zero, não de adaptar a antiga",
-        /BUILD NOVA DEPOIS DA EVOLUCAO[\s\S]*NAO use a build antiga como base/.test(TE.montarPromptBuild(claydol, { modo: "revisao", anterior: marcada, deNome: "Baltoy" })));
-      // Lista cheia: sai a variante mais antiga, nunca a de antes de evoluir.
-      const v1 = build({ moves: ["Surf"], savedAt: "2026-01-01T00:00:00Z" });
-      const v2 = build({ moves: ["Muddy Water"], savedAt: "2026-02-01T00:00:00Z" });
-      const marcada2 = build({ moves: ["Earthquake"], source: "ia", revisar: "evolucao", revisadaDe: "Baltoy", savedAt: "2026-03-01T00:00:00Z" });
-      v1.active = false; v2.active = false; marcada2.active = true;
-      S.customBuilds = { SPECIES_CLAYDOL: [v1, v2, marcada2] };
-      const r4 = await TE.generateBuildWithAI(claydol, "sem-status", { modo: "revisao", anterior: marcada2, deNome: "Baltoy", silencioso: true });
-      const l4 = S.customBuilds.SPECIES_CLAYDOL;
-      check("lista cheia: sai a variante mais antiga e a de antes de evoluir fica",
-        r4 === true && l4.length === 3 && l4.indexOf(v1) === -1 && l4.indexOf(marcada2) !== -1 && marcada2.antesDeEvoluir === "Baltoy" && l4[2].active,
-        l4.map((b) => b.moves.join("/") + (b.active ? "*" : "")));
-      // Botão no card do time enquanto a build ainda é a da forma anterior.
-      const pendente = build({ moves: ["Earthquake"], source: "ia", revisar: "evolucao", revisadaDe: "Baltoy" });
-      pendente.active = true;
-      S.customBuilds = { SPECIES_CLAYDOL: [pendente] };
-      TE.renderTeam();
-      const botaoEvo = document.querySelector('#team-slots .ts-evo-gerar[data-x="' + claydol.x + '"]');
-      check("card do time mostra 'Gerar build nova (evoluiu)' enquanto a build é a da forma anterior", !!botaoEvo && /evoluiu/.test(botaoEvo.textContent));
       // Curada que veio da pré-evolução também é marcada pra build nova.
       const marsh = TE.getSpeciesBySname("SPECIES_BALTOY");
       if (marsh) {
@@ -248,7 +187,6 @@ async function section24() {
     }
     setSearch("");
   } finally {
-    if (claudeAntes === undefined) delete window.claude; else window.claude = claudeAntes;
     TE.applySave(snapshot);
     S.autoLog = logAntes;
   }

@@ -374,41 +374,6 @@
     if (!isNaN(x)) goToDexSpecies(x);
   });
 
-  // "Ver Estratégias" no card "Time gerado" (achado em auditoria,
-  // 2026-09-18, item 16): o guia de uso já cita um chefão real e quem
-  // segura ele, mas o jogador ainda tinha que navegar à mão até a Dex e
-  // abrir Estratégias pra ver um set alternativo pra essa matchup - fecha
-  // esse ciclo com 1 clique/Enter. goToDexSpecies já roda selectSpecies()
-  // de forma síncrona, então o <details> de Estratégias já existe no DOM
-  // logo depois - só falta abri-lo e rolar até ele.
-  function goToDexSpeciesStrategies(x) {
-    goToDexSpecies(x);
-    var det = [].slice.call(document.querySelectorAll(".detail-group")).find(function (d) {
-      var s = d.querySelector("summary");
-      return s && s.textContent.indexOf("Estratégias") === 0;
-    });
-    if (det) {
-      det.open = true;
-      // Rolagem suave só para quem aceita movimento (ticket 10): o CSS de prefers-reduced-motion não alcança o JS.
-      var semMovimento = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      det.scrollIntoView({ block: "start", behavior: semMovimento ? "auto" : "smooth" });
-    }
-  }
-  document.addEventListener("click", function (e) {
-    var el = e.target.closest && e.target.closest(".goto-species-strategies");
-    if (!el) return;
-    var x = parseInt(el.dataset.x, 10);
-    if (!isNaN(x)) goToDexSpeciesStrategies(x);
-  });
-  document.addEventListener("keydown", function (e) {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    var el = e.target.closest && e.target.closest(".goto-species-strategies");
-    if (!el) return;
-    e.preventDefault();
-    var x = parseInt(el.dataset.x, 10);
-    if (!isNaN(x)) goToDexSpeciesStrategies(x);
-  });
-
   // Ficha: barras dos stats base.
   function fichaStatsHtml(sp) {
   var statLabels = ["HP", "Ataque", "Defesa", "Sp. Atq", "Sp. Def", "Velocidade"];

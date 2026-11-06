@@ -184,23 +184,6 @@ test("lista da Dex: End vai à última espécie (carregando os lotes) e Home vol
   await expect(linhas.first()).toBeFocused();
 });
 
-for (const reduzida of [true, false]) {
-  test("rolagem até Estratégias: " + (reduzida ? "sem" : "com") + " animação quando o sistema pede " + (reduzida ? "menos movimento" : "movimento normal"), async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: reduzida ? "reduce" : "no-preference" });
-    await abrirApp(page);
-    const comportamento = await page.evaluate(() => {
-      const chamadas = [];
-      const original = Element.prototype.scrollIntoView;
-      Element.prototype.scrollIntoView = function (o) { chamadas.push(o && o.behavior); return original.call(this, o); };
-      const sp = window.__erTest.getSpeciesBySname("SPECIES_CHARIZARD");
-      window.__erTest.goToDexSpeciesStrategies(sp.x);
-      Element.prototype.scrollIntoView = original;
-      return chamadas[chamadas.length - 1];
-    });
-    expect(comportamento).toBe(reduzida ? "auto" : "smooth");
-  });
-}
-
 // Ticket 13 (07/10/2026): anterior/próximo da ficha segue a lista da tela (busca aplicada) e a ficha mostra
 // o TOTAL dos stats e as faixas Fraco/Resiste/Imune.
 test("ficha: próximo segue a lista filtrada; TOTAL e faixas de efetividade aparecem", async ({ page }) => {

@@ -3,12 +3,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import vm from "node:vm";
 import { carregarRegras, lerComMutacao } from "./carregar_regras.mjs";
 import { validarBuilds } from "../../scripts/validar_dados.mjs";
 
 const R = carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" });
-const R0 = carregarRegras({ milestone: 0, difficulty: "ace", levelCapMode: "more" });
 // Sabotagem (tests/run_sabotage.mjs) para arquivos fora de src/regras, que o carregarRegras não cobre:
 // src/ui/ia.js e data/builds.json passam por aqui, com o mesmo MUTACAO_* (trecho exato, só na memória).
 const bruto = JSON.parse(lerComMutacao("data/builds.json", "builds.json"));
@@ -18,41 +16,6 @@ test("item 4: build da IA promovida pelo playtester tem Confiança consenso (nã
   const s = R.seloDaBuild({ origem: "curada", fonte: "ia-curada-playtester" });
   assert.equal(s.nivel, "consenso");
   assert.equal(R.seloDaBuild({ origem: "ia" }).nivel, "relato", "a build gerada na hora continua relato");
-});
-
-test("item 5: Mega cuja pedra ainda não saiu na Etapa não gera build; liberada, gera", () => {
-  const mega = R0.getSpeciesBySname("SPECIES_ABSOL_MEGA");
-  assert.equal(R0.megaFormLiberada(mega), false, "pré-condição: Etapa 0, pedra travada");
-  const motivo = R0.motivoDeNaoGerarBuild(mega);
-  assert.match(motivo, /Mega só a partir da/);
-  assert.equal(R0.motivoDeNaoGerarBuild(R0.getSpeciesBySname("SPECIES_ABSOL")), null, "forma base gera");
-  assert.equal(R.motivoDeNaoGerarBuild(R.getSpeciesBySname("SPECIES_ABSOL_MEGA")), null, "Etapa 8: pedra liberada");
-});
-
-test("item 5 (ligação na UI): src/ui/ia.js não chama a IA para Mega travada, nem no pedido único nem no lote", async () => {
-  const Ru = carregarRegras({ milestone: 0, difficulty: "ace", levelCapMode: "more" });
-  const el = { textContent: "" };
-  Ru.document = { getElementById: () => el };
-  vm.runInContext(lerComMutacao("src/ui/ia.js", "ia.js"), Ru, { filename: "src/ui/ia.js" });
-  let chamadas = 0;
-  Ru.pedirIA = async () => { chamadas++; return { ok: false, mensagem: "sem IA no teste" }; };
-  const mega = Ru.getSpeciesBySname("SPECIES_ABSOL_MEGA");
-  assert.equal(Ru.megaFormLiberada(mega), false, "pré-condição: Mega travada");
-  assert.equal(await Ru.generateBuildWithAI(mega, "x", {}), false);
-  assert.match(el.textContent, /Mega só a partir da/);
-  assert.equal(chamadas, 0, "pedido único: nenhuma consulta à IA");
-  const lote = await Ru.gerarBuildsDoTimeComIA([mega, Ru.getSpeciesBySname("SPECIES_ABSOL_MEGA")], "x", () => ({}), {});
-  assert.equal(lote[mega.sname], false);
-  assert.match(lote.ultimoMotivo, /Mega só a partir da/);
-  assert.equal(chamadas, 0, "lote: nenhuma consulta à IA");
-});
-
-test("item 6: o prompt diz quais itens ainda não estão disponíveis, e some quando já saíram", () => {
-  const cedo = R0.blocoItensComunsIA(false, "");
-  assert.match(cedo, /AINDA NAO DISPONIVEIS/);
-  assert.match(cedo, /Zoom Lens \(a partir da Etapa 1\)/, "item real do dado que só sai na Etapa 1");
-  assert.match(cedo, /com motivo claro/, "a IA evita mas pode usar com motivo");
-  assert.doesNotMatch(R.blocoItensComunsIA(false, ""), /AINDA NAO DISPONIVEIS/, "Etapa 8 já liberou todos");
 });
 
 test("item 7: só no golpe-ponte, item da curada avisa Choice com status e o 3º item igual (nada além)", () => {
@@ -140,13 +103,4 @@ test("item 13: builds dos vídeos entram como 2ª Build, ao lado da curada do Di
   assert.equal(R.conflitoDeItem(w.item, w.moves, R.getSpeciesBySname("SPECIES_WOOLY_WORM")), null);
   // O app mostra as duas (curadasDe lê lista).
   assert.equal(R.curadasDe("SPECIES_WOOLY_WORM").length, 2);
-});
-
-test("item 7 (marca): a build do golpe-ponte sai marcada e a marca sobrevive à gravação na lista", () => {
-  const sp = R.getSpeciesBySname("SPECIES_RATTATA");
-  const v = { ability: "", nature: "Hardy", item: "", moves: ["Tackle"], evs: [0, 0, 0, 0, 0, 0] };
-  R.ajustarBuildDaIa(sp, v, { modo: "ponte", alvo: { ability: "", nature: "Jolly", item: "Choice Band", evs: "252 Atk" } }, 20);
-  assert.equal(v.ponte, true);
-  assert.equal(R.entradaDeBuild(v, "curada", sp.sname, null).ponte, true);
-  assert.equal(R.entradaDeBuild({ moves: ["Tackle"] }, "ia", sp.sname, null).ponte, undefined);
 });

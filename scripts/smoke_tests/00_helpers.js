@@ -133,12 +133,6 @@ function selecionarArquetipo(axis, value) {
   if (chip) chip.click();
   return chip;
 }
-// Desde 21/10/2026 o Meu Time abre no Modo Motor (padrão); as seções que testam o caminho da IA ("Gerar time completo") passam antes por este
-// helper, que clica o chip "IA (Claude)" como o jogador faria.
-async function usarModoIA() {
-  var chip = document.getElementById("modo-montagem-ia");
-  if (chip && chip.getAttribute("aria-pressed") !== "true") { chip.click(); await wait(30); }
-}
 async function addByName(name, toBox) {
   setSearch(name);
   await wait(120);

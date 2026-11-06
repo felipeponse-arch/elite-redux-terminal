@@ -39,16 +39,6 @@ test("Mind Crunch torna a mordida especial; Power Fists faz o soco mirar a Defes
   assert.equal(R.efeitoDasHabilidadesNoDuelo([idHab("Dual Wield")], "DW", null).categoriaExtra.corte, 1.4);
 });
 
-test("sinergia da espécie inclui a de categoria: quem tem Iron Fist e aprende socos é avisado", () => {
-  const sp = R.SPECIES.find((s) => s && R.uniqueIds((s.ab || []).concat(s.inn || [])).includes(idHab("Iron Fist")) &&
-    R.golpesDeDueloAte(s, null).some((g) => R.categoriasDoGolpeDuelo(g).includes("soco")));
-  assert.ok(sp, "fixture: espécie com Iron Fist que aprende soco");
-  const s = R.sinergiasDaEspecie(sp).find((h) => h.name === "Iron Fist");
-  assert.ok(s && s.golpes.some((g) => /Punch/.test(g)), JSON.stringify(s));
-  assert.ok(s.motivos.includes("bônus de poder"), JSON.stringify(s));
-  assert.match(R.montarPromptBuild(sp, {}), /Iron Fist \((innate|escolhivel)\) reforca soco por bônus de poder/);
-});
-
 test("sinergia geral preserva o motivo de prioridade e separa Fire Fang de Fire Lash", () => {
   const sp = R.SPECIES.find((s) => s && s.sname === "SPECIES_CENTISKORCH");
   assert.ok(sp, "fixture: Centiskorch");

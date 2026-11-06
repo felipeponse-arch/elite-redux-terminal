@@ -59,25 +59,6 @@ test("dois climas diferentes no campo: fica sem clima (depende de quem entra por
   assert.equal(R.climaNoCampoDuelo({ clima: null, ef: { climasProprios: ["nevoa"] } }, { ef: {} }), "nevoa");
 });
 
-test("lote de builds: quem ainda vai ganhar build nova não conta nos itens em uso (trava de 2 iguais)", () => {
-  const porNome = (n) => R.SPECIES.find((s) => s && s.n === n);
-  const [a, b, c] = ["Luvdisc", "Wailmer", "Corphish"].map(porNome);
-  R.state.team = [a.x, b.x, c.x]; R.state.box = []; R.state.customBuilds = {};
-  const com = (item) => [{ ability: "", nature: "Hardy", item, moves: ["Tackle"], evs: [0, 0, 0, 0, 0, 0], ivs: [31, 31, 31, 31, 31, 31], active: true, source: "ia" }];
-  R.state.customBuilds[a.sname] = com("Life Orb");
-  R.state.customBuilds[b.sname] = com("Life Orb");
-  assert.equal((R.itensEmUsoComQuem(c.x)["Life Orb"] || []).length, 2, "sem lote: as 2 builds antigas contam");
-  R.comecarLoteDeBuilds([a.x, b.x, c.x]);
-  try {
-    assert.equal(R.itensEmUsoComQuem(c.x)["Life Orb"], undefined, "no lote: A e B ainda vão ser trocados");
-    R.concluirBuildDoLote(a.x);
-    assert.equal(R.itensEmUsoComQuem(c.x)["Life Orb"].length, 1, "A já ganhou a build nova - conta de novo");
-  } finally {
-    R.encerrarLoteDeBuilds();
-    R.state.team = []; R.state.customBuilds = {};
-  }
-});
-
 test("Lum/Chesto Berry: a 1ª tentativa de sono se perde (uma vez só); Unnerve e Klutz anulam a baga", () => {
   const eu = (ab) => unidade(efDe(ab), golpe("F"));
   const comLum = (ab) => unidade(efDe(ab || []), golpe("F"), { it: R.itemDoDuelo("Lum Berry", null) });

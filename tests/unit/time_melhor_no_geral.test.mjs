@@ -19,19 +19,6 @@ test("alvo { campo: true }: um ás por luta da run, nenhum chefão em foco", () 
   assert.notEqual(padrao.alvo && padrao.alvo.origem, "campo");
 });
 
-test("a escolha da IA com opts.campo usa o campo inteiro e o prompt diz isso", () => {
-  const r = R.candidatosParaAEscolhaDaIa(sp("Scizor"), { timeNovo: true, campo: true });
-  assert.equal(r.alvo.origem, "campo");
-  assert.match(R.blocoDeCandidatosParaIA(sp("Scizor"), r), /campo inteiro da run, sem focar em nenhum chefao/);
-  const doChefao = R.candidatosParaAEscolhaDaIa(sp("Scizor"), { timeNovo: true });
-  assert.notEqual(doChefao && doChefao.alvo && doChefao.alvo.origem, "campo", "sem campo: comportamento antigo");
-});
-
-test("a tela do time (Montar time completo) pede as builds com campo: true", () => {
-  const src = readFileSync(new URL("../../src/ui/arquetipo.js", import.meta.url), "utf8");
-  assert.match(src, /gerarBuildsDoTimeComIA\(paraIA, "archetype-status", function \(\) \{ return \{ timeNovo: true, campo: true \}; \}/);
-});
-
 test("o rank v2 e a tela do time usam a MESMA lista de lutas", () => {
   const script = readFileSync(new URL("../../scripts/calcular_rank_v2.mjs", import.meta.url), "utf8");
   assert.match(script, /const LUTAS_DA_RUN = R\.LUTAS_DA_RUN;/);

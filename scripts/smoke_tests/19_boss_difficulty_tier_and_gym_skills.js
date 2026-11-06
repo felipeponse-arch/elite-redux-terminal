@@ -190,17 +190,6 @@ async function section19() {
           check("botão de aplicar troca existe se e somente se há troca sugerida da caixa",
             !!cardConfronto.querySelector(".cf-apply-swap") === temTrocas);
 
-          // Ferramenta de IA com o elenco real da próxima luta (fase 4).
-          var milestoneFase4 = T.state.settings.milestone;
-          T.state.settings.milestone = 0;
-          var roster = T.aiTool_getNextBossRoster();
-          var proxima = T.getRemainingBossEntries()[0];
-          check("getNextBossRoster devolve o elenco real da próxima luta (golpes, habilidade, item)",
-            roster.nextBossName === proxima.name &&
-              roster.timeDoChefao.length === T.bossPartyPorDificuldade(proxima).length &&
-              roster.timeDoChefao.every(function (m) { return m.golpes.length > 0 && m.habilidade; }),
-            roster);
-          T.state.settings.milestone = milestoneFase4;
         }
       }
     }

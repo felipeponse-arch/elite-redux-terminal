@@ -105,14 +105,6 @@ test("save: 'Snow' de save antigo vira 'Hail' e a Tática é guardada (2026-09-2
   for (const t of ["Hail", "Eerie Fog", "Electric Terrain", "Toxic Terrain"]) assert.ok(R.ARQUETIPOS_DE_CAMPO.includes(t), t);
 });
 
-test("todo valor de arquétipo tem orientação pra IA, e a Tática entra no prompt", () => {
-  for (const v of R.PACE_ARCHETYPES) assert.ok(R.PACE_BUILD_GUIDANCE[v], "Estilo " + v);
-  for (const v of R.ARQUETIPOS_DE_CAMPO) assert.ok(R.WEATHER_BUILD_GUIDANCE[v], "Clima e campo " + v);
-  for (const v of R.TATICA_ARCHETYPES) assert.ok(R.TATICA_BUILD_GUIDANCE[v], "Tática " + v);
-  R.state.archetype.tatica = "Armadilhas e pivô";
-  assert.match(R.montarPromptBuild(sp("SPECIES_GARCHOMP"), {}), /Tatica do time: Armadilhas e pivô .*Stealth Rock/);
-});
-
 test("save: syncContentDiffers ignora datas e o log, e vê qualquer outro campo (inclusive só de um lado)", () => {
   const a = { team: ["X"], savedAt: "1", autoLog: [1], v: 2 };
   assert.equal(R.syncContentDiffers(a, { team: ["X"], savedAt: "2", autoLog: [2], v: 3 }), false);

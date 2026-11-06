@@ -29,7 +29,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   isMegaEvoKind:22, evoluiAinda:27, evioliteFunciona:32, megaFormsOf:38, formFamilyPromptNote:46, megaModePromptLine:60, formFamilyOf:65, isMegaForm:71, megaMode:82, megaEvolutionUnlocked:93, rotuloDaEtapaDaMegaLiberada:102, etapaDaMega:104, megaFormLiberada:109, megaSoNoDebug:110, quandoMega:112, rotuloEtapaDaMega:113, battleFamilyOf:132, usableSpeciesFor:135, megaPromptBlock:139, megaDaPedra:169, stonesOf:175, battleUnitsOf:185, unitTypeMult:201
 - **golpes.js** - O que cada golpe faz (papel pelo efeito real) e como descrevê-lo pra IA.
   dadoExterno:19, movePromptLine:28, ehGolpeDePivo:41, ehPrioridadeDeDano:49, moveRoleOf:53
-- **itens_do_time.js** - UMA lista de itens para o set do duelo (itemDoSetDuelo), o Modo Motor (time_pelo_motor.js) e a IA (prompts_ia.js,
+- **itens_do_time.js** - UMA lista de itens para o set do duelo (itemDoSetDuelo), o Modo Motor (time_pelo_motor.js) e a validação de build (
   soExistentes:30, itensDeEspeciePara:82, itemValidoNoTime:94, itensDoTime:98, itemDeTipoDoTime:102
 - **level_cap.js** - Level cap atual e golpes liberados por ele.
   levelCapMode:16, levelCapModeFromDifficulty:22, innatesAtivasNoNivel:34, nivelDaHabilidadeNoElite:40, innatesTravadasNoNivel:44, getCurrentCap:49, capOuPadrao:61, nivelDeCalculo:65, availableMovesFor:73, golpesTravadosNoCap:90
@@ -73,7 +73,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **caixa.js** - Aba Caixa (PC Box): grade por páginas, busca e ações de cada Pokémon da caixa.
   renderBox:16
 - **dex_ficha.js** - Dex: ficha do Pokémon (stats, habilidades, golpes, rank, evolução) e o agendamento do resumo do topo.
-  abilityCard:14, buildSynergyHtml:42, conditionMoveSynergyNoteHtml:70, evoConditionText:88, renderMovesTable:111, rankBadgeHtml:169, rankStageBadgeHtml:203, roleTagsHtml:215, howToObtainText:236, whereToFindText:266, badgeDeTierHtml:284, marcasDoRankHtml:288, rankInfoLineHtml:310, goToDexSpecies:354, goToDexSpeciesStrategies:384, fichaStatsHtml:413, fichaEfetividadeHtml:423, fichaNavHtml:435, fichaEvolucaoHtml:446, fichaFormasHtml:464, fichaComoObterHtml:486, fichaCabecalhoHtml:504, fichaConhecerHtml:558, fichaGolpesHtml:580, fichaNotasHtml:591, selectSpecies:599, scheduleDashboardRefresh:723, updateResetTeamBoxBtn:737
+  abilityCard:14, buildSynergyHtml:42, conditionMoveSynergyNoteHtml:70, evoConditionText:88, renderMovesTable:111, rankBadgeHtml:169, rankStageBadgeHtml:203, roleTagsHtml:215, howToObtainText:236, whereToFindText:266, badgeDeTierHtml:284, marcasDoRankHtml:288, rankInfoLineHtml:310, goToDexSpecies:354, fichaStatsHtml:378, fichaEfetividadeHtml:388, fichaNavHtml:400, fichaEvolucaoHtml:411, fichaFormasHtml:429, fichaComoObterHtml:451, fichaCabecalhoHtml:469, fichaConhecerHtml:523, fichaGolpesHtml:545, fichaNotasHtml:556, selectSpecies:564, scheduleDashboardRefresh:688, updateResetTeamBoxBtn:702
 - **dex_lista.js** - Dex: filtro de tipo, busca, ordenação, lista em lotes e o modal de troca do time.
   moveListboxCursor:118, bst:152, statPct:163, statTier:164, getFiltered:171, linhaDaListaHtml:212, renderMaisLista:232, renderList:243, preencherListaSeCurta:283, syncRowAddButtons:313, openSwapModal:328, closeSwapModal:367, openConfirmModal:403, closeConfirmModal:411, esconderToast:437, agendarToast:451, flashToast:473
 - **editor_build.js** - Formato Showdown, cópia e o editor "Meu build" da ficha.
@@ -324,7 +324,6 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **itens_da_config.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **itens_de_atributo.test.mjs** - TK-08 (28/10/2026): itens que mexem num atributo da espécie, iguais ao código do jogo (er-repo f34fc2b,
 - **itens_do_time.test.mjs** - TK-14 (motor-D5.3, decisão do usuário 28/10): UMA lista de itens para o set do duelo, o Motor e a IA.
-- **itens_indisponiveis_ia_paridade.test.mjs** - TK-14: o aviso "ainda nao disponiveis" da IA usa a lista unica (itensDoTime) e da o mesmo resultado da regra antiga.
 - **itens_no_duelo.test.mjs** - Itens no duelo (2026-09-29, decisão do usuário: "item nos sets do duelo").
 - **itens_registro_14.test.mjs** - TK-14 (estrutura-2026-10-22): itens. Expert Belt 1,2x do código (não o f:30 da config), Knock Off pela regra real do jogo
 - **juiz_do_time.test.mjs** - Depende de dado: chefões (bosses.json) e level caps (levelcaps.json) da versão do jogo (muda quando o jogo troca de versão).
@@ -340,7 +339,6 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **lote_b_plano_real.test.mjs** - Lote B da força-tarefa (2026-10-02): o plano contra o chefão tem que corresponder ao time
 - **lote_c_validacao.test.mjs** - Lote C da força-tarefa (2026-10-02): validação estratégica das builds da IA e o que a
 - **lote_d_confiabilidade.test.mjs** - Lote D da força-tarefa (2026-10-02): confiabilidade do estado, do save, da sincronização
-- **lote_de_builds.test.mjs** - Lote de builds do time (2026-09-30, decisão do usuário: "sim, uma chamada pro
 - **lutas_comuns_nome_de_habilidade.test.mjs** - Depende de dado: nome de habilidade das lutas comuns e versão gravada pelo build (muda quando o jogo troca de versão).
 - **manual_build.test.mjs** - Manual de build competitivo (reunião de 2026-09-28): regras gerais de nature,
 - **mapa_do_codigo.test.mjs** - Gerador do mapa do código: determinístico e acha função conhecida com a linha certa.

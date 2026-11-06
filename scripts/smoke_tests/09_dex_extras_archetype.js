@@ -270,11 +270,9 @@ async function section09() {
     !document.querySelector(".archetype-warning"));
   check("botão avulso 'Montar melhor time' foi removido (achado de UX, 2026-09-18)",
     !document.getElementById("archetype-build"));
-  check("o Meu Time abre no Modo Motor (padrão): botão 'Montar meu melhor time' e chip Automático marcado",
-    !!document.getElementById("motor-montar") && document.getElementById("modo-montagem-motor").getAttribute("aria-pressed") === "true");
-  await usarModoIA(); // o padrão é o Modo Motor (botão 'Montar meu melhor time'); a IA é o outro chip
-  check("só resta o botão 'Gerar time completo' no card de arquétipo (modo IA)",
-    !!document.getElementById("archetype-build-complete"));
+  check("o Meu Time abre no Modo Motor (padrão): botão 'Montar meu melhor time' sem seletor de modo",
+    !!document.getElementById("motor-montar") && !document.getElementById("modo-montagem-motor") && !document.getElementById("modo-montagem-ia"));
+  check("não existe mais o botão 'Gerar time completo' (o app não usa IA)", !document.getElementById("archetype-build-complete"));
   check("card 'Leitura estratégica' foi removido (redundante com 'Gerar time completo')",
     ![...document.querySelectorAll(".card h3")].some(h => h.textContent === "Leitura estratégica"));
 

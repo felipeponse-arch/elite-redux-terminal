@@ -1,6 +1,6 @@
   // ===== src/regras/campo.js =====
   // TK-16 (campo, fase 1): FONTE ÚNICA do vocabulário de clima, terreno, telas e hazards, e das durações de campo.
-  // Antes cada consumidor (dados_base, duelo, condicoes_habilidade, time_pelo_motor_papeis, mono_run, prompts_ia) trazia
+  // Antes cada consumidor (dados_base, duelo, condicoes_habilidade, time_pelo_motor_papeis, mono_run) trazia
   // a sua lista. Colado no <script> principal por scripts/build.mjs (marcador @regras campo.js), ANTES de dados_base.js.
   // Só dado e funções puras: nada aqui lê ou desenha a página.
 

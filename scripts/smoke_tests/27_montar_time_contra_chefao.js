@@ -1,21 +1,22 @@
 // Seção 27 (2026-09-29): botão "Montar time contra este chefão" (aba Chefões),
 // que substituiu o cartão "Enviar para o Claude" (texto pra copiar e colar na
-// conversa). Clique de verdade; a IA das builds é simulada (window.claude), o
-// resto é o app real: simulador de duelo, troca do time, time antigo guardado,
+// conversa). Clique de verdade, sem IA (o app não usa mais, 06/11/2026): simulador de duelo, troca do time, time antigo guardado,
 // plano da luta no cartão da aba Time e o botão de voltar ao time anterior.
 async function section27() {
   await prepararRunPadrao();
   var T = window.__erTest;
   if (!T) { check("ponte de teste disponível", false); return; }
-  var claudeAntes = window.claude;
-  // O fluxo do botão (time, status, aviso de faltou build) é testado com o prompt de build do zero; a escolha entre candidatos no lote é a seção 29.
-  T.definirEscolhaEntreCandidatos(false);
-  T.definirPausasIA([0, 0]);
+  // Espera a simulação do botão terminar (o status "Simulando…" aparece e some).
+  async function esperarMontagem() {
+    for (var q = 0; q < 400; q++) {
+      await wait(50);
+      var s = document.getElementById("boss-team-status");
+      if (q >= 2 && (!s || !/Simulando/.test(s.textContent))) break;
+    }
+    await wait(150);
+  }
   var timeAntes = T.state.team.slice();
   var donos = T.state.team.concat(T.state.box);
-  var prompts = [];
-  // Resposta que a validação recusa: o teste é do fluxo, não da qualidade da build.
-  window.claude = { use: async function (n) { return n === "sample" ? { json: async function (p) { prompts.push(p); return { ability: "Nada", moves: [] }; } } : null; } };
   try {
     document.querySelector('.tab-btn[data-tab="bosses"]').click();
     await wait(50);
@@ -47,14 +48,7 @@ async function section27() {
     var botao = document.getElementById("boss-montar-time");
     if (!achou("botão 'Montar time contra este chefão'", botao)) return;
     botao.click();
-    // Espera o fluxo inteiro (duelos + 1 build por membro, IA simulada).
-    // Só "Faltou build" encerra: o aviso fica vazio ENQUANTO as builds são pedidas
-    // (parar no vazio cortava a espera no meio quando o duelo ficou mais pesado).
-    for (var i = 0; i < 300; i++) {
-      await wait(50);
-      var st = document.getElementById("chefao-build-status");
-      if (st && /^Faltou build/.test(st.textContent) && prompts.length) break;
-    }
+    await esperarMontagem();
     check("o botão leva pra aba Meu time", document.querySelector('.tab-btn[data-tab="team"]').classList.contains("active"));
     var time = T.state.team.slice();
     check("o time foi trocado pelos escolhidos (até 6, todos do time ou da caixa de antes)",
@@ -83,59 +77,15 @@ async function section27() {
     var passos = document.querySelectorAll(".plano-luta li");
     check("o cartão mostra a luta simulada inteira, passo a passo", !!card && /Luta simulada inteira/.test(card.textContent) && passos.length >= 1,
       [].map.call(passos, function (li) { return li.textContent.slice(0, 60); }));
-    check("pediu uma build por membro, mirando a Flannery 1",
-      prompts.length >= time.length && prompts.every(function (p) { return /OBJETIVO DEST[AE] (BUILD|TIME): vencer Flannery 1/.test(p); }), prompts.length);
-    check("build recusada vira aviso de 'faltou build', sem travar o fluxo",
+    check("membros sem build ganham o aviso 'faltou build', sem travar o fluxo",
       /^Faltou build/.test(document.getElementById("chefao-build-status").textContent), document.getElementById("chefao-build-status").textContent);
     // Clicar de novo não cria um segundo "Antes de ..." (reaproveita a vaga).
     document.querySelector('.tab-btn[data-tab="bosses"]').click();
     await wait(50);
     document.getElementById("boss-montar-time").click();
-    for (var j = 0; j < 300; j++) {
-      await wait(50);
-      var st2 = document.getElementById("chefao-build-status");
-      if (st2 && /^Faltou build/.test(st2.textContent)) break;
-    }
+    await esperarMontagem();
     check("clicar de novo reaproveita a vaga do 'Antes de ...' (não gasta outra das 3)",
       T.state.savedTeams.filter(function (t) { return /^Antes de /.test(t.name); }).length === 1, T.state.savedTeams.map(function (t) { return t.name; }));
-    // Economia de IA (2026-09-30): quem já tem build ativa feita pra este chefão
-    // neste level cap não pede build de novo ao clicar outra vez.
-    var capAgora = T.getCurrentCap() || 0;
-    T.state.team.forEach(function (x) {
-      var spT = T.getSpeciesByX(x);
-      T.state.customBuilds[spT.sname] = [{ ability: "", nature: "Hardy", item: "", moves: ["Tackle"], evs: [0, 0, 0, 0, 0, 0], ivs: [31, 31, 31, 31, 31, 31],
-        source: "ia", active: true, savedAt: "2026-09-30", rationale: "", feitaPara: { chefao: "Flannery 1|" + (T.bossState.diff || "party"), cap: capAgora } }];
-    });
-    var pedidosAntes = prompts.length;
-    document.querySelector('.tab-btn[data-tab="bosses"]').click();
-    await wait(50);
-    document.getElementById("boss-montar-time").click();
-    for (var m = 0; m < 300; m++) {
-      await wait(50);
-      var stM = document.getElementById("chefao-build-status");
-      if (stM && /Mantidas/.test(stM.textContent)) break;
-    }
-    check("clicar de novo com builds já feitas pra este chefão não pede nenhuma build à IA",
-      prompts.length === pedidosAntes && /Mantidas as builds que já eram contra Flannery 1/.test((document.getElementById("chefao-build-status") || {}).textContent || ""),
-      { pedidos: prompts.length - pedidosAntes, status: (document.getElementById("chefao-build-status") || {}).textContent });
-    // Revisão de 2026-09-30: o mesmo chefão tem 3 times (Padrão/Insane/Hell) - trocar a
-    // variante e clicar de novo tem que pedir build nova (a marca é chefão + variante).
-    document.querySelector('.tab-btn[data-tab="bosses"]').click();
-    await wait(50);
-    var outraVariante = [].filter.call(document.querySelectorAll("#boss-detail [data-diff]"), function (b) { return b.dataset.diff !== (T.bossState.diff || "party"); })[0];
-    if (achou("botão de outra variante (Insane/Hell) da Flannery 1", outraVariante)) {
-      outraVariante.click();
-      await wait(50);
-      var pedidosVariante = prompts.length;
-      document.getElementById("boss-montar-time").click();
-      for (var v = 0; v < 300; v++) {
-        await wait(50);
-        var stV = document.getElementById("chefao-build-status");
-        if (stV && /^Faltou build/.test(stV.textContent) && prompts.length > pedidosVariante) break;
-      }
-      check("outra variante do mesmo chefão (outro time) pede build nova",
-        prompts.length > pedidosVariante, { variante: T.bossState.diff, pedidos: prompts.length - pedidosVariante });
-    }
     // Segundo chefão (revisão de 2026-09-30): montar contra outro chefão com o time
     // do botão na tela NÃO pode trocar o backup do time do jogador pelo do botão.
     var snamesAntes = timeAntes.map(function (x) { return T.getSpeciesByX(x).sname; }).sort().join(",");
@@ -147,13 +97,8 @@ async function section27() {
     if (achou("Wattson na lista de chefões", row2)) {
       row2.click();
       await wait(30);
-      prompts.length = 0;
       document.getElementById("boss-montar-time").click();
-      for (var k = 0; k < 300; k++) {
-        await wait(50);
-        var st3 = document.getElementById("chefao-build-status");
-        if (st3 && /^Faltou build/.test(st3.textContent) && prompts.length) break;
-      }
+      await esperarMontagem();
       var backup = T.state.savedTeams.filter(function (t) { return /^Antes de /.test(t.name); });
       check("com um 2º chefão, o backup continua sendo o time do JOGADOR (não o montado pelo botão)",
         backup.length === 1 && backup[0].team.slice().sort().join(",") === snamesAntes,
@@ -167,8 +112,6 @@ async function section27() {
         T.state.team.slice().sort().join(",") === timeAntes.slice().sort().join(","), T.state.team.map(function (x) { return T.getSpeciesByX(x).n; }));
     }
   } finally {
-    T.definirPausasIA([4000, 10000]);
-    T.definirEscolhaEntreCandidatos(true);
-    if (claudeAntes === undefined) delete window.claude; else window.claude = claudeAntes;
+    // nada a restaurar: o app não usa mais IA
   }
 }

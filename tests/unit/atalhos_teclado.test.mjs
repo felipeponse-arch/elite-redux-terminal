@@ -29,9 +29,9 @@ test("todo markup de atalho para espécie nasce com tabindex=0 e role=button", (
   assert.deepEqual(furos, []);
 });
 
-test("os dois ouvintes globais (clique e Enter/Espaço) cobrem os dois atalhos", () => {
+test("os dois ouvintes globais (clique e Enter/Espaço) cobrem o atalho", () => {
   const ficha = fs.readFileSync(path.join(RAIZ, "src/ui/dex_ficha.js"), "utf8");
-  for (const classe of [".goto-species", ".goto-species-strategies"]) {
+  for (const classe of [".goto-species"]) {
     const usos = ficha.split('closest(".' + classe.slice(1) + '")').length - 1;
     assert.equal(usos, 2, classe + ": um ouvinte de clique e um de teclado");
   }

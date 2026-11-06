@@ -290,11 +290,6 @@ async function section18() {
     setSearch("");
     await wait(30);
 
-    var toolResult = T.aiTool_getConditionMoveSynergy({ sname: especieComCombo.sname });
-    check("ferramenta de IA getConditionMoveSynergy devolve o mesmo combo real mostrado na ficha",
-      toolResult.combos.length === T.CONDITION_MOVE_SYNERGY[especieComCombo.sname].length &&
-        toolResult.combos[0].ability === hit.habilidade,
-      toolResult);
   } else {
     check("pré-condição da checagem de combo autossuficiente (fixtures reais achadas)", false);
   }

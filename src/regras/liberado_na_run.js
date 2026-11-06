@@ -34,7 +34,7 @@
   function entradasDoJogador() { return state.team.concat(state.box); }
   // xsDoJogador: o mesmo, sem contar duas vezes o MESMO x. O app guarda cada espécie uma vez só (builds por
   // sname; o dex barra adicionar quem já está no time ou na caixa), então x repetido é a mesma entrada, não
-  // uma segunda captura - essa é a única proteção mantida (era o filtro de prompts_ia e aba_chefoes).
+  // uma segunda captura - essa é a única proteção mantida (era o filtro da aba_chefoes).
   function xsDoJogador() {
     return entradasDoJogador().filter(function (x, i, arr) { return arr.indexOf(x) === i; });
   }

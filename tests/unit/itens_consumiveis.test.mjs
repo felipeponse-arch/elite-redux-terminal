@@ -33,44 +33,6 @@ test("gemas, reforço de tipo e utilidade entram na lista da IA, com o tipo cert
   assert.ok(R.ITENS_IA_UTILIDADE.every((n) => R.ITEM_DESC[n]), "todo item de utilidade vai com a descrição do jogo");
 });
 
-test("item exclusivo de espécie só aparece e só vale pra espécie certa", () => {
-  const pikachu = R.SPECIES.find((s) => s.n === "Pikachu");
-  const charizard = R.SPECIES.find((s) => s.n === "Charizard");
-  assert.deepEqual([...R.itensDeEspeciePara(pikachu)], ["Light Ball"]);
-  assert.equal(R.itensDeEspeciePara(charizard).length, 0);
-  const marowak = R.SPECIES.find((s) => s.n.startsWith("Marowak "));
-  if (marowak) assert.ok(R.itensDeEspeciePara(marowak).includes("Thick Club"), "forma regional conta");
-  assert.match(R.montarPromptBuild(pikachu, {}), /Exclusivo desta especie:[\s\S]*Light Ball/);
-  assert.doesNotMatch(R.montarPromptBuild(charizard, {}), /Light Ball/);
-});
-
-test("innate que come berry exige berry, na regra e no prompt", () => {
-  const sp = R.SPECIES.find((s) => naoMega(s) && inn(s).includes("Gluttony"));
-  assert.ok(sp, "fixture: espécie com Gluttony innate");
-  const regra = R.regraItemConsumivelPara(sp, ab(sp)[0]);
-  assert.equal(regra.habilidade, "Gluttony");
-  assert.equal(regra.precisa, "berry");
-  assert.match(R.regraItemConsumivelPrompt(sp), /innate Gluttony .*TEM que ser uma Berry/);
-});
-
-test("Unburden escolhível só exige item gasto na luta quando é a escolhida", () => {
-  const sp = R.SPECIES.find((s) => naoMega(s) && ab(s).includes("Unburden") && !inn(s).some((n) => ["Gluttony", "Ripen", "Harvest", "Cud Chew", "Unburden"].includes(n)));
-  assert.ok(sp, "fixture: espécie com Unburden só como escolhível");
-  assert.equal(R.regraItemConsumivelPara(sp, "Unburden").precisa, "consumivel");
-  const outra = ab(sp).find((n) => n !== "Unburden");
-  if (outra) assert.equal(R.regraItemConsumivelPara(sp, outra), null, "outra habilidade escolhida: sem exigência");
-  assert.match(R.regraItemConsumivelPrompt(sp), /se escolher Unburden/);
-  assert.ok(R.itemSeGastaNaLuta("Focus Sash") && R.itemSeGastaNaLuta("Flying Gem") && R.itemSeGastaNaLuta("Salac Berry"));
-  assert.ok(!R.itemSeGastaNaLuta("King's Rock") && !R.itemSeGastaNaLuta("Leftovers"));
-});
-
-test("espécie sem essas habilidades não recebe exigência nem linha no prompt", () => {
-  const todas = ["Gluttony", "Ripen", "Harvest", "Cud Chew", "Unburden"];
-  const sp = R.SPECIES.find((s) => naoMega(s) && ![...inn(s), ...ab(s)].some((n) => todas.includes(n)));
-  assert.equal(R.regraItemConsumivelPara(sp, ab(sp)[0]), null);
-  assert.equal(R.regraItemConsumivelPrompt(sp), "");
-});
-
 test("validação rejeita Gluttony sem berry e aceita com berry", () => {
   R.state.settings.milestone = 9;
   const sp = R.SPECIES.find((s) => naoMega(s) && inn(s).includes("Gluttony") && R.availableMovesFor(s).names.length >= 8);
@@ -88,11 +50,4 @@ test("validação rejeita Gluttony sem berry e aceita com berry", () => {
   assert.ok(ok, "com berry a build passa");
   assert.equal(ok.item, "Salac Berry");
   R.state.settings.milestone = 0;
-});
-
-test("o prompt da build leva a exigência do item", () => {
-  const sp = R.SPECIES.find((s) => naoMega(s) && inn(s).includes("Gluttony"));
-  const p = R.montarPromptBuild(sp, {});
-  assert.match(p, /ITEM OBRIGATORIO: a innate Gluttony/);
-  assert.match(p, /Occa=Fire/);
 });

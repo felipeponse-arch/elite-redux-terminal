@@ -787,7 +787,7 @@
     var TIPO_DO_TERRENO_DUELO = TIPO_DO_TERRENO;
   var REFORCO_DO_TERRENO_DUELO = 1.3;
   // Multiplicadores de habilidade (er-repo f34fc2b, abilities.cc: SERENE_GRACE :861, TECHNICIAN :1595, SHEER_FORCE :1851).
-  // O prompt da IA (prompts_ia.js) lê daqui; o motor lê Technician e Sheer Force do texto do jogo, e o teste confere que batem.
+  // O motor lê Technician e Sheer Force do texto do jogo, e o teste confere que batem.
   var SERENE_GRACE_MULT = 2;
   var TECHNICIAN_LIMITE = 60;
   var TECHNICIAN_MULT = 1.5;

@@ -1,8 +1,8 @@
 ﻿# Injecao de mock de sincronizacao (db), 2026-09-11: exclusiva deste servidor
 # de dev local - NUNCA entra no artifact_final.html publicado. Motivo: ao
-# contrario do mock de IA (claude.use("sample")), que a suite de testes
-# consegue injetar em window.claude a qualquer momento porque generateBuildWithAI()
-# so chama claude.use() no clique do botao, a sincronizacao (wireSync()) roda
+# contrario de um mock de window.claude, que a suite de testes
+# consegue injetar em window.claude a qualquer momento
+# so e lido na carga da pagina; a sincronizacao (wireSync()) roda
 # UMA VEZ, na carga da pagina, dentro da IIFE principal do app - nao ha
 # reentrada exposta pra injetar window.claude depois que a pagina ja carregou.
 # A unica forma de testar o mecanismo real (nao uma simulacao por fora) e

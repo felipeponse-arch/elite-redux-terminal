@@ -61,14 +61,3 @@ test("nenhum placeholder/texto do artifact_template.html tem três pontos", () =
   });
   assert.deepEqual(sobras, []);
 });
-
-test("a regex que tira as reticências do rótulo da IA aceita … e ... (ia.js)", () => {
-  const fonte = ler("src/ui/ia.js");
-  const m = fonte.match(/rotulo\.replace\((\/[^\n]*?\/), ""\)/);
-  assert.ok(m, "achou a regex do rótulo em chamarModelo");
-  const re = new RegExp(m[1].slice(1, -1)); // corpo do literal de regex copiado do próprio código
-  assert.equal("Consultando o Claude…".replace(re, ""), "Consultando o Claude");
-  assert.equal("Consultando o Claude...".replace(re, ""), "Consultando o Claude");
-  assert.equal("Gerando as builds…".replace(re, ""), "Gerando as builds");
-  assert.equal("sem reticências".replace(re, ""), "sem reticências");
-});

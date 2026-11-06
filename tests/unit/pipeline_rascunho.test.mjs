@@ -104,17 +104,6 @@ test("Geodude, Graveler e Onix (Rock Head entre as habilidades): set com Head Sm
   assert.ok(achou >= 3, "premissa: o pipeline propõe Head Smash nessas espécies (" + achou + ")");
 });
 
-// ---------- tudo junto: o rascunho continua válido ----------
-test("o rascunho coerente passa em validateAiBuild e fecharBuild nas espécies do ticket", () => {
-  ["SPECIES_BULBASAUR", "SPECIES_GEODUDE", "SPECIES_BUTTERFREE", "SPECIES_ONIX", "SPECIES_CHARMANDER"].forEach((s) => {
-    cands(s).forEach((c) => {
-      assert.ok(R.validateAiBuild(sp(s), { ability: c.build.ability, moves: c.build.moves, item: c.build.item, nature: c.build.nature, evs: c.build.evs }, {}, {}), s + " " + c.golpes.join("/"));
-      const f = R.fecharBuild(c, { evs: c.build.evs, item: c.build.item, natureza: c.build.nature });
-      assert.equal(f.ok, true, s + " " + (f.erros || []).join(" "));
-    });
-  });
-});
-
 // ---------- 6. Dream Eater ----------
 // O jogo só deixa o Dream Eater agir em alvo dormindo (ou com Comatose): ferramentas/er-repo/data/battle_scripts_1.s
 // BattleScript_EffectDreamEater (jumpifstatus SLEEP / jumpifabilityflag COMATOSE, senão BattleScript_DreamEaterNoEffect).
