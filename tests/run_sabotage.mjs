@@ -221,7 +221,7 @@ let quebradas = 0;
 let semAssercao = 0;
 let soPesado = 0;
 let divida = 0;
-const pendentes = resultados.filter((r) => !r).length;
+const pendentes = MUTACOES.length - resultados.filter(Boolean).length; // resultados é esparso: filter pula os buracos
 for (const r of resultados.filter(Boolean)) {
   const m = r.m;
   if (r.tipo === "quebrada") {
