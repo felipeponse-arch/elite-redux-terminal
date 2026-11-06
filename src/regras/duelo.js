@@ -4118,7 +4118,7 @@
   // Memória por participante (06/11/2026, perfil do teste mais lento: 35 de 81 s eram esta função recriando a
   // unidade a cada consulta). A unidade só muda quando muda algum insumo da assinatura abaixo; sem mudança,
   // devolve o MESMO objeto (WeakMap: nada é gravado no participante).
-  var COMO_ESTA_MEMO = new WeakMap();
+  var COMO_ESTA_MEMO = new WeakMap(); // unidade (c.u) -> { assinatura -> resultado }: as cópias de c das buscas à frente também acertam
   function assinaturaComoEstaDuelo(c) {
     var b = c.bonus, e = b.estagios, st = c.status, s = "", k;
     for (k in e) s += k + e[k] + ",";
@@ -4128,10 +4128,13 @@
     return s;
   }
   function comoEstaDuelo(c) {
-    var sig = assinaturaComoEstaDuelo(c), m = COMO_ESTA_MEMO.get(c);
-    if (m && m.u === c.u && m.sig === sig) return m.v;
-    var v = comoEstaDueloSemMemoria(c);
-    COMO_ESTA_MEMO.set(c, { u: c.u, sig: sig, v: v });
+    var sig = assinaturaComoEstaDuelo(c), porU = COMO_ESTA_MEMO.get(c.u);
+    if (!porU) COMO_ESTA_MEMO.set(c.u, porU = new Map());
+    var v = porU.get(sig);
+    if (v === undefined) {
+      if (porU.size >= 256) porU.clear(); // teto: estados de uma luta longa não crescem sem limite
+      porU.set(sig, v = comoEstaDueloSemMemoria(c));
+    }
     return v;
   }
   function comoEstaDueloSemMemoria(c) {
