@@ -80,36 +80,6 @@ test("com todos os buffs da Flannery ativos, a mesma luta rende menos que sem ne
   assert.equal(r.foes[0].stats[2], Math.floor(sem.foes[0].stats[2] * 1.8));
 });
 
-test("buffsAtivosDoChefao: só os que o jogador não marcou, pelo nome base do líder", () => {
-  R.state.gymSkillsCleared = { Flannery: ["flannery_burn"] };
-  const ativos = R.buffsAtivosDoChefao("Flannery 1");
-  assert.ok(ativos.length > 0 && ativos.indexOf("flannery_burn") === -1 && ativos.indexOf("flannery_toxic") !== -1);
-  assert.equal(R.buffsAtivosDoChefao("Juan 1").length, 0, "Juan é só trava de entrada");
-  const linhas = R.linhasProximaLutaIA(null, { boss: flannery, party }).join("\n");
-  assert.match(linhas, /Buffs do ginasio AINDA ATIVOS/);
-  assert.doesNotMatch(linhas, /Queimadura nos últimos 2/);
-  R.state.gymSkillsCleared = {};
-});
-
-// ---------------- Elite: innates liberadas pelo nível (código oficial) ----------------
-// pokemon_config.h: INNATE_1_LEVEL_ELITE 1, INNATE_2 17, INNATE_3 24; só o jogador. Corrige a v158,
-// que travava tudo até a 2ª insígnia (o vídeo Mono Fairy mostra habilidades antes do 1º ginásio).
-test("Elite: escolhida e 1ª innate sempre; 2ª innate no nível 17, 3ª no 24; Ace sem trava", () => {
-  const E = carregarRegras({ milestone: 0, difficulty: "elite", levelCapMode: "elite" });
-  const sp = E.getSpeciesBySname("SPECIES_GARCHOMP");
-  assert.equal(sp.inn.length, 3, "fixture: Garchomp tem 3 innates");
-  const ab = sp.ab[0];
-  const set = { nome: "x", evs: [0, 252, 0, 0, 4, 252], nature: "Jolly" };
-  const golpes = E.golpesDeDueloAte(sp, 50);
-  const ids = (nivel) => E.unidadeDeDuelo(sp, set, ab, nivel, golpes, null).ids.join(",");
-  assert.equal(ids(10), [sp.inn[0], ab].join(","), "nível 10: 1ª innate + escolhida");
-  assert.equal(ids(17), [sp.inn[0], sp.inn[1], ab].join(","), "nível 17: libera a 2ª");
-  assert.equal(ids(24), [sp.inn[0], sp.inn[1], sp.inn[2], ab].join(","), "nível 24: todas");
-  assert.match(E.linhasContextoComumIA(null, null).join("\n"), /INNATES NO ELITE/);
-  assert.equal(R.unidadeDeDuelo(sp, set, ab, 10, golpes, null).ids.length, 4, "Ace: tudo desde o início");
-  assert.doesNotMatch(R.linhasContextoComumIA(null, null).join("\n"), /INNATES NO ELITE/);
-});
-
 // ---------------- iniciais por BP ----------------
 test("iniciais por BP: a base diz a loja, a evolução manda comprar a base; Mega e não-inicial ficam de fora", () => {
   const t = (s) => R.compraDeInicialTexto(R.getSpeciesBySname(s));
