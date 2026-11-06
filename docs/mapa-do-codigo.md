@@ -121,7 +121,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **cache_sabotagem.mjs** - Cache de "arquivo lembrado" da sabotagem (tests/.sabotagem_cache.json, fora do git).
   mesclarCache:9, ler:18, gravarCacheMesclando:26
 - **calcular_rank_v2.mjs** - Rank v2 (modelo aprovado pelo usuário em 2026-10-02, depois da pesquisa de método):
-  capDe:40, foe:44, ARG:62, etapaDe:81, br:84, avaliar:91, notas:205, lutasComunsParaOMeuTime:241
+  capDe:41, foe:45, ARG:61, etapaDe:64, br:67, avaliar:74, lerTxt:158, notas:213
 - **carimbo_derivado.mjs** - TK-24: grava em data/carimbo_derivados.json de que versão do jogo/config cada derivado foi gerado.
   carimbarDerivado:4, avisosDeFrescor:15, pendentesSemCarimbo:22, problemasDeCarimbo:27
 - **categorias_pela_config.mjs** - Categorias de golpe (soco, mordida, corte...) pelas FLAGS do jogo, não pelo texto da NextDex.
@@ -187,6 +187,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   melhoresPelaSoma:9, mediaDoEixo:13, notaDosEixos:18, escolherPelaNotaFinal:22
 - **rank_fatia.mjs** - Rank com fatia fixa de peso (ticket todas-as-lutas/02, decisão do usuário em 16/10/2026): chefões 60% e lutas comuns 40%.
   notasComFatia:9, comunsMaisPerigosas:36
+- **rank_incremental.mjs** - Rank incremental (06/11/2026, decisão do usuário: atualização recalcula SÓ O QUE MUDOU).
+  hash:10, digitalDaEspecie:15, digitalGlobal:23, decidir:29, r6:41, reduzirMedicao:42, expandirMedicao:53
 - **remapear_sprite_index.mjs** - Sprites pelo NOME da espécie (15/10/2026). O atlas (data/sprite_atlas.png) foi montado com o índice pelo número da espécie (x) do
   indicePorNumero:10
 - **sabotagem_incremental.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026): no master a sabotagem roda só as
@@ -398,6 +400,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **rank_disponibilidade.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **rank_escolha.test.mjs** - Ticket 08 (07/10/2026): a escolha do set do rank avalia por inteiro os melhores pela soma rápida
 - **rank_fatia.test.mjs** - Fatia fixa de peso do rank (ticket todas-as-lutas/02, 21/10/2026): chefões 60% e lutas comuns 40%, com a composição REAL da run
+- **rank_incremental.test.mjs** - Rank incremental (06/11/2026): impressão digital por espécie + global, e a decisão do que recalcular.
 - **rank_premia_hazard.test.mjs** - TK-32 (decisão do usuário de 29/10/2026): o rank premia suporte, só hazard. Dado real: Forretress no nível 40
 - **rank_so_por_rankde.test.mjs** - ADR-003 (ticket 01): o dado do Rank só é lido por rankDe(); SPECIES_RANK não é reescrito depois da carga.
 - **recarga_e_dois_turnos.test.mjs** - TK-06 (decisão 7 do usuário, 28/10): recarga e golpe de 2 turnos lidos do EFEITO do dado, não da tradução PT.

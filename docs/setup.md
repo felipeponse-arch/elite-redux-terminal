@@ -72,7 +72,7 @@ Fluxo certo quando sai versão nova (o que o TK-35 fez na 2.65.5):
 1. Colocar o dado bruto em `data/gameData.json` e conferir a versão em `VERSAO_DEX` de `scripts/alarme_upstream.mjs`.
 2. `scripts/build.ps1` (ou, em Node, `scripts/extracao/transform.mjs <gameData> data/dex_compact.json --versao=<VERSAO_DEX> --config-nova=data/config_nova.json`).
    O build grava a versão do alarme (nunca mais "2.65beta"), aplica o patch da er-config e expande as habilidades compostas.
-3. O build NÃO toca em `data/species_rank.json`. O rank é passo manual no fim: `node scripts/calcular_rank_v2.mjs --gravar` (~2h45), um commit só.
+3. O build NÃO toca em `data/species_rank.json`. O rank é passo manual no fim: `node scripts/calcular_rank_v2.mjs --gravar` (06/11/2026: só os 29 chefões e INCREMENTAL; ~22 min no rank completo `--tudo`, ~6 s por espécie mudada). O cache `data/rank_medicao.json` guarda a medição e a impressão digital de cada espécie; versão nova do jogo muda os dados, e só as espécies com digital diferente recalculam. Mudou a regra do motor/rank de propósito: suba `RANK_REGRA_VERSAO` em `scripts/rank_incremental.mjs` (recalcula tudo). Um commit só.
 4. Depois do build, conferir à mão o que ele não cobre: chefões e builds de referência (`scripts/extracao/chefoes.mjs` + `itens_pela_config.mjs`, o Eviolite sai da config),
    `gerar_mega_forms.mjs`, `gerar_rank_disponibilidade.mjs`, `importar_mono.mjs` (mono_disponibilidade) e `rank_comum.mjs` (lutas comuns).
 Pendente: `extract_bosses.ps1`/`extract_boss_builds.ps1` seguem no build porque `chefoes.mjs` sozinho não reproduz o `bosses.json` commitado (falta a camada da config).

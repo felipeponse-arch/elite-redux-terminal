@@ -2,8 +2,6 @@
  "_aviso": "Sabotagens que JA nao eram pegas por asserção na branch integracao-2026-10-28 antes da refatoração de 06/11/2026 (conferido sem nenhuma mudança). Aparecem como DIVIDA no relatório e não reprovam a rodada. Consertar = escrever o teste que falha com asserção; ao consertar, tirar o id daqui.",
  "ids": [
   "loteB-estrategia-sem-armador",
-  "golpe-hammer-arm-sem-queda",
-  "rank-item-sem-checar-liberacao",
-  "rank-herda-campos-do-rank-antigo"
+  "golpe-hammer-arm-sem-queda"
  ]
 }
