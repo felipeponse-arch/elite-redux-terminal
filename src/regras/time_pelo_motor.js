@@ -236,8 +236,6 @@
     var u = ctx.cache.unid[ck];
     if (u === undefined) {
       u = unidadeDaBuild(c.sp, c.build, nivel, null);
-      // Contrafactual da Fase D: a mesma build sem os golpes de um tipo (setup, tela, vento, sala...); a chave da build já muda.
-      if (c.semTipos) u = Object.assign({}, u, { statusIds: (u.statusIds || []).filter(function (id) { var p = planoDoGolpeStatus(id); return !(p && c.semTipos.indexOf(p.tipo) !== -1); }) });
       motorGuardar(ctx.cache, "unid", ck, u);
     }
     return u;
@@ -454,7 +452,7 @@
       // As comuns mais perigosas de cada etapa que falta (a conferência da fatia de 40%): quantas o time vence e quais perde.
       if (comunsRest.length) metricas.comuns = motorMetricas(motorAvaliar(ctx, busca.time, comunsRest), comunsRest);
       var v = { chave: chave, objetivo: { nome: obj.nome, descricao: obj.descricao },
-        membros: busca.time.map(function (c) { return { sname: c.sname, nome: c.nome, x: c.x, base: c.base.sname, travado: c.travado, origem: c.origem, build: c.build, papeis: [], abstencao: null, contribuicoes: [] }; }),
+        membros: busca.time.map(function (c) { return { sname: c.sname, nome: c.nome, x: c.x, base: c.base.sname, travado: c.travado, origem: c.origem, build: c.build, papeis: [] }; }),
         metricas: metricas, avisos: [], avaliacoes: busca.avaliacoes, itensFechados: itensFechados, tempoItensMs: tItensMs };
       v.melhorTentativa = metricas.restantes.lutas > 0 && metricas.restantes.vence < metricas.restantes.lutas / 2;
       // Favorito nunca some em silêncio: ou está em `membros` ou há um aviso dizendo por quê (linha evolutiva repetida, sem build...).
@@ -470,11 +468,10 @@
       yield "plano-b";
       v.planoB = motorPlanoB(ctx, busca, rsTodas);
       yield "papeis";
-      // Fase D: papéis por build, contribuições, tags e estilo (paralelo ao papel legado da espécie, que não é tocado).
-      var tc = relogio(), cl = motorClassificar(ctx, busca.time);
-      v.membros.forEach(function (m, i) { m.papeis = cl.membros[i].papeis; m.abstencao = cl.membros[i].abstencao; m.contribuicoes = cl.membros[i].contribuicoes; });
-      v.estilo = cl.estilo; v.estiloProva = cl.estiloProva; v.tags = cl.tags; v.condicaoDeVitoria = cl.condicaoDeVitoria; v.naoMedidos = cl.naoMedidos;
-      v.tempoClassificacaoMs = relogio() - tc;
+      // Papéis (do rank), tags de sinergia e estilo do time (sem prova por simulação).
+      var cl = motorClassificar(ctx, busca.time);
+      v.membros.forEach(function (m, i) { m.papeis = cl.membros[i].papeis; });
+      v.estilo = cl.estilo; v.estiloProva = cl.estiloProva; v.tags = cl.tags;
       v.explicacao = motorTextos(v);
       v.tempoMs = relogio() - tv;
       variantes.push(v);

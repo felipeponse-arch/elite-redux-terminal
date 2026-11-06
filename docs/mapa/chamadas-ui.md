@@ -34,7 +34,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - planoContraChefaoHtml:212 - chama: faixaDeHpDaLuta (chefoes.js:593), NOME_DA_CONDICAO (condicoes_habilidade.js:42)
 - renderMonoRun:374 - chama: state (nucleo.js:8) | chamado por: renderTeam (time.js:8)
 - renderTeamAnalysis:400 - chama: computeSharedRisks (chefoes.js:121), USABLE_TYPES (dados_base.js:132), abilityTypeMod (tipos.js:173) | chamado por: renderTeam (time.js:8)
-- renderTeamStrategy:283 - chama: modoMotorAquecer (modo_motor.js:39), modoMotorResultadoHtml (modo_motor.js:224) | chamado por: modoMotorFicarComVariante (modo_motor.js:118), modoMotorMontar (modo_motor.js:67), renderTeam (time.js:8)
+- renderTeamStrategy:283 - chama: modoMotorAquecer (modo_motor.js:39), modoMotorResultadoHtml (modo_motor.js:223) | chamado por: modoMotorFicarComVariante (modo_motor.js:118), modoMotorMontar (modo_motor.js:67), renderTeam (time.js:8)
 - resumoDoArquetipo:74 - chama: state (nucleo.js:8)
 - teamKeyFor:14 - chamado por: guardarTimeAnterior (aba_chefoes.js:265), montarTimeContraEsteChefao (aba_chefoes.js:307)
 - teamRecommendation:30 - chamado por: montarTimeContraEsteChefao (aba_chefoes.js:307), modoMotorFicarComVariante (modo_motor.js:118), zerarRun (time.js:343)
@@ -126,10 +126,9 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - modoMotorFavoritosHtml:151 - chamado por: archetypeCardHtml (arquetipo.js:85)
 - modoMotorFavoritosValidos:30 - chama: state (nucleo.js:8)
 - modoMotorFicarComVariante:118 - chama: getSpeciesByX (dados_base.js:78), SUGESTAO_ROTULO (sugestao_do_motor.js:11), gravarSugestoesDoMotor (sugestao_do_motor.js:61), planoDeGravarSugestoes (sugestao_do_motor.js:39), applyRecommendedTeam (arquetipo.js:143), +4
-- modoMotorMembroHtml:168 - chama: MOTOR_FRASE_DA_PROVA (time_pelo_motor_papeis.js:317)
 - modoMotorMontar:67 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:185), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:74), contextoDoMotor (time_pelo_motor.js:140), +3
-- modoMotorResultadoHtml:224 - chamado por: renderTeamStrategy (arquetipo.js:283)
-- modoMotorRodapeHtml:181 - chama: SUGESTAO_ROTULO (sugestao_do_motor.js:11)
+- modoMotorResultadoHtml:223 - chamado por: renderTeamStrategy (arquetipo.js:283)
+- modoMotorRodapeHtml:180 - chama: SUGESTAO_ROTULO (sugestao_do_motor.js:11)
 
 ## ui/nucleo.js
 - STORE_KEY:82 - chamado por: aplicarSaveRemoto (sync.js:45), lerSaveLocal (sync.js:174)

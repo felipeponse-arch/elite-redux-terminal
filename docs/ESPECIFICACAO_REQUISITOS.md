@@ -737,7 +737,7 @@ nova entra no motor sem consultar e registrar lá.
   Desvio conhecido: Insect Impact ~10% acima da calculadora (causa desconhecida, sem efeito grande).
 - RF116 — **Pipeline de build com intenção** [estende RF21 a RF30 e RF114] (**planejado/decidido; fases 1 e 2
   já existem no motor, ainda sem tela**; desenho em `docs/pipeline_de_build.md`): o Terminal deve montar, por
-  código e antes da IA, de 3 a 5 Candidatos de build (4 golpes e a habilidade) com o motivo de cada um,
+  código e antes da IA, até 2 Candidatos de build (4 golpes e a habilidade) com o motivo de cada um,
   simulá-los no duelo e marcar o hit-kill em 2 níveis: derruba em 1 golpe e bate primeiro é o melhor; derruba
   em 2 golpes e bate primeiro é o segundo. "Bate primeiro" = golpe de prioridade ou mais Velocidade; a
   prioridade não vale contra Queenly Majesty, Dazzling e Armor Tail. O alvo padrão é o próximo líder de

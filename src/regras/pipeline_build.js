@@ -1,8 +1,8 @@
   // ===== src/regras/pipeline_build.js =====
   // Pipeline de build com intenção (ticket 20 da dívida, desenho de 14/10/2026; docs/pipeline_de_build.md).
-  // Do Pokémon para a build: o código monta de 3 a 5 candidatos (uma das 3 habilidades + as inatas + 4 golpes),
-  // simula cada um contra o alvo com o motor do duelo e marca o hit-kill e quem bate primeiro. O app mostra os
-  // candidatos na tela do pipeline; item, EVs e natureza ficam para o jogador (a validação é a de sempre).
+  // Do Pokémon para a build: o código monta no máximo 2 candidatos (corte de 06/11/2026: os 2 melhores e distintos; uma das 3
+  // habilidades + as inatas + 4 golpes), simula cada um contra o alvo com o motor do duelo e marca o hit-kill e quem bate
+  // primeiro. O app mostra os candidatos na tela do pipeline; item, EVs e natureza ficam para o jogador (a validação é a de sempre).
   // Funções públicas: candidatosDeBuild (caso A, do Pokémon) e especiesQueResolvem (caso B, do alvo).
   // Testes: tests/unit/pipeline_build.test.mjs. Escopo global, ES5, sem window/document (ADR-004).
   // Função pura: não muda `state` nem grava nada; o único efeito é o cache interno do motor (benigno).
@@ -20,8 +20,8 @@
   var CONSIDERA_PRIORIDADE_DO_ALVO = true;
 
   var AVISO_SIMULACAO_1X1 = "Simulação 1x1: luta em dupla e Fake Out não são simulados.";
-  var MAX_CANDIDATOS_PIPELINE = 5;
-  var MIN_CANDIDATOS_PIPELINE = 3;
+  var MAX_CANDIDATOS_PIPELINE = 2;
+  var MIN_CANDIDATOS_PIPELINE = 2;
   // Referência de simulação: EVs de ataque + 252 Spe, SEM item (conservador: nunca prometer o que só vale com Life Orb).
   // O item e os EVs finais são da IA; a natureza é a que mais ajuda o candidato (as quatro são testadas).
   var NATUREZAS_DO_PIPELINE = [

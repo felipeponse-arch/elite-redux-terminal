@@ -167,9 +167,8 @@
   var MOTOR_ORIGEM_ROTULO = { pipeline: "build sugerida pelo jogo", "build-salva": "sua build salva", fallback: "melhor set do simulador" };
   function modoMotorMembroHtml(m) {
     var papeis = m.papeis.length
-      ? m.papeis.map(function (p) { return '<span class="plano-chip">' + escapeHtml(p.papel) + '</span>'; }).join(" ") +
-        '<span class="motor-prova">' + m.papeis.map(function (p) { return escapeHtml(p.papel + ": " + MOTOR_FRASE_DA_PROVA[p.papel](p.prova)); }).join("; ") + '.</span>'
-      : '<span class="motor-prova">Sem papel provado: ' + escapeHtml(m.abstencao || "") + '.</span>';
+      ? m.papeis.map(function (p) { return '<span class="plano-chip">' + escapeHtml(p) + '</span>'; }).join(" ")
+      : '<span class="motor-prova">Sem papel definido no rank.</span>';
     var b = m.build || {};
     return '<li class="motor-membro">' + spriteImgHtml(m.x, m.nome, 32) +
       '<div class="motor-membro-corpo"><div class="motor-membro-nome"><span class="goto-species" tabindex="0" role="button" data-x="' + m.x + '">' + escapeHtml(m.nome) + '</span>' +
@@ -198,7 +197,7 @@
     var tags = (v.tags || []).map(function (g) {
       return '<li>' + (g.armador
         ? 'Tag <b>' + escapeHtml(g.tag) + '</b>: ' + escapeHtml(g.armador) + ' arma (' + escapeHtml(g.via) + '); ' +
-          g.beneficiarios.map(function (x) { return escapeHtml(x.nome) + ' (+' + x.ganhoPorDuelo + ' de nota por duelo)'; }).join(" e ") + ' ganham; o time faz +' + g.ganhoDoTime + ' pontos nas ' + g.lutasMedidas + ' lutas medidas.'
+          g.beneficiarios.map(function (x) { return escapeHtml(x.nome) + ' (+' + x.ganhoPorDuelo + ' de nota por duelo)'; }).join(" e ") + ' ganham.'
         : 'Tag <b>' + escapeHtml(g.tag) + '</b>: todos os membros têm o tipo da run.') + '</li>';
     }).join("");
     var b = v.planoB;
@@ -210,10 +209,10 @@
       '<h4 id="motor-v-' + v.chave + '">' + escapeHtml(v.objetivo.nome) + '</h4>' +
       '<p class="mybuild-hint">' + escapeHtml(v.objetivo.descricao.charAt(0).toUpperCase() + v.objetivo.descricao.slice(1)) + '.</p>' +
       '<div class="motor-chips"><span class="plano-chip plano-chip-forte">Vence ' + rest.vence + ' de ' + rest.lutas + ' lutas daqui para frente</span>' +
-        '<span class="plano-chip">Estilo: ' + escapeHtml(v.estilo || "sem prova suficiente") + '</span></div>' +
+        '<span class="plano-chip">Estilo: ' + escapeHtml(v.estilo || "sem papel no rank") + '</span></div>' +
       (v.melhorTentativa ? '<p class="plano-faltou-build">Melhor tentativa com o que você tem: o time não vence metade das lutas que faltam.</p>' : "") +
       '<ol class="motor-membros">' + v.membros.map(modoMotorMembroHtml).join("") + '</ol>' +
-      (tags ? '<ul class="motor-tags">' + tags + '</ul>' : '<p class="mybuild-hint">Sem tag de clima ou tática: nenhuma condição armada teve dois beneficiários medidos.</p>') +
+      (tags ? '<ul class="motor-tags">' + tags + '</ul>' : '<p class="mybuild-hint">Sem tag de clima ou tática: nenhuma condição armada teve dois beneficiários.</p>') +
       '<p class="mybuild-hint">' + planoB + '</p>' +
       (v.avisos.length ? '<ul class="motor-avisos">' + v.avisos.map(function (a) { return '<li>' + escapeHtml(a) + '</li>'; }).join("") + '</ul>' : "") +
       '<details class="motor-explicacao" data-chave="' + v.chave + '"' + (motorExplicacaoAberta[v.chave] ? " open" : "") + '><summary>Por que este time</summary><ul>' +
