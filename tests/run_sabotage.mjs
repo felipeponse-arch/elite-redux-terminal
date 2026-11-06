@@ -136,7 +136,9 @@ function candidatosPara(m) {
 async function avaliar(m) {
   const lembrado = cache[m.id];
   // O cache guarda um arquivo ou uma COMBINAÇÃO ("a|b") que só pega junta (teste que depende do estado do outro).
-  const lista = lembrado ? lembrado.split("|") : [];
+  // "?pesado" = nenhum teste rápido pega (marcado no modo rápido); só a rodada com os pesados (--com-pesados) confirma.
+  if (lembrado === "?pesado" && !COM_PESADOS) return { m, tipo: "so-pesado" };
+  const lista = lembrado && lembrado !== "?pesado" ? lembrado.split("|") : [];
   if (!COM_PESADOS && lista.length && lista.every((f) => ARQUIVOS_PESADOS.includes(f))) return { m, tipo: "so-pesado" };
   const rapidos = lista.filter((f) => ARQUIVOS_DE_TESTE.includes(f));
   if (rapidos.length) {
@@ -167,6 +169,7 @@ async function avaliar(m) {
   const r = await rodar(m, ARQUIVOS_DE_TESTE);
   const c = classificarFalha(r);
   if (c === "quebrada") return { m, tipo: "quebrada" };
+  if (c === "sobreviveu" && !COM_PESADOS) { atualizacoes.set(m.id, "?pesado"); return { m, tipo: "so-pesado" }; }
   if (c === "sobreviveu" || c === "erro-sem-assercao") {
     if (lembrado) atualizacoes.set(m.id, null);
     return { m, tipo: c };
