@@ -304,11 +304,11 @@ test("alvo { foe } já montado pelo motor vale como alvo", () => {
 // Ninetales fora da amostra: o dado novo da er-config 30f0f5a tirou Vengeance e Flash Fire das sinergias dele (species_ability_synergy.json) e ele gera só 2 candidatos; a amostra cobre espécies com 3+.
 const AMOSTRA = ["Ledian", "Accelgor", "Steelix", "Centiskorch", "Scizor", "Diglett", "Vaporeon", "Gulpin", "Lickilicky", "Gigalith", "Fearow"];
 
-test("todo candidato passa em validateAiBuild, tem de 3 a 5 conjuntos distintos e vem na ordem do ranking", () => {
+test("todo candidato passa em validateAiBuild, tem de 1 a 2 conjuntos distintos e vem na ordem do ranking", () => {
   AMOSTRA.forEach((nome) => {
     const r = R.candidatosDeBuild(sp(nome), { alvo: ninetales });
     const rico = !["Vaporeon", "Gigalith", "Lickilicky", "Diglett", "Gulpin"].includes(nome); // poucos golpes de dano contra o alvo
-    assert.ok(r.candidatos.length >= (rico ? 3 : 1) && r.candidatos.length <= 5, nome + ": " + r.candidatos.length + " (" + r.aviso + ")");
+    assert.ok(r.candidatos.length >= (rico ? 2 : 1) && r.candidatos.length <= 2, nome + ": " + r.candidatos.length + " (" + r.aviso + ")");
     const conjuntos = r.candidatos.map((c) => c.golpes.slice().sort().join(","));
     assert.equal(new Set(conjuntos).size, conjuntos.length, nome + ": conjunto repetido");
     r.candidatos.forEach((c, i) => {

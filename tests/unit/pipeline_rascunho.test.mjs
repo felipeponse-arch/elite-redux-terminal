@@ -15,7 +15,7 @@ const FISICAS = ["Adamant", "Jolly", "Brave", "Impish"];
 // ---------- 1. item: quem ainda evolui leva Eviolite ----------
 test("Bulbasaur (ainda evolui): todo candidato leva Eviolite no rascunho, com o aviso", () => {
   const lista = cands("SPECIES_BULBASAUR");
-  assert.ok(lista.length >= 3);
+  assert.ok(lista.length >= 2);
   lista.forEach((c) => {
     assert.equal(c.build.item, "Eviolite", c.golpes.join("/"));
     assert.match(c.avisos.join(" | "), /ainda evolui: o rascunho leva Eviolite/);
@@ -30,14 +30,14 @@ test("Eviolite que o jogo só dá depois da Etapa atual não entra no rascunho",
   const cedo = novo();
   cedo.ONDE_ACHAR_ITENS.Eviolite = [{ etapa: 7, local: "teste", como: "teste" }];
   const lista = cands("SPECIES_BULBASAUR", cedo);
-  assert.ok(lista.length >= 3);
+  assert.ok(lista.length >= 2);
   lista.forEach((c) => assert.notEqual(c.build.item, "Eviolite"));
 });
 
 // ---------- 2. EVs de espécie lenta ----------
 test("Geodude (Speed base 20): EVs em HP, ataque e defesa, sem Velocidade, natureza que sobe o ataque", () => {
   const lista = cands("SPECIES_GEODUDE");
-  assert.ok(lista.length >= 3);
+  assert.ok(lista.length >= 2);
   lista.forEach((c) => {
     assert.equal(c.build.evs[5], 0, c.golpes.join("/"));
     assert.ok(c.build.evs[0] >= 200, "HP " + c.build.evs[0]);
@@ -78,9 +78,9 @@ test("natureza física só com maioria física, especial só com maioria especia
 // especial (a penalidade é 15): abre físico. O caso do atributo fraco fica no Alakazam (Atk 50 x SpA 135), com físico mais forte (152,6 x 138,6) e abertura especial.
 test("atributo fraco: Alakazam (Atk 50 x SpA 135) abre com o set especial, mesmo havendo set físico que bate mais forte", () => {
   const lista = cands("SPECIES_ALAKAZAM");
+  // Com no máximo 2 candidatos (corte 06/11/2026) o set físico pode nem entrar na lista; se entrar, não pode vir antes do especial.
   const fisico = lista.find((c) => FISICAS.includes(c.build.nature));
-  assert.ok(fisico, "premissa: o set físico existe (o motor o mede mais forte)");
-  assert.ok(fisico.dano.max > lista[0].dano.max, "premissa: o físico bate mais forte");
+  assert.ok(!fisico || lista.indexOf(fisico) > 0, "o set físico não abre a lista");
   assert.ok(!FISICAS.includes(lista[0].build.nature), lista[0].build.nature);
 });
 

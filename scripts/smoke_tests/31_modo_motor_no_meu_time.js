@@ -74,8 +74,8 @@ async function section31() {
       [].every.call(varas, function (v) { return [].some.call(v.querySelectorAll(".motor-membro"), function (m) { return /Klefki/.test(m.textContent) && /favorito/.test(m.textContent); }); }));
     check("o favorito (Togekiss) está nas três variantes, marcado como favorito",
       [].every.call(varas, function (v) { return [].some.call(v.querySelectorAll(".motor-membro"), function (m) { return /Togekiss/.test(m.textContent) && /favorito/.test(m.textContent); }); }));
-    check("cada Pokémon mostra a build e o papel provado ou o motivo de não ter papel",
-      [].every.call(card.querySelectorAll(".motor-membro"), function (m) { return !!m.querySelector(".motor-build").textContent.trim() && /Sem papel provado|:/.test(m.querySelector(".motor-papeis").textContent); }));
+    check("cada Pokémon mostra a build e o papel do rank ou o aviso de que não tem",
+      [].every.call(card.querySelectorAll(".motor-membro"), function (m) { return !!m.querySelector(".motor-build").textContent.trim() && /Sem papel definido|Pivô|Tanque|Wallbreaker|Sweeper/.test(m.querySelector(".motor-papeis").textContent); }));
     check("cada variante traz o plano B e a explicação ('Por que este time')",
       [].every.call(varas, function (v) { return /Plano B/.test(v.textContent) && !!v.querySelector(".motor-explicacao li"); }));
     check("o Motor não tocou na IA (claude.use nunca foi chamado)", chamadas.length === 0, chamadas);

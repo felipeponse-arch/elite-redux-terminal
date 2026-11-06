@@ -22,7 +22,7 @@ const respostaDe = (i, extra = {}) => ({ escolha: i + 1, nature: cands[i].build.
 // ---------- o prompt ----------
 
 test("o prompt da escolha leva os candidatos (habilidade, golpes, motivos) e o formato da resposta, sem o movepool inteiro", () => {
-  assert.ok(cands.length >= 3, "o dado real traz de 3 a 5 candidatos");
+  assert.ok(cands.length >= 2, "o dado real traz 2 candidatos");
   const p = R.montarPromptEscolhaDeBuild(ledian, rLedian, {});
   cands.forEach((c, i) => {
     assert.ok(p.includes((i + 1) + ") habilidade " + c.habilidade), "candidato " + (i + 1));

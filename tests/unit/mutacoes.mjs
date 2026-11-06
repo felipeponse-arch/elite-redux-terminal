@@ -2702,7 +2702,7 @@ export const MUTACOES = [
   },
   {
     id: "pipeline-limite-de-5-some",
-    descricao: "a lista de candidatos deixa de ser limitada a 5",
+    descricao: "a lista de candidatos deixa de ser limitada a 2",
     arquivo: "pipeline_build.js",
     de: ".slice(0, MAX_CANDIDATOS_PIPELINE); // volta à ordem do ranking",
     para: "; // volta à ordem do ranking",

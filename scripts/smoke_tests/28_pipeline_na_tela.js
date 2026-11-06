@@ -51,7 +51,7 @@ async function section28() {
     var sname = T.getSpeciesByX(S.selected).sname;
     var antes = T.getBuildList(sname).length;
     botao.click();
-    check("o botão abre de 3 a 5 sugestões", await pollUntil(function () { return !painel.hidden && painel.querySelectorAll(".pipe-cand").length >= 3; }, 3000), painel.querySelectorAll(".pipe-cand").length);
+    check("o botão abre as sugestões (até 2)", await pollUntil(function () { return !painel.hidden && painel.querySelectorAll(".pipe-cand").length >= 2; }, 3000), painel.querySelectorAll(".pipe-cand").length);
     check("o botão avisa que está aberto (aria-expanded)", document.getElementById("mybuild-pipeline-ver").getAttribute("aria-expanded") === "true");
     var cand = painel.querySelector(".pipe-cand");
     check("cada sugestão mostra 4 golpes, habilidade, selo e o veredito", cand.querySelectorAll(".pipe-golpe").length === 4 && /Habilidade:/.test(cand.textContent) &&
