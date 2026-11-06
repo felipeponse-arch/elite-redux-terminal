@@ -4115,7 +4115,26 @@
     if (lado.teia && chao) c.bonus.estagios.spe = (c.bonus.estagios.spe || 0) - 1;
   }
   // A unidade como está agora na luta: estágios ganhos, status que trouxe, golpe perdido.
+  // Memória por participante (06/11/2026, perfil do teste mais lento: 35 de 81 s eram esta função recriando a
+  // unidade a cada consulta). A unidade só muda quando muda algum insumo da assinatura abaixo; sem mudança,
+  // devolve o MESMO objeto (WeakMap: nada é gravado no participante).
+  var COMO_ESTA_MEMO = new WeakMap();
+  function assinaturaComoEstaDuelo(c) {
+    var b = c.bonus, e = b.estagios, st = c.status, s = "", k;
+    for (k in e) s += k + e[k] + ",";
+    s += "|" + b.crit + "|" + b.mult + "|" + b.semGolpe.join(";") + "|" + (b.imuneStatus ? JSON.stringify(b.imuneStatus) : "") + "|" + b.primeiroGolpe +
+      "|" + c.vivosNoTime + "|" + c.caidosNoTime + "|" + c.apanhou + "|" + (c.itemGasto ? 1 : 0) + "|";
+    for (k in st) s += k + st[k] + ",";
+    return s;
+  }
   function comoEstaDuelo(c) {
+    var sig = assinaturaComoEstaDuelo(c), m = COMO_ESTA_MEMO.get(c);
+    if (m && m.u === c.u && m.sig === sig) return m.v;
+    var v = comoEstaDueloSemMemoria(c);
+    COMO_ESTA_MEMO.set(c, { u: c.u, sig: sig, v: v });
+    return v;
+  }
+  function comoEstaDueloSemMemoria(c) {
     var b = c.bonus, u = c.u;
     // Item gasto numa luta anterior (Sitrus, gema, Focus Sash...) não volta - Harvest guarda a baga.
     if (c.itemGasto && u.it && u.it.consumivel && !(u.ef.colheita && u.it.baga)) u = Object.assign({}, u, { item: "", it: itemDoDuelo("", null) });
