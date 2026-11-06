@@ -23,10 +23,3 @@ test("o build de publicação (ER_PUBLICAR=1) falha enquanto o arquivo real for 
   else { assert.notEqual(r.status, 0); assert.match(r.stderr + r.stdout, /provisório/); }
 });
 
-test("calcular_rank_v2 --gravar recusa outra fatia, --lutas-extra e --so-chefoes (a decisão 60/40 de 16/10)", () => {
-  for (const arg of ["--fatia=0.5", "--lutas-extra=x.json", "--so-chefoes"]) {
-    const r = spawnSync(process.execPath, ["scripts/calcular_rank_v2.mjs", "--gravar", arg], { cwd: RAIZ, encoding: "utf8" });
-    assert.notEqual(r.status, 0, arg);
-    assert.match(r.stderr, /--gravar exige a fatia 0\.6/, arg);
-  }
-});

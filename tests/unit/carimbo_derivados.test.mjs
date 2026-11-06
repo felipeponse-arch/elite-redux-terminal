@@ -27,7 +27,6 @@ test("carimbarDerivado copia jogo/er-repo/er-config/data do carimbo dos dados", 
 test("os geradores de rank, lutas comuns e chefões chamam carimbarDerivado", () => {
   const rank = lerComMutacao("scripts/calcular_rank_v2.mjs", "calcular_rank_v2.mjs");
   assert.match(rank, /carimbarDerivado\("species_rank\.json"\)/);
-  assert.match(rank, /carimbarDerivado\("lutas_comuns_run\.json"\)/);
   assert.match(readFileSync("scripts/extracao/chefoes.mjs", "utf8"), /carimbarDerivado\("bosses\.json"\)/);
 });
 

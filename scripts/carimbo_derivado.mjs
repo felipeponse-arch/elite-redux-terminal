@@ -9,7 +9,7 @@ export function carimbarDerivado(arquivo, { origem = "data/carimbo_dados.json", 
 }
 
 // Derivados gerados pelo rank/extração que ainda não passaram pelo gerador carimbado (TK-24).
-export const PENDENTES_DO_GERADOR = ["species_rank.json", "lutas_comuns_run.json", "bosses.json"];
+export const PENDENTES_DO_GERADOR = ["species_rank.json", "lutas_comuns_run.json", "bosses.json", "rank_medicao.json"];
 
 // Frescor: derivado cujo `dadosDe` é anterior à data do dado de origem está velho. Só olha entradas geradas (com dadosDe).
 export function avisosDeFrescor(reg, carimboDados) {
