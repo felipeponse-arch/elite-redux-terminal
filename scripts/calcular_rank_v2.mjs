@@ -10,13 +10,14 @@
 //  5. dois eixos: POTENCIAL (com golpes de status/setup) e VIABILIDADE (sem eles);
 //     nota final = média geométrica dos dois.
 // Revanches, Frontier, Cynthia/Leaf e o campeão monotype ficam de fora (pós-jogo/opcional).
-//  6. todas as lutas (todas-as-lutas/02, 21/10/2026): além dos 29 chefões entram os treinadores comuns da run (scripts/estudo/lutas_comuns.mjs),
-//     com FATIA FIXA de peso: chefões 60% e comuns 40% (scripts/rank_fatia.mjs); dentro de cada fatia vale o peso por ameaça.
+//  6. CORTE (06/11/2026, decisão do usuário): o rank pode ser mais genérico. Só as 29 lutas de chefão (os treinadores comuns e a fatia
+//     60/40 saíram) e INCREMENTAL: cada espécie tem uma impressão digital (scripts/rank_incremental.mjs) e o cache data/rank_medicao.json
+//     guarda a medição. Digital global igual = recalcula só as espécies cuja digital mudou (ou novas); global mudou = tudo.
 // Fontes de cada decisão: docs/decisoes_mecanicas.md (seção Rank).
 //
-// Uso: node scripts/calcular_rank_v2.mjs [--especies=A,B] [--amostra=N] [--gravar] [--so-chefoes] [--fatia=0.6] [--saida=arq] [--relatorio=arq] [--gravar-lutas=arq]
-//  --gravar grava data/species_rank.json E data/lutas_comuns_run.json (as comuns mais perigosas de cada etapa, para o Meu Time);
-//  --gravar-lutas=arq grava só a lista das comuns (aceita --amostra, serve de prova); --so-chefoes é o rank antigo (29 lutas).
+// Uso: node scripts/calcular_rank_v2.mjs [--incremental|--tudo] [--especies=A,B] [--amostra=N] [--gravar] [--cache=arq] [--saida=arq] [--relatorio=arq]
+//  --incremental (padrão) usa o cache; --tudo recalcula tudo. --gravar (rank completo) grava data/species_rank.json E o cache.
+//  Com --amostra o cache só é lido/gravado se --cache=arq for dado (amostra nunca mexe no cache oficial).
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,10 +25,10 @@ import { cpus, setPriority, constants as osConst } from "node:os";
 import { Worker, isMainThread, parentPort, workerData } from "node:worker_threads";
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 import { melhoresPelaSoma, notaDosEixos, escolherPelaNotaFinal } from "./rank_escolha.mjs";
-import { lutasComunsDaRun } from "./estudo/lutas_comuns.mjs";
 import { percentis, tierDe, unidadeComItemLiberado, camposHerdados, chavesDoRankNovo } from "./rank_comum.mjs";
 import { carimbarDerivado } from "./carimbo_derivado.mjs";
-import { notasComFatia, comunsMaisPerigosas, COMUNS_POR_ETAPA } from "./rank_fatia.mjs";
+import { notasComFatia } from "./rank_fatia.mjs";
+import { digitalDaEspecie, digitalGlobal, decidir, reduzirMedicao, expandirMedicao } from "./rank_incremental.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const R = carregarRegras({ milestone: 9 });
@@ -57,25 +58,7 @@ for (const d of DIFICULDADES) {
     return { nome, etapa, nivel, foes: party.map((m) => foe(m, nivel)).filter(Boolean) };
   }).filter((l) => l && l.foes.length);
 }
-// Todas as lutas (todas-as-lutas/02): os treinadores comuns da run entram com o MESMO método, na fatia fixa de peso.
-// --lutas-extra=<arquivo> troca a lista (estudo); --so-chefoes tira as comuns (rank antigo, só as 29 lutas de chefão).
 const ARG = (k) => (process.argv.find((x) => x.startsWith(k + "=")) || "").slice(k.length + 1) || null;
-const LUTAS_EXTRA = ARG("--lutas-extra");
-const SO_CHEFOES = process.argv.includes("--so-chefoes");
-const FATIA = ARG("--fatia") ? Number(ARG("--fatia")) : R.FATIA_DOS_CHEFOES;
-// A fatia 60/40 é decisão do usuário (16/10/2026): o rank GRAVADO não aceita outra fatia nem outra lista de lutas.
-if (process.argv.includes("--gravar") && (FATIA !== R.FATIA_DOS_CHEFOES || LUTAS_EXTRA || SO_CHEFOES)) throw new Error("--gravar exige a fatia " + R.FATIA_DOS_CHEFOES + " e a lista oficial de lutas (sem --fatia diferente, --lutas-extra ou --so-chefoes)");
-if (!SO_CHEFOES) {
-  const extra = LUTAS_EXTRA ? JSON.parse(readFileSync(LUTAS_EXTRA, "utf8")).lutas : lutasComunsDaRun(RAIZ).lutas;
-  for (const d of DIFICULDADES) {
-    for (const l of extra) {
-      const party = (l[d.chave] && l[d.chave].length ? l[d.chave] : l.party) || [];
-      const nivel = capDe(l.etapa, d.caps);
-      const foes = party.map((m) => foe(m, nivel)).filter(Boolean);
-      if (foes.length) lutas[d.chave].push({ nome: l.nome, etapa: l.etapa, nivel, foes, comum: true });
-    }
-  }
-}
 const dispPath = join(RAIZ, "data", "rank_disponibilidade.json");
 const DISP = existsSync(dispPath) ? JSON.parse(readFileSync(dispPath, "utf8")) : null;
 const etapaDe = (sname) => (DISP ? DISP.etapa[sname] : 0);
@@ -170,13 +153,38 @@ const t0 = Date.now();
 const amostra = parseInt((process.argv.find((x) => x.startsWith("--amostra=")) || "").split("=")[1], 10) || 1;
 const todas = R.SPECIES.filter((sp) => sp && sp.sname).map((sp) => sp.sname).filter((_, i) => i % amostra === 0);
 const nucleos = Math.max(1, Math.min(cpus().length - 2, 10));
-const partes = Array.from({ length: nucleos }, (_, i) => todas.filter((_, j) => j % nucleos === i));
-const res = {};
-const respostas = await Promise.all(partes.map((snames) => new Promise((ok, erro) => {
-  const w = new Worker(new URL(import.meta.url), { workerData: { snames }, argv: process.argv.slice(2).filter((x) => x !== "--gravar") }) // os núcleos precisam das opções (--lutas-extra);
+
+// Incremental (06/11/2026): digital por espécie + digital global; cache em data/rank_medicao.json (amostra só usa cache se --cache=arq).
+const lerTxt = (nome) => (existsSync(join(RAIZ, "data", nome)) ? readFileSync(join(RAIZ, "data", nome), "utf8").replace(/\r\n/g, "\n") : "");
+const dex = JSON.parse(lerTxt("dex_compact.json"));
+const ARQ_CACHE = ARG("--cache") || (amostra === 1 ? join(RAIZ, "data", "rank_medicao.json") : null);
+const TUDO = process.argv.includes("--tudo");
+const DADOS_GLOBAIS = ["levelcaps.json", "itens_config.json", "pedras_etapa.json", "onde_achar_itens.json", "config_nova.json", "golpes_flags_config.json",
+  "move_categorias.json", "poder_variavel.json", "species_ability_synergy.json", "condition_move_synergy.json", "move_roles.json", "rank_disponibilidade.json"];
+const globalAtual = digitalGlobal(Object.assign({ lutas: lutas, dex: Object.fromEntries(Object.entries(dex).filter(([k]) => !["species", "abilities", "moves"].includes(k))) },
+  Object.fromEntries(DADOS_GLOBAIS.map((n) => [n, lerTxt(n)]))));
+const atuais = Object.fromEntries(todas.map((s) => [s, digitalDaEspecie(R.getSpeciesBySname(s), etapaDe(s), R)]));
+const cache = ARQ_CACHE && existsSync(ARQ_CACHE) ? JSON.parse(readFileSync(ARQ_CACHE, "utf8")) : null;
+const dec = decidir(cache, globalAtual, atuais, { tudo: TUDO });
+console.log(`incremental: ${dec.motivo}; recalcular ${dec.recalcular.length}, manter ${dec.manter.length}`);
+const nPartes = Math.min(nucleos, Math.max(1, dec.recalcular.length));
+const partes = Array.from({ length: nPartes }, (_, i) => dec.recalcular.filter((_, j) => j % nPartes === i));
+const red = {}; // medição enxuta (média por luta) de todas as espécies, vinda do cache ou do cálculo novo
+for (const s of dec.manter) red[s] = cache.especies[s].res;
+const respostas = dec.recalcular.length ? await Promise.all(partes.map((snames) => new Promise((ok, erro) => {
+  const w = new Worker(new URL(import.meta.url), { workerData: { snames }, argv: process.argv.slice(2).filter((x) => x !== "--gravar") }); // os núcleos precisam das opções
   w.once("message", ok); w.once("error", erro);
-})));
-respostas.forEach((p) => Object.assign(res, p));
+}))) : [];
+respostas.forEach((p) => Object.entries(p).forEach(([s, r]) => { red[s] = reduzirMedicao(r, DIFICULDADES.map((d) => d.chave)); }));
+const res = {};
+const lutasPorDif = Object.fromEntries(DIFICULDADES.map((d) => [d.chave, lutas[d.chave]]));
+for (const s of todas) res[s] = expandirMedicao(red[s], lutasPorDif);
+// O cache guarda só o que foi medido agora mais o que já estava (espécies fora da amostra não se perdem). Só grava com cache próprio.
+if (ARQ_CACHE && (process.argv.includes("--gravar") || ARG("--cache"))) {
+  const especies = Object.assign({}, cache && cache.global === globalAtual ? cache.especies : {});
+  for (const s of todas) especies[s] = { digital: atuais[s], res: red[s] };
+  writeFileSync(ARQ_CACHE, JSON.stringify({ global: globalAtual, especies }));
+}
 // --por-luta=<arquivo> (estudo todas-as-lutas/02): a média do Battle Rating de cada espécie em cada luta, nos 2 eixos e nas 2
 // dificuldades, para testar divisões de peso sem refazer a simulação (scripts/estudo/fatias_de_peso.mjs).
 if (ARG("--por-luta")) {
@@ -193,7 +201,7 @@ if (ARG("--por-luta")) {
       for (const eixo of ["potencial", "viabilidade"]) porEsp[s][d.chave][eixo] = r.eixos[eixo].map((e) => [indice[d.chave][e.luta], r3(e.brs.reduce((a, v) => a + v, 0) / e.brs.length)]);
     }
   }
-  writeFileSync(ARG("--por-luta"), JSON.stringify({ lutas: Object.fromEntries(DIFICULDADES.map((d) => [d.chave, lutas[d.chave].map((l) => ({ nome: l.nome, comum: !!l.comum, etapa: l.etapa }))])), res: porEsp }));
+  writeFileSync(ARG("--por-luta"), JSON.stringify({ lutas: Object.fromEntries(DIFICULDADES.map((d) => [d.chave, lutas[d.chave].map((l) => ({ nome: l.nome, etapa: l.etapa }))])), res: porEsp }));
 }
 const validos = Object.keys(res).filter((s) => res[s]);
 
@@ -207,7 +215,7 @@ function notas(dif, eixo) {
   const indice = Object.fromEntries(L.map((l, i) => [l.nome, i]));
   const mediaDe = (e) => e.brs.reduce((a, v) => a + v, 0) / e.brs.length;
   const lista = (s) => ((res[s][dif] && res[s][dif].eixos[eixo]) || []).map((e) => [indice[e.luta], mediaDe(e)]);
-  const r = notasComFatia(L.map((l) => ({ comum: !!l.comum })), validos, lista, FATIA);
+  const r = notasComFatia(L.map(() => ({ comum: false })), validos, lista, null);
   return { nota: r.nota, pesoLuta: Object.fromEntries(L.map((l, i) => [l.nome, r.pesoLuta[i]])) };
 }
 const final = {};
@@ -235,25 +243,7 @@ for (const d of DIFICULDADES) {
   });
 }
 writeFileSync(ARG("--saida") || join(RAIZ, "..", "rank_v2_saida.json"), JSON.stringify(final));
-// Lista das comuns mais perigosas de cada etapa, com a ameaça medida (potencial): o Meu Time lê daqui (src/regras/time_pelo_motor.js),
-// sem simular as 500+ lutas ao vivo. Formato: lutas[dificuldade] = [{ nome, etapa, db, peso }]; times[nome] = { party, insane? } (insane só
-// quando difere do party: o dado é um arquivo só para as duas dificuldades).
-function lutasComunsParaOMeuTime(extraPorNome) {
-  const out = { fatia: FATIA, porEtapa: COMUNS_POR_ETAPA, amostra: amostra, lutas: {}, times: {} };
-  for (const d of DIFICULDADES) {
-    const L = lutas[d.chave], peso = L.map((l) => relatorio[d.chave].pesoLuta[l.nome]);
-    out.lutas[d.chave] = comunsMaisPerigosas(L, peso).map((s) => {
-      const e = extraPorNome[s.nome];
-      const t = (out.times[s.nome] = out.times[s.nome] || { party: e.party || [] });
-      if (d.chave === "insane" && e.insane && e.insane.length && JSON.stringify(e.insane) !== JSON.stringify(e.party)) t.insane = e.insane;
-      return { nome: s.nome, etapa: s.etapa, db: !!e.db, peso: Math.round(s.peso * 1000) / 1000 };
-    });
-  }
-  return out;
-}
-const extraPorNome = SO_CHEFOES ? {} : Object.fromEntries((LUTAS_EXTRA ? JSON.parse(readFileSync(LUTAS_EXTRA, "utf8")).lutas : lutasComunsDaRun(RAIZ).lutas).map((l) => [l.nome, l]));
-if (ARG("--gravar-lutas")) writeFileSync(ARG("--gravar-lutas"), JSON.stringify(lutasComunsParaOMeuTime(extraPorNome)));
-if (ARG("--relatorio")) writeFileSync(ARG("--relatorio"), JSON.stringify(Object.fromEntries(DIFICULDADES.map((x) => [x.chave, { pesoLuta: relatorio[x.chave].pesoLuta, comuns: lutas[x.chave].filter((l) => l.comum).map((l) => l.nome) }]))));
+if (ARG("--relatorio")) writeFileSync(ARG("--relatorio"), JSON.stringify(Object.fromEntries(DIFICULDADES.map((x) => [x.chave, { pesoLuta: relatorio[x.chave].pesoLuta, }]))));
 // --gravar (só com o rank completo, sem --amostra): data/species_rank.json no formato que o app
 // lê. tier/score/monoRanks do topo = Fácil/Ace (party); src/regras/rank_da_run.js troca pela
 // dificuldade da run. Fora do rank vira { foraDoRank: motivo }. Validação aprovada em 02/10
@@ -299,7 +289,5 @@ if (process.argv.includes("--gravar")) {
   }
   writeFileSync(join(RAIZ, "data", "species_rank.json"), JSON.stringify(novo));
   carimbarDerivado("species_rank.json");
-  if (!SO_CHEFOES) writeFileSync(join(RAIZ, "data", "lutas_comuns_run.json"), JSON.stringify(lutasComunsParaOMeuTime(extraPorNome)));
-  if (!SO_CHEFOES) carimbarDerivado("lutas_comuns_run.json");
   console.log("gravado: data/species_rank.json (rank v2 por dificuldade; fora do rank: " + Object.values(novo).filter((x) => x.foraDoRank).length + ")");
 }
