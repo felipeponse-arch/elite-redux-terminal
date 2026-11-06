@@ -19,14 +19,11 @@ import { readFileSync, existsSync } from "node:fs";
 import { arquivosRapidos, arquivosPesados, arquivosTodos } from "../scripts/testes_unit.mjs";
 import { cpus } from "node:os";
 import { MUTACOES as TODAS } from "./unit/mutacoes.mjs";
-import { segurarVaga } from "../scripts/vaga.mjs";
 import { selecionarMutacoes } from "../scripts/sabotagem_incremental.mjs";
 import { gravarCacheMesclando } from "../scripts/cache_sabotagem.mjs";
 import { classificarFalha, conferirAlvos } from "./sabotagem_util.mjs";
 import { caminhoDoAlvo, lerComMutacao } from "./unit/carregar_regras.mjs";
 
-// Vaga pesada (melhoria B): rodada direta espera na fila; dentro do gancho (ER_VAGA_DONO) não pede de novo.
-await segurarVaga("pesada");
 
 const ARGS = process.argv.slice(2);
 const COMPLETO = ARGS.includes("--completo");
