@@ -1,0 +1,43 @@
+name: Site (GitHub Pages)
+
+# Publica o app como site: build a partir dos data/*.json versionados e entrega artifact_final.html como index.html.
+# Só roda no master. Antes de usar: Settings > Pages > Source = "GitHub Actions" (uma vez, no repositório).
+on:
+  push:
+    branches: [master]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Monta a pasta do site
+        run: |
+          mkdir site
+          cp artifact_final.html site/index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4

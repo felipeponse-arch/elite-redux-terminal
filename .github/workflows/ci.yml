@@ -25,89 +25,59 @@ concurrency:
 permissions:
   contents: read
 
+# Meta (06/11/2026): CI inteiro em até ~10 min. Dois jobs em paralelo, cada um com teto de tempo:
+#   rapido    - travas, unitários rápidos, sabotagem (cache versionado em tests/.sabotagem_cache.json), build
+#   navegador - build + Playwright
+# Os testes pesados (tests/pesados.json) e a sabotagem a frio ficam no workflow "Pesado" (semanal/manual).
 jobs:
-  verificar:
+  rapido:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 12
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: npm
-
-      # npm ci instala exatamente o que está no package-lock.json - npm install
-      # podia resolver versões diferentes das testadas localmente.
       - name: Instala dependências
         run: npm ci
-
-      # Etapa 1 da pauta técnica (S2): dependência com vulnerabilidade alta ou
-      # crítica bloqueia o CI. As dependências são só do processo de teste,
-      # nunca do artifact publicado.
       - name: Auditoria de dependências (npm audit)
         run: npm audit --audit-level=high
-
-      # Acento corrompido, .ps1 sem BOM, sintaxe (inclusive o JS de dentro do
-      # template), ESLint e stylelint só com regras de correção, tokens de CSS
-      # (as duas paletas escuras iguais, todo var() declarado) e tipos de
-      # src/regras (tsc, checkJs).
-      - name: Travas estáticas (codificação, sintaxe, lint JS/CSS, tokens, tipos)
+      - name: Travas estáticas
         run: npm run check
-
-      # Regras do jogo testadas no Node, sem build nem navegador - falha em
-      # segundos, antes dos minutos de Chromium.
-      - name: Testes unitários das regras (src/regras)
+      - name: Testes unitários rápidos
         run: ER_SEM_TS=1 npm run test:unit
-
-      # Cada defeito do catálogo (tests/unit/mutacoes.mjs) tem que derrubar
-      # algum teste unitário - defeito que sobrevive = regra sem proteção.
-      - name: Teste de sabotagem das regras
+      - name: Teste de sabotagem (cache versionado)
         run: npm run test:sabotage
-
-      # Valida os dados (builds.json e invariantes) e monta o app.
-      - name: Build (npm run build)
+      - name: Build
         run: npm run build
 
-      # O navegador fica em cache entre execuções (mesma versão do Playwright
-      # do package-lock = mesmo navegador).
+  navegador:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
       - name: Cache do navegador do Playwright
         id: cache-navegador
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
       - name: Instala o Chromium do Playwright
         if: steps.cache-navegador.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
-
       - name: Dependências de sistema do Chromium (navegador veio do cache)
         if: steps.cache-navegador.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
-
-      # O Playwright sobe sozinho o servidor de testes (webServer em
-      # playwright.config.mjs). Um comando só: cada seção da suíte sozinha em
-      # navegador limpo + a sequência completa, cenários com recarga, fuzz de
-      # saves e sincronização entre aparelhos. No CI: uma nova tentativa por
-      # teste, e o que só passa na segunda aparece como "flaky" no relatório.
       - name: Testes de navegador (Playwright)
         run: npm run test:e2e
-
-      # Não bloqueia: as imagens de referência são geradas no Windows local, e o
-      # Linux renderiza fonte com antialiasing diferente - falha aqui é sinal
-      # pra olhar as imagens (sobem no relatório), não prova de regressão.
-      - name: Regressão visual (informativa)
-        if: ${{ !cancelled() }}
-        continue-on-error: true
-        run: npm run test:visual
-
-      # Relatório HTML + prints, traces e diferenças visuais de cada falha.
-      # Só quando algo falha, por 3 dias e sem derrubar o job: a cota de armazenamento
-      # de artefatos do GitHub esgotou em 21/10/2026 e o upload passou a falhar o CI.
-      - name: Guarda o relatório dos testes
+      - name: Guarda o relatório (só se falhar)
         if: ${{ failure() }}
         continue-on-error: true
         uses: actions/upload-artifact@v4
@@ -115,8 +85,6 @@ jobs:
           name: relatorio-playwright
           path: |
             playwright-report/
-            playwright-report-visual/
             test-results/
-            test-results-visual/
           if-no-files-found: ignore
           retention-days: 3

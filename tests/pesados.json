@@ -1,0 +1,20 @@
+{
+ "_aviso": "Arquivos de teste lentos (>5 s cada, 92% do tempo da suite unitaria em 06/11/2026). Rodam em npm run test:unit:pesado e na rodada semanal; fora do commit e do CI de PR. Medir de novo: tempo de cada arquivo com node --test.",
+ "arquivos": [
+  "tests/unit/buffs_e_pendencias_antigas.test.mjs",
+  "tests/unit/builds_estrutura_18.test.mjs",
+  "tests/unit/comparar_motor_ia.test.mjs",
+  "tests/unit/lote_b_plano_real.test.mjs",
+  "tests/unit/modo_motor_sem_ia.test.mjs",
+  "tests/unit/montar_time_contra_chefao.test.mjs",
+  "tests/unit/motor_item.test.mjs",
+  "tests/unit/pipeline_build.test.mjs",
+  "tests/unit/sugestao_do_motor.test.mjs",
+  "tests/unit/time_pelo_motor.test.mjs",
+  "tests/unit/time_pelo_motor_comuns.test.mjs",
+  "tests/unit/time_pelo_motor_papeis.test.mjs",
+  "tests/unit/time_pelo_motor_papeis_regras.test.mjs",
+  "tests/unit/time_pelo_motor_regras.test.mjs",
+  "tests/unit/vaga.test.mjs"
+ ]
+}

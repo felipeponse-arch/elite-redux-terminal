@@ -15,7 +15,8 @@
 // verdade". E roda várias sabotagens ao mesmo tempo (processos separados: cada
 // uma sabota só a própria memória, nunca o arquivo).
 import { spawn, spawnSync } from "node:child_process";
-import { readdirSync, readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
+import { arquivosRapidos, arquivosPesados, arquivosTodos } from "../scripts/testes_unit.mjs";
 import { cpus } from "node:os";
 import { MUTACOES as TODAS } from "./unit/mutacoes.mjs";
 import { segurarVaga } from "../scripts/vaga.mjs";
@@ -37,7 +38,12 @@ let MUTACOES = FILTROS.length ? TODAS.filter((m) => FILTROS.some((f) => m.id.sta
 
 // Todo arquivo *.test.mjs da pasta, igual ao npm run test:unit - antes era uma
 // lista fixa, e um arquivo de teste novo ficava fora da sabotagem sem aviso.
-const ARQUIVOS_DE_TESTE = readdirSync("tests/unit").filter((f) => f.endsWith(".test.mjs")).map((f) => "tests/unit/" + f);
+// Por padrão só os testes RÁPIDOS (tests/pesados.json): os 15 pesados eram 92% do tempo e rodavam em cada
+// sabotagem (757 x 5 min = ~10 h a frio). Sabotagem que só um teste pesado pega fica no cache apontando pro
+// arquivo pesado e é pulada aqui; a rodada semanal usa --com-pesados e confere.
+const COM_PESADOS = ARGS.includes("--com-pesados");
+const ARQUIVOS_DE_TESTE = COM_PESADOS ? arquivosTodos() : arquivosRapidos();
+const ARQUIVOS_PESADOS = arquivosPesados();
 const CACHE = "tests/.sabotagem_cache.json";
 let cache = {};
 // Atualizações desta rodada (id -> arquivo | null). O cache em memória só ESCOLHE o arquivo; quem grava é a
@@ -114,6 +120,7 @@ function contarFalhas(saida) {
 // defeito) vira "erro-sem-assercao" e reprova a rodada: não prova que um teste protege a regra.
 async function avaliar(m) {
   const lembrado = cache[m.id];
+  if (!COM_PESADOS && lembrado && ARQUIVOS_PESADOS.includes(lembrado)) return { m, tipo: "so-pesado" };
   if (lembrado && ARQUIVOS_DE_TESTE.includes(lembrado)) {
     const r = await rodar(m, [lembrado]);
     const c = classificarFalha(r);
@@ -169,11 +176,15 @@ await Promise.all(Array.from({ length: Math.min(AO_MESMO_TEMPO, MUTACOES.length)
 let sobreviveram = 0;
 let quebradas = 0;
 let semAssercao = 0;
+let soPesado = 0;
 for (const r of resultados) {
   const m = r.m;
   if (r.tipo === "quebrada") {
     quebradas++;
     console.log(`ERRO      ${m.id}: o trecho sabotado não existe mais (ou o trecho mudou) em ${m.arquivo} - atualize tests/unit/mutacoes.mjs`);
+  } else if (r.tipo === "so-pesado") {
+    soPesado++;
+    console.log(`so-pesado ${m.id}: só um teste pesado pega (conferido na rodada semanal, --com-pesados)`);
   } else if (r.tipo === "erro-sem-assercao") {
     semAssercao++;
     console.log(`SEM-ASSERCAO ${m.id}: ${m.descricao} - a suíte falhou, mas nenhuma asserção (erro de carga/TypeError): não prova proteção`);
@@ -185,5 +196,5 @@ for (const r of resultados) {
   }
 }
 gravarCacheMesclando(CACHE, atualizacoes, cache);
-console.log(`\n=== sabotagem: ${MUTACOES.length - sobreviveram - quebradas - semAssercao}/${MUTACOES.length} pegas em ${Math.round((Date.now() - inicio) / 1000)} s ===`);
+console.log(`\n=== sabotagem: ${MUTACOES.length - sobreviveram - quebradas - semAssercao - soPesado}/${MUTACOES.length} pegas (+${soPesado} só pelo pesado) em ${Math.round((Date.now() - inicio) / 1000)} s ===`);
 if (sobreviveram || quebradas || semAssercao) process.exitCode = 1;

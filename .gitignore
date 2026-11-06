@@ -22,9 +22,6 @@ node_modules/
 test-results*/
 playwright-report*/
 
-# Cache do teste de sabotagem (2026-09-30): qual arquivo de teste pegou cada
-# sabotagem na última rodada. Só atalho - apagar não muda o resultado.
-tests/.sabotagem_cache.json
 
 # Worktrees das sessões do Claude Code (02/10: uma worktree dentro do repo fazia o
 # lint varrer a cópia inteira e derrubava o npm run check de todo mundo).

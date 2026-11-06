@@ -192,6 +192,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sabotagem_incremental.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026): no master a sabotagem roda só as
   git:17, caminhoDoVerde:22, lerVerde:28, gravarVerde:40, modoDaSabotagemNoMaster:55, selecionarMutacoes:68
 - **servidor_estatico.mjs** - Servidor estático dos testes (fase 6 da refatoração, 2026-09-24): serve a raiz
+- **testes_unit.mjs** - Lista os arquivos de teste unitário em rápidos e pesados (tests/pesados.json) e roda um dos grupos.
+  arquivosPesados:11, arquivosTodos:12, arquivosRapidos:13
 - **vaga.mjs** - Vaga de máquina para verificação pesada (melhoria B de docs/pipeline_do_projeto.md, 2026-10-13).
   pasta:38, vivo:44, lerJson:49, donoAbandonado:55, existe:61, dorme:63, filaViva:67, segurarVaga:80, comVaga:152
 - **validar_dado_cru.mjs** - Validação do dado CRU do NextDex (lote 2, 2026-10-06). Roda ANTES do

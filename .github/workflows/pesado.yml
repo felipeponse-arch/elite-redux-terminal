@@ -21,7 +21,7 @@ on:
       fatias:
         description: "Sabotagem: em quantas fatias dividir (1 a 20)"
         type: string
-        default: "8"
+        default: "20"
       filtro:
         description: "Sabotagem: só estes prefixos de id, separados por espaço (vazio = todas). Rank: ignorado"
         type: string
@@ -73,7 +73,7 @@ jobs:
   sabotagem:
     needs: planejar
     runs-on: ubuntu-latest
-    timeout-minutes: 350 # abaixo das 6 h do runner, deixa folga pro upload
+    timeout-minutes: 60
     strategy:
       fail-fast: false # uma fatia vermelha não mata as outras
       matrix: ${{ fromJSON(needs.planejar.outputs.matriz) }}
@@ -95,7 +95,7 @@ jobs:
           mkdir -p saida
           set -o pipefail
           # $IDS sem aspas de propósito: cada id vira um argumento (filtro).
-          node tests/run_sabotage.mjs --completo $IDS 2>&1 | tee saida/sabotagem-${{ matrix.fatia }}.log
+          node tests/run_sabotage.mjs --com-pesados $IDS 2>&1 | tee saida/sabotagem-${{ matrix.fatia }}.log
       - name: Guarda o log da fatia
         if: ${{ !cancelled() }}
         continue-on-error: true # cota de artefatos já estourou antes (ver ci.yml)
