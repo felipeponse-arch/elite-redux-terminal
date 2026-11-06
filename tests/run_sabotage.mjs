@@ -118,15 +118,54 @@ function contarFalhas(saida) {
 
 // "Pega" = uma ASSERÇÃO falhou (TK-29, 27/10/2026). Falha por outro motivo (erro de carga, TypeError do próprio
 // defeito) vira "erro-sem-assercao" e reprova a rodada: não prova que um teste protege a regra.
+// Cache a frio sem rodar a suíte inteira por sabotagem (06/11/2026: 757 sabotagens x suíte inteira = 3 h sem fim):
+// antes da suíte inteira, tenta sozinhos os arquivos de teste mais ligados ao defeito (palavras do id e do trecho
+// sabotado que aparecem no texto do teste). Quase todo defeito cai em 1 a 3 arquivos. Não achou = suíte inteira, como antes.
+const DIVIDA = new Set(JSON.parse(readFileSync("tests/sabotagem_conhecidas.json", "utf8")).ids);
+const IA_ORCAMENTO = ARGS.find((a) => a.startsWith("--orcamento="));
+const ORCAMENTO_MS = IA_ORCAMENTO ? Number(IA_ORCAMENTO.split("=")[1]) * 60000 : Infinity;
+const TEXTOS = new Map(ARQUIVOS_DE_TESTE.map((f) => [f, readFileSync(f, "utf8")]));
+const PALAVRAS_FRACAS = new Set(["function", "return", "const", "var", "true", "false", "null", "undefined", "length", "state", "nivel"]);
+function candidatosPara(m) {
+  const doId = String(m.id).split(/[-_.]/).filter((t) => t.length >= 4);
+  const doTrecho = (String(m.de).match(/[A-Za-z_][A-Za-z0-9_]{5,}/g) || []).filter((t) => !PALAVRAS_FRACAS.has(t));
+  return ARQUIVOS_DE_TESTE.map((f) => {
+    const txt = TEXTOS.get(f); let pontos = 0;
+    for (const t of doId) { if (f.includes(t)) pontos += 20; if (txt.includes(t)) pontos += 3; }
+    for (const t of new Set(doTrecho)) if (txt.includes(t)) pontos += 1;
+    return { f, pontos };
+  }).filter((x) => x.pontos > 0).sort((a, b) => b.pontos - a.pontos).slice(0, 4).map((x) => x.f);
+}
 async function avaliar(m) {
   const lembrado = cache[m.id];
-  if (!COM_PESADOS && lembrado && ARQUIVOS_PESADOS.includes(lembrado)) return { m, tipo: "so-pesado" };
-  if (lembrado && ARQUIVOS_DE_TESTE.includes(lembrado)) {
-    const r = await rodar(m, [lembrado]);
+  // O cache guarda um arquivo ou uma COMBINAÇÃO ("a|b") que só pega junta (teste que depende do estado do outro).
+  const lista = lembrado ? lembrado.split("|") : [];
+  if (!COM_PESADOS && lista.length && lista.every((f) => ARQUIVOS_PESADOS.includes(f))) return { m, tipo: "so-pesado" };
+  const rapidos = lista.filter((f) => ARQUIVOS_DE_TESTE.includes(f));
+  if (rapidos.length) {
+    const r = await rodar(m, rapidos);
     const c = classificarFalha(r);
     if (c === "quebrada") return { m, tipo: "quebrada" };
     // atalho só vale com asserção; qualquer outra coisa cai na suíte inteira
     if (c === "pega") return { m, tipo: "pega", falhas: contarFalhas(r.saida), rapido: true };
+  }
+  for (const f of candidatosPara(m)) {
+    const rc = await rodar(m, [f]);
+    const cc = classificarFalha(rc);
+    if (cc === "quebrada") return { m, tipo: "quebrada" };
+    if (cc === "pega") { atualizacoes.set(m.id, f); return { m, tipo: "pega", falhas: contarFalhas(rc.saida), rapido: true }; }
+  }
+  // Combinação dos candidatos: pega junto o que sozinho não pega (3 s em vez da suíte inteira).
+  const cand = candidatosPara(m);
+  if (cand.length > 1) {
+    const rj = await rodar(m, cand);
+    if (classificarFalha(rj) === "pega") {
+      const falharam = arquivosQueFalharam(rj.saida).slice(0, 6);
+      if (falharam.length && classificarFalha(await rodar(m, falharam)) === "pega") {
+        atualizacoes.set(m.id, falharam.join("|"));
+        return { m, tipo: "pega", falhas: contarFalhas(rj.saida), rapido: true };
+      }
+    }
   }
   const r = await rodar(m, ARQUIVOS_DE_TESTE);
   const c = classificarFalha(r);
@@ -141,6 +180,11 @@ async function avaliar(m) {
   let lembrar = null;
   for (const arq of arquivosQueFalharam(r.saida)) {
     if (classificarFalha(await rodar(m, [arq])) === "pega") { lembrar = arq; break; }
+  }
+  // Nenhum pega sozinho: lembra a COMBINAÇÃO dos que falharam, se ela pega junta (senão a suíte inteira roda todo dia).
+  if (!lembrar) {
+    const falharam = arquivosQueFalharam(r.saida).slice(0, 6);
+    if (falharam.length > 1 && classificarFalha(await rodar(m, falharam)) === "pega") lembrar = falharam.join("|");
   }
   if (lembrar || lembrado) atualizacoes.set(m.id, lembrar);
   return { m, tipo: "pega", falhas: contarFalhas(r.saida), rapido: false };
@@ -165,9 +209,11 @@ const inicio = Date.now();
 const resultados = new Array(MUTACOES.length);
 let proxima = 0;
 async function trabalhador() {
-  while (proxima < MUTACOES.length) {
+  while (proxima < MUTACOES.length && Date.now() - inicio < ORCAMENTO_MS) {
     const i = proxima++;
     resultados[i] = await avaliar(MUTACOES[i]);
+    // grava a cada resultado: estourar o orçamento (ou Ctrl+C) não perde o que já foi provado
+    if (atualizacoes.size) { gravarCacheMesclando(CACHE, new Map(atualizacoes), cache); atualizacoes.clear(); }
   }
 }
 console.log(`paralelismo: ${Math.min(AO_MESMO_TEMPO, MUTACOES.length)} sabotagem(ns) x ${CONCORRENCIA_POR_PROCESSO} arquivo(s) de teste por vez (${CPUS} núcleos)`);
@@ -177,7 +223,9 @@ let sobreviveram = 0;
 let quebradas = 0;
 let semAssercao = 0;
 let soPesado = 0;
-for (const r of resultados) {
+let divida = 0;
+const pendentes = resultados.filter((r) => !r).length;
+for (const r of resultados.filter(Boolean)) {
   const m = r.m;
   if (r.tipo === "quebrada") {
     quebradas++;
@@ -185,6 +233,9 @@ for (const r of resultados) {
   } else if (r.tipo === "so-pesado") {
     soPesado++;
     console.log(`so-pesado ${m.id}: só um teste pesado pega (conferido na rodada semanal, --com-pesados)`);
+  } else if ((r.tipo === "erro-sem-assercao" || r.tipo === "sobreviveu") && DIVIDA.has(m.id)) {
+    divida++;
+    console.log(`DIVIDA    ${m.id}: ${m.descricao} - já era assim antes de 06/11 (tests/sabotagem_conhecidas.json)`);
   } else if (r.tipo === "erro-sem-assercao") {
     semAssercao++;
     console.log(`SEM-ASSERCAO ${m.id}: ${m.descricao} - a suíte falhou, mas nenhuma asserção (erro de carga/TypeError): não prova proteção`);
@@ -196,5 +247,5 @@ for (const r of resultados) {
   }
 }
 gravarCacheMesclando(CACHE, atualizacoes, cache);
-console.log(`\n=== sabotagem: ${MUTACOES.length - sobreviveram - quebradas - semAssercao - soPesado}/${MUTACOES.length} pegas (+${soPesado} só pelo pesado) em ${Math.round((Date.now() - inicio) / 1000)} s ===`);
+console.log(`\n=== sabotagem: ${MUTACOES.length - sobreviveram - quebradas - semAssercao - soPesado - pendentes - divida}/${MUTACOES.length} pegas (+${soPesado} só pelo pesado${divida ? `, ${divida} em dívida conhecida` : ""}${pendentes ? `, ${pendentes} PENDENTES: o orçamento acabou, rode de novo para continuar` : ""}) em ${Math.round((Date.now() - inicio) / 1000)} s ===`);
 if (sobreviveram || quebradas || semAssercao) process.exitCode = 1;
