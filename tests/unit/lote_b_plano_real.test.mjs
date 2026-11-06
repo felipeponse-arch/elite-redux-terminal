@@ -49,17 +49,6 @@ test("clima dura o número de turnos e só liga quando o armador entra", () => {
   assert.ok(s2.log.filter((l) => l.meu).every((l) => l.clima === false));
 });
 
-test("a IA recebe o set provado pelo simulador (habilidade, golpes e golpe-chave)", () => {
-  const prov = R.resumoProvadoPeloSimulador(r);
-  const e = r.escolhidos[0];
-  const p = prov[e.sp.sname];
-  assert.ok(p && p.golpes.length >= 1 && p.golpes.length <= 4);
-  assert.equal(p.habilidade, e.ab);
-  const prompt = R.montarPromptBuildsDoTime(r.escolhidos.map((x) => x.sp), { chefao: { boss: flannery, party, clima: r.clima, estrategia: r.estrategia }, responde: {}, provado: prov });
-  assert.match(prompt, /O SIMULADOR PROVOU ESTE POKEMON/);
-  assert.ok(prompt.indexOf(p.golpes[0]) !== -1);
-});
-
 test("o simulador usa a build salva do jogador quando existe", () => {
   const sp = porNome("Azumarill");
   const b = { ability: R.ABILITIES[sp.ab[0]][0], nature: "Adamant", item: "Choice Band", moves: ["Aqua Tail", "Play Rough", "Superpower", "Knock Off"].filter((n) => R.MOVE_ID_BY_NAME[n] !== undefined), evs: [252, 252, 0, 0, 4, 0] };

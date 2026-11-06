@@ -6,6 +6,10 @@
   // técnica, 2026-09-16), o que permite carregar este arquivo no Node pros
   // testes unitários (tests/unit/).
 
+  // ctx explícito das regras puras (TK-19): { archetype, team, settings, cap }. Este é o ÚNICO ponto das regras de build que lê o state.
+  function ctxDoState() { return { archetype: state.archetype, team: state.team, box: state.box, settings: state.settings, cap: getCurrentCap() }; }
+  function completarCtx(ctx) { return ctx && ctx.settings && ctx.archetype && ctx.team && ctx.cap !== undefined ? ctx : Object.assign(ctxDoState(), ctx || {}); }
+
   // No modo temporário, uma forma mega só existe na luta se estiver segurando
   // a pedra - o slot de item é dela. No permanente (ou pra forma base, que
   // pode lutar sem mega-evoluir) não há regra. Mega sem pedra conhecida
@@ -52,21 +56,6 @@
     if (ativas.indexOf("Unburden") !== -1) return { habilidade: "Unburden", precisa: "consumivel" };
     return null;
   }
-  // Linha pro prompt, antes da IA escolher a habilidade: a exigência da innate
-  // e, pras escolhíveis, a condição "se escolher X".
-  function regraItemConsumivelPrompt(sp) {
-    if (megaStoneRuleFor(sp)) return ""; // a pedra ocupa o slot de item
-    var textoDe = function (r) {
-      return r.precisa === "berry" ? "o item TEM que ser uma Berry" : "o item TEM que ser um que se gasta na luta (Berry, Gem, Focus Sash, White Herb, Weakness Policy…)";
-    };
-    var daInnate = regraItemConsumivelPara(sp, null);
-    if (daInnate) return "ITEM OBRIGATORIO: a innate " + daInnate.habilidade + " so funciona consumindo o item - " + textoDe(daInnate) + ".\n";
-    var linhas = uniqueIds(sp.ab || []).map(function (id) { return ABILITIES[id] ? ABILITIES[id][0] : ""; })
-      .map(function (n) { var r = regraItemConsumivelPara(sp, n); return r ? "se escolher " + n + ", " + textoDe(r) : ""; })
-      .filter(Boolean);
-    return linhas.length ? "ITEM x HABILIDADE: " + linhas.join("; ") + ".\n" : "";
-  }
-
   // ---- Papel e item (2026-09-27, revisão do prompt de build pedida pelo
   // usuário: "se um Pokémon é tanque ele não prioriza a velocidade, prioriza
   // defesa ou HP; se é pivô prioriza as coisas de pivô..."; "os itens que ele
@@ -474,53 +463,3 @@
     return { ability: raw.ability, nature: raw.nature, item: item, moves: raw.moves.slice(0, 4), ivs: ivs, evs: evs, rationale: rationale };
   }
 
-  // Resposta das Estratégias ({"sets":[...]}) -> só os sets que passam na MESMA
-  // validação da build (validateAiBuild) e têm nome. Set ruim entre sets bons
-  // não derruba os outros. Movido do template na fase 4 (2026-09-24).
-  function setsValidosDaResposta(sp, bruto) {
-    var candidatos = (bruto && Array.isArray(bruto.sets)) ? bruto.sets : [];
-    var out = [];
-    candidatos.forEach(function (c) {
-      var v = validateAiBuild(sp, c);
-      if (v && typeof c.name === "string" && c.name.trim()) {
-        v.name = c.name.trim().slice(0, 40);
-        out.push(v);
-      }
-    });
-    return out;
-  }
-  // Ajustes na build validada antes de gravar (tirados de generateBuildWithAI na fase 5 da refatoração; movidos
-  // pra cá no ticket 17, 08/10, pra ter teste). Item repetido no time é permitido desde 2026-09-27 (pedido do
-  // usuário: "cada Pokémon pode ter um item e esse item pode ser repetido pelo time") - antes o item já em uso
-  // por outro membro era apagado.
-  function ajustarBuildDaIa(sp, validated, opts, cap) {
-    if (opts.modo === "ponte" && opts.alvo) {
-      // A build de agora é a curada com golpes-ponte: habilidade, natureza,
-      // item e EVs continuam os da curada (quando valem pra esta forma).
-      var alvoAb = habilidadesEscolhiveis(sp);
-      if (alvoAb.indexOf(opts.alvo.ability) !== -1) validated.ability = opts.alvo.ability;
-      if (opts.alvo.nature) validated.nature = opts.alvo.nature;
-      validated.item = opts.alvo.item || "";
-      validated.ponte = true; // marca a build como golpe-ponte: o item da curada recebe avisos próprios (avisosDaBuild)
-      // A curada vem de texto do Discord e pode somar mais que o jogo permite (Lepastry: 520).
-      validated.evs = limitarEvsAoJogo(evsTextoParaArray(opts.alvo.evs));
-      validated.rationale = "Build curada adaptada ao level cap " + cap + ": golpes-ponte até liberar os da curada.";
-    }
-  }
-
-  // Curada no lugar da IA no time novo (2026-09-30, decisão do usuário: "só quando não houver Clima/Tática").
-  // Devolve a entrada a gravar, ou null quando a curada não serve e a IA deve montar: golpe ainda travado no
-  // level cap, item que já está em 2 do time, ou habilidade que esta forma não escolhe (ticket 17, 08/10: a
-  // curada da Arbok Mega traz a Merciless, que é da base - nunca misturar dado entre formas).
-  function entradaDaCuradaParaTimeNovo(sp, cur) {
-    if (!cur || golpesTravadosNoCap(sp, cur.moves).some(function (g) { return g.nivel !== null; })) return null;
-    var item = stripNote(cur.item);
-    if (item && itemEsgotadoNoTime(itensEmUsoComQuem(sp.x)[item])) return null;
-    var escolhiveis = habilidadesEscolhiveis(sp);
-    if (escolhiveis.indexOf(cur.ability) === -1) return null;
-    var entrada = { ability: cur.ability, nature: cur.nature, item: cur.item, moves: cur.moves.slice(), planoConsultado: true,
-      ivs: [31, 31, 31, 31, 31, 31], evs: limitarEvsAoJogo(evsTextoParaArray(cur.evs)),
-      rationale: "Build curada de " + sp.n + " (" + (cur.fonte || "curadoria") + "), no estilo do time." };
-    if (cur.plano) entrada.plano = cur.plano;
-    return entrada;
-  }

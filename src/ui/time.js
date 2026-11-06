@@ -20,7 +20,7 @@
         var build = effectiveBuild(sp);
         var buildHtml = build ? (
           '<div class="ts-build">' +
-            '<div class="ts-build-head"><span class="ts-build-label">' + rotuloDaBuild(build) + '</span>' + seloDaBuildHtml(build) + revisaoStatusHtml(sp.sname) +
+            '<div class="ts-build-head"><span class="ts-build-label">' + rotuloDaBuild(build) + '</span>' + seloDaBuildHtml(build) +
               '<button class="ts-build-copy" data-x="' + sp.x + '" type="button" title="Copiar este set">copiar</button></div>' +
             '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
             planoDaBuildHtml(build) +
@@ -34,17 +34,9 @@
             (build.note ? '<div class="ts-nota-fonte" title="' + escapeHtml(build.note) + '">' + buildNoteHtml(escapeHtml(build.note)) + '</div>' : "") +
           '</div>'
         ) : (
-          // Achado real do usuário, 2026-09-13: "não achei o botão de criar
-          // build na tela do time" - o texto dizia pra ir pra Dex, mas nunca
-          // dava um jeito de gerar direto daqui. Botão real, chama a MESMA
-          // generateBuildWithAI() que a Dex já usa (mesmo prompt, mesmas
-          // validações, já ciente do arquétipo/level cap/item já em uso) -
-          // status por espécie (id próprio) porque até 6 cards existem ao
-          // mesmo tempo nesta tela, não dá pra reusar um id global único.
+          // Sem build salva: o texto leva para a Dex (o app não gera build por IA; o Modo Motor monta o time com as builds).
           '<div class="ts-build ts-build-empty">' +
-            '<p style="margin:0 0 8px;">Sem build salva ainda.</p>' +
-            '<button class="ts-ai-generate-btn" id="ts-ai-generate-' + sp.x + '" data-x="' + sp.x + '" type="button">Gerar build com IA</button> ' +
-            '<span id="ts-ai-status-' + sp.x + '" class="notes-status" role="status" aria-live="polite"></span>' +
+            '<p style="margin:0 0 8px;">Sem build salva ainda - monte na Dex ou use "Montar meu melhor time".</p>' +
           '</div>'
         );
         var swapOpen = teamSwapIdx === i;
@@ -116,17 +108,6 @@
         var spCopia = getSpeciesByX(x);
         copyText(showdownSet(spCopia, effectiveBuild(spCopia)), null, "");
         flashToast("Set do " + spCopia.n + " copiado (formato Showdown)");
-      } else if (btn.classList.contains("ts-evo-gerar")) {
-        // Build nova depois da evolução, pedida com um clique (2026-09-27).
-        var spEvo = getSpeciesByX(x);
-        var antiga = spEvo && getActiveBuild(spEvo.sname);
-        if (spEvo && antiga && antiga.revisar === "evolucao" && !revisaoEmAndamento(spEvo.sname)) {
-          btn.disabled = true;
-          generateBuildWithAI(spEvo, "ts-evo-status-" + x, { modo: "revisao", anterior: antiga, deNome: antiga.revisadaDe });
-        }
-      } else if (btn.classList.contains("ts-ai-generate-btn")) {
-        var spIa = getSpeciesByX(x);
-        if (spIa) generateBuildWithAI(spIa, "ts-ai-status-" + x);
       } else if (btn.classList.contains("swap-pick")) {
         rosterMove(x, state.team[parseInt(btn.dataset.idx, 10)]); // a ação redesenha o time
       } else if (btn.id === "ts-goto-dex") {

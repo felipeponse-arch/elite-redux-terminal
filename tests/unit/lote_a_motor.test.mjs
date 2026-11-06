@@ -75,16 +75,3 @@ test("luta inteira: o recuo/Life Orb do golpe que nocauteia sai do HP que passa 
   const custo = R.custoDoGolpeFinalDuelo(atq, alvo, 1, 50);
   assert.ok(custo > 0.1, "recuo de 33% + Life Orb no golpe final: " + custo);
 });
-
-test("regra de campo: Tate&Liza 1 com Trick Room + invertida; Steven Doubles com Gravity", () => {
-  assert.deepEqual([R.regraDeCampoDoChefao("Tate And Liza 1").sala, R.regraDeCampoDoChefao("Tate And Liza 1").inversa], [true, true]);
-  assert.equal(R.regraDeCampoDoChefao("Tate And Liza 2").inversa, undefined, "revanche: só Trick Room");
-  assert.equal(R.regraDeCampoDoChefao("Steven Doubles").gravidade, true);
-  const foes = [unidade(["Psychic"])];
-  const com = R.foesComRegraDeCampo(foes, R.regraDeCampoDoChefao("Tate And Liza 1"));
-  assert.equal(com[0].ef.sala, 99);
-  assert.equal(com[0].ef.inversa, 99);
-  assert.equal(foes[0].ef.sala, 0, "não mexe no original");
-  const tl = R.BOSSES.find((b) => b.name === "Tate And Liza 1");
-  assert.match(R.linhasProximaLutaIA(null, { boss: tl, party: R.bossPartyPorDificuldade(tl) }).join("\n"), /INVERTIDA/);
-});

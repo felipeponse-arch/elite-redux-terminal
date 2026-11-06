@@ -725,15 +725,11 @@
 /*@regras condicoes_habilidade.js*/
 /*@regras avisos_build.js*/
 /*@regras duelo.js*/
-/*@regras prompts_ia.js*/
 /*@regras pipeline_build.js*/
 /*@regras time_pelo_motor.js*/
 /*@regras time_pelo_motor_papeis.js*/
 /*@regras sugestao_do_motor.js*/
-/*@regras escolha_ia_candidatos.js*/
-/*@regras ferramentas_ia.js*/
 /*@regras lista_de_builds.js*/
-/*@regras gravacao_build_ia.js*/
 
   // Tinta do texto sobre a cor do tipo, escolhida pelo contraste (WCAG AA, 4,5:1) em vez
   // de uma lista "claro/escuro" à mão (lote 1, 2026-10-03: Fire, Grass, Normal, Psychic e
@@ -846,7 +842,6 @@
 
 /*@ui editor_build.js*/
 
-/*@ui ia.js*/
 
 /*@ui pipeline_tela.js*/
 
@@ -903,8 +898,6 @@
   window.__erTest = {
     buildChipsHtml: buildChipsHtml,
     renderTeam: renderTeam,
-    goToDexSpeciesStrategies: goToDexSpeciesStrategies, // ticket 10: rolagem com animação reduzida
-    montarPromptBuild: montarPromptBuild,
     validateAiBuild: validateAiBuild,
     buildSynergyHtml: buildSynergyHtml,
     ABILITY_SYNERGY: ABILITY_SYNERGY,
@@ -925,42 +918,23 @@
     planoDaBuildHtml: planoDaBuildHtml,
     rotuloDaBuild: rotuloDaBuild,
     golpesFuturosDe: golpesFuturosDe,
-    planoPromptBlock: planoPromptBlock,
-    anexarPlanoDaIa: anexarPlanoDaIa,
     MEGA_BASE_BY_X: MEGA_BASE_BY_X,
-    generateBuildWithAI: generateBuildWithAI,
-    gerarPlanoParaBuild: gerarPlanoParaBuild,
     processarRevisoes: processarRevisoes,
     acao: acao,
     TELAS: TELAS,
-    pedirIA: pedirIA,
-    // Testes não esperam os segundos reais entre novas tentativas de IA.
-    definirPausasIA: function (p) { PAUSAS_IA_MS = p; },
-    definirTempoLimiteIA: function (ms) { TEMPO_LIMITE_IA_MS = ms; },
-    sampleErrorMessage: sampleErrorMessage,
     desligarRevisaoAutomatica: function (sim) { revisaoAutomaticaDesligada = !!sim; },
     // O aquecimento do Modo Motor (builds calculadas em segundo plano) só atrapalharia as seções, que montam o estado à mão.
     desligarAquecimentoDoMotor: function (sim) { motorAquecimentoDesligado = !!sim; },
-    modoMotor: { estado: function () { return { modo: modoDeMontagem, favoritos: state.motorFavoritos.slice(), tela: motorTela, aquecidoPara: motorAquecidoPara }; } },
-    // Ticket 03 do pipeline: liga/desliga a IA que escolhe entre candidatos (desligada = o prompt de build do zero de antes).
-    definirEscolhaEntreCandidatos: function (sim) { escolhaEntreCandidatosLigada = !!sim; },
-    montarPromptEscolhaDeBuild: montarPromptEscolhaDeBuild,
-    montarPromptEscolhaDoTime: montarPromptEscolhaDoTime,
-    montarPromptBuildsDoTime: montarPromptBuildsDoTime,
-    gerarBuildsDoTimeComIA: gerarBuildsDoTimeComIA,
+    modoMotor: { estado: function () { return { favoritos: state.motorFavoritos.slice(), tela: motorTela, aquecidoPara: motorAquecidoPara }; } },
     candidatosDeBuild: candidatosDeBuild,
-    strategySetsHtml: strategySetsHtml,
     confrontoParaParty: confrontoParaParty,
     bossConfrontoHtml: bossConfrontoHtml,
     dashboardConfrontoHtml: dashboardConfrontoHtml,
     confrontoTime: confrontoTime,
     renderDashboard: renderDashboard,
-    aiTool_getNextBossRoster: aiTool_getNextBossRoster,
     coberturaSugerida: coberturaSugerida,
-    buildStandardAiTools: buildStandardAiTools,
     bossPartyPorDificuldade: bossPartyPorDificuldade,
     conditionMoveSynergyNoteHtml: conditionMoveSynergyNoteHtml,
-    aiTool_getConditionMoveSynergy: aiTool_getConditionMoveSynergy,
     BUILDS: BUILDS,
     getSpeciesBySname: function (sname) {
       for (var i = 0; i < SPECIES.length; i++) { if (SPECIES[i].sname === sname) return SPECIES[i]; }
@@ -986,7 +960,6 @@
     gymSkillsSummaryFor: gymSkillsSummaryFor,
     MONOTYPE_ARCHETYPES: MONOTYPE_ARCHETYPES,
     computeTeamGenerationValidation: computeTeamGenerationValidation,
-    generateTeamForArchetype: generateTeamForArchetype,
     LEVELCAPS: LEVELCAPS,
     computeSpeedTiers: computeSpeedTiers,
     calcFinalStat: calcFinalStat,

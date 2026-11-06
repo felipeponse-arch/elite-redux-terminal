@@ -1,12 +1,5 @@
-// Seções Multi-build (até 3 por espécie) + 'Gerar build com IA', passe de acessibilidade da Fase 2 e 'Resolve o problema do QA' (leitor de caixa/dashboard).
-// Extraído de scripts/smoke_test_suite.js (refactor 2026-09-13) - conteúdo idêntico ao original, só movido pra seu próprio arquivo.
-// O 'Gerar build com IA' daqui é testado com o prompt de build do ZERO (a escolha entre candidatos é a seção 29): a chave fica desligada só aqui dentro.
+// Seções Multi-build (até 3 por espécie) e passe de acessibilidade da Fase 2. O "Gerar build com IA" saiu em 06/11/2026 (o app não usa mais IA).
 async function section07() {
-  var T0 = window.__erTest;
-  if (T0 && T0.definirEscolhaEntreCandidatos) T0.definirEscolhaEntreCandidatos(false);
-  try { await section07Corpo(); } finally { if (T0 && T0.definirEscolhaEntreCandidatos) T0.definirEscolhaEntreCandidatos(true); }
-}
-async function section07Corpo() {
   await prepararRunPadrao();
   // --- Multi-build (up to 3 per species) + "Gerar build com IA" -
   // 2026-09-09, user's own rule: check for a saved build first, ask if a
@@ -38,7 +31,6 @@ async function section07Corpo() {
     // depois de "mybuild-save", o número de chips é o que já havia (se >=1,
     // porque substituiu) ou 1 (se era 0, porque criou a primeira).
     const chipsBeforeAnySave = document.querySelectorAll(".mybuild-chip").length;
-    check("'Gerar build com IA' button is present", !!document.getElementById("mybuild-ai-generate"));
 
     setSelMB("mybuild-ability", "Overgrow");
     document.getElementById("mybuild-save").click();
@@ -56,9 +48,7 @@ async function section07Corpo() {
     await wait(50);
     check("3 saved builds show 3 chips", document.querySelectorAll(".mybuild-chip").length === 3);
     check("'Salvar como nova variante' hides once the 3-build cap is hit", !document.getElementById("mybuild-save-variant"));
-    check("hitting the cap shows the limit message instead of the AI button",
-      !document.getElementById("mybuild-ai-generate") &&
-      document.querySelector(".mybuild-ai-row").textContent.indexOf("Limite de 3") !== -1);
+
 
     const firstChip = document.querySelector('.mybuild-chip[data-idx="0"]');
     firstChip.click();
@@ -75,17 +65,6 @@ async function section07Corpo() {
       Array.isArray(afterDelete) && afterDelete.filter(function (b) { return b.active; }).length === 1,
       afterDelete && JSON.stringify(afterDelete));
 
-    // Degrade path: this dev server never injects window.claude at all, so
-    // clicking "Gerar build com IA" (available again now that the list is
-    // back under the cap) must show a clear message, not fail silently.
-    const aiBtnAgain = document.getElementById("mybuild-ai-generate");
-    if (aiBtnAgain) {
-      aiBtnAgain.click();
-      await wait(50);
-      check("AI generation degrades to a clear message when window.claude is unavailable",
-        document.getElementById("mybuild-ai-status").textContent.indexOf("não disponível") !== -1,
-        document.getElementById("mybuild-ai-status").textContent);
-    } else { check("AI button available again under the 3-build cap", false); }
   } else { check("Bulbasaur found for the multi-build test", false); }
   setSearch("");
   await wait(120);
@@ -188,133 +167,5 @@ async function section07Corpo() {
   setSearch("");
   await wait(120);
 
-  // --- Resolve o problema do QA, 2026-09-10: reunião da equipe sobre onde o
-  // Especialista em Meta Pokémon entra na geração de build por IA. Antes,
-  // "não dá pra testar a chamada real de sample() localmente" era aceito
-  // como limitação permanente (não existe window.claude no dev-server local).
-  // Isso resolve a parte que REALMENTE precisa ser testada por QA: que o
-  // app monta o prompt certo, que as ferramentas (getTeamWeaknesses/
-  // getSpeciesRank) são chamadas de verdade, que a resposta é validada
-  // contra os dados reais, e que ela é salva/exibida corretamente. Um
-  // window.claude FALSO, só nesta suíte de testes (nunca no build
-  // publicado), que devolve uma resposta fabricada usando valores REAIS
-  // lidos direto das opções já renderizadas na tela (não chutados) - assim
-  // a resposta sempre passa em validateAiBuild() sem precisar adivinhar
-  // qual ability/golpe é real pra cada espécie. O que isso NÃO testa (e
-  // nunca vai testar por aqui): se a IA de verdade, ao vivo, dá uma resposta
-  // de qualidade - isso continua precisando do aparelho real do usuário.
-  setSearch("Squirtle"); // espécie ainda não tocada por nenhuma seção anterior
-  await wait(120);
-  const squirtleRow = document.querySelector("#species-list .species-row");
-  if (squirtleRow) {
-    squirtleRow.click();
-    await wait(30);
-    const realAbility = document.querySelector("#mybuild-ability option[value]:not([value=''])");
-    const realNature = document.querySelector("#mybuild-nature option[value]:not([value=''])");
-    const realMoveOptions = [...document.querySelectorAll("#mybuild-move-0 option")].filter(o => o.value);
-    if (realAbility && realNature && realMoveOptions.length >= 4) {
-      const fakeMoves = realMoveOptions.slice(0, 4).map(o => o.value);
-      const mockRationale = "Escolhido pra cobrir a fraqueza compartilhada do time (teste automatizado).";
-      window.__mockToolCalls = [];
-      window.claude = {
-        use: async function (name) {
-          if (name !== "sample") return null;
-          return {
-            json: async function (prompt, opts) {
-              window.__mockLastPrompt = prompt;
-              if (opts && Array.isArray(opts.tools)) {
-                for (const t of opts.tools) {
-                  const input = (t.name === "getSpeciesRank" || t.name === "getPriorityMoveOptions" || t.name === "getAbilityMovepoolSynergy" || t.name === "getSpeedBenchmark") ? { sname: "SPECIES_SQUIRTLE" } : {};
-                  const result = await t.execute(input);
-                  window.__mockToolCalls.push({ name: t.name, result });
-                }
-              }
-              if (!(opts && Array.isArray(opts.tools) && opts.tools.some(t => t.name === "getRemainingBosses"))) {
-                window.__missingRemainingBossesTool = true;
-              }
-              return {
-                ability: realAbility.value, nature: realNature.value, item: "",
-                moves: fakeMoves, evs: [252, 0, 0, 252, 0, 4],
-                rationale: mockRationale
-              };
-            }
-          };
-        }
-      };
-      const aiBtn = document.getElementById("mybuild-ai-generate");
-      if (aiBtn) {
-        aiBtn.click();
-        await wait(80);
-        // Desde 2026-09-28 a build sai numa chamada só, sem ferramentas: o que
-        // as ferramentas devolviam (rank, sinergia, Velocidade, chefões) vai
-        // no próprio prompt (blocoContextoIA). Confere que foi mesmo, com os
-        // números reais - não só que o bloco existe.
-        var P = window.__mockLastPrompt || "";
-        check("build por IA sai sem ferramentas (uma chamada só)", window.__missingRemainingBossesTool === true && window.__mockToolCalls.length === 0, window.__mockToolCalls.length);
-        check("o prompt traz o CONTEXTO já calculado pelo app", P.indexOf("CONTEXTO JA CALCULADO PELO APP") !== -1);
-        check("o contexto traz a sinergia real Torrent (innate) com Surf",
-          /Torrent \(innate\) reforca [^;\n]*Surf/.test(P), (P.match(/Sinergia habilidade x golpe[^\n]*/) || [""])[0]);
-        var Terr = window.__erTest;
-        var stReal = Terr.computeSpeedTiers("");
-        var idxReal = stReal.rows.findIndex(function (r) { return r.sp.sname === "SPECIES_SQUIRTLE"; });
-        var rowReal = stReal.rows[idxReal];
-        check("a Velocidade do contexto bate com a tabela real de Speed Tiers",
-          idxReal !== -1 && P.indexOf("252 EV + nature que sobe Velocidade " + rowReal.invested + " (passa " + (stReal.rows.length - idxReal - 1) + " de " + stReal.rows.length) !== -1 &&
-          P.indexOf("com Choice Scarf " + rowReal.scarf) !== -1,
-          (P.match(/Velocidade no nivel[^\n]*/) || [""])[0]);
-        // A suíte roda com milestone 9 (Champion) - não falta chefe nenhum.
-        check("com milestone 9 já configurado, o contexto não lista chefão que falta", P.indexOf("Chefoes que faltam") === -1 && P.indexOf("Proxima luta:") === -1);
-        check("build gerada por IA foi validada e salva (aparece 1 chip 'IA 1')",
-          document.querySelectorAll(".mybuild-chip").length === 1 &&
-          document.querySelector(".mybuild-chip").textContent.indexOf("IA 1") !== -1,
-          document.querySelector(".mybuild-chip") && document.querySelector(".mybuild-chip").textContent);
-        const rationaleEl = document.querySelector(".mybuild-rationale");
-        check("a justificativa aparece em destaque na tela (bloco .mybuild-rationale)",
-          rationaleEl && rationaleEl.textContent.indexOf(mockRationale) !== -1,
-          rationaleEl && rationaleEl.textContent);
-        var savedSquirtle = JSON.parse(localStorage.getItem("er_terminal_save") || "{}").customBuilds.SPECIES_SQUIRTLE;
-        var savedEntry = savedSquirtle && savedSquirtle[0];
-        check("a ability/golpes salvos batem exatamente com o que a IA (mock) escolheu",
-          savedEntry && savedEntry.ability === realAbility.value && JSON.stringify(savedEntry.moves) === JSON.stringify(fakeMoves),
-          savedEntry && JSON.stringify(savedEntry));
-
-        // sampleErrorMessage() - 2026-09-11, achado na reunião sobre o
-        // material de IHC (tabela "mensagens frustrantes x construtivas"):
-        // o catch de generateBuildWithAI() era genérico ("Erro ao gerar
-        // build - tente de novo."), sem dizer o que aconteceu - o mesmo
-        // defeito do exemplo "Erro de sintaxe!" do livro. Corrigido pra
-        // branchear por code (contrato sample.d.ts 0.2.41). O mock troca
-        // json() por uma versão que sempre rejeita com o code pedido -
-        // ainda é o código REAL do app (sampleErrorMessage) reagindo, só o
-        // resultado do sample() é fabricado, mesmo espírito do resto desta
-        // suíte. Testa 1 code documentado (mensagem específica) e 1 code
-        // desconhecido (sample.d.ts manda tratar como upstream_error -
-        // "falha transitória, tentar de novo é uma ação real" - nunca cair
-        // de volta na mensagem genérica antiga).
-        window.__erTest.definirPausasIA([0, 0]);
-        async function checkErrorCode(code, expectedSubstr) {
-          window.claude = { use: async function (name) { return name === "sample" ? { json: async function () { throw { code: code, message: "teste" }; } } : null; } };
-          document.getElementById("mybuild-ai-generate") && document.getElementById("mybuild-ai-generate").click();
-          await wait(80);
-          const status = document.getElementById("mybuild-ai-status").textContent;
-          check("sampleErrorMessage() dá uma mensagem construtiva pra code=\"" + code + "\" (não a genérica antiga)",
-            status.indexOf(expectedSubstr) !== -1 && status.indexOf("Erro ao gerar build - tente de novo.") === -1,
-            status);
-        }
-        await checkErrorCode("rate_limited", "espere um pouco");
-        await checkErrorCode("um_code_que_nao_existe_ainda", "temporária");
-      } else { check("botão 'Gerar build com IA' encontrado pro teste de mock", false); }
-      // Limpa o mock - as seções mais acima (Bulbasaur) já rodaram e não
-      // dependem mais disso, mas nada depois deste ponto deve herdar um
-      // window.claude falso por engano.
-      delete window.claude;
-      delete window.__mockToolCalls;
-      delete window.__mockLastPrompt;
-      delete window.__missingRemainingBossesTool;
-      window.__erTest.definirPausasIA([4000, 10000]);
-    } else { check("Squirtle tem opções reais suficientes (ability/nature/4 golpes) pro teste de mock", false); }
-  } else { check("Squirtle encontrado pro teste de mock da IA", false); }
-  setSearch("");
-  await wait(120);
 
 }

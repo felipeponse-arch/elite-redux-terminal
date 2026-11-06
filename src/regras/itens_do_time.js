@@ -1,5 +1,5 @@
   // ===== src/regras/itens_do_time.js =====
-  // UMA lista de itens para o set do duelo (itemDoSetDuelo), o Modo Motor (time_pelo_motor.js) e a IA (prompts_ia.js,
+  // UMA lista de itens para o set do duelo (itemDoSetDuelo), o Modo Motor (time_pelo_motor.js) e a validação de build (
   // validacao_build_ia.js) - TK-14, decisão do usuário (28/10/2026). Antes eram três: o palpite do set, MOTOR_ITENS_FIXOS + o
   // item de tipo alfabético do ITENS_CONFIG (Psychic caía em Odd Incense, que a IA não oferecia) e a lista da IA.
   // Papéis diferentes (ordem de preferência, quais o Motor simula) ficam com quem chama; "quais itens existem" é só daqui.

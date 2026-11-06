@@ -94,19 +94,6 @@ test("fraquezas do tipo, quem cobre, e quem vira/sai do tipo", () => {
   assert.equal(R.mudancaDeTipo(porNome("Squirtle"), "Water"), null, "a linha toda é Water");
 });
 
-test("Monotype entra no prompt da build e do time; aviso do próximo líder", () => {
-  R.state.archetype.monotype = "Fire";
-  const pb = R.montarPromptBuild(porNome("Charmander"), {});
-  assert.match(pb, /Monotype do time: run Monotype Fire/);
-  assert.match(pb, /Passho Berry/, "berry contra Water, a fraqueza do time");
-  R.state.team = [porNome("Charmander").x];
-  const pt = R.montarPromptTimeArquetipo(R.rosterParaTimeIA("Fire").roster, null, null, "Fire");
-  assert.match(pt, /divide as mesmas fraquezas \(Water, Ground, Rock\)|divide as mesmas fraquezas/);
-  const aviso = R.avisoProximoLider("Fire");
-  assert.ok(aviso && aviso.total > 0 && aviso.batemForte.length <= aviso.total);
-  R.state.archetype.monotype = null; R.state.team = [];
-});
-
 test("clima que combina: só bônus confirmado nas páginas oficiais", () => {
   assert.equal(R.climaQueCombina("Fire").clima, "Sun");
   assert.equal(R.climaQueCombina("Water").clima, "Rain");

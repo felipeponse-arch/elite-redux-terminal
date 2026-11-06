@@ -116,16 +116,6 @@ test("habilidade que acrescenta tipo muda o STAB e as fraquezas (Phantom/Half Dr
   assert.ok(u.ef.stabExtra.includes(novo));
 });
 
-test("a build pedida pelo botão mira o chefão escolhido, não o próximo", () => {
-  const sp = porNome("Azumarill");
-  const p = R.montarPromptBuild(sp, { chefao: { boss: flannery, party, responde: ["Arcanine Redux", "Sunflora"], clima: "sol" } });
-  assert.match(p, /Luta alvo desta build: Flannery 1/);
-  assert.match(p, /OBJETIVO DESTA BUILD: vencer Flannery 1/);
-  assert.match(p, /resposta do time para: Arcanine Redux, Sunflora/);
-  assert.match(p, /arma sol/);
-  assert.doesNotMatch(R.montarPromptBuild(sp, {}), /OBJETIVO DESTA BUILD/);
-});
-
 // Simulador em passos (Fase 3, 2026-09-30): o botão devolve a vez pra tela entre
 // os passos; o progresso "N de total" precisa fechar e o resultado ser o mesmo.
 test("em passos: soma dos passos = total anunciado, e o mesmo time da versão direta", () => {

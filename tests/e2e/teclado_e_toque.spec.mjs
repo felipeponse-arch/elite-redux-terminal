@@ -41,34 +41,6 @@ test.describe("Enter e Espaço abrem a espécie", () => {
       expect((await page.locator("#species-detail h2").innerText()).trim()).toBe(nome);
     });
 
-    test(`a partir do link "Ver Estratégias" (${rotulo})`, async ({ page }) => {
-      await abrirApp(page);
-      await abrirAba(page, "dex");
-      await page.locator("#species-list .species-row").first().click();
-      const xAlvo = await page.evaluate(() => {
-        // O link real só existe depois do gerador de times (IA); aqui entra o mesmo
-        // elemento que arquetipo.js monta, na aba Chefões, para o teste do teclado.
-        const x = document.querySelector("#species-list .species-row[data-x]").dataset.x;
-        const link = document.createElement("span");
-        link.id = "link-estrategias-teste";
-        link.className = "goto-species-strategies";
-        link.setAttribute("tabindex", "0");
-        link.setAttribute("role", "button");
-        link.dataset.x = x;
-        link.textContent = "Ver Estratégias →";
-        document.getElementById("view-bosses").prepend(link);
-        return x;
-      });
-      // Vai para outra aba e usa o link dali: Enter/Espaço têm que trazer de volta à Dex.
-      await abrirAba(page, "bosses");
-      await page.evaluate(() => document.getElementById("link-estrategias-teste").focus());
-      await page.keyboard.press(tecla);
-      await expect(page.locator("#view-dex")).toBeVisible();
-      await expect(page.locator("#species-detail h2")).toBeVisible();
-      const estrategias = page.locator("#species-detail .detail-group", { has: page.locator("summary", { hasText: /^Estratégias/ }) });
-      await expect(estrategias, "a seção Estratégias abre sozinha").toHaveJSProperty("open", true);
-      expect(await page.evaluate(() => document.querySelector("#species-list .species-row.selected, #species-list .species-row[aria-selected=true]")?.dataset.x)).toBe(xAlvo);
-    });
   }
 
   test("Espaço não rola a página quando abre a espécie", async ({ page }) => {
@@ -91,7 +63,7 @@ test.describe("Enter e Espaço abrem a espécie", () => {
     // Percorre as telas que mostram atalhos e confere cada um que existe na tela.
     const falhas = [];
     const conferir = async (onde) => {
-      const f = await page.evaluate(() => [...document.querySelectorAll(".goto-species, .goto-species-strategies")]
+      const f = await page.evaluate(() => [...document.querySelectorAll(".goto-species")]
         .filter((el) => el.tabIndex !== 0 || !(el.tagName === "BUTTON" || el.getAttribute("role") === "button"))
         .map((el) => el.className));
       falhas.push(...f.map((c) => `${onde}: ${c}`));

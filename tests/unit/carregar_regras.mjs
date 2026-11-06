@@ -14,7 +14,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const lerJson = (nome) => JSON.parse(aplicarTrecho(readFileSync(join(root, "data", nome), "utf8").replace(/\r\n/g, "\n"), nome));
 
 // Mesma reindexação por sname que o artifact_template.html faz ao carregar (CONDITION_MOVE_SYNERGY):
-// as ferramentas da IA (src/regras/ferramentas_ia.js) leem esse índice.
+// (índice usado pelas regras de dados).
 function indexarCondicaoGolpe(bruto) {
   const porSname = {};
   const add = (sname, entrada) => { (porSname[sname] = porSname[sname] || []).push(entrada); };

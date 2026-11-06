@@ -1,6 +1,6 @@
 // Seção 31 (2026-10-21): Modo Motor no Meu Time (ticket time-pelo-motor/01, Fase F). Clique de verdade: o Motor é o botão padrão e monta o
 // time SEM chamar a IA (claude.use nunca é tocado), em passos que não travam a página; as três variantes aparecem com papéis e prova; usar uma
-// variante troca o time; repetir dá o mesmo resultado; o chip "IA (Claude)" devolve o caminho antigo, esse sim chamando claude.use.
+// variante troca o time; repetir dá o mesmo resultado. Não existe mais o chip "IA" nem o botão "Gerar time completo" (06/11/2026).
 async function section31() {
   await prepararRunPadrao();
   var T = window.__erTest;
@@ -9,7 +9,6 @@ async function section31() {
   var claudeAntes = window.claude, chamadas = [];
   window.claude = { use: async function (n) { chamadas.push(n); return null; } };
   var snapshot = JSON.parse(JSON.stringify(T.buildSave()));
-  T.definirPausasIA([0, 0]);
   try {
     S.settings.milestone = 2;
     S.settings.difficulty = "ace";
@@ -27,10 +26,6 @@ async function section31() {
     if (!detalhes.open) { detalhes.querySelector("summary").click(); await wait(40); }
 
     // ---- o botão do Motor ----
-    var chipMotor = document.getElementById("modo-montagem-motor");
-    if (!achou("chip 'Automático (sem IA)'", chipMotor)) return;
-    chipMotor.click();
-    await wait(30);
     detalhes = document.querySelector("#team-strategy details.arquetipo");
     detalhes.open = false; // outra seção pode tê-lo deixado aberto (o app lembra)
     await wait(30);
@@ -38,9 +33,9 @@ async function section31() {
     check("com o card de arquétipo recolhido, 'Montar meu melhor time' já está visível (fora do card)", !detalhes.open && !!document.getElementById("motor-montar") && !detalhes.contains(document.getElementById("motor-montar")) && document.getElementById("motor-montar").offsetParent !== null,
       { aberto: detalhes.open, botao: !!document.getElementById("motor-montar"), dentro: !!document.getElementById("motor-montar") && detalhes.contains(document.getElementById("motor-montar")), visivel: !!document.getElementById("motor-montar") && document.getElementById("motor-montar").offsetParent !== null });
     if (!detalhes.open) { detalhes.querySelector("summary").click(); await wait(40); }
-    check("com o modo Motor, o card mostra 'Montar meu melhor time' e não mostra 'Gerar time completo'",
+    check("o card mostra 'Montar meu melhor time', sem 'Gerar time completo' nem seletor de modo",
       !!document.getElementById("motor-montar") && !document.getElementById("archetype-build-complete") &&
-      document.getElementById("modo-montagem-motor").getAttribute("aria-pressed") === "true" && document.getElementById("modo-montagem-ia").getAttribute("aria-pressed") === "false");
+      !document.getElementById("modo-montagem-motor") && !document.getElementById("modo-montagem-ia"));
     // Favorito da CAIXA: Klefki só está na caixa e, marcado, entra travado.
     var favCaixa = document.querySelector('[data-motor-fav="SPECIES_KLEFKI"]');
     if (!achou("chip de favorito do Klefki (que está só na caixa)", favCaixa)) return;
@@ -136,22 +131,6 @@ async function section31() {
     check("confirmando, a sugestão entra como variante ativa e a build do jogador continua guardada",
       listaS.length === 2 && listaS[0].source === "manual" && listaS[0].nature === minha.nature && listaS[1].source === "sugestao" && listaS[1].active && !listaS[0].active, listaS.map(function (b) { return b.source + ":" + b.active; }));
 
-    // ---- a troca para a IA ----
-    document.getElementById("modo-montagem-ia").click();
-    await wait(40);
-    check("trocar para 'IA (Claude)' mostra 'Gerar time completo' e esconde o Motor e o resultado",
-      !!document.getElementById("archetype-build-complete") && !document.getElementById("motor-montar") && !document.getElementById("motor-resultado") && document.activeElement.id === "modo-montagem-ia");
-    selecionarArquetipo("pace", "Hyper Offense");
-    await wait(30);
-    window.claude = { use: async function (n) { chamadas.push(n); return n === "sample" ? { json: async function () { return { team: [], reasoning: "" }; } } : null; } };
-    document.getElementById("archetype-build-complete").click();
-    var iaChamada = await pollUntil(function () { return chamadas.indexOf("sample") !== -1; }, 4000);
-    check("no modo IA o botão chama a IA (claude.use)", iaChamada, chamadas);
-    await wait(100);
-    document.getElementById("modo-montagem-motor").click();
-    await wait(40);
-    check("voltar ao Motor traz o botão do Motor de volta", !!document.getElementById("motor-montar") && !document.getElementById("archetype-build-complete"));
-    selecionarArquetipo("pace", "");
   } finally {
     window.claude = claudeAntes;
     T.applySave(snapshot);

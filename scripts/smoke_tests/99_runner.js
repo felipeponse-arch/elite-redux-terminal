@@ -21,20 +21,16 @@ async function runAllSections() {
   await section13();
   await section14();
   await section15();
-  await section16();
   await section17();
   await section18();
   await section19();
-  await section20();
   await section21();
   await section22();
   await section23();
   await section24();
   await section25();
-  await section26();
   await section27();
   await section28();
-  await section29();
   await section30();
   await section31();
 

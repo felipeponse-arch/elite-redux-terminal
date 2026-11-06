@@ -18,8 +18,7 @@
 
   // Plano de golpes: o que veio com a build; senão, o da build que ela substitui
   // (editar a build à mão mantém as trocas dos golpes que continuam nela). Build
-  // sem plano que ainda tem golpe por liberar fica marcada pra revisão
-  // automática, que pede só o plano à IA (gerarPlanoParaBuild).
+  // sem plano segue sem plano (o app não pede mais plano a IA).
   function entradaDeBuild(build, source, sname, substituida) {
     var e = {
       ability: build.ability, nature: build.nature, item: build.item, moves: build.moves, ivs: build.ivs, evs: build.evs,
@@ -35,10 +34,6 @@
     var mesmosGolpes = !!substituida && (substituida.moves || []).slice().sort().join("|") === (build.moves || []).slice().sort().join("|");
     if (build.planoConsultado || (mesmosGolpes && substituida.planoConsultado)) e.planoConsultado = true;
     if (build.feitaPara) e.feitaPara = { chefao: build.feitaPara.chefao, cap: build.feitaPara.cap }; // botão do chefão (2026-09-30)
-    if (!plano && !e.planoConsultado && (e.source !== "ia" || build.pedirPlano)) {
-      var sp = getSpeciesBySname(sname);
-      if (sp && golpesFuturosDe(sp, getCurrentCap()).length) { e.revisar = "plano"; e.tentativasRevisao = 0; }
-    }
     return e;
   }
 
@@ -110,15 +105,8 @@
   // de "defesa em profundidade" pós-validação que os itens têm (não dá pra
   // simplesmente apagar 1 dos 4 golpes de uma build sem deixá-la quebrada,
   // ao contrário do item, que tem "vazio" como fallback válido).
-  // Lote de builds em andamento (2026-09-30, revisão): no "Montar time completo" e
-  // no botão do chefão, quem ainda vai ganhar build nova não conta como "em uso" -
-  // a build antiga dele vai sair. Antes a trava de 2 itens iguais rejeitava item
-  // válido por causa dessas builds velhas e gastava mais uma chamada de IA.
-  var buildsPendentesNoLote = [];
-  function comecarLoteDeBuilds(xs) { buildsPendentesNoLote = xs.slice(); }
-  function concluirBuildDoLote(x) { buildsPendentesNoLote = buildsPendentesNoLote.filter(function (p) { return p !== x; }); }
-  function encerrarLoteDeBuilds() { buildsPendentesNoLote = []; }
-  function contaNoTime(x, excludeX) { return x !== excludeX && buildsPendentesNoLote.indexOf(x) === -1; }
+  // Quem conta como "em uso" no time (menos o próprio).
+  function contaNoTime(x, excludeX) { return x !== excludeX; }
 
   function teamMovesInUse(excludeX) {
     var moves = [];

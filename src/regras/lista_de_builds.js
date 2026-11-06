@@ -4,7 +4,7 @@
   // par de mesmo propósito embrulhado em acao() (setOrReplaceActiveBuild, addBuildVariant,
   // removeBuildIndex, abrirVagaPreservando), que grava e redesenha. Separadas no ticket 06
   // da dívida técnica (2026-10-08) para a regra de "o que gravar da resposta da IA"
-  // (gravacao_build_ia.js) rodar e ser testada no Node sem a tela. Lógica idêntica à de antes.
+  // gravar a lista rodar e ser testada no Node sem a tela. Lógica idêntica à de antes.
   // Colado no <script> principal por scripts/build.mjs (marcador @regras lista_de_builds.js).
 
   // Troca a build ativa (ou cria, se a lista não está cheia). Cheia e sem ativa: troca a 1ª.

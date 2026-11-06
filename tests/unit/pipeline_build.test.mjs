@@ -1,5 +1,5 @@
 // Pipeline de build com intenção (ticket 20 da dívida, 14/10/2026): src/regras/pipeline_build.js, só pela interface
-// pública (candidatosDeBuild, especiesQueResolvem, fecharBuild), com as regras carregadas como no app.
+// pública (candidatosDeBuild, especiesQueResolvem), com as regras carregadas como no app.
 // Caso A: a sinergia do kit (Centiskorch: Coil Up + Flaming Jaws => Fire Fang, não Fire Lash).
 // Caso B: matar o alvo no turno 1 (Ledian contra o Ninetales da Meteor Falls; a prioridade não vale contra Queenly Majesty).
 import { test } from "node:test";
@@ -354,10 +354,10 @@ test("não muta o state", () => {
   const foto = () => JSON.stringify(Rx.state, (k, v) => (v instanceof Set ? [...v] : v));
   const antes = foto();
   const alvo = { chefao: Rx.BOSSES.find((b) => b.name === "Courtney Meteor Falls"), indice: 0 };
-  const c = Rx.candidatosDeBuild(Rx.getSpeciesBySname("SPECIES_LEDIAN"), {});
+  Rx.candidatosDeBuild(Rx.getSpeciesBySname("SPECIES_LEDIAN"), {});
   Rx.candidatosDeBuild(Rx.getSpeciesBySname("SPECIES_LEDIAN"), { alvo });
   Rx.especiesQueResolvem(alvo, {});
-  Rx.fecharBuild(c.candidatos[0], { evs: [0, 252, 0, 0, 0, 252], item: "", natureza: "Adamant" });
+
   assert.equal(foto(), antes);
 });
 
@@ -623,39 +623,4 @@ test("especiesQueResolvem: opts.demais soma as melhores do rank da Etapa, depois
   Rx.especiesQueResolvem(alvo, { demais: 12 }).forEach((e) => assert.ok(Rx.speciesTypeNames(e.sp).includes("Bug"), e.sp.n));
   // opts.especies marca "informada"
   assert.equal(R.especiesQueResolvem(ninetales, { especies: ["SPECIES_LEDIAN"] })[0].origem, "informada");
-});
-
-// ---------- 3. fechar a build ----------
-test("fecharBuild: com a escolha da IA devolve a build validada com os golpes e a habilidade do candidato", () => {
-  const c = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales }).candidatos[0];
-  const f = R.fecharBuild(c, { evs: [0, 252, 0, 0, 0, 252], item: "Life Orb", natureza: "Adamant" });
-  assert.equal(f.ok, true, f.erros.join(" "));
-  deepEqual(f.erros, []);
-  deepEqual(f.build.moves, c.golpes);
-  assert.equal(f.build.ability, c.habilidade);
-  assert.equal(f.build.nature, "Adamant");
-  assert.equal(f.build.item, "Life Orb");
-  assert.ok(R.validateAiBuild(sp("Ledian"), f.build, {}, {}));
-});
-
-test("fecharBuild: EVs, item, natureza e candidato inválidos viram { ok: false, erros } sem exceção", () => {
-  const c = R.candidatosDeBuild(sp("Ledian"), { alvo: ninetales }).candidatos[0];
-  const base = { evs: [0, 252, 0, 0, 0, 252], item: "", natureza: "Adamant" };
-  const ruins = [
-    Object.assign({}, base, { evs: [0, 300, 0, 0, 0, 252] }), Object.assign({}, base, { evs: [0, 252, 0, 0, 0] }),
-    Object.assign({}, base, { evs: [252, 252, 252, 0, 0, 0] }), Object.assign({}, base, { evs: "muito" }), Object.assign({}, base, { evs: [0, 1.5, 0, 0, 0, 0] }),
-    Object.assign({}, base, { item: "Item Que Nao Existe" }), Object.assign({}, base, { item: 7 }),
-    Object.assign({}, base, { natureza: "Nope" }), Object.assign({}, base, { natureza: undefined }), null, undefined, {}
-  ];
-  ruins.forEach((e) => {
-    const f = R.fecharBuild(c, e);
-    assert.equal(f.ok, false, JSON.stringify(e));
-    assert.equal(f.build, null);
-    assert.ok(f.erros.length > 0 && typeof f.erros[0] === "string");
-  });
-  [null, undefined, {}, { sname: "SPECIES_LEDIAN" }, { sname: "SPECIES_NAO_EXISTE", build: { moves: [] } }].forEach((cand) => {
-    const f = R.fecharBuild(cand, base);
-    assert.equal(f.ok, false);
-    assert.ok(f.erros.length > 0);
-  });
 });

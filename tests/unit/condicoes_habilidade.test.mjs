@@ -62,15 +62,6 @@ test("tipo Poison ou Steel não é envenenado pela Toxic Orb", () => {
   assert.equal(R.podeTerStatus(porNome("Goodra"), "veneno", ["Immunity"]), false); // "Cannot be poisoned"
 });
 
-test("o prompt avisa as habilidades condicionais e traz o contexto sem pedir ferramenta", () => {
-  const p = R.montarPromptBuild(porNome("Goodra"), {});
-  assert.match(p, /HABILIDADES CONDICIONAIS[\s\S]*Poison Heal \(escolhivel\): so funciona com estar envenenado\. NAO garantida hoje - para usar: segurar Toxic Orb/);
-  assert.match(p, /CONTEXTO JA CALCULADO PELO APP/);
-  assert.match(p, /Velocidade no nivel \d+/);
-  assert.doesNotMatch(p, /getSpeedBenchmark|getNextBossRoster|getAbilityMovepoolSynergy|getConditionMoveSynergy/);
-  assert.doesNotMatch(R.montarPromptEstrategias(porNome("Goodra")), /getSpeedBenchmark|getNextBossRoster|getSpeciesRank/);
-});
-
 test("Trick Room: build lenta de propósito sai com IV de Velocidade 0 (Iron Pill)", () => {
   R.state.archetype.weather = "Trick Room";
   const sp = porNome("Snorlax"); // innate Gluttony pede berry

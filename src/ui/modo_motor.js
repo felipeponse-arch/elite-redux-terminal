@@ -1,12 +1,11 @@
   // ===== src/ui/modo_motor.js =====
-  // Modo Motor no Meu Time (ticket time-pelo-motor/01, Fase F2, 21/10/2026). O Modo Motor é o PADRÃO (aprovação do usuário, 21/10):
-  // monta o time só com o simulador de duelo do app, sem IA. A IA continua como alternativa selecionável (chip "IA").
+  // Modo Motor no Meu Time (ticket time-pelo-motor/01, Fase F2, 21/10/2026). O app NÃO usa IA (decisão do usuário, 06/11/2026):
+  // o Modo Motor monta o time só com o simulador de duelo do app.
   // Só desenho e orquestração: a regra está em src/regras/time_pelo_motor.js (montarTimePeloMotorEmPassos). Este arquivo NUNCA
-  // chama claude.use nem pedirIA (tests/unit/modo_motor_sem_ia.test.mjs confere o fonte; a seção 31 do smoke confere a execução).
+  // chama claude.use (tests/unit/modo_motor_sem_ia.test.mjs confere o fonte; a seção 31 do smoke confere a execução).
   //
-  // Estado só de tela: o modo escolhido e o último resultado. Os favoritos moram em state.motorFavoritos (vão para o save e a nuvem). Favorito = um Pokémon do time
+  // Estado só de tela: o último resultado. Os favoritos moram em state.motorFavoritos (vão para o save e a nuvem). Favorito = um Pokémon do time
   // atual que o jogador pede para manter (a vaga dele só escolhe a forma); no máximo os que estão no time.
-  var modoDeMontagem = "motor";
   var motorTela = null;          // { res, chaveCtx, aplicada: chave da variante | null }
   var motorRodando = false;
   var motorCacheDaTela = null;   // o mesmo cache serve a montagem e o aquecimento
@@ -38,7 +37,7 @@
   // ---- aquecimento: as builds top-1 do elenco calculadas com a tela livre, antes do clique (Fase F1) ----
   // Aborta sozinho se o contexto muda no meio (as builds do pipeline leem o level cap do state) ou se uma montagem começa.
   async function modoMotorAquecer() {
-    if (motorAquecimentoDesligado || modoDeMontagem !== "motor" || motorRodando) return;
+    if (motorAquecimentoDesligado || motorRodando) return;
     var chave = modoMotorChave();
     if (motorAquecidoPara === chave || motorAquecendo === chave) return;
     motorAquecendo = chave;
@@ -50,7 +49,7 @@
       while (!passos.next().done) {
         if (Date.now() - inicio >= FATIA_DO_MOTOR_MS) {
           await modoMotorEsperar();
-          if (motorRodando || modoDeMontagem !== "motor" || modoMotorChave() !== chave) return;
+          if (motorRodando || modoMotorChave() !== chave) return;
           inicio = Date.now();
         }
       }
@@ -112,7 +111,7 @@
     }
   }
 
-  // "Ficar com este time" (F5, 21/10): troca o time (a mesma regra de "Usar este time" da IA: o resto vai para a caixa) E grava as builds
+  // "Ficar com este time" (F5, 21/10): troca o time (o resto vai para a caixa) E grava as builds
   // desses Pokémon com a origem "Sugestão do app" (src/regras/sugestao_do_motor.js). Se a sugestão passaria por cima de uma build que o
   // jogador montou, pede confirmação na tela antes (modoMotorConfirmando); a build dele nunca é apagada: fica como variante.
   function modoMotorVarianteDe(chave) { return motorTela && motorTela.res.variantes.filter(function (x) { return x.chave === chave; })[0]; }
@@ -149,14 +148,6 @@
   }
 
   // ---- desenho ----
-  function modoMotorSeletorHtml() {
-    var motor = modoDeMontagem === "motor";
-    return '<div class="archetype-axis"><span class="archetype-axis-label" id="modo-montagem-rotulo">Como montar o time</span>' +
-      '<div class="archetype-chips" role="group" aria-labelledby="modo-montagem-rotulo">' +
-        '<button type="button" class="modo-chip' + (motor ? " active" : "") + '" id="modo-montagem-motor" data-modo="motor" aria-pressed="' + motor + '" title="Monta pelo simulador de duelo do app, sem gastar a sua conta de IA">Automático (sem IA)</button>' +
-        '<button type="button" class="modo-chip' + (!motor ? " active" : "") + '" id="modo-montagem-ia" data-modo="ia" aria-pressed="' + !motor + '" title="Pede a composição, as builds e o guia ao Claude">IA (Claude)</button>' +
-      '</div></div>';
-  }
   function modoMotorFavoritosHtml() {
     var capturados = modoMotorCapturados();
     if (!capturados.length) return "";
@@ -251,14 +242,6 @@
       var alvo = e.target.closest("button");
       if (!alvo || !painel.contains(alvo)) return;
       if (alvo.id === "motor-montar") { modoMotorMontar(); return; }
-      if (alvo.dataset.modo) {
-        modoDeMontagem = alvo.dataset.modo;
-        redesenhar();
-        var novo = document.getElementById("modo-montagem-" + modoDeMontagem);
-        if (novo) novo.focus();
-        if (modoDeMontagem === "motor") modoMotorAquecer();
-        return;
-      }
       if (alvo.dataset.motorFav) {
         var s = alvo.dataset.motorFav, i = state.motorFavoritos.indexOf(s);
         if (i === -1) state.motorFavoritos.push(s); else state.motorFavoritos.splice(i, 1);

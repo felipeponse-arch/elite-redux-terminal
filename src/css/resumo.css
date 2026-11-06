@@ -105,9 +105,6 @@
    party member. See goToDexSpecies(). */
 .goto-species { cursor: pointer; }
 .goto-species:hover { opacity: .8; }
-/* "Ver Estratégias" no card "Time gerado" - vai direto pro membro certo
-   da ameaça citada (goToDexSpeciesStrategies), não só a Dex genérica. */
-.goto-species-strategies { cursor: pointer; color: var(--badge-accent2); font-weight: 600; text-decoration: underline; text-decoration-style: dotted; }
 .goto-species-strategies:hover { opacity: .8; }
 .evo-arrow { color: var(--text-dim); font-size: var(--fs-texto); display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 44px; padding: 0 2px; }
 .evo-arrow-line { width: 100%; height: 2px; background: repeating-linear-gradient(90deg, var(--border) 0 4px, transparent 4px 8px); position: relative; flex: none; }

@@ -106,47 +106,6 @@ test("achado 4: o texto que o modelo escreveu volta limitado no motivo da rejei�
   }
 });
 
-test("achado 5: build curada no time novo não leva habilidade que a forma não tem (a curada do Arbok, Merciless, numa espécie que não a escolhe)", () => {
-  // Era o Arbok Mega (Merciless é da base); a Arbok Mega saiu do jogo na 2.65.4 (ticket versao-nova/05), então o caso é montado com a curada real do Arbok e outra espécie.
-  const R2 = carregarRegras({ milestone: 9, difficulty: "ace", levelCapMode: "more" });
-  const outra = R2.getSpeciesBySname("SPECIES_PIKACHU");
-  const cur = R2.curadasDe("SPECIES_ARBOK")[0];
-  const escolhiveis = R2.uniqueIds(outra.ab).map((id) => R2.ABILITIES[id][0]);
-  assert.ok(!escolhiveis.includes(cur.ability), "pré-condição (dado real): a curada usa uma habilidade que a espécie não escolhe");
-  assert.equal(R2.entradaDaCuradaParaTimeNovo(outra, cur), null);
-});
-
-test("achado 5b: curada válida entra no time novo, com golpes e habilidade da curada", () => {
-  const R2 = carregarRegras({ milestone: 9, difficulty: "ace", levelCapMode: "more" });
-  let ok = null;
-  for (const sname of Object.keys(R2.BUILDS)) {
-    const s = R2.getSpeciesBySname(sname);
-    const cur = s && R2.curadasDe(sname)[0];
-    if (!cur) continue;
-    const e = R2.entradaDaCuradaParaTimeNovo(s, cur);
-    if (e) { ok = { s, cur, e }; break; }
-  }
-  assert.ok(ok, "alguma curada do dado real serve");
-  assert.equal(ok.e.ability, ok.cur.ability);
-  assert.deepEqual([...ok.e.moves], [...ok.cur.moves]);
-  assert.equal(ok.e.planoConsultado, true);
-});
-
-test("achado 6: EV da curada copiado pra build do jogador nunca passa de 510 (Lepastry do Discord tem 520)", () => {
-  const R2 = carregarRegras({ milestone: 9, difficulty: "ace", levelCapMode: "more" });
-  const lepastry = R2.getSpeciesBySname("SPECIES_LEPASTRY");
-  const cur = R2.curadasDe("SPECIES_LEPASTRY")[0];
-  const bruta = R2.evsTextoParaArray(cur.evs);
-  assert.ok(bruta.reduce((a, b) => a + b, 0) > 510, "pré-condição (dado real): a curada soma mais de 510");
-  const e = R2.entradaDaCuradaParaTimeNovo(lepastry, cur);
-  if (e) assert.ok(e.evs.reduce((a, b) => a + b, 0) <= 510);
-  // Golpe-ponte: habilidade, natureza, item e EVs ficam os da curada, mas dentro do limite do jogo.
-  const validated = { ability: "x", nature: "Calm", item: "", moves: [], evs: [0, 0, 0, 0, 0, 0], rationale: "" };
-  R2.ajustarBuildDaIa(lepastry, validated, { modo: "ponte", alvo: cur }, 40);
-  assert.ok(validated.evs.reduce((a, b) => a + b, 0) <= 510);
-  assert.ok(validated.evs.every((v) => v >= 0 && v <= 252));
-});
-
 // ---------- casos mínimos do ticket (guardas) ----------
 
 test("caso mínimo: golpe acima do level cap é rejeitado pela validação e vira aviso quando já está na build", () => {

@@ -3,7 +3,6 @@
  "arquivos": [
   "tests/unit/buffs_e_pendencias_antigas.test.mjs",
   "tests/unit/builds_estrutura_18.test.mjs",
-  "tests/unit/comparar_motor_ia.test.mjs",
   "tests/unit/lote_b_plano_real.test.mjs",
   "tests/unit/modo_motor_sem_ia.test.mjs",
   "tests/unit/montar_time_contra_chefao.test.mjs",

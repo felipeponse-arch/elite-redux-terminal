@@ -39,13 +39,6 @@ test("duração de campo vem do código do jogo e as habilidades de entrada a us
   assert.equal(efDe("Air Blower").vento, D.vento);
 });
 
-test("prompt: terreno cita a duração do campo.js e o clima sai em português, sem chave inglesa crua", () => {
-  assert.match(R.WEATHER_BUILD_GUIDANCE["Grassy Terrain"], new RegExp("^" + R.DURACAO_CAMPO.terreno + " turnos"));
-  assert.equal(R.rotuloDoArquetipoDeCampo("Sand"), "Areia");
-  assert.equal(R.rotuloDoArquetipoDeCampo("Electric Terrain"), "Terreno Elétrico");
-  R.ARQUETIPOS_DE_CAMPO.forEach((a) => assert.ok(R.ROTULO_ARQUETIPO_CAMPO[a], a));
-});
-
 test("hazard: golpe e habilidade usam o mesmo caminho (camadas máximas do campo.js)", () => {
   const lado = { rocha: false, espinho: 0, toxico: 0, teia: false };
   for (let i = 0; i < 5; i++) Object.values(R.HAZARD_DO_GOLPE).forEach((h) => R.poeHazardNoLado(lado, h));

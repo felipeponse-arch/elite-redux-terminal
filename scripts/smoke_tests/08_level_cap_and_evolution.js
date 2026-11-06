@@ -297,9 +297,6 @@ async function section08() {
       check("o set volta igual depois de salvar e carregar",
         lido.SPECIES_GARCHOMP && lido.SPECIES_GARCHOMP.sets[0].moves.join(",") === "Earthquake,Dragon Claw" && lido.SPECIES_GARCHOMP.cap === 40, lido);
       TE.state.strategySets = lido;
-      const html = TE.strategySetsHtml(garchomp);
-      check("a ficha mostra o set guardado sem nova chamada, com o cap em que foi gerado",
-        html.indexOf("Sweeper Físico") !== -1 && html.indexOf("level cap 40") !== -1 && html.indexOf("Gerar de novo") !== -1);
       const sujo = TE.sanitizarStrategySets({
         SPECIES_GARCHOMP: { sets: [set], dataVersion: "0.0-outra", geradoEm: "x" },
         SPECIES_NAO_EXISTE: { sets: [set], dataVersion: versao },
