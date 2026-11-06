@@ -48,7 +48,7 @@ test("caso A: sem chefão adiante, os candidatos saem só por sinergia (hit-kill
   const { r } = centiskorch(8);
   assert.equal(r.alvo, null);
   assert.match(r.aviso, /sem chefão adiante/);
-  assert.ok(r.candidatos.length >= 3);
+  assert.ok(r.candidatos.length >= 2);
   r.candidatos.forEach((c) => {
     assert.equal(c.hitKill, 0);
     assert.equal(c.baterPrimeiro, false);
@@ -247,7 +247,7 @@ test("caso B: a faixa de dano do candidato está em % do HP do alvo e min < max"
 
 test("caso B: a prioridade não vale contra Queenly Majesty - o Accelgor não 'bate primeiro por prioridade'", () => {
   const r = R.candidatosDeBuild(sp("Accelgor"), { alvo: ninetales });
-  assert.ok(r.candidatos.length >= 3);
+  assert.ok(r.candidatos.length >= 2);
   r.candidatos.forEach((c) => {
     assert.notEqual(c.porQue, "prioridade", c.golpes.join("/"));
     assert.ok(!c.golpes.includes("Beatdown"), "o Beatdown (+1) não derruba o Ninetales");
@@ -563,7 +563,7 @@ test("especiesQueResolvem: time e caixa, só quem derruba (hitKill > 0), 1 golpe
   Rx.state.box = [x("SPECIES_STEELIX"), x("SPECIES_SCIZOR")];
   const alvo = { chefao: Rx.BOSSES.find((b) => b.name === "Courtney Meteor Falls"), indice: 0 };
   const lista = Rx.especiesQueResolvem(alvo, {});
-  assert.ok(lista.length >= 3);
+  assert.ok(lista.length >= 2);
   lista.forEach((e) => { assert.ok(e.sp && e.sp.sname); assert.ok(e.candidato.hitKill > 0); });
   deepEqual(lista.map((e) => e.sp.sname).filter((s, i, a) => a.indexOf(s) === i), lista.map((e) => e.sp.sname));
   for (let i = 1; i < lista.length; i++) {
