@@ -505,9 +505,10 @@
   // simulação (o dano é o dos outros 3) e o candidato fica "estimado". Tanque = o mesmo conjunto com EVs de bulk, re-simulado.
   // Sweeper/Wallbreaker = a própria melhor build (já ofensiva). Critério dos papéis: conferirPapelDaBuild (a regra da IA). null = não deu: vale o ranking normal.
   var ROTULO_PAPEL_PIPELINE = { Pivo: "Pivô", Tanque: "Tanque", Sweeper: "Sweeper", Wallbreaker: "Wallbreaker" };
-  function pipelinePapeisDuplos(sp, base, outro, kit, alvo, ctx) {
+  // `so` (foco do chip): "Pivo" ou o papel `outro` devolve só aquela build; sem `so`, as duas.
+  function pipelinePapeisDuplos(sp, base, outro, kit, alvo, ctx, so) {
     var pivos = kit.filter(ehGolpeDePivo);
-    if (!pivos.length) return null;
+    if (!pivos.length && so !== outro) return null;
     var hab = base.g.hab, nat = base.g.nat, golpes = base.g.av.golpes;
     var tabela = pipelineTabela(sp, hab, nat, kit, alvo);
     function montar(g, papel, estimado) {
@@ -515,6 +516,8 @@
       if (!rv.v || conferirPapelDaBuild(ROTULO_PAPEL_PIPELINE[papel], rv.v.evs, rv.v.moves, sp, ctx)) return null;
       return { g: g, v: rv.v, itemDeRascunho: rv.itemDeRascunho, tipoDoItem: rv.tipoDoItem, pedras: rv.pedras, papel: papel, pivoEstimado: estimado };
     }
+    var cPivo = null;
+    if (so !== outro) {
     var comPivo = golpes.some(ehGolpeDePivo), novos = golpes, avPivo = base.g.av;
     if (!comPivo) {
       var fraco = golpes.slice().sort(function (a, b) { return (tabela[a] ? tabela[a].fracMin : 0) - (tabela[b] ? tabela[b].fracMin : 0) || (a < b ? -1 : 1); })[0];
@@ -523,7 +526,9 @@
       if (!avPivo) return null;
       avPivo.golpes = novos.slice();
     }
-    var cPivo = montar(Object.assign({}, base.g, { av: avPivo }), "Pivo", true);
+    cPivo = montar(Object.assign({}, base.g, { av: avPivo }), "Pivo", true);
+    }
+    if (so === "Pivo") return cPivo ? [cPivo] : null;
     var gOutro = base.g;
     if (outro === "Tanque") { // mesma forma dos EVs da espécie lenta (pipelineNaturezaEEvs): HP + ataque, 4 na defesa mais fraca, sem Velocidade
       var ataque = nat.evs[1] > 0 ? 1 : 3, defesa = sp.b[2] <= sp.b[4] ? 2 : 4, evs = [252, 0, 0, 0, 0, 0];
@@ -534,6 +539,7 @@
       gOutro = Object.assign({}, base.g, { av: av2, fin: { nome: nat.nome, evs: evs, motivo: "Papel Tanque: EVs em HP e " + (ataque === 1 ? "Atk" : "SpA") + ", sem Velocidade (bulk)" } });
     }
     var cOutro = montar(gOutro, outro, false);
+    if (so === outro) return cOutro ? [cOutro] : null;
     if (!cPivo || !cOutro || cPivo.v.moves.join() + cPivo.v.evs.join() === cOutro.v.moves.join() + cOutro.v.evs.join()) return null;
     return [cPivo, cOutro];
   }
@@ -545,7 +551,7 @@
     var alvo = pipelineResolverAlvo(opts && opts.alvo, ctx);
     return pipelineCandidatos(sp, alvo, ctx);
   }
-  function pipelineCandidatos(spEntrada, alvo, ctx) {
+  function pipelineCandidatos(spEntrada, alvo, ctx, foco) {
     ctx = ctx || ctxDoState();
     var saida = { alvo: alvo.info, candidatos: [], aviso: alvo.aviso || null, avisos: [] };
     if (alvo.aviso) saida.avisos.push(alvo.aviso);
@@ -559,12 +565,19 @@
       var kit = golpesDeDueloAte(sp, cap).map(function (id) { return MOVES[id][0]; })
         .filter(function (n, i, a) { return a.indexOf(n) === i && liberados.indexOf(n) !== -1 && moveRoleOf(n) !== "dupla" && GOLPES_QUE_DEPENDEM_DE_ITEM.indexOf(n) === -1 && GOLPES_QUE_FALHAM_SE_LEVAR_DANO.indexOf(n) === -1; });
       if (!kit.length) { saida.aviso = saida.aviso || sp.n + " não tem golpe de dano liberado nesta Etapa"; saida.avisos.push(sp.n + " não tem golpe de dano liberado nesta Etapa"); return saida; }
+      var catDoFoco = foco === "Fisico" ? "F" : foco === "Especial" ? "E" : null;
       var habilidades = uniqueIds(sp.ab || []).map(nomeHabDuelo).filter(Boolean);
       var geradas = {};
       habilidades.forEach(function (hab) {
         var sinergias = pipelineSinergiasAtivas(sp, hab);
         NATUREZAS_DO_PIPELINE.forEach(function (nat) {
           var tabela = pipelineTabela(sp, hab, nat, kit, alvo);
+          var pool = liberados;
+          if (catDoFoco) { // Físico/Especial: só golpes dessa categoria (os de outra saem da tabela e do movepool)
+            var catDe = {};
+            Object.keys(tabela).forEach(function (n) { catDe[n] = tabela[n].g.cat; if (catDe[n] !== catDoFoco) delete tabela[n]; });
+            pool = liberados.filter(function (n) { return catDe[n] ? catDe[n] === catDoFoco : moveRoleOf(n) !== "dano"; }); // golpe de dano fora do kit não entra: a categoria dele não foi medida
+          }
           var tiposStab = speciesTypeNames(sp).concat(pipelineTiposExtraDeStab(sp, hab));
           var nomes = Object.keys(tabela).sort();
           // Âncoras: os golpes de maior valor e os de maior sinergia (a pergunta do caso A: Fire Fang, não Fire Lash).
@@ -574,7 +587,8 @@
           var ancoras = porValor.slice(0, 8).concat(porSin).filter(function (n, i, a) { return a.indexOf(n) === i; });
           ancoras.forEach(function (ancora) {
             MODOS_DE_PREENCHER_PIPELINE.forEach(function (modo) {
-            var conjunto = pipelineMontarConjunto(ancora, tabela, sinergias, modo, liberados, tiposStab);
+            var conjunto = pipelineMontarConjunto(ancora, tabela, sinergias, modo, pool, tiposStab);
+            if (conjunto && foco === "Misto") conjunto = pipelineForcarMisto(conjunto, ancora, tabela, sinergias);
             if (!conjunto) return;
             var chave = conjunto.slice().sort().join(","); // sem conjunto de golpes repetido (fica a melhor habilidade/natureza)
             // A natureza segue o split dos golpes escolhidos (ticket 05): Adamant/Jolly só com maioria física, Modest/Timid só com maioria especial.
@@ -618,7 +632,9 @@
       while (aceitos.length < MIN_CANDIDATOS_PIPELINE && sobras.length) aceitos.push(sobras.shift());
       aceitos = aceitos.sort(function (a, b) { return validos.indexOf(a) - validos.indexOf(b); }).slice(0, MAX_CANDIDATOS_PIPELINE); // volta à ordem do ranking
       var rolesEsp = (SPECIES_ROLE[sp.sname] || {}).roles || [];
-      if (rolesEsp.length === 2 && rolesEsp.indexOf("Pivo") !== -1 && validos.length) {
+      if (foco) { // chip do cartão (buildFocadaDoMotor): 1 build só
+        aceitos = pipelineAceitosDoFoco(sp, foco, validos, kit, alvo, ctx);
+      } else if (rolesEsp.length === 2 && rolesEsp.indexOf("Pivo") !== -1 && validos.length) {
         var duplos = pipelinePapeisDuplos(sp, validos[0], rolesEsp[0] === "Pivo" ? rolesEsp[1] : rolesEsp[0], kit, alvo, ctx);
         if (duplos) aceitos = duplos;
       }
@@ -664,6 +680,77 @@
       saida.avisos.push(saida.aviso);
     }
     return saida;
+  }
+
+  // ---- foco do chip do cartão (pedido 07/11/2026): a melhor build para um papel ou tipo de dano ----
+  var FOCOS_DA_BUILD = ["Pivo", "Tanque", "Wallbreaker", "Sweeper", "Fisico", "Especial", "Misto"];
+  var ROTULO_FOCO_BUILD = { Pivo: "Pivô", Tanque: "Tanque", Wallbreaker: "Wallbreaker", Sweeper: "Sweeper", Fisico: "Físico", Especial: "Especial", Misto: "Misto" };
+  // Golpes de dano com poder de verdade (bate no alvo) por categoria; Body Press/Foul Play (fonteAtk) não usam o ataque do usuário e não contam.
+  // `estrito` (Físico/Especial): Body Press/Foul Play contam na categoria e golpe de dano sem medida conta como `x` (reprova).
+  function pipelineContaCategorias(tabela, golpes, estrito) {
+    var c = { f: 0, e: 0, x: 0 };
+    golpes.forEach(function (n) {
+      var t = tabela[n];
+      if (!t && estrito && moveRoleOf(n) === "dano") c.x++;
+      if (!t || (t.g.fonteAtk && !estrito) || t.fracMax <= 0) return;
+      if (t.g.cat === "F") c.f++; else if (t.g.cat === "E") c.e++;
+    });
+    return c;
+  }
+  // Misto: o conjunto tem que ter >= 1 golpe físico e >= 1 especial com poder. Se faltar uma categoria, troca o golpe mais fraco
+  // (que não é a âncora) da categoria que sobra pelo melhor da que falta. null = a espécie não tem as duas categorias.
+  function pipelineForcarMisto(conjunto, ancora, tabela, sinergias) {
+    var c = pipelineContaCategorias(tabela, conjunto);
+    if (c.f && c.e) return conjunto;
+    var falta = c.f ? "E" : "F", sobra = c.f ? "F" : "E";
+    var valor = function (n) { return pipelineValorDoGolpe(tabela[n], sinergias); };
+    var entra = Object.keys(tabela).sort().filter(function (n) { return conjunto.indexOf(n) === -1 && !tabela[n].g.fonteAtk && tabela[n].g.cat === falta && tabela[n].fracMax > 0; })
+      .sort(function (a, b) { return valor(b) - valor(a) || (a < b ? -1 : 1); })[0];
+    var sai = conjunto.filter(function (n) { return n !== ancora && tabela[n] && tabela[n].g.cat === sobra; })
+      .sort(function (a, b) { return valor(a) - valor(b) || (a < b ? -1 : 1); })[0];
+    if (!entra || !sai) return null;
+    return conjunto.map(function (n) { return n === sai ? entra : n; });
+  }
+  // Escolhe a única build do foco entre as válidas (já na ordem do ranking). Pivô/Tanque: o mesmo caminho dos 2 papéis; Wallbreaker/Sweeper:
+  // a primeira que passa em conferirPapelDaBuild; tipo de dano: a primeira cujo split final confere (o conjunto já nasceu filtrado).
+  function pipelineAceitosDoFoco(sp, foco, validos, kit, alvo, ctx) {
+    if (!validos.length) return [];
+    if (foco === "Pivo" || foco === "Tanque") return pipelinePapeisDuplos(sp, validos[0], "Tanque", kit, alvo, ctx, foco) || [];
+    if (foco === "Wallbreaker" || foco === "Sweeper") {
+      var ok = validos.filter(function (c) { return !conferirPapelDaBuild(ROTULO_PAPEL_PIPELINE[foco], c.v.evs, c.v.moves, sp, ctx); })[0];
+      if (!ok) return [];
+      ok.papel = foco;
+      return [ok];
+    }
+    var bate = validos.filter(function (c) {
+      var n = pipelineContaCategorias(pipelineTabela(sp, c.g.hab, c.g.fin, kit, alvo), c.v.moves, foco !== "Misto");
+      return foco === "Misto" ? n.f > 0 && n.e > 0 : foco === "Fisico" ? n.e === 0 && n.x === 0 && n.f > 0 : n.f === 0 && n.x === 0 && n.e > 0;
+    })[0];
+    return bate ? [bate] : [];
+  }
+  // buildFocadaDoMotor(sname, foco, opts): a MELHOR build da espécie para o foco do chip, na Etapa atual (opts.ctx e opts.alvo como em
+  // candidatosDeBuild). Sugestão: nada é aplicado. { ok, foco, rotulo, build:{habilidade,item,natureza,evs,golpes}, nota, motivos, estimado, avisos }
+  // ou { ok:false, motivo }. Determinística; sem estado novo.
+  function buildFocadaDoMotor(spEntrada, foco, opts) {
+    opts = opts || {};
+    var sp = pipelineEspecie(spEntrada);
+    if (FOCOS_DA_BUILD.indexOf(foco) === -1) return { ok: false, foco: foco, motivo: "foco desconhecido: " + foco };
+    if (!sp) return { ok: false, foco: foco, motivo: "espécie não encontrada" };
+    var ctx = opts.ctx || ctxDoState();
+    var papeis = (SPECIES_ROLE[sp.sname] || {}).roles || [];
+    if (ROTULO_PAPEL_PIPELINE[foco] && papeis.indexOf(foco) === -1) return { ok: false, foco: foco, motivo: sp.n + " não tem o papel " + ROTULO_FOCO_BUILD[foco] + " no rank" };
+    var alvo = pipelineResolverAlvo(opts.alvo, ctx);
+    var r = pipelineCandidatos(sp, alvo, ctx, foco), c = r.candidatos[0];
+    if (!c) return { ok: false, foco: foco, motivo: ROTULO_FOCO_BUILD[foco] + " não se aplica a " + sp.n + " nesta Etapa" + (r.aviso ? " (" + r.aviso + ")" : "") };
+    var chave = function (x) { return x.golpes.slice().sort().join() + "|" + x.habilidade + "|" + x.build.nature + "|" + x.build.evs.join(); };
+    var igualDeHoje = pipelineCandidatos(sp, alvo, ctx).candidatos.some(function (x) { return chave(x) === chave(c); });
+    var rk = typeof rankDe === "function" ? rankDe(sp.sname) : null;
+    var motivos = c.motivos.slice();
+    if (foco === "Pivo") motivos.push("Pivô estimado: o simulador não executa golpe de troca; o dano medido é o dos outros 3 golpes.");
+    if (igualDeHoje) motivos.push("É a mesma build que o Motor já sugere para " + sp.n + " hoje.");
+    return { ok: true, foco: foco, rotulo: c.rotulo, estimado: c.rotulo === "estimada",
+      build: { habilidade: c.build.ability, item: c.build.item, natureza: c.build.nature, evs: c.build.evs.slice(), golpes: c.build.moves.slice() },
+      nota: rk && typeof rk.score === "number" ? rk.score : null, motivos: motivos, avisos: c.avisos.slice() };
   }
 
   // ---- 2. do alvo para os Pokémon (caso B) ----
