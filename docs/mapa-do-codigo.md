@@ -40,7 +40,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **mono_run.js** - Mono run: o que dá pra pegar do seu tipo até a etapa atual (2026-09-26,
   linhaEvolutivaDe:20, compraDeInicialTexto:47, monotypeAtivo:72, serveProMono:74, fraquezasDoTipo:80, resistemAoTipo:83, cobreFraquezas:88, mudancaDeTipo:95, pctClima:133, climaQueCombina:141, orientacaoMono:144, avisoProximoLider:158, monoDisponibilidade:176
 - **pipeline_build.js** - Pipeline de build com intenção (ticket 20 da dívida, desenho de 14/10/2026; docs/pipeline_de_build.md).
-  pipelineEspecie:61, pipelineResolverAlvo:70, pipelineAmeacasDePrioridade:132, pipelineSemFuga:158, pipelineDuelo:159, pipelineLinhaDoGolpe:169, pipelineTierDaLinha:208, pipelineChaveDaLinha:213, pipelineSinergiasAtivas:218, pipelinePesoDoGolpe:223, pipelinePesoDoConjunto:226, pipelineTabela:232, pipelineValorDoGolpe:258, pipelineAvaliarConjunto:263, pipelineMontarConjunto:306, pipelineHabilidadesSemRegra:359, pipelineTierDoCandidato:367, pipelineVelocidade:370, pipelineMotivos:376, pipelineTiposExtraDeStab:403, pipelineSplitDoConjunto:418, pipelineNaturezaServe:428, pipelineAtributoFraco:432, pipelineNaturezaEEvs:438, pipelineGolpesComRecuo:452, pipelineSemRecuo:459, pipelineEvioliteServe:466, mesclarContextos:472, pipelineValidarRascunho:480, candidatosDeBuild:505 (+2)
+  pipelineEspecie:61, pipelineResolverAlvo:70, pipelineAmeacasDePrioridade:132, pipelineSemFuga:158, pipelineDuelo:159, pipelineLinhaDoGolpe:169, pipelineTierDaLinha:208, pipelineChaveDaLinha:213, pipelineSinergiasAtivas:218, pipelinePesoDoGolpe:223, pipelinePesoDoConjunto:226, pipelineTabela:232, pipelineValorDoGolpe:258, pipelineAvaliarConjunto:263, pipelineMontarConjunto:306, pipelineHabilidadesSemRegra:359, pipelineTierDoCandidato:367, pipelineVelocidade:370, pipelineMotivos:376, pipelineTiposExtraDeStab:403, pipelineSplitDoConjunto:418, pipelineNaturezaServe:428, pipelineAtributoFraco:432, pipelineNaturezaEEvs:438, pipelineGolpesComRecuo:452, pipelineSemRecuo:459, pipelineEvioliteServe:466, mesclarContextos:472, pipelineValidarRascunho:480, pipelinePapeisDuplos:509 (+7)
 - **plano_build.js** - Build que acompanha o jogador: plano de golpes por slot, estilo da build e
   evsTextoParaArray:24, estiloDeEvs:37, estiloDoRitmo:48, nivelDoGolpe:56, nivelDeEvolucaoDaForma:68, validarPlano:80, planoSaneado:107, golpesNoCap:123, trocasEntreCaps:141, curadasDe:153, curadaParaEstilo:160
 - **rank_da_run.js** - Rank v2 (2026-10-02, modelo aprovado pelo usuário - scripts/calcular_rank_v2.mjs):
@@ -246,6 +246,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **avisos_e_selo_de_build.test.mjs** - Lote 5 das pesquisas de 06/10: Avisos de build (um bloco, reaproveitando as contas
 - **best_offense_pelo_codigo.test.mjs** - Ticket versao-nova/05 (15/10/2026), pergunta P2 respondida pelo Felipe: Best Offense e Magus Blades valem pelo CÓDIGO da versão mais nova
 - **buffs_e_pendencias_antigas.test.mjs** - Lote de 2026-10-01: buffs do ginásio no simulador (números do código do jogo,
+- **build_focada.test.mjs** - buildFocadaDoMotor(sname, foco): a melhor build para o chip clicado no cartão (papel ou tipo de dano), na Etapa atual.
 - **build_ps1_nao_regride.test.mjs** - Depende de dado: versão gravada pelo build (muda quando o jogo troca de versão).
 - **builds_estrutura_18.test.mjs** - TK-18 (estrutura-2026-10-22): builds. Código de motivo na recusa, IA recusa item não liberado (decisão 10),
 - **cache_sabotagem.test.mjs** - (sem comentário de topo)
@@ -364,6 +365,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **pinnacle_blade_pelo_codigo.test.mjs** - Ticket mecanica-2026-10-22/03 (parte Pinnacle Blade), 22/10/2026. Vale pelo CÓDIGO da versão nova (er-repo upcoming):
 - **pipeline_build.test.mjs** - Pipeline de build com intenção (ticket 20 da dívida, 14/10/2026): src/regras/pipeline_build.js, só pela interface
 - **pipeline_kit_legal.test.mjs** - Fase 1 do pipeline: contrato determinístico do kit legal.
+- **pipeline_papeis.test.mjs** - Pipeline: espécie com 2 papéis (um é Pivô) tem uma build para cada papel; 1 papel segue com as 2 melhores.
 - **pipeline_rascunho.test.mjs** - Rascunho coerente do pipeline de build (ticket docs/tickets/pipeline-build-2026-10-14/05-rascunho-coerente.md, revisão de metagame de 15/...
 - **plano_build.test.mjs** - Testes da build que acompanha o jogador (src/regras/plano_build.js), pedido do
 - **poder_que_cresce.test.mjs** - Ticket 19 (07/10/2026): poder que cresce e golpe que carrega, pelo código oficial (er-repo 217dd0f):
