@@ -481,12 +481,31 @@
   // Revanche de líder (Roxanne 2 a 5, Flannery 2 a 5, Wallace 2 a 5...): com o jogo zerado o script do líder (FLAG_SYS_GAME_CLEAR)
   // vai direto pro RematchScript e NUNCA passa pelo CheckTrainers, onde ficam todos os registerbattleevent (revisão dos ginásios
   // de 04/10, os 8 scripts). Só o 1º encontro de cada líder tem os buffs do ginásio.
+  // 8º ginásio (scripts.pory:286-289): Juan 5 + Wallace 5 são a 2ª dupla do 1º encontro, não revanche, enquanto a insígnia 8 não saiu.
+  var OITAVO_GINASIO = { luta1: ["Juan 1", "Wallace"], luta2: ["Juan 5", "Wallace 5"], insignia: 8 };
   function ehRevancheDeLider(nome) {
     var b = BOSSES.filter(function (x) { return x.name === nome; })[0];
     if (!b || b.cat !== "Lider de Ginasio") return false;
+    if (OITAVO_GINASIO.luta2.indexOf(nome) !== -1 && state.settings.milestone < OITAVO_GINASIO.insignia) return false;
     var base = gymLeaderBaseName(nome);
     var primeiro = BOSSES.filter(function (x) { return x.cat === "Lider de Ginasio" && gymLeaderBaseName(x.name) === base; })[0];
     return primeiro !== b;
+  }
+  // 8º ginásio inteiro: duas duplas seguidas (Juan 1 + Wallace, depois Juan 5 + Wallace 5), sem cura e sem trocar o time entre elas
+  // (HealPlayerParty antes da 1ª, FLAG_SYS_DISABLE_AUTOHEAL ligada até o fim: scripts.pory:275-279). HP, status e desmaiados da luta 1
+  // entram na 2. Sem buffs de ginásio (só gate; Tense Battle é música). Os dois líderes entram juntos na frente, um de cada vez como em campo.
+  function simularOitavoGinasio(meus, nivel) {
+    var porNome = function (n) { return BOSSES.filter(function (x) { return x.name === n; })[0]; };
+    var parte = function (nomes) {
+      var ps = nomes.map(function (n) { return bossPartyPorDificuldade(porNome(n)); });
+      var clima = climaDoTimeDoChefao(ps[0].concat(ps[1])), ordem = [];
+      for (var i = 0; i < Math.max(ps[0].length, ps[1].length); i++) ps.forEach(function (p) { if (p[i]) ordem.push(p[i]); });
+      return ordem.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean);
+    };
+    var r1 = simularDuplaContraChefao(meus, parte(OITAVO_GINASIO.luta1), nivel, null);
+    if (!r1.venceu) return { dupla: true, venceu: false, derrubados: r1.derrubados, total: r1.total, vivos: r1.vivos, luta1: r1, luta2: null };
+    var r2 = simularDuplaContraChefao(meus, parte(OITAVO_GINASIO.luta2), nivel, { heranca: r1.heranca });
+    return { dupla: true, venceu: r2.venceu, derrubados: r1.derrubados + r2.derrubados, total: r1.total + r2.total, vivos: r2.vivos, luta1: r1, luta2: r2 };
   }
   // Buffs do ginásio (ou parte deles) que o simulador de duelo NÃO calcula - dependem de turno exato em campo (Foresight, Leech Seed,
   // Magnet Rise, Embargo) ou de estágio de precisão/herança de estágios. Vão pro aviso do plano, pra ele não parecer mais completo do
