@@ -74,6 +74,8 @@ function instalarMockDb(semente) {
 // inicial). A espera final dá tempo do get() inicial da sincronização resolver.
 export async function abrirApp(page, { mockDb = false, semente = null, arquivo = "artifact_final.html" } = {}) {
   if (mockDb) await ligarMockDb(page, semente);
+  // Tema padrão agora é o escuro (aço azul-noite): o claro só com data-theme="light". Teste que pede sistema claro pede o tema claro.
+  await page.addInitScript(() => { if (window.matchMedia("(prefers-color-scheme: light)").matches) document.documentElement.setAttribute("data-theme", "light"); });
   await page.goto("/" + arquivo, { waitUntil: "load" });
   await esperarFontes(page);
   if (mockDb) await page.waitForTimeout(200);

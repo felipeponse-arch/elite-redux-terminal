@@ -3,7 +3,7 @@
 <!-- Cor da barra do navegador no celular. Este valor é só o de partida (fundo do
      tema claro, --bg de src/css/tokens.css): em seguida o script do app
      (corDoTema, em src/ui/nucleo.js) troca pelo --bg do tema que estiver ativo. -->
-<meta name="theme-color" content="#f6f4ec">
+<meta name="theme-color" content="#0a1220">
 <!-- Fontes embutidas (05/11/2026): Bricolage Grotesque, Figtree, IBM Plex Mono e Potta One (SIL OFL,
      data/fontes/FONTES.md) entram como @font-face em base64 pelo build (src/css/fontes.css). Antes vinham do
      Google Fonts; sem rede externa o visual é determinístico e o app abre offline. O script abaixo só
@@ -163,7 +163,7 @@
           <ul id="species-list" class="species-list" role="listbox" aria-label="Resultados da busca na Dex"></ul>
         </aside>
         <div id="species-detail" class="species-detail">
-          <div class="empty-state">Selecione um Pokémon na lista para ver a ficha completa: stats, as 3 habilidades, as 3 innates, evolução e movepool.</div>
+          <div class="empty-state capa-carteira"><div class="capa-titulo">Carteira de Treinador</div><div class="capa-barras" aria-hidden="true"><span>HP</span><i></i><span>Atq</span><i></i><span>Def</span><i></i><span>SpA</span><i></i><span>SpD</span><i></i><span>Vel</span><i></i></div><p>Selecione um Pokémon na lista para ver a ficha completa: stats, as 3 habilidades, as 3 innates, evolução e movepool.</p></div>
         </div>
       </div>
     </section>

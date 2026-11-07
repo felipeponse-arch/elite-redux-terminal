@@ -20,12 +20,12 @@ test.describe("meta theme-color segue o tema", () => {
     expect(await corDoMeta(page)).toBe("#f6f4ec");
   });
 
-  test("tema escuro do sistema: cor do fundo escuro, e troca ao vivo", async ({ page }) => {
+  test("tema padrão é o aço azul-noite (mesmo com o sistema claro) e o claro vale só com data-theme", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "light" });
     await abrirApp(page);
-    await page.emulateMedia({ colorScheme: "dark" });
-    await expect.poll(() => corDoMeta(page)).toBe("#0b0c09");
-    await page.emulateMedia({ colorScheme: "light" });
+    await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+    await expect.poll(() => corDoMeta(page)).toBe("#0a1220");
+    await page.evaluate(() => document.documentElement.setAttribute("data-theme", "light"));
     await expect.poll(() => corDoMeta(page)).toBe("#f6f4ec");
   });
 
@@ -33,7 +33,7 @@ test.describe("meta theme-color segue o tema", () => {
     await page.emulateMedia({ colorScheme: "light" });
     await abrirApp(page);
     await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
-    await expect.poll(() => corDoMeta(page)).toBe("#0b0c09");
+    await expect.poll(() => corDoMeta(page)).toBe("#0a1220");
     await page.evaluate(() => document.documentElement.setAttribute("data-theme", "light"));
     await expect.poll(() => corDoMeta(page)).toBe("#f6f4ec");
   });

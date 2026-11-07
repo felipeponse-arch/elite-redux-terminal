@@ -477,7 +477,7 @@
       // Pokémon é o protagonista da ficha, e com image-rendering: pixelated o
       // dobro exato fica nítido). O identificador interno (SPECIES_...) saiu da
       // tela - era ruído técnico pro jogador.
-      '<div class="detail-head ficha-cartao tipo-' + names[0] + (names[1] ? ' tipo2-' + names[1] : '') + '"><div class="ts-head">' + spriteImgHtml(sp.x, sp.n, 96) + '<div class="detail-titles">' +
+      '<div class="detail-head ficha-cartao tipo-' + names[0] + (names[1] ? ' tipo2-' + names[1] : '') + '"><div class="ts-head">' + spriteImgHtml(sp.x, sp.n, 192) + '<div class="detail-titles">' +
         '<h2>' + escapeHtml(sp.n) + '</h2>' +
         '<div class="detail-dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</div>' + avisoSemSpriteHtml(sp.x, SPRITE_INDEX) +
       '</div></div><div class="detail-acoes">' +
@@ -510,8 +510,10 @@
         // without this the only way to see the team update is back -> scroll
         // -> switch tab by hand. See AUDITORIA-DOSSIE.md UX 4.
         (inTeam ? '<button class="back-btn" id="goto-team-link" type="button" style="margin:0;">Ir para Meu Time &rarr;</button>' : "") +
-      '</div></div>' +
-      '<div class="detail-types">' + names.map(function (n) { return typePill(n); }).join("") + '</div>' +
+      '</div>' +
+      '<div class="ficha-meio"><div class="detail-types">' + names.map(function (n) { return typePill(n); }).join("") + '</div>' +
+        '<div class="ficha-selo"><span class="rank-info-label">Nota geral</span>' + rankBadgeHtml(sp.sname) + '</div></div>' +
+      '<div class="ficha-stats"><h3 class="stats-titulo">Stats base <span class="stats-total mono" aria-label="Total dos stats base: ' + bst(sp) + '">TOTAL ' + bst(sp) + '</span></h3>' + fichaStatsHtml(sp) + '</div></div>' +
       rankInfoLineHtml(sp) +
       (function () { var t = descricaoDaEspecie(sp); return t ? '<p class="flavor">' + escapeHtml(t) + '</p>' : ""; })() +
       (function () { var t = howToObtainText(sp); return t ? '<p class="obtain-hint">' + escapeHtml(t) + '</p>' : ""; })() +
@@ -521,7 +523,6 @@
 
   // Ficha: bloco "Conhecer a espécie" (stats, habilidades, evolução, formas).
   function fichaConhecerHtml(sp) {
-    var statsHtml = fichaStatsHtml(sp);
     var synergyHits = sinergiasDaEspecie(sp);
     var abiHtml = uniqueIds(sp.ab).map(function (id) { return abilityCard(id, "Escolhível", "choosable", synergyHits); }).join("");
     var innHtml = sp.inn.map(function (id) { return abilityCard(id, "Innate", "innate", synergyHits); }).join("");
@@ -529,7 +530,6 @@
     var frmHtml = fichaFormasHtml(sp);
     var howToObtainHtml = fichaComoObterHtml(sp);
     return '<div class="detail-group"><h3 class="detail-group-heading">Conhecer a espécie</h3>' +
-      '<div class="card"><h3 class="stats-titulo">Stats base <span class="stats-total mono" aria-label="Total dos stats base: ' + bst(sp) + '">TOTAL ' + bst(sp) + '</span></h3>' + statsHtml + '</div>' +
       fichaEfetividadeHtml(sp) +
       '<div class="card"><h3>Habilidades &amp; Innates</h3><div class="abi-grid">' + abiHtml + innHtml + '</div>' +
         '<p style="color:var(--text-dim);font-size:var(--fs-pequeno);margin-top:10px;">1 habilidade escolhível fica ativa por vez, como na série principal. As innates ficam sempre ativas, além da habilidade escolhida.</p>' +

@@ -111,6 +111,7 @@
   --fs-base: 15px;      /* corpo */
   --fs-grande: 16px;    /* título de modal, cabeçalho no celular */
   --fs-titulo: 20px;    /* título do app, ícones */
+  --fs-cartao: 34px;    /* nome na ficha-cartão e título da capa */
   --fs-display: 26px;   /* nome da espécie na ficha */
   /* Escritos pelo JS: "Aumentar fonte" (Progresso) e a cor do tipo nos chips
      de Monotype. Declarados aqui pra ter valor padrão e ficar na lista de
@@ -119,15 +120,16 @@
   --chip-color: var(--accent);
   --chip-ink: var(--accent-ink);
 }
-@media (prefers-color-scheme: dark) {
+/* Tema padrão = aço azul-noite (07/11/2026): vale com o sistema claro ou escuro; o claro só com data-theme="light". */
+@media (prefers-color-scheme: dark), (prefers-color-scheme: light) {
   :root:not([data-theme="light"]) {
-    --bg: #0b0c09;
-    --surface: #151612;
-    --surface-2: #1e201a;
-    --surface-3: #292c23;
-    --border: #585c4a;
-    --text: #f6f4e8;
-    --text-dim: #b3b09b;
+    --bg: #0a1220;
+    --surface: #111c2e;
+    --surface-2: #182640;
+    --surface-3: #223454;
+    --border: #5a7499;
+    --text: #eaf1fb;
+    --text-dim: #a9b9d0;
     --accent: #ff5d70;
     --accent-strong: #ff8e9b;
     --accent-ink: #1a0509;
@@ -142,10 +144,10 @@
     --elev-2: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 8px 20px -10px rgb(0 0 0 / 0.6);
     /* No escuro o rubi e o ouro vivos já passam AA como texto sobre o
        preto, então as variantes -badge repetem os mesmos valores. */
-    --badge-accent: #ff5d70;
+    --badge-accent: #ff7b8b;
     --badge-accent2: #f3c941;
     --badge-resist: #5fd694;
-    --badge-text-dim: #b3b09b;
+    --badge-text-dim: #a9b9d0;
     --cat-aqua: #6fb0ff;
     --cat-magma: #ff8a5c;
     --cat-frontier: #c9a3f2;
@@ -155,13 +157,13 @@
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0b0c09;
-  --surface: #151612;
-  --surface-2: #1e201a;
-  --surface-3: #292c23;
-  --border: #585c4a;
-  --text: #f6f4e8;
-  --text-dim: #b3b09b;
+  --bg: #0a1220;
+  --surface: #111c2e;
+  --surface-2: #182640;
+  --surface-3: #223454;
+  --border: #5a7499;
+  --text: #eaf1fb;
+  --text-dim: #a9b9d0;
   --accent: #ff5d70;
   --accent-strong: #ff8e9b;
   --accent-ink: #1a0509;
@@ -174,10 +176,10 @@
   --shadow: 0 10px 32px -14px rgb(0 0 0 / 0.6);
   --elev-1: inset 0 1px 0 rgb(255 255 255 / 0.04);
   --elev-2: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 8px 20px -10px rgb(0 0 0 / 0.6);
-  --badge-accent: #ff5d70;
+  --badge-accent: #ff7b8b;
   --badge-accent2: #f3c941;
   --badge-resist: #5fd694;
-  --badge-text-dim: #b3b09b;
+  --badge-text-dim: #a9b9d0;
   --cat-aqua: #6fb0ff;
   --cat-magma: #ff8a5c;
   --cat-frontier: #c9a3f2;

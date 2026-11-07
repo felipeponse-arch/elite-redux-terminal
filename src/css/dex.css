@@ -74,7 +74,7 @@
    what's actually selected. */
 .species-row.kbd-active { outline: 2px solid var(--focus); outline-offset: -2px; }
 .species-row .dexno { color: var(--text-dim); font-size: var(--fs-pequeno); width: 34px; flex: none; }
-.species-row .sname { font-weight: 600; font-size: var(--fs-destaque); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.species-row .sname { font-weight: 600; font-size: var(--fs-destaque); flex: 1; min-width: 0; overflow: hidden; line-height: 1.15; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow-wrap: anywhere; }
 .species-row .pips { display: flex; gap: 3px; flex: none; }
 .no-results { padding: 20px 16px; color: var(--text-dim); font-size: var(--fs-texto); }
 

@@ -213,7 +213,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - simularDuplaContraChefao:3827 - chama: poeHazardNoLado (campo.js:58) | chamado por: simularOitavoGinasio (chefoes.js:497), motorSimular (time_pelo_motor.js:200)
 - simularLutaContraChefao:4345 - chamado por: motorSimular (time_pelo_motor.js:200)
 - simularLutaDeVerdadeContraChefao:4354 - chama: hazardCheioNoLado (campo.js:57), poeHazardNoLado (campo.js:58), typeMultiplier (tipos.js:244)
-- sinergiasDaEspecie:1320 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:122) | chamado por: pipelineSinergiasAtivas (pipeline_build.js:218), habilidadeSubstitutaPara (reconciliar_build.js:26), validateAiBuild (validacao_build_ia.js:199), buildSynergyHtml (dex_ficha.js:42), fichaConhecerHtml (dex_ficha.js:523)
+- sinergiasDaEspecie:1320 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:122) | chamado por: pipelineSinergiasAtivas (pipeline_build.js:218), habilidadeSubstitutaPara (reconciliar_build.js:26), validateAiBuild (validacao_build_ia.js:199), buildSynergyHtml (dex_ficha.js:42), fichaConhecerHtml (dex_ficha.js:525)
 - temHazardDuelo:4062 - chama: CAMADAS_DE_HAZARD (campo.js:55)
 - temPrioridadeNoCampoDuelo:2276 - chamado por: pipelineLinhaDoGolpe (pipeline_build.js:169)
 - textoHabDuelo:48 - chama: descricaoDeHabilidadePorId (condicoes_habilidade.js:88), expandirTextoDeHabilidade (condicoes_habilidade.js:99), ABILITIES (dados_base.js:10), LIDO_PELO_TEXTO_NOVO_DUELO (texto_versao_nova.js:156), TEXTO_DA_VERSAO_NOVA_DUELO (texto_versao_nova.js:9)

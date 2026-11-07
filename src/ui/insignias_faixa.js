@@ -54,7 +54,7 @@
   function renderFaixaEtapa() {
     var el = document.getElementById("faixa-etapa");
     if (!el || !LEVELCAPS || !Array.isArray(LEVELCAPS.rows) || !LEVELCAPS.rows.length) return;
-    var rows = LEVELCAPS.rows, atual = state.settings.milestone, ultimo = rows.length - 1;
+    var rows = LEVELCAPS.rows, atual = state.settings.milestone;
     var cap = getCurrentCap();
     var capTxt = cap === null ? "Sem limite" : "Nv " + cap;
     var nomeCompleto = rows[atual] ? rows[atual].milestone : "";
@@ -64,18 +64,18 @@
       return '<button type="button" class="ins-btn tipo-' + INSIGNIAS_TIPOS[forma] + (acesa ? " on" : "") + (proxima ? " proxima" : "") +
         (idx === insigniaParaEncaixar ? " encaixa" : "") + '" data-etapa="' + idx + '"' + (idx === atual ? ' aria-current="step"' : "") +
         ' title="' + escapeHtml(r.milestone) + '" aria-label="' + escapeHtml(r.milestone) + (idx === atual ? " (atual)" : " - definir como Etapa") + '">' +
-        insigniaSvgHtml(forma) + '</button>';
+        insigniaSvgHtml(forma) + '<span class="ins-rotulo">' + escapeHtml(etapaNomeCurto(r.milestone)) + '</span></button>';
     }).join("");
     insigniaParaEncaixar = null;
-    var pontos = rows.map(function (r, i) { return '<i' + (i <= atual ? ' class="on"' : "") + '></i>'; }).join("");
     el.innerHTML =
       '<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="ins-metal" x1="0" y1="0" x2="0" y2="1">' +
         '<stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient></defs></svg>' +
       '<div class="faixa-insignias" role="group" aria-label="Insígnias da run">' + botoes + '</div>' +
       '<div class="etapa-info"><span class="etapa-nome">' + escapeHtml(nomeCompleto) + '</span><span class="etapa-cap">Level cap ' + capTxt + '</span></div>' +
-      '<div class="etapa-compacta"><button type="button" class="etapa-passo" data-passo="-1" aria-label="Etapa anterior"' + (atual <= 0 ? " disabled" : "") + '>&lsaquo;</button>' +
-        '<div class="etapa-info"><span class="etapa-nome">' + escapeHtml(etapaNomeCurto(nomeCompleto)) + ' &middot; Etapa ' + atual + '/' + (ultimo - 1) + '</span><span class="etapa-cap">' + capTxt + '</span><span class="etapa-pontos" aria-hidden="true">' + pontos + '</span></div>' +
-        '<button type="button" class="etapa-passo" data-passo="1" aria-label="Próxima Etapa"' + (atual >= ultimo ? " disabled" : "") + '>&rsaquo;</button></div>';
+      '';
+    var atualBtn = el.querySelector('.ins-btn[aria-current]');
+    var faixa = el.querySelector('.faixa-insignias');
+    if (atualBtn && faixa && faixa.scrollWidth > faixa.clientWidth) faixa.scrollLeft = Math.max(0, atualBtn.offsetLeft - faixa.clientWidth / 2 + atualBtn.offsetWidth / 2);
   }
   (function () {
     var el = document.getElementById("faixa-etapa");
@@ -83,7 +83,5 @@
     el.addEventListener("click", function (e) {
       var b = e.target.closest(".ins-btn[data-etapa]");
       if (b) { etapaPara(parseInt(b.dataset.etapa, 10)); return; }
-      var p = e.target.closest(".etapa-passo[data-passo]");
-      if (p) etapaPara(Math.max(0, Math.min(LEVELCAPS.rows.length - 1, state.settings.milestone + parseInt(p.dataset.passo, 10))));
-    });
+          });
   })();
