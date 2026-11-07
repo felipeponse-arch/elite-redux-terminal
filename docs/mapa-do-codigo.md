@@ -80,6 +80,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   copyText:11, itemDescHtml:45, hpEvEfficiencyNote:83, evBreakpointNote:116, buildEvNotesHtml:141, buildNoteHtml:155, buildContextNotesHtml:161, seloDaBuildHtml:168, megaModeBuildNoteHtml:174, buildEntryHtml:182, buildChipsHtml:212, myBuildEditorHtml:223, updateMyBuildEvTotal:322, updateMyBuildStatus:352, wireMyBuildEditor:416, lerFormularioDoEditor:444, apagarBuildComDesfazer:467
 - **ficha_extras.js** - Ficha: comparar builds, anotações, histórico de builds e builds de referência dos chefões.
   compareCardHtml:14, compareResultHtml:22, notesCardHtml:78, buildHistoryHtml:87, bossReferenceHtml:103, rotuloDaBuild:170, planoDaBuildHtml:179, megaLockedTagHtml:199, otherFormsHtml:206
+- **insignias_faixa.js** - Faixa de Etapa no cabeçalho (fatia 1 do visual "Carteira de Treinador", 07/11/2026).
+  insigniaSvgHtml:38, etapaNomeCurto:42, etapaPara:46, renderFaixaEtapa:54
 - **modo_motor.js** - Modo Motor no Meu Time (ticket time-pelo-motor/01, Fase F2, 21/10/2026). O app NÃO usa IA (decisão do usuário, 06/11/2026):
   modoMotorCache:18, modoMotorChave:20, modoMotorCapturados:25, modoMotorFavoritosValidos:30, modoMotorSegundos:34, modoMotorEsperar:35, modoMotorAquecer:39, modoMotorMontar:67, modoMotorVarianteDe:117, modoMotorFicarComVariante:118, modoMotorFavoritosHtml:151, modoMotorBotaoHtml:163, modoMotorMembroHtml:168, modoMotorRodapeHtml:180, modoMotorVarianteHtml:195, modoMotorResultadoHtml:223
 - **nucleo.js** - Estado do app (state), gravação no aparelho e a camada de ações (acao/TELAS): toda mudança grava uma vez e redesenha cada tela uma vez.
@@ -87,7 +89,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **pipeline_tela.js** - Pipeline de build na tela (ticket docs/tickets/pipeline-build-2026-10-14/02): só desenho. As regras (candidatos, hit-kill,
   pipelineResultado:14, pipelineAlvoValido:26, pipelineSeletorDeAlvoHtml:32, pipelineResumoDoAlvo:46, pipelineVereditoDe:53, pipelineSeloHtml:63, pipelineGolpeHtml:71, pipelineCandidatoHtml:77, pipelinePainelDaFichaHtml:96, pipelineDesenharFicha:113, pipelineDesenharTime:125
 - **progresso.js** - Aba Progresso: dificuldade, level cap, insígnia, modo de Mega, confirmação da run e acessibilidade.
-  renderRunStatus:9, renderCapBadge:17, renderCapDisplay:21, renderProgressTrail:30, renderChangelog:92, initProgress:105
+  renderRunStatus:9, renderCapBadge:17, renderCapDisplay:22, renderProgressTrail:31, renderChangelog:93, initProgress:106
 - **quem_resolve.js** - "Quem derruba este chefão" (ticket docs/tickets/pipeline-build-2026-10-14/04): o caso B do pipeline (especiesQueResolvem,
   quemResolveEstadoDe:14, quemResolveChave:17, quemResolveEmCache:21, quemResolveCalcular:22, quemResolveOrigemHtml:37, quemResolveItemHtml:43, quemResolveListaHtml:50, quemResolvePreencher:66, quemResolveCardHtml:83, quemResolveRestaurar:103
 - **resumo_luta.js** - Confronto e resumo da próxima luta (card do chefão, resumo do topo da Dex, card no fim do Time).

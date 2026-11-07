@@ -477,7 +477,7 @@
       // Pokémon é o protagonista da ficha, e com image-rendering: pixelated o
       // dobro exato fica nítido). O identificador interno (SPECIES_...) saiu da
       // tela - era ruído técnico pro jogador.
-      '<div class="detail-head"><div class="ts-head">' + spriteImgHtml(sp.x, sp.n, 96) + '<div class="detail-titles">' +
+      '<div class="detail-head ficha-cartao tipo-' + names[0] + (names[1] ? ' tipo2-' + names[1] : '') + '"><div class="ts-head">' + spriteImgHtml(sp.x, sp.n, 96) + '<div class="detail-titles">' +
         '<h2>' + escapeHtml(sp.n) + '</h2>' +
         '<div class="detail-dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</div>' + avisoSemSpriteHtml(sp.x, SPRITE_INDEX) +
       '</div></div><div class="detail-acoes">' +

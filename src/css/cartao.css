@@ -1,0 +1,94 @@
+/* Carteira de Treinador (fatia 1, 07/11/2026): tokens de cor por TIPO (18) e da caixa de insígnias,
+   cartão da ficha e faixa de Etapa. As cores são as mesmas de TYPE_META (artifact_template.html);
+   a classe .tipo-X / .tipo2-X só escolhe --t1 / --t2 e tudo (chip, halo, fio, barra) lê esses dois. */
+:root {
+  --tipo-normal: #8e8873; --tipo-fighting: #c1432e; --tipo-fire: #e8632c; --tipo-water: #3d7dc9;
+  --tipo-electric: #d6a819; --tipo-grass: #5a9e42; --tipo-ice: #5cc3ce; --tipo-poison: #8e4ea6;
+  --tipo-ground: #b5904a; --tipo-flying: #7f9fd6; --tipo-psychic: #d9527e; --tipo-bug: #8fa832;
+  --tipo-rock: #a68a4a; --tipo-ghost: #5c5a94; --tipo-dragon: #5b4fc4; --tipo-dark: #4a4640;
+  --tipo-steel: #7c8a94; --tipo-fairy: #d982ad;
+  --t1: var(--accent-2);
+  --t2: var(--t1);
+  --chanfro: 8px;
+}
+.tipo-Normal { --t1: var(--tipo-normal); } .tipo-Fighting { --t1: var(--tipo-fighting); } .tipo-Fire { --t1: var(--tipo-fire); }
+.tipo-Water { --t1: var(--tipo-water); } .tipo-Electric { --t1: var(--tipo-electric); } .tipo-Grass { --t1: var(--tipo-grass); }
+.tipo-Ice { --t1: var(--tipo-ice); } .tipo-Poison { --t1: var(--tipo-poison); } .tipo-Ground { --t1: var(--tipo-ground); }
+.tipo-Flying { --t1: var(--tipo-flying); } .tipo-Psychic { --t1: var(--tipo-psychic); } .tipo-Bug { --t1: var(--tipo-bug); }
+.tipo-Rock { --t1: var(--tipo-rock); } .tipo-Ghost { --t1: var(--tipo-ghost); } .tipo-Dragon { --t1: var(--tipo-dragon); }
+.tipo-Dark { --t1: var(--tipo-dark); } .tipo-Steel { --t1: var(--tipo-steel); } .tipo-Fairy { --t1: var(--tipo-fairy); }
+.tipo2-Normal { --t2: var(--tipo-normal); } .tipo2-Fighting { --t2: var(--tipo-fighting); } .tipo2-Fire { --t2: var(--tipo-fire); }
+.tipo2-Water { --t2: var(--tipo-water); } .tipo2-Electric { --t2: var(--tipo-electric); } .tipo2-Grass { --t2: var(--tipo-grass); }
+.tipo2-Ice { --t2: var(--tipo-ice); } .tipo2-Poison { --t2: var(--tipo-poison); } .tipo2-Ground { --t2: var(--tipo-ground); }
+.tipo2-Flying { --t2: var(--tipo-flying); } .tipo2-Psychic { --t2: var(--tipo-psychic); } .tipo2-Bug { --t2: var(--tipo-bug); }
+.tipo2-Rock { --t2: var(--tipo-rock); } .tipo2-Ghost { --t2: var(--tipo-ghost); } .tipo2-Dragon { --t2: var(--tipo-dragon); }
+.tipo2-Dark { --t2: var(--tipo-dark); } .tipo2-Steel { --t2: var(--tipo-steel); } .tipo2-Fairy { --t2: var(--tipo-fairy); }
+
+/* ---- Faixa de insígnias (dentro do cabeçalho) ---- */
+.faixa-etapa {
+  flex: 1 1 100%; order: 9; display: flex; align-items: center; gap: var(--space-4);
+  padding-top: var(--space-2); border-top: 1px solid var(--border);
+}
+.faixa-insignias { display: flex; align-items: center; gap: var(--space-1); flex: none; }
+.ins-btn {
+  position: relative; display: grid; place-items: center; width: 34px; height: 34px; padding: 0;
+  background: none; border: 1px solid transparent; border-radius: var(--radius-sm); cursor: pointer; color: var(--text-dim);
+}
+.ins-btn:hover { border-color: var(--border); background: var(--surface-2); }
+.ins-btn svg { width: 28px; height: 28px; overflow: visible; }
+.ins-btn .b-corpo { fill: var(--ins, var(--surface-3)); stroke: color-mix(in srgb, var(--ins, var(--surface-3)) 55%, #000); stroke-width: 1.4; stroke-linejoin: round; }
+.ins-btn .b-metal { fill: url(#ins-metal); stroke: none; pointer-events: none; }
+.ins-btn .b-furo { fill: color-mix(in srgb, var(--ins, var(--surface-3)) 30%, #000); stroke: none; }
+.ins-btn:not(.on) { --ins: var(--surface-3); }
+.ins-btn:not(.on) svg { opacity: .8; }
+.ins-btn:not(.on) .b-corpo { stroke: var(--text-dim); stroke-dasharray: 2 2; }
+.ins-btn:not(.on) .b-metal { opacity: .25; }
+.ins-btn.on { --ins: var(--t1); }
+.ins-btn[aria-current="step"] { border-color: var(--border); background: var(--surface-2); }
+.ins-btn.proxima svg { animation: ins-pulso 2.4s ease-in-out infinite; }
+.ins-btn.encaixa svg { animation: ins-encaixe 220ms var(--ease-out); }
+@keyframes ins-pulso { 0%, 100% { opacity: .8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
+@keyframes ins-encaixe { 0% { transform: translateY(-9px) scale(1.18); opacity: .4; } 70% { transform: translateY(1px) scale(.97); } 100% { transform: none; opacity: 1; } }
+.etapa-info { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-3); min-width: 0; }
+.etapa-nome { font-family: var(--fonte-display); font-size: var(--fs-destaque); font-weight: 400; }
+.etapa-cap { font-family: "IBM Plex Mono", monospace; font-size: var(--fs-pequeno); font-variant-numeric: tabular-nums; color: var(--text-dim); }
+.etapa-compacta { display: none; align-items: center; gap: var(--space-2); flex: 1; min-width: 0; }
+.etapa-passo { width: 44px; height: 44px; flex: none; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: var(--fs-grande); cursor: pointer; }
+.etapa-passo:disabled { opacity: .4; cursor: default; }
+.etapa-compacta .etapa-info { flex: 1; text-align: center; justify-content: center; flex-direction: column; align-items: center; gap: 2px; }
+.etapa-pontos { display: flex; gap: 3px; justify-content: center; }
+.etapa-pontos i { width: 12px; height: 4px; border-radius: 2px; background: var(--surface-3); }
+.etapa-pontos i.on { background: var(--accent-2); }
+
+/* ---- Cartão da ficha ---- */
+.detail-head.ficha-cartao {
+  position: relative; padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3);
+  background: linear-gradient(115deg, color-mix(in srgb, var(--t1) 16%, var(--surface)) 0%, var(--surface) 62%, color-mix(in srgb, var(--t2) 10%, var(--surface)) 100%);
+  border: 1px solid var(--border); border-top: 3px solid var(--t1); border-bottom-color: var(--t2);
+  clip-path: polygon(0 0, calc(100% - var(--chanfro)) 0, 100% var(--chanfro), 100% 100%, 0 100%);
+}
+/* Halo da cor do tipo atrás do sprite (o sprite é um fundo de atlas: não pode trocar o background dele). */
+.ficha-cartao .ts-head { position: relative; isolation: isolate; }
+.ficha-cartao .ts-head::before {
+  content: ""; position: absolute; z-index: -1; left: -18px; top: 50%; width: 132px; height: 132px; transform: translateY(-50%); pointer-events: none;
+  background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--t1) 55%, transparent) 0%, color-mix(in srgb, var(--t2) 22%, transparent) 55%, transparent 72%);
+}
+.ficha-cartao .detail-titles h2 { line-height: 1.1; }
+.detail-types { align-items: center; flex-wrap: wrap; }
+.rank-info-geral .rank-badge { clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%); border-radius: 0; }
+.stat-bar-track { background: color-mix(in srgb, var(--t1) 12%, var(--surface-2)); }
+.stat-row .stat-val { font-variant-numeric: tabular-nums; font-weight: 700; }
+
+/* ---- Lista: a mesma gramática (brilho do tipo, sem perder linha) ---- */
+.species-row { background-image: linear-gradient(90deg, color-mix(in srgb, var(--t1) 14%, transparent), transparent 40%); }
+.species-row.selected { background-color: var(--surface-2); }
+
+@media (max-width: 620px) {
+  .faixa-insignias, .faixa-etapa > .etapa-info { display: none; }
+  .etapa-compacta { display: flex; }
+  .faixa-etapa { padding-top: var(--space-1); }
+  .detail-head.ficha-cartao { padding: var(--space-3); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ins-btn.proxima svg, .ins-btn.encaixa svg { animation: none; }
+}

@@ -219,7 +219,7 @@
     // Same three states syncRowAddButtons() maintains: in team / team full (swap) / free slot.
     var addTitle = inTeam ? "Já está no time" : teamFull ? "Trocar por um do time" : "Adicionar ao time";
     var addLabel = inTeam ? "✓" : teamFull ? "⇄" : "+";
-    return '<li class="species-row' + sel + '" data-x="' + sp.x + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
+    return '<li class="species-row tipo-' + names[0] + sel + '" data-x="' + sp.x + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
       '<span class="dexno mono">#' + String(sp.i || 0).padStart(3, "0") + '</span>' +
       spriteImgHtml(sp.x, sp.n, 28) +
       '<span class="sname">' + escapeHtml(sp.n) + '</span>' + avisoSemSpriteHtml(sp.x, SPRITE_INDEX) +

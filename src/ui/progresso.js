@@ -17,6 +17,7 @@
   function renderCapBadge() {
     var cap = getCurrentCap();
     document.getElementById("cap-badge").textContent = cap === null ? "s/ limite" : "Lv " + cap;
+    renderFaixaEtapa();
   }
   function renderCapDisplay() {
     var cap = getCurrentCap();
