@@ -75,7 +75,11 @@ function instalarMockDb(semente) {
 export async function abrirApp(page, { mockDb = false, semente = null, arquivo = "artifact_final.html" } = {}) {
   if (mockDb) await ligarMockDb(page, semente);
   // Tema padrão agora é o escuro (aço azul-noite): o claro só com data-theme="light". Teste que pede sistema claro pede o tema claro.
-  await page.addInitScript(() => { if (window.matchMedia("(prefers-color-scheme: light)").matches) document.documentElement.setAttribute("data-theme", "light"); });
+  await page.addInitScript(() => {
+    if (!window.matchMedia("(prefers-color-scheme: light)").matches) return;
+    const pôr = () => document.documentElement && (document.documentElement.setAttribute("data-theme", "light"), true);
+    if (!pôr()) new MutationObserver((_, o) => { if (pôr()) o.disconnect(); }).observe(document, { childList: true });
+  });
   await page.goto("/" + arquivo, { waitUntil: "load" });
   await esperarFontes(page);
   if (mockDb) await page.waitForTimeout(200);

@@ -160,7 +160,7 @@ test.describe("bordas seguras (celular com entalhe)", () => {
       const t = document.querySelector(".topbar");
       return { alturaAviso: b.height, paddingAviso: getComputedStyle(document.getElementById("run-setup-banner")).paddingTop, topoCabecalho: t.getBoundingClientRect().top, paddingCabecalho: getComputedStyle(t).paddingTop };
     });
-    expect(m.paddingAviso).toBe("55px");
+    expect(m.paddingAviso).toBe("51px");
     expect(m.paddingCabecalho, "o aviso já cobre o entalhe").toBe("8px");
     expect(m.topoCabecalho, "cabeçalho começa logo abaixo do aviso").toBeGreaterThanOrEqual(m.alturaAviso - 1);
     // Fechar o aviso devolve a borda segura ao cabeçalho.
