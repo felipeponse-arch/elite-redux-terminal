@@ -56,9 +56,9 @@ test("Knock Off: o item do alvo vale metade da luta; pedra de Mega e Sticky Hold
 // atributo; Rampage (Outrage...) deixa quem usa confuso depois de 2-3 turnos.
 test("Hammer Arm baixa a própria Velocidade; V-create, Defesa, Def. Especial e Velocidade", () => {
   const ha = R.prepararGolpesDuelo([R.MOVE_ID_BY_NAME["Hammer Arm"]], u100(), null)[0];
-  assert.equal(ha.estagios.proprio.spe, -1);
+  assert.equal(ha.estagios?.proprio?.spe, -1); // ?. : sem a regra, falha por asserção (não por TypeError)
   const vc = R.prepararGolpesDuelo([R.MOVE_ID_BY_NAME["V-create"]], u100(), null)[0];
-  assert.equal([vc.estagios.proprio.def, vc.estagios.proprio.spd, vc.estagios.proprio.spe].join(","), "-1,-1,-1");
+  assert.equal([vc.estagios?.proprio?.def, vc.estagios?.proprio?.spd, vc.estagios?.proprio?.spe].join(","), "-1,-1,-1");
 });
 
 test("Rampage (Outrage): em luta longa, quem usa fica confuso e se fere; Own Tempo não", () => {

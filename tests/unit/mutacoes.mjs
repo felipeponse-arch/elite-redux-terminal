@@ -1209,7 +1209,7 @@ export const MUTACOES = [
     id: "duelo-sem-seguimento-de-categoria",
     descricao: "Chunky Bass Line/Two Step/Aftershock deixam de somar o golpe de seguimento",
     arquivo: "duelo.js",
-    de: "if (vale && poder > 0) hab *= (poder + sg.poder) / poder;",
+    de: "else if (vale && poder > 0) hab *= (poder + sg.poder) / poder;",
     para: "",
   },
   {
@@ -4483,7 +4483,7 @@ export const MUTACOES = [
     descricao: "o veredito da luta declara vitória (ok e \"Vence:\") mesmo sem vencer",
     arquivo: "chefoes.js",
     de: "{ ok: !!l.venceu, titulo: l.venceu ? \"Vence:\"",
-    para: "{ ok: true, titulo: \"Vence:\"",
+    para: "{ ok: true, titulo: true ? \"Vence:\"",
   },
   {
     id: "faixa-hp-luta-limiar-alto",
