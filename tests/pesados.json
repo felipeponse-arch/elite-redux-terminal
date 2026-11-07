@@ -16,7 +16,6 @@
   "tests/unit/time_pelo_motor.parte3.test.mjs",
   "tests/unit/time_pelo_motor.parte4.test.mjs",
   "tests/unit/time_pelo_motor.parte5.test.mjs",
-  "tests/unit/time_pelo_motor_comuns.test.mjs",
   "tests/unit/time_pelo_motor_regras.test.mjs",
   "tests/unit/vaga.test.mjs"
  ]

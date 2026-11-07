@@ -7,7 +7,6 @@ import { carregarRegras } from "./carregar_regras.mjs";
 const POOL = ["Politoed", "Ludicolo", "Kingdra", "Swampert", "Floatzel", "Gyarados", "Scizor", "Garchomp", "Metagross", "Togekiss", "Pelipper", "Torkoal", "Charizard", "Venusaur", "Lilligant"];
 function run(nomes, milestone = 3, builds = {}) {
   const R = carregarRegras({ milestone });
-  R.LUTAS_COMUNS_RUN = null;
   const sp = (n) => R.SPECIES.find((s) => s && s.n === n);
   R.state.team = nomes.slice(0, 6).map((n) => sp(n).x);
   R.state.box = nomes.slice(6).map((n) => sp(n).x);

@@ -48,7 +48,7 @@ Write-Output "--- 3/4 build + suite completa ---"
 $ErrorActionPreference = "Continue"
 # Publicar = sabotagem COMPLETA (o master so faz a incremental fora daqui; 14/10/2026).
 $env:ER_VERIFICAR = "completo"
-$env:ER_PUBLICAR = "1"   # o build recusa dado provisório (data/lutas_comuns_run.json de amostra)
+$env:ER_PUBLICAR = "1"   # o build recusa dado provisório
 & node (Join-Path $PSScriptRoot "verificar.mjs") 2>&1 | ForEach-Object { "$_" }
 $saidaTestes = $LASTEXITCODE
 $ErrorActionPreference = "Stop"

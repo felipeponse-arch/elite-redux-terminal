@@ -70,13 +70,6 @@ export const MUTACOES = [
     para: "var CONDICAO_DO_ARQUETIPO = CONDICAO_DO_ARQUETIPO_CAMPO; var CONDICOES_DE_CAMPO = ",
   },
   {
-    id: "fatias-de-peso-copia-propria-de-tier",
-    descricao: "TK-33b: o estudo fatias_de_peso volta a ter cópia própria (e defasada) de tierDe/percentis em vez de importar do rank_comum",
-    arquivo: "fatias_de_peso.mjs",
-    de: "import { percentis, tierDe } from \"../rank_comum.mjs\";",
-    para: "const tierDe = (p) => (p >= 95 ? \"SS\" : \"D\"); const percentis = (o) => o; //",
-  },
-  {
     id: "etapa-mega-texto-fixo-mono-run",
     descricao: "TK-33b: a loja de iniciais volta a citar 'Flannery' em texto fixo em vez do líder da Etapa da Mega (pedras_etapa.json)",
     arquivo: "mono_run.js",
@@ -4016,20 +4009,6 @@ export const MUTACOES = [
     para: "",
   },
   {
-    id: "motor-juiz-ignora-as-comuns",
-    descricao: "o juiz do Modo Motor volta a olhar só os 29 chefões (as lutas comuns da fatia de 40% somem da decisão)",
-    arquivo: "time_pelo_motor.js",
-    de: "if (!c || !c.amostra.length) return vB;",
-    para: "return vB;",
-  },
-  {
-    id: "motor-fatia-invertida",
-    descricao: "a fatia do Modo Motor troca os lados: chefões 40% e comuns 60% (o rank é 60/40)",
-    arquivo: "time_pelo_motor.js",
-    de: "return c.fatia * vB + (1 - c.fatia) * obj.valor(",
-    para: "return (1 - c.fatia) * vB + c.fatia * obj.valor(",
-  },
-  {
     id: "tag-com-um-beneficiario",
     descricao: "a tag do armador nasce com um beneficiário só (a regra pede dois)",
     arquivo: "time_pelo_motor_papeis.js",
@@ -4079,13 +4058,6 @@ export const MUTACOES = [
     para: "if (c.build.item) continue;",
   },
   {
-    id: "motor-lutas-comuns-restantes-sem-etapa",
-    descricao: "as lutas comuns de Etapas já passadas voltam a entrar no juiz",
-    arquivo: "time_pelo_motor.js",
-    de: "var restantes = todas.filter(function (l) { return l.etapa >= etapa; }), vistas",
-    para: "var restantes = todas.filter(function (l) { return true; }), vistas",
-  },
-  {
     id: "motor-amostra-chefoes-sem-etapa",
     descricao: "a amostra de chefões inclui lutas de Etapas já passadas",
     arquivo: "time_pelo_motor.js",
@@ -4119,13 +4091,6 @@ export const MUTACOES = [
     arquivo: "chefoes.js",
     de: "var FATIA_DOS_CHEFOES = 0.6;",
     para: "var FATIA_DOS_CHEFOES = 0.5;",
-  },
-  {
-    id: "motor-fatia-ignora-o-dado",
-    descricao: "a fatia do Modo Motor ignora a fatia do dado do rank e usa sempre o padrão",
-    arquivo: "time_pelo_motor.js",
-    de: "fatia: dado && dado.fatia !== undefined ? dado.fatia : FATIA_DOS_CHEFOES",
-    para: "fatia: FATIA_DOS_CHEFOES",
   },
   {
     id: "motor-busca-desempate-ultimo",

@@ -1,5 +1,5 @@
 // Regras do Modo Motor que só a sabotagem do TK-03 (27/10/2026) mostrou sem proteção: item liberado e limite de repetição,
-// nível pelo modo do level cap, fatia vinda do dado e desempate por nome. Cada teste usa dado real do app e checa a REGRA, não um exemplo.
+// nível pelo modo do level cap, desempate por nome. Cada teste usa dado real do app e checa a REGRA, não um exemplo.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
@@ -47,18 +47,6 @@ test("nível: o nível das lutas segue o modo do level cap escolhido (easy, more
   });
   const R = carregarRegras();
   assert.ok(R.LEVELCAPS.rows.some((l) => l.easy !== l.more), "o dado precisa distinguir os modos para o teste valer");
-});
-
-test("fatia: o juiz usa a fatia do dado do rank (inclusive zero), e o padrão 60/40 só quando o dado não traz fatia", () => {
-  const R = carregarRegras({ milestone: 2 });
-  const real = R.LUTAS_COMUNS_RUN;
-  assert.ok(real && real.lutas, "dado real das lutas comuns");
-  const fatiaCom = (f) => { R.LUTAS_COMUNS_RUN = Object.assign({}, real, { fatia: f }); return R.motorLutasComunsDoContexto(2).fatia; };
-  assert.equal(fatiaCom(0.45), 0.45);
-  assert.equal(fatiaCom(0), 0);
-  const { fatia: _f, ...semFatia } = real;
-  R.LUTAS_COMUNS_RUN = semFatia;
-  assert.equal(R.motorLutasComunsDoContexto(2).fatia, 0.6);
 });
 
 test("busca: empate no desempenho sozinho desempata pelo nome da espécie, não pela ordem em que os candidatos chegam", () => {

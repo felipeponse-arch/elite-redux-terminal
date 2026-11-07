@@ -1,13 +1,13 @@
-// Fatia fixa de peso do rank (ticket todas-as-lutas/02, 21/10/2026): chefões 60% e lutas comuns 40%, com a composição REAL da run
-// (as 29 lutas de chefão de LUTAS_DA_RUN + os treinadores comuns do dado do jogo). Sem fatia, as comuns pesam ~95% (estudo.md §4).
+// Fatia fixa de peso do rank (ticket todas-as-lutas/02, 21/10/2026): chefões 60% e lutas comuns 40%, com as 29 lutas de chefão REAIS
+// (LUTAS_DA_RUN) + treinadores comuns sintéticos. Sem fatia, as comuns pesam ~95% (estudo.md §4).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
-import { lutasComunsDaRun } from "../../scripts/estudo/lutas_comuns.mjs";
 import { notasComFatia, comunsMaisPerigosas, COMUNS_POR_ETAPA } from "../../scripts/rank_fatia.mjs";
 
 const R = carregarRegras({ milestone: 0 });
-const comuns = lutasComunsDaRun().lutas;
+// Comuns sintéticas (o dado real saiu em 07/11/2026): 70 por etapa, de 1 a 8, só para exercitar a conta da fatia.
+const comuns = Array.from({ length: 560 }, (_, i) => ({ nome: "Comum " + i, etapa: 1 + (i % 8) }));
 const lutas = R.LUTAS_DA_RUN.map(([nome, etapa]) => ({ nome, etapa, comum: false })).concat(comuns.map((l) => ({ nome: l.nome, etapa: l.etapa, comum: true })));
 const todas = lutas.map((_, i) => i);
 

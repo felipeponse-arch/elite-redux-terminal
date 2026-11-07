@@ -10,7 +10,7 @@ test("data/gameData.json existe e o nome velho com versão sumiu", () => {
 });
 
 test("nenhum script ou teste lê gameData_<versão>.json", () => {
-  for (const dir of ["scripts", "tests/unit", "scripts/estudo"]) {
+  for (const dir of ["scripts", "tests/unit"]) {
     for (const f of readdirSync(dir).filter((n) => /\.(ps1|mjs)$/.test(n) && n !== "origem_dado_cru.test.mjs")) {
       assert.doesNotMatch(readFileSync(`${dir}/${f}`, "utf8"), /gameData_\d+\.json/, `${dir}/${f}`);
     }
