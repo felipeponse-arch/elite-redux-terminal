@@ -1281,7 +1281,7 @@
     if (gAtq && atq.it && atq.it.recuar && !capa) soma("recuar", atq.it.recuar * itemAtivoDuelo(atq, def, gDef ? gDef.contato : undefined), false); // King's Rock
     if (gDef) atq.ef.statusDefesa.forEach(function (a) {
       if (a.filtro.especial && gDef.cat !== "E") return;
-      var contatoDeVerdade = gDef.contato && !(def.it && def.it.semEfeitoContato); // Protective Pads
+      var contatoDeVerdade = gDef.contato; // Protective Pads/Luva já saíram de g.contato (IsMoveMakingContact, só no atacante; Klutz anula)
       a.st.forEach(function (s) { soma(s, contatoDeVerdade ? a.pContato : a.pOutro, a.ignoraGenero); });
     });
     var out = {};
@@ -2526,7 +2526,7 @@
       var hp = u.stats[0], perde = 0, ganha = 0;
       var it = u.it || itemDoDuelo("", null), itO = outro.it || itemDoDuelo("", null);
       var ativo = itemAtivoDuelo(u, outro, g ? g.contato : undefined), ativoO = itemAtivoDuelo(outro, u, g ? g.contato : undefined);
-      var contato = g && g.contato && !it.semEfeitoContato; // Protective Pads
+      var contato = g && g.contato; // Protective Pads/Luva já saíram de g.contato (só no atacante; Klutz anula)
       // Dano que de fato entra (não passa do HP do alvo) e a parte dos golpes ANTES do
       // nocaute: recuo, Life Orb e custo do golpe que derruba não mudam o resultado.
       var golpesAteDerrubar = golpesNecessariosDuelo(outro.stats[0], ataque);

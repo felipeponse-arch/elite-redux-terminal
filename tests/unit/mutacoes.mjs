@@ -3011,6 +3011,27 @@ export const MUTACOES = [
     para: "var contato = temContatoDuelo(m) && !u.ef.semContato;",
   },
   {
+    id: "habilidades-klutz-nao-anula-item-de-contato",
+    descricao: "a Klutz deixa de anular Protective Pads/Punching Glove (o item continuaria tirando o contato)",
+    arquivo: "duelo.js",
+    de: "var itemTiraContato = u.it && !u.ef.klutz && (",
+    para: "var itemTiraContato = u.it && (",
+  },
+  {
+    id: "habilidades-pads-checado-no-balanco",
+    descricao: "o balanço volta a olhar o Protective Pads do dono do golpe sem a Klutz (reação de contato some com Klutz)",
+    arquivo: "duelo.js",
+    de: "var contato = g && g.contato; // Protective Pads/Luva",
+    para: "var contato = g && g.contato && !it.semEfeitoContato; // Protective Pads/Luva",
+  },
+  {
+    id: "habilidades-pads-checado-no-status-de-defesa",
+    descricao: "o status de defesa por contato volta a olhar o Protective Pads sem a Klutz",
+    arquivo: "duelo.js",
+    de: "var contatoDeVerdade = gDef.contato; // Protective Pads/Luva",
+    para: "var contatoDeVerdade = gDef.contato && !(def.it && def.it.semEfeitoContato); // Protective Pads/Luva",
+  },
+  {
     id: "habilidades-giant-wings-sem-texto",
     descricao: "o texto \"Boosts the power of wing, wind or air-based moves by 1.3x\" da Giant Wings deixa de valer",
     arquivo: "duelo.js",

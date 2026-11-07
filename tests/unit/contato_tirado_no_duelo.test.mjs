@@ -73,3 +73,46 @@ test("Long Reach + Juggernaut: mantém o +20% Def em Mach Punch, mas não sofre 
   assert.ok(R.danoNoDuelo(lrJ, rough, NIVEL).melhor.dano > R.danoNoDuelo(lr, rough, NIVEL).melhor.dano, "Juggernaut soma Def mesmo com Long Reach");
   assert.notDeepEqual(duelo(forcar(lrJ, true), rough), duelo(lrJ, rough), "sem Long Reach o Rough Skin cobraria");
 });
+
+// Ticket mecanica-2026-10-22/04: o Protective Pads vale só no ATACANTE (IsMoveMakingContact checa battlerAtk); o item do alvo não muda nada.
+test("Protective Pads no atacante: golpe de contato sai sem contato, sem Rough Skin/Rocky Helmet e sem Tough Claws", () => {
+  const pads = iso("Garchomp", ["Tough Claws"], ["Body Slam"], "Protective Pads");
+  const sem = iso("Garchomp", ["Tough Claws"], ["Body Slam"]);
+  assert.equal(pads.golpesProntos[0].contato, false);
+  assert.equal(sem.golpesProntos[0].contato, true);
+  const rough = iso("Magikarp", ["Rough Skin"], ["Tackle"]), capacete = iso("Magikarp", [], ["Tackle"], "Rocky Helmet");
+  for (const alvo of [rough, capacete]) {
+    igual(duelo(pads, alvo), duelo(semContatoForcado(pads), alvo));
+    assert.notDeepEqual(duelo(pads, alvo), duelo(forcar(pads, true), alvo), "com contato a reação cobraria");
+  }
+  assert.ok(R.danoNoDuelo(sem, rough, NIVEL).melhor.dano > R.danoNoDuelo(pads, rough, NIVEL).melhor.dano, "Tough Claws x1,3 some com Pads");
+});
+
+test("Protective Pads no alvo não muda nada: o atacante segue com contato e leva a reação", () => {
+  const rough = iso("Magikarp", ["Rough Skin"], ["Tackle"]), roughPads = iso("Magikarp", ["Rough Skin"], ["Tackle"], "Protective Pads");
+  const atq = iso("Garchomp", [], ["Body Slam"]);
+  igual(duelo(atq, roughPads), duelo(atq, rough));
+});
+
+test("Protective Pads + Juggernaut: o bônus lê o contato cru e fica (contatoBruto), mas as reações não pegam", () => {
+  const rough = iso("Magikarp", ["Rough Skin"], ["Tackle"]);
+  const pj = iso("Conkeldurr", ["Juggernaut"], ["Mach Punch"], "Protective Pads");
+  const j = iso("Conkeldurr", ["Juggernaut"], ["Mach Punch"]);
+  assert.equal(pj.golpesProntos[0].contato, false);
+  assert.equal(pj.golpesProntos[0].contatoBruto, true);
+  assert.equal(R.danoNoDuelo(pj, rough, NIVEL).melhor.dano, R.danoNoDuelo(j, rough, NIVEL).melhor.dano, "mesmo dano: Juggernaut mantido");
+  igual(duelo(pj, rough), duelo(semContatoForcado(pj), rough));
+});
+
+test("Klutz anula Protective Pads e Punching Glove: o contato volta e a reação cobra", () => {
+  const rough = iso("Magikarp", ["Rough Skin"], ["Tackle"]), estatica = iso("Magikarp", ["Static"], ["Tackle"]);
+  const pads = iso("Garchomp", ["Klutz"], ["Body Slam"], "Protective Pads");
+  const luva = iso("Garchomp", ["Klutz"], ["Mach Punch"], "Punching Glove");
+  for (const u of [pads, luva]) {
+    assert.equal(u.golpesProntos[0].contato, true, "Klutz: item sem efeito");
+    for (const alvo of [rough, estatica]) {
+      igual(duelo(u, alvo), duelo(forcar(u, true), alvo));
+      assert.notDeepEqual(duelo(u, alvo), duelo(semContatoForcado(u), alvo));
+    }
+  }
+});
