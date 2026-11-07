@@ -10,7 +10,7 @@ const declara = (texto, id) => new RegExp("\\b(var|let|const|function)\\s+" + id
 test("'NOME acima' num comentário não aponta para algo declarado em OUTRO arquivo de src", () => {
   const arquivos = [];
   for (const dir of ["src/regras", "src/ui"]) {
-    for (const nome of readdirSync(dir).filter((f) => f.endsWith(".js"))) arquivos.push({ caminho: dir + "/" + nome, texto: lerComMutacao(dir + "/" + nome, nome) });
+    for (const nome of readdirSync(dir).filter((f) => f.endsWith(".js"))) arquivos.push({ caminho: dir + "/" + nome, texto: lerComMutacao(dir + "/" + nome, dir === "src/ui" ? "ui/" + nome : nome) });
   }
   const problemas = [];
   arquivos.forEach(({ caminho, texto }) => {

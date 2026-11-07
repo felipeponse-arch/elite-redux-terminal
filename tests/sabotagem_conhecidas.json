@@ -1,7 +1,9 @@
 {
- "_aviso": "Sabotagens que JA nao eram pegas por asserção na branch integracao-2026-10-28 antes da refatoração de 06/11/2026 (conferido sem nenhuma mudança). Aparecem como DIVIDA no relatório e não reprovam a rodada. Consertar = escrever o teste que falha com asserção; ao consertar, tirar o id daqui.",
+ "_aviso": "Sabotagens que JA nao eram pegas por asserção na branch integracao-2026-10-28 antes da refatoração de 06/11/2026 (conferido sem nenhuma mudança). Aparecem como DIVIDA no relatório e não reprovam a rodada. Consertar = escrever o teste que falha com asserção; ao consertar, tirar o id daqui. Acrescentados em 06/11 (fim do dia): gerador-ev-sem-formato (caminho do EV só era testado pelo teste da IA, que saiu) e duelo-sem-seguimento-de-categoria (a sabotagem quebra por TypeError, sem asserção; escrever teste que falhe com asserção).",
  "ids": [
   "loteB-estrategia-sem-armador",
-  "golpe-hammer-arm-sem-queda"
+  "golpe-hammer-arm-sem-queda",
+  "gerador-ev-sem-formato",
+  "duelo-sem-seguimento-de-categoria"
  ]
 }
