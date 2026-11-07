@@ -99,7 +99,9 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sync.js** - Sincronização entre aparelhos (capability db) e os avisos de sync.
   aplicarSaveRemoto:45, conflitoDeProgresso:61, remotoComSomaErrada:88, pushToSync:96, showSyncBanner:105, syncBannerOffset:119, atualizarTituloDoSubtitulo:139, setSyncStatusIndicator:143, scheduleSyncRetry:162, lerSaveLocal:174, connectSync:179
 - **time.js** - Aba Time: cards dos membros, troca com a caixa, times salvos e "Novo jogo".
-  papelChipsHtml:10, golpesChipsHtml:17, carimboEtapaHtml:26, renderTeam:34, swapPanelHtml:152, telasDeElenco:178, rosterMove:186, teamsMatch:207, htmlDoCartaoDoTimeSalvo:216, renderSavedTeams:235, carregarTimeSalvo:259, excluirTimeSalvo:287, comecarRenomearTimeSalvo:305, salvarNomeTimeSalvo:311, zerarRun:370
+  carimboEtapaHtml:9, renderTeam:17, swapPanelHtml:115, telasDeElenco:141, rosterMove:149, teamsMatch:170, htmlDoCartaoDoTimeSalvo:179, renderSavedTeams:198, carregarTimeSalvo:222, excluirTimeSalvo:250, comecarRenomearTimeSalvo:268, salvarNomeTimeSalvo:274, zerarRun:333
+- **time_build.js** - Painel da build no cartão do Meu Time (fatia 2b, 07/11/2026). Só desenha dados que já existem:
+  categoriaDoGolpe:11, evsDaBuild:16, evsBarrasHtml:22, golpesBuildHtml:30, habilidadesBuildHtml:43, itemBuildHtml:53, avisoEnxutoHtml:64, painelDaBuildHtml:72, semBuildHtml:85, papelChipsHtml:89
 - **tipos.js** - Aba Tipos: tabela de efetividade, velocidades e compêndio de papéis.
   renderTypeMatrix:9, renderSpeedTiers:35, wireSpeedTiersOnce:63, computeRoleCompendium:91, renderRoleCompendium:113
 

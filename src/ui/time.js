@@ -5,24 +5,7 @@
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   // ---------------- team roster rendering ----------------
-  // Fatia 2 (07/11/2026): cartão do membro. Papel, golpes na cor do tipo e carimbo da Etapa são camadas
-  // de leitura rápida; o set completo (showdown-block) continua no cartão.
-  function papelChipsHtml(sp) {
-    var role = SPECIES_ROLE[sp.sname];
-    var partes = role ? (role.roles || []).map(function (r) { return ROLE_LABEL_PT[r] || r; }) : [];
-    if (role && role.split) partes.push(SPLIT_LABEL_PT[role.split] || role.split);
-    return partes.length ? '<div class="cm-papeis" title="Papel calculado por ataque, bulk e velocidade (não avalia sinergia com o time)">' +
-      partes.map(function (p) { return '<span class="cm-papel">' + escapeHtml(p) + '</span>'; }).join("") + '</div>' : "";
-  }
-  function golpesChipsHtml(build) {
-    var golpes = (build && build.moves || []).filter(Boolean);
-    if (!golpes.length) return "";
-    return '<ul class="cm-golpes" aria-label="Golpes da build">' + golpes.map(function (n) {
-      var m = MOVE_BY_NAME[stripNote(n)];
-      var tipo = m ? TYPES[m[1]] : "";
-      return '<li class="cm-golpe' + (tipo ? ' tipo-' + tipo : '') + '"' + (tipo ? ' title="' + tipo + '"' : '') + '>' + escapeHtml(stripNote(n)) + '</li>';
-    }).join("") + '</ul>';
-  }
+  // Fatia 2 (07/11/2026): carimbo da Etapa; o painel da build mora em time_build.js.
   function carimboEtapaHtml() {
     var idx = state.settings.milestone;
     if (!idx || idx < 1 || typeof insigniaSvgHtml !== "function") return "";
@@ -44,35 +27,16 @@
         var abiNames = habilidadesEscolhiveis(sp).join(", ");
         var innNames = sp.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ");
         var build = effectiveBuild(sp);
-        var buildHtml = build ? (
-          '<div class="ts-build">' +
-            golpesChipsHtml(build) +
-            '<div class="ts-build-head"><span class="ts-build-label">' + rotuloDaBuild(build) + '</span>' + seloDaBuildHtml(build) +
-              '<button class="ts-build-copy" data-x="' + sp.x + '" type="button" title="Copiar este set">copiar</button></div>' +
-            '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
-            planoDaBuildHtml(build) +
-            itemDescHtml(build.item) +
-            megaModeBuildNoteHtml(sp, build) +
-            buildContextNotesHtml(sp, build) +
-            buildSynergyHtml(sp, build) +
-            // Nota da curada (fonte + observações do autor): no card fica em 3
-            // linhas, com o texto inteiro no title; completa na ficha
-            // (redesenho 2026-09-24 - ocupava metade do card).
-            (build.note ? '<div class="ts-nota-fonte" title="' + escapeHtml(build.note) + '">' + buildNoteHtml(escapeHtml(build.note)) + '</div>' : "") +
-          '</div>'
-        ) : (
-          // Sem build salva: o texto leva para a Dex (o app não gera build por IA; o Modo Motor monta o time com as builds).
-          '<div class="ts-build ts-build-empty">' +
-            '<p style="margin:0 0 8px;">Sem build salva ainda - monte na Dex ou use "Montar meu melhor time".</p>' +
-          '</div>'
-        );
+        var buildHtml = build ? painelDaBuildHtml(sp, build) : semBuildHtml();
         var swapOpen = teamSwapIdx === i;
         slots.push('<div class="team-slot cartao-membro tipo-' + names[0] + (names[1] ? ' tipo2-' + names[1] : '') + (swapOpen ? ' swapping' : '') + '">' + carimboEtapaHtml() + '<div>' +
           '<div class="ts-head goto-species" tabindex="0" role="button" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 96) +
           '<div><div class="ts-name">' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + megaLockedTagHtml(sp) + '</div>' +
-          '<div class="ts-types">' + names.map(function (n) { return typePill(n, true); }).join("") + '</div>' + papelChipsHtml(sp) + '</div></div>' +
-          '<div class="ts-abis"><b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + otherFormsHtml(sp) + '</div>' +
+          '<div class="ts-types">' + names.map(function (n) { return typePill(n, true); }).join("") + '</div></div></div>' +
+          papelChipsHtml(sp) +
+          '<div class="ts-abis">' + (build ? otherFormsHtml(sp).replace(/^<br>/, "") : '<b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + otherFormsHtml(sp)) + '</div>' +
           buildHtml +
+          '<div class="build-sugerida" id="build-sugerida-' + sp.x + '" aria-live="polite" hidden></div>' +
           buildHistoryHtml(sp) +
           (swapOpen ? swapPanelHtml(i, sp) : "") +
           '</div><div class="ts-actions">' +
@@ -131,10 +95,9 @@
         var idx = parseInt(btn.dataset.idx, 10);
         teamSwapIdx = (teamSwapIdx === idx) ? null : idx; // estado de tela (painel aberto), nada a gravar
         renderTeam();
-      } else if (btn.classList.contains("ts-build-copy")) {
-        var spCopia = getSpeciesByX(x);
-        copyText(showdownSet(spCopia, effectiveBuild(spCopia)), null, "");
-        flashToast("Set do " + spCopia.n + " copiado (formato Showdown)");
+      } else if (btn.classList.contains("ts-montar-build")) {
+        var montar = document.getElementById("motor-montar"); // a ação que já existe (Modo Motor)
+        if (montar) montar.click();
       } else if (btn.classList.contains("swap-pick")) {
         rosterMove(x, state.team[parseInt(btn.dataset.idx, 10)]); // a ação redesenha o time
       } else if (btn.id === "ts-goto-dex") {

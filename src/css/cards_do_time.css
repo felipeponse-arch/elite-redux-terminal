@@ -233,21 +233,8 @@
   color: var(--text);
 }
 .ts-build-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
-/* .ts-ai-generate-btn precisa de classe própria (não pode reusar
-   .ts-build-copy) - o card do Meu Time já tem um listener delegado que
-   escuta TODO .ts-build-copy dentro de #team-slots pra copiar o set;
-   usar a mesma classe faria o botão de gerar build acionar o copiador
-   por engano. Mesma aparência visual, ação diferente.
-   Achado em auditoria de frontend (2026-09-13): .ts-build-copy (ts- =
-   team-slot) tinha virado o nome genérico de fato pra este estilo,
-   reusado em 7+ botões fora do Time (editor "Meu build", anotações,
-   arquétipo, estratégia de time, builds de referência) - todos com seu
-   próprio listener por id, então não colidem HOJE, mas um futuro
-   listener delegado em .ts-build-copy escopado a `document` (uma
-   "simplificação" natural) dispararia em todos eles por engano. Só o
-   botão real de copiar dentro de #team-slots usa .ts-build-copy agora;
-   todo o resto usa .text-action-btn, puramente visual. */
-.ts-build-copy, .ts-ai-generate-btn, .text-action-btn {
+/* Botões de texto (o de copiar o set saiu do cartão do Meu Time em 07/11/2026). */
+.ts-ai-generate-btn, .text-action-btn {
   background: none;
   border: none;
   color: var(--badge-accent2);

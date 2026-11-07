@@ -136,11 +136,12 @@ async function section05() {
   // reading the assertion and assuming it checked the right element.
   const ttarSlot = [...document.querySelectorAll(".team-slot")].find(s => s.textContent.indexOf("Tyranitar Mega Redux") !== -1);
   const teamBuildLabel = ttarSlot && ttarSlot.querySelector(".ts-build-label");
-  const teamBuildText = ttarSlot && ttarSlot.querySelector(".showdown-block");
+  // 07/11/2026: o cartão do time não mostra mais o texto Showdown; os EVs saem em barras (.bp-ev).
+  const teamBuildText = ttarSlot && ttarSlot.querySelector(".bp-ev[data-stat=\"Spe\"] .bp-ev-n");
   check("a build saved in the Dex shows up on the Team tab, labeled as mine",
     teamBuildLabel && teamBuildLabel.textContent === "Meu build", teamBuildLabel && teamBuildLabel.textContent);
   check("EVs render as a formatted string on the Team tab (not the raw array's default toString)",
-    teamBuildText && teamBuildText.textContent.indexOf("252 Spe") !== -1 && teamBuildText.textContent.indexOf(",") === -1,
+    teamBuildText && teamBuildText.textContent === "252",
     teamBuildText && teamBuildText.textContent);
   document.querySelector('.tab-btn[data-tab="dex"]').click();
   await wait(30);
