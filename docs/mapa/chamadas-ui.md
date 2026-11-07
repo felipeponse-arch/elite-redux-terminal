@@ -118,15 +118,15 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - rotuloDaBuild:170 - chama: ESTILO_ROTULO (plano_build.js:20), SUGESTAO_ROTULO (sugestao_do_motor.js:11) | chamado por: renderTeam (time.js:8)
 
 ## ui/modo_motor.js
-- modoMotorAquecer:39 - chama: contextoDoMotor (time_pelo_motor.js:140), motorAquecerBuildsEmPassos (time_pelo_motor.js:228) | chamado por: renderTeamStrategy (arquetipo.js:283)
+- modoMotorAquecer:39 - chama: contextoDoMotor (time_pelo_motor.js:96), motorAquecerBuildsEmPassos (time_pelo_motor.js:184) | chamado por: renderTeamStrategy (arquetipo.js:283)
 - modoMotorBotaoHtml:163 - chamado por: archetypeCardHtml (arquetipo.js:85)
-- modoMotorCache:18 - chama: criarCacheDoMotor (time_pelo_motor.js:64)
+- modoMotorCache:18 - chama: criarCacheDoMotor (time_pelo_motor.js:56)
 - modoMotorCapturados:25 - chama: getSpeciesByX (dados_base.js:78), xsDoJogador (liberado_na_run.js:38), state (nucleo.js:8)
 - modoMotorChave:20 - chama: megaMode (formas_mega.js:82), capOuPadrao (level_cap.js:61), levelCapMode (level_cap.js:16), xsDoJogador (liberado_na_run.js:38), state (nucleo.js:8)
 - modoMotorFavoritosHtml:151 - chamado por: archetypeCardHtml (arquetipo.js:85)
 - modoMotorFavoritosValidos:30 - chama: state (nucleo.js:8)
 - modoMotorFicarComVariante:118 - chama: getSpeciesByX (dados_base.js:78), SUGESTAO_ROTULO (sugestao_do_motor.js:11), gravarSugestoesDoMotor (sugestao_do_motor.js:61), planoDeGravarSugestoes (sugestao_do_motor.js:39), applyRecommendedTeam (arquetipo.js:143), +4
-- modoMotorMontar:67 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:185), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:74), contextoDoMotor (time_pelo_motor.js:140), +3
+- modoMotorMontar:67 - chama: getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:185), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:74), contextoDoMotor (time_pelo_motor.js:96), +3
 - modoMotorResultadoHtml:223 - chamado por: renderTeamStrategy (arquetipo.js:283)
 - modoMotorRodapeHtml:180 - chama: SUGESTAO_ROTULO (sugestao_do_motor.js:11)
 
@@ -150,7 +150,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - setActiveBuildIndex:104 - chama: getBuildList (evolucao.js:14)
 - setOrReplaceActiveBuild:94 - chama: trocarBuildAtivaNaLista (lista_de_builds.js:11) | chamado por: initBosses (aba_chefoes.js:33), processarRevisoes (revisao_automatica.js:23)
 - showStorageBanner:166 - chamado por: remotoComSomaErrada (sync.js:88)
-- state:8 - chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:190), itensEmUsoComQuem (builds.js:141), teamItemsInUse (builds.js:85), teamMovesInUse (builds.js:111), +99
+- state:8 - chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:190), itensEmUsoComQuem (builds.js:141), teamItemsInUse (builds.js:85), teamMovesInUse (builds.js:111), +98
 - telasDeBuild:237 - chamado por: processarRevisoes (revisao_automatica.js:23)
 
 ## ui/pipeline_tela.js
@@ -159,7 +159,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - pipelineDesenharFicha:113 - chamado por: wireMyBuildEditor (editor_build.js:416)
 - pipelineDesenharTime:125 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8) | chamado por: renderTeam (time.js:8)
 - pipelineGolpeHtml:71 - chama: MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9)
-- pipelineResultado:14 - chama: getCurrentCap (level_cap.js:49), candidatosDeBuild (pipeline_build.js:530), state (nucleo.js:8)
+- pipelineResultado:14 - chama: getCurrentCap (level_cap.js:49), candidatosDeBuild (pipeline_build.js:505), state (nucleo.js:8)
 - pipelineSeletorDeAlvoHtml:32 - chama: getRemainingBossEntries (chefoes.js:63)
 
 ## ui/progresso.js
@@ -170,7 +170,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderRunStatus:9 - chama: state (nucleo.js:8)
 
 ## ui/quem_resolve.js
-- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:653)
+- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:628)
 - quemResolveCardHtml:83 - chama: DIFF_TO_BOSSKEY (chefoes.js:25), DIFF_LABELS (aba_chefoes.js:233), state (nucleo.js:8) | chamado por: renderBossDetail (aba_chefoes.js:527)
 - quemResolveChave:17 - chama: getCurrentCap (level_cap.js:49), state (nucleo.js:8)
 - quemResolveItemHtml:43 - chama: pipelineCandidatoHtml (pipeline_tela.js:77)

@@ -25,14 +25,6 @@
   var MOTOR_AMOSTRA_DE_LUTAS = ["Roxanne 1", "Brawly 1", "Wattson 1", "Flannery 1", "Norman 1", "Shelly Weather Institute",
     "Archie Mt Pyre", "Tate And Liza 1", "Archie", "Drake"];
   var MOTOR_AMOSTRA_MINIMA = 3;
-  // Todas as lutas (todas-as-lutas/02, 21/10/2026): além dos 29 chefões o juiz pesa as lutas COMUNS mais perigosas de cada etapa
-  // (data/lutas_comuns_run.json, pré-calculado pelo rank: ameaça medida, nada de simular as 538 lutas ao vivo), com a MESMA fatia do
-  // rank v2 (chefões 60%, comuns 40%; a fatia vem do próprio arquivo). Na busca entram só as MOTOR_COMUNS_NA_AMOSTRA mais perigosas
-  // de cada etapa que falta (espaçadas: a primeira, uma do meio e a última etapa que falta); a conferência final simula as
-  // MOTOR_COMUNS_NA_CONFERENCIA mais perigosas de cada etapa. Medido: cada luta custa ~11 ms por time simulado, e a busca avalia ~40 times
-  // por variante; 1 comum por etapa (7 lutas) e 10 na conferência levaram a montagem de 6,8 s para 15,8 s, acima dos 10 s do ticket.
-  var MOTOR_COMUNS_NA_AMOSTRA = 3;
-  var MOTOR_COMUNS_NA_CONFERENCIA = 3;
   // Os objetivos de seleção. Todos leem os MESMOS números da luta completa (venceu, derrubados, total, vivos, pontos); só mudam
   // o que premiam. A régua comum (pontos médios, vitórias, cobertura) é a mesma nas variantes e vem em `metricas`.
   var MOTOR_OBJETIVOS = {
@@ -85,39 +77,6 @@
     return { nome: nome, etapa: etapa, nivel: nivel, dupla: dupla, clima: climaDoChefao, foes: foes, inicio: buffs.length ? inicioDaLutaComBuffs(buffs) : null, buffs: buffs,
       chave: [nome, nivel, DIFF_TO_BOSSKEY[state.settings.difficulty] || "party", dupla ? "d" : "s", buffs.slice().sort().join(","), JSON.stringify(campo), clima].join("|") };
   }
-  // Luta COMUM da run (dado pré-calculado do rank): mesma montagem do juiz, sem buff de ginásio nem regra de campo (treinador comum não tem).
-  function motorMontarLutaComum(c, tier) {
-    var tm = LUTAS_COMUNS_RUN.times[c.nome] || {}, party = (tier === "insane" && tm.insane && tm.insane.length ? tm.insane : tm.party) || [];
-    var nivel = motorNivelDaEtapa(c.etapa), clima = climaDoTimeDoChefao(party), dupla = !!c.db;
-    var foes = party.map(function (m) { return foeDeDuelo(m, nivel, clima); }).filter(Boolean);
-    if (!foes.length) return null;
-    return { nome: c.nome, etapa: c.etapa, nivel: nivel, dupla: dupla, clima: clima, foes: foes, inicio: null, buffs: [], comum: true, peso: c.peso,
-      chave: [c.nome, nivel, tier, dupla ? "d" : "s", "", "null", clima].join("|") };
-  }
-  // Até `n` itens espaçados por igual (o primeiro, o último e os do meio), na ordem dada.
-  function motorEspacadas(lista, n) {
-    if (lista.length <= n) return lista;
-    if (n === 1) return [lista[Math.floor((lista.length - 1) / 2)]];
-    var out = [];
-    for (var i = 0; i < n; i++) out.push(lista[Math.round(i * (lista.length - 1) / (n - 1))]);
-    return out;
-  }
-  // As lutas comuns do contexto, na dificuldade da run: todas as selecionadas, as que ainda faltam e a amostra da busca (as mais perigosas de
-  // cada etapa que falta). Sem o arquivo (ou sem lutas na dificuldade) a lista é vazia e a fatia vira 100% chefões.
-  function motorLutasComunsDoContexto(etapa) {
-    var tier = DIFF_TO_BOSSKEY[state.settings.difficulty] || "party";
-    var dado = typeof LUTAS_COMUNS_RUN !== "undefined" && LUTAS_COMUNS_RUN ? LUTAS_COMUNS_RUN : null;
-    var lista = dado && dado.lutas && dado.lutas[tier] ? dado.lutas[tier] : [];
-    var todas = lista.map(function (c) { return motorMontarLutaComum(c, tier); }).filter(Boolean);
-    var restantes = todas.filter(function (l) { return l.etapa >= etapa; }), vistas = {}, amostra = [], conferencia = [];
-    var ordem = function (a, b) { return a.etapa - b.etapa || (a.nome < b.nome ? -1 : 1); };
-    restantes.slice().sort(function (a, b) { return b.peso - a.peso || (a.nome < b.nome ? -1 : 1); }).forEach(function (l) {
-      vistas[l.etapa] = (vistas[l.etapa] || 0) + 1;
-      if (vistas[l.etapa] === 1) amostra.push(l); // a mais perigosa de cada etapa; abaixo, afinada para MOTOR_COMUNS_NA_AMOSTRA
-      if (vistas[l.etapa] <= MOTOR_COMUNS_NA_CONFERENCIA) conferencia.push(l);
-    });
-    return { todas: todas, restantes: restantes, amostra: motorEspacadas(amostra.sort(ordem), MOTOR_COMUNS_NA_AMOSTRA), conferencia: conferencia.sort(ordem), fatia: dado && dado.fatia !== undefined ? dado.fatia : FATIA_DOS_CHEFOES };
-  }
   // As lutas do contexto: todas as 29 (conferência final) e a amostra fixa (busca), função só da etapa.
   function motorLutasDoContexto(etapa) {
     var todas = [], porNome = {};
@@ -127,14 +86,11 @@
     // Poucas lutas sobrando (fim da run): completa com as restantes, na ordem da run, até o mínimo.
     restantes.forEach(function (l) { if (amostra.length < MOTOR_AMOSTRA_MINIMA && amostra.indexOf(l) === -1) amostra.push(l); });
     if (!amostra.length) amostra = todas.slice(-MOTOR_AMOSTRA_MINIMA);
-    return { todas: todas, restantes: restantes, amostra: amostra, comuns: motorLutasComunsDoContexto(etapa) };
+    return { todas: todas, restantes: restantes, amostra: amostra };
   }
-  // O valor do objetivo na régua do rank: fatia dos chefões (amostra fixa) + o resto nas comuns mais perigosas (amostra de comuns).
-  // Sem comuns na amostra é só o valor dos chefões. O bônus de sinergia, que não depende das lutas, entra uma vez só (fatia + resto = 1).
+  // O valor do objetivo na régua do rank: a amostra fixa de chefões (o rank oficial é só de chefões).
   function motorValorDoObjetivo(ctx, obj, time) {
-    var vB = obj.valor(motorAvaliar(ctx, time, ctx.lutas.amostra), time.length, time, ctx), c = ctx.lutas.comuns;
-    if (!c || !c.amostra.length) return vB;
-    return c.fatia * vB + (1 - c.fatia) * obj.valor(motorAvaliar(ctx, time, c.amostra), time.length, time, ctx);
+    return obj.valor(motorAvaliar(ctx, time, ctx.lutas.amostra), time.length, time, ctx);
   }
   // Contexto da run lido do state (adaptador): quem chama pode trocar qualquer campo.
   function contextoDoMotor(troca) {
@@ -446,11 +402,8 @@
       var rsAmostra = motorAvaliar(ctx, busca.time, ctx.lutas.amostra), rsTodas = motorAvaliar(ctx, busca.time, ctx.lutas.todas);
       var idxRest = ctx.lutas.todas.map(function (l, i) { return l.etapa >= ctx.etapa ? i : -1; }).filter(function (i) { return i >= 0; });
       var rsRest = idxRest.map(function (i) { return rsTodas[i]; }), lutasRest = idxRest.map(function (i) { return ctx.lutas.todas[i]; });
-      var comuns = ctx.lutas.comuns, comunsRest = comuns ? comuns.conferencia : [];
       var metricas = { objetivo: motorArred(motorValorDoObjetivo(ctx, obj, busca.time), 4), amostra: motorMetricas(rsAmostra, ctx.lutas.amostra),
         completo: motorMetricas(rsTodas, ctx.lutas.todas), restantes: motorMetricas(rsRest, lutasRest) };
-      // As comuns mais perigosas de cada etapa que falta (a conferência da fatia de 40%): quantas o time vence e quais perde.
-      if (comunsRest.length) metricas.comuns = motorMetricas(motorAvaliar(ctx, busca.time, comunsRest), comunsRest);
       var v = { chave: chave, objetivo: { nome: obj.nome, descricao: obj.descricao },
         membros: busca.time.map(function (c) { return { sname: c.sname, nome: c.nome, x: c.x, base: c.base.sname, travado: c.travado, origem: c.origem, build: c.build, papeis: [] }; }),
         metricas: metricas, avisos: [], avaliacoes: busca.avaliacoes, itensFechados: itensFechados, tempoItensMs: tItensMs };

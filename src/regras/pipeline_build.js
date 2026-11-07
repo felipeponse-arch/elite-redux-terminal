@@ -64,9 +64,6 @@
     return x && x.sname ? x : null;
   }
 
-  // APROXIMAÇÃO declarada do rank (decisão do usuário, 22/10/2026): o rank mede todas as comuns (~30 por etapa) com o time inteiro; aqui entram só as 3 mais
-  // perigosas de cada etapa (peso de ameaça), e a parte dos chefões é o PIOR chefão, não a média ponderada do rank. Custo ~25 ms por alvo por candidato.
-  var PIPELINE_COMUNS_POR_ETAPA = 3;
   // ---- alvo ----
   // Devolve { info, foes, clima, nivel } ou { info: null, foes: [] } (com o motivo em `aviso`).
   // `foes` são os Pokémon medidos: o que foi pedido, ou o primeiro e o ás (o último) do chefão.
@@ -92,23 +89,8 @@
         }
       });
       if (!saida.foes.length) { saida.aviso = "sem chefão no dado para o campo da run"; return saida; }
-      // Lutas comuns (todas-as-lutas/03, 22/10/2026): depois dos chefões entram o ás das PIPELINE_COMUNS_POR_ETAPA comuns mais perigosas de
-      // cada etapa (data/lutas_comuns_run.json, a mesma lista do rank). nChefoes separa os dois grupos; a fatia vem do próprio arquivo.
-      saida.nChefoes = saida.foes.length; saida.pesosComuns = []; saida.fatia = 1;
-      var dadoComum = typeof LUTAS_COMUNS_RUN !== "undefined" && LUTAS_COMUNS_RUN ? LUTAS_COMUNS_RUN : null;
-      var listaComum = dadoComum && dadoComum.lutas ? (dadoComum.lutas[DIFF_TO_BOSSKEY[ctx.settings.difficulty] || "party"] || []) : [];
-      var porEtapa = {};
-      listaComum.slice().sort(function (a, b) { return b.peso - a.peso || (a.nome < b.nome ? -1 : 1); }).forEach(function (c) {
-        porEtapa[c.etapa] = (porEtapa[c.etapa] || 0) + 1;
-        if (porEtapa[c.etapa] > PIPELINE_COMUNS_POR_ETAPA) return;
-        var tm = dadoComum.times[c.nome] || {}, tier = DIFF_TO_BOSSKEY[ctx.settings.difficulty] || "party", pt = (tm[tier] && tm[tier].length ? tm[tier] : tm.party) || [];
-        for (var k = pt.length - 1; k >= 0; k--) {
-          var fc = foeDeDuelo(pt[k], nivel, null);
-          if (fc) { saida.foes.push(fc); saida.pesosComuns.push(c.peso); return; }
-        }
-      });
-      if (saida.pesosComuns.length) saida.fatia = dadoComum.fatia !== undefined ? dadoComum.fatia : FATIA_DOS_CHEFOES;
-      saida.info = { chefao: null, indice: null, pokemon: saida.foes.map(function (f) { return f.nome; }), origem: "campo", lutas: saida.nChefoes, comuns: saida.pesosComuns.length };
+      saida.nChefoes = saida.foes.length;
+      saida.info = { chefao: null, indice: null, pokemon: saida.foes.map(function (f) { return f.nome; }), origem: "campo", lutas: saida.nChefoes };
       return saida;
     }
     var boss, indice = null, origem = "informado";
@@ -266,7 +248,7 @@
     Object.keys(tabela).forEach(function (nome) {
       var e = tabela[nome];
       if (!alvo.foes.length) { e.relativo = maiorProxy > 0 ? e.proxy / maiorProxy : 0; }
-      var ls = e.linhas.slice(0, alvo.nChefoes || e.linhas.length); // as comuns só entram na nota do conjunto (fracMedia), nunca no pior caso
+      var ls = e.linhas.slice(0, alvo.nChefoes || e.linhas.length);
       e.fracMin = alvo.foes.length ? Math.min.apply(null, ls.map(function (l) { return l.frac; })) : e.relativo;
       e.fracMax = alvo.foes.length ? Math.max.apply(null, ls.map(function (l) { return l.frac; })) : e.relativo; // bate em pelo menos um alvo
       e.tierMin = alvo.foes.length ? Math.min.apply(null, ls.map(pipelineTierDaLinha)) : 1;
@@ -291,7 +273,6 @@
         return melhor;
       });
       if (linhas.some(function (l) { return !l; })) return null;
-      var linhasComuns = linhas.slice(alvo.nChefoes || linhas.length);
       linhas = linhas.slice(0, alvo.nChefoes || linhas.length);
       var piorFrac = linhas[0];
       linhas.forEach(function (l) { if (l.frac < piorFrac.frac) piorFrac = l; });
@@ -305,12 +286,6 @@
       res.pior = piorFrac;
       res.tier = res.hitKill === 1 && res.baterPrimeiro ? 3 : res.hitKill === 2 && res.baterPrimeiro ? 2 : 1;
       res.fracMedia = piorFrac.frac;
-      // Fatia do rank (chefões 60%, comuns 40%): o pior chefão (como sempre) pesa a fatia; as comuns entram pela média ponderada pela ameaça.
-      if (linhasComuns.length) {
-        var sp = 0, sf = 0;
-        linhasComuns.forEach(function (l, i) { sp += alvo.pesosComuns[i]; sf += alvo.pesosComuns[i] * l.frac; });
-        res.fracMedia = alvo.fatia * piorFrac.frac + (1 - alvo.fatia) * (sp ? sf / sp : piorFrac.frac);
-      }
       // Garantido = mesmo na rolagem mínima (85%) o alvo cai no número de golpes anunciado. O ranking segue pela média.
       res.garantido = res.hitKill > 0 && linhas.every(function (l) {
         var minimo = l.frac / FAIXA_DE_ROLAGEM_PIPELINE.media * FAIXA_DE_ROLAGEM_PIPELINE.min;

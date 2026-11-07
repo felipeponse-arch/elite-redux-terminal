@@ -9,7 +9,7 @@ export function carimbarDerivado(arquivo, { origem = "data/carimbo_dados.json", 
 }
 
 // Derivados gerados pelo rank/extração que ainda não passaram pelo gerador carimbado (TK-24).
-export const PENDENTES_DO_GERADOR = ["species_rank.json", "lutas_comuns_run.json", "bosses.json", "rank_medicao.json"];
+export const PENDENTES_DO_GERADOR = ["species_rank.json", "bosses.json", "rank_medicao.json"];
 
 // Frescor: derivado cujo `dadosDe` é anterior à data do dado de origem está velho. Só olha entradas geradas (com dadosDe).
 export function avisosDeFrescor(reg, carimboDados) {
@@ -23,7 +23,7 @@ export function pendentesSemCarimbo(reg) {
   return PENDENTES_DO_GERADOR.filter((f) => !reg[f]).map((f) => `${f} sem carimbo em carimbo_derivados.json: rode o gerador antes de publicar`);
 }
 
-// Padrão do projeto para dado provisório (guarda_lutas_comuns): avisa sempre, barra só com ER_PUBLICAR=1.
+// Padrão do projeto para dado provisório (dado de rank provisório): avisa sempre, barra só com ER_PUBLICAR=1.
 export function problemasDeCarimbo(reg, carimboDados, publicar) {
   const avisos = [...avisosDeFrescor(reg, carimboDados), ...pendentesSemCarimbo(reg)];
   return { avisos, barra: publicar && avisos.length > 0 };

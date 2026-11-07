@@ -27,7 +27,6 @@ declare var state: any;
 declare var BOSSES: any[];
 /** Buffs de ginásio por líder (data/gym_skills.json). */
 declare var GYM_SKILLS: any;
-declare var LUTAS_COMUNS_RUN: any;
 /** Descrição de habilidade em português (data/ability_translations_pt.json), por id. */
 declare var ABILITY_PT: Record<string, string>;
 /** Descrição de item do próprio jogo (data/item_descriptions.json), por nome. */

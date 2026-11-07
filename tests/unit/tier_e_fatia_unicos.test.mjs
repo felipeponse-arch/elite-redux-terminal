@@ -24,12 +24,9 @@ test("chefoes.js e rank_da_run.js não repetem o mapa: os dois leem TIER_DA_DIFI
   assert.match(readFileSync(new URL("chefoes.js", raiz), "utf8"), /TIER_DA_DIFICULDADE/);
 });
 
-test("fatia 60/40: constante única FATIA_DOS_CHEFOES; Meu Time e pipeline caem nela sem fatia no dado", () => {
+test("fatia 60/40: constante única FATIA_DOS_CHEFOES; Meu Time e pipeline não têm 0.6 próprio", () => {
   const R = carregarRegras({ milestone: 2 });
   assert.equal(R.FATIA_DOS_CHEFOES, 0.6);
-  const { fatia: _f, ...semFatia } = R.LUTAS_COMUNS_RUN;
-  R.LUTAS_COMUNS_RUN = semFatia;
-  assert.equal(R.motorLutasComunsDoContexto(2).fatia, R.FATIA_DOS_CHEFOES);
   const script = readFileSync(new URL("../../scripts/rank_fatia.mjs", import.meta.url), "utf8");
   assert.doesNotMatch(script, /FATIA_DOS_CHEFOES\s*=\s*0\.6/);
   assert.doesNotMatch(readFileSync(new URL("../../src/regras/time_pelo_motor.js", import.meta.url), "utf8"), /0\.6/);

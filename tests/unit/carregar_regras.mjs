@@ -38,7 +38,7 @@ export function lerComMutacao(caminho, nome, env = process.env) {
 }
 // Onde mora o alvo de uma sabotagem pelo nome curto do catálogo; null = não existe (ou "@comportamento").
 export function caminhoDoAlvo(nome) {
-  for (const dir of ["src/regras", "src/ui", "src/css", "scripts", "scripts/estudo", "data"]) {
+  for (const dir of ["src/regras", "src/ui", "src/css", "scripts", "data"]) {
     if (existsSync(join(root, dir, nome))) return dir + "/" + nome;
   }
   return null;
@@ -64,7 +64,6 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
     MOVE_ROLES: lerJson("move_roles.json"),
     BOSSES: lerJson("bosses.json"),
     GYM_SKILLS: lerJson("gym_skills.json"),
-    LUTAS_COMUNS_RUN: lerJson("lutas_comuns_run.json"),
     MONO_DISP: lerJson("mono_disponibilidade.json"),
     MOVE_CATEGORIAS: lerJson("move_categorias.json"),
     ITENS_CONFIG: lerJson("itens_config.json"),
