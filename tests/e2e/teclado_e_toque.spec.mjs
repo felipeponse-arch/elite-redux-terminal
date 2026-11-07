@@ -38,7 +38,7 @@ test.describe("Enter e Espaço abrem a espécie", () => {
       await page.keyboard.press(tecla);
       await expect(page.locator("#view-dex")).toBeVisible();
       // O card mostra o nome de exibição (forma mega inclusive); a ficha abre a espécie dele.
-      expect((await page.locator("#species-detail h2").innerText()).trim()).toBe(nome);
+      expect((await page.locator("#species-detail h2").textContent()).trim()).toBe(nome);
     });
 
   }

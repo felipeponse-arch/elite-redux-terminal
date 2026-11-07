@@ -59,9 +59,9 @@
      espalhados pelo arquivo (achado de auditoria visual, 2026-09-18: TODO
      card/botão/chip usava o mesmo raio, sem hierarquia nenhuma - "SaaS card
      kit" clássico). */
-  /* Fonte de destaque (ticket 12, paleta Shiny): Potta One só em título grande (nome do app, da
+  /* Fonte de destaque (ticket 12, paleta Shiny): Big Shoulders Display (07/11/2026, no lugar da Potta One) só em título grande (nome do app, da
      espécie e do chefão, >= 14px); o resto segue Bricolage/Figtree. Reserva = Bricolage. */
-  --fonte-display: "Potta One", "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --fonte-display: "Big Shoulders Display", "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 18px;
@@ -111,7 +111,9 @@
   --fs-base: 15px;      /* corpo */
   --fs-grande: 16px;    /* título de modal, cabeçalho no celular */
   --fs-titulo: 20px;    /* título do app, ícones */
-  --fs-cartao: 34px;    /* nome na ficha-cartão e título da capa */
+  --fs-marca: 24px;     /* título do app (Big Shoulders) */
+  --fs-nomecel: 34px;
+  --fs-cartao: 46px;    /* nome na ficha-cartão e título da capa */
   --fs-display: 26px;   /* nome da espécie na ficha */
   /* Escritos pelo JS: "Aumentar fonte" (Progresso) e a cor do tipo nos chips
      de Monotype. Declarados aqui pra ter valor padrão e ficar na lista de

@@ -59,7 +59,7 @@ body { background: radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--
 @keyframes ins-pulso { 0%, 100% { opacity: .85; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
 @keyframes ins-encaixe { 0% { transform: translateY(-12px) scale(1.2); opacity: .4; } 70% { transform: translateY(1px) scale(.97); } 100% { transform: none; opacity: 1; } }
 .etapa-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.etapa-nome { font-family: var(--fonte-display); font-size: var(--fs-grande); font-weight: 400; }
+.etapa-nome { font-family: var(--fonte-display); font-size: var(--fs-titulo); font-weight: 800; letter-spacing: .04em; line-height: 1.1; }
 .etapa-cap { font-family: "IBM Plex Mono", monospace; font-size: var(--fs-texto); font-variant-numeric: tabular-nums; color: var(--text-dim); }
 
 /* ---- Cartão da ficha ---- */
@@ -68,7 +68,7 @@ body { background: radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--
   background:
     radial-gradient(60% 90% at 0% 0%, color-mix(in srgb, var(--t1) 24%, transparent), transparent 70%),
     linear-gradient(160deg, color-mix(in srgb, var(--surface-2) 90%, var(--t2)) 0%, var(--surface) 70%);
-  border: 1px solid var(--border); border-top: 3px solid var(--t1); border-bottom: 3px solid var(--t2); border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) var(--radius-sm);
+  border: 1px solid var(--border); border-top: 3px solid var(--t1); border-bottom: 3px solid var(--t2); border-radius: 0;
   box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent), 0 10px 24px -14px rgb(0 0 0 / .6);
 }
 .detail-head.ficha-cartao::after { content: ""; position: absolute; top: -3px; right: -1px; width: var(--chanfro); height: var(--chanfro); background: linear-gradient(225deg, var(--bg) 50%, transparent 50%); pointer-events: none; }
@@ -80,7 +80,7 @@ body { background: radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--
 }
 .ficha-cartao .spr { background-color: transparent; box-shadow: none; border-radius: 0; filter: drop-shadow(0 6px 6px rgb(0 0 0 / .5)); }
 .ficha-cartao .detail-titles h2 {
-  font-family: var(--fonte-display); font-size: var(--fs-cartao); line-height: 1; letter-spacing: .005em;
+  font-family: var(--fonte-display); font-size: var(--fs-cartao); font-weight: 900; text-transform: uppercase; line-height: .95; letter-spacing: .02em;
   text-shadow: 0 2px 0 color-mix(in srgb, #000 35%, transparent);
 }
 .ficha-cartao .detail-dexno { font-size: var(--fs-destaque); letter-spacing: .08em; }
@@ -105,9 +105,9 @@ body { background: radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--
 /* ---- Capa da Dex vazia: cartela da Carteira de Treinador ---- */
 #species-detail > .empty-state.capa-carteira {
   background: linear-gradient(160deg, var(--surface-2), var(--surface)); border: 1px solid var(--border); border-top: 3px solid var(--accent-2);
-  display: block; text-align: left; max-width: 560px; padding: var(--space-5); border-radius: var(--radius-sm);
+  display: block; text-align: left; max-width: 560px; padding: var(--space-5); border-radius: 0;
 }
-.capa-titulo { font-family: var(--fonte-display); font-size: var(--fs-cartao); color: var(--text); line-height: 1.1; margin-bottom: var(--space-4); }
+.capa-titulo { font-family: var(--fonte-display); font-weight: 900; text-transform: uppercase; letter-spacing: .03em; font-size: var(--fs-cartao); color: var(--text); line-height: 1.1; margin-bottom: var(--space-4); }
 .capa-barras { display: grid; grid-template-columns: 40px 1fr; gap: var(--space-2) var(--space-3); align-items: center; margin-bottom: var(--space-4); font-family: "IBM Plex Mono", monospace; font-size: var(--fs-pequeno); color: var(--text-dim); }
 .capa-barras i { display: block; height: 10px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--accent-2) 14%, var(--bg)); }
 .capa-carteira p { margin: 0; color: var(--text-dim); font-size: var(--fs-texto); max-width: 52ch; }
@@ -122,17 +122,23 @@ body { background: radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--
   .ins-btn { width: 52px; min-height: 66px; scroll-snap-align: center; }
   .ins-btn svg { width: 40px; height: 40px; }
   .etapa-info { flex-direction: row; align-items: baseline; gap: var(--space-3); }
-  .etapa-nome { font-size: var(--fs-destaque); }
-  .detail-head.ficha-cartao { padding: var(--space-3); }
-  .ficha-cartao .ts-head { gap: var(--space-2); }
-  .ficha-cartao .ts-head .spr { zoom: .72; }
-  .ficha-cartao .ts-head::before { width: 200px; height: 200px; left: -30px; }
-  .ficha-cartao .detail-acoes { width: 100%; }
-  .ficha-cartao .add-team-btn { padding: 6px 14px; }
-  .ficha-stats { gap: var(--space-1) var(--space-3); }
+  .etapa-nome { font-size: var(--fs-grande); }
+  /* Cartão no celular: sprite à esquerda; nome, tipos e nota à direita; botões; 6 barras em 2 colunas. Tudo na primeira tela. */
+  .detail-head.ficha-cartao {
+    display: grid; grid-template-columns: 138px minmax(0, 1fr); grid-template-areas: "spr tit" "spr meio" "acoes acoes" "stats stats";
+    gap: var(--space-2) var(--space-3); padding: var(--space-3);
+  }
+  .ficha-cartao .ts-head { display: contents; }
+  .ficha-cartao .ts-head::before { display: none; }
+  .ficha-cartao .ts-head .spr { grid-area: spr; zoom: .72; filter: drop-shadow(0 0 18px var(--t1)) drop-shadow(0 4px 4px rgb(0 0 0 / .5)); align-self: center; }
+  .ficha-cartao .detail-titles { grid-area: tit; align-self: end; min-width: 0; }
+  .ficha-cartao .detail-titles h2 { font-size: var(--fs-nomecel); overflow-wrap: anywhere; }
+  .ficha-meio { grid-area: meio; align-self: start; gap: var(--space-2) var(--space-3); margin-top: 0; }
+  .ficha-cartao .detail-acoes { grid-area: acoes; width: 100%; flex-wrap: nowrap; }
+  .ficha-cartao .detail-acoes .add-team-btn { flex: 1 1 0; min-height: 44px; padding: 6px 10px; }
+  .ficha-stats { grid-area: stats; margin-top: 0; gap: var(--space-1) var(--space-3); }
   .ficha-stats .stat-row { grid-template-columns: 58px 28px 1fr; gap: var(--space-1); }
   .ficha-stats .stat-label { font-size: var(--fs-legenda); }
-  .ficha-cartao .detail-titles h2 { font-size: var(--fs-display); }
 }
 @media (prefers-reduced-motion: reduce) {
   .ins-btn.proxima svg, .ins-btn.encaixa svg { animation: none; }

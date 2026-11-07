@@ -37,9 +37,9 @@
   src: url(__FONTE_PLEXMONO_600_DATAURI__) format("woff2");
 }
 @font-face {
-  font-family: "Potta One";
+  font-family: "Big Shoulders Display";
   font-style: normal;
-  font-weight: 400;
+  font-weight: 700 900;
   font-display: swap;
-  src: url(__FONTE_POTTAONE_DATAURI__) format("woff2");
+  src: url(__FONTE_BIGSHOULDERS_DATAURI__) format("woff2");
 }

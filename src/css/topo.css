@@ -46,7 +46,7 @@
 }
 /* Marca (ticket 15, paleta Shiny): o Rayquaza shiny no lugar do símbolo antigo. */
 .brand-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.brand-text h1 { font-family: var(--fonte-display); font-size: var(--fs-titulo); font-weight: 400; letter-spacing: 0.01em; white-space: nowrap; line-height: 1.25; }
+.brand-text h1 { font-family: var(--fonte-display); font-size: var(--fs-marca); font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; line-height: 1.25; }
 /* Duas partes: a linha de versão/dados (quebra se faltar largura; a versão do jogo
    nunca é cortada) e o chip de sincronização, que é o que avisa "só neste aparelho". */
 .brand-sub { margin: 2px 0 0; font-size: var(--fs-texto); line-height: 1.4; color: var(--text-dim); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); }

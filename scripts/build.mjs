@@ -126,7 +126,7 @@ for (const [placeholder, nome] of Object.entries(ARQUIVOS_DE_DADOS)) {
 if (!final.includes("__SPRITE_ATLAS_DATAURI__")) falhar("placeholder __SPRITE_ATLAS_DATAURI__ não está no template.");
 final = trocarTudo(final, "__SPRITE_ATLAS_DATAURI__", "data:image/png;base64," + readFileSync(atlas).toString("base64"));
 // Fontes embutidas (05/11/2026): data/fontes/*.woff2 viram data URI no @font-face de src/css/fontes.css.
-for (const [marca, arq] of [["__FONTE_BRICOLAGE_DATAURI__", "bricolage-grotesque-500-800-latin.woff2"], ["__FONTE_FIGTREE_DATAURI__", "figtree-400-700-latin.woff2"], ["__FONTE_PLEXMONO_400_DATAURI__", "ibm-plex-mono-400-latin.woff2"], ["__FONTE_PLEXMONO_500_DATAURI__", "ibm-plex-mono-500-latin.woff2"], ["__FONTE_PLEXMONO_600_DATAURI__", "ibm-plex-mono-600-latin.woff2"], ["__FONTE_POTTAONE_DATAURI__", "potta-one-400-latin.woff2"]]) {
+for (const [marca, arq] of [["__FONTE_BRICOLAGE_DATAURI__", "bricolage-grotesque-500-800-latin.woff2"], ["__FONTE_FIGTREE_DATAURI__", "figtree-400-700-latin.woff2"], ["__FONTE_PLEXMONO_400_DATAURI__", "ibm-plex-mono-400-latin.woff2"], ["__FONTE_PLEXMONO_500_DATAURI__", "ibm-plex-mono-500-latin.woff2"], ["__FONTE_PLEXMONO_600_DATAURI__", "ibm-plex-mono-600-latin.woff2"], ["__FONTE_BIGSHOULDERS_DATAURI__", "big-shoulders-display-700-900-latin.woff2"]]) {
   if (!existsSync(join(DADOS, "fontes", arq))) falhar("falta a fonte data/fontes/" + arq);
   if (!final.includes(marca)) falhar(`placeholder ${marca} não está no CSS.`);
   final = trocarTudo(final, marca, "data:font/woff2;base64," + readFileSync(join(DADOS, "fontes", arq)).toString("base64"));

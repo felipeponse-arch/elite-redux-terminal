@@ -12,9 +12,9 @@ test("artifact_final.html não referencia o Google Fonts", () => {
   assert.ok(!html.includes("fonts.gstatic.com"));
 });
 
-test("artifact_final.html tem @font-face em base64 das 4 famílias", () => {
+test("artifact_final.html tem @font-face em base64 das 4 famílias (Big Shoulders no lugar da Potta One)", () => {
   const html = ler("artifact_final.html");
-  for (const familia of ["Bricolage Grotesque", "Figtree", "IBM Plex Mono", "Potta One"]) {
+  for (const familia of ["Bricolage Grotesque", "Figtree", "IBM Plex Mono", "Big Shoulders Display"]) {
     const re = new RegExp(String.raw`@font-face\s*\{[^}]*font-family:\s*"${familia}"[^}]*url\(data:font/woff2;base64,[A-Za-z0-9+/=]{1000,}\)`);
     assert.match(html, re, `falta @font-face embutido de ${familia}`);
   }
@@ -23,7 +23,7 @@ test("artifact_final.html tem @font-face em base64 das 4 famílias", () => {
 
 test("os pesos declarados de cada família continuam no CSS", () => {
   const css = ler("src/css/fontes.css");
-  const esperado = [["Bricolage Grotesque", "500 800"], ["Figtree", "400 700"], ["IBM Plex Mono", "400"], ["IBM Plex Mono", "500"], ["IBM Plex Mono", "600"], ["Potta One", "400"]];
+  const esperado = [["Bricolage Grotesque", "500 800"], ["Figtree", "400 700"], ["IBM Plex Mono", "400"], ["IBM Plex Mono", "500"], ["IBM Plex Mono", "600"], ["Big Shoulders Display", "700 900"]];
   for (const [familia, peso] of esperado) {
     const re = new RegExp(String.raw`font-family:\s*"${familia}";[^}]*font-weight:\s*${peso}\s*;`);
     assert.match(css, re, `falta o peso ${peso} de ${familia}`);
