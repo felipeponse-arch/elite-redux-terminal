@@ -26,7 +26,7 @@ permissions:
   contents: read
 
 # Meta (06/11/2026): CI inteiro em até ~10 min. Dois jobs em paralelo, cada um com teto de tempo:
-#   rapido    - travas, unitários rápidos, sabotagem (cache versionado em tests/.sabotagem_cache.json), build
+#   rapido    - travas, unitários rápidos, build (a sabotagem completa roda na rodada semanal "Pesado", não no PR)
 #   navegador - build + Playwright
 # Os testes pesados (tests/pesados.json) e a sabotagem a frio ficam no workflow "Pesado" (semanal/manual).
 jobs:
@@ -47,8 +47,6 @@ jobs:
         run: npm run check
       - name: Testes unitários rápidos
         run: ER_SEM_TS=1 npm run test:unit
-      - name: Teste de sabotagem (cache versionado)
-        run: npm run test:sabotage
       - name: Build
         run: npm run build
 

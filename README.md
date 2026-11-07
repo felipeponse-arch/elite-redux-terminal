@@ -1,16 +1,18 @@
 # Elite Redux Terminal
 
-Dex completa, rank das espécies e montador de times para o ROM hack **Elite Redux** (Pokémon), com os dados da versão mais
-nova do jogo. É um app de arquivo único (HTML + JS puro, sem framework), publicado como Artifact no claude.ai.
+Dex e montador de builds e times para o hack Elite Redux (tudo em português do Brasil). O app é um arquivo único (`artifact_final.html`) gerado por `npm run build`; o Modo Motor monta o time contra os chefões só com o simulador de duelo, sem IA.
 
-- O que o app faz e para quem: `docs/ESPECIFICACAO_REQUISITOS.md`
-- Como rodar e verificar: `docs/onboarding.md`
-- Regras para quem trabalha no projeto (pessoas e agentes): `AGENTS.md`
-- Qualidade e portão: `docs/quality.md` · Estado das ferramentas: `docs/setup.md`
+- **Site:** publicado pelo GitHub Pages a cada push no `master` (workflow `.github/workflows/pages.yml`).
+- **Atenção:** a sincronização entre aparelhos só funciona dentro do Artifact do claude.ai. No site público o app mostra "só neste aparelho" e guarda o progresso no navegador.
+- **Rank:** o site usa `data/species_rank.json` atual. O rank novo (só os 29 chefões, incremental) ainda não foi regerado.
 
-```bash
-npm ci
-npm run build
+## Rotina (rápida)
 ```
-
-O `artifact_final.html` gerado abre direto no navegador.
+npm run check            # travas (~20 s)
+npm run test:unit        # testes rápidos (~25 s)
+npm run build            # monta artifact_final.html (~1 s)
+npm run test:e2e         # navegador (~100 s)
+npm run test:unit:pesado # testes pesados (~140 s), antes de publicar
+npm run test:sabotage    # com o cache em tests/.sabotagem_cache.json (~2 min); semanal: --com-pesados
+```
+Regra dos pacotes e prazos: `docs/pacotes/regra.md`. Mapa dos documentos: `docs/`.
