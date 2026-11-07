@@ -11,7 +11,7 @@ arquivo em base64 no `@font-face` de `src/css/fontes.css`.
 | ibm-plex-mono-400-latin.woff2 | IBM Plex Mono 400 | v20 | https://fonts.gstatic.com/s/ibmplexmono/v20/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2 |
 | ibm-plex-mono-500-latin.woff2 | IBM Plex Mono 500 | v20 | https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3twJwlBFgg.woff2 |
 | ibm-plex-mono-600-latin.woff2 | IBM Plex Mono 600 | v20 | https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlBFgg.woff2 |
-| potta-one-400-latin.woff2 | Potta One 400 (só títulos: `--fonte-display`) | v19 | https://fonts.gstatic.com/s/pottaone/v19/FeVSS05Bp6cy7xI-Yfxg2pRm.woff2 |
+| big-shoulders-display-700-900-latin.woff2 | Big Shoulders Display, variável (wght), 700-900 (display: nome do Pokémon, Etapa e título; `--fonte-display`) | v24 | https://fonts.gstatic.com/s/bigshouldersdisplay/v24/fC1_PZJEZG-e9gHhdI4-NBbfd2ys3SjJCx1czNDu.woff2 |
 
 Fora do subconjunto latin: latin-ext, cirílico, grego, vietnamita e japonês (Potta One). O app só mostra português e
 nomes de espécie (Latin-1); caractere fora cai na fonte de reserva da pilha (`--fonte-*` em `src/css/tokens.css`).
@@ -24,4 +24,4 @@ https://github.com/google/fonts/tree/main/ofl/<pasta>/OFL.txt). Conferido nos pr
 - Bricolage Grotesque (`ofl/bricolagegrotesque`): Copyright 2022 The Bricolage Grotesque Project Authors
 - Figtree (`ofl/figtree`): Copyright 2022 The Figtree Project Authors
 - IBM Plex Mono (`ofl/ibmplexmono`): Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"
-- Potta One (`ofl/pottaone`): Copyright 2020 The Potta Project Authors
+- Big Shoulders Display (`ofl/bigshouldersdisplay`): Copyright 2019 The Big Shoulders Project Authors (baixada em 07/11/2026, a pedido do usuário; Potta One saiu: nada mais a usa)
