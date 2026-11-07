@@ -77,9 +77,10 @@ async function section05() {
       document.getElementById("mybuild-ev-total").textContent);
     document.getElementById("mybuild-save").click();
     await wait(50);
-    const preview = [...document.querySelectorAll("#species-detail .showdown-block")].find(p => p.textContent.indexOf("Charizard @ Life Orb") === 0);
-    check("saved build renders as a real Showdown-format block",
-      preview && preview.textContent.indexOf("Tough Claws") !== -1, preview && preview.textContent);
+    // 07/11/2026: a Dex não mostra mais o texto Showdown; a build salva aparece nos campos do editor.
+    check("saved build is shown in the Meu build form fields",
+      document.getElementById("mybuild-ability").value === "Tough Claws" && document.getElementById("mybuild-item").value === "Life Orb",
+      document.getElementById("mybuild-ability").value + " / " + document.getElementById("mybuild-item").value);
     var savedRaw = JSON.parse(localStorage.getItem("er_terminal_save") || "{}");
     // customBuilds[sname] is a LIST now (up to 3 builds, Fase-3 multi-build +
     // AI-generation feature, 2026-09-09) - a fresh build here is entry [0].

@@ -179,12 +179,19 @@
       (build.item ? escapeHtml(build.item) + ' só funciona' : 'esta build só funciona') +
       ' no modo permanente. Troque o modo em Progresso se for o seu caso.');
   }
+  // Resumo da build de uma entrada (histórico, build vista em chefão): os mesmos dados do antigo bloco Showdown, em chips.
+  function entradaResumoHtml(sp, entry) {
+    var evs = Array.isArray(entry.evs) ? evsToShowdownText(entry.evs) : String(entry.evs || "");
+    return '<div class="bh-resumo bp">' +
+      (entry.ability ? '<div class="bp-abis"><span class="bp-rot">Hab.</span><span class="bp-chip bp-chip-sel">' + escapeHtml(stripNote(entry.ability)) + '</span></div>' : '') +
+      itemBuildHtml(entry) +
+      (evs ? '<div class="bp-abis"><span class="bp-rot">EVs</span><span class="bh-evs">' + escapeHtml(evs) + '</span></div>' : '') +
+      golpesBuildHtml(entry) + '</div>';
+  }
   function buildEntryHtml(sp, entry, metaHtml, copyAttrs) {
     return '<div class="bh-entry">' +
-      '<div class="bh-meta">' + metaHtml +
-      '<button class="bh-copy" ' + copyAttrs + ' type="button" title="Copiar este set">copiar</button></div>' +
-      '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, entry)) + '</pre>' +
-      itemDescHtml(entry.item) +
+      '<div class="bh-meta">' + metaHtml + '</div>' +
+      entradaResumoHtml(sp, entry) +
       megaModeBuildNoteHtml(sp, entry) +
       buildContextNotesHtml(sp, entry) +
       buildSynergyHtml(sp, entry) +
@@ -267,10 +274,6 @@
       return '<input type="number" class="mybuild-num" id="mybuild-ev-' + i + '" min="0" max="252" step="4" aria-label="EV de ' + STAT_LABELS_SHORT[i] + '">';
     }).join("");
     var hasBuild = list.length > 0;
-    var preview = hasBuild ? showdownSet(sp, {
-      ability: b.ability, nature: b.nature, item: b.item,
-      evs: evsToShowdownText(b.evs), moves: b.moves.filter(Boolean)
-    }) : "";
     return '<div class="card"><h3>Meu build</h3>' +
       '<p class="mybuild-hint">Monte seu set escolhendo direto das opções reais deste Pokémon - nada de digitar de cabeça.</p>' +
       buildChipsHtml(list) +
@@ -310,7 +313,6 @@
       (hasBuild && (b.source === "ia" || b.source === "sugestao") && b.rationale
         ? '<div class="mybuild-rationale"><strong>Por que essa escolha:</strong> ' + escapeHtml(b.rationale) + '</div>'
         : '') +
-      (hasBuild ? '<pre class="showdown-block">' + escapeHtml(preview) + '</pre><button id="mybuild-copy" class="text-action-btn" type="button">Copiar</button>' : '') +
       '<div class="mybuild-ai-row">' +
         // Sugestões do jogo (pipeline de build, ticket pipeline-build/02): calculadas pelo código, sem IA e sem gravar nada.
         '<button id="mybuild-pipeline-ver" class="text-action-btn" type="button" aria-expanded="false" aria-controls="mybuild-pipeline-painel">Ver sugestões do jogo</button>' +
@@ -528,14 +530,6 @@
         var activeIdx = 0;
         for (var i = 0; i < list.length; i++) { if (list[i].active) { activeIdx = i; break; } }
         apagarBuildComDesfazer(sp, activeIdx);
-      } else if (alvo.id === "mybuild-copy") {
-        var saved = getActiveBuild(sp.sname);
-        if (!saved) return;
-        var text = showdownSet(sp, {
-          ability: saved.ability, nature: saved.nature, item: saved.item,
-          evs: evsToShowdownText(saved.evs), moves: saved.moves.filter(Boolean)
-        });
-        copyText(text, document.getElementById("mybuild-status"), "Copiado!");
       }
     });
   })();

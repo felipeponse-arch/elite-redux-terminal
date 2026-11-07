@@ -216,22 +216,6 @@
 }
 #sync-banner-dismiss, #storage-banner-dismiss, #run-setup-dismiss { background: none; font-size: var(--fs-grande); padding: 0 4px; line-height: 1; }
 
-.showdown-block {
-  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
-  font-size: var(--fs-pequeno);
-  line-height: 1.55;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  margin: 0;
-  /* Quebra a linha em vez de rolar de lado: numa coluna estreita a linha de
-     EVs sumia pela borda (redesenho 2026-09-24). Copiar usa o texto gerado,
-     não o que está na tela. */
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  color: var(--text);
-}
 .ts-build-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
 /* Botões de texto (o de copiar o set saiu do cartão do Meu Time em 07/11/2026). */
 .ts-ai-generate-btn, .text-action-btn {
@@ -289,7 +273,6 @@
 .bh-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
 .bh-date { font-size: var(--fs-micro); color: var(--text-dim); }
 .bh-context { font-size: var(--fs-legenda); color: var(--text); font-style: italic; flex: 1; }
-.bh-copy { background: none; border: none; color: var(--badge-accent2); font-size: var(--fs-legenda); font-weight: 700; cursor: pointer; padding: 2px 4px; }
 /* Build nova depois da evolução (2026-09-27): chama atenção sem gritar - a
    build antiga continua valendo até o clique. */
 .ts-evo-gerar { background: none; border: 1px solid var(--accent-2); color: var(--badge-accent2); border-radius: var(--radius-sm); padding: 1px 8px; font: inherit; font-size: var(--fs-legenda); font-weight: 600; cursor: pointer; }

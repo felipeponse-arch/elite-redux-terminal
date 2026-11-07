@@ -77,9 +77,9 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **dex_lista.js** - Dex: filtro de tipo, busca, ordenação, lista em lotes e o modal de troca do time.
   moveListboxCursor:118, bst:152, statPct:163, statTier:164, getFiltered:171, linhaDaListaHtml:212, renderMaisLista:232, renderList:243, preencherListaSeCurta:283, syncRowAddButtons:313, openSwapModal:328, closeSwapModal:367, openConfirmModal:403, closeConfirmModal:411, esconderToast:437, agendarToast:451, flashToast:473
 - **editor_build.js** - Formato Showdown, cópia e o editor "Meu build" da ficha.
-  copyText:11, itemDescHtml:45, hpEvEfficiencyNote:83, evBreakpointNote:116, buildEvNotesHtml:141, buildNoteHtml:155, buildContextNotesHtml:161, seloDaBuildHtml:168, megaModeBuildNoteHtml:174, buildEntryHtml:182, buildChipsHtml:212, myBuildEditorHtml:223, updateMyBuildEvTotal:322, updateMyBuildStatus:352, wireMyBuildEditor:416, lerFormularioDoEditor:444, apagarBuildComDesfazer:467
+  copyText:11, itemDescHtml:45, hpEvEfficiencyNote:83, evBreakpointNote:116, buildEvNotesHtml:141, buildNoteHtml:155, buildContextNotesHtml:161, seloDaBuildHtml:168, megaModeBuildNoteHtml:174, entradaResumoHtml:183, buildEntryHtml:191, buildChipsHtml:219, myBuildEditorHtml:230, updateMyBuildEvTotal:324, updateMyBuildStatus:354, wireMyBuildEditor:418, lerFormularioDoEditor:446, apagarBuildComDesfazer:469
 - **ficha_extras.js** - Ficha: comparar builds, anotações, histórico de builds e builds de referência dos chefões.
-  compareCardHtml:14, compareResultHtml:22, notesCardHtml:78, buildHistoryHtml:87, bossReferenceHtml:103, rotuloDaBuild:170, planoDaBuildHtml:179, megaLockedTagHtml:199, otherFormsHtml:206
+  compareCardHtml:14, compareResultHtml:22, notesCardHtml:78, buildHistoryHtml:87, bossReferenceHtml:103, rotuloDaBuild:157, planoDaBuildHtml:166, megaLockedTagHtml:186, otherFormsHtml:193
 - **insignias_faixa.js** - Faixa de Etapa no cabeçalho (fatia 1 do visual "Carteira de Treinador", 07/11/2026).
   insigniaSvgHtml:38, etapaNomeCurto:42, etapaPara:46, renderFaixaEtapa:54
 - **modo_motor.js** - Modo Motor no Meu Time (ticket time-pelo-motor/01, Fase F2, 21/10/2026). O app NÃO usa IA (decisão do usuário, 06/11/2026):

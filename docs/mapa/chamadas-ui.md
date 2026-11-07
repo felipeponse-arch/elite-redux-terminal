@@ -6,7 +6,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## ui/aba_chefoes.js
 - DIFF_LABELS:233 - chamado por: bossReferenceHtml (ficha_extras.js:103), quemResolveCardHtml (quem_resolve.js:83)
-- STAT_LABELS_SHORT:526 - chamado por: evBreakpointNote (editor_build.js:116), myBuildEditorHtml (editor_build.js:223), updateMyBuildStatus (editor_build.js:352), compareResultHtml (ficha_extras.js:22)
+- STAT_LABELS_SHORT:526 - chamado por: evBreakpointNote (editor_build.js:116), myBuildEditorHtml (editor_build.js:230), updateMyBuildStatus (editor_build.js:354), compareResultHtml (ficha_extras.js:22)
 - bossMonCardHtml:431 - chama: calcFinalStat (calc_stat.js:160), itemRuleFor (calc_stat.js:149), ABILITIES (dados_base.js:10), getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), +2
 - bossState:13 - chamado por: initProgress (progresso.js:106), quemResolvePreencher (quem_resolve.js:66), quemResolveRestaurar (quem_resolve.js:103)
 - campoDoChefaoHtml:178 - chama: regraDeCampoDoChefao (chefoes.js:426)
@@ -16,8 +16,8 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - iaDoChefaoHtml:190 - chama: comportamentoDaIADoChefao (chefoes.js:459)
 - initBosses:33 - chama: showdownSet (builds.js:53), getSpeciesByX (dados_base.js:78), flashToast (dex_lista.js:473), copyText (editor_build.js:11), acao (nucleo.js:243), +3
 - montarTimeContraEsteChefao:307 - chama: computeTeamGenerationValidation (builds.js:228), buffsAtivosDoChefao (chefoes.js:534), buffsParaMostrarDoChefao (chefoes.js:522), planoDaLuta (chefoes.js:568), regraDeCampoDoChefao (chefoes.js:426), +12
-- myBuildLevel:19 - chamado por: myBuildEditorHtml (editor_build.js:223), updateMyBuildStatus (editor_build.js:352), wireMyBuildEditor (editor_build.js:416)
-- myBuildLevelIsCustom:31 - chamado por: myBuildEditorHtml (editor_build.js:223), wireMyBuildEditor (editor_build.js:416), initProgress (progresso.js:106), zerarRun (time.js:342)
+- myBuildLevel:19 - chamado por: myBuildEditorHtml (editor_build.js:230), updateMyBuildStatus (editor_build.js:354), wireMyBuildEditor (editor_build.js:418)
+- myBuildLevelIsCustom:31 - chamado por: myBuildEditorHtml (editor_build.js:230), wireMyBuildEditor (editor_build.js:418), initProgress (progresso.js:106), zerarRun (time.js:342)
 - renderBossDetail:527 - chama: classeDoCabecalhoDoChefao (chefoes.js:57), nivelDeCalculo (level_cap.js:65), monotypeAtivo (mono_run.js:72), quemResolveCardHtml (quem_resolve.js:83), quemResolveRestaurar (quem_resolve.js:103), +1
 - renderGymSkillsCardHtml:394 - chama: ehRevancheDeLider (chefoes.js:486), gymLeaderBaseName (chefoes.js:55), gymSkillsSummaryFor (chefoes.js:379)
 - selectBoss:375 - chama: varianteDoChefao (chefoes.js:370)
@@ -51,7 +51,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/dex_ficha.js
 - RANK_TIER_CLASS:154 - chamado por: monoRunCardHtml (arquetipo.js:317)
 - abilityCard:14 - chama: ABILITIES (dados_base.js:10)
-- buildSynergyHtml:42 - chama: sinergiasDaEspecie (duelo.js:1320) | chamado por: buildEntryHtml (editor_build.js:182), painelDaBuildHtml (time_build.js:72)
+- buildSynergyHtml:42 - chama: sinergiasDaEspecie (duelo.js:1320) | chamado por: buildEntryHtml (editor_build.js:191), painelDaBuildHtml (time_build.js:72)
 - conditionMoveSynergyNoteHtml:70 - chama: buildNoteHtml (editor_build.js:155)
 - evoConditionText:88 - chama: EVOKINDS (dados_base.js:13), EVO_LEVEL_FEMALE (dados_base.js:32), EVO_LEVEL_MALE (dados_base.js:31), EVO_MEGA_KINDS (dados_base.js:34), EVO_PRIMAL (dados_base.js:33)
 - fichaCabecalhoHtml:469 - chama: avisoSemSpriteHtml (dados_base.js:196), descricaoDaEspecie (dados_base.js:187), compraDeInicialTexto (mono_run.js:47), speciesTypeNames (tipos.js:254), bst (dex_lista.js:152), +1
@@ -70,13 +70,13 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderMovesTable:111 - chama: MOVES (dados_base.js:11), TYPES (dados_base.js:9), getCurrentCap (level_cap.js:49)
 - roleTagsHtml:215 - chama: ROLE_LABEL_PT (dados_base.js:181), SPLIT_LABEL_PT (dados_base.js:182) | chamado por: renderBox (caixa.js:16)
 - scheduleDashboardRefresh:688 - chama: renderDashboard (resumo_luta.js:183)
-- selectSpecies:564 - chama: getSpeciesByX (dados_base.js:78), myBuildEditorHtml (editor_build.js:223), wireMyBuildEditor (editor_build.js:416), compareCardHtml (ficha_extras.js:14), state (nucleo.js:8) | chamado por: redesenharFichaAberta (nucleo.js:197)
+- selectSpecies:564 - chama: getSpeciesByX (dados_base.js:78), myBuildEditorHtml (editor_build.js:230), wireMyBuildEditor (editor_build.js:418), compareCardHtml (ficha_extras.js:14), state (nucleo.js:8) | chamado por: redesenharFichaAberta (nucleo.js:197)
 - updateResetTeamBoxBtn:702 - chama: runTemAlgoPraZerar (evolucao.js:247) | chamado por: persist (nucleo.js:144)
 - whereToFindText:266 - chama: MAPS (dados_base.js:49)
 
 ## ui/dex_lista.js
 - bst:152 - chamado por: fichaCabecalhoHtml (dex_ficha.js:469), compareResultHtml (ficha_extras.js:22)
-- flashToast:473 - chamado por: initBosses (aba_chefoes.js:33), montarTimeContraEsteChefao (aba_chefoes.js:307), applyRecommendedTeam (arquetipo.js:143), autoEvolveRoster (auto_evolucao.js:20), apagarBuildComDesfazer (editor_build.js:467), +2
+- flashToast:473 - chamado por: initBosses (aba_chefoes.js:33), montarTimeContraEsteChefao (aba_chefoes.js:307), applyRecommendedTeam (arquetipo.js:143), autoEvolveRoster (auto_evolucao.js:20), apagarBuildComDesfazer (editor_build.js:469), +2
 - getFiltered:171 - chama: SPECIES (dados_base.js:52), rankDe (rank_da_run.js:29), speciesTypeNames (tipos.js:254), state (nucleo.js:8)
 - linhaDaListaHtml:212 - chama: avisoSemSpriteHtml (dados_base.js:196), speciesTypeNames (tipos.js:254), rankBadgeHtml (dex_ficha.js:169), state (nucleo.js:8)
 - listaAtual:210 - chamado por: fichaNavHtml (dex_ficha.js:400)
@@ -89,33 +89,34 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - syncRowAddButtons:313 - chama: state (nucleo.js:8)
 
 ## ui/editor_build.js
-- apagarBuildComDesfazer:467 - chama: getSpeciesByX (dados_base.js:78), getBuildList (evolucao.js:14), flashToast (dex_lista.js:473), reinserirBuild (nucleo.js:131), removeBuildIndex (nucleo.js:124), +1
-- buildChipsHtml:212 - chama: SUGESTAO_ROTULO (sugestao_do_motor.js:11)
+- apagarBuildComDesfazer:469 - chama: getSpeciesByX (dados_base.js:78), getBuildList (evolucao.js:14), flashToast (dex_lista.js:473), reinserirBuild (nucleo.js:131), removeBuildIndex (nucleo.js:124), +1
+- buildChipsHtml:219 - chama: SUGESTAO_ROTULO (sugestao_do_motor.js:11)
 - buildContextNotesHtml:161 - chama: avisosDaBuild (avisos_build.js:8)
-- buildEntryHtml:182 - chama: showdownSet (builds.js:53), buildSynergyHtml (dex_ficha.js:42) | chamado por: bossReferenceHtml (ficha_extras.js:103), buildHistoryHtml (ficha_extras.js:87)
-- buildNoteHtml:155 - chamado por: conditionMoveSynergyNoteHtml (dex_ficha.js:70), planoDaBuildHtml (ficha_extras.js:179), painelDaBuildHtml (time_build.js:72)
+- buildEntryHtml:191 - chama: buildSynergyHtml (dex_ficha.js:42) | chamado por: bossReferenceHtml (ficha_extras.js:103), buildHistoryHtml (ficha_extras.js:87)
+- buildNoteHtml:155 - chamado por: conditionMoveSynergyNoteHtml (dex_ficha.js:70), planoDaBuildHtml (ficha_extras.js:166), painelDaBuildHtml (time_build.js:72)
 - copyText:11 - chamado por: initBosses (aba_chefoes.js:33)
+- entradaResumoHtml:183 - chama: evsToShowdownText (builds.js:70), stripNote (builds.js:44), golpesBuildHtml (time_build.js:30), itemBuildHtml (time_build.js:53)
 - evBreakpointNote:116 - chama: minEvSameStat (calc_stat.js:200), STAT_LABELS_SHORT (aba_chefoes.js:526)
 - hpEvEfficiencyNote:83 - chama: stripNote (builds.js:44), calcFinalStat (calc_stat.js:160)
 - itemDescHtml:45 - chama: ondeAcharItemTexto (avisos_build.js:100), stripNote (builds.js:44)
-- lerFormularioDoEditor:444 - chama: clampInt (dados_base.js:103)
+- lerFormularioDoEditor:446 - chama: clampInt (dados_base.js:103)
 - megaModeBuildNoteHtml:174 - chama: megaStoneRuleFor (validacao_build_ia.js:18) | chamado por: painelDaBuildHtml (time_build.js:72)
-- myBuildEditorHtml:223 - chama: evsToShowdownText (builds.js:70), showdownSet (builds.js:53), ABILITIES (dados_base.js:10), ALL_NATURES (dados_base.js:101), ITEMS (dados_base.js:12), +12 | chamado por: selectSpecies (dex_ficha.js:564)
+- myBuildEditorHtml:230 - chama: ABILITIES (dados_base.js:10), ALL_NATURES (dados_base.js:101), ITEMS (dados_base.js:12), MOVES (dados_base.js:11), uniqueIds (dados_base.js:122), +10 | chamado por: selectSpecies (dex_ficha.js:564)
 - seloDaBuildHtml:168 - chama: seloDaBuild (avisos_build.js:82) | chamado por: painelDaBuildHtml (time_build.js:72)
-- updateMyBuildEvTotal:322 - chama: clampInt (dados_base.js:103)
-- updateMyBuildStatus:352 - chama: ITEM_MOVE_POWER_MODS (calc_stat.js:132), calcFinalStat (calc_stat.js:160), itemRuleFor (calc_stat.js:149), MOVE_BY_NAME (dados_base.js:86), SPLIT_STATUS (dados_base.js:29), +6
-- wireMyBuildEditor:416 - chama: getActiveBuild (evolucao.js:16), nivelDeCalculo (level_cap.js:65), myBuildLevel (aba_chefoes.js:19), myBuildLevelIsCustom (aba_chefoes.js:31), pipelineDesenharFicha (pipeline_tela.js:113) | chamado por: selectSpecies (dex_ficha.js:564)
+- updateMyBuildEvTotal:324 - chama: clampInt (dados_base.js:103)
+- updateMyBuildStatus:354 - chama: ITEM_MOVE_POWER_MODS (calc_stat.js:132), calcFinalStat (calc_stat.js:160), itemRuleFor (calc_stat.js:149), MOVE_BY_NAME (dados_base.js:86), SPLIT_STATUS (dados_base.js:29), +6
+- wireMyBuildEditor:418 - chama: getActiveBuild (evolucao.js:16), nivelDeCalculo (level_cap.js:65), myBuildLevel (aba_chefoes.js:19), myBuildLevelIsCustom (aba_chefoes.js:31), pipelineDesenharFicha (pipeline_tela.js:113) | chamado por: selectSpecies (dex_ficha.js:564)
 
 ## ui/ficha_extras.js
-- bossReferenceHtml:103 - chama: DIFF_LABELS (aba_chefoes.js:233), buildEntryHtml (editor_build.js:182) | chamado por: fichaNotasHtml (dex_ficha.js:556)
-- buildHistoryHtml:87 - chama: buildEntryHtml (editor_build.js:182) | chamado por: fichaNotasHtml (dex_ficha.js:556), renderTeam (time.js:17)
+- bossReferenceHtml:103 - chama: DIFF_LABELS (aba_chefoes.js:233), buildEntryHtml (editor_build.js:191) | chamado por: fichaNotasHtml (dex_ficha.js:556)
+- buildHistoryHtml:87 - chama: buildEntryHtml (editor_build.js:191) | chamado por: fichaNotasHtml (dex_ficha.js:556), renderTeam (time.js:17)
 - compareCardHtml:14 - chamado por: selectSpecies (dex_ficha.js:564)
 - compareResultHtml:22 - chama: effectiveBuild (builds.js:190), stripNote (builds.js:44), speciesTypeNames (tipos.js:254), STAT_LABELS_SHORT (aba_chefoes.js:526), rankBadgeHtml (dex_ficha.js:169), +1
-- megaLockedTagHtml:199 - chama: isMegaForm (formas_mega.js:71), megaFormLiberada (formas_mega.js:109), megaSoNoDebug (formas_mega.js:110), quandoMega (formas_mega.js:112), rotuloEtapaDaMega (formas_mega.js:113) | chamado por: renderBox (caixa.js:16), renderTeam (time.js:17)
+- megaLockedTagHtml:186 - chama: isMegaForm (formas_mega.js:71), megaFormLiberada (formas_mega.js:109), megaSoNoDebug (formas_mega.js:110), quandoMega (formas_mega.js:112), rotuloEtapaDaMega (formas_mega.js:113) | chamado por: renderBox (caixa.js:16), renderTeam (time.js:17)
 - notesCardHtml:78 - chama: state (nucleo.js:8) | chamado por: fichaNotasHtml (dex_ficha.js:556)
-- otherFormsHtml:206 - chama: formFamilyOf (formas_mega.js:65), isMegaForm (formas_mega.js:71), megaFormLiberada (formas_mega.js:109), megaSoNoDebug (formas_mega.js:110), quandoMega (formas_mega.js:112), +1 | chamado por: renderTeam (time.js:17)
-- planoDaBuildHtml:179 - chama: buildNoteHtml (editor_build.js:155) | chamado por: myBuildEditorHtml (editor_build.js:223), painelDaBuildHtml (time_build.js:72)
-- rotuloDaBuild:170 - chama: ESTILO_ROTULO (plano_build.js:20), SUGESTAO_ROTULO (sugestao_do_motor.js:11) | chamado por: painelDaBuildHtml (time_build.js:72)
+- otherFormsHtml:193 - chama: formFamilyOf (formas_mega.js:65), isMegaForm (formas_mega.js:71), megaFormLiberada (formas_mega.js:109), megaSoNoDebug (formas_mega.js:110), quandoMega (formas_mega.js:112), +1 | chamado por: renderTeam (time.js:17)
+- planoDaBuildHtml:166 - chama: buildNoteHtml (editor_build.js:155) | chamado por: myBuildEditorHtml (editor_build.js:230), painelDaBuildHtml (time_build.js:72)
+- rotuloDaBuild:157 - chama: ESTILO_ROTULO (plano_build.js:20), SUGESTAO_ROTULO (sugestao_do_motor.js:11) | chamado por: painelDaBuildHtml (time_build.js:72)
 
 ## ui/insignias_faixa.js
 - INSIGNIAS_FORMAS:6 - chamado por: carimboEtapaHtml (time.js:9)
@@ -151,8 +152,8 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - lsSet:85 - chamado por: aplicarSaveRemoto (sync.js:45)
 - persist:144 - chama: buildSave (save.js:339), updateResetTeamBoxBtn (dex_ficha.js:702), pushToSync (sync.js:96) | chamado por: aplicarSaveRemoto (sync.js:45)
 - redesenharFichaAberta:197 - chama: selectSpecies (dex_ficha.js:564)
-- reinserirBuild:131 - chama: getBuildList (evolucao.js:14) | chamado por: apagarBuildComDesfazer (editor_build.js:467)
-- removeBuildIndex:124 - chama: removerBuildDaLista (lista_de_builds.js:32) | chamado por: apagarBuildComDesfazer (editor_build.js:467)
+- reinserirBuild:131 - chama: getBuildList (evolucao.js:14) | chamado por: apagarBuildComDesfazer (editor_build.js:469)
+- removeBuildIndex:124 - chama: removerBuildDaLista (lista_de_builds.js:32) | chamado por: apagarBuildComDesfazer (editor_build.js:469)
 - saveA11yPrefs:295 - chamado por: initProgress (progresso.js:106)
 - setActiveBuildIndex:104 - chama: getBuildList (evolucao.js:14)
 - setOrReplaceActiveBuild:94 - chama: trocarBuildAtivaNaLista (lista_de_builds.js:11) | chamado por: initBosses (aba_chefoes.js:33), processarRevisoes (revisao_automatica.js:23)
@@ -163,7 +164,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/pipeline_tela.js
 - pipelineAlvoValido:26 - chama: getRemainingBossEntries (chefoes.js:63)
 - pipelineCandidatoHtml:77 - chamado por: quemResolveItemHtml (quem_resolve.js:43)
-- pipelineDesenharFicha:113 - chamado por: wireMyBuildEditor (editor_build.js:416)
+- pipelineDesenharFicha:113 - chamado por: wireMyBuildEditor (editor_build.js:418)
 - pipelineDesenharTime:125 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8) | chamado por: renderTeam (time.js:17)
 - pipelineGolpeHtml:71 - chama: MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9)
 - pipelineResultado:14 - chama: getCurrentCap (level_cap.js:49), candidatosDeBuild (pipeline_build.js:549), state (nucleo.js:8)
@@ -229,9 +230,9 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - alternarFocoDoCartao:109 - chama: getSpeciesByX (dados_base.js:78), buildFocadaDoMotor (pipeline_build.js:734), state (nucleo.js:8), renderTeam (time.js:17)
 - avisoEnxutoHtml:64 - chama: avisosDaBuild (avisos_build.js:8)
 - categoriaDoGolpe:11 - chama: SPLIT_STATUS (dados_base.js:29)
-- golpesBuildHtml:30 - chama: stripNote (builds.js:44), MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9)
+- golpesBuildHtml:30 - chama: stripNote (builds.js:44), MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9) | chamado por: entradaResumoHtml (editor_build.js:183)
 - habilidadesBuildHtml:43 - chama: stripNote (builds.js:44), ABILITIES (dados_base.js:10), habilidadesEscolhiveis (dados_base.js:119)
-- itemBuildHtml:53 - chama: stripNote (builds.js:44)
+- itemBuildHtml:53 - chama: stripNote (builds.js:44) | chamado por: entradaResumoHtml (editor_build.js:183)
 - painelDaBuildHtml:72 - chama: ondeAcharItemTexto (avisos_build.js:100), stripNote (builds.js:44), buildSynergyHtml (dex_ficha.js:42), buildNoteHtml (editor_build.js:155), megaModeBuildNoteHtml (editor_build.js:174), +3 | chamado por: renderTeam (time.js:17)
 - papelChipsHtml:89 - chama: ROLE_LABEL_PT (dados_base.js:181), SPLIT_LABEL_PT (dados_base.js:182) | chamado por: renderTeam (time.js:17)
 - semBuildHtml:85 - chamado por: renderTeam (time.js:17)

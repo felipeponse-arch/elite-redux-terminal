@@ -115,19 +115,6 @@
   // Delegated once for the whole document: the Dex detail and the team slots
   // re-render their own subtree often, so binding here avoids re-attaching a
   // listener every time either view redraws.
-  document.addEventListener("click", function (e) {
-    var btn = e.target.closest && e.target.closest(".bh-copy");
-    if (!btn) return;
-    var sp = getSpeciesBySname(btn.dataset.sname);
-    if (!sp) return;
-    var fromBoss = btn.dataset.src === "boss";
-    var list = fromBoss ? BOSS_BUILDS[sp.sname] : BUILD_HISTORY[sp.sname];
-    if (!list) return;
-    var entry = fromBoss ? list[parseInt(btn.dataset.idx, 10)] : list.slice().reverse()[parseInt(btn.dataset.idx, 10)];
-    if (!entry) return;
-    copyText(showdownSet(sp, entry), null, "");
-    flashToast((fromBoss ? "Build de chefão do " : "Build antiga do ") + sp.n + " copiada (formato Showdown)");
-  });
 
   // "+ Usar como meu build" on a history/boss-reference entry - 2026-09-09,
   // user caught that the "copiar" button above never touched "Meu build" or
