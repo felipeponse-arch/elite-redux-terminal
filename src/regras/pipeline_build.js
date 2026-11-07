@@ -525,6 +525,44 @@
     return { v: v, itemDeRascunho: v.item === item ? item : null, tipoDoItem: tipo, pedras: regra ? regra.stones.slice() : [] };
   }
 
+  // ---- espécie com 2 papéis no rank, um deles Pivô: uma build para cada papel (pedido 06/11/2026, opção A) ----
+  // Pivô = a melhor build com o golpe de pivô no lugar do golpe mais fraco; o motor NÃO executa troca, então o golpe de pivô não entra na
+  // simulação (o dano é o dos outros 3) e o candidato fica "estimado". Tanque = o mesmo conjunto com EVs de bulk, re-simulado.
+  // Sweeper/Wallbreaker = a própria melhor build (já ofensiva). Critério dos papéis: conferirPapelDaBuild (a regra da IA). null = não deu: vale o ranking normal.
+  var ROTULO_PAPEL_PIPELINE = { Pivo: "Pivô", Tanque: "Tanque", Sweeper: "Sweeper", Wallbreaker: "Wallbreaker" };
+  function pipelinePapeisDuplos(sp, base, outro, kit, alvo, ctx) {
+    var pivos = kit.filter(ehGolpeDePivo);
+    if (!pivos.length) return null;
+    var hab = base.g.hab, nat = base.g.nat, golpes = base.g.av.golpes;
+    var tabela = pipelineTabela(sp, hab, nat, kit, alvo);
+    function montar(g, papel, estimado) {
+      var rv = pipelineValidarRascunho(sp, g, ctx);
+      if (!rv.v || conferirPapelDaBuild(ROTULO_PAPEL_PIPELINE[papel], rv.v.evs, rv.v.moves, sp, ctx)) return null;
+      return { g: g, v: rv.v, itemDeRascunho: rv.itemDeRascunho, tipoDoItem: rv.tipoDoItem, pedras: rv.pedras, papel: papel, pivoEstimado: estimado };
+    }
+    var comPivo = golpes.some(ehGolpeDePivo), novos = golpes, avPivo = base.g.av;
+    if (!comPivo) {
+      var fraco = golpes.slice().sort(function (a, b) { return (tabela[a] ? tabela[a].fracMin : 0) - (tabela[b] ? tabela[b].fracMin : 0) || (a < b ? -1 : 1); })[0];
+      novos = golpes.map(function (n) { return n === fraco ? pivos[0] : n; });
+      avPivo = pipelineAvaliarConjunto(tabela, golpes.filter(function (n) { return n !== fraco; }), base.g.sinergias, alvo);
+      if (!avPivo) return null;
+      avPivo.golpes = novos.slice();
+    }
+    var cPivo = montar(Object.assign({}, base.g, { av: avPivo }), "Pivo", true);
+    var gOutro = base.g;
+    if (outro === "Tanque") { // mesma forma dos EVs da espécie lenta (pipelineNaturezaEEvs): HP + ataque, 4 na defesa mais fraca, sem Velocidade
+      var ataque = nat.evs[1] > 0 ? 1 : 3, defesa = sp.b[2] <= sp.b[4] ? 2 : 4, evs = [252, 0, 0, 0, 0, 0];
+      evs[ataque] = 252; evs[defesa] = 4;
+      var tab2 = pipelineTabela(sp, hab, { nome: nat.nome, evs: evs }, kit, alvo);
+      var av2 = pipelineAvaliarConjunto(tab2, golpes, base.g.sinergias, alvo);
+      if (!av2) return null;
+      gOutro = Object.assign({}, base.g, { av: av2, fin: { nome: nat.nome, evs: evs, motivo: "Papel Tanque: EVs em HP e " + (ataque === 1 ? "Atk" : "SpA") + ", sem Velocidade (bulk)" } });
+    }
+    var cOutro = montar(gOutro, outro, false);
+    if (!cPivo || !cOutro || cPivo.v.moves.join() + cPivo.v.evs.join() === cOutro.v.moves.join() + cOutro.v.evs.join()) return null;
+    return [cPivo, cOutro];
+  }
+
   // ---- 1. do Pokémon para a build (caso A) ----
   // Devolve { alvo, candidatos, aviso, avisos }. `aviso` é o aviso principal (ou null); `avisos` traz todos.
   function candidatosDeBuild(sp, opts) {
@@ -604,6 +642,11 @@
       });
       while (aceitos.length < MIN_CANDIDATOS_PIPELINE && sobras.length) aceitos.push(sobras.shift());
       aceitos = aceitos.sort(function (a, b) { return validos.indexOf(a) - validos.indexOf(b); }).slice(0, MAX_CANDIDATOS_PIPELINE); // volta à ordem do ranking
+      var rolesEsp = (SPECIES_ROLE[sp.sname] || {}).roles || [];
+      if (rolesEsp.length === 2 && rolesEsp.indexOf("Pivo") !== -1 && validos.length) {
+        var duplos = pipelinePapeisDuplos(sp, validos[0], rolesEsp[0] === "Pivo" ? rolesEsp[1] : rolesEsp[0], kit, alvo, ctx);
+        if (duplos) aceitos = duplos;
+      }
       var innNomes = innatesAtivasNoNivel(sp, alvo.nivel).map(nomeHabDuelo);
       aceitos.forEach(function (c) {
         var av = c.g.av;
@@ -614,6 +657,7 @@
         if (!alvo.foes.length) motivosEstimada.push("sem alvo, nada foi simulado");
         if (semRegra.length) motivosEstimada.push("o motor não lê " + semRegra.join(", "));
         if (fuga) motivosEstimada.push("fuga no Intimidate (o motor trata como empate)");
+        if (c.pivoEstimado) motivosEstimada.push("pivô estimado, o simulador não executa troca");
         var calibrada = !motivosEstimada.length;
         var avisos = [];
         if (c.itemDeRascunho && c.tipoDoItem === "eviolite") avisos.push(sp.n + " ainda evolui: o rascunho leva Eviolite (o motor também usa Eviolite nesses casos); a simulação não conta o item.");
@@ -627,7 +671,7 @@
         }
         if (av.linhas.some(function (l) { return l.sash; })) avisos.push("O alvo aguenta o primeiro golpe (Focus Sash ou Sturdy): o hit-kill de 1 golpe virou 2.");
         saida.candidatos.push({
-          sname: sp.sname,
+          sname: sp.sname, papel: c.papel || null,
           golpes: c.v.moves.slice(), habilidade: c.v.ability, inatas: innNomes.slice(),
           motivos: pipelineMotivos(av, c.g.sinergias, c.g.hab, calibrada, alvo).concat(c.g.fin.motivo ? [c.g.fin.motivo] : [],
             c.g.protegePelaHab ? [c.g.hab + " (habilidade escolhida): anula o recuo de " + c.g.recuos.join(", ")] : []),

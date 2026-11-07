@@ -4947,4 +4947,25 @@ export const MUTACOES = [
     de: "&& state.settings.milestone < OITAVO_GINASIO.insignia) return false;",
     para: "&& false) return false;",
   },
+  {
+    id: "pipeline-papeis-tanque-sem-bulk",
+    descricao: "Pipeline 2 papéis: a build Tanque volta a sair com EVs de Velocidade em vez de bulk",
+    arquivo: "pipeline_build.js",
+    de: "defesa = sp.b[2] <= sp.b[4] ? 2 : 4, evs = [252, 0, 0, 0, 0, 0];",
+    para: "defesa = sp.b[2] <= sp.b[4] ? 2 : 4, evs = [0, 0, 0, 0, 0, 252];",
+  },
+  {
+    id: "pipeline-papeis-pivo-nao-entra",
+    descricao: "Pipeline 2 papéis: o golpe de pivô deixa de entrar na build Pivô (cai nas 2 melhores sem papel)",
+    arquivo: "pipeline_build.js",
+    de: "var pivos = kit.filter(ehGolpeDePivo);",
+    para: "var pivos = [];",
+  },
+  {
+    id: "pipeline-papeis-pivo-sem-estimado",
+    descricao: "Pipeline 2 papéis: a build Pivô deixa de ser marcada como estimada (o simulador não executa troca)",
+    arquivo: "pipeline_build.js",
+    de: "if (c.pivoEstimado) motivosEstimada.push(",
+    para: "if (false) motivosEstimada.push(",
+  },
 ];
