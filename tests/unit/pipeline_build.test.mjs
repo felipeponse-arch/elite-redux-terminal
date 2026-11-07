@@ -334,7 +334,7 @@ test("a prioridade vence a Velocidade só quando o golpe é de prioridade e não
 test("rótulo 'estimada' só com habilidade sem regra no motor (atacante ou alvo) ou fuga no Intimidate: na amostra, nenhuma estimada sem motivo", () => {
   AMOSTRA.forEach((nome) => {
     R.candidatosDeBuild(sp(nome), { alvo: ninetales }).candidatos.forEach((c) => {
-      if (c.rotulo === "estimada") assert.match(c.selo, /não lê|fuga no Intimidate/, nome + " " + c.golpes.join("/") + ": " + c.selo);
+      if (c.rotulo === "estimada") assert.match(c.selo, /não lê|fuga no Intimidate|pivô estimado/, nome + " " + c.golpes.join("/") + ": " + c.selo);
       else assert.equal(c.selo, "Calculado pelo código do jogo");
     });
   });
