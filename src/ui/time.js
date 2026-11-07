@@ -36,7 +36,7 @@
           papelChipsHtml(sp) +
           '<div class="ts-abis">' + (build ? otherFormsHtml(sp).replace(/^<br>/, "") : '<b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + otherFormsHtml(sp)) + '</div>' +
           buildHtml +
-          '<div class="build-sugerida" id="build-sugerida-' + sp.x + '" aria-live="polite" hidden></div>' +
+          sugestaoDoCartaoHtml(sp) +
           buildHistoryHtml(sp) +
           (swapOpen ? swapPanelHtml(i, sp) : "") +
           '</div><div class="ts-actions">' +
@@ -95,6 +95,15 @@
         var idx = parseInt(btn.dataset.idx, 10);
         teamSwapIdx = (teamSwapIdx === idx) ? null : idx; // estado de tela (painel aberto), nada a gravar
         renderTeam();
+      } else if (btn.classList.contains("cm-foco")) {
+        alternarFocoDoCartao(x, btn.dataset.foco);
+      } else if (btn.classList.contains("bs-usar")) {
+        usarSugestaoDoCartao(x);
+      } else if (btn.classList.contains("bs-fechar")) {
+        delete sugestaoDoCartao[x];
+        renderTeam();
+        var chipVolta = document.querySelector('#team-slots .cm-foco[data-x="' + x + '"]');
+        if (chipVolta) chipVolta.focus();
       } else if (btn.classList.contains("ts-montar-build")) {
         var montar = document.getElementById("motor-montar"); // a ação que já existe (Modo Motor)
         if (montar) montar.click();

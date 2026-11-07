@@ -144,7 +144,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - clampInt:103 - chamado por: applySave (save.js:49), sanitizarStrategySets (save.js:258), limitarEvsAoJogo (validacao_build_ia.js:154), lerFormularioDoEditor (editor_build.js:444), updateMyBuildEvTotal (editor_build.js:322), +1
 - descricaoDaEspecie:187 - chamado por: fichaCabecalhoHtml (dex_ficha.js:469)
 - getSpeciesBySname:79 - chamado por: confrontoFoesDe (chefoes.js:270), efeitoDasHabilidadesNoDuelo (duelo.js:1367), foeDeDuelo (duelo.js:3037), carryUserData (evolucao.js:167), devolveChainByX (evolucao.js:206), +11
-- getSpeciesByX:78 - chamado por: effectiveBuild (builds.js:190), itensEmUsoComQuem (builds.js:141), teamItemsInUse (builds.js:85), teamMovesInUse (builds.js:111), teamRolesInUse (builds.js:153), +46
+- getSpeciesByX:78 - chamado por: effectiveBuild (builds.js:190), itensEmUsoComQuem (builds.js:141), teamItemsInUse (builds.js:85), teamMovesInUse (builds.js:111), teamRolesInUse (builds.js:153), +48
 - habilidadesEscolhiveis:119 - chamado por: formFamilyPromptNote (formas_mega.js:46), habilidadeSubstitutaPara (reconciliar_build.js:26), reconciliarBuild (reconciliar_build.js:39), contextoDeValidacao (validacao_build_ia.js:182), validateAiBuild (validacao_build_ia.js:199), +3
 - snameOf:80 - chamado por: applySave (save.js:49), xsToSnames (save.js:24)
 - uniqueIds:122 - chamado por: nomesDeHabilidades (condicoes_habilidade.js:116), armadoresDeClima (duelo.js:3283), climaDoTimeDoChefao (duelo.js:3063), comHabilidadesDuelo (duelo.js:3519), foeDeDuelo (duelo.js:3037), +14
@@ -317,7 +317,8 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - serveProMono:74 - chama: speciesTypeNames (tipos.js:254) | chamado por: bestBoxCandidateForBoss (chefoes.js:195), confrontoUnidadesDaCaixa (chefoes.js:301), especiesQueResolvem (pipeline_build.js:759), motorCandidatosEmPassos (time_pelo_motor.js:160), motorClassificar (time_pelo_motor_papeis.js:123), +2
 
 ## regras/pipeline_build.js
-- buildFocadaDoMotor:734 - chama: rankDe (rank_da_run.js:29), ctxDoState (validacao_build_ia.js:10)
+- ROTULO_FOCO_BUILD:687 - chamado por: sugestaoDoCartaoHtml (time_build.js:140)
+- buildFocadaDoMotor:734 - chama: rankDe (rank_da_run.js:29), ctxDoState (validacao_build_ia.js:10) | chamado por: alternarFocoDoCartao (time_build.js:109)
 - candidatosDeBuild:549 - chama: ctxDoState (validacao_build_ia.js:10) | chamado por: pipelineResultado (pipeline_tela.js:14)
 - especiesQueResolvem:759 - chama: SPECIES (dados_base.js:52), getSpeciesByX (dados_base.js:78), battleUnitsOf (formas_mega.js:185), serveProMono (mono_run.js:74), rankDe (rank_da_run.js:29), +1 | chamado por: quemResolveCalcular (quem_resolve.js:22)
 - pipelineAceitosDoFoco:716 - chama: conferirPapelDaBuild (validacao_build_ia.js:69)
@@ -377,14 +378,14 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - sanitizarStrategySets:258 - chama: clampInt (dados_base.js:103), getSpeciesBySname (dados_base.js:79)
 - saveChegandoTemMenosProgresso:386 - chamado por: conflitoDeProgresso (sync.js:61)
 - saveEnviavel:336 - chamado por: connectSync (sync.js:179), remotoComSomaErrada (sync.js:88)
-- snamesToXs:15 - chama: SPECIES_BY_SNAME (dados_base.js:72) | chamado por: carregarTimeSalvo (time.js:222), renderSavedTeams (time.js:198)
+- snamesToXs:15 - chama: SPECIES_BY_SNAME (dados_base.js:72) | chamado por: carregarTimeSalvo (time.js:231), renderSavedTeams (time.js:207)
 - syncContentDiffers:400 - chamado por: connectSync (sync.js:179)
 - xsToSnames:24 - chama: snameOf (dados_base.js:80) | chamado por: guardarTimeAnterior (aba_chefoes.js:265)
 
 ## regras/sugestao_do_motor.js
-- SUGESTAO_ROTULO:11 - chamado por: buildChipsHtml (editor_build.js:212), rotuloDaBuild (ficha_extras.js:170), modoMotorFicarComVariante (modo_motor.js:118), modoMotorRodapeHtml (modo_motor.js:180)
-- gravarSugestoesDoMotor:61 - chama: entradaDeBuild (builds.js:22), getBuildList (evolucao.js:14), acrescentarVarianteNaLista (lista_de_builds.js:23), removerBuildDaLista (lista_de_builds.js:32), state (nucleo.js:8) | chamado por: modoMotorFicarComVariante (modo_motor.js:118)
-- planoDeGravarSugestoes:39 - chama: getActiveBuild (evolucao.js:16), getBuildList (evolucao.js:14) | chamado por: modoMotorFicarComVariante (modo_motor.js:118)
+- SUGESTAO_ROTULO:11 - chamado por: buildChipsHtml (editor_build.js:212), rotuloDaBuild (ficha_extras.js:170), modoMotorFicarComVariante (modo_motor.js:118), modoMotorRodapeHtml (modo_motor.js:180), usarSugestaoDoCartao (time_build.js:123)
+- gravarSugestoesDoMotor:61 - chama: entradaDeBuild (builds.js:22), getBuildList (evolucao.js:14), acrescentarVarianteNaLista (lista_de_builds.js:23), removerBuildDaLista (lista_de_builds.js:32), state (nucleo.js:8) | chamado por: modoMotorFicarComVariante (modo_motor.js:118), usarSugestaoDoCartao (time_build.js:123)
+- planoDeGravarSugestoes:39 - chama: getActiveBuild (evolucao.js:16), getBuildList (evolucao.js:14) | chamado por: modoMotorFicarComVariante (modo_motor.js:118), usarSugestaoDoCartao (time_build.js:123)
 
 ## regras/texto_versao_nova.js
 - LIDO_PELO_TEXTO_NOVO_DUELO:156 - chamado por: expandirTextoDeHabilidade (condicoes_habilidade.js:99), textoHabDuelo (duelo.js:48)

@@ -63,10 +63,6 @@
 /* Card de membro (lote 2, 2026-10-04): o set deixa de ser uma caixa lilás cheia e vira texto
    com uma linha lateral; as notas ficam abaixo do nome do Pokémon na hierarquia; as ações
    ficam sempre no rodapé do card, separadas por uma linha. */
-.team-slot .ts-build .showdown-block {
-  background: transparent; border: 0; border-left: 2px solid var(--border); border-radius: 0;
-  padding: 2px 0 2px 10px; font-size: var(--fs-pequeno);
-}
 .team-slot .ts-build .abi-synergy, .team-slot .ts-build .ts-item-desc, .team-slot .ts-nota-fonte .ts-build-note { font-size: var(--fs-legenda); }
 .team-slot .ts-actions { margin-top: 12px; padding-top: 6px; border-top: 1px solid var(--border); }
 .team-slot > div:first-child { flex: 1 1 auto; min-width: 0; }
