@@ -35,7 +35,8 @@
       var sp = members[startIdx + i];
       if (sp) {
         var selected = sp.x === pcBoxSelectedX;
-        slotsHtml += '<button class="pcbox-slot' + (selected ? ' selected' : '') + '" data-x="' + sp.x + '" type="button" title="' + escapeHtml(sp.n) + '">' +
+        var nomesTipo = speciesTypeNames(sp);
+        slotsHtml += '<button class="pcbox-slot tipo-' + nomesTipo[0] + (nomesTipo[1] ? ' tipo2-' + nomesTipo[1] : '') + (selected ? ' selected' : '') + '" data-x="' + sp.x + '" type="button" title="' + escapeHtml(sp.n) + '">' +
           spriteImgHtml(sp.x, sp.n, 40) + '</button>';
       } else {
         slotsHtml += '<div class="pcbox-slot empty" aria-hidden="true"></div>';
@@ -54,7 +55,7 @@
       var abiNames = habilidadesEscolhiveis(selectedSp).join(", ");
       var innNames = selectedSp.inn.map(function (id) { return ABILITIES[id][0]; }).join(", ");
       var usageHtml = roleTagsHtml(selectedSp.sname);
-      detailHtml = '<div class="pcbox-detail">' +
+      detailHtml = '<div class="pcbox-detail cartao-membro tipo-' + names[0] + (names[1] ? ' tipo2-' + names[1] : '') + '">' +
         '<div class="pcbox-detail-top">' +
           '<span class="pcbox-detail-sprite goto-species" tabindex="0" role="button" data-x="' + selectedSp.x + '" title="Ver na Dex">' + spriteImgHtml(selectedSp.x, selectedSp.n, 44) + '</span>' +
           '<div class="pcbox-detail-identity">' +

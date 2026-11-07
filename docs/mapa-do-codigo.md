@@ -99,7 +99,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **sync.js** - Sincronização entre aparelhos (capability db) e os avisos de sync.
   aplicarSaveRemoto:45, conflitoDeProgresso:61, remotoComSomaErrada:88, pushToSync:96, showSyncBanner:105, syncBannerOffset:119, atualizarTituloDoSubtitulo:139, setSyncStatusIndicator:143, scheduleSyncRetry:162, lerSaveLocal:174, connectSync:179
 - **time.js** - Aba Time: cards dos membros, troca com a caixa, times salvos e "Novo jogo".
-  renderTeam:8, swapPanelHtml:125, telasDeElenco:151, rosterMove:159, teamsMatch:180, htmlDoCartaoDoTimeSalvo:189, renderSavedTeams:208, carregarTimeSalvo:232, excluirTimeSalvo:260, comecarRenomearTimeSalvo:278, salvarNomeTimeSalvo:284, zerarRun:343
+  papelChipsHtml:10, golpesChipsHtml:17, carimboEtapaHtml:26, renderTeam:34, swapPanelHtml:152, telasDeElenco:178, rosterMove:186, teamsMatch:207, htmlDoCartaoDoTimeSalvo:216, renderSavedTeams:235, carregarTimeSalvo:259, excluirTimeSalvo:287, comecarRenomearTimeSalvo:305, salvarNomeTimeSalvo:311, zerarRun:370
 - **tipos.js** - Aba Tipos: tabela de efetividade, velocidades e compêndio de papéis.
   renderTypeMatrix:9, renderSpeedTiers:35, wireSpeedTiersOnce:63, computeRoleCompendium:91, renderRoleCompendium:113
 

@@ -5,6 +5,32 @@
   // template (fase 5 da refatoração, 2026-09-24) - a ordem de execução não mudou.
 
   // ---------------- team roster rendering ----------------
+  // Fatia 2 (07/11/2026): cartão do membro. Papel, golpes na cor do tipo e carimbo da Etapa são camadas
+  // de leitura rápida; o set completo (showdown-block) continua no cartão.
+  function papelChipsHtml(sp) {
+    var role = SPECIES_ROLE[sp.sname];
+    var partes = role ? (role.roles || []).map(function (r) { return ROLE_LABEL_PT[r] || r; }) : [];
+    if (role && role.split) partes.push(SPLIT_LABEL_PT[role.split] || role.split);
+    return partes.length ? '<div class="cm-papeis" title="Papel calculado por ataque, bulk e velocidade (não avalia sinergia com o time)">' +
+      partes.map(function (p) { return '<span class="cm-papel">' + escapeHtml(p) + '</span>'; }).join("") + '</div>' : "";
+  }
+  function golpesChipsHtml(build) {
+    var golpes = (build && build.moves || []).filter(Boolean);
+    if (!golpes.length) return "";
+    return '<ul class="cm-golpes" aria-label="Golpes da build">' + golpes.map(function (n) {
+      var m = MOVE_BY_NAME[stripNote(n)];
+      var tipo = m ? TYPES[m[1]] : "";
+      return '<li class="cm-golpe' + (tipo ? ' tipo-' + tipo : '') + '"' + (tipo ? ' title="' + tipo + '"' : '') + '>' + escapeHtml(stripNote(n)) + '</li>';
+    }).join("") + '</ul>';
+  }
+  function carimboEtapaHtml() {
+    var idx = state.settings.milestone;
+    if (!idx || idx < 1 || typeof insigniaSvgHtml !== "function") return "";
+    var forma = Math.min(idx, INSIGNIAS_FORMAS.length) - 1;
+    var nome = LEVELCAPS && LEVELCAPS.rows && LEVELCAPS.rows[idx] ? LEVELCAPS.rows[idx].milestone : "Etapa " + idx;
+    return '<span class="carimbo-etapa ins-btn on tipo-' + INSIGNIAS_TIPOS[forma] + '" title="Build ativa para a Etapa: ' + escapeHtml(nome) + '" role="img" aria-label="Etapa: ' + escapeHtml(nome) + '">' + insigniaSvgHtml(forma) + '</span>';
+  }
+
   function renderTeam() {
     // Só desenha. A revisão automática das builds é disparada pelas ações que
     // mudam time/builds (concluirAcoes), não por quem desenha.
@@ -20,6 +46,7 @@
         var build = effectiveBuild(sp);
         var buildHtml = build ? (
           '<div class="ts-build">' +
+            golpesChipsHtml(build) +
             '<div class="ts-build-head"><span class="ts-build-label">' + rotuloDaBuild(build) + '</span>' + seloDaBuildHtml(build) +
               '<button class="ts-build-copy" data-x="' + sp.x + '" type="button" title="Copiar este set">copiar</button></div>' +
             '<pre class="showdown-block">' + escapeHtml(showdownSet(sp, build)) + '</pre>' +
@@ -40,10 +67,10 @@
           '</div>'
         );
         var swapOpen = teamSwapIdx === i;
-        slots.push('<div class="team-slot' + (swapOpen ? ' swapping' : '') + '"><div>' +
-          '<div class="ts-head goto-species" tabindex="0" role="button" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 64) +
+        slots.push('<div class="team-slot cartao-membro tipo-' + names[0] + (names[1] ? ' tipo2-' + names[1] : '') + (swapOpen ? ' swapping' : '') + '">' + carimboEtapaHtml() + '<div>' +
+          '<div class="ts-head goto-species" tabindex="0" role="button" data-x="' + sp.x + '" title="Ver na Dex">' + spriteImgHtml(sp.x, sp.n, 96) +
           '<div><div class="ts-name">' + escapeHtml(sp.n) + ' ' + rankBadgeHtml(sp.sname) + megaLockedTagHtml(sp) + '</div>' +
-          '<div class="ts-types">' + names.map(function (n) { return typePill(n, true); }).join("") + '</div></div></div>' +
+          '<div class="ts-types">' + names.map(function (n) { return typePill(n, true); }).join("") + '</div>' + papelChipsHtml(sp) + '</div></div>' +
           '<div class="ts-abis"><b>Hab.:</b> ' + escapeHtml(abiNames) + '<br><b>Innate:</b> ' + escapeHtml(innNames) + otherFormsHtml(sp) + '</div>' +
           buildHtml +
           buildHistoryHtml(sp) +
