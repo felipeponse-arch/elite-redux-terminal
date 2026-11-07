@@ -1,6 +1,6 @@
 # 01 — Saltos de percentil no rank v2 (caso Orchestot)
 
-Status: a-avaliar (usuário, 21/10/2026: publicar a v183 e investigar depois)
+Status: descartado (06/11/2026, decisão do usuário: o rank foi refeito (29 chefões, incremental) no pacote 01)
 Tamanho: M.
 
 ## Sintoma

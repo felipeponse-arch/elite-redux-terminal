@@ -1,6 +1,6 @@
 # 01 — Plano: arquivos acima de 350 linhas
 
-Status: a-avaliar (decisão do Felipe, 17/10/2026: medir e planejar, sem refatorar agora)
+Status: descartado (06/11/2026, decisão do usuário: o corte do pacote 01 encolheu motor e pipeline; reavaliação dispensada (decisão do usuário, 06/11))
 Origem: setup do vibe-coding-toolkit (`docs/setup.md`). Regra `max-lines` (350) como AVISO em `eslint.config.mjs`.
 
 ## Medição na adoção (17/10/2026, master 7b154d0)

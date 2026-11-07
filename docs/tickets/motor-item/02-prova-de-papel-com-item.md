@@ -1,6 +1,6 @@
 # 02 — Prova de papel e tag com o item fechado pelo motor
 
-Status: pronto-para-agente
+Status: descartado (06/11/2026, decisão do usuário: a prova de papel por simulação saiu no corte do pacote 01 (papel e estilo vêm da tag do rank))
 Tamanho: P. Dono: engenheira-do-motor.
 Origem: revisão do motor-item/01 (supervisor r1, 22/10/2026), não bloqueante.
 

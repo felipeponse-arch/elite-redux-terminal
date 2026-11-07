@@ -1,6 +1,6 @@
 # 08 — Registro de efeitos de habilidade: criar com um efeito piloto
 
-Status: pronto-para-agente
+Status: descartado (06/11/2026, decisão do usuário: fora do escopo depois do corte (decisão do usuário, 06/11))
 Bloqueado por: 07
 
 ## O que entrega

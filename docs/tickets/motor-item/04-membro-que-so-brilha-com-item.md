@@ -1,6 +1,6 @@
 # 04 — Membro que só brilha com item pode não entrar no time
 
-Status: a-avaliar
+Status: descartado (06/11/2026, decisão do usuário: dependia da prova de papel por simulação, removida no pacote 01)
 Tamanho: M. Dono: engenheira-do-motor.
 Origem: revisão do motor-item/01 (supervisor r1, 22/10/2026), não bloqueante.
 

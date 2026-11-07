@@ -1,6 +1,6 @@
 # 03 — "Montar meu melhor time" passa de 10 s na etapa 5
 
-Status: a-avaliar
+Status: descartado (06/11/2026, decisão do usuário: o teste lento e a montagem foram enxugados no pacote 01 (pesado em ~2,5 min))
 Tamanho: M. Dono: engenheira-do-motor.
 Origem: revisão do motor-item/01 (supervisor r1, 22/10/2026), não bloqueante.
 

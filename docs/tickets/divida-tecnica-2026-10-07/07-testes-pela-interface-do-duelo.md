@@ -1,6 +1,6 @@
 # 07 — Testes e sabotagens pela interface do duelo
 
-Status: em-andamento (2ª metade feita e rebaseada no master 78f5756 em 14/10/2026; falta só o resto listado em "Falta")
+Status: descartado (06/11/2026, decisão do usuário: fora do escopo depois do corte (decisão do usuário, 06/11))
 Bloqueado por: nenhum
 
 ## O que entrega

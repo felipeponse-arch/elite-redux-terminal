@@ -1,6 +1,6 @@
 # 08 — Rank × comunidade, builds dos vídeos e pedras sem fonte
 
-Status: em-andamento
+Status: descartado (06/11/2026, decisão do usuário: superado pelo rank enxuto de 06/11)
 Bloqueado por: 03, 05, 16, 17, 18, 19
 Agentes: meta-pokemon
 

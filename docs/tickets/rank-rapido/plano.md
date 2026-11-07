@@ -1,6 +1,6 @@
 # Rank rápido e melhor - plano (04/11/2026)
 
-Status: a-avaliar (plano; nada foi alterado no código nem no dado)
+Status: descartado (06/11/2026, decisão do usuário: substituído pelo rank incremental por impressão digital (pacote 01))
 Pedido: Felipe, 04/11/2026 - o rank completo (`node scripts/calcular_rank_v2.mjs --gravar`, ~2h50 em 10 workers) é o gargalo de toda atualização; ele quer o rank MELHOR e MAIS RÁPIDO.
 Base lida: `scripts/calcular_rank_v2.mjs`, `rank_escolha.mjs`, `rank_comum.mjs`, `rank_fatia.mjs`, `src/regras/duelo.js` (`danoNoDuelo` 1976, `resultadoDoDuelo` 2748, `unidadeDeDuelo` 3081, `quatroGolpesDeDano` 3129, `resultadosDaLutaComHazard` 3221, `comQuatroGolpes` 3238), `docs/decisoes_mecanicas.md`.
 

@@ -1,6 +1,6 @@
 # 09 — Registro de efeitos de habilidade: migrar em lotes
 
-Status: pronto-para-agente
+Status: descartado (06/11/2026, decisão do usuário: fora do escopo depois do corte (decisão do usuário, 06/11))
 Bloqueado por: 08
 
 ## O que entrega
