@@ -518,10 +518,10 @@
     }
     var cPivo = null;
     if (so !== outro) {
-    var comPivo = golpes.some(ehGolpeDePivo), novos = golpes, avPivo = base.g.av;
+    var comPivo = golpes.some(ehGolpeDePivo), avPivo = base.g.av;
     if (!comPivo) {
       var fraco = golpes.slice().sort(function (a, b) { return (tabela[a] ? tabela[a].fracMin : 0) - (tabela[b] ? tabela[b].fracMin : 0) || (a < b ? -1 : 1); })[0];
-      novos = golpes.map(function (n) { return n === fraco ? pivos[0] : n; });
+      var novos = golpes.map(function (n) { return n === fraco ? pivos[0] : n; });
       avPivo = pipelineAvaliarConjunto(tabela, golpes.filter(function (n) { return n !== fraco; }), base.g.sinergias, alvo);
       if (!avPivo) return null;
       avPivo.golpes = novos.slice();
