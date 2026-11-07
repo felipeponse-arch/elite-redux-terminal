@@ -3828,7 +3828,9 @@
     meus = semItemDuplicadoNoHell(meus);
     var time = meus.map(participanteDupla), deles = foes.map(participanteDupla);
     var ladoMeu = inicio ? Object.assign(novoLadoDuelo(), inicio.lado) : novoLadoDuelo(), ladoDele = novoLadoDuelo();
-    if (inicio) aplicarStatusNoFimDuelo(time, inicio.statusNoFim);
+    if (inicio && inicio.statusNoFim) aplicarStatusNoFimDuelo(time, inicio.statusNoFim);
+    // Luta seguinte sem cura (8º ginásio): HP, status e desmaiados da luta anterior (`heranca`, mesma ordem de `meus`).
+    if (inicio && inicio.heranca) inicio.heranca.forEach(function (h, i) { if (time[i]) { time[i].frac = h.frac; time[i].vivo = h.vivo; time[i].status = Object.assign({}, h.status); } });
     var log = [], voltas = 0;
     function inversaPermanente() { return time.concat(deles).some(function (c) { return c.u.ef.inversa >= INVERSA_PERMANENTE_DUELO; }); }
     function vivos(l) { return l.filter(function (c) { return c.vivo; }); }
@@ -3957,6 +3959,7 @@
     var derrubados = deles.filter(function (f) { return !f.vivo; }).length, fica = vivos(time);
     var venceu = derrubados === deles.length;
     return { dupla: true, venceu: venceu, derrubados: derrubados, total: deles.length, vivos: fica.length,
+      heranca: time.map(function (c) { return { frac: c.frac, vivo: c.vivo, status: Object.assign({}, c.status) }; }),
       hpRestante: fica.reduce(function (s, c) { return s + c.frac; }, 0), log: log,
       pontos: derrubados + (venceu ? 6 + fica.length * 0.5 + fica.reduce(function (s, c) { return s + c.frac; }, 0) * 0.5 : 0) +
         deles.reduce(function (s, f) { return s + (f.vivo ? 1 - f.frac : 0); }, 0) * 0.5 };
