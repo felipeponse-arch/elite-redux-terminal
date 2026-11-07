@@ -45,10 +45,11 @@ jobs:
         run: npm audit --audit-level=high
       - name: Travas estáticas
         run: npm run check
-      - name: Testes unitários rápidos
-        run: ER_SEM_TS=1 npm run test:unit
+      # Build antes dos unitários: 2 testes (fontes) leem artifact_final.html, que não é versionado.
       - name: Build
         run: npm run build
+      - name: Testes unitários rápidos
+        run: ER_SEM_TS=1 npm run test:unit
 
   navegador:
     runs-on: ubuntu-latest
