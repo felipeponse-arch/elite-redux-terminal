@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "po-do-sono-plano-comum-sem-imunidade",
+    descricao: "Pendência 04/11: Spore e Sleep Powder voltam a dormir Grass, Overcoat e Safety Goggles no plano comum do duelo",
+    arquivo: "duelo.js",
+    de: "if (poBarraSonoDuelo(x, y, nome)) return null;",
+    para: "",
+  },
+  {
     id: "tk19-pipeline-le-state-em-vez-do-ctx",
     descricao: "TK-19: o pipeline de build volta a pegar o nível de cálculo do state global em vez do cap do ctx recebido",
     arquivo: "pipeline_build.js",
@@ -4741,8 +4748,8 @@ export const MUTACOES = [
     id: "tk43-po-sem-imunidade",
     descricao: "TK-43: Spore/Sleep Powder dormem Grass, Overcoat e Safety Goggles",
     arquivo: "duelo.js",
-    de: "if (GOLPES_DE_PO_DO_SONO_DUELO[MOVES[id][0]] && ",
-    para: "if (false && GOLPES_DE_PO_DO_SONO_DUELO[MOVES[id][0]] && ",
+    de: "if (poBarraSonoDuelo(atq, def, MOVES[id][0])) return;",
+    para: "",
   },
   {
     id: "tk43-po-sem-habilidade",

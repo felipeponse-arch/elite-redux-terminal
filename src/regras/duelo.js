@@ -1978,6 +1978,10 @@
   // Constantes do sono do alvo (TK-43): declaradas antes do uso em danoNoDuelo.
   var SONO_DO_ALVO_DUELO = { "Dream Eater": 1, "Nightmare": 1, "Wake-Up Slap": 1, "Dream Invasion": 1 };
   var GOLPES_DE_PO_DO_SONO_DUELO = { "Spore": 1, "Sleep Powder": 1 };
+  // IsPowderImmune (battle_util.c:3197, canceller :3467): Grass, Safety Goggles e habilidade de pó barram o golpe; Mycelium Might ignora.
+  function poBarraSonoDuelo(atq, def, nome) {
+    return !!GOLPES_DE_PO_DO_SONO_DUELO[nome] && !atq.ef.statusIgnoraImune && (def.tipos.indexOf("Grass") !== -1 || !!def.ef.imunePo || !!(def.it && def.it.nome === "Safety Goggles"));
+  }
   var MAXHP_PESADELO_DUELO = 1 / 4; // ENDTURN_NIGHTMARES (battle_util.c:2619-2621)
   function danoNoDuelo(atq, def, nivel) {
     // Wide Guard permanente do ginásio (Tate & Liza): golpe em área não chega no time dele; sobram os de alvo único.
@@ -2211,7 +2215,7 @@
     (atq.statusIds || []).forEach(function (id) {
       var p = planoDoGolpeStatus(id);
       if (!p || p.tipo !== "status" || p.status !== "sono") return;
-      if (GOLPES_DE_PO_DO_SONO_DUELO[MOVES[id][0]] && !atq.ef.statusIgnoraImune && (def.tipos.indexOf("Grass") !== -1 || def.ef.imunePo || (def.it && def.it.nome === "Safety Goggles"))) return; // IsPowderImmune (battle_util.c:3197)
+      if (poBarraSonoDuelo(atq, def, MOVES[id][0])) return;
       var r = efeitoDoPlanoDuelo(atq, def, id, { nX: n, hpY: def.stats[0], dY: 0 }, nivel);
       if (r) melhor = Math.max(melhor, Math.min(1, r.perdeY / n));
     });
@@ -3643,6 +3647,7 @@
     if (p.tipo === "status") {
       var s = p.status;
       if (s === "sono") {
+        if (poBarraSonoDuelo(x, y, nome)) return null;
         if (y.ef.imuneStatus.sono || y.ef.aliadoImuneStatus && y.ef.aliadoImuneStatus.sono) return null;
         var podeDormir = podeDormirDuelo(y, x);
         if (!podeDormir) return null;
