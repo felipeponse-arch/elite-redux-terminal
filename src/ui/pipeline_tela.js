@@ -74,7 +74,8 @@
   }
 
   // Um candidato. `comBotao`: na ficha ganha o "Usar golpes e habilidade no editor"; no time não (o time só informa).
-  function pipelineCandidatoHtml(c, idx, temAlvo, comBotao) {
+  // `golpesCartao`: golpes no formato do cartão do Meu Time (cor do tipo e ícone de categoria), usado em "Quem derruba".
+  function pipelineCandidatoHtml(c, idx, temAlvo, comBotao, golpesCartao) {
     var v = pipelineVereditoDe(c, temAlvo);
     var inatas = (c.inatas || []).length ? ' &middot; <b>Inatas:</b> ' + escapeHtml(c.inatas.join(", ")) : "";
     var motivos = (c.motivos || []).length
@@ -84,7 +85,7 @@
     return '<article class="pipe-cand ' + v.classe + '" aria-label="Sugestão ' + (idx + 1) + '">' +
       '<div class="pipe-cand-topo"><span class="pipe-veredito">' + escapeHtml(v.texto) + '</span>' +
         (v.ordem ? '<span class="pipe-ordem">' + escapeHtml(v.ordem) + '</span>' : "") + '</div>' +
-      '<div class="pipe-golpes">' + c.golpes.map(pipelineGolpeHtml).join("") + '</div>' +
+      (golpesCartao ? golpesBuildHtml({ moves: c.golpes }) : '<div class="pipe-golpes">' + c.golpes.map(pipelineGolpeHtml).join("") + '</div>') +
       '<div class="pipe-hab"><b>Habilidade:</b> ' + escapeHtml(c.habilidade) + inatas + '</div>' +
       motivos + avisos +
       '<div class="pipe-rodape">' + pipelineSeloHtml(c) +

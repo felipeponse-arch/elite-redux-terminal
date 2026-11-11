@@ -41,10 +41,11 @@
   }
 
   function quemResolveItemHtml(e) {
-    return '<section class="pipe-membro qr-item"><div class="pipe-membro-cab">' + spriteImgHtml(e.sp.x, e.sp.n, 40) +
-      '<span class="pipe-membro-nome">' + escapeHtml(e.sp.n) + '</span>' + quemResolveOrigemHtml(e) +
+    var tipos = speciesTypeNames(e.sp);
+    return '<section class="pipe-membro qr-item cartao-membro tipo-' + tipos[0] + (tipos[1] ? ' tipo2-' + tipos[1] : '') + '"><div class="pipe-membro-cab">' + spriteImgHtml(e.sp.x, e.sp.n, 48) +
+      '<span class="pipe-membro-nome">' + escapeHtml(e.sp.n) + '</span><span class="qr-tipos">' + tipos.map(function (n) { return typePill(n, true); }).join("") + '</span>' + quemResolveOrigemHtml(e) +
       '<button class="text-action-btn goto-species pipe-ver" data-x="' + e.sp.x + '" tabindex="0" role="button" type="button" title="Abre a ficha de ' + escapeHtml(e.sp.n) + '">Abrir a ficha</button></div>' +
-      pipelineCandidatoHtml(e.candidato, 0, true, false) + '</section>';
+      pipelineCandidatoHtml(e.candidato, 0, true, false, true) + '</section>';
   }
 
   function quemResolveListaHtml(res, nomeDoAlvo) {

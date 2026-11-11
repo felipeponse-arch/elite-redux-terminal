@@ -48,7 +48,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - poeHazardNoLado:58 - chamado por: resultadosDaLutaComHazard (duelo.js:3227), simularDuplaContraChefao (duelo.js:3827), simularLutaDeVerdadeContraChefao (duelo.js:4354)
 
 ## regras/chefoes.js
-- DIFF_TO_BOSSKEY:25 - chamado por: motorMontarLuta (time_pelo_motor.js:70), quemResolveCardHtml (quem_resolve.js:83)
+- DIFF_TO_BOSSKEY:25 - chamado por: motorMontarLuta (time_pelo_motor.js:70), quemResolveCardHtml (quem_resolve.js:84)
 - HELL_DANO_EXTRA_A_PARTIR_DA_INSIGNIA:470 - chamado por: fDanoGlobalHell (duelo.js:3034)
 - HELL_IV_ZERO_A_PARTIR_DA_INSIGNIA:471 - chamado por: ivDoJogadorDuelo (duelo.js:3075)
 - HELL_NIVEIS_EXTRAS:467 - chamado por: nivelDoInimigoHell (duelo.js:3036)
@@ -429,7 +429,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - abilityTypeModFor:196 - chama: ABILITIES (dados_base.js:10) | chamado por: ameacaDe (confronto.js:91), coberturaSugerida (confronto.js:196), ofensaContra (confronto.js:59), aterradoDuelo (duelo.js:833), efetividadeNoDuelo (duelo.js:1927)
 - alwaysActiveAbilities:164 - chamado por: confrontoUnitOf (chefoes.js:245)
 - perfilDefensivoDaEspecie:179 - chama: USABLE_TYPES (dados_base.js:132) | chamado por: fichaEfetividadeHtml (dex_ficha.js:388)
-- speciesTypeNames:254 - chama: TYPES (dados_base.js:9) | chamado por: confrontoUnitOf (chefoes.js:245), podeTerStatus (condicoes_habilidade.js:128), coberturaSugerida (confronto.js:196), ofensaContra (confronto.js:59), itemDoDuelo (duelo.js:879), +18
+- speciesTypeNames:254 - chama: TYPES (dados_base.js:9) | chamado por: confrontoUnitOf (chefoes.js:245), podeTerStatus (condicoes_habilidade.js:128), coberturaSugerida (confronto.js:196), ofensaContra (confronto.js:59), itemDoDuelo (duelo.js:879), +19
 - typeMultiplier:244 - chamado por: efetividadeNoDuelo (duelo.js:1927), entrarNoLadoDuelo (duelo.js:4103), simularLutaDeVerdadeContraChefao (duelo.js:4354), avisoProximoLider (mono_run.js:158), fraquezasDoTipo (mono_run.js:80), +2
 
 ## regras/validacao_build_ia.js

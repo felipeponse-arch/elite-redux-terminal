@@ -155,3 +155,23 @@
   mask-image: linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%);
   -webkit-mask-image: linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%);
 }
+
+/* ---- Carteira de Treinador, fatia 3b (10/11/2026): matriz de confronto com cabeçalho reto e células em carimbo reto ---- */
+#boss-detail .cf-scroll { margin: 0; padding: 0 0 var(--space-1); border: 1px solid var(--border); background: var(--surface); max-width: 100%; }
+#boss-detail .cf-table { border-spacing: 0; border-collapse: collapse; min-width: 100%; }
+#boss-detail .cf-table th { padding: var(--space-1) var(--space-2); border-bottom: 2px solid var(--accent-2); vertical-align: middle; color: var(--text); }
+#boss-detail .cf-table th .spr { background-color: transparent; box-shadow: none; border-radius: 0; }
+#boss-detail .cf-table tbody th, #boss-detail .cf-table tbody td { border-bottom: 1px solid var(--border); padding: var(--space-1) var(--space-2); }
+#boss-detail .cf-table tbody th.cf-foe { background: var(--surface-2); text-transform: none; font-family: inherit; letter-spacing: 0; }
+#boss-detail .cf-foe-cell { gap: var(--space-2); }
+#boss-detail .cf-foe-nome { font-weight: 800; }
+#boss-detail .cf-cell { min-width: 44px; height: 44px; border-radius: 0; border: 1px solid var(--border); border-left-width: 4px; }
+#boss-detail .cf-cell .cf-sym { font-weight: 900; color: var(--text); }
+#boss-detail .cf-v-vantagem { border-color: var(--sem-resist); }
+#boss-detail .cf-v-seguro { border-color: var(--accent-2); }
+#boss-detail .cf-v-arriscado, #boss-detail .cf-v-desvantagem { border-color: var(--sem-weak); }
+#boss-detail .cf-best { white-space: normal; min-width: 140px; }
+#boss-detail .cf-legend { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-top: var(--space-2); font-size: var(--fs-legenda); color: var(--text-dim); }
+#boss-detail .cf-plan { border: 1px solid var(--border); border-radius: 0; padding: 0 var(--space-3); margin-top: var(--space-2); }
+#boss-detail .cf-plan summary { min-height: var(--alvo-min); display: flex; align-items: center; cursor: pointer; font-weight: 800; }
+#boss-detail .cf-fix { border-left: 3px solid var(--aviso); padding-left: var(--space-3); }

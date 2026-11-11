@@ -1,3 +1,4 @@
+:root { --chanfro: 8px; --t1: var(--accent-2); --t2: var(--t1); } /* mesmos padrões de cartao.css (o verificador de variáveis olha arquivo a arquivo) */
 /* Quem derruba este chefão (ticket pipeline-build/04). Reaproveita os cartões .pipe-* do ticket 02; aqui só o
    invólucro: o card recolhido, um grupo por Pokémon do chefão e a etiqueta de origem. A origem sempre vem escrita
    (a cor só reforça), e nada novo de sombra: o fundo é o mesmo bloco --surface-2. */
@@ -14,10 +15,6 @@
 .qr-corpo-card > p { margin: 0; }
 
 .qr-membro { border-top: 1px solid var(--border); min-width: 0; }
-.qr-membro > summary {
-  cursor: pointer; min-height: var(--alvo-min); display: flex; align-items: center; gap: 8px;
-  list-style: none; font-weight: 600; font-size: var(--fs-texto);
-}
 .qr-membro > summary:hover { color: var(--badge-accent); }
 .qr-membro > summary::-webkit-details-marker { display: none; }
 .qr-membro > summary::before { content: "▸"; color: var(--text-dim); flex: none; }
@@ -26,16 +23,40 @@
 .qr-corpo { display: flex; flex-direction: column; gap: 10px; padding: 4px 0 12px; min-width: 0; }
 .qr-grupo { margin: 4px 0 0; font-size: var(--fs-pequeno); font-weight: 700; color: var(--text-dim); }
 .qr-item { gap: 6px; }
-.qr-item .pipe-membro-cab { flex-wrap: wrap; row-gap: 4px; }
-.qr-item .pipe-membro-nome { flex: 0 1 auto; }
-.qr-origem {
-  font-size: var(--fs-legenda); font-weight: 600; padding: 2px 8px; border-radius: var(--radius-pill);
-  border: 1px solid var(--border); background: var(--surface-3); color: var(--text);
-}
 .qr-origem.meu { border-color: var(--badge-resist); }
 .qr-origem.fora { border-style: dashed; color: var(--text-dim); }
-.qr-item .pipe-ver { margin-left: auto; }
 
 @media (pointer: coarse) {
   .qr-card > summary, .qr-membro > summary { min-height: 44px; }
 }
+
+/* ---- Carteira de Treinador, fatia 3b (10/11/2026): cada Pokémon que derruba vira mini-cartão chanfrado ---- */
+.qr-item.cartao-membro {
+  position: relative; gap: var(--space-2); padding: var(--space-3); border-radius: 0; border: 1px solid var(--border);
+  border-top: 3px solid var(--t1); border-bottom: 3px solid var(--t2);
+  background:
+    radial-gradient(60% 50% at 0% 0%, color-mix(in srgb, var(--t1) 18%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--surface-2) 90%, var(--t2)) 0%, var(--surface) 70%);
+  clip-path: polygon(0 0, calc(100% - var(--chanfro)) 0, 100% var(--chanfro), 100% 100%, 0 100%);
+}
+.qr-item .pipe-membro-cab { flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.qr-item .pipe-membro-cab .spr { background-color: transparent; box-shadow: none; border-radius: 0; filter: drop-shadow(0 3px 3px rgb(0 0 0 / .5)); }
+.qr-item .pipe-membro-nome { flex: 0 1 auto; font-family: var(--fonte-display); font-size: var(--fs-titulo); font-weight: 900; text-transform: uppercase; letter-spacing: .02em; line-height: 1; }
+.qr-tipos { display: inline-flex; flex-wrap: wrap; gap: var(--space-1); }
+.qr-origem { border-radius: 0; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; font-size: var(--fs-micro); padding: 3px 7px; border: 1px solid var(--border); background: var(--surface-3); color: var(--text); }
+.qr-item .pipe-cand { border: 0; border-left: 0; background: transparent; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.qr-item .pipe-veredito {
+  font-family: var(--fonte-display); font-size: var(--fs-grande); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; line-height: 1; padding: 6px 10px;
+  color: var(--text); border: 1px solid var(--t1); background: color-mix(in srgb, var(--t1) 22%, var(--surface));
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+}
+.qr-item .pipe-cand.k1 .pipe-veredito { background: var(--accent-2); color: var(--accent-ink); border-color: var(--accent-2); }
+.qr-item .pipe-cand-topo { align-items: center; gap: var(--space-2); }
+.qr-item .pipe-motivos { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1); max-width: none; }
+.qr-item .pipe-motivos li { margin: 0; padding: 3px 8px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-dim); font-size: var(--fs-pequeno); }
+.qr-item .cm-golpes { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.qr-item .pipe-selo { border-radius: 0; }
+.qr-item .pipe-ver { margin-left: auto; border-radius: 0; border: 1px solid var(--border); background: var(--surface-2); padding: 0 var(--space-3); min-height: var(--alvo-min); }
+.qr-membro > summary { cursor: pointer; min-height: var(--alvo-min); display: flex; align-items: center; gap: 8px; list-style: none; font-size: var(--fs-grande); font-family: var(--fonte-display); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.qr-membro > summary:focus-visible, .qr-card > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (max-width: 620px) { .qr-item .cm-golpes { grid-template-columns: 1fr; } .qr-item .pipe-ver { margin-left: 0; } }

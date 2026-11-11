@@ -5,10 +5,10 @@ Por função de nível superior: `chama:` e `chamado por:` funções de OUTROS a
 no máximo 5 por lista, o resto vira `+N`. Referência vale também como callback. Chamada pelo template/HTML não aparece. Mapa geral: [mapa-do-codigo.md](../mapa-do-codigo.md).
 
 ## ui/aba_chefoes.js
-- DIFF_LABELS:236 - chamado por: bossReferenceHtml (ficha_extras.js:103), quemResolveCardHtml (quem_resolve.js:83)
+- DIFF_LABELS:236 - chamado por: bossReferenceHtml (ficha_extras.js:103), quemResolveCardHtml (quem_resolve.js:84)
 - STAT_LABELS_SHORT:533 - chamado por: evBreakpointNote (editor_build.js:116), myBuildEditorHtml (editor_build.js:230), updateMyBuildStatus (editor_build.js:354), compareResultHtml (ficha_extras.js:22)
 - bossMonCardHtml:434 - chama: calcFinalStat (calc_stat.js:160), itemRuleFor (calc_stat.js:149), ABILITIES (dados_base.js:10), getSpeciesBySname (dados_base.js:79), getSpeciesByX (dados_base.js:78), +6
-- bossState:13 - chamado por: initProgress (progresso.js:106), quemResolvePreencher (quem_resolve.js:66), quemResolveRestaurar (quem_resolve.js:103)
+- bossState:13 - chamado por: initProgress (progresso.js:106), quemResolvePreencher (quem_resolve.js:67), quemResolveRestaurar (quem_resolve.js:104)
 - campoDoChefaoHtml:178 - chama: regraDeCampoDoChefao (chefoes.js:426)
 - candidatosDoJogador:250 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), battleUnitsOf (formas_mega.js:185), xsDoJogador (liberado_na_run.js:38), serveProMono (mono_run.js:74)
 - guardarTimeAnterior:268 - chama: getSpeciesByX (dados_base.js:78), ehBackupDeTime (save.js:48), xsToSnames (save.js:24), generatedTeamResult (arquetipo.js:35), teamKeyFor (arquetipo.js:14), +2
@@ -18,7 +18,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - montarTimeContraEsteChefao:310 - chama: computeTeamGenerationValidation (builds.js:228), buffsAtivosDoChefao (chefoes.js:534), buffsParaMostrarDoChefao (chefoes.js:522), planoDaLuta (chefoes.js:568), regraDeCampoDoChefao (chefoes.js:426), +12
 - myBuildLevel:19 - chamado por: myBuildEditorHtml (editor_build.js:230), updateMyBuildStatus (editor_build.js:354), wireMyBuildEditor (editor_build.js:418)
 - myBuildLevelIsCustom:31 - chamado por: myBuildEditorHtml (editor_build.js:230), wireMyBuildEditor (editor_build.js:418), initProgress (progresso.js:106), zerarRun (time.js:342)
-- renderBossDetail:534 - chama: classeDoCabecalhoDoChefao (chefoes.js:57), getRemainingBossEntries (chefoes.js:63), nivelDeCalculo (level_cap.js:65), monotypeAtivo (mono_run.js:72), quemResolveCardHtml (quem_resolve.js:83), +2
+- renderBossDetail:534 - chama: classeDoCabecalhoDoChefao (chefoes.js:57), getRemainingBossEntries (chefoes.js:63), nivelDeCalculo (level_cap.js:65), monotypeAtivo (mono_run.js:72), quemResolveCardHtml (quem_resolve.js:84), +2
 - renderBossList:211 - chama: getRemainingBossEntries (chefoes.js:63)
 - renderGymSkillsCardHtml:397 - chama: ehRevancheDeLider (chefoes.js:486), gymLeaderBaseName (chefoes.js:55), gymSkillsSummaryFor (chefoes.js:379)
 - selectBoss:378 - chama: varianteDoChefao (chefoes.js:370)
@@ -106,7 +106,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - seloDaBuildHtml:168 - chama: seloDaBuild (avisos_build.js:82) | chamado por: painelDaBuildHtml (time_build.js:72)
 - updateMyBuildEvTotal:324 - chama: clampInt (dados_base.js:103)
 - updateMyBuildStatus:354 - chama: ITEM_MOVE_POWER_MODS (calc_stat.js:132), calcFinalStat (calc_stat.js:160), itemRuleFor (calc_stat.js:149), MOVE_BY_NAME (dados_base.js:86), SPLIT_STATUS (dados_base.js:29), +6
-- wireMyBuildEditor:418 - chama: getActiveBuild (evolucao.js:16), nivelDeCalculo (level_cap.js:65), myBuildLevel (aba_chefoes.js:19), myBuildLevelIsCustom (aba_chefoes.js:31), pipelineDesenharFicha (pipeline_tela.js:113) | chamado por: selectSpecies (dex_ficha.js:564)
+- wireMyBuildEditor:418 - chama: getActiveBuild (evolucao.js:16), nivelDeCalculo (level_cap.js:65), myBuildLevel (aba_chefoes.js:19), myBuildLevelIsCustom (aba_chefoes.js:31), pipelineDesenharFicha (pipeline_tela.js:114) | chamado por: selectSpecies (dex_ficha.js:564)
 
 ## ui/ficha_extras.js
 - bossReferenceHtml:103 - chama: DIFF_LABELS (aba_chefoes.js:236), buildEntryHtml (editor_build.js:191) | chamado por: fichaNotasHtml (dex_ficha.js:556)
@@ -164,9 +164,9 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## ui/pipeline_tela.js
 - pipelineAlvoValido:26 - chama: getRemainingBossEntries (chefoes.js:63)
-- pipelineCandidatoHtml:77 - chamado por: quemResolveItemHtml (quem_resolve.js:43)
-- pipelineDesenharFicha:113 - chamado por: wireMyBuildEditor (editor_build.js:418)
-- pipelineDesenharTime:125 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8) | chamado por: renderTeam (time.js:17)
+- pipelineCandidatoHtml:78 - chama: golpesBuildHtml (time_build.js:30) | chamado por: quemResolveItemHtml (quem_resolve.js:43)
+- pipelineDesenharFicha:114 - chamado por: wireMyBuildEditor (editor_build.js:418)
+- pipelineDesenharTime:126 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8) | chamado por: renderTeam (time.js:17)
 - pipelineGolpeHtml:71 - chama: MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9)
 - pipelineResultado:14 - chama: getCurrentCap (level_cap.js:49), candidatosDeBuild (pipeline_build.js:549), state (nucleo.js:8)
 - pipelineSeletorDeAlvoHtml:32 - chama: getRemainingBossEntries (chefoes.js:63)
@@ -181,12 +181,12 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## ui/quem_resolve.js
 - quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:759)
-- quemResolveCardHtml:83 - chama: DIFF_TO_BOSSKEY (chefoes.js:25), DIFF_LABELS (aba_chefoes.js:236), state (nucleo.js:8) | chamado por: renderBossDetail (aba_chefoes.js:534)
+- quemResolveCardHtml:84 - chama: DIFF_TO_BOSSKEY (chefoes.js:25), DIFF_LABELS (aba_chefoes.js:236), state (nucleo.js:8) | chamado por: renderBossDetail (aba_chefoes.js:534)
 - quemResolveChave:17 - chama: getCurrentCap (level_cap.js:49), state (nucleo.js:8)
-- quemResolveItemHtml:43 - chama: pipelineCandidatoHtml (pipeline_tela.js:77)
+- quemResolveItemHtml:43 - chama: speciesTypeNames (tipos.js:254), pipelineCandidatoHtml (pipeline_tela.js:78)
 - quemResolveOrigemHtml:37 - chama: rankDe (rank_da_run.js:29)
-- quemResolvePreencher:66 - chama: bossState (aba_chefoes.js:13)
-- quemResolveRestaurar:103 - chama: bossState (aba_chefoes.js:13) | chamado por: renderBossDetail (aba_chefoes.js:534)
+- quemResolvePreencher:67 - chama: bossState (aba_chefoes.js:13)
+- quemResolveRestaurar:104 - chama: bossState (aba_chefoes.js:13) | chamado por: renderBossDetail (aba_chefoes.js:534)
 
 ## ui/resumo_luta.js
 - bossConfrontoHtml:96 - chama: confrontoParaParty (chefoes.js:310) | chamado por: renderBossDetail (aba_chefoes.js:534)
@@ -232,7 +232,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - avisoEnxutoHtml:64 - chama: avisosDaBuild (avisos_build.js:8)
 - categoriaDoGolpe:11 - chama: SPLIT_STATUS (dados_base.js:29)
 - evsBarrasHtml:22 - chamado por: bossMonCardHtml (aba_chefoes.js:434)
-- golpesBuildHtml:30 - chama: stripNote (builds.js:44), MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9) | chamado por: bossMonCardHtml (aba_chefoes.js:434), entradaResumoHtml (editor_build.js:183)
+- golpesBuildHtml:30 - chama: stripNote (builds.js:44), MOVE_BY_NAME (dados_base.js:86), TYPES (dados_base.js:9) | chamado por: bossMonCardHtml (aba_chefoes.js:434), entradaResumoHtml (editor_build.js:183), pipelineCandidatoHtml (pipeline_tela.js:78)
 - habilidadesBuildHtml:43 - chama: stripNote (builds.js:44), ABILITIES (dados_base.js:10), habilidadesEscolhiveis (dados_base.js:119) | chamado por: bossMonCardHtml (aba_chefoes.js:434)
 - itemBuildHtml:53 - chama: stripNote (builds.js:44) | chamado por: bossMonCardHtml (aba_chefoes.js:434), entradaResumoHtml (editor_build.js:183)
 - painelDaBuildHtml:72 - chama: ondeAcharItemTexto (avisos_build.js:100), stripNote (builds.js:44), buildSynergyHtml (dex_ficha.js:42), buildNoteHtml (editor_build.js:155), megaModeBuildNoteHtml (editor_build.js:174), +3 | chamado por: renderTeam (time.js:17)

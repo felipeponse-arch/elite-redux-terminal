@@ -98,7 +98,7 @@
     if (!cx) return "";
     var c = cx.c;
     var head = '<tr><th class="cf-foe" scope="col">Chefão</th>' + cx.minhas.map(function (m) {
-      return '<th scope="col" title="' + escapeHtml(m.main.n) + '">' + spriteImgHtml(m.main.x, m.main.n, 26) + '</th>';
+      return '<th scope="col" title="' + escapeHtml(m.main.n) + '">' + spriteImgHtml(m.main.x, m.main.n, 32) + '</th>';
     }).join("") + '<th class="cf-best" scope="col">Melhor resposta</th></tr>';
     var rows = c.linhas.map(function (l) {
       var foe = l.foe;
@@ -111,8 +111,8 @@
         melhorTxt = '<b>' + escapeHtml(quem.n) + '</b>' + (o && o.move && m.duelo.ofensa.classe === "super" ? " (" + escapeHtml(o.move) + ")" : "") +
           (m.pontos < 0 ? " - sem boa resposta" : "");
       }
-      return '<tr><th scope="row" class="cf-foe"><span class="cf-foe-cell">' + spriteImgHtml(foe.sp.x, foe.name, 26) +
-        '<span>' + escapeHtml(foe.name) + (foe.transformado ? ' <small>vira ' + escapeHtml(foe.sp.n) + '</small>' : "") + '</span></span></th>' +
+      return '<tr><th scope="row" class="cf-foe"><span class="cf-foe-cell">' + spriteImgHtml(foe.sp.x, foe.name, 32) +
+        '<span class="cf-foe-nome">' + escapeHtml(foe.name) + (foe.transformado ? ' <small>vira ' + escapeHtml(foe.sp.n) + '</small>' : "") + '</span></span></th>' +
         celulas + '<td class="cf-best">' + melhorTxt + '</td></tr>';
     }).join("");
     var legenda = Object.keys(CONFRONTO_SIMBOLO).map(function (k) {
