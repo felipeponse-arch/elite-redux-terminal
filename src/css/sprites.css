@@ -10,6 +10,8 @@
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
+/* menor que a casa do atlas (64 px): suaviza, senão a redução come pixels */
+.spr.spr-suave { image-rendering: auto; }
 .sprite-fallback {
   flex: none;
   display: inline-flex;

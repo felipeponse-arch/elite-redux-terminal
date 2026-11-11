@@ -202,6 +202,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 ## Scripts (.ps1) - scripts/
 - **acrescentar_sprites_atlas.ps1** - >
 - **archive_build.ps1** - >
+- **atlas_para_64.ps1** - >
+  Pixels:22, Parecidos:33, NovoDesenho:40
 - **audit_field_types.ps1** - Varredura sistemática de tipos no dado bruto do NextDex, 2026-09-10.
   Get-TypeName:25, Note:32
 - **build.ps1** - (fast path when only editing the template,

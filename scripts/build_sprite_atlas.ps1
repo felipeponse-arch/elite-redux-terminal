@@ -25,7 +25,8 @@ if (-not (Test-Path $rawDir)) { New-Item -ItemType Directory -Path $rawDir | Out
 # 2.5MB to 1.7MB with nothing in the UI being upscaled.
 # NearestNeighbor on purpose: smooth interpolation invents intermediate colours
 # and partial alpha, which makes the PNG BIGGER, not smaller (measured).
-$CELL = 48
+# 10/11/2026: a ficha passou a mostrar o sprite a 192 px; em 48 ele saia deformado. Fica no tamanho original (64).
+$CELL = 64
 $ATLAS_COLS = 44
 
 $ser = New-GameDataParser

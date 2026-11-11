@@ -16,7 +16,7 @@ if (-not $pendentes) { Write-Output "acrescentar_sprites_atlas: nenhuma espécie
 
 $atlasPath = Join-Path $dataDir "sprite_atlas.png"
 $orig = [System.Drawing.Image]::FromFile($atlasPath)
-$CELL = 48; $COLS = 44
+$CELL = 64; $COLS = 44
 # Cresce o atlas em linhas inteiras quando as espécies pendentes não cabem nas casas livres (04/11/2026, TK-51).
 $primeira = [int](@($pendentes)[0] -split " ")[1]
 $linhas = [math]::Max([math]::Floor($orig.Height / $CELL), [math]::Ceiling(($primeira + @($pendentes).Count) / $COLS))

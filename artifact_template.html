@@ -784,7 +784,8 @@
     if (slot !== undefined) {
       var col = slot % SPRITE_INDEX.cols;
       var row = Math.floor(slot / SPRITE_INDEX.cols);
-      return '<span class="spr" style="width:' + sizePx + 'px;height:' + sizePx + 'px;' +
+      // Menor que a casa do atlas (64 px): reduzir sem suavizar come pixels; ali o navegador suaviza (.spr-suave).
+      return '<span class="spr' + (sizePx < SPRITE_INDEX.cell ? ' spr-suave' : '') + '" style="width:' + sizePx + 'px;height:' + sizePx + 'px;' +
         'background-size:' + (SPRITE_INDEX.cols * sizePx) + 'px ' + (SPRITE_INDEX.rows * sizePx) + 'px;' +
         'background-position:' + (-col * sizePx) + 'px ' + (-row * sizePx) + 'px;" ' +
         'role="img" aria-label="' + escapeHtml(speciesName || "") + '"></span>';
