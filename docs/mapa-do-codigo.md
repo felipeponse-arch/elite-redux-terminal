@@ -178,7 +178,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **rank_fatia.mjs** - Nota do rank por espécie (ticket todas-as-lutas/02). Desde 06/11/2026 só as 29 lutas de chefão entram, todas no mesmo saco:
   notasComFatia:7
 - **rank_incremental.mjs** - Rank incremental (06/11/2026, decisão do usuário: atualização recalcula SÓ O QUE MUDOU).
-  hash:10, digitalDaEspecie:15, digitalGlobal:23, decidir:30, r6:49, reduzirMedicao:50, expandirMedicao:61
+  hash:10, digitalDaEspecie:15, digitalGlobal:23, decidir:30, r6:50, reduzirMedicao:51, expandirMedicao:62
 - **remapear_sprite_index.mjs** - Sprites pelo NOME da espécie (15/10/2026). O atlas (data/sprite_atlas.png) foi montado com o índice pelo número da espécie (x) do
   indicePorNumero:10
 - **sabotagem_incremental.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026): no master a sabotagem roda só as

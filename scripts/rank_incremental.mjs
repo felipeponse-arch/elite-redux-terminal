@@ -32,7 +32,8 @@ export function decidir(cache, globalAtual, atuais, { tudo = false, so = null } 
   if (tudo) return { recalcular: snames, manter: [], motivo: "--tudo" };
   if (so) {
     if (!cache || !cache.especies || cache.global !== globalAtual) throw new Error("--so exige cache válido (digital global igual)");
-    const alvo = new Set(so), fora = snames.filter((x) => !alvo.has(x));
+    const alvo = new Set(so), fora = snames.filter((x) => !alvo.has(x)), estranhas = so.filter((x) => !(x in atuais));
+    if (estranhas.length) throw new Error("--so: espécie desconhecida: " + estranhas.slice(0, 3).join(","));
     const semCache = fora.filter((x) => !cache.especies[x]);
     if (semCache.length) throw new Error("--so: sem medição no cache para " + semCache.slice(0, 3).join(","));
     return { recalcular: snames.filter((x) => alvo.has(x)), manter: fora, motivo: "--so" };

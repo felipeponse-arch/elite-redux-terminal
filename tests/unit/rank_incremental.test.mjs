@@ -95,4 +95,5 @@ test("--so recalcula só a lista e mantém o resto do cache; sem cache válido, 
   assert.throws(() => decidir(cache, "outra", atuais, { so: ["C"] }), /cache válido/);
   assert.throws(() => decidir(null, "g", atuais, { so: ["C"] }), /cache válido/);
   assert.throws(() => decidir(cache, "g", { A: "x", D: "w" }, { so: ["A"] }), /sem medição/);
+  assert.throws(() => decidir(cache, "g", atuais, { so: ["C", "ZZZ"] }), /desconhecida/);
 });
