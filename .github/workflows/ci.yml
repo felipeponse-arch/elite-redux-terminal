@@ -73,7 +73,9 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Dependências de sistema do Chromium (navegador veio do cache)
         if: steps.cache-navegador.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+        # Já travou 10 min no apt do runner (11/11/2026, run 43044136507): falha rápido e tenta uma vez de novo.
+        timeout-minutes: 4
+        run: npx playwright install-deps chromium || (sleep 20 && npx playwright install-deps chromium)
       - name: Testes de navegador (Playwright)
         run: npm run test:e2e
       - name: Guarda o relatório (só se falhar)
