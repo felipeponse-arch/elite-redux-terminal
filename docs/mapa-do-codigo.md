@@ -63,7 +63,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 
 ## Interface - src/ui/
 - **aba_chefoes.js** - Aba Chefões: lista, time do chefão por dificuldade, buffs de ginásio e exportação.
-  initBosses:33, getFilteredBosses:148, nomeDaCategoriaDeChefao:175, campoDoChefaoHtml:178, opcionalHtml:185, iaDoChefaoHtml:190, hellDoChefaoHtml:199, bossCatColor:209, renderBossList:211, candidatosDoJogador:247, mesmoConjunto:264, guardarTimeAnterior:265, simularSemTravarATela:294, montarTimeContraEsteChefao:307, selectBoss:375, renderGymSkillsCardHtml:394, bossMonCardHtml:431, renderBossDetail:527
+  initBosses:33, getFilteredBosses:148, nomeDaCategoriaDeChefao:175, campoDoChefaoHtml:178, opcionalHtml:185, iaDoChefaoHtml:190, hellDoChefaoHtml:199, bossCatColor:209, renderBossList:211, candidatosDoJogador:250, mesmoConjunto:267, guardarTimeAnterior:268, simularSemTravarATela:297, montarTimeContraEsteChefao:310, selectBoss:378, renderGymSkillsCardHtml:397, bossMonCardHtml:434, renderBossDetail:534
 - **abas.js** - Navegação entre abas (e o redesenho da aba que abre).
   posicionarProgresso:22, closeMorePanel:32
 - **arquetipo.js** - Arquétipo do time, time sugerido e o Gerador Inteligente de Times.

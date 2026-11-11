@@ -217,15 +217,18 @@
     }
     // Same listbox/roving-tabindex treatment as the Dex's #species-list -
     // see the accessibility-pass comment there, 2026-09-10.
+    var proximoChefao = getRemainingBossEntries()[0];
     var hasSelectedBossRow = rows.some(function (row) { return row.i === bossState.selected; });
     ul.innerHTML = rows.map(function (row, idx) {
       var isSel = bossState.selected === row.i;
       var sel = isSel ? " selected" : "";
       var isTabStop = isSel || (!hasSelectedBossRow && idx === 0);
       var catColor = bossCatColor(row.b.cat);
-      return '<li class="species-row' + sel + '" data-i="' + row.i + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
+      var proxima = row.b === proximoChefao;
+      return '<li class="species-row boss-row' + sel + (proxima ? " proxima-luta" : "") + '" style="--t1:' + catColor + '" data-i="' + row.i + '" role="option" aria-selected="' + isSel + '" tabindex="' + (isTabStop ? "0" : "-1") + '">' +
         '<span class="sname">' + escapeHtml(row.b.name) + (row.b.db ? " (dupla)" : "") + '</span>' +
-        '<span class="boss-cat-tag" style="color:' + catColor + ';background:color-mix(in srgb, ' + catColor + ' 16%, var(--surface-2));">' + escapeHtml(nomeDaCategoriaDeChefao(row.b.cat)) + '</span></li>';
+        (proxima ? '<span class="carimbo-proxima">Próxima luta</span>' : "") +
+        '<span class="boss-cat-tag">' + escapeHtml(nomeDaCategoriaDeChefao(row.b.cat)) + '</span></li>';
     }).join("");
     // Clique numa linha: ouvinte único em #boss-list (initBosses).
   }
@@ -482,6 +485,10 @@
         return '<span class="bm-stat"><span class="bm-stat-label">' + STAT_LABELS_SHORT[i] + '</span><span class="mono">' + v + '</span>' + flag + '</span>';
       }).join("") + '</div>';
     }
+    // Mesmo formato de build do Meu Time: os componentes de time_build.js desenham chips, barras de EV e golpes.
+    var buildDoChefao = { ability: m.abi, item: m.item || "nenhum", nature: m.nat || "?", evs: m.evsRaw || m.evs, moves: m.mv };
+    var nomesTipos = effectiveSp ? speciesTypeNames(effectiveSp) : [];
+    var classeTipo = nomesTipos.length ? " tipo-" + nomesTipos[0] + (nomesTipos[1] ? " tipo2-" + nomesTipos[1] : "") : "";
     var abiHtml;
     if (megaSp) {
       var megaInnNames = (megaSp.inn || []).map(function (id) { return ABILITIES[id] ? ABILITIES[id][0] : null; }).filter(Boolean);
@@ -491,19 +498,19 @@
         (megaSp.ab && megaSp.ab.length ? '1 escolhível própria da forma (não sabemos qual das ' + megaSp.ab.length + ')' : "") +
         '</div>';
     } else {
-      abiHtml = '<div class="bm-row"><b>Habilidade:</b> ' + escapeHtml(m.abi || "?") + '</div>';
+      abiHtml = sp ? habilidadesBuildHtml(sp, buildDoChefao)
+        : '<div class="bp-abis"><span class="bp-rot">Hab.</span><span class="bp-chip bp-chip-sel">' + escapeHtml(m.abi || "?") + '</span></div>';
     }
-    return '<div class="boss-mon-card">' +
-      '<div class="bm-head goto-species" tabindex="0" role="button" data-x="' + displayX + '" title="Ver na Dex">' + spriteImgHtml(displayX, displayName, 48) +
-      '<div><div class="bm-name">' + escapeHtml(displayName) + '</div>' +
+    return '<div class="boss-mon-card cartao-membro' + classeTipo + '">' +
+      '<div class="bm-head ts-head goto-species" tabindex="0" role="button" data-x="' + displayX + '" title="Ver na Dex">' + spriteImgHtml(displayX, displayName, 96) +
+      '<div class="bm-id"><div class="bm-name ts-name">' + escapeHtml(displayName) + '</div>' +
       '<div class="bm-types">' + typesHtml + '</div></div></div>' +
-      '<div class="bm-set">' +
+      '<div class="bm-set bp">' +
       transformNote +
       abiHtml +
-      '<div class="bm-row"><b>Item:</b> ' + escapeHtml(m.item || "nenhum") + '</div>' +
-      '<div class="bm-row"><b>Nature:</b> ' + escapeHtml(m.nat || "?") + '</div>' +
-      (m.evs ? '<div class="bm-row"><b>EVs:</b> ' + escapeHtml(m.evs) + '</div>' : "") +
-      '<div class="bm-row"><b>Golpes:</b> ' + escapeHtml(m.mv.join(" / ")) + '</div>' +
+      itemBuildHtml(buildDoChefao) +
+      evsBarrasHtml(buildDoChefao) +
+      golpesBuildHtml(buildDoChefao) +
       statsHtml +
       // Copies this boss party member's build straight into "Meu build"
       // for the same species - 2026-09-09, user feedback: the only way to
@@ -536,7 +543,7 @@
     var availableDiffs = ["party", "insane", "hell"].filter(function (k) { return boss[k] && boss[k].length; });
     var diffBtns = availableDiffs.length > 1 ? availableDiffs.map(function (k) {
       var active = k === diffKey ? " active" : "";
-      return '<button class="chip-btn' + active + '" data-diff="' + k + '" type="button" style="margin-right:6px;">' + DIFF_LABELS[k] + '</button>';
+      return '<button class="chip-btn seg-dif' + active + '" data-diff="' + k + '" type="button" aria-pressed="' + (k === diffKey) + '">' + DIFF_LABELS[k] + '</button>';
     }).join("") : "";
 
     var monsHtml = party.map(function (m, idx) { return bossMonCardHtml(m, idx); }).join("");
@@ -554,15 +561,16 @@
     document.getElementById("boss-detail").innerHTML =
       '<button class="back-btn" id="boss-back-to-list">&larr; Voltar para a lista</button>' +
       // Cabeçalho com a arte da equipe (ticket 14): só Aqua e Magma têm arte; os outros seguem sem fundo.
-      '<div class="detail-head' + classeDoCabecalhoDoChefao(boss.cat) + '"><div class="detail-titles">' +
+      '<div class="detail-head chefao-cartao' + classeDoCabecalhoDoChefao(boss.cat) + '" style="--t1:' + bossCatColor(boss.cat) + '"><div class="detail-titles">' +
         '<h2>' + escapeHtml(boss.name) + '</h2>' +
-        '<div class="detail-dexno mono">' + escapeHtml(nomeDaCategoriaDeChefao(boss.cat)) + (boss.db ? " · batalha em dupla" : "") + '</div>' +
+        '<div class="detail-dexno mono"><span class="carimbo-cat">' + escapeHtml(nomeDaCategoriaDeChefao(boss.cat)) + '</span>' + (boss.db ? '<span class="carimbo-cat carimbo-dupla">Batalha em dupla</span>' : "") +
+          (boss === getRemainingBossEntries()[0] ? '<span class="carimbo-proxima">Próxima luta</span>' : "") + '</div>' +
       '</div></div>' +
-      (diffBtns ? '<div style="margin-bottom:14px;">' + diffBtns + '<p style="color:var(--text-dim);font-size:var(--fs-legenda);margin:6px 0 0;max-width:65ch;">Padrão é o time de Easy e Ace (os dois usam o mesmo), Insane é o time do Elite e Hell é o do modo Hell (confirmado no código do jogo).</p></div>' : "") +
+      (diffBtns ? '<div class="dif-bloco"><div class="dif-seg" role="group" aria-label="Dificuldade">' + diffBtns + '</div><p class="dif-nota">Padrão é o time de Easy e Ace (os dois usam o mesmo), Insane é o time do Elite e Hell é o do modo Hell (confirmado no código do jogo).</p></div>' : "") +
+      montarHtml +
       opcionalHtml(boss) + campoDoChefaoHtml(boss.name) + iaDoChefaoHtml(boss.name) +
       hellDoChefaoHtml(boss.name, diffKey) +
       bossConfrontoHtml(boss, party) +
-      montarHtml +
       quemResolveCardHtml(boss, diffKey, party) +
       '<div class="card"><h3>Time do chefão' + (diffKey !== "party" ? " — " + DIFF_LABELS[diffKey] : "") + '</h3>' +
         '<div class="boss-level-row"><label for="boss-level-input">Status final calculados pro nível</label>' +
