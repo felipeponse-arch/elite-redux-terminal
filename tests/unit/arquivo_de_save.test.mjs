@@ -127,3 +127,21 @@ test("builds do aparelho que o arquivo não tem viram variantes; o que não cabe
   assert.equal(m2.naoCouberam, 1);
   assert.equal(m2.save.customBuilds.SPECIES_CHARIZARD.length, 3);
 });
+
+test("pilha de backups: o primeiro (mais antigo) e o último nunca se perdem em silêncio", () => {
+  let l = [];
+  for (const n of ["A", "B", "C", "D", "E"]) l = R.empilharBackup(l, { n });
+  assert.equal(l.map((x) => x.n).join(), "E,B,A");
+  assert.equal(l.length, 3);
+  assert.equal(l[l.length - 1].n, "A", "o original continua guardado");
+  assert.equal(l[0].n, "E");
+  assert.equal(R.empilharBackup([{ n: "A" }], { n: "B" }).length, 2, "backup existente não é sobrescrito");
+});
+
+test("arquivo acima de 2 MB é recusado antes de ler o JSON", () => {
+  assert.equal(R.erroDeTamanho(2 * 1024 * 1024), "");
+  assert.match(R.erroDeTamanho(2 * 1024 * 1024 + 1), /2 MB/);
+  const r = R.lerArquivoDeSave("x".repeat(2 * 1024 * 1024 + 1));
+  assert.equal(r.ok, false);
+  assert.match(r.erro, /2 MB/);
+});

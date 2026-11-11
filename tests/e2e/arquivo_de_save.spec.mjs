@@ -3,6 +3,7 @@
 import { mkdtempSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { carregarRegras } from "../unit/carregar_regras.mjs";
 import { test, expect, abrirApp, abrirAba, saveLocal, recarregar } from "./apoio.mjs";
 
 const build = {
@@ -71,4 +72,46 @@ test("exportar, limpar e importar devolve time e builds; arquivo mexido é recus
   await expect(page.locator("#save-arquivo-status")).toContainText("Importação desfeita");
   expect((await saveLocal(page)).team).toEqual([]);
   await expect(page.locator("#save-desfazer-btn")).toBeHidden();
+});
+
+test("duas importações seguidas guardam os dois backups; arquivo de mais de 2 MB é recusado sem escrever nada", async ({ page }) => {
+  await abrirApp(page);
+  await guardar(page, semente);
+  await recarregar(page);
+  await abrirAba(page, "progress");
+  const pasta = mkdtempSync(join(tmpdir(), "er-save-"));
+  const [dl] = await Promise.all([page.waitForEvent("download"), page.locator("#save-exportar-btn").click()]);
+  const arqA = join(pasta, "a.json");
+  await dl.saveAs(arqA);
+  const b = JSON.parse(readFileSync(arqA, "utf8"));
+  b.save.team = ["SPECIES_VENUSAUR"]; b.save.box = [];
+  delete b.save.soma;
+  b.save.soma = carregarRegras().somaDoSave(b.save);
+  const arqB = join(pasta, "b.json");
+  writeFileSync(arqB, JSON.stringify(b));
+  const importar = async (arq) => {
+    await page.locator("#save-importar-input").setInputFiles(arq);
+    await page.locator("#confirm-modal-ok").click();
+    await expect(page.locator("#save-arquivo-status")).toContainText("Save carregado");
+  };
+  await importar(arqA); // 1ª: backup = save original (Charizard + Blastoise)
+  await importar(arqB); // 2ª: backup anterior NÃO é sobrescrito
+  await expect(page.locator("#save-arquivo-status")).toContainText("Já havia um backup");
+  await expect(page.locator("#save-backups-info")).toContainText("Backups guardados: 2");
+  expect((await saveLocal(page)).team).toEqual(["SPECIES_VENUSAUR"]);
+  for (let i = 0; i < 2; i++) { // desfazer duas vezes chega ao save original
+    await page.locator("#save-desfazer-btn").click();
+    await page.locator("#confirm-modal-ok").click();
+    await expect(page.locator("#save-arquivo-status")).toContainText("Importação desfeita");
+  }
+  expect((await saveLocal(page)).team).toEqual(["SPECIES_CHARIZARD", "SPECIES_BLASTOISE"]);
+  await expect(page.locator("#save-desfazer-btn")).toBeHidden();
+
+  // Grande demais: recusa pelo tamanho, sem diálogo e sem backup.
+  const grande = join(pasta, "grande.json");
+  writeFileSync(grande, " ".repeat(2 * 1024 * 1024 + 10));
+  await page.locator("#save-importar-input").setInputFiles(grande);
+  await expect(page.locator("#save-arquivo-status")).toContainText("2 MB");
+  await expect(page.locator("#save-desfazer-btn")).toBeHidden();
+  expect(await page.evaluate(() => localStorage.getItem("er_terminal_save_antes_da_importacao"))).toBeNull();
 });

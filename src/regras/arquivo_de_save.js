@@ -8,6 +8,20 @@
   var CAMPOS_DO_SAVE = ["v", "dataVersion", "savedAt", "team", "box", "savedTeams", "settings", "motorFavoritos", "notes",
     "autoEvolved", "autoLog", "gymSkillsCleared", "customBuilds", "archetype", "soma"];
 
+  // Limite do arquivo: um save de verdade tem poucas centenas de KB; acima de 2 MB não é save do app.
+  var ARQUIVO_TAMANHO_MAX = 2 * 1024 * 1024;
+  function erroDeTamanho(tamanho) {
+    return tamanho > ARQUIVO_TAMANHO_MAX ? "O arquivo tem mais de 2 MB, grande demais para ser um save do app. Nada foi lido nem trocado." : "";
+  }
+  // Pilha de backups da importação (mais recente primeiro, até 3). Cheia: sai o segundo mais novo, então o
+  // primeiro (o mais antigo) e o último nunca se perdem em silêncio.
+  var BACKUPS_MAX = 3;
+  function empilharBackup(lista, novo) {
+    var l = [novo].concat(Array.isArray(lista) ? lista : []);
+    if (l.length > BACKUPS_MAX) l.splice(1, l.length - BACKUPS_MAX);
+    return l;
+  }
+
   function montarArquivoDeSave(versaoApp) {
     var save = buildSave();
     return { schema: ARQUIVO_SCHEMA, dataVersion: save.dataVersion, versaoApp: String(versaoApp || ""), exportadoEm: new Date().toISOString(), save: save };
@@ -33,6 +47,8 @@
   // texto -> { ok:true, arquivo } | { ok:false, erro }. Valida formato e soma ANTES de qualquer mudança.
   function lerArquivoDeSave(texto) {
     var arq;
+    var tam = erroDeTamanho(String(texto).length);
+    if (tam) return { ok: false, erro: tam };
     try { arq = JSON.parse(texto); } catch (e) { return { ok: false, erro: "O arquivo não é um JSON válido (está cortado ou não é um save do app)." }; }
     if (!arq || typeof arq !== "object" || Array.isArray(arq) || typeof arq.schema !== "number") {
       return { ok: false, erro: "Este arquivo não é um save exportado pelo app." };

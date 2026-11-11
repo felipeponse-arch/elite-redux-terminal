@@ -42,7 +42,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - vereditoDaLutaHtml:199 - chama: vereditoDaLuta (chefoes.js:603)
 
 ## ui/arquivo_de_save.js
-- arquivoDeSaveUi:7 - chama: contarDoSave (arquivo_de_save.js:24), lerArquivoDeSave (arquivo_de_save.js:34), mesclarBuildsDoAtual (arquivo_de_save.js:54), montarArquivoDeSave (arquivo_de_save.js:11), resumoDaImportacao (arquivo_de_save.js:76), +16
+- arquivoDeSaveUi:7 - chama: BACKUPS_MAX (arquivo_de_save.js:18), contarDoSave (arquivo_de_save.js:38), empilharBackup (arquivo_de_save.js:19), erroDeTamanho (arquivo_de_save.js:13), lerArquivoDeSave (arquivo_de_save.js:48), +19
 
 ## ui/auto_evolucao.js
 - autoEvolveRoster:20 - chama: devolveChainByX (evolucao.js:206), evoluirElencoSemDuplicar (evolucao.js:40), evolveChainByX (evolucao.js:66), logAutoAction (evolucao.js:229), podarAutoEvolved (evolucao.js:61), +3 | chamado por: loadSave (nucleo.js:332), initProgress (progresso.js:106)
@@ -163,7 +163,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - setActiveBuildIndex:99 - chama: getBuildList (evolucao.js:14)
 - setOrReplaceActiveBuild:89 - chama: trocarBuildAtivaNaLista (lista_de_builds.js:11) | chamado por: initBosses (aba_chefoes.js:33), processarRevisoes (revisao_automatica.js:23)
 - showStorageBanner:161 - chamado por: remotoComSomaErrada (sync.js:88)
-- state:8 - chamado por: resumoDaImportacao (arquivo_de_save.js:76), avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:190), itensEmUsoComQuem (builds.js:141), teamItemsInUse (builds.js:85), +106
+- state:8 - chamado por: resumoDaImportacao (arquivo_de_save.js:92), avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:190), itensEmUsoComQuem (builds.js:141), teamItemsInUse (builds.js:85), +106
 - telasDeBuild:232 - chamado por: processarRevisoes (revisao_automatica.js:23)
 
 ## ui/pipeline_tela.js

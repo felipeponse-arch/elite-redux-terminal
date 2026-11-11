@@ -7,6 +7,20 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "arquivo-de-save-backup-sobrescrito",
+    descricao: "Pacote 08: a 2ª importação sobrescreve o backup em vez de empilhar",
+    arquivo: "arquivo_de_save.js",
+    de: "var l = [novo].concat(Array.isArray(lista) ? lista : []);",
+    para: "var l = [novo];",
+  },
+  {
+    id: "arquivo-de-save-sem-limite-de-tamanho",
+    descricao: "Pacote 08: arquivo de qualquer tamanho é aceito",
+    arquivo: "arquivo_de_save.js",
+    de: "return tamanho > ARQUIVO_TAMANHO_MAX ?",
+    para: "return false ?",
+  },
+  {
     id: "arquivo-de-save-sem-conferir-soma",
     descricao: "Pacote 08: importar deixa de conferir a soma de verificação e aceita arquivo mexido",
     arquivo: "arquivo_de_save.js",

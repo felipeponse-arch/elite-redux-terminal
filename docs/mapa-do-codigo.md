@@ -6,7 +6,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 
 ## Regras (lógica pura) - src/regras/
 - **arquivo_de_save.js** - Exportar/importar o save por arquivo .json (pacote 08, 11/11/2026). Só lógica: a página
-  montarArquivoDeSave:11, listaDeBuilds:16, totalDeBuilds:19, contarDoSave:24, lerArquivoDeSave:34, mesclarBuildsDoAtual:54, resumoDaImportacao:76
+  erroDeTamanho:13, empilharBackup:19, montarArquivoDeSave:25, listaDeBuilds:30, totalDeBuilds:33, contarDoSave:38, lerArquivoDeSave:48, mesclarBuildsDoAtual:70, resumoDaImportacao:92
 - **avisos_build.js** - Lote 5 das pesquisas de 06/10 (ideias do GPT, seções 3.2/17/26/42): Avisos de build e selo de
   avisosDaBuild:8, seloDaBuild:82, primeiroLugarDoItem:94, rotuloDaEtapaDoItem:98, ondeAcharItemTexto:100
 - **builds.js** - Build mostrada (effectiveBuild: salva > herdada da base pela Mega > curada do

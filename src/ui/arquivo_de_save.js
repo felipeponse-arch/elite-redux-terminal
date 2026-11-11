@@ -8,6 +8,7 @@
     var statusEl = document.getElementById("save-arquivo-status");
     var btnDesfazer = document.getElementById("save-desfazer-btn");
     var entrada = document.getElementById("save-importar-input");
+    var infoBackups = document.getElementById("save-backups-info");
 
     function mostrar(linhas, erro) {
       statusEl.innerHTML = "";
@@ -18,7 +19,18 @@
         statusEl.appendChild(li);
       });
     }
-    function atualizarDesfazer() { btnDesfazer.hidden = !lsGet(BACKUP_IMPORTACAO_KEY); }
+    // Backups: lista JSON (mais recente primeiro). Formato antigo (um save solto) vale como lista de 1.
+    function lerBackups() {
+      try {
+        var v = JSON.parse(lsGet(BACKUP_IMPORTACAO_KEY));
+        return Array.isArray(v) ? v : (v && typeof v === "object" ? [v] : []);
+      } catch (e) { return []; }
+    }
+    function atualizarDesfazer() {
+      var n = lerBackups().length;
+      btnDesfazer.hidden = !n;
+      infoBackups.textContent = n ? "Backups guardados: " + n + " (máx. " + BACKUPS_MAX + "). \"Desfazer importação\" volta ao mais recente; repetir volta aos mais antigos." : "";
+    }
     atualizarDesfazer();
 
     // Os <select> da aba Progresso só leem o state quando abrem: depois de trocar o state por fora, acerta-os.
@@ -54,6 +66,8 @@
     entrada.addEventListener("change", function () {
       var arquivo = entrada.files && entrada.files[0];
       if (!arquivo) return;
+      var grande = erroDeTamanho(arquivo.size);
+      if (grande) { entrada.value = ""; mostrar([grande], true); return; }
       var leitor = new FileReader();
       leitor.onerror = function () { mostrar(["Não consegui ler o arquivo."], true); };
       leitor.onload = function () {
@@ -64,7 +78,8 @@
           "Substituir o save atual?",
           "O arquivo traz " + c.time + " no time, " + c.caixa + " na caixa, " + c.builds + " builds e " + c.anotacoes + " anotações" +
             (lido.arquivo.exportadoEm ? " (exportado em " + String(lido.arquivo.exportadoEm).slice(0, 10) + ")" : "") + ". " +
-            "O save atual é guardado e dá para voltar em \"Desfazer importação\". Builds suas que o arquivo não tem viram variantes.",
+            "O save atual é guardado e dá para voltar em \"Desfazer importação\". Builds suas que o arquivo não tem viram variantes." +
+            (lerBackups().length ? " Já existe um backup de outra importação; ele também é guardado." : ""),
           "Carregar save",
           function () { importar(lido.arquivo); }
         );
@@ -75,20 +90,20 @@
 
     function importar(arq) {
       // Backup primeiro: se não der para guardar o save atual, não troca nada.
-      if (!lsSet(BACKUP_IMPORTACAO_KEY, JSON.stringify(buildSave()))) {
+      var anteriores = lerBackups();
+      if (!lsSet(BACKUP_IMPORTACAO_KEY, JSON.stringify(empilharBackup(anteriores, buildSave())))) {
         mostrar(["Não deu para guardar o backup (armazenamento cheio?). Nada foi trocado."], true);
         return;
       }
       var mescla = mesclarBuildsDoAtual(arq.save, state.customBuilds);
       aplicarNoApp(mescla.save);
-      mostrar(["Save carregado."].concat(resumoDaImportacao(arq, mescla)));
+      mostrar(["Save carregado."].concat(anteriores.length ? ["Já havia um backup; o anterior foi guardado (" + Math.min(anteriores.length + 1, BACKUPS_MAX) + " no total)."] : []).concat(resumoDaImportacao(arq, mescla)));
       atualizarDesfazer();
       flashToast("Save carregado. Dá para desfazer na aba Progresso.");
     }
 
     btnDesfazer.addEventListener("click", function () {
-      var antigo = null;
-      try { antigo = JSON.parse(lsGet(BACKUP_IMPORTACAO_KEY)); } catch (e) { antigo = null; }
+      var antigo = lerBackups()[0];
       if (!antigo || typeof antigo !== "object") { mostrar(["O backup não pôde ser lido; nada foi trocado."], true); return; }
       openConfirmModal(
         "Desfazer a importação?",
@@ -96,7 +111,9 @@
         "Desfazer",
         function () {
           aplicarNoApp(antigo);
-          try { localStorage.removeItem(BACKUP_IMPORTACAO_KEY); } catch (e) { /* sem armazenamento: o botão some no próximo carregamento */ }
+          var resto = lerBackups().slice(1);
+          if (resto.length) lsSet(BACKUP_IMPORTACAO_KEY, JSON.stringify(resto));
+          else { try { localStorage.removeItem(BACKUP_IMPORTACAO_KEY); } catch (e) { /* sem armazenamento: o botão some no próximo carregamento */ } }
           atualizarDesfazer();
           mostrar(["Importação desfeita: o save de antes voltou."]);
         }
