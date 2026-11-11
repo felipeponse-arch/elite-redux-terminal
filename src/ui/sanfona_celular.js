@@ -7,6 +7,10 @@
   var SANFONA_RAIZES = ["species-detail", "boss-detail", "view-team"];
 
   function sanfonaResumo(card) {
+    var efe = Array.prototype.map.call(card.querySelectorAll(".efe-faixa"), function (f) {
+      return f.querySelector(".efe-rotulo").textContent.trim() + " " + f.querySelectorAll(".efe-tipo").length;
+    });
+    if (efe.length) return efe.join(" · ");
     var esc = card.querySelectorAll(".abi-grid .choosable").length;
     var inn = card.querySelectorAll(".abi-grid .innate").length;
     if (esc || inn) return esc + " + " + inn;
@@ -41,6 +45,33 @@
     card.parentNode.replaceChild(det, card);
   }
 
+  // Painel de build do cartão do Meu Time: <details> fechado, resumo "Build curada · Molten Down · 4 golpes". Os nós
+  // internos são movidos para dentro (ouvintes e classes seguem valendo); o próprio <details> leva "ts-build bp".
+  function sanfonaConverterBuild(painel) {
+    var slot = painel.closest(".team-slot");
+    var nome = slot && slot.querySelector(".ts-name");
+    var chave = "build:" + (nome ? nome.firstChild.textContent.trim() : "");
+    var rot = painel.querySelector(".ts-build-label");
+    var hab = painel.querySelector(".bp-chip-sel");
+    var golpes = painel.querySelectorAll(".cm-golpes li").length;
+    var partes = [rot ? rot.textContent.replace(/\s*\(.*\)$/, "") : "Build", hab ? hab.textContent : "", golpes ? golpes + (golpes === 1 ? " golpe" : " golpes") : ""];
+    var det = document.createElement("details");
+    det.className = painel.className + " sanfona-build";
+    det.setAttribute("data-sanfona", "1");
+    det.open = !!sanfonaAbertas[chave];
+    var sum = document.createElement("summary");
+    sum.className = "sanfona-resumo";
+    sum.innerHTML = '<span class="sanfona-titulo"></span>';
+    sum.firstChild.textContent = partes.filter(Boolean).join(" · ");
+    var corpo = document.createElement("div");
+    corpo.className = "sanfona-corpo";
+    while (painel.firstChild) corpo.appendChild(painel.firstChild);
+    det.appendChild(sum);
+    det.appendChild(corpo);
+    det.addEventListener("toggle", function () { sanfonaAbertas[chave] = det.open; });
+    painel.parentNode.replaceChild(det, painel);
+  }
+
   function sanfonaAplicar() {
     if (!sanfonaMedia || !sanfonaMedia.matches) return;
     SANFONA_RAIZES.forEach(function (id) {
@@ -52,6 +83,7 @@
         if (/^Montar time/.test(h3.textContent.trim())) return;
         sanfonaConverter(card);
       });
+      Array.prototype.slice.call(raiz.querySelectorAll(".team-slot .ts-build.bp:not(.sanfona-build)")).forEach(sanfonaConverterBuild);
       // Blocos que já eram <details> abertos por padrão (Auto Build): no celular seguem a memória da sessão.
       Array.prototype.slice.call(raiz.querySelectorAll("details.detail-group[open]:not([data-sanfona])")).forEach(function (d) {
         d.setAttribute("data-sanfona", "1");

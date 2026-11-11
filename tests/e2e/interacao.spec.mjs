@@ -157,16 +157,19 @@ test("clicar numa etapa da trilha marca o badge", async ({ page }) => {
   expect(salvo).toBe(3);
 });
 
-test("no celular, digitar na busca volta pra lista e a ficha some", async ({ page }) => {
+// Refino do celular (11/11/2026): com a ficha aberta a busca recolhe (a ficha começa mais perto do topo) e volta com "Voltar para a lista".
+test("no celular, a busca some com a ficha aberta e volta ao voltar para a lista", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 });
   await abrirApp(page);
   await abrirAba(page, "dex");
   await page.locator("#species-list .species-row", { hasText: "Charizard" }).first().click();
   await expect(page.locator("#species-detail")).toBeVisible();
   await expect(page.locator("#species-list")).toBeHidden();
-  await page.locator("#search-input").fill("Pika");
+  await expect(page.locator("#search-input")).toBeHidden();
+  await page.locator("#back-to-list").click();
   await expect(page.locator("#species-list")).toBeVisible();
-  await expect(page.locator("#species-detail")).toBeHidden();
+  await page.locator("#search-input").fill("Pika");
+  await expect(page.locator("#species-list .species-row").first()).toContainText("Pika");
 });
 
 // Ticket 10 (07/10/2026): Home/End na lista (padrão de listbox do ARIA APG). Na Dex a lista vem em lotes:

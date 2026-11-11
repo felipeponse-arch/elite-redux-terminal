@@ -56,6 +56,7 @@
   .sanfona[open] > .sanfona-resumo::after { content: "\2212"; }
   .sanfona[open] > .sanfona-resumo { border-bottom: 1px solid var(--border); margin-bottom: 8px; }
   .sanfona[open] { padding-bottom: 12px; }
+  .sanfona-titulo { white-space: nowrap; }
   .sanfona-info { font-size: var(--fs-pequeno); font-weight: 400; color: var(--text-dim); }
 
   /* Com a ficha (Dex) ou o chefão aberto, o topo não empurra o conteúdo: as insígnias saem da vista; o nome da Etapa e o level cap ficam. */
@@ -69,4 +70,16 @@
 
   /* Ficha da Dex aberta: a busca recolhe (volta com "Voltar para a lista"); a ficha começa mais perto do topo. */
   .dex-shell.show-detail .search-row { display: none; }
+
+  /* Meu Time: um cartão por linha (largura toda); o painel de build vira sanfona de uma linha (sanfona_celular.js). */
+  .team-slots { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+  .team-slot.cartao-membro { padding: var(--space-3); }
+  .cartao-membro .ts-head { flex-direction: row; align-items: center; gap: var(--space-3); }
+  .cartao-membro .ts-head::before { left: -20px; top: 50%; width: 170px; height: 170px; }
+  .team-slot.cartao-membro .ts-name { font-size: var(--fs-marca); }
+  .sanfona-build { padding: 0; }
+  .sanfona-build > .sanfona-resumo { padding: 0; }
+  .sanfona-build[open] > .sanfona-resumo::after { content: "\2212"; }
+  .sanfona-build[open] > .sanfona-resumo { margin-bottom: var(--space-2); border-bottom: 0; }
+  .sanfona-corpo { display: flex; flex-direction: column; gap: var(--space-2); }
 }
