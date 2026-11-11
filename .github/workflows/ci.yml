@@ -73,13 +73,11 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Dependências de sistema do Chromium (navegador veio do cache)
         if: steps.cache-navegador.outputs.cache-hit == 'true'
-        # Já travou 10 min no apt do runner (11/11/2026, run 43044136507): falha rápido e tenta uma vez de novo.
-        timeout-minutes: 8
-        run: |
-          # DIAGNÓSTICO (11/11/2026): o apt travou 3x; mostra nas anotações onde para.
-          out=$(timeout 90 sudo apt-get update 2>&1 | tail -4 | tr '\n' '|'); echo "::warning::apt-update $out"
-          out=$(timeout 200 npx playwright install-deps chromium 2>&1 | tail -6 | tr '\n' '|'); echo "::warning::install-deps $out"
-          npx playwright install-deps chromium
+        # 11/11/2026: o espelho do apt (azure.archive.ubuntu.com) saiu do ar e o passo travou 10 min. Os runners já trazem as
+        # bibliotecas do Chromium; este passo só reforça. Sem rede ele vence o tempo e segue: se faltar biblioteca, o teste de navegador acusa.
+        timeout-minutes: 3
+        continue-on-error: true
+        run: npx playwright install-deps chromium
       - name: Testes de navegador (Playwright)
         run: npm run test:e2e
       - name: Guarda o relatório (só se falhar)
