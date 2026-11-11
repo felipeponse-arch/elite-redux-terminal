@@ -42,7 +42,7 @@ jobs:
   # mutação (o filtro do run_sabotage.mjs aceita prefixo, e o id inteiro serve).
   planejar:
     if: ${{ github.event_name == 'schedule' || inputs.tipo == 'sabotagem' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # fixo: ubuntu-latest já aponta para o Ubuntu 26 e o apt do Playwright travou (11/11/2026)
     timeout-minutes: 10
     outputs:
       matriz: ${{ steps.plano.outputs.matriz }}
@@ -75,7 +75,7 @@ jobs:
 
   sabotagem:
     needs: planejar
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # fixo: ubuntu-latest já aponta para o Ubuntu 26 e o apt do Playwright travou (11/11/2026)
     timeout-minutes: 60
     strategy:
       fail-fast: false # uma fatia vermelha não mata as outras
@@ -112,7 +112,7 @@ jobs:
   juntar-sabotagem:
     needs: sabotagem
     if: ${{ always() && (github.event_name == 'schedule' || inputs.tipo == 'sabotagem') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # fixo: ubuntu-latest já aponta para o Ubuntu 26 e o apt do Playwright travou (11/11/2026)
     timeout-minutes: 15
     steps:
       - uses: actions/download-artifact@v4
@@ -142,7 +142,7 @@ jobs:
 
   rank:
     if: ${{ inputs.tipo == 'rank' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # fixo: ubuntu-latest já aponta para o Ubuntu 26 e o apt do Playwright travou (11/11/2026)
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4

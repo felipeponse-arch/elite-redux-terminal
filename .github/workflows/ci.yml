@@ -31,7 +31,7 @@ permissions:
 # Os testes pesados (tests/pesados.json) e a sabotagem a frio ficam no workflow "Pesado" (semanal/manual).
 jobs:
   rapido:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # fixo: ubuntu-latest já aponta para o Ubuntu 26 e o apt do Playwright travou (11/11/2026)
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
         run: ER_SEM_TS=1 npm run test:unit
 
   navegador:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # fixo: ubuntu-latest já aponta para o Ubuntu 26 e o apt do Playwright travou (11/11/2026)
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4

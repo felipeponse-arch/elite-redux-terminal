@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   conferir:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # fixo: ubuntu-latest já aponta para o Ubuntu 26 e o apt do Playwright travou (11/11/2026)
     timeout-minutes: 5
     steps:
       - name: Checkout
