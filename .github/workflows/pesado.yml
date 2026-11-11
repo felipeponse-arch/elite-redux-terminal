@@ -2,7 +2,8 @@ name: Pesado (sabotagem e rank)
 
 # Trabalho que não cabe no CI normal (limite de 20 min) nem no PC do usuário:
 # a sabotagem completa (tests/unit/mutacoes.mjs) e o rank pelo duelo.
-# Só roda quando o usuário dispara na mão (Actions > "Pesado" > Run workflow).
+# Roda sozinho toda segunda-feira (sabotagem completa, 8 fatias (padrão do plano)) e quando o usuário dispara na mão
+# (Actions > "Pesado" > Run workflow). No agendamento não há inputs: vale a sabotagem.
 # Ticket TK-54. Como usar: docs/pesado_no_github.md.
 #
 # - sabotagem: divide as mutações em N fatias (matriz em paralelo, cada fatia
@@ -11,6 +12,8 @@ name: Pesado (sabotagem e rank)
 #   espécies sobre TODAS elas, então dividir por espécie mudaria a nota; por isso
 #   não há fatias aqui. Não grava nada no repositório: só gera os arquivos de saída.
 on:
+  schedule:
+    - cron: "0 6 * * 1" # segunda 06:00 UTC
   workflow_dispatch:
     inputs:
       tipo:
@@ -38,7 +41,7 @@ jobs:
   # Sabotagem: monta a lista de fatias. Cada fatia é um conjunto de ids de
   # mutação (o filtro do run_sabotage.mjs aceita prefixo, e o id inteiro serve).
   planejar:
-    if: ${{ inputs.tipo == 'sabotagem' }}
+    if: ${{ github.event_name == 'schedule' || inputs.tipo == 'sabotagem' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -108,7 +111,7 @@ jobs:
   # Junta as fatias: baixa os logs, mostra o resumo e falha se alguma fatia falhou.
   juntar-sabotagem:
     needs: sabotagem
-    if: ${{ always() && inputs.tipo == 'sabotagem' }}
+    if: ${{ always() && (github.event_name == 'schedule' || inputs.tipo == 'sabotagem') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
