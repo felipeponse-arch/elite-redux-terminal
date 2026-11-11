@@ -184,7 +184,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderRunStatus:9 - chama: state (nucleo.js:8)
 
 ## ui/quem_resolve.js
-- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:781)
+- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:784)
 - quemResolveCardHtml:84 - chama: DIFF_TO_BOSSKEY (chefoes.js:25), DIFF_LABELS (aba_chefoes.js:236), state (nucleo.js:8) | chamado por: renderBossDetail (aba_chefoes.js:534)
 - quemResolveChave:17 - chama: getCurrentCap (level_cap.js:49), state (nucleo.js:8)
 - quemResolveItemHtml:43 - chama: speciesTypeNames (tipos.js:254), pipelineCandidatoHtml (pipeline_tela.js:78)

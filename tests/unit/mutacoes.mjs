@@ -5066,4 +5066,11 @@ export const MUTACOES = [
     de: "if (contra) saida.contraChefao",
     para: "if (false) saida.contraChefao",
   },
+  {
+    id: "foco-luta-sem-ganho-no-motivo",
+    descricao: "Quando as duas builds perdem, o motivo deixa de dizer quanto a mirada tira a mais do time do chefão",
+    arquivo: "pipeline_build.js",
+    de: "contra.pontos > contraBase.pontos) contra.motivo +=",
+    para: "false) contra.motivo +=",
+  },
 ];

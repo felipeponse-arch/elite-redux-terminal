@@ -106,3 +106,16 @@ test("caso real: Machamp Físico na Etapa 8 — sem luta não há chefão adiant
 test("luta inexistente: ok false, sem sugestão às cegas", () => {
   assert.equal(R.buildFocadaDoMotor(MACHAMP, "Fisico", { luta: "Ninguém 9" }).ok, false);
 });
+
+test("melhora provada: com luta a build pontua >= a de hoje; Lucario Mega Especial x Norman 1 (Etapa 2) estritamente mais, e o motivo diz o ganho", () => {
+  const E2 = carregarRegras({ milestone: 2, difficulty: "ace", levelCapMode: "more" });
+  const pts = (r, luta) => E2.pipelineDuelarContraChefao(E2.pipelineEspecie(LUCARIO_MEGA), { ability: r.build.habilidade, item: r.build.item, nature: r.build.natureza, evs: r.build.evs, moves: r.build.golpes }, luta, E2.ctxDoState()).pontos;
+  const sem = E2.buildFocadaDoMotor(LUCARIO_MEGA, "Especial"), com = E2.buildFocadaDoMotor(LUCARIO_MEGA, "Especial", { luta: "Norman 1" });
+  assert.ok(pts(com, "Norman 1") > pts(sem, "Norman 1"));
+  assert.match(com.contraChefao.motivo, /tira 33% do time dele \(antes 23%\)/);
+  // e nunca pior que a de hoje (Machamp x Sidney, Etapa 8)
+  const E8 = carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" });
+  const a = E8.buildFocadaDoMotor(MACHAMP, "Fisico"), b = E8.buildFocadaDoMotor(MACHAMP, "Fisico", { luta: "Sidney" });
+  assert.ok(pts8(b) >= pts8(a));
+  function pts8(r) { return E8.pipelineDuelarContraChefao(E8.pipelineEspecie(MACHAMP), { ability: r.build.habilidade, item: r.build.item, nature: r.build.natureza, evs: r.build.evs, moves: r.build.golpes }, "Sidney", E8.ctxDoState()).pontos; }
+});

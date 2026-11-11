@@ -749,6 +749,7 @@
       var base = opts.alvo ? null : pipelineCandidatos(sp, pipelineResolverAlvo(undefined, ctx), ctx, foco).candidatos[0];
       var contraBase = base ? pipelineDuelarContraChefao(sp, base.build, opts.luta, ctx) : null;
       if (contra && contraBase && contraBase.pontos > contra.pontos) { c = base; contra = contraBase; }
+      else if (contra && contraBase && contra.resultado === "perde" && contraBase.resultado === "perde" && contra.pontos > contraBase.pontos) contra.motivo += "; tira " + contra.danoPct + "% do time dele (antes " + contraBase.danoPct + "%)";
     }
     var chave = function (x) { return x.golpes.slice().sort().join() + "|" + x.habilidade + "|" + x.build.nature + "|" + x.build.evs.join(); };
     var igualDeHoje = pipelineCandidatos(sp, alvo, ctx).candidatos.some(function (x) { return chave(x) === chave(c); });
@@ -772,7 +773,9 @@
     var hp = s.venceu ? Math.round(s.hpRestante * 100) : 0;
     var perde = (s.log || []).filter(function (l) { return l.venceu === false && l.contra !== undefined; })[0];
     var motivo = s.venceu ? "vence " + nomeLuta + " com " + hp + "% de HP" : "derruba " + s.derrubados + " de " + s.total + " de " + nomeLuta + (perde ? "; perde para " + perde.contra : "");
-    return { resultado: s.venceu ? "vence" : "perde", hpRestante: hp, motivo: motivo, pontos: s.pontos };
+    // dano ao time dele quando perde: nocautes + fração tirada dos vivos (pontos = nocautes + 0,5 x fração)
+    var danoPct = s.venceu ? 100 : Math.round((s.derrubados + 2 * (s.pontos - s.derrubados)) / s.total * 100);
+    return { resultado: s.venceu ? "vence" : "perde", hpRestante: hp, motivo: motivo, pontos: s.pontos, danoPct: danoPct };
   }
 
   // ---- 2. do alvo para os Pokémon (caso B) ----
