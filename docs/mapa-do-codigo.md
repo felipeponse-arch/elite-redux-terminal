@@ -14,7 +14,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **campo.js** - TK-16 (campo, fase 1): FONTE ÚNICA do vocabulário de clima, terreno, telas e hazards, e das durações de campo.
   rotuloDoArquetipoDeCampo:46, hazardCheioNoLado:57, poeHazardNoLado:58
 - **chefoes.js** - Chefões e a próxima luta: o que falta vencer, variante por dificuldade,
-  gymLeaderBaseName:55, classeDoCabecalhoDoChefao:57, getRemainingBossEntries:63, computeSharedRisks:121, bossSpeedSummary:144, computeBossAttackTypes:159, bossSafetyScore:183, bestBoxCandidateForBoss:195, confrontoUnitOf:245, confrontoFoesDe:270, confrontoMelhorUnidade:281, confrontoMinhasUnidades:291, confrontoUnidadesDaCaixa:301, confrontoParaParty:310, bossPartyPorDificuldade:339, bestRankForm:345, nextFightCx:363, varianteDoChefao:370, gymSkillsSummaryFor:379, regraDeCampoDoChefao:426, comportamentoDaIADoChefao:459, habilidadesExtrasDoHell:476, regrasDoHell:477, ehRevancheDeLider:486, simularOitavoGinasio:497, buffsParaMostrarDoChefao:522, buffsAtivosDoChefao:534, computeSpeedTiers:548, planoDaLuta:568, resumoDaLuta:581 (+3)
+  gymLeaderBaseName:52, classeDoCabecalhoDoChefao:54, getRemainingBossEntries:60, computeSharedRisks:118, bossSpeedSummary:141, computeBossAttackTypes:156, bossSafetyScore:180, bestBoxCandidateForBoss:192, confrontoUnitOf:242, confrontoFoesDe:267, confrontoMelhorUnidade:278, confrontoMinhasUnidades:288, confrontoUnidadesDaCaixa:298, confrontoParaParty:307, bossPartyPorDificuldade:336, bestRankForm:342, nextFightCx:360, varianteDoChefao:367, gymSkillsSummaryFor:376, regraDeCampoDoChefao:423, comportamentoDaIADoChefao:456, habilidadesExtrasDoHell:473, regrasDoHell:474, ehRevancheDeLider:483, simularOitavoGinasio:494, buffsParaMostrarDoChefao:519, buffsAtivosDoChefao:531, computeSpeedTiers:545, planoDaLuta:565, resumoDaLuta:578 (+3)
 - **condicoes_habilidade.js** - Habilidade que só funciona numa condição do PRÓPRIO Pokémon (status,
   descricaoDeHabilidade:77, descricaoDeHabilidadePorId:88, expandirTextoDeHabilidade:99, habilidadeArma:113, nomesDeHabilidades:116, podeTerStatus:128, garantiaDoTime:141, garantiaDaCondicao:155, comoGarantir:171, condicaoDaBuild:190, precisaDeSetter:213, blocoCondicoesIA:238
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
@@ -175,8 +175,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   percentis:5, tierDe:12, unidadeComItemLiberado:16, chavesDoRankNovo:24, camposHerdados:31
 - **rank_escolha.mjs** - Escolha do set no rank v2 (ticket 08, 07/10/2026). A soma rápida (nota do duelo contra todos os
   melhoresPelaSoma:9, mediaDoEixo:13, notaDosEixos:18, escolherPelaNotaFinal:22
-- **rank_fatia.mjs** - Rank com fatia fixa de peso (ticket todas-as-lutas/02, decisão do usuário em 16/10/2026): chefões 60% e lutas comuns 40%.
-  notasComFatia:9, comunsMaisPerigosas:36
+- **rank_fatia.mjs** - Nota do rank por espécie (ticket todas-as-lutas/02). Desde 06/11/2026 só as 29 lutas de chefão entram, todas no mesmo saco:
+  notasComFatia:7
 - **rank_incremental.mjs** - Rank incremental (06/11/2026, decisão do usuário: atualização recalcula SÓ O QUE MUDOU).
   hash:10, digitalDaEspecie:15, digitalGlobal:23, decidir:30, r6:49, reduzirMedicao:50, expandirMedicao:61
 - **remapear_sprite_index.mjs** - Sprites pelo NOME da espécie (15/10/2026). O atlas (data/sprite_atlas.png) foi montado com o índice pelo número da espécie (x) do
@@ -383,7 +383,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **rank_da_run.test.mjs** - Rank v2 no app (src/regras/rank_da_run.js): nota pela dificuldade da run, dois eixos,
 - **rank_disponibilidade.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **rank_escolha.test.mjs** - Ticket 08 (07/10/2026): a escolha do set do rank avalia por inteiro os melhores pela soma rápida
-- **rank_fatia.test.mjs** - Fatia fixa de peso do rank (ticket todas-as-lutas/02, 21/10/2026): chefões 60% e lutas comuns 40%, com as 29 lutas de chefão REAIS
+- **rank_fatia.test.mjs** - Nota do rank (scripts/rank_fatia.mjs): sem fatia, todas as lutas no mesmo saco. A fatia 60/40 e as lutas comuns saíram em 06/11/2026.
 - **rank_incremental.test.mjs** - Rank incremental (06/11/2026): impressão digital por espécie + global, e a decisão do que recalcular.
 - **rank_premia_hazard.test.mjs** - TK-32 (decisão do usuário de 29/10/2026): o rank premia suporte, só hazard. Dado real: Forretress no nível 40
 - **rank_so_por_rankde.test.mjs** - ADR-003 (ticket 01): o dado do Rank só é lido por rankDe(); SPECIES_RANK não é reescrito depois da carga.

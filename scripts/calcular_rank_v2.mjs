@@ -210,13 +210,13 @@ const validos = Object.keys(res).filter((s) => res[s]);
 // espécies ponderadas pela própria nota (vencer quem os fortes também perdem vale mais).
 // Média só das lutas cobertas (desde que a espécie existe na run). Contar a luta não coberta como 0 misturava "aparece cedo" com
 // "é forte" (02/10: fortes da comunidade caíram de 73 para 65); a etapa fica à mostra ao lado da nota.
-// A fatia fixa (chefões x comuns) e a iteração moram em rank_fatia.mjs (notasComFatia).
+// A iteração do peso mora em rank_fatia.mjs (notasComFatia).
 function notas(dif, eixo) {
   const L = lutas[dif];
   const indice = Object.fromEntries(L.map((l, i) => [l.nome, i]));
   const mediaDe = (e) => e.brs.reduce((a, v) => a + v, 0) / e.brs.length;
   const lista = (s) => ((res[s][dif] && res[s][dif].eixos[eixo]) || []).map((e) => [indice[e.luta], mediaDe(e)]);
-  const r = notasComFatia(L.map(() => ({ comum: false })), validos, lista, null);
+  const r = notasComFatia(L.length, validos, lista);
   return { nota: r.nota, pesoLuta: Object.fromEntries(L.map((l, i) => [l.nome, r.pesoLuta[i]])) };
 }
 const final = {};

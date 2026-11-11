@@ -24,9 +24,6 @@
   };
   var DIFF_TO_BOSSKEY = {};
   Object.keys(TIER_DA_DIFICULDADE).forEach(function (d) { DIFF_TO_BOSSKEY[d] = TIER_DA_DIFICULDADE[d].chefao; });
-  // Fatia fixa do rank v2 (decisão do usuário, 16/10/2026): chefões 60%, lutas comuns 40%. Não há outra cópia (o Meu Time e o pipeline
-  // de build usam só os chefões desde 07/11/2026).
-  var FATIA_DOS_CHEFOES = 0.6;
 
   // "Estou no 2º badge, o que faz sentido daqui até o final?" - pedido do
   // usuário, 2026-09-10: sem NENHUMA pergunta nova pro jogador - usa só o

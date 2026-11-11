@@ -4121,13 +4121,6 @@ export const MUTACOES = [
     para: 'hell: { chefao: "insane", rank: "insane" }',
   },
   {
-    id: "fatia-dos-chefoes-50-50",
-    descricao: "a fatia única dos chefões deixa de ser 60% (decisão do usuário, 16/10/2026)",
-    arquivo: "chefoes.js",
-    de: "var FATIA_DOS_CHEFOES = 0.6;",
-    para: "var FATIA_DOS_CHEFOES = 0.5;",
-  },
-  {
     id: "motor-busca-desempate-ultimo",
     descricao: "a busca troca o desempate: empate de valor passa a escolher o ÚLTIMO candidato (antes: o primeiro)",
     arquivo: "time_pelo_motor.js",
