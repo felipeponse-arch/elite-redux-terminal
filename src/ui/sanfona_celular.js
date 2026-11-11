@@ -83,4 +83,9 @@
     }
     sanfonaObservar();
     sanfonaAplicar();
+    // Girar o aparelho para tela larga: o estilo da sanfona some (só existe ≤640 px), então tudo abre; ao voltar, reaplica.
+    if (sanfonaMedia && sanfonaMedia.addEventListener) sanfonaMedia.addEventListener("change", function () {
+      if (sanfonaMedia.matches) { sanfonaAplicar(); return; }
+      Array.prototype.slice.call(document.querySelectorAll("details.sanfona, details[data-sanfona]")).forEach(function (d) { d.open = true; });
+    });
   })();

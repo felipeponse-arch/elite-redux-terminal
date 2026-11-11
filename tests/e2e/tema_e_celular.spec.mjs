@@ -120,7 +120,8 @@ test.describe("bordas seguras (celular com entalhe)", () => {
       const t = getComputedStyle(document.querySelector(".topbar")), r = getComputedStyle(document.querySelector(".footer"));
       return { topo: [t.paddingTop, t.paddingRight, t.paddingBottom, t.paddingLeft], rodape: [r.paddingTop, r.paddingRight, r.paddingBottom, r.paddingLeft] };
     });
-    expect(p.topo).toEqual(["8px", "10px", "8px", "10px"]);
+    // Topo compacto no celular (11/11/2026, celular_topo.css): --pad-y caiu de 8 para 4 px; o horizontal segue 10.
+    expect(p.topo).toEqual(["4px", "10px", "4px", "10px"]);
     expect(p.rodape).toEqual(["0px", "14px", "0px", "14px"]);
   });
 
@@ -132,7 +133,7 @@ test.describe("bordas seguras (celular com entalhe)", () => {
       const t = getComputedStyle(document.querySelector(".topbar")), r = getComputedStyle(document.querySelector(".footer"));
       return { topo: t.paddingTop, rodape: r.paddingBottom, rodapeTopo: r.paddingTop };
     });
-    expect(p.topo).toBe("55px"); // 8 + 47
+    expect(p.topo).toBe("51px"); // 4 (compacto) + 47 do entalhe, somado uma vez só
     expect(p.rodape).toBe("34px"); // 0 + 34
     expect(p.rodapeTopo).toBe("0px");
     // O conteúdo do cabeçalho (marca) começa abaixo do entalhe, e o rodapé termina acima da barra de gestos.
@@ -160,11 +161,11 @@ test.describe("bordas seguras (celular com entalhe)", () => {
       const t = document.querySelector(".topbar");
       return { alturaAviso: b.height, paddingAviso: getComputedStyle(document.getElementById("run-setup-banner")).paddingTop, topoCabecalho: t.getBoundingClientRect().top, paddingCabecalho: getComputedStyle(t).paddingTop };
     });
-    expect(m.paddingAviso).toBe("51px");
-    expect(m.paddingCabecalho, "o aviso já cobre o entalhe").toBe("8px");
+    expect(m.paddingAviso).toBe("47px"); // o aviso compacto não tem folga própria: só o entalhe
+    expect(m.paddingCabecalho, "o aviso já cobre o entalhe").toBe("4px");
     expect(m.topoCabecalho, "cabeçalho começa logo abaixo do aviso").toBeGreaterThanOrEqual(m.alturaAviso - 1);
     // Fechar o aviso devolve a borda segura ao cabeçalho.
     await page.evaluate(() => { document.getElementById("run-setup-banner").hidden = true; });
-    await expect.poll(() => page.evaluate(() => getComputedStyle(document.querySelector(".topbar")).paddingTop)).toBe("55px");
+    await expect.poll(() => page.evaluate(() => getComputedStyle(document.querySelector(".topbar")).paddingTop)).toBe("51px"); // 4 + 47
   });
 });

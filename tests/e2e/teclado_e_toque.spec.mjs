@@ -207,6 +207,9 @@ test.describe("alto contraste: alvo de toque da caixa", () => {
       await ligarAltoContraste(page);
       await abrirAba(page, "bosses");
       await page.locator("#boss-list .species-row").first().click();
+      // No celular o bloco "Time do chefão" é uma sanfona fechada (sanfona_celular.js): conteúdo dentro de <details>
+      // fechado não recebe foco, então o teclado abre o resumo primeiro (como um usuário faria).
+      await page.locator("#boss-detail summary.sanfona-resumo", { hasText: "Time do chefão" }).click();
       const cabeca = page.locator("#boss-detail .bm-head.goto-species").first();
       await cabeca.focus();
       await page.keyboard.press("Shift+Tab");

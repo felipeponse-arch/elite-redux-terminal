@@ -145,6 +145,18 @@ test.describe("celular", () => {
     await abrirFicha(page, "Charizard");
     await print(page, "celular-ficha.png");
   });
+
+  // Topo compacto + sanfona (11/11/2026): Meu Time e detalhe de chefão no celular.
+  test("Meu Time", async ({ page }) => {
+    await timeComUm(page, "Charizard");
+    await page.evaluate(() => { document.getElementById("toast").style.display = "none"; }); // o aviso "entrou no time" cobriria o cartão
+    await print(page, "celular-meu-time.png");
+  });
+
+  test("detalhe de chefão", async ({ page }) => {
+    await primeiroChefao(page);
+    await print(page, "celular-chefao-detalhe.png");
+  });
 });
 
 // ---- celular nos 3 temas + entalhe (ticket 15 da dívida, 2026-10-08) ----

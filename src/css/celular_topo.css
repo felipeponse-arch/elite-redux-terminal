@@ -14,6 +14,8 @@
   /* Insígnias numa faixa só de ícones; o rótulo fica só na atual (os outros seguem no DOM, fora da vista). */
   .tabs { padding: 2px; }
   .faixa-etapa { gap: 0; padding-top: 2px; }
+  /* A faixa é preenchida por script depois do primeiro desenho: reserva a altura final para a tela não pular (CLS). */
+  .faixa-etapa:empty { min-height: 65px; }
   .faixa-insignias { gap: 0; padding: 0; align-items: center; }
   .ins-btn { width: 44px; min-height: 44px; padding: 2px 0; gap: 0; justify-content: center; }
   .ins-btn svg { width: 28px; height: 28px; }
