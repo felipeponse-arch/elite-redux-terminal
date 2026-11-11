@@ -27,3 +27,13 @@ test("pó não é sono em geral: Hypnosis passa por Overcoat; Mycelium Might ign
   assert.ok(plano(unidade(["Overcoat"]), "Hypnosis"));
   assert.ok(plano(unidade(["Overcoat"]), "Spore", unidade(["Mycelium Might"])));
 });
+
+test("os outros pós com plano (Stun Spore, Poison Powder, Cotton Spore) respeitam a mesma imunidade", () => {
+  for (const g of ["Stun Spore", "Poison Powder", "Cotton Spore"]) {
+    assert.ok(plano(unidade([]), g), g + " pega quem não tem imunidade");
+    assert.equal(plano(unidade([], ["Grass"]), g), null, g + " x Grass");
+    assert.equal(plano(unidade(["Overcoat"]), g), null, g + " x Overcoat");
+    assert.equal(plano(unidade([], ["Water"], "Safety Goggles"), g), null, g + " x Safety Goggles");
+  }
+  assert.ok(plano(unidade(["Overcoat"]), "Thunder Wave"), "golpe sem a flag de pó passa por Overcoat");
+});

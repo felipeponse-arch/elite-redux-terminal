@@ -1977,10 +1977,11 @@
   }
   // Constantes do sono do alvo (TK-43): declaradas antes do uso em danoNoDuelo.
   var SONO_DO_ALVO_DUELO = { "Dream Eater": 1, "Nightmare": 1, "Wake-Up Slap": 1, "Dream Invasion": 1 };
-  var GOLPES_DE_PO_DO_SONO_DUELO = { "Spore": 1, "Sleep Powder": 1 };
+  // Golpes com FLAG_POWDER (powder_affected na MoveList) que têm plano no motor; Powder, Rage Powder (mira o próprio usuário) e Magic Powder não têm plano.
+  var GOLPES_DE_PO_DUELO = { "Spore": 1, "Sleep Powder": 1, "Stun Spore": 1, "Poison Powder": 1, "Cotton Spore": 1 };
   // IsPowderImmune (battle_util.c:3197, canceller :3467): Grass, Safety Goggles e habilidade de pó barram o golpe; Mycelium Might ignora.
-  function poBarraSonoDuelo(atq, def, nome) {
-    return !!GOLPES_DE_PO_DO_SONO_DUELO[nome] && !atq.ef.statusIgnoraImune && (def.tipos.indexOf("Grass") !== -1 || !!def.ef.imunePo || !!(def.it && def.it.nome === "Safety Goggles"));
+  function poBarraDuelo(atq, def, nome) {
+    return !!GOLPES_DE_PO_DUELO[nome] && !atq.ef.statusIgnoraImune && (def.tipos.indexOf("Grass") !== -1 || !!def.ef.imunePo || !!(def.it && def.it.nome === "Safety Goggles"));
   }
   var MAXHP_PESADELO_DUELO = 1 / 4; // ENDTURN_NIGHTMARES (battle_util.c:2619-2621)
   function danoNoDuelo(atq, def, nivel) {
@@ -2215,7 +2216,7 @@
     (atq.statusIds || []).forEach(function (id) {
       var p = planoDoGolpeStatus(id);
       if (!p || p.tipo !== "status" || p.status !== "sono") return;
-      if (poBarraSonoDuelo(atq, def, MOVES[id][0])) return;
+      if (poBarraDuelo(atq, def, MOVES[id][0])) return;
       var r = efeitoDoPlanoDuelo(atq, def, id, { nX: n, hpY: def.stats[0], dY: 0 }, nivel);
       if (r) melhor = Math.max(melhor, Math.min(1, r.perdeY / n));
     });
@@ -3618,6 +3619,7 @@
     var p = planoDoGolpeStatus(id);
     var nome = MOVES[id][0], acc = MOVES[id][4] > 0 && MOVES[id][4] <= 100 ? MOVES[id][4] / 100 : 1;
     if (!p) return null;
+    if (poBarraDuelo(x, y, nome)) return null;
     if (x.ef.precisaoGolpe[nome] !== undefined) acc = Math.max(acc, x.ef.precisaoGolpe[nome]); // Hypnotist, Lullaby, Hypnotic Trance
     var r = { nome: nome, tipo: p.tipo, atraso: 1, multX: 1, multY: 1, residuoY: 0, perdeY: 0, sustenta: false, velX: 1, velY: 1, custo: 0 };
     var gX = base.golpeX, gY = base.golpeY;
@@ -3647,7 +3649,6 @@
     if (p.tipo === "status") {
       var s = p.status;
       if (s === "sono") {
-        if (poBarraSonoDuelo(x, y, nome)) return null;
         if (y.ef.imuneStatus.sono || y.ef.aliadoImuneStatus && y.ef.aliadoImuneStatus.sono) return null;
         var podeDormir = podeDormirDuelo(y, x);
         if (!podeDormir) return null;

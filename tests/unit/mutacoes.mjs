@@ -7,10 +7,31 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "po-conjunto-sem-sono",
+    descricao: "Pós (11/11): Spore e Sleep Powder saem do conjunto de pós: voltam a dormir Grass e Overcoat",
+    arquivo: "duelo.js",
+    de: "{ \"Spore\": 1, \"Sleep Powder\": 1, ",
+    para: "{ ",
+  },
+  {
+    id: "po-conjunto-sem-paralisia-veneno",
+    descricao: "Pós (11/11): Stun Spore e Poison Powder saem do conjunto de pós: voltam a pegar Grass e Overcoat",
+    arquivo: "duelo.js",
+    de: "\"Stun Spore\": 1, \"Poison Powder\": 1, ",
+    para: "",
+  },
+  {
+    id: "po-conjunto-sem-cotton-spore",
+    descricao: "Pós (11/11): Cotton Spore sai do conjunto de pós: volta a derrubar a Speed de Grass e Overcoat",
+    arquivo: "duelo.js",
+    de: "\"Cotton Spore\": 1 }",
+    para: "}",
+  },
+  {
     id: "po-do-sono-plano-comum-sem-imunidade",
     descricao: "Pendência 04/11: Spore e Sleep Powder voltam a dormir Grass, Overcoat e Safety Goggles no plano comum do duelo",
     arquivo: "duelo.js",
-    de: "if (poBarraSonoDuelo(x, y, nome)) return null;",
+    de: "if (poBarraDuelo(x, y, nome)) return null;",
     para: "",
   },
   {
@@ -4748,7 +4769,7 @@ export const MUTACOES = [
     id: "tk43-po-sem-imunidade",
     descricao: "TK-43: Spore/Sleep Powder dormem Grass, Overcoat e Safety Goggles",
     arquivo: "duelo.js",
-    de: "if (poBarraSonoDuelo(atq, def, MOVES[id][0])) return;",
+    de: "if (poBarraDuelo(atq, def, MOVES[id][0])) return;",
     para: "",
   },
   {
