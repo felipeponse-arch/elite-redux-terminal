@@ -96,6 +96,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   confrontoMultTxt:11, confrontoNomesTxt:12, confrontoCelulaHtml:15, confrontoResumoTxt:25, trocaBuracosTxt:40, confrontoAjustesHtml:44, confrontoPlanoHtml:67, bossConfrontoHtml:96, dashboardConfrontoHtml:135, boxFitNote:154, megaOfNote:175, renderDashboard:183, nextFightDetailHtml:215, renderNextFightCard:257
 - **revisao_automatica.js** - Revisão automática das builds do time (evolução, com a curada da forma nova, sem IA) e as trocas do plano ao mudar o cap.
   tarefaDeRevisao:13, processarRevisoes:23, registrarTrocasDoPlano:71, agendarRevisoes:91
+- **sanfona_celular.js** - Sanfona no celular (pedido de 11/11/2026): em até 640 px os blocos (.card com título h3) da ficha da Dex, do
+  sanfonaResumo:9, sanfonaConverter:19, sanfonaAplicar:44, sanfonaLigar:66
 - **sync.js** - Sincronização entre aparelhos (capability db) e os avisos de sync.
   aplicarSaveRemoto:45, conflitoDeProgresso:61, remotoComSomaErrada:88, pushToSync:96, showSyncBanner:105, syncBannerOffset:119, atualizarTituloDoSubtitulo:139, setSyncStatusIndicator:143, scheduleSyncRetry:162, lerSaveLocal:174, connectSync:179
 - **time.js** - Aba Time: cards dos membros, troca com a caixa, times salvos e "Novo jogo".
