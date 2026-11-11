@@ -101,3 +101,8 @@
 }
 .chefao-cartao .detail-titles h2 { font-family: var(--fonte-display); font-size: var(--fs-cartao); font-weight: 900; text-transform: uppercase; line-height: .95; letter-spacing: .02em; }
 @media (max-width: 620px) { .chefao-cartao .detail-titles h2 { font-size: var(--fs-nomecel); overflow-wrap: anywhere; } }
+
+/* nota longa do cálculo de status: recolhida, alvo de toque de 44 px */
+.boss-nota-nivel { margin: 4px 0 12px; }
+.boss-nota-nivel > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--text-dim); font-size: var(--fs-pequeno); font-weight: 700; }
+.boss-nota-nivel > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
