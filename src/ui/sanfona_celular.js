@@ -6,7 +6,23 @@
   var sanfonaAbertas = {};
   var SANFONA_RAIZES = ["species-detail", "boss-detail", "view-team"];
 
+  // Time do chefão: sprites pequenos no título fechado (o aberto passa de 3000 px no celular); "N Pokémon · nível X".
+  function sanfonaFaixaTime(card) {
+    var cartas = card.querySelectorAll(".boss-mon-card .bm-head");
+    if (!cartas.length) return null;
+    var nivel = card.querySelector("#boss-level-input");
+    return {
+      texto: cartas.length + " Pokémon" + (nivel && nivel.value ? " · nível " + nivel.value : ""),
+      sprites: Array.prototype.map.call(cartas, function (c) {
+        var nome = c.querySelector(".bm-name");
+        return spriteImgHtml(c.getAttribute("data-x"), nome ? nome.textContent : "", 36);
+      }).join("")
+    };
+  }
+
   function sanfonaResumo(card) {
+    var faixa = sanfonaFaixaTime(card);
+    if (faixa) return faixa.texto;
     var efe = Array.prototype.map.call(card.querySelectorAll(".efe-faixa"), function (f) {
       return f.querySelector(".efe-rotulo").textContent.trim() + " " + f.querySelectorAll(".efe-tipo").length;
     });
@@ -32,6 +48,11 @@
     sum.innerHTML = '<span class="sanfona-titulo"></span>' + (resumo ? '<span class="sanfona-info mono"></span>' : "");
     sum.firstChild.textContent = titulo;
     if (resumo) sum.lastChild.textContent = "· " + resumo;
+    var faixaTime = sanfonaFaixaTime(card);
+    if (faixaTime) {
+      det.classList.add("sanfona-time");
+      sum.insertAdjacentHTML("beforeend", '<span class="sanfona-faixa" aria-hidden="true">' + faixaTime.sprites + "</span>");
+    }
     det.appendChild(sum);
     card.removeChild(h3);
     while (card.firstChild) det.appendChild(card.firstChild);
@@ -50,7 +71,8 @@
   function sanfonaConverterBuild(painel) {
     var slot = painel.closest(".team-slot");
     var nome = slot && slot.querySelector(".ts-name");
-    var chave = "build:" + (nome ? nome.firstChild.textContent.trim() : "");
+    var indice = slot ? Array.prototype.indexOf.call(slot.parentNode.children, slot) : 0;
+    var chave = "build:" + indice + ":" + (nome ? nome.firstChild.textContent.trim() : "");
     var rot = painel.querySelector(".ts-build-label");
     var hab = painel.querySelector(".bp-chip-sel");
     var golpes = painel.querySelectorAll(".cm-golpes li").length;

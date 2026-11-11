@@ -97,7 +97,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **revisao_automatica.js** - Revisão automática das builds do time (evolução, com a curada da forma nova, sem IA) e as trocas do plano ao mudar o cap.
   tarefaDeRevisao:13, processarRevisoes:23, registrarTrocasDoPlano:71, agendarRevisoes:91
 - **sanfona_celular.js** - Sanfona no celular (pedido de 11/11/2026): em até 640 px os blocos (.card com título h3) da ficha da Dex, do
-  sanfonaResumo:9, sanfonaConverter:23, sanfonaConverterBuild:50, sanfonaAplicar:75, sanfonaLigar:98
+  sanfonaFaixaTime:10, sanfonaResumo:23, sanfonaConverter:39, sanfonaConverterBuild:71, sanfonaAplicar:97, sanfonaLigar:120
 - **sync.js** - Sincronização entre aparelhos (capability db) e os avisos de sync.
   aplicarSaveRemoto:45, conflitoDeProgresso:61, remotoComSomaErrada:88, pushToSync:96, showSyncBanner:105, syncBannerOffset:119, atualizarTituloDoSubtitulo:139, setSyncStatusIndicator:143, scheduleSyncRetry:162, lerSaveLocal:174, connectSync:179
 - **time.js** - Aba Time: cards dos membros, troca com a caixa, times salvos e "Novo jogo".

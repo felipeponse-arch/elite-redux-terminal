@@ -58,6 +58,11 @@
   .sanfona[open] { padding-bottom: 12px; }
   .sanfona-titulo { white-space: nowrap; }
   .sanfona-info { font-size: var(--fs-pequeno); font-weight: 400; color: var(--text-dim); }
+  /* Time do chefão fechado: a faixa de sprites ocupa uma linha própria abaixo do título; o "+" fica na primeira. */
+  .sanfona-time > .sanfona-resumo { flex-wrap: wrap; padding-bottom: var(--space-2); }
+  .sanfona-time > .sanfona-resumo::after { order: 2; }
+  .sanfona-faixa { order: 3; flex: 1 0 100%; display: flex; flex-wrap: wrap; gap: 2px; }
+  .sanfona-time[open] .sanfona-faixa { display: none; }
 
   /* Com a ficha (Dex) ou o chefão aberto, o topo não empurra o conteúdo: as insígnias saem da vista; o nome da Etapa e o level cap ficam. */
   :root:has(#view-dex.active .dex-shell.show-detail, #view-bosses.active #boss-shell.show-detail) .faixa-insignias { display: none; }
@@ -69,7 +74,7 @@
   .chefao-cartao .detail-dexno { margin-top: 0; gap: var(--space-1); }
 
   /* Ficha da Dex aberta: a busca recolhe (volta com "Voltar para a lista"); a ficha começa mais perto do topo. */
-  .dex-shell.show-detail .search-row { display: none; }
+  .dex-shell.show-detail .search-row, .dex-shell.show-detail .rank-legenda { display: none; }
 
   /* Meu Time: um cartão por linha (largura toda); o painel de build vira sanfona de uma linha (sanfona_celular.js). */
   .team-slots { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
