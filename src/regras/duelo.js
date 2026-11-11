@@ -1394,7 +1394,7 @@
       ataqueNaEntrada: 0, seguimentoCategoria: [], aoUsar: [], limpaBuffsNaEntrada: false, quedaNaEntrada: {},
       maiorNaEntrada: 0, maiorAtaqueNaEntrada: 0, shellSmashNaMetade: false, inverteIntimida: false, dobraQuedas: false,
       encadeiaStatus: {},
-      hemolise: false, sempreDormindo: false, imunePo: false, limpaNaEntrada: false, trocaStatusDoTipo: {}, curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
+      hemolise: false, sempreDormindo: false, imunePo: false, imunePoBug: false, limpaNaEntrada: false, trocaStatusDoTipo: {}, curaPorTurno: 0, curaEnvenenado: 0, drenoPct: 0, drenoContato: 0, contatoMult: 1, semContato: false, absorveReforca: null, danoAoContato: 0,
       semRecuo: false, recuoMult: 1, custoPorAtaque: 0, custoTipo: {}, bloqueiaCura: false, liquidOoze: false,
       multStatus: {}, multChanceTipo: {}, evasao: 1, imuneFlag: {}, ignoraResist: {}, bloqueiaSuperEf: false, soSuperEf: false,
       bloqueios: 0, sempreResiste: 0, corCamaleao: false, tipoDoGolpe: false, defesaExtraVel: 0, categoriaPorTipo: {}, somPorTipo: {}, semErrarCategoria: {}, precisaoPorTipo: {},
@@ -1655,6 +1655,8 @@
       // Cleanse (abilities.cc:12991-13001): onEntry usa Heal Bell (até 2x por batalha); no 1x1 vale a 1ª entrada, que limpa o status do próprio usuário (Toxic Spikes, maldição de luta anterior).
       if (nomeHabDuelo(id) === "Cleanse") ef.limpaNaEntrada = true;
       if (/^(Shield Dust|Effect Spore|Overcoat|Guardian Coat|Charge Spores)$/.test(nomeHabDuelo(id))) ef.imunePo = true;
+      // pollinateImmunities (abilities.cc:4835 Pollinate, :8767 Steel Beetle, :12663 Butterfly Wings): só vale se o dono for Bug (battle_util.c:3202).
+      if (/^(Pollinate|Steel Beetle|Butterfly Wings)$/.test(nomeHabDuelo(id))) ef.imunePoBug = true;
       if (imuneAntes) { ef.imuneStatus = imuneAntes; IMUNE_STATUS_POR_HABILIDADE[nomeHabDuelo(id)].forEach(function (s) { ef.imuneStatus[s] = true; }); }
     });
     ef.stabExtra = ef.stabExtra.filter(function (tp, i, a) { return a.indexOf(tp) === i; });
@@ -1979,9 +1981,9 @@
   var SONO_DO_ALVO_DUELO = { "Dream Eater": 1, "Nightmare": 1, "Wake-Up Slap": 1, "Dream Invasion": 1 };
   // Golpes com FLAG_POWDER (powder_affected na MoveList) que têm plano no motor; Powder, Rage Powder (mira o próprio usuário) e Magic Powder não têm plano.
   var GOLPES_DE_PO_DUELO = { "Spore": 1, "Sleep Powder": 1, "Stun Spore": 1, "Poison Powder": 1, "Cotton Spore": 1 };
-  // IsPowderImmune (battle_util.c:3197, canceller :3467): Grass, Safety Goggles e habilidade de pó barram o golpe; Mycelium Might ignora.
+  // IsPowderImmune (battle_util.c:3197, canceller :3467): Grass, Safety Goggles, habilidade de pó e Bug com pollinateImmunities (:3202) barram o golpe; Mycelium Might ignora.
   function poBarraDuelo(atq, def, nome) {
-    return !!GOLPES_DE_PO_DUELO[nome] && !atq.ef.statusIgnoraImune && (def.tipos.indexOf("Grass") !== -1 || !!def.ef.imunePo || !!(def.it && def.it.nome === "Safety Goggles"));
+    return !!GOLPES_DE_PO_DUELO[nome] && !atq.ef.statusIgnoraImune && (def.tipos.indexOf("Grass") !== -1 || !!def.ef.imunePo || (!!def.ef.imunePoBug && def.tipos.indexOf("Bug") !== -1) || !!(def.it && def.it.nome === "Safety Goggles"));
   }
   var MAXHP_PESADELO_DUELO = 1 / 4; // ENDTURN_NIGHTMARES (battle_util.c:2619-2621)
   function danoNoDuelo(atq, def, nivel) {

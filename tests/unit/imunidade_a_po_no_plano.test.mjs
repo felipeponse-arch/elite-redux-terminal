@@ -37,3 +37,14 @@ test("os outros pós com plano (Stun Spore, Poison Powder, Cotton Spore) respeit
   }
   assert.ok(plano(unidade(["Overcoat"]), "Thunder Wave"), "golpe sem a flag de pó passa por Overcoat");
 });
+
+test("pollinateImmunities (battle_util.c:3202): Pollinate, Steel Beetle e Butterfly Wings barram o pó só em Bug", () => {
+  for (const h of ["Pollinate", "Steel Beetle", "Butterfly Wings"]) {
+    for (const g of ["Spore", "Sleep Powder", "Stun Spore"]) {
+      assert.equal(plano(unidade([h], ["Bug", "Steel"]), g), null, g + " x " + h + " Bug");
+      assert.ok(plano(unidade([h], ["Water"]), g), g + " x " + h + " não-Bug dorme");
+    }
+  }
+  assert.ok(plano(unidade([], ["Bug"]), "Spore"), "Bug sem a habilidade dorme");
+  assert.ok(plano(unidade(["Pollinate"], ["Bug"]), "Spore", unidade(["Mycelium Might"])), "Mycelium Might ignora");
+});

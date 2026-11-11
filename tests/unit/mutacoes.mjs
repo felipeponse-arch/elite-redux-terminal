@@ -4780,6 +4780,13 @@ export const MUTACOES = [
     para: "ef.imunePo = false;",
   },
   {
+    id: "po-bug-sem-pollinate",
+    descricao: "Pollinate, Steel Beetle e Butterfly Wings deixam de barrar o pó em Bug",
+    arquivo: "duelo.js",
+    de: "ef.imunePoBug = true;",
+    para: "ef.imunePoBug = false;",
+  },
+  {
     id: "tk43-pesadelo-sem-residual",
     descricao: "TK-43: Nightmare perde o dano residual de 1/4 do PV",
     arquivo: "duelo.js",
