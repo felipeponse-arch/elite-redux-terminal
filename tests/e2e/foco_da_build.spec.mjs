@@ -23,6 +23,7 @@ test("clicar no chip mostra a sugestão, marca o chip e não aplica nada", async
   await expect(sug).toBeVisible();
   await expect(sug.locator(".bs-foco")).toHaveText("Misto");
   await expect(sug.locator(".bs-usar")).toBeVisible();
+  await expect(sug.locator(".bs-chefao")).toContainText(/(vence|derruba)/); // o motivo contra o próximo chefão
   await expect(chip).toHaveAttribute("aria-pressed", "true");
   await expect(rotuloDoCartao(page)).toHaveText(antes); // a build do cartão continua a mesma
   // clicar de novo fecha

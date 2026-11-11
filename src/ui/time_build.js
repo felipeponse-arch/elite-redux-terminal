@@ -111,7 +111,7 @@
     if (!sp) return;
     if (atual && atual.foco === foco) { delete sugestaoDoCartao[x]; renderTeam(); return; }
     var r;
-    try { r = buildFocadaDoMotor(sp.sname, foco); } catch (err) { r = { ok: false, motivo: "não foi possível calcular agora" }; }
+    try { var proxima = getRemainingBossEntries()[0]; r = buildFocadaDoMotor(sp.sname, foco, proxima ? { luta: proxima.name } : undefined); } catch (err) { r = { ok: false, motivo: "não foi possível calcular agora" }; }
     sugestaoDoCartao[x] = { foco: foco, r: r, etapa: state.settings.milestone };
     renderTeam();
     var chip = document.querySelector('#team-slots .cm-foco[data-x="' + x + '"][data-foco="' + foco + '"]');
@@ -150,6 +150,7 @@
       '<div class="bs-cab"><span class="bs-foco">' + escapeHtml(ROTULO_FOCO_BUILD[r.foco] || r.foco) + '</span>' +
         '<span class="bs-selo bs-selo-' + (r.estimado ? 'estimada' : 'medida') + '" title="' + (r.estimado ? 'Não medida pelo simulador de duelo' : 'Medida pelo simulador de duelo') + '">' + (r.estimado ? 'estimada' : 'medida') + '</span>' +
         (typeof r.nota === "number" ? '<span class="bs-nota">nota ' + r.nota + '</span>' : '') + '</div>' +
+      (r.contraChefao ? '<p class="bs-chefao bs-chefao-' + r.contraChefao.resultado + '">' + escapeHtml(r.contraChefao.motivo) + '</p>' : '') +
       painelDaBuildHtml(sp, build) +
       (porque.length ? '<details class="bp-mais"><summary>Por que esta build</summary><ul class="bs-motivos">' + porque.map(function (m) { return '<li>' + escapeHtml(m) + '</li>'; }).join("") + '</ul></details>' : '') +
       '<div class="bs-acoes"><button type="button" class="bs-usar add-team-btn" data-x="' + sp.x + '">Usar esta build</button>' + fechar + '</div></div>';

@@ -184,7 +184,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderRunStatus:9 - chama: state (nucleo.js:8)
 
 ## ui/quem_resolve.js
-- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:759)
+- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:781)
 - quemResolveCardHtml:84 - chama: DIFF_TO_BOSSKEY (chefoes.js:25), DIFF_LABELS (aba_chefoes.js:236), state (nucleo.js:8) | chamado por: renderBossDetail (aba_chefoes.js:534)
 - quemResolveChave:17 - chama: getCurrentCap (level_cap.js:49), state (nucleo.js:8)
 - quemResolveItemHtml:43 - chama: speciesTypeNames (tipos.js:254), pipelineCandidatoHtml (pipeline_tela.js:78)
@@ -233,7 +233,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - zerarRun:342 - chama: logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), myBuildLevelIsCustom (aba_chefoes.js:31), generatedTeamResult (arquetipo.js:35), teamRecommendation (arquetipo.js:30), +4
 
 ## ui/time_build.js
-- alternarFocoDoCartao:109 - chama: getSpeciesByX (dados_base.js:78), buildFocadaDoMotor (pipeline_build.js:734), state (nucleo.js:8), renderTeam (time.js:17)
+- alternarFocoDoCartao:109 - chama: getRemainingBossEntries (chefoes.js:60), getSpeciesByX (dados_base.js:78), buildFocadaDoMotor (pipeline_build.js:734), state (nucleo.js:8), renderTeam (time.js:17)
 - avisoEnxutoHtml:64 - chama: avisosDaBuild (avisos_build.js:8)
 - categoriaDoGolpe:11 - chama: SPLIT_STATUS (dados_base.js:29)
 - evsBarrasHtml:22 - chamado por: bossMonCardHtml (aba_chefoes.js:434)

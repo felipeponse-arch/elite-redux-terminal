@@ -5052,4 +5052,18 @@ export const MUTACOES = [
     de: "if (so === outro) return cOutro ? [cOutro] : null;",
     para: "",
   },
+  {
+    id: "foco-ignora-a-luta",
+    descricao: "buildFocadaDoMotor ignora opts.luta: volta à build do próximo líder, sem olhar o chefão pedido",
+    arquivo: "pipeline_build.js",
+    de: "opts.alvo || (opts.luta ? { chefao: opts.luta } : undefined)",
+    para: "opts.alvo",
+  },
+  {
+    id: "foco-luta-sem-duelo",
+    descricao: "opts.luta escolhe a build mas não devolve o duelo contra o chefão (contraChefao some)",
+    arquivo: "pipeline_build.js",
+    de: "if (contra) saida.contraChefao",
+    para: "if (false) saida.contraChefao",
+  },
 ];

@@ -77,3 +77,32 @@ test("determinística: mesma entrada, mesma saída", () => {
   const a = plain(R.buildFocadaDoMotor(BLASTOISE_MEGA, "Pivo")), b = plain(R.buildFocadaDoMotor(BLASTOISE_MEGA, "Pivo"));
   assert.deepEqual(a, b);
 });
+
+// ---- opts.luta (pacote 09): a build olha o chefão ----
+test("sem opts.luta o resultado é o de sempre (sem contraChefao, igual a opts vazio)", () => {
+  const a = R.buildFocadaDoMotor(MACHAMP, "Fisico"), b = R.buildFocadaDoMotor(MACHAMP, "Fisico", { luta: undefined });
+  assert.deepEqual(plain(b), plain(a));
+  assert.equal("contraChefao" in a, false);
+});
+
+test("com luta devolve contraChefao { luta, resultado, hpRestante, motivo } e o motivo cita o chefão", () => {
+  const r = R.buildFocadaDoMotor(MACHAMP, "Fisico", { luta: "Flannery 1" });
+  assert.equal(r.ok, true);
+  assert.ok(r.contraChefao, "contraChefao ausente");
+  assert.equal(r.contraChefao.luta, "Flannery 1");
+  assert.ok(["vence", "perde"].includes(r.contraChefao.resultado));
+  assert.equal(typeof r.contraChefao.hpRestante, "number");
+  assert.match(r.contraChefao.motivo, /Flannery 1/);
+});
+
+test("caso real: Machamp Físico na Etapa 8 — sem luta não há chefão adiante; com Sidney a build muda e o duelo é medido", () => {
+  const E8 = carregarRegras({ milestone: 8, difficulty: "ace", levelCapMode: "more" });
+  const sem = E8.buildFocadaDoMotor(MACHAMP, "Fisico"), com = E8.buildFocadaDoMotor(MACHAMP, "Fisico", { luta: "Sidney" });
+  assert.equal(sem.ok && com.ok, true);
+  assert.notDeepEqual(com.build.golpes.slice().sort(), sem.build.golpes.slice().sort());
+  assert.match(com.contraChefao.motivo, /Sidney/);
+});
+
+test("luta inexistente: ok false, sem sugestão às cegas", () => {
+  assert.equal(R.buildFocadaDoMotor(MACHAMP, "Fisico", { luta: "Ninguém 9" }).ok, false);
+});

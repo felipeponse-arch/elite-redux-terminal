@@ -739,18 +739,40 @@
     var ctx = opts.ctx || ctxDoState();
     var papeis = (SPECIES_ROLE[sp.sname] || {}).roles || [];
     if (ROTULO_PAPEL_PIPELINE[foco] && papeis.indexOf(foco) === -1) return { ok: false, foco: foco, motivo: sp.n + " não tem o papel " + ROTULO_FOCO_BUILD[foco] + " no rank" };
-    var alvo = pipelineResolverAlvo(opts.alvo, ctx);
+    var alvo = pipelineResolverAlvo(opts.alvo || (opts.luta ? { chefao: opts.luta } : undefined), ctx);
     var r = pipelineCandidatos(sp, alvo, ctx, foco), c = r.candidatos[0];
     if (!c) return { ok: false, foco: foco, motivo: ROTULO_FOCO_BUILD[foco] + " não se aplica a " + sp.n + " nesta Etapa" + (r.aviso ? " (" + r.aviso + ")" : "") };
+    // opts.luta (pacote 09, 11/11): olha o chefão. Duelo de verdade da build mirada nele contra a do alvo de hoje (próximo líder); fica a que pontua mais.
+    var contra = null;
+    if (opts.luta) {
+      contra = pipelineDuelarContraChefao(sp, c.build, opts.luta, ctx);
+      var base = opts.alvo ? null : pipelineCandidatos(sp, pipelineResolverAlvo(undefined, ctx), ctx, foco).candidatos[0];
+      var contraBase = base ? pipelineDuelarContraChefao(sp, base.build, opts.luta, ctx) : null;
+      if (contra && contraBase && contraBase.pontos > contra.pontos) { c = base; contra = contraBase; }
+    }
     var chave = function (x) { return x.golpes.slice().sort().join() + "|" + x.habilidade + "|" + x.build.nature + "|" + x.build.evs.join(); };
     var igualDeHoje = pipelineCandidatos(sp, alvo, ctx).candidatos.some(function (x) { return chave(x) === chave(c); });
     var rk = typeof rankDe === "function" ? rankDe(sp.sname) : null;
     var motivos = c.motivos.slice();
     if (foco === "Pivo") motivos.push("Pivô estimado: o simulador não executa golpe de troca; o dano medido é o dos outros 3 golpes.");
     if (igualDeHoje) motivos.push("É a mesma build que o Motor já sugere para " + sp.n + " hoje.");
-    return { ok: true, foco: foco, rotulo: c.rotulo, estimado: c.rotulo === "estimada",
+    var saida = { ok: true, foco: foco, rotulo: c.rotulo, estimado: c.rotulo === "estimada",
       build: { habilidade: c.build.ability, item: c.build.item, natureza: c.build.nature, evs: c.build.evs.slice(), golpes: c.build.moves.slice() },
       nota: rk && typeof rk.score === "number" ? rk.score : null, motivos: motivos, avisos: c.avisos.slice() };
+    if (contra) saida.contraChefao = { luta: opts.luta, resultado: contra.resultado, hpRestante: contra.hpRestante, motivo: contra.motivo };
+    return saida;
+  }
+  // A build sozinha (1 Pokémon) numa luta da run, com o duelo de verdade do motor (mesma montagem do juiz). null = luta ou build indisponível.
+  function pipelineDuelarContraChefao(sp, build, nomeLuta, ctx) {
+    var luta = motorMontarLuta(nomeLuta, ctx.settings.milestone);
+    var u = luta ? unidadeDaBuild(sp, build, luta.nivel, null) : null;
+    if (!u) return null;
+    if (luta.buffs.length) u = meuComBuffsDoGinasio(u, luta.buffs);
+    var s = (luta.dupla ? simularDuplaContraChefao : simularLutaContraChefao)([u], luta.foes, luta.nivel, luta.inicio);
+    var hp = s.venceu ? Math.round(s.hpRestante * 100) : 0;
+    var perde = (s.log || []).filter(function (l) { return l.venceu === false && l.contra !== undefined; })[0];
+    var motivo = s.venceu ? "vence " + nomeLuta + " com " + hp + "% de HP" : "derruba " + s.derrubados + " de " + s.total + " de " + nomeLuta + (perde ? "; perde para " + perde.contra : "");
+    return { resultado: s.venceu ? "vence" : "perde", hpRestante: hp, motivo: motivo, pontos: s.pontos };
   }
 
   // ---- 2. do alvo para os Pokémon (caso B) ----
