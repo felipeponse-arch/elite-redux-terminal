@@ -20,12 +20,11 @@ $dataDir = Join-Path (Split-Path $PSScriptRoot -Parent) "data"
 $rawDir = Join-Path $dataDir "sprites_all"
 if (-not (Test-Path $rawDir)) { New-Item -ItemType Directory -Path $rawDir | Out-Null }
 
-# Source sprites are 64px, but the UI never shows one larger than this cell size,
-# so storing them bigger only costs page weight. At 48 the atlas drops from
-# 2.5MB to 1.7MB with nothing in the UI being upscaled.
+# Source sprites are 64px and the atlas keeps that size: the Dex sheet shows a sprite at 192px,
+# and at 48 it came out deformed (10/11/2026). Storing at 64 costs page weight but nothing is upscaled
+# beyond what the UI needs.
 # NearestNeighbor on purpose: smooth interpolation invents intermediate colours
 # and partial alpha, which makes the PNG BIGGER, not smaller (measured).
-# 10/11/2026: a ficha passou a mostrar o sprite a 192 px; em 48 ele saia deformado. Fica no tamanho original (64).
 $CELL = 64
 $ATLAS_COLS = 44
 
