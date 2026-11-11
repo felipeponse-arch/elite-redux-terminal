@@ -14,7 +14,7 @@
   flex: none; font-size: var(--fs-micro); font-weight: 900; letter-spacing: .08em; text-transform: uppercase; line-height: 1; padding: 4px 7px;
   color: var(--accent-ink); background: var(--accent-2); clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 0 100%);
 }
-.boss-row.proxima-luta { border-left: 4px solid var(--accent-2); }
+.boss-row.proxima-luta { background: color-mix(in srgb, var(--accent-2) 10%, transparent); }
 
 /* ---- Cabeçalho: carteira do rival ---- */
 .detail-head.chefao-cartao {

@@ -11,6 +11,15 @@
         ],
         "createdAt": "2026-11-07T15:55:57.788Z",
         "reason": "tech lead (sem confirmação do usuário): nas linhas 71 e 107 o CSS declara border-radius: 0 (cartão quadrado com canto chanfrado em ::after); a regra casa a propriedade, não o valor; evidência: src/css/cartao.css L71 e L107"
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "src/css/chefoes_carteira.css"
+        ],
+        "createdAt": "2026-11-11T02:29:11.165Z",
+        "reason": "tech lead (sem confirmação do usuário): L21, L51 e L72 declaram border-radius: 0 (cartão reto com canto chanfrado por clip-path); a regra casa a propriedade, não o valor; mesmo caso de src/css/cartao.css"
       }
     ]
   }
