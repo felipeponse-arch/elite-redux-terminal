@@ -22,7 +22,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { cpus, setPriority, constants as osConst } from "node:os";
-import { Worker, isMainThread, parentPort, workerData } from "node:worker_threads";
+import { Worker, isMainThread, parentPort } from "node:worker_threads";
 import { carregarRegras } from "../tests/unit/carregar_regras.mjs";
 import { melhoresPelaSoma, notaDosEixos, escolherPelaNotaFinal } from "./rank_escolha.mjs";
 import { percentis, tierDe, unidadeComItemLiberado, camposHerdados, chavesDoRankNovo } from "./rank_comum.mjs";
@@ -126,10 +126,9 @@ function avaliar(sp) {
 }
 
 if (!isMainThread) {
-  const parte = {};
-  for (const s of workerData.snames) parte[s] = avaliar(R.getSpeciesBySname(s));
-  parentPort.postMessage(parte);
-  process.exit(0);
+  // Fila dinâmica (11/11/2026): o núcleo recebe UMA espécie por vez e pede a próxima; divisão fixa deixava um núcleo com as lentas.
+  parentPort.on("message", (s) => parentPort.postMessage([s, avaliar(R.getSpeciesBySname(s))]));
+  await new Promise(() => {}); // fica à espera; quem encerra é o processo principal (terminate)
 }
 
 // Prioridade abaixo do normal (16/10/2026): o cálculo usa todos os núcleos e travava o PC; assim o resto da máquina vem primeiro.
@@ -168,14 +167,16 @@ const cache = ARQ_CACHE && existsSync(ARQ_CACHE) ? JSON.parse(readFileSync(ARQ_C
 const dec = decidir(cache, globalAtual, atuais, { tudo: TUDO, so: ARG("--so") ? ARG("--so").split(",") : null });
 console.log(`incremental: ${dec.motivo}; recalcular ${dec.recalcular.length}, manter ${dec.manter.length}`);
 const nPartes = Math.min(nucleos, Math.max(1, dec.recalcular.length));
-const partes = Array.from({ length: nPartes }, (_, i) => dec.recalcular.filter((_, j) => j % nPartes === i));
 const red = {}; // medição enxuta (média por luta) de todas as espécies, vinda do cache ou do cálculo novo
 for (const s of dec.manter) red[s] = cache.especies[s].res;
-const respostas = dec.recalcular.length ? await Promise.all(partes.map((snames) => new Promise((ok, erro) => {
-  const w = new Worker(new URL(import.meta.url), { workerData: { snames }, argv: process.argv.slice(2).filter((x) => x !== "--gravar") }); // os núcleos precisam das opções
-  w.once("message", ok); w.once("error", erro);
-}))) : [];
-respostas.forEach((p) => Object.entries(p).forEach(([s, r]) => { red[s] = reduzirMedicao(r, DIFICULDADES.map((d) => d.chave)); }));
+const fila = dec.recalcular.slice(), chavesDif = DIFICULDADES.map((d) => d.chave);
+if (fila.length) await Promise.all(Array.from({ length: nPartes }, () => new Promise((ok, erro) => {
+  const w = new Worker(new URL(import.meta.url), { argv: process.argv.slice(2).filter((x) => x !== "--gravar") }); // os núcleos precisam das opções
+  const proxima = () => (fila.length ? w.postMessage(fila.pop()) : w.terminate().then(ok));
+  w.on("message", ([s, r]) => { red[s] = reduzirMedicao(r, chavesDif); proxima(); });
+  w.once("error", erro);
+  proxima();
+})));
 const res = {};
 const lutasPorDif = Object.fromEntries(DIFICULDADES.map((d) => [d.chave, lutas[d.chave]]));
 for (const s of todas) res[s] = expandirMedicao(red[s], lutasPorDif);

@@ -115,7 +115,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **cache_sabotagem.mjs** - Cache de "arquivo lembrado" da sabotagem (tests/.sabotagem_cache.json, fora do git).
   mesclarCache:9, ler:18, gravarCacheMesclando:26
 - **calcular_rank_v2.mjs** - Rank v2 (modelo aprovado pelo usuário em 2026-10-02, depois da pesquisa de método):
-  capDe:41, foe:45, ARG:61, etapaDe:64, br:67, avaliar:74, lerTxt:158, notas:213
+  capDe:41, foe:45, ARG:61, etapaDe:64, br:67, avaliar:74, lerTxt:157, notas:214
 - **carimbo_derivado.mjs** - TK-24: grava em data/carimbo_derivados.json de que versão do jogo/config cada derivado foi gerado.
   carimbarDerivado:4, avisosDeFrescor:15, pendentesSemCarimbo:22, problemasDeCarimbo:27
 - **categorias_pela_config.mjs** - Categorias de golpe (soco, mordida, corte...) pelas FLAGS do jogo, não pelo texto da NextDex.
