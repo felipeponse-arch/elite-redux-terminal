@@ -66,21 +66,6 @@
 .team-slot .ts-build .abi-synergy, .team-slot .ts-build .ts-item-desc, .team-slot .ts-nota-fonte .ts-build-note { font-size: var(--fs-legenda); }
 .team-slot .ts-actions { margin-top: 12px; padding-top: 6px; border-top: 1px solid var(--border); }
 .team-slot > div:first-child { flex: 1 1 auto; min-width: 0; }
-/* "Estratégias" (referência estilo Smogon, 2026-09-18) - cada set é seu
-   próprio bloco visual (não empilhado dentro de outro .card), pra ficar
-   claro que são ALTERNATIVAS entre si, não uma sequência única. */
-.strategy-set {
-  background: var(--surface-2);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.strategy-set:first-child { margin-top: 14px; }
-.strategy-set-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
-.strategy-set-name { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: var(--fs-destaque); color: var(--accent); }
 .remove-btn {
   align-self: flex-end;
   background: none;

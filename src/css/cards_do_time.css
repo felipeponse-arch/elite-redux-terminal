@@ -105,9 +105,6 @@
 .ts-usage-guide { display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--fs-texto); margin-bottom: var(--space-3); }
 .ts-usage-guide > p { margin: 0; }
 .ts-usage-guide > .plano-chefao { margin-top: 4px; }
-.ts-guide-item b { color: var(--text-dim); font-weight: 700; }
-.ts-validation { font-size: var(--fs-texto); color: var(--text-dim); padding-top: 8px; border-top: 1px solid var(--border); }
-.ts-validation-warn { color: var(--aviso); }
 /* Card "Buffs do ginásio" (lote 2 do redesenho, 2026-10-04): resumo "N de M ativos" em chip
    no título; cada buff é uma linha com uma chave de dois estados. A caixa de seleção segue
    sendo o controle (marcada = "já tirado"): fica invisível por cima da linha inteira e a
@@ -218,7 +215,7 @@
 
 .ts-build-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
 /* Botões de texto (o de copiar o set saiu do cartão do Meu Time em 07/11/2026). */
-.ts-ai-generate-btn, .text-action-btn {
+.text-action-btn {
   background: none;
   border: none;
   color: var(--badge-accent2);
@@ -232,9 +229,8 @@
   min-height: var(--alvo-min);
   padding: 2px 8px;
 }
-/* "Gerar build com IA": ação principal do estado vazio, não link solto (lote 1,
-   2026-10-03) - botão secundário com borda e fundo. */
-.ts-ai-generate-btn, #mybuild-ai-generate, #mybuild-pipeline-ver {
+/* Botão secundário com borda e fundo (ação principal do estado vazio, lote 1, 2026-10-03). */
+#mybuild-pipeline-ver {
   justify-content: center;
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -242,8 +238,8 @@
   padding: 4px 14px;
   font-size: var(--fs-pequeno);
 }
-.ts-ai-generate-btn:hover, #mybuild-ai-generate:hover, #mybuild-pipeline-ver:hover { background: var(--surface-3); }
-.ts-ai-generate-btn:disabled, #mybuild-ai-generate:disabled, #mybuild-pipeline-ver:disabled { color: var(--text-dim); cursor: default; }
+#mybuild-pipeline-ver:hover { background: var(--surface-3); }
+#mybuild-pipeline-ver:disabled { color: var(--text-dim); cursor: default; }
 .ts-build-note { font-size: var(--fs-legenda); color: var(--text-dim); margin-top: 6px; font-style: italic; max-width: 70ch; }
 .ts-nota-fonte .ts-build-note { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .ts-item-desc { font-size: var(--fs-legenda); color: var(--text-dim); margin-top: 4px; }
@@ -273,9 +269,3 @@
 .bh-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
 .bh-date { font-size: var(--fs-micro); color: var(--text-dim); }
 .bh-context { font-size: var(--fs-legenda); color: var(--text); font-style: italic; flex: 1; }
-/* Build nova depois da evolução (2026-09-27): chama atenção sem gritar - a
-   build antiga continua valendo até o clique. */
-.ts-evo-gerar { background: none; border: 1px solid var(--accent-2); color: var(--badge-accent2); border-radius: var(--radius-sm); padding: 1px 8px; font: inherit; font-size: var(--fs-legenda); font-weight: 600; cursor: pointer; }
-.ts-evo-gerar:hover { background: color-mix(in srgb, var(--accent-2) 14%, transparent); }
-.ts-evo-gerar:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.ts-evo-gerar:disabled { opacity: .6; cursor: default; }
