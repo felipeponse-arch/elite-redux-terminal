@@ -75,7 +75,7 @@ export function carregarRegras({ difficulty = "ace", levelCapMode = "more", mile
       query: "", typeFilter: new Set(), sort: "dex", selected: null, team: [], box: [],
       settings: { difficulty, levelCapMode, milestone, megaMode, runConfirmedAt: null },
       savedTeams: [], orphans: { team: [], box: [] }, notes: {}, autoEvolved: {}, autoLog: [],
-      gymSkillsCleared: {}, customBuilds: {}, strategySets: {}, motorFavoritos: [],
+      gymSkillsCleared: {}, customBuilds: {}, motorFavoritos: [],
       archetype: { pace: null, weather: null, monotype: null, tatica: null, reasoning: "" },
     },
   };

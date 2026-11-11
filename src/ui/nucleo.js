@@ -58,11 +58,6 @@
     // showdownSet() every other build source already uses. Purely
     // additive, same {} safe-default pattern as notes/orphans.
     customBuilds: {},
-    // Sets de "Estratégias" já gerados, por sname (pedido do usuário,
-    // 2026-09-24: economizar chamada de IA - antes ficavam só na memória e
-    // cada recarga da página pagava a mesma chamada de novo). Ver
-    // sanitizarStrategySets() em applySave().
-    strategySets: {},
     motorFavoritos: [], // favoritos do Modo Motor (snames); vão pro save
     // Arquétipo do time (Fase 3b do roadmap de estratégia, 2026-09-12) - dois
     // eixos INDEPENDENTES (fonte real trazida pelo usuário, r/VGC via

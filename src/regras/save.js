@@ -30,15 +30,11 @@
   // migrated, exported and imported as a unit. Schema (v: 2):
   //   { v, team: [sname], box: [sname], savedTeams: [{name, team:[sname], depois?}],
   //     settings: {difficulty, levelCapMode, megaMode, milestone, runConfirmedAt, sort, typeFilter},
-  //     motorFavoritos? [sname], notes, autoEvolved, autoLog, gymSkillsCleared, customBuilds, strategySets, archetype,
+  //     motorFavoritos? [sname], notes, autoEvolved, autoLog, gymSkillsCleared, customBuilds, archetype,
   //     orphans dentro de team/box, dataVersion, savedAt, soma }
   // v: applySave só avisa (log) quando o save é de formato MAIS NOVO que este app; ainda não há migração.
   // applySave é defensivo: campo inválido ou ausente em settings mantém o valor atual do state (não zera).
   var AUTO_LOG_MAX = 30;
-
-  // Teto de espécies com sets de Estratégias guardados no save (os mais
-  // antigos saem primeiro) - o save vai pro localStorage e pra sincronização.
-  var STRATEGY_SETS_MAX = 60;
 
   var SCHEMA_VERSION = 2;
   var reconciliouAoAplicar = false;
@@ -206,7 +202,7 @@
         }
       });
     }
-    state.strategySets = sanitizarStrategySets(save.strategySets);
+    // strategySets (sets gerados pela IA, removida em 06/11/2026) de save antigo é ignorado; não volta no próximo save.
     // Favoritos do Modo Motor (TK-02b, 28/10/2026): só espécie conhecida, sem repetir. Save antigo sem o campo = vazio.
     // Desconhecida não se perde: fica em state.orphans.fav (como team/box) e volta no buildSave.
     var favOrphans = [];
@@ -248,46 +244,6 @@
     if (plano) out.plano = plano;
     var mais = anteriorSaneado(a.anterior, profundidade + 1);
     if (mais) out.anterior = mais;
-    return out;
-  }
-
-  // Mesma disciplina defensiva das builds: só aceita set com o formato certo,
-  // de espécie que existe nesta versão dos dados e gerado sobre ESTA versão
-  // (um patch novo muda movepool/habilidades - aí o set é descartado e a
-  // próxima visita gera de novo). Mantém só as STRATEGY_SETS_MAX mais novas.
-  function sanitizarStrategySets(raw) {
-    var out = {};
-    if (!raw || typeof raw !== "object") return out;
-    var versaoAtual = DATA.meta ? DATA.meta.version : null;
-    var entradas = [];
-    Object.keys(raw).forEach(function (sname) {
-      var e = raw[sname];
-      if (!e || typeof e !== "object" || !Array.isArray(e.sets) || !getSpeciesBySname(sname)) return;
-      if (versaoAtual && e.dataVersion && e.dataVersion !== versaoAtual) return;
-      var sets = e.sets.slice(0, 3).map(function (s) {
-        if (!s || typeof s !== "object" || typeof s.name !== "string" || !Array.isArray(s.moves)) return null;
-        var moves = s.moves.filter(function (m) { return typeof m === "string" && m; }).slice(0, 4);
-        if (!moves.length) return null;
-        return {
-          name: s.name.slice(0, 40),
-          ability: typeof s.ability === "string" ? s.ability : "",
-          nature: typeof s.nature === "string" ? s.nature : "",
-          item: typeof s.item === "string" ? s.item : "",
-          moves: moves,
-          evs: Array.isArray(s.evs) && s.evs.length === 6 ? s.evs.map(function (v) { return clampInt(v, 0, 252, 0); }) : [0, 0, 0, 0, 0, 0],
-          rationale: typeof s.rationale === "string" ? s.rationale.slice(0, 400) : ""
-        };
-      }).filter(Boolean);
-      if (!sets.length) return;
-      entradas.push([sname, {
-        sets: sets,
-        cap: typeof e.cap === "number" ? e.cap : null,
-        dataVersion: typeof e.dataVersion === "string" ? e.dataVersion : versaoAtual,
-        geradoEm: typeof e.geradoEm === "string" ? e.geradoEm : ""
-      }]);
-    });
-    entradas.sort(function (a, b) { return a[1].geradoEm < b[1].geradoEm ? 1 : a[1].geradoEm > b[1].geradoEm ? -1 : 0; });
-    entradas.slice(0, STRATEGY_SETS_MAX).forEach(function (p) { out[p[0]] = p[1]; });
     return out;
   }
 
@@ -362,7 +318,6 @@
       autoLog: state.autoLog,
       gymSkillsCleared: state.gymSkillsCleared,
       customBuilds: state.customBuilds,
-      strategySets: state.strategySets,
       archetype: state.archetype
     };
     // Só grava quando há favorito: sem ele o save fica idêntico ao de antes (mesma soma, sem diferença falsa no sync).

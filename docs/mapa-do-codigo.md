@@ -48,7 +48,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **reconciliar_build.js** - Uma build salva precisa continuar valendo pra espécie em que ela está AGORA.
   movepoolCompletoDe:17, habilidadeSubstitutaPara:26, reconciliarBuild:39
 - **save.js** - Save do app: formato gravado (buildSave), leitura defensiva (applySave e os
-  snamesToXs:15, xsToSnames:24, ehBackupDeTime:48, applySave:49, anteriorSaneado:239, sanitizarStrategySets:258, textoCanonicoDoSave:304, somaDoSave:319, conferirSomaDoSave:329, saveEnviavel:336, buildSave:339, montarSave:344, progressoDoSave:380, saveChegandoTemMenosProgresso:386, syncContentDiffers:400
+  snamesToXs:15, xsToSnames:24, ehBackupDeTime:44, applySave:45, anteriorSaneado:235, textoCanonicoDoSave:260, somaDoSave:275, conferirSomaDoSave:285, saveEnviavel:292, buildSave:295, montarSave:300, progressoDoSave:335, saveChegandoTemMenosProgresso:341, syncContentDiffers:355
 - **sugestao_do_motor.js** - "Ficar com este time" do Meu Time (ticket time-pelo-motor/01, F5, 21/10/2026): além de trocar o time, grava as builds do
   sugestaoDoMembro:13, sugestaoMesmaBuild:24, ehBuildDoJogador:28, indiceQueSaiParaSugestao:31, planoDeGravarSugestoes:39, gravarSugestoesDoMotor:61
 - **texto_versao_nova.js** - Texto da habilidade que o parser do duelo lê (tabelas de dado, saídas de duelo.js em 28/10/2026, TK-12 estrutura D4.5b).
@@ -85,7 +85,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **modo_motor.js** - Modo Motor no Meu Time (ticket time-pelo-motor/01, Fase F2, 21/10/2026). O app NÃO usa IA (decisão do usuário, 06/11/2026):
   modoMotorCache:18, modoMotorChave:20, modoMotorCapturados:25, modoMotorFavoritosValidos:30, modoMotorSegundos:34, modoMotorEsperar:35, modoMotorAquecer:39, modoMotorMontar:67, modoMotorVarianteDe:117, modoMotorFicarComVariante:118, modoMotorFavoritosHtml:151, modoMotorBotaoHtml:163, modoMotorMembroHtml:168, modoMotorRodapeHtml:180, modoMotorVarianteHtml:195, modoMotorResultadoHtml:223
 - **nucleo.js** - Estado do app (state), gravação no aparelho e a camada de ações (acao/TELAS): toda mudança grava uma vez e redesenha cada tela uma vez.
-  lsGet:84, lsSet:85, setOrReplaceActiveBuild:94, addBuildVariant:101, setActiveBuildIndex:104, abrirVagaPreservando:118, removeBuildIndex:124, reinserirBuild:131, persist:144, showStorageBanner:166, abaAtiva:184, redesenharFichaAberta:197, telasDeBuild:237, acao:243, fichaAfetada:261, concluirAcoes:266, loadA11yPrefs:285, applyA11yPrefs:291, saveA11yPrefs:295, corDoTema:307, loadSave:337
+  lsGet:79, lsSet:80, setOrReplaceActiveBuild:89, addBuildVariant:96, setActiveBuildIndex:99, abrirVagaPreservando:113, removeBuildIndex:119, reinserirBuild:126, persist:139, showStorageBanner:161, abaAtiva:179, redesenharFichaAberta:192, telasDeBuild:232, acao:238, fichaAfetada:256, concluirAcoes:261, loadA11yPrefs:280, applyA11yPrefs:286, saveA11yPrefs:290, corDoTema:302, loadSave:332
 - **pipeline_tela.js** - Pipeline de build na tela (ticket docs/tickets/pipeline-build-2026-10-14/02): só desenho. As regras (candidatos, hit-kill,
   pipelineResultado:14, pipelineAlvoValido:26, pipelineSeletorDeAlvoHtml:32, pipelineResumoDoAlvo:46, pipelineVereditoDe:53, pipelineSeloHtml:63, pipelineGolpeHtml:71, pipelineCandidatoHtml:78, pipelinePainelDaFichaHtml:97, pipelineDesenharFicha:114, pipelineDesenharTime:126
 - **progresso.js** - Aba Progresso: dificuldade, level cap, insígnia, modo de Mega, confirmação da run e acessibilidade.

@@ -14,7 +14,7 @@ const build = (extra) => Object.assign({ ability: "", nature: "Jolly", item: "",
 beforeEach(() => {
   const s = R.state;
   s.team = []; s.box = []; s.savedTeams = []; s.orphans = { team: [], box: [] }; s.notes = {};
-  s.autoEvolved = {}; s.autoLog = []; s.gymSkillsCleared = {}; s.customBuilds = {}; s.strategySets = {};
+  s.autoEvolved = {}; s.autoLog = []; s.gymSkillsCleared = {}; s.customBuilds = {};
   s.archetype = { pace: null, weather: null, monotype: null, tatica: null, reasoning: "" };
   s.settings = { difficulty: "ace", levelCapMode: "more", milestone: 0, megaMode: "temporaria", runConfirmedAt: null };
 });
@@ -62,6 +62,28 @@ test("save: soma de verificação confere no ida e volta e acusa qualquer mudan�
   assert.equal(R.conferirSomaDoSave(null), "errada");
   // A soma muda a cada gravação (savedAt), mas não conta como "conteúdo mudou" no sync.
   assert.equal(R.syncContentDiffers(salvo, Object.assign({}, salvo, { soma: "00000000" })), false);
+});
+
+test("save: save antigo com strategySets (sobra da IA) carrega inteiro e o campo não volta no próximo save", () => {
+  const s = R.state;
+  const versao = R.buildSave().dataVersion;
+  const set = { name: "Sweeper Físico", ability: "x", nature: "Jolly", item: "", moves: ["Earthquake"], evs: [0, 252, 0, 0, 4, 252], rationale: "t" };
+  const antigo = JSON.parse(JSON.stringify(R.buildSave()));
+  antigo.team = ["SPECIES_GARCHOMP", "SPECIES_SWAMPERT"]; antigo.box = ["SPECIES_HAXORUS"]; antigo.notes = { SPECIES_GARCHOMP: "anotação" };
+  antigo.customBuilds = { SPECIES_GARCHOMP: [build({ moves: ["Earthquake"], source: "ia" })] };
+  antigo.settings.milestone = 3;
+  antigo.strategySets = { SPECIES_GARCHOMP: { sets: [set], cap: 40, dataVersion: versao, geradoEm: "2026-09-24T10:00:00Z" } };
+  antigo.soma = R.somaDoSave(antigo);
+  assert.equal(R.conferirSomaDoSave(antigo), "ok");
+  R.applySave(antigo);
+  assert.equal(R.xsToSnames(s.team).join(","), "SPECIES_GARCHOMP,SPECIES_SWAMPERT");
+  assert.equal(R.xsToSnames(s.box).join(","), "SPECIES_HAXORUS");
+  assert.equal(s.notes.SPECIES_GARCHOMP, "anotação");
+  assert.equal(s.customBuilds.SPECIES_GARCHOMP[0].moves[0], "Earthquake");
+  assert.equal(s.settings.milestone, 3);
+  const novo = JSON.parse(JSON.stringify(R.buildSave()));
+  assert.equal("strategySets" in novo, false, "o campo morto não é mais gravado");
+  assert.equal(R.conferirSomaDoSave(novo), "ok");
 });
 
 test("save: applySave é defensivo com save malformado ou de outra versão", () => {
