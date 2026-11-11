@@ -1,5 +1,6 @@
 /* Topo compacto no celular (pedido de 11/11/2026): o conteúdo (lista, Time, Chefões) começa em até ~300 px.
    Só media query: o desktop não muda. Nada sai do DOM; o que sumiu da vista continua para o leitor de tela. */
+:root { --chanfro: 8px; } /* mesmo padrão de cartao.css (o verificador de variáveis olha arquivo a arquivo) */
 @media (max-width: 640px) {
   /* Aviso da run: uma linha fina. O alvo de toque segue com 44 px (margem negativa tira a altura, não a área clicável). */
   .sync-banner { padding-top: var(--safe-top); padding-bottom: 0; }
@@ -40,7 +41,12 @@
 
 /* Sanfona (src/ui/sanfona_celular.js): resumo de uma linha, alvo de 44 px, mesmo visual dos .detail-group. */
 @media (max-width: 640px) {
-  .card.sanfona { padding: 0 var(--space-3, 12px); }
+  /* Carteira de Treinador: canto superior direito chanfrado (como os cartões), sem arredondar. */
+  .card.sanfona {
+    padding: 0 var(--space-3, 12px); border-radius: 0;
+    clip-path: polygon(0 0, calc(100% - var(--chanfro)) 0, 100% var(--chanfro), 100% 100%, 0 100%);
+  }
+  .sanfona-resumo:focus-visible { outline: 2px solid var(--focus); outline-offset: -3px; }
   .sanfona-resumo {
     display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; list-style: none;
     font-family: var(--fonte-display); font-weight: 700; font-size: var(--fs-destaque);
@@ -54,4 +60,13 @@
 
   /* Com a ficha (Dex) ou o chefão aberto, o topo não empurra o conteúdo: as insígnias saem da vista; o nome da Etapa e o level cap ficam. */
   :root:has(#view-dex.active .dex-shell.show-detail, #view-bosses.active #boss-shell.show-detail) .faixa-insignias { display: none; }
+
+  /* Cabeçalho do chefão compacto: nome menor (quebra em até 2 linhas, sem cortar) e selos ao lado dele. */
+  .detail-head.chefao-cartao, .detail-head.chefao-cartao:not(.chefao-heroi) { padding: var(--space-2) var(--space-3); margin-bottom: var(--space-3); }
+  .chefao-cartao .detail-titles { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); padding: 0; }
+  .chefao-cartao .detail-titles h2 { font-size: var(--fs-marca); flex: 0 1 auto; min-width: 0; }
+  .chefao-cartao .detail-dexno { margin-top: 0; gap: var(--space-1); }
+
+  /* Ficha da Dex aberta: a busca recolhe (volta com "Voltar para a lista"); a ficha começa mais perto do topo. */
+  .dex-shell.show-detail .search-row { display: none; }
 }
