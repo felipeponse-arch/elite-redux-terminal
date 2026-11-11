@@ -7,6 +7,34 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "arquivo-de-save-sem-conferir-soma",
+    descricao: "Pacote 08: importar deixa de conferir a soma de verificação e aceita arquivo mexido",
+    arquivo: "arquivo_de_save.js",
+    de: "if (conferirSomaDoSave(arq.save) !== \"ok\") {",
+    para: "if (false) {",
+  },
+  {
+    id: "arquivo-de-save-ignora-build-em-silencio",
+    descricao: "Pacote 08: builds do arquivo que não cabem deixam de entrar no aviso da importação",
+    arquivo: "arquivo_de_save.js",
+    de: "if (ignBuilds > 0) linhas.push(",
+    para: "if (false) linhas.push(",
+  },
+  {
+    id: "arquivo-de-save-perde-build-do-aparelho",
+    descricao: "Pacote 08: a build do aparelho que não cabe como variante some sem ser contada",
+    arquivo: "arquivo_de_save.js",
+    de: "if (lista.length >= 3) { naoCouberam++; return; }",
+    para: "if (lista.length >= 3) { return; }",
+  },
+  {
+    id: "arquivo-de-save-schema-qualquer",
+    descricao: "Pacote 08: importar aceita arquivo de qualquer schema",
+    arquivo: "arquivo_de_save.js",
+    de: "if (arq.schema !== ARQUIVO_SCHEMA) {",
+    para: "if (false) {",
+  },
+  {
     id: "rank-so-ignora-a-lista",
     descricao: "Rank --so: a opção volta a recalcular todas as espécies mudadas em vez de só a lista pedida",
     arquivo: "rank_incremental.mjs",

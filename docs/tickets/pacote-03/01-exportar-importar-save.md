@@ -1,6 +1,6 @@
 # Exportar e importar o save por arquivo
 
-Status: pronto-para-agente
+Status: feito-no-branch (pacote/08-save, 11/11/2026; aguarda verificador e supervisor)
 Pacote: 03 (junto com `dois-iguais/01` depois da sabatina). Tamanho: P/M.
 
 Origem: decisão do usuário (06/11/2026). A sincronização entre aparelhos só funciona dentro do Artifact do claude.ai (`claude.use("db")`, src/ui/sync.js). No site público (GitHub Pages) o app mostra "só neste aparelho" e guarda o progresso no navegador.

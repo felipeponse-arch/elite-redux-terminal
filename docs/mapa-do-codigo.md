@@ -5,6 +5,8 @@ Não edite à mão. Conflito de junção neste arquivo: regenere (`npm run mapa 
 Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limit). Quem chama quem entre arquivos: [chamadas-regras](mapa/chamadas-regras.md), [chamadas-ui](mapa/chamadas-ui.md).
 
 ## Regras (lógica pura) - src/regras/
+- **arquivo_de_save.js** - Exportar/importar o save por arquivo .json (pacote 08, 11/11/2026). Só lógica: a página
+  montarArquivoDeSave:11, listaDeBuilds:16, totalDeBuilds:19, contarDoSave:24, lerArquivoDeSave:34, mesclarBuildsDoAtual:54, resumoDaImportacao:76
 - **avisos_build.js** - Lote 5 das pesquisas de 06/10 (ideias do GPT, seções 3.2/17/26/42): Avisos de build e selo de
   avisosDaBuild:8, seloDaBuild:82, primeiroLugarDoItem:94, rotuloDaEtapaDoItem:98, ondeAcharItemTexto:100
 - **builds.js** - Build mostrada (effectiveBuild: salva > herdada da base pela Mega > curada do
@@ -68,6 +70,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   posicionarProgresso:22, closeMorePanel:32
 - **arquetipo.js** - Arquétipo do time, time sugerido e o Gerador Inteligente de Times.
   teamKeyFor:14, classeDeEntradaDoCardGerado:41, archetypeChipsHtml:53, resumoDoArquetipo:74, archetypeCardHtml:85, applyRecommendedTeam:143, vereditoDaLutaHtml:199, buffsMudaram:208, planoContraChefaoHtml:212, generatedTeamCardHtml:261, renderTeamStrategy:283, climaQueCombinaHtml:296, monoRunCardHtml:317, renderMonoRun:374, renderTeamAnalysis:400
+- **arquivo_de_save.js** - Card "Save em arquivo" da aba Progresso (pacote 08): Baixar save, Carregar save e Desfazer importação.
+  arquivoDeSaveUi:7
 - **auto_evolucao.js** - Registro "O que o app fez sozinho" na tela e a auto-evolução do time/caixa pelo level cap.
   renderAutoLog:9, autoEvolveRoster:20
 - **caixa.js** - Aba Caixa (PC Box): grade por páginas, busca e ações de cada Pokémon da caixa.
@@ -244,6 +248,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **alarme_upstream.test.mjs** - Leitura das páginas oficiais pelo alarme de versão nova (sem rede).
 - **aliases_de_campo_tirados.test.mjs** - TK-33b item 8: os aliases de migração CONDICAO_DO_ARQUETIPO e WEATHER_ARCHETYPES saíram; todos leem campo.js direto.
 - **areia_e_sets_rapidos.test.mjs** - Diagnóstico dos físicos subavaliados (03/10): Tyranitar/Rock sem o +50% de Sp. Def na areia (código oficial
+- **arquivo_de_save.test.mjs** - Pacote 08 (11/11/2026): exportar/importar o save por arquivo. Formato, validação ANTES de aplicar,
 - **atalhos_teclado.test.mjs** - Ticket 14 da dívida técnica (2026-10-08): atalhos que não são botão de verdade
 - **atributo_do_ataque.test.mjs** - Golpes que trocam o atributo de ataque ou de defesa (06/10, lote 4 da fila da comunidade; ver
 - **auditoria_do_motor.test.mjs** - Auditoria permanente do motor do duelo (revisão da equipe, 2026-09-30, pedido do

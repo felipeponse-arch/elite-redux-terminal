@@ -30,7 +30,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - buffsMudaram:208 - chama: buffsParaMostrarDoChefao (chefoes.js:519)
 - climaQueCombinaHtml:296 - chama: climaQueCombina (mono_run.js:141), state (nucleo.js:8)
 - generatedTeamCardHtml:261 - chama: computeTeamGenerationValidation (builds.js:228)
-- generatedTeamResult:35 - chamado por: guardarTimeAnterior (aba_chefoes.js:268), montarTimeContraEsteChefao (aba_chefoes.js:310), zerarRun (time.js:342)
+- generatedTeamResult:35 - chamado por: guardarTimeAnterior (aba_chefoes.js:268), montarTimeContraEsteChefao (aba_chefoes.js:310), arquivoDeSaveUi (arquivo_de_save.js:7), zerarRun (time.js:342)
 - monoRunCardHtml:317 - chama: entradasDoJogador (liberado_na_run.js:34), MONO_MARCAS (mono_run.js:11), avisoProximoLider (mono_run.js:158), fraquezasDoTipo (mono_run.js:80), monoDisponibilidade (mono_run.js:176), +2
 - planoContraChefaoHtml:212 - chama: faixaDeHpDaLuta (chefoes.js:609), NOME_DA_CONDICAO (condicoes_habilidade.js:42)
 - renderMonoRun:374 - chama: state (nucleo.js:8) | chamado por: renderTeam (time.js:17)
@@ -38,15 +38,18 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderTeamStrategy:283 - chama: modoMotorAquecer (modo_motor.js:39), modoMotorResultadoHtml (modo_motor.js:223) | chamado por: modoMotorFicarComVariante (modo_motor.js:118), modoMotorMontar (modo_motor.js:67), renderTeam (time.js:17)
 - resumoDoArquetipo:74 - chama: state (nucleo.js:8)
 - teamKeyFor:14 - chamado por: guardarTimeAnterior (aba_chefoes.js:268), montarTimeContraEsteChefao (aba_chefoes.js:310)
-- teamRecommendation:30 - chamado por: montarTimeContraEsteChefao (aba_chefoes.js:310), modoMotorFicarComVariante (modo_motor.js:118), zerarRun (time.js:342)
+- teamRecommendation:30 - chamado por: montarTimeContraEsteChefao (aba_chefoes.js:310), arquivoDeSaveUi (arquivo_de_save.js:7), modoMotorFicarComVariante (modo_motor.js:118), zerarRun (time.js:342)
 - vereditoDaLutaHtml:199 - chama: vereditoDaLuta (chefoes.js:603)
+
+## ui/arquivo_de_save.js
+- arquivoDeSaveUi:7 - chama: contarDoSave (arquivo_de_save.js:24), lerArquivoDeSave (arquivo_de_save.js:34), mesclarBuildsDoAtual (arquivo_de_save.js:54), montarArquivoDeSave (arquivo_de_save.js:11), resumoDaImportacao (arquivo_de_save.js:76), +16
 
 ## ui/auto_evolucao.js
 - autoEvolveRoster:20 - chama: devolveChainByX (evolucao.js:206), evoluirElencoSemDuplicar (evolucao.js:40), evolveChainByX (evolucao.js:66), logAutoAction (evolucao.js:229), podarAutoEvolved (evolucao.js:61), +3 | chamado por: loadSave (nucleo.js:332), initProgress (progresso.js:106)
 - renderAutoLog:9 - chama: state (nucleo.js:8) | chamado por: initProgress (progresso.js:106), registrarTrocasDoPlano (revisao_automatica.js:71)
 
 ## ui/caixa.js
-- pcBoxSelectedX:14 - chamado por: zerarRun (time.js:342)
+- pcBoxSelectedX:14 - chamado por: arquivoDeSaveUi (arquivo_de_save.js:7), zerarRun (time.js:342)
 - renderBox:16 - chama: ABILITIES (dados_base.js:10), getSpeciesByX (dados_base.js:78), habilidadesEscolhiveis (dados_base.js:119), speciesTypeNames (tipos.js:254), rankBadgeHtml (dex_ficha.js:169), +4
 
 ## ui/dex_ficha.js
@@ -77,11 +80,11 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## ui/dex_lista.js
 - bst:152 - chamado por: fichaCabecalhoHtml (dex_ficha.js:469), compareResultHtml (ficha_extras.js:22)
-- flashToast:473 - chamado por: initBosses (aba_chefoes.js:33), montarTimeContraEsteChefao (aba_chefoes.js:310), applyRecommendedTeam (arquetipo.js:143), autoEvolveRoster (auto_evolucao.js:20), apagarBuildComDesfazer (editor_build.js:469), +2
+- flashToast:473 - chamado por: initBosses (aba_chefoes.js:33), montarTimeContraEsteChefao (aba_chefoes.js:310), applyRecommendedTeam (arquetipo.js:143), arquivoDeSaveUi (arquivo_de_save.js:7), autoEvolveRoster (auto_evolucao.js:20), +3
 - getFiltered:171 - chama: SPECIES (dados_base.js:52), rankDe (rank_da_run.js:29), speciesTypeNames (tipos.js:254), state (nucleo.js:8)
 - linhaDaListaHtml:212 - chama: avisoSemSpriteHtml (dados_base.js:196), speciesTypeNames (tipos.js:254), rankBadgeHtml (dex_ficha.js:169), state (nucleo.js:8)
 - listaAtual:210 - chamado por: fichaNavHtml (dex_ficha.js:400)
-- openConfirmModal:403 - chamado por: excluirTimeSalvo (time.js:259), usarSugestaoDoCartao (time_build.js:123)
+- openConfirmModal:403 - chamado por: arquivoDeSaveUi (arquivo_de_save.js:7), excluirTimeSalvo (time.js:259), usarSugestaoDoCartao (time_build.js:123)
 - openSwapModal:328 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8)
 - renderList:243 - chama: getSpeciesByX (dados_base.js:78), fichaNavHtml (dex_ficha.js:400), state (nucleo.js:8)
 - renderMaisLista:232 - chama: state (nucleo.js:8)
@@ -142,15 +145,16 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## ui/nucleo.js
 - STORE_KEY:77 - chamado por: aplicarSaveRemoto (sync.js:45), lerSaveLocal (sync.js:174)
 - TELAS:200 - chamado por: montarTimeContraEsteChefao (aba_chefoes.js:310), applyRecommendedTeam (arquetipo.js:143)
+- TELAS_ORDEM:233 - chamado por: arquivoDeSaveUi (arquivo_de_save.js:7)
 - abrirVagaPreservando:113 - chama: buildQueSaiParaAbrirVaga (lista_de_builds.js:43) | chamado por: processarRevisoes (revisao_automatica.js:23)
-- acao:238 - chamado por: guardarTimeAnterior (aba_chefoes.js:268), initBosses (aba_chefoes.js:33), applyRecommendedTeam (arquetipo.js:143), modoMotorFicarComVariante (modo_motor.js:118), initProgress (progresso.js:106), +7
+- acao:238 - chamado por: guardarTimeAnterior (aba_chefoes.js:268), initBosses (aba_chefoes.js:33), applyRecommendedTeam (arquetipo.js:143), arquivoDeSaveUi (arquivo_de_save.js:7), modoMotorFicarComVariante (modo_motor.js:118), +8
 - addBuildVariant:96 - chama: acrescentarVarianteNaLista (lista_de_builds.js:23) | chamado por: processarRevisoes (revisao_automatica.js:23)
 - concluirAcoes:261 - chama: agendarRevisoes (revisao_automatica.js:91)
 - fichaAfetada:256 - chama: getSpeciesByX (dados_base.js:78)
 - loadA11yPrefs:280 - chamado por: initProgress (progresso.js:106)
 - loadSave:332 - chama: applySave (save.js:45), conferirSomaDoSave (save.js:285), reconciliouAoAplicar (save.js:40), autoEvolveRoster (auto_evolucao.js:20)
-- lsGet:79 - chamado por: lerSaveLocal (sync.js:174)
-- lsSet:80 - chamado por: aplicarSaveRemoto (sync.js:45)
+- lsGet:79 - chamado por: arquivoDeSaveUi (arquivo_de_save.js:7), lerSaveLocal (sync.js:174)
+- lsSet:80 - chamado por: arquivoDeSaveUi (arquivo_de_save.js:7), aplicarSaveRemoto (sync.js:45)
 - persist:139 - chama: buildSave (save.js:295), updateResetTeamBoxBtn (dex_ficha.js:702), pushToSync (sync.js:96) | chamado por: aplicarSaveRemoto (sync.js:45)
 - redesenharFichaAberta:192 - chama: selectSpecies (dex_ficha.js:564)
 - reinserirBuild:126 - chama: getBuildList (evolucao.js:14) | chamado por: apagarBuildComDesfazer (editor_build.js:469)
@@ -159,7 +163,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - setActiveBuildIndex:99 - chama: getBuildList (evolucao.js:14)
 - setOrReplaceActiveBuild:89 - chama: trocarBuildAtivaNaLista (lista_de_builds.js:11) | chamado por: initBosses (aba_chefoes.js:33), processarRevisoes (revisao_automatica.js:23)
 - showStorageBanner:161 - chamado por: remotoComSomaErrada (sync.js:88)
-- state:8 - chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:190), itensEmUsoComQuem (builds.js:141), teamItemsInUse (builds.js:85), teamMovesInUse (builds.js:111), +104
+- state:8 - chamado por: resumoDaImportacao (arquivo_de_save.js:76), avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:190), itensEmUsoComQuem (builds.js:141), teamItemsInUse (builds.js:85), +106
 - telasDeBuild:232 - chamado por: processarRevisoes (revisao_automatica.js:23)
 
 ## ui/pipeline_tela.js
@@ -201,7 +205,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 
 ## ui/revisao_automatica.js
 - agendarRevisoes:91 - chamado por: concluirAcoes (nucleo.js:261)
-- capRegistrado:70 - chamado por: initProgress (progresso.js:106), aplicarSaveRemoto (sync.js:45), zerarRun (time.js:342)
+- capRegistrado:70 - chamado por: arquivoDeSaveUi (arquivo_de_save.js:7), initProgress (progresso.js:106), aplicarSaveRemoto (sync.js:45), zerarRun (time.js:342)
 - processarRevisoes:23 - chama: getSpeciesByX (dados_base.js:78), logAutoAction (evolucao.js:229), golpesTravadosNoCap (level_cap.js:90), curadaParaEstilo (plano_build.js:160), estiloDoRitmo (plano_build.js:48), +7
 - registrarTrocasDoPlano:71 - chama: getSpeciesByX (dados_base.js:78), getActiveBuild (evolucao.js:16), logAutoAction (evolucao.js:229), trocasEntreCaps (plano_build.js:141), renderAutoLog (auto_evolucao.js:9), +1 | chamado por: initProgress (progresso.js:106)
 - tarefaDeRevisao:13 - chama: getActiveBuild (evolucao.js:16)
@@ -224,6 +228,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - rosterMove:158 - chama: getSpeciesByX (dados_base.js:78), acao (nucleo.js:238), state (nucleo.js:8) | chamado por: initBosses (aba_chefoes.js:33)
 - salvarNomeTimeSalvo:283 - chama: acao (nucleo.js:238), state (nucleo.js:8)
 - swapPanelHtml:124 - chama: getSpeciesByX (dados_base.js:78), state (nucleo.js:8)
+- teamSwapIdx:122 - chamado por: arquivoDeSaveUi (arquivo_de_save.js:7)
 - telasDeElenco:150 - chama: getSpeciesByX (dados_base.js:78)
 - zerarRun:342 - chama: logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), myBuildLevelIsCustom (aba_chefoes.js:31), generatedTeamResult (arquetipo.js:35), teamRecommendation (arquetipo.js:30), +4
 

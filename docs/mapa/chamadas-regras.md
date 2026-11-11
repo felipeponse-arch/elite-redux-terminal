@@ -4,6 +4,13 @@ Gerado por `npm run mapa` (scripts/mapa_chamadas.mjs, API do TypeScript); não e
 Por função de nível superior: `chama:` e `chamado por:` funções de OUTROS arquivos de src/regras e src/ui, como `nome (arquivo:linha)`;
 no máximo 5 por lista, o resto vira `+N`. Referência vale também como callback. Chamada pelo template/HTML não aparece. Mapa geral: [mapa-do-codigo.md](../mapa-do-codigo.md).
 
+## regras/arquivo_de_save.js
+- contarDoSave:24 - chamado por: arquivoDeSaveUi (arquivo_de_save.js:7)
+- lerArquivoDeSave:34 - chama: conferirSomaDoSave (save.js:285) | chamado por: arquivoDeSaveUi (arquivo_de_save.js:7)
+- mesclarBuildsDoAtual:54 - chamado por: arquivoDeSaveUi (arquivo_de_save.js:7)
+- montarArquivoDeSave:11 - chama: buildSave (save.js:295) | chamado por: arquivoDeSaveUi (arquivo_de_save.js:7)
+- resumoDaImportacao:76 - chama: SPECIES_BY_SNAME (dados_base.js:72), state (nucleo.js:8) | chamado por: arquivoDeSaveUi (arquivo_de_save.js:7)
+
 ## regras/avisos_build.js
 - avisosDaBuild:8 - chama: MAX_MESMO_ITEM_NO_TIME (builds.js:138), itemEsgotadoNoTime (builds.js:140), itensEmUsoComQuem (builds.js:141), stripNote (builds.js:44), garantiaDaCondicao (condicoes_habilidade.js:155), +15 | chamado por: buildContextNotesHtml (editor_build.js:161), avisoEnxutoHtml (time_build.js:64)
 - ondeAcharItemTexto:100 - chamado por: itemDescHtml (editor_build.js:45), painelDaBuildHtml (time_build.js:72)
@@ -134,7 +141,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - PACE_ARCHETYPES:146 - chamado por: applySave (save.js:45), archetypeCardHtml (arquetipo.js:85)
 - ROLE_LABEL_PT:181 - chamado por: motorPapeisDaEspecie (time_pelo_motor_papeis.js:119), roleTagsHtml (dex_ficha.js:215), papelChipsHtml (time_build.js:89), computeRoleCompendium (tipos.js:91)
 - SPECIES:52 - chamado por: especiePorNomeDoItem (calc_stat.js:135), computeSpeedTiers (chefoes.js:545), especieDaFormaDuelo (duelo.js:3571), especiesQueResolvem (pipeline_build.js:759), montarTimePeloMotorEmPassos (time_pelo_motor.js:385), +3
-- SPECIES_BY_SNAME:72 - chamado por: snamesToXs (save.js:15)
+- SPECIES_BY_SNAME:72 - chamado por: resumoDaImportacao (arquivo_de_save.js:76), snamesToXs (save.js:15)
 - SPLIT_LABEL_PT:182 - chamado por: roleTagsHtml (dex_ficha.js:215), papelChipsHtml (time_build.js:89)
 - SPLIT_STATUS:29 - chamado por: moveRoleOf (golpes.js:53), conflitoDeItem (validacao_build_ia.js:121), updateMyBuildStatus (editor_build.js:354), categoriaDoGolpe (time_build.js:11)
 - TATICA_ARCHETYPES:149 - chamado por: applySave (save.js:45), archetypeCardHtml (arquetipo.js:85)
@@ -280,10 +287,10 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - NIVEL_DE_CALCULO_SEM_CAP:60 - chamado por: pipelineResolverAlvo (pipeline_build.js:70), validateAiBuild (validacao_build_ia.js:199)
 - availableMovesFor:73 - chama: MOVES (dados_base.js:11), uniqueIds (dados_base.js:122), liberadoNaRun (liberado_na_run.js:23), state (nucleo.js:8) | chamado por: confrontoUnitOf (chefoes.js:242), comoGarantir (condicoes_habilidade.js:171), precisaDeSetter (condicoes_habilidade.js:213), pipelineCandidatos (pipeline_build.js:554), conferirPapelDaBuild (validacao_build_ia.js:69), +2
 - capOuPadrao:61 - chamado por: contextoDoMotor (time_pelo_motor.js:96), modoMotorChave (modo_motor.js:20)
-- getCurrentCap:49 - chama: state (nucleo.js:8) | chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:190), ctxDoState (validacao_build_ia.js:10), autoEvolveRoster (auto_evolucao.js:20), renderMovesTable (dex_ficha.js:111), +9
+- getCurrentCap:49 - chama: state (nucleo.js:8) | chamado por: avisosDaBuild (avisos_build.js:8), effectiveBuild (builds.js:190), ctxDoState (validacao_build_ia.js:10), arquivoDeSaveUi (arquivo_de_save.js:7), autoEvolveRoster (auto_evolucao.js:20), +10
 - golpesTravadosNoCap:90 - chama: MOVE_ID_BY_NAME (dados_base.js:87), liberadoNaRun (liberado_na_run.js:23), state (nucleo.js:8) | chamado por: avisosDaBuild (avisos_build.js:8), processarRevisoes (revisao_automatica.js:23)
 - innatesAtivasNoNivel:34 - chama: state (nucleo.js:8) | chamado por: unidadeDeDuelo (duelo.js:3094), pipelineCandidatos (pipeline_build.js:554)
-- levelCapMode:16 - chama: state (nucleo.js:8) | chamado por: motorChaveDoContexto (time_pelo_motor.js:123), motorNivelDaEtapa (time_pelo_motor.js:64), modoMotorChave (modo_motor.js:20), initProgress (progresso.js:106)
+- levelCapMode:16 - chama: state (nucleo.js:8) | chamado por: motorChaveDoContexto (time_pelo_motor.js:123), motorNivelDaEtapa (time_pelo_motor.js:64), arquivoDeSaveUi (arquivo_de_save.js:7), modoMotorChave (modo_motor.js:20), initProgress (progresso.js:106)
 - levelCapModeFromDifficulty:22 - chamado por: applySave (save.js:45)
 - nivelDaHabilidadeNoElite:40 - chama: nomesDeHabilidades (condicoes_habilidade.js:116) | chamado por: marcasDoRankHtml (dex_ficha.js:288)
 - nivelDeCalculo:65 - chamado por: computeSpeedTiers (chefoes.js:545), montarTimeContraEsteChefao (aba_chefoes.js:310), renderBossDetail (aba_chefoes.js:534), myBuildEditorHtml (editor_build.js:230), updateMyBuildStatus (editor_build.js:354), +1
@@ -369,9 +376,9 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 ## regras/save.js
 - AUTO_LOG_MAX:37 - chamado por: logAutoAction (evolucao.js:229)
 - anteriorSaneado:235 - chama: planoSaneado (plano_build.js:107)
-- applySave:45 - chama: BUILD_SOURCES (builds.js:17), ARQUETIPOS_DE_CAMPO (campo.js:33), MONOTYPE_ARCHETYPES (dados_base.js:156), PACE_ARCHETYPES (dados_base.js:146), TATICA_ARCHETYPES (dados_base.js:149), +10 | chamado por: loadSave (nucleo.js:332), aplicarSaveRemoto (sync.js:45)
-- buildSave:295 - chamado por: persist (nucleo.js:139), aplicarSaveRemoto (sync.js:45), connectSync (sync.js:179)
-- conferirSomaDoSave:285 - chamado por: loadSave (nucleo.js:332), remotoComSomaErrada (sync.js:88)
+- applySave:45 - chama: BUILD_SOURCES (builds.js:17), ARQUETIPOS_DE_CAMPO (campo.js:33), MONOTYPE_ARCHETYPES (dados_base.js:156), PACE_ARCHETYPES (dados_base.js:146), TATICA_ARCHETYPES (dados_base.js:149), +10 | chamado por: arquivoDeSaveUi (arquivo_de_save.js:7), loadSave (nucleo.js:332), aplicarSaveRemoto (sync.js:45)
+- buildSave:295 - chamado por: montarArquivoDeSave (arquivo_de_save.js:11), arquivoDeSaveUi (arquivo_de_save.js:7), persist (nucleo.js:139), aplicarSaveRemoto (sync.js:45), connectSync (sync.js:179)
+- conferirSomaDoSave:285 - chamado por: lerArquivoDeSave (arquivo_de_save.js:34), loadSave (nucleo.js:332), remotoComSomaErrada (sync.js:88)
 - ehBackupDeTime:44 - chamado por: guardarTimeAnterior (aba_chefoes.js:268)
 - montarSave:300 - chama: state (nucleo.js:8)
 - reconciliouAoAplicar:40 - chamado por: loadSave (nucleo.js:332), aplicarSaveRemoto (sync.js:45)

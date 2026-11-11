@@ -23,6 +23,7 @@
   /*@css time_caixa.css*/
   /*@css sprites.css*/
   /*@css cards_do_time.css*/
+  /*@css arquivo_de_save.css*/
   /*@css dialogos_e_notas.css*/
   /*@css estrategia.css*/
   /*@css pipeline_tela.css*/
@@ -323,6 +324,17 @@
           <h3>O que o app fez sozinho</h3>
           <p class="hint" style="margin:0 0 10px;">Mudanças que o app aplicou sem você clicar, as mais recentes primeiro.</p>
           <ul id="auto-log-list" class="auto-log"></ul>
+        </div>
+        <div class="card card-ajustes card-save-arquivo" id="card-save-arquivo">
+          <h3>Save em arquivo</h3>
+          <p class="hint" style="margin:0 0 10px;">Leve o seu progresso para outro aparelho ou guarde uma cópia: baixa um arquivo .json (time, caixa, builds, anotações) e carrega de volta. Ao carregar, o save atual é guardado e dá para desfazer.</p>
+          <div class="save-arquivo-botoes">
+            <button id="save-exportar-btn" type="button" class="add-team-btn">Baixar save</button>
+            <button id="save-importar-btn" type="button" class="add-team-btn">Carregar save</button>
+            <button id="save-desfazer-btn" type="button" class="add-team-btn" hidden>Desfazer importação</button>
+          </div>
+          <input id="save-importar-input" type="file" accept=".json,application/json" hidden>
+          <ul id="save-arquivo-status" class="save-arquivo-status" role="status" aria-live="polite"></ul>
         </div>
         <div class="card card-ajustes">
           <h3>Novidades</h3>
@@ -719,6 +731,7 @@
 /*@regras plano_build.js*/
 /*@regras rank_da_run.js*/
 /*@regras save.js*/
+/*@regras arquivo_de_save.js*/
 /*@regras evolucao.js*/
 /*@regras builds.js*/
 /*@regras chefoes.js*/
@@ -866,6 +879,8 @@
 /*@ui aba_chefoes.js*/
 
 /*@ui progresso.js*/
+
+/*@ui arquivo_de_save.js*/
 
 /*@ui insignias_faixa.js*/
 
