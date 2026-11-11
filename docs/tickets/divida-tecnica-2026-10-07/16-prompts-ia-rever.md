@@ -1,6 +1,6 @@
 # 16 — Prompts da IA: rever os blocos rasos
 
-Status: adiado (usuário, 21/10: até o veredito do Modo Motor, time-pelo-motor/01)
+Status: descartado (11/11/2026: a IA saiu do app no corte de 06/11; ticket sem objeto)
 Bloqueado por: 05
 
 ## O que entrega

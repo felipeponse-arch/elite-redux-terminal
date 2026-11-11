@@ -1,6 +1,6 @@
 # Testes das dívidas de sabotagem (regra de jogo sem teste que falhe por asserção)
 
-Status: pronto-para-agente
+Status: resolvido (feito em pacote/02-a, publicado em 07/11, commit 68d74d8)
 Pacote: 02 (mecânica, 2 dias). Prioridade: o veredito da luta primeiro.
 
 Origem: `tests/sabotagem_conhecidas.json` (06/11/2026). Três ids tocam regra de jogo e hoje nenhum teste falha por asserção quando o código é sabotado:

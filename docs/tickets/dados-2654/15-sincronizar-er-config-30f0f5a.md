@@ -1,6 +1,6 @@
 # 15 — Sincronizar com a er-config 30f0f5a (Ninetales Rework e tipos da config)
 
-Status: em andamento
+Status: descartado (11/11/2026: superado; dados já estão na NextDex 2.65.5 e os critérios de aceite estavam marcados)
 Bloqueado por: nenhum (o TK-47 já está junto neste branch)
 
 ## O que entrega

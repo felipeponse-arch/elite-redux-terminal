@@ -1,6 +1,6 @@
 # 04 — Protective Pads no defensor (lógica a mais) e testes de Pads/Klutz
 
-Status: pronto-para-agente
+Status: resolvido (feito em pacote/02-b, publicado em 07/11, commit 68d74d8)
 Tamanho: P. Dono: engenheira-do-motor.
 Origem: revisão do mecanica-2026-10-22/02 (supervisor, 22/10/2026), não bloqueante.
 

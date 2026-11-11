@@ -1,6 +1,6 @@
 # 10 — Fechamento: rank, histórico e publicação
 
-Status: pronto-para-agente (reescrito em 21/10: o fechamento antigo saiu na v178/v179; agora = recalcular o rank depois do 08 e 09)
+Status: descartado (11/11/2026: superado; rank novo e versão 2.65.5 publicados em 07/11, commit 68d74d8)
 Bloqueado por: 08, 09
 
 ## O que entrega
