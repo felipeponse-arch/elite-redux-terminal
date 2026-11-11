@@ -74,8 +74,12 @@ jobs:
       - name: Dependências de sistema do Chromium (navegador veio do cache)
         if: steps.cache-navegador.outputs.cache-hit == 'true'
         # Já travou 10 min no apt do runner (11/11/2026, run 43044136507): falha rápido e tenta uma vez de novo.
-        timeout-minutes: 4
-        run: npx playwright install-deps chromium || (sleep 20 && npx playwright install-deps chromium)
+        timeout-minutes: 8
+        run: |
+          # DIAGNÓSTICO (11/11/2026): o apt travou 3x; mostra nas anotações onde para.
+          out=$(timeout 90 sudo apt-get update 2>&1 | tail -4 | tr '\n' '|'); echo "::warning::apt-update $out"
+          out=$(timeout 200 npx playwright install-deps chromium 2>&1 | tail -6 | tr '\n' '|'); echo "::warning::install-deps $out"
+          npx playwright install-deps chromium
       - name: Testes de navegador (Playwright)
         run: npm run test:e2e
       - name: Guarda o relatório (só se falhar)
