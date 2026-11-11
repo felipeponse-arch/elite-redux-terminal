@@ -7,6 +7,13 @@
 // passar em silêncio: atualize o catálogo junto.
 export const MUTACOES = [
   {
+    id: "rank-so-ignora-a-lista",
+    descricao: "Rank --so: a opção volta a recalcular todas as espécies mudadas em vez de só a lista pedida",
+    arquivo: "rank_incremental.mjs",
+    de: "recalcular: snames.filter((x) => alvo.has(x)), manter: fora,",
+    para: "recalcular: snames, manter: [],",
+  },
+  {
     id: "po-conjunto-sem-sono",
     descricao: "Pós (11/11): Spore e Sleep Powder saem do conjunto de pós: voltam a dormir Grass e Overcoat",
     arquivo: "duelo.js",

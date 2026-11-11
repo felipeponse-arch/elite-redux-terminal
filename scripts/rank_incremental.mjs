@@ -26,9 +26,17 @@ export function digitalGlobal(partes, regra = RANK_REGRA_VERSAO) {
 
 // cache = { global, especies: { sname: { digital, res } } } ou null.
 // atuais = { sname: digital }. Devolve { recalcular, manter, motivo }.
-export function decidir(cache, globalAtual, atuais, { tudo = false } = {}) {
+// so (lista de snames, 11/11/2026): recalcula SÓ essas e mantém o resto do cache como está (estudo de um ajuste de regra; sem cache válido, erro).
+export function decidir(cache, globalAtual, atuais, { tudo = false, so = null } = {}) {
   const snames = Object.keys(atuais);
   if (tudo) return { recalcular: snames, manter: [], motivo: "--tudo" };
+  if (so) {
+    if (!cache || !cache.especies || cache.global !== globalAtual) throw new Error("--so exige cache válido (digital global igual)");
+    const alvo = new Set(so), fora = snames.filter((x) => !alvo.has(x));
+    const semCache = fora.filter((x) => !cache.especies[x]);
+    if (semCache.length) throw new Error("--so: sem medição no cache para " + semCache.slice(0, 3).join(","));
+    return { recalcular: snames.filter((x) => alvo.has(x)), manter: fora, motivo: "--so" };
+  }
   if (!cache || !cache.especies) return { recalcular: snames, manter: [], motivo: "sem cache" };
   if (cache.global !== globalAtual) return { recalcular: snames, manter: [], motivo: "digital global mudou" };
   const recalcular = [], manter = [];

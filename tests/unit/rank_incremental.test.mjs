@@ -86,3 +86,13 @@ test("o rank novo herda só estágio da linha antiga, nunca bst/duelo", () => {
   const h = camposHerdados({ stage: 2, stageTier: "A", stageScore: 70, bst: 500, duelo: { x: 1 }, tier: "S" });
   assert.deepEqual(h, { stage: 2, stageTier: "A", stageScore: 70 });
 });
+
+test("--so recalcula só a lista e mantém o resto do cache; sem cache válido, erro", () => {
+  const cache = { global: "g", especies: { A: { digital: "x" }, B: { digital: "y" }, C: { digital: "z" } } };
+  const atuais = { A: "x2", B: "y", C: "z" }; // A mudou, mas o --so manda recalcular só C
+  const d = decidir(cache, "g", atuais, { so: ["C"] });
+  assert.deepEqual([d.recalcular, d.manter, d.motivo], [["C"], ["A", "B"], "--so"]);
+  assert.throws(() => decidir(cache, "outra", atuais, { so: ["C"] }), /cache válido/);
+  assert.throws(() => decidir(null, "g", atuais, { so: ["C"] }), /cache válido/);
+  assert.throws(() => decidir(cache, "g", { A: "x", D: "w" }, { so: ["A"] }), /sem medição/);
+});

@@ -15,7 +15,7 @@
 //     guarda a medição. Digital global igual = recalcula só as espécies cuja digital mudou (ou novas); global mudou = tudo.
 // Fontes de cada decisão: docs/decisoes_mecanicas.md (seção Rank).
 //
-// Uso: node scripts/calcular_rank_v2.mjs [--incremental|--tudo] [--especies=A,B] [--amostra=N] [--gravar] [--cache=arq] [--saida=arq] [--relatorio=arq]
+// Uso: node scripts/calcular_rank_v2.mjs [--incremental|--tudo] [--especies=A,B] [--so=A,B] [--amostra=N] [--gravar] [--cache=arq] [--saida=arq] [--relatorio=arq]
 //  --incremental (padrão) usa o cache; --tudo recalcula tudo. --gravar (rank completo) grava data/species_rank.json E o cache.
 //  Com --amostra o cache só é lido/gravado se --cache=arq for dado (amostra nunca mexe no cache oficial).
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
@@ -165,7 +165,7 @@ const globalAtual = digitalGlobal(Object.assign({ lutas: lutas, dex: Object.from
   Object.fromEntries(DADOS_GLOBAIS.map((n) => [n, lerTxt(n)]))));
 const atuais = Object.fromEntries(todas.map((s) => [s, digitalDaEspecie(R.getSpeciesBySname(s), etapaDe(s), R)]));
 const cache = ARQ_CACHE && existsSync(ARQ_CACHE) ? JSON.parse(readFileSync(ARQ_CACHE, "utf8")) : null;
-const dec = decidir(cache, globalAtual, atuais, { tudo: TUDO });
+const dec = decidir(cache, globalAtual, atuais, { tudo: TUDO, so: ARG("--so") ? ARG("--so").split(",") : null });
 console.log(`incremental: ${dec.motivo}; recalcular ${dec.recalcular.length}, manter ${dec.manter.length}`);
 const nPartes = Math.min(nucleos, Math.max(1, dec.recalcular.length));
 const partes = Array.from({ length: nPartes }, (_, i) => dec.recalcular.filter((_, j) => j % nPartes === i));

@@ -178,7 +178,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **rank_fatia.mjs** - Rank com fatia fixa de peso (ticket todas-as-lutas/02, decisão do usuário em 16/10/2026): chefões 60% e lutas comuns 40%.
   notasComFatia:9, comunsMaisPerigosas:36
 - **rank_incremental.mjs** - Rank incremental (06/11/2026, decisão do usuário: atualização recalcula SÓ O QUE MUDOU).
-  hash:10, digitalDaEspecie:15, digitalGlobal:23, decidir:29, r6:41, reduzirMedicao:42, expandirMedicao:53
+  hash:10, digitalDaEspecie:15, digitalGlobal:23, decidir:30, r6:49, reduzirMedicao:50, expandirMedicao:61
 - **remapear_sprite_index.mjs** - Sprites pelo NOME da espécie (15/10/2026). O atlas (data/sprite_atlas.png) foi montado com o índice pelo número da espécie (x) do
   indicePorNumero:10
 - **sabotagem_incremental.mjs** - Sabotagem incremental no master (decisão do usuário, 14/10/2026): no master a sabotagem roda só as
