@@ -9,12 +9,15 @@
   function renderAutoLog() {
     var out = document.getElementById("auto-log-list");
     if (!out) return;
-    if (!state.autoLog.length) { out.innerHTML = '<li class="hint" style="margin:0;">Nada até agora.</li>'; return; }
-    out.innerHTML = state.autoLog.map(function (e) {
+    if (!state.autoLog.length) { out.innerHTML = '<li class="hint" style="margin:0;">O app ainda não mudou nada sozinho</li>'; return; }
+    // Lista curta: as 3 mais recentes à vista; o resto numa sanfona (nada some).
+    var lis = state.autoLog.map(function (e) {
       var d = new Date(e.at);
       var quando = isNaN(d.getTime()) ? "" : d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
       return '<li><time datetime="' + escapeHtml(e.at) + '">' + escapeHtml(quando) + '</time>' + escapeHtml(e.text) + '</li>';
-    }).join("");
+    });
+    out.innerHTML = lis.slice(0, 3).join("") + (lis.length > 3
+      ? '<li><details class="auto-log-mais"><summary>Ver mais ' + (lis.length - 3) + '</summary><ul class="auto-log">' + lis.slice(3).join("") + '</ul></details></li>' : "");
   }
 
   function autoEvolveRoster(announce) {

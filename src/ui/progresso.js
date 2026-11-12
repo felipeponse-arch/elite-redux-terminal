@@ -94,12 +94,17 @@
     var out = document.getElementById("changelog-list");
     if (!out) return;
     if (!CHANGELOG.length) { out.innerHTML = '<p class="hint">Nada por aqui ainda.</p>'; return; }
-    out.innerHTML = CHANGELOG.map(function (entry) {
-      var items = (entry.items || []).map(function (line) {
-        return "<li>" + escapeHtml(line) + "</li>";
+    var dataEl = document.getElementById("novidades-data");
+    if (dataEl) dataEl.textContent = " · " + CHANGELOG[0].date;
+    // Só a data mais recente abre; cada item mostra 2 linhas e abre inteiro ao clicar (nada some).
+    out.innerHTML = CHANGELOG.map(function (entry, i) {
+      var itens = entry.items || [];
+      var lis = itens.map(function (line) {
+        return '<li><details class="nov-item"><summary>' + escapeHtml(line) + '</summary></details></li>';
       }).join("");
-      return '<div class="changelog-entry"><div class="changelog-date mono">' + escapeHtml(entry.date) + '</div>' +
-        '<ul class="changelog-items">' + items + '</ul></div>';
+      return '<details class="changelog-entry"' + (i === 0 ? " open" : "") + '><summary class="changelog-date mono">' +
+        escapeHtml(entry.date) + " · " + itens.length + (itens.length === 1 ? " mudança" : " mudanças") +
+        '</summary><ul class="changelog-items">' + lis + '</ul></details>';
     }).join("");
   }
 

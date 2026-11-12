@@ -320,9 +320,8 @@
           </div>
           <p style="color:var(--text-dim);font-size:var(--fs-legenda);margin-top:10px;" id="settings-note"></p>
         </div>
-        <div class="card card-ajustes">
-          <h3>O que o app fez sozinho</h3>
-          <p class="hint" style="margin:0 0 10px;">Mudanças que o app aplicou sem você clicar, as mais recentes primeiro.</p>
+        <div class="card card-ajustes card-fezsozinho">
+          <h3>O que o app fez sozinho <span class="info-i" tabindex="0" role="note" aria-label="Mudanças que o app aplicou sem você clicar, as mais recentes primeiro." title="Mudanças que o app aplicou sem você clicar, as mais recentes primeiro.">i</span></h3>
           <ul id="auto-log-list" class="auto-log"></ul>
         </div>
         <div class="card card-ajustes card-save-arquivo" id="card-save-arquivo">
@@ -337,11 +336,10 @@
           <p id="save-backups-info" class="hint" style="margin:10px 0 0;"></p>
           <ul id="save-arquivo-status" class="save-arquivo-status" role="status" aria-live="polite"></ul>
         </div>
-        <div class="card card-ajustes">
-          <h3>Novidades</h3>
-          <p class="hint" style="margin:0 0 10px;">Versão do app: <span id="app-version" class="mono" title="Commit do código publicado">__APP_VERSION__</span></p>
+        <details class="card card-ajustes card-novidades" id="novidades-card">
+          <summary class="nov-resumo"><span class="nov-titulo">Novidades</span><span class="nov-info mono">v<span id="app-version" title="Commit do código publicado">__APP_VERSION__</span><span id="novidades-data"></span></span></summary>
           <div id="changelog-list"></div>
-        </div>
+        </details>
         <!-- Checklist eMAG 3.1 (achado em auditoria de UX/Acessibilidade,
              2026-09-13): "alto contraste" e "aumentar fonte" não eram
              atendidos de jeito nenhum - só documentados como gap, nunca

@@ -73,7 +73,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **arquivo_de_save.js** - Card "Save em arquivo" da aba Progresso (pacote 08): Baixar save, Carregar save e Desfazer importação.
   arquivoDeSaveUi:7
 - **auto_evolucao.js** - Registro "O que o app fez sozinho" na tela e a auto-evolução do time/caixa pelo level cap.
-  renderAutoLog:9, autoEvolveRoster:20
+  renderAutoLog:9, autoEvolveRoster:23
 - **caixa.js** - Aba Caixa (PC Box): grade por páginas, busca e ações de cada Pokémon da caixa.
   renderBox:16
 - **dex_ficha.js** - Dex: ficha do Pokémon (stats, habilidades, golpes, rank, evolução) e o agendamento do resumo do topo.
@@ -93,7 +93,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **pipeline_tela.js** - Pipeline de build na tela (ticket docs/tickets/pipeline-build-2026-10-14/02): só desenho. As regras (candidatos, hit-kill,
   pipelineResultado:14, pipelineAlvoValido:26, pipelineSeletorDeAlvoHtml:32, pipelineResumoDoAlvo:46, pipelineVereditoDe:53, pipelineSeloHtml:63, pipelineGolpeHtml:71, pipelineCandidatoHtml:78, pipelinePainelDaFichaHtml:97, pipelineDesenharFicha:114, pipelineDesenharTime:126
 - **progresso.js** - Aba Progresso: dificuldade, level cap, insígnia, modo de Mega, confirmação da run e acessibilidade.
-  renderRunStatus:9, renderCapBadge:17, renderCapDisplay:22, renderProgressTrail:31, renderChangelog:93, initProgress:106
+  renderRunStatus:9, renderCapBadge:17, renderCapDisplay:22, renderProgressTrail:31, renderChangelog:93, initProgress:111
 - **quem_resolve.js** - "Quem derruba este chefão" (ticket docs/tickets/pipeline-build-2026-10-14/04): o caso B do pipeline (especiesQueResolvem,
   quemResolveEstadoDe:14, quemResolveChave:17, quemResolveEmCache:21, quemResolveCalcular:22, quemResolveOrigemHtml:37, quemResolveItemHtml:43, quemResolveListaHtml:51, quemResolvePreencher:67, quemResolveCardHtml:84, quemResolveRestaurar:104
 - **resumo_luta.js** - Confronto e resumo da próxima luta (card do chefão, resumo do topo da Dex, card no fim do Time).

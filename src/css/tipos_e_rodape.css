@@ -12,10 +12,7 @@
 #view-progress > .types-shell > .card { margin: 0; max-width: none; }
 #view-progress > .types-shell > .hint { max-width: 70ch; }
 .hint { color: var(--text-dim); font-size: var(--fs-texto); max-width: 70ch; margin-bottom: 16px; }
-.changelog-entry { margin-bottom: 14px; }
 .changelog-entry:last-child { margin-bottom: 0; }
-.changelog-date { font-size: var(--fs-pequeno); color: var(--text-dim); margin-bottom: 6px; }
-.changelog-items { margin: 0; padding-left: 18px; font-size: var(--fs-texto); line-height: 1.6; }
 .changelog-items li { margin-bottom: 3px; }
 #type-matrix { border-collapse: collapse; font-size: var(--fs-pequeno); }
 #type-matrix th, #type-matrix td { padding: 5px 7px; text-align: center; border: 1px solid var(--border); white-space: nowrap; }
@@ -61,4 +58,53 @@
      de 44 px no fim da tela nem caberia na janela (lote 1, 2026-10-03). */
   .footer a { margin-block: 0; padding-block: 5px; }
   .rodape-extra { display: none; }
+}
+
+/* Progresso: "O que o app fez sozinho" e "Novidades" compactos (pedido de 11/11/2026). Carteira de Treinador:
+   canto superior direito chanfrado; cada cartão com a sua altura (a grade já alinha ao início). */
+:root { --chanfro: 8px; } /* mesmo padrão de cartao.css (o verificador de variáveis olha arquivo a arquivo) */
+.card-fezsozinho, .card-novidades {
+  border-radius: 0; padding: var(--space-3) var(--space-4);
+  clip-path: polygon(0 0, calc(100% - var(--chanfro)) 0, 100% var(--chanfro), 100% 100%, 0 100%);
+}
+.card-fezsozinho h3 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+.info-i {
+  display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%;
+  border: 1px solid var(--border); color: var(--text-dim); font: 700 11px/1 monospace; cursor: help;
+}
+.info-i:focus-visible, .nov-resumo:focus-visible, .changelog-date:focus-visible, .nov-item > summary:focus-visible,
+.auto-log-mais > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.card-fezsozinho .auto-log { gap: 4px; }
+.auto-log-mais > summary { cursor: pointer; color: var(--text-dim); min-height: 24px; }
+.card-novidades > summary { list-style: none; }
+.card-novidades > summary::-webkit-details-marker, .changelog-date::-webkit-details-marker,
+.nov-item > summary::-webkit-details-marker { display: none; }
+.nov-resumo {
+  display: flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer;
+  font-weight: 600; font-size: var(--fs-destaque); color: var(--text);
+}
+.nov-titulo { display: inline-flex; align-items: center; gap: 8px; }
+.nov-titulo::before { content: ""; width: 4px; height: 14px; flex: none; background: var(--accent-2); border-radius: var(--radius-sm); }
+.nov-resumo::after { content: "+"; margin-left: auto; color: var(--text-dim); font-weight: 400; }
+.card-novidades[open] > .nov-resumo::after { content: "\2212"; }
+.card-novidades[open] > .nov-resumo { border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.nov-info { font-size: var(--fs-pequeno); font-weight: 400; color: var(--text-dim); }
+.changelog-entry { margin-bottom: 6px; }
+.changelog-date {
+  font-size: var(--fs-pequeno); color: var(--text-dim);
+  cursor: pointer; list-style: none; display: flex; align-items: center; min-height: 28px; margin-bottom: 2px;
+}
+.changelog-date::before { content: "\25B8"; margin-right: 6px; }
+.changelog-entry[open] > .changelog-date::before { content: "\25BE"; }
+.changelog-items { list-style: none; margin: 0; padding-left: 0; font-size: var(--fs-texto); line-height: 1.6; }
+.nov-item > summary {
+  cursor: pointer; list-style: none; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  line-clamp: 2; overflow: hidden;
+}
+.nov-item[open] > summary { display: block; overflow: visible; }
+@media (pointer: coarse), (max-width: 640px) {
+  .nov-resumo, .changelog-date { min-height: 44px; }
+  .nov-item > summary { padding: 4px 0; }
+  .auto-log-mais > summary { min-height: 44px; display: flex; align-items: center; }
+  .info-i { width: 44px; height: 44px; border: 0; background: none; }
 }
