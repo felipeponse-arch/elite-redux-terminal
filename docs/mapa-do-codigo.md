@@ -353,7 +353,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **lote_b_plano_real.test.mjs** - Lote B da força-tarefa (2026-10-02): o plano contra o chefão tem que corresponder ao time
 - **lote_c_validacao.test.mjs** - Lote C da força-tarefa (2026-10-02): validação estratégica das builds da IA e o que a
 - **lote_d_confiabilidade.test.mjs** - Lote D da força-tarefa (2026-10-02): confiabilidade do estado, do save, da sincronização
-- **lupa_texto.test.mjs** - Lupa (11/11/2026): o texto do balão é o mesmo da ficha da Dex (descricaoDoGolpe / descricaoDaHabilidade), sem texto novo.
+- **lupa_texto.test.mjs** - Lupa (11/11/2026): o texto do balão sai das mesmas funções que a ficha da Dex usa. O esperado é lido direto dos JSON de tradução e dos da...
 - **manual_build.test.mjs** - Manual de build competitivo (reunião de 2026-09-28): regras gerais de nature,
 - **mapa_do_codigo.test.mjs** - Gerador do mapa do código: determinístico e acha função conhecida com a linha certa.
 - **marca_de_dado.test.mjs** - Gate de processo (TK-30): testes que dependem de dado que muda com a versão/rank/lutas levam marca,

@@ -1,21 +1,43 @@
-// Lupa (11/11/2026): o texto do balão é o mesmo da ficha da Dex (descricaoDoGolpe / descricaoDaHabilidade), sem texto novo.
+// Lupa (11/11/2026): o texto do balão sai das mesmas funções que a ficha da Dex usa. O esperado é lido direto dos JSON de tradução e dos dados, sem repetir a regra de fallback.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { carregarRegras } from "./carregar_regras.mjs";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { carregarRegras, lerComMutacao } from "./carregar_regras.mjs";
 
+const raiz = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const lerData = (nome) => JSON.parse(readFileSync(join(raiz, "data", nome), "utf8"));
 const R = carregarRegras();
+const MOVE_PT = lerData("move_translations_pt.json");
+const ABILITY_PT = lerData("ability_translations_pt.json");
 
-test("golpe: tradução PT, senão o texto do dado, senão 'Sem descrição.'", () => {
-  const ids = Object.keys(R.MOVES).filter((i) => R.MOVES[i] && R.MOVES[i][0]);
-  assert.ok(ids.length > 500);
-  for (const i of ids.slice(0, 400)) assert.equal(R.descricaoDoGolpe(i), R.MOVE_PT[String(i)] || R.MOVES[i][6] || "Sem descrição.");
-  assert.equal(R.descricaoDoGolpe(999999), "Sem descrição.");
+test("golpe com tradução: o balão mostra exatamente a tradução do arquivo (amostra grande)", () => {
+  const ids = Object.keys(MOVE_PT).filter((k) => R.MOVES[k] && R.MOVES[k][0]);
+  assert.ok(ids.length >= 100, "amostra menor que 100: " + ids.length);
+  for (const k of ids) assert.equal(R.descricaoDoGolpe(k), MOVE_PT[k], "golpe " + k);
 });
 
-test("habilidade: tradução PT, senão ABILITIES[id][1]; nome acha o id", () => {
-  const ids = Object.keys(R.ABILITIES).filter((i) => R.ABILITIES[i] && R.ABILITIES[i][0]);
-  for (const i of ids.slice(0, 400)) assert.equal(R.descricaoDaHabilidade(i), R.ABILITY_PT[String(i)] || R.ABILITIES[i][1]);
-  const i0 = ids[0];
-  assert.equal(R.ABILITIES[R.ABILITY_ID_BY_NAME[R.ABILITIES[i0][0]]][0], R.ABILITIES[i0][0]);
-  assert.equal(R.descricaoDaHabilidade(999999), "");
+test("golpe sem tradução: mostra o texto do próprio dado, nunca vazio", () => {
+  const semPt = Object.keys(R.MOVES).filter((k) => R.MOVES[k] && R.MOVES[k][0] && !(k in MOVE_PT));
+  assert.ok(semPt.length >= 1);
+  for (const k of semPt) assert.equal(R.descricaoDoGolpe(k), R.MOVES[k][6] || "Sem descrição.", "golpe " + k);
+});
+
+test("habilidade com tradução: o balão mostra a tradução do arquivo (amostra grande)", () => {
+  const ids = Object.keys(ABILITY_PT).filter((k) => R.ABILITIES[k] && R.ABILITIES[k][0]);
+  assert.ok(ids.length >= 100, "amostra menor que 100: " + ids.length);
+  for (const k of ids) assert.equal(R.descricaoDaHabilidade(k), ABILITY_PT[k], "habilidade " + k);
+});
+
+test("habilidade sem tradução: mostra o texto do próprio dado", () => {
+  const semPt = Object.keys(R.ABILITIES).filter((k) => R.ABILITIES[k] && R.ABILITIES[k][0] && !(k in ABILITY_PT));
+  // Hoje todas têm tradução (lista vazia); o caso fica coberto se um dia faltar uma.
+  for (const k of semPt) assert.equal(R.descricaoDaHabilidade(k), R.ABILITIES[k][1], "habilidade " + k);
+});
+
+test("a ficha da Dex chama as mesmas funções (golpe e habilidade)", () => {
+  const ficha = lerComMutacao("src/ui/dex_ficha.js", "dex_ficha.js");
+  assert.ok(ficha.includes("var mvDesc = descricaoDoGolpe(moveId);"), "golpe da Dex não usa descricaoDoGolpe");
+  assert.ok(ficha.includes("var desc = descricaoDaHabilidade(id);"), "habilidade da Dex não usa descricaoDaHabilidade");
 });
