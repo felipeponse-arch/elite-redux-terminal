@@ -14,7 +14,7 @@
   function abilityCard(id, kindLabel, kindClass, synergyHits) {
     var a = ABILITIES[id];
     if (!a) return "";
-    var desc = ABILITY_PT[String(id)] || a[1];
+    var desc = descricaoDaHabilidade(id);
     var synergyHtml = "";
     var hits = synergyHits || [];
     for (var i = 0; i < hits.length; i++) {
@@ -136,7 +136,7 @@
         '<td class="mono">' + (mv[3] || "&mdash;") + '</td>' +
         '<td class="mono">' + (mv[4] ? mv[4] + "%" : "&mdash;") + '</td>' +
         '<td class="mono">' + (mv[5] || "&mdash;") + '</td></tr>';
-      var mvDesc = MOVE_PT[String(moveId)] || mv[6] || "Sem descrição.";
+      var mvDesc = descricaoDoGolpe(moveId);
       var detail = '<tr class="move-detail-row hidden" id="' + id + '"><td colspan="6">' + escapeHtml(mvDesc) + '</td></tr>';
       return main + detail;
     }).join("");

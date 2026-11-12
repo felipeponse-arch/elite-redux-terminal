@@ -5073,4 +5073,11 @@ export const MUTACOES = [
     de: "contra.pontos > contraBase.pontos) contra.motivo +=",
     para: "false) contra.motivo +=",
   },
+  {
+    id: "lupa-golpe-ignora-traducao-da-dex",
+    descricao: "Lupa: o texto do golpe deixa de usar a mesma tradução PT que a ficha da Dex mostra",
+    arquivo: "dados_base.js",
+    de: "return MOVE_PT[String(moveId)] || (mv && mv[6])",
+    para: "return (mv && mv[6])",
+  },
 ];

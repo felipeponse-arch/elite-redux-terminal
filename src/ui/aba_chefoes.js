@@ -492,14 +492,14 @@
     var abiHtml;
     if (megaSp) {
       var megaInnNames = (megaSp.inn || []).map(function (id) { return ABILITIES[id] ? ABILITIES[id][0] : null; }).filter(Boolean);
-      abiHtml = '<div class="bm-row"><b>Entra com:</b> ' + escapeHtml(m.abi || "?") + '</div>' +
+      abiHtml = '<div class="bm-row"><b>Entra com:</b> ' + escapeHtml(m.abi || "?") + lupaHtml("hab", m.abi) + '</div>' +
         '<div class="bm-row"><b>Após transformar:</b> ' +
         (megaInnNames.length ? escapeHtml(megaInnNames.join(", ")) + ' (inata' + (megaInnNames.length > 1 ? "s" : "") + ')' + (megaSp.ab && megaSp.ab.length ? " + " : "") : "") +
         (megaSp.ab && megaSp.ab.length ? '1 escolhível própria da forma (não sabemos qual das ' + megaSp.ab.length + ')' : "") +
         '</div>';
     } else {
       abiHtml = sp ? habilidadesBuildHtml(sp, buildDoChefao)
-        : '<div class="bp-abis"><span class="bp-rot">Hab.</span><span class="bp-chip bp-chip-sel">' + escapeHtml(m.abi || "?") + '</span></div>';
+        : '<div class="bp-abis"><span class="bp-rot">Hab.</span><span class="bp-chip bp-chip-sel">' + escapeHtml(m.abi || "?") + lupaHtml("hab", m.abi) + '</span></div>';
     }
     return '<div class="boss-mon-card cartao-membro' + classeTipo + '">' +
       '<div class="bm-head ts-head goto-species" tabindex="0" role="button" data-x="' + displayX + '" title="Ver na Dex">' + spriteImgHtml(displayX, displayName, 96) +

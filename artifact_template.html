@@ -36,6 +36,7 @@
   /*@css cartao_time.css*/
   /*@css chefoes_carteira.css*/
   /*@css celular_topo.css*/
+  /*@css lupa.css*/
 </style>
 
 <!-- Populated once at startup (not per species-detail render, unlike the
@@ -866,6 +867,7 @@
 
 /*@ui ficha_extras.js*/
 
+/*@ui lupa.js*/
 /*@ui time_build.js*/
 /*@ui time.js*/
 
@@ -919,6 +921,7 @@
   // nada aqui altera estado do app, salva build ou toca localStorage.
   window.__erTest = {
     buildChipsHtml: buildChipsHtml,
+    textosCrus: function () { return { MOVES: MOVES, MOVE_PT: MOVE_PT, ABILITIES: ABILITIES, ABILITY_PT: ABILITY_PT }; }, // lupa: confere o balão contra os dados
     renderTeam: renderTeam,
     validateAiBuild: validateAiBuild,
     buildSynergyHtml: buildSynergyHtml,

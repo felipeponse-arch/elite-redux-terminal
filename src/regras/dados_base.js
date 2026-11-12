@@ -87,6 +87,16 @@
   var MOVE_ID_BY_NAME = Object.create(null);
   MOVES.forEach(function (m, id) { if (m && m[0]) { MOVE_BY_NAME[m[0]] = m; MOVE_ID_BY_NAME[m[0]] = id; } });
 
+  // Texto de golpe e de habilidade que a ficha da Dex mostra (a lupa de 11/11/2026 reusa estas duas funções).
+  function descricaoDoGolpe(moveId) {
+    var mv = MOVES[moveId];
+    return MOVE_PT[String(moveId)] || (mv && mv[6]) || "Sem descrição.";
+  }
+  function descricaoDaHabilidade(id) {
+    var a = ABILITIES[id];
+    return a ? (ABILITY_PT[String(id)] || a[1]) : "";
+  }
+
   var NATURE_MODS = {
     Lonely: [1, 2], Brave: [1, 5], Adamant: [1, 3], Naughty: [1, 4],
     Bold: [2, 1], Relaxed: [2, 5], Impish: [2, 3], Lax: [2, 4],

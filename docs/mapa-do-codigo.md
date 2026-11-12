@@ -22,7 +22,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **confronto.js** - Motor de confronto: dado o time do jogador e o time de um chefão, diz quem
   confrontoDamagingMoves:29, confrontoMoveType:32, foeAbilityIds:36, foeFromBossMember:49, ofensaContra:59, ameacaDe:91, velocidadeBase:114, confrontoDuelo:126, confrontoTime:146, coberturaSugerida:196, confrontoDuelosDe:243, valorDoTime:249, melhoresTrocas:265, cuidadosDoChefao:302, aberturaEmDupla:319
 - **dados_base.js** - Tabelas derivadas dos dados do jogo (tipos, golpes, espécies, rótulos conferidos, naturezas) e utilitários puros.
-  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, clampInt:103, habilidadesEscolhiveis:119, uniqueIds:122, descricaoDaEspecie:187, semSpriteOficial:193, avisoSemSpriteHtml:196
+  dataLabel:23, getSpeciesByX:78, getSpeciesBySname:79, snameOf:80, descricaoDoGolpe:91, descricaoDaHabilidade:95, clampInt:113, habilidadesEscolhiveis:129, uniqueIds:132, descricaoDaEspecie:197, semSpriteOficial:203, avisoSemSpriteHtml:206
 - **duelo.js** - Simulador de duelo 1x1 contra Pokémon reais de chefão - o motor do rank
   nomeHabDuelo:46, textoHabDuelo:48, bonusDeGolpeLidoDoTextoDuelo:85, acertosDoGolpeDuelo:86, golpeDeRecargaDuelo:93, golpeUtilNoDuelo:107, categoriaNoDuelo:119, temContatoDuelo:125, golpesDeRecargaAte:128, golpesDeDueloAte:135, golpesDeStatusAte:141, tipoDoTextoDuelo:162, fraseFixaDuelo:167, categoriasDoTextoDuelo:184, categoriasDoGolpeDuelo:187, modoHellDuelo:212, statusDoTrechoDuelo:271, presencaDoStatus:278, todosOsStatusDuelo:284, lerStatusDaFraseDuelo:289, chanceDoEstagioCrit:339, lerCriticoDaFraseDuelo:340, lerCondicaoDaFraseDuelo:366, estagioDoTexto:395, multDoEstagio:396, lerEstagioDaFraseDuelo:398, poderDoGolpeDuelo:458, lerExtrasDaFraseDuelo:460, lerCuraDaFraseDuelo:514, filtroDoTextoDuelo:547 (+160)
 - **evolucao.js** - Builds salvas por espécie, registro "O que o app fez sozinho" e o que acontece
@@ -86,6 +86,8 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   compareCardHtml:14, compareResultHtml:22, notesCardHtml:78, buildHistoryHtml:87, bossReferenceHtml:103, rotuloDaBuild:157, planoDaBuildHtml:166, megaLockedTagHtml:186, otherFormsHtml:193
 - **insignias_faixa.js** - Faixa de Etapa no cabeçalho (fatia 1 do visual "Carteira de Treinador", 07/11/2026).
   insigniaSvgHtml:38, etapaNomeCurto:42, etapaPara:46, renderFaixaEtapa:54
+- **lupa.js** - Lupa (11/11/2026): botão de lupa ao lado do nome de habilidade, inata ou golpe; abre um balão com o texto que a Dex já mostra.
+  lupaHtml:8, lupaBalao:14, lupaFechar:26, lupaAbrir:34, lupaBotao:51
 - **modo_motor.js** - Modo Motor no Meu Time (ticket time-pelo-motor/01, Fase F2, 21/10/2026). O app NÃO usa IA (decisão do usuário, 06/11/2026):
   modoMotorCache:18, modoMotorChave:20, modoMotorCapturados:25, modoMotorFavoritosValidos:30, modoMotorSegundos:34, modoMotorEsperar:35, modoMotorAquecer:39, modoMotorMontar:67, modoMotorVarianteDe:117, modoMotorFicarComVariante:118, modoMotorFavoritosHtml:151, modoMotorBotaoHtml:163, modoMotorMembroHtml:168, modoMotorRodapeHtml:180, modoMotorVarianteHtml:195, modoMotorResultadoHtml:223
 - **nucleo.js** - Estado do app (state), gravação no aparelho e a camada de ações (acao/TELAS): toda mudança grava uma vez e redesenha cada tela uma vez.
@@ -351,6 +353,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **lote_b_plano_real.test.mjs** - Lote B da força-tarefa (2026-10-02): o plano contra o chefão tem que corresponder ao time
 - **lote_c_validacao.test.mjs** - Lote C da força-tarefa (2026-10-02): validação estratégica das builds da IA e o que a
 - **lote_d_confiabilidade.test.mjs** - Lote D da força-tarefa (2026-10-02): confiabilidade do estado, do save, da sincronização
+- **lupa_texto.test.mjs** - Lupa (11/11/2026): o texto do balão é o mesmo da ficha da Dex (descricaoDoGolpe / descricaoDaHabilidade), sem texto novo.
 - **manual_build.test.mjs** - Manual de build competitivo (reunião de 2026-09-28): regras gerais de nature,
 - **mapa_do_codigo.test.mjs** - Gerador do mapa do código: determinístico e acha função conhecida com a linha certa.
 - **marca_de_dado.test.mjs** - Gate de processo (TK-30): testes que dependem de dado que muda com a versão/rank/lutas levam marca,

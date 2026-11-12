@@ -36,17 +36,17 @@
       var tipo = TYPES[mv[1]], cat = categoriaDoGolpe(mv);
       return '<li class="cm-golpe tipo-' + tipo + '" title="' + tipo + " · " + CATEGORIA_ROTULO[cat] + '">' +
         '<svg class="cm-g-cat" viewBox="0 0 16 16" aria-hidden="true" focusable="false" fill="currentColor">' + CATEGORIA_ICONE[cat] + '</svg>' +
-        '<span class="cm-g-nome">' + escapeHtml(nome) + '</span>' +
+        '<span class="cm-g-nome">' + escapeHtml(nome) + lupaHtml("golpe", nome) + '</span>' +
         '<span class="cm-g-tipo">' + tipo + ' · ' + CATEGORIA_ROTULO[cat] + '</span></li>';
     }).join("") + '</ul>';
   }
   function habilidadesBuildHtml(sp, build) {
     var escolhida = stripNote(build.ability);
     var chips = habilidadesEscolhiveis(sp).map(function (n) {
-      return '<span class="bp-chip' + (n === escolhida ? ' bp-chip-sel' : '') + '"' + (n === escolhida ? ' title="Habilidade desta build"' : '') + '>' + escapeHtml(n) + '</span>';
+      return '<span class="bp-chip' + (n === escolhida ? ' bp-chip-sel' : '') + '"' + (n === escolhida ? ' title="Habilidade desta build"' : '') + '>' + escapeHtml(n) + lupaHtml("hab", n) + '</span>';
     });
-    if (escolhida && habilidadesEscolhiveis(sp).indexOf(escolhida) === -1) chips.unshift('<span class="bp-chip bp-chip-sel" title="Habilidade desta build">' + escapeHtml(escolhida) + '</span>');
-    var inatas = sp.inn.map(function (id) { return '<span class="bp-chip bp-chip-inn" title="Innate (sempre ativa)">' + escapeHtml(ABILITIES[id][0]) + '</span>'; });
+    if (escolhida && habilidadesEscolhiveis(sp).indexOf(escolhida) === -1) chips.unshift('<span class="bp-chip bp-chip-sel" title="Habilidade desta build">' + escapeHtml(escolhida) + lupaHtml("hab", escolhida) + '</span>');
+    var inatas = sp.inn.map(function (id) { return '<span class="bp-chip bp-chip-inn" title="Innate (sempre ativa)">' + escapeHtml(ABILITIES[id][0]) + lupaHtml("hab", ABILITIES[id][0]) + '</span>'; });
     return '<div class="bp-abis"><span class="bp-rot">Hab.</span>' + chips.join("") + '</div>' +
       (inatas.length ? '<div class="bp-abis"><span class="bp-rot">Innate</span>' + inatas.join("") + '</div>' : "");
   }

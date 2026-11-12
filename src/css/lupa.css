@@ -1,0 +1,24 @@
+/* Lupa (11/11/2026): botão ao lado do nome e balão com o texto. Carteira de Treinador: cantos chanfrados, sem raio, cor do tema. */
+.lupa-btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;
+  width: 20px; height: 20px; margin-left: 4px; padding: 0; flex: none;
+  color: var(--text-dim); background: transparent; border: 1px solid var(--border); border-radius: 0; cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 0 100%);
+}
+.lupa-btn:hover, .lupa-btn[aria-expanded="true"] { color: var(--text); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 22%, var(--surface)); }
+.lupa-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; clip-path: none; }
+/* Área de toque de 44 px no celular: o pseudo-elemento cresce além do ícone sem mexer no layout. */
+@media (pointer: coarse), (max-width: 700px) {
+  .lupa-btn::after { content: ""; position: absolute; inset: -12px; }
+}
+#lupa-balao {
+  position: fixed; z-index: 1000; max-width: min(280px, 90vw); padding: 8px 10px; box-sizing: border-box;
+  font-size: var(--fs-pequeno); line-height: 1.35; font-weight: 500; color: var(--text); overflow-wrap: anywhere; pointer-events: none;
+  background: var(--surface); border: 1px solid var(--text-dim); border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+}
+#lupa-balao[hidden] { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  #lupa-balao { animation: lupa-entra .12s ease-out; }
+  @keyframes lupa-entra { from { opacity: 0; } to { opacity: 1; } }
+}
