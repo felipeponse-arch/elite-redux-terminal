@@ -5080,4 +5080,18 @@ export const MUTACOES = [
     de: "return MOVE_PT[String(moveId)] || (mv && mv[6])",
     para: "return (mv && mv[6])",
   },
+  {
+    id: "lupa-habilidade-ignora-traducao-da-dex",
+    descricao: "Lupa: o texto da habilidade deixa de usar a tradução PT que a ficha da Dex mostra",
+    arquivo: "dados_base.js",
+    de: "return a ? (ABILITY_PT[String(id)] || a[1]) : \"\";",
+    para: "return a ? a[1] : \"\";",
+  },
+  {
+    id: "lupa-dex-nao-usa-descricao-compartilhada",
+    descricao: "Lupa: a ficha da Dex monta o texto do golpe por conta própria, sem a função que o balão usa",
+    arquivo: "dex_ficha.js",
+    de: "var mvDesc = descricaoDoGolpe(moveId);",
+    para: "var mvDesc = (MOVES[moveId] || [])[6] || \"Sem descrição.\";",
+  },
 ];
