@@ -41,3 +41,31 @@ test("sem buff aprendível: só dano na lista, nada a medir; e o buff especial n
 test("sem alvo simulado não há comparação: o conjunto segue só de dano", () => {
   assert.equal(R.pipelineComStatus(sp("Dragonite"), { v: { moves: ["a", "b", "c", "d"] } }, [], { foes: [] }, {}, []), null);
 });
+
+const notas = (c) => { const m = c.motivos.join(" | ").match(/pontua (\d+\.\d+) contra (\d+\.\d+) com 4 golpes de dano/); assert.ok(m, "esperava o motivo com as duas notas"); return { com: Number(m[1]), sem: Number(m[2]) }; };
+
+test("a nota do duelo com o buff/status é maior que a dos 4 golpes de dano (Tyranitar Mega e Walking Wake)", () => {
+  [["Tyranitar Mega", "Dragon Dance"], ["Walking Wake", "Glare"]].forEach(([n, g]) => {
+    const { com, sem } = notas(candidatos(n).find((x) => x.golpes.includes(g)));
+    assert.ok(com > sem, n + ": " + com + " deveria ser maior que " + sem);
+  });
+});
+
+test("borda: conjunto que já tem golpe de status não é tocado (máximo 1)", () => {
+  const c = { v: { moves: ["Earthquake", "Rock Slide", "Crunch", "Dragon Dance"] } };
+  assert.equal(R.pipelineComStatus(sp("Tyranitar Mega"), c, [], { foes: [{}] }, {}, ["Swords Dance"]), null);
+});
+
+test("borda: candidato com papel (Pivô/Tanque) não leva troca de status", () => {
+  ["Beedrill", "Clefable"].forEach((n) => candidatos(n).filter((c) => c.papel).forEach((c) => {
+    assert.doesNotMatch(c.motivos.join(" | "), /\((buff|status)\) no lugar de/, n + " " + c.papel);
+    assert.deepEqual(semDano(c).filter((g) => !R.ehGolpeDePivo(g)), [], n + " " + c.papel);
+  }));
+});
+
+test("pivô livre: a troca por buff/status nunca tira o golpe de pivô", () => {
+  R.SPECIES.filter((s) => s && R.rankDe(s.sname) && R.rankDe(s.sname).etapa <= 5).slice(0, 40).forEach((s) => candidatos(s.n).forEach((c) => {
+    const pivo = c.golpes.find(R.ehGolpeDePivo);
+    if (pivo) assert.doesNotMatch(c.motivos.join(" | "), new RegExp("no lugar de " + pivo + ":"), s.n);
+  }));
+});

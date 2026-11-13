@@ -512,8 +512,7 @@
   // O motor compara no duelo COMPLETO (resultadoDoDuelo com os 4 golpes, que já simula setup, cura, status e sala): (a) 4 de dano,
   // (b) 3 de dano + 1 buff do próprio usuário, (c) 3 de dano + 1 status útil. Fica a de maior nota; no máximo 1 golpe de status e só
   // golpe liberado na Etapa. Sem alvo (nada simulado) não há comparação e o conjunto de dano segue como está.
-  // shortcut: testa no máximo 3 buffs e 3 status por candidato (cura, depois status no alvo, depois sala; buffs pelo tamanho do ganho), upgrade: medir todos se o tempo da ficha permitir.
-  var MAX_BUFFS_PIPELINE = 3, MAX_STATUS_PIPELINE = 3, GANHO_MIN_STATUS_PIPELINE = 0.01;
+  var GANHO_MIN_STATUS_PIPELINE = 0.01;
   var ORDEM_STATUS_PIPELINE = { cura: 0, status: 1, sala: 2 };
   function pipelineNotaDoSet(sp, b, alvo) {
     var eu = unidadeDaBuild(sp, b, alvo.nivel, alvo.clima), foes = alvo.foes.slice(0, alvo.nChefoes || alvo.foes.length), soma = 0;
@@ -538,7 +537,7 @@
     });
     buffs.sort(function (a, b) { return b.peso - a.peso || (a.n < b.n ? -1 : 1); });
     outros.sort(function (a, b) { return a.ordem - b.ordem || (a.n < b.n ? -1 : 1); });
-    return { buffs: buffs.slice(0, MAX_BUFFS_PIPELINE).map(function (x) { return x.n; }), outros: outros.slice(0, MAX_STATUS_PIPELINE).map(function (x) { return x.n; }) };
+    return { buffs: buffs.map(function (x) { return x.n; }), outros: outros.map(function (x) { return x.n; }) };
   }
   // c = candidato validado ({ g, v }). Devolve { v, golpe, tipo, trocou, nota0, nota1 } se um golpe de status vence os 4 de dano
   // pelo duelo, ou null (fica o conjunto de dano).
@@ -554,8 +553,8 @@
     var cv = mesclarContextos(ctx, contextoDeValidacao(sp, null));
     var base = { ability: c.v.ability, nature: c.v.nature, item: c.v.item, evs: c.v.evs.slice() };
     var nota0 = pipelineNotaDoSet(sp, Object.assign({ moves: golpes.slice() }, base), alvo), melhor = null;
-    // Sai o golpe de dano mais fraco que não é a única sinergia nem o único STAB do conjunto.
-    var fracos = golpes.slice().sort(function (a, b) { return (tabela[a] ? tabela[a].fracMin : 0) - (tabela[b] ? tabela[b].fracMin : 0) || (a < b ? -1 : 1); });
+    // Sai o golpe de dano mais fraco (nunca o pivô livre) que não é a única sinergia nem o único STAB do conjunto.
+    var fracos = golpes.filter(function (n) { return !ehGolpeDePivo(n); }).sort(function (a, b) { return (tabela[a] ? tabela[a].fracMin : 0) - (tabela[b] ? tabela[b].fracMin : 0) || (a < b ? -1 : 1); });
     var tiposStab = speciesTypeNames(sp).concat(pipelineTiposExtraDeStab(sp, c.g.hab));
     var sinAntes = pipelinePesoDoConjunto(c.g.sinergias, golpes);
     opcoes.forEach(function (o) {
