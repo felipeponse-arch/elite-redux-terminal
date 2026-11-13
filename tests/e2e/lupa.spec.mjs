@@ -53,21 +53,22 @@ for (const [nome, abrir] of [["Time do Chefão", abrirChefao], ["Meu Time", abri
         await expect(page.locator("#lupa-balao")).toBeHidden();
       }
     });
-    test("imprimir a tela: print com o balão aberto", async ({ page }) => {
+    test("imprimir a tela: print com o balão aberto", async ({ page }, testInfo) => {
       await abrirApp(page);
       const cartao = await abrir(page);
       await cartao.locator('.lupa-btn[data-lupa="golpe"]').first().hover();
-      await page.screenshot({ path: `../../../../relatorios/lupa_2026_11_11/${nome === "Meu Time" ? "meutime" : "chefao"}_1280.png` });
+      // O print vai para test-results/ (ignorado pelo git): o caminho antigo, fora do repositório, não existe no CI.
+      await page.screenshot({ path: testInfo.outputPath(`${nome === "Meu Time" ? "meutime" : "chefao"}_1280.png`) });
     });
   });
   test.describe(nome + " celular", () => {
     test.use({ viewport: { width: 390, height: 844 } });
-    test("tocar abre, tocar de novo fecha, tocar fora fecha; balão cabe em 90vw", async ({ page }) => {
+    test("tocar abre, tocar de novo fecha, tocar fora fecha; balão cabe em 90vw", async ({ page }, testInfo) => {
       await abrirApp(page);
       const cartao = await abrir(page);
       const btn = await conferir(page, cartao, "golpe", (b) => b.click());
       expect((await page.locator("#lupa-balao").boundingBox()).width).toBeLessThanOrEqual(390 * 0.9 + 1);
-      await page.screenshot({ path: `../../../../relatorios/lupa_2026_11_11/${nome === "Meu Time" ? "meutime" : "chefao"}_390.png` });
+      await page.screenshot({ path: testInfo.outputPath(`${nome === "Meu Time" ? "meutime" : "chefao"}_390.png`) });
       await btn.click();
       await expect(page.locator("#lupa-balao")).toBeHidden();
       await btn.click();
