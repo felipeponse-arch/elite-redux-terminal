@@ -65,10 +65,14 @@ for (const [nome, abrir] of [["Time do Chefão", abrirChefao], ["Meu Time", abri
     test.use({ viewport: { width: 390, height: 844 } });
     test("tocar abre, tocar de novo fecha, tocar fora fecha; balão cabe em 90vw", async ({ page }, testInfo) => {
       await abrirApp(page);
+      await (await page.context().newCDPSession(page)).send("Emulation.setCPUThrottlingRate", { rate: 6 });
       const cartao = await abrir(page);
       const btn = await conferir(page, cartao, "golpe", (b) => b.click());
       expect((await page.locator("#lupa-balao").boundingBox()).width).toBeLessThanOrEqual(390 * 0.9 + 1);
       await page.screenshot({ path: testInfo.outputPath(`${nome === "Meu Time" ? "meutime" : "chefao"}_390.png`) });
+      // Evento de rolagem sem deslocar o botão (chega atrasado em máquina lenta) não fecha o balão; rolar de verdade fecha.
+      await page.evaluate(() => window.dispatchEvent(new Event("scroll")));
+      await expect(page.locator("#lupa-balao")).toBeVisible();
       await btn.click();
       await expect(page.locator("#lupa-balao")).toBeHidden();
       await btn.click();

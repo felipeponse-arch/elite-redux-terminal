@@ -45,7 +45,7 @@
     balao.style.left = x + "px"; balao.style.top = y + "px";
     btn.setAttribute("aria-expanded", "true");
     btn.setAttribute("aria-describedby", "lupa-balao");
-    lupaAtual = { btn: btn, fixado: !!fixado };
+    lupaAtual = { btn: btn, fixado: !!fixado, top: r.top, left: r.left };
   }
 
   function lupaBotao(e) { return e.target.closest ? e.target.closest(".lupa-btn") : null; }
@@ -71,5 +71,10 @@
     else lupaAbrir(b, true);
   }, true);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") lupaFechar(); });
-  window.addEventListener("scroll", lupaFechar, true);
+  // Só fecha se o botão saiu do lugar: o balão é fixo, então rolagem sem deslocamento (evento atrasado do toque, sanfona abrindo) não deve fechá-lo.
+  window.addEventListener("scroll", function () {
+    if (!lupaAtual) return;
+    var r = lupaAtual.btn.getBoundingClientRect();
+    if (Math.abs(r.top - lupaAtual.top) > 2 || Math.abs(r.left - lupaAtual.left) > 2) lupaFechar();
+  }, true);
   window.addEventListener("resize", lupaFechar);
