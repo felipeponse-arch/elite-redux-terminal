@@ -517,9 +517,7 @@
   function pipelinePapeisDuplos(sp, base, outro, kit, alvo, ctx, so) {
     var hab = base.g.hab, nat = base.g.nat, golpes = base.g.av.golpes;
     var tabela = pipelineTabela(sp, hab, nat, kit, alvo);
-    // Pivô de dano segue a categoria do set (pacote 12): um pivô F não entra no set Especial, e vice-versa.
-    var catSet = pipelineCatDoSet(null, nat);
-    var pivos = kit.filter(ehGolpeDePivo).filter(function (n) { return moveRoleOf(n) !== "dano" || (tabela[n] && tabela[n].g.cat === catSet); });
+    var pivos = kit.filter(ehGolpeDePivo); // pivô (U-turn, Volt Switch...) fica FORA da regra de categoria (decisão do usuário, 13/11)
     if (!pivos.length && so !== outro) return null;
     function montar(g, papel, estimado) {
       var rv = pipelineValidarRascunho(sp, g, ctx);
@@ -586,7 +584,13 @@
           if (catDoSet) { // só golpes dessa categoria (os de outra saem da tabela e do movepool); status não muda
             var catDe = {};
             Object.keys(tabela).forEach(function (n) { catDe[n] = tabela[n].g.cat; if (catDe[n] !== catDoSet) delete tabela[n]; });
-            pool = liberados.filter(function (n) { return catDe[n] ? catDe[n] === catDoSet : moveRoleOf(n) !== "dano"; }); // golpe de dano fora do kit não entra: a categoria dele não foi medida
+            // golpe fora do kit (não medido): usa a categoria estática do dado; golpe de dano sem categoria conhecida não entra.
+            // shortcut: habilidade que troca a categoria de golpe fora do kit não é vista, upgrade: medir todo golpe liberado
+            pool = liberados.filter(function (n) {
+              if (catDe[n]) return catDe[n] === catDoSet;
+              var m = MOVE_BY_NAME[n], cat = m && m[3] > 0 ? (m[2] === 0 ? "F" : m[2] === 1 ? "E" : null) : null;
+              return cat ? cat === catDoSet : moveRoleOf(n) !== "dano";
+            });
           }
           var tiposStab = speciesTypeNames(sp).concat(pipelineTiposExtraDeStab(sp, hab));
           var nomes = Object.keys(tabela).sort();

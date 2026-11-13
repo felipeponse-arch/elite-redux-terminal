@@ -5012,10 +5012,17 @@ export const MUTACOES = [
   },
   {
     id: "foco-fisico-especial-filtra",
-    descricao: "Foco Físico/Especial: golpe de outra categoria deixa de sair da tabela do conjunto",
+    descricao: "Categoria do set (foco ou natureza): golpe de outra categoria deixa de sair da tabela do conjunto",
     arquivo: "pipeline_build.js",
-    de: "if (catDe[n] !== catDoFoco) delete tabela[n];",
+    de: "if (catDe[n] !== catDoSet) delete tabela[n];",
     para: "if (false) delete tabela[n];",
+  },
+  {
+    id: "categoria-do-set-sem-filtro-do-pool",
+    descricao: "Categoria do set: sem o filtro de categoria, o movepool volta a aceitar golpe da outra categoria (Especial com golpe F, Físico com golpe E)",
+    arquivo: "pipeline_build.js",
+    de: "if (catDoSet) { // só golpes",
+    para: "if (false) { // só golpes",
   },
   {
     id: "foco-misto-forca-as-duas-categorias",

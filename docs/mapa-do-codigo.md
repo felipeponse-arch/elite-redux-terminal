@@ -271,6 +271,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **campo_no_duelo.test.mjs** - Campo no duelo (2026-09-29): terreno das habilidades (Grassy/Electric/Psychic/
 - **carimbo_derivados.test.mjs** - Depende de dado: rank/lutas/chefões (lê os derivados gravados; muda quando eles são regerados).
 - **categoria_do_set.test.mjs** - Categoria do set (pacote 12): build Especial só com golpe de dano E; Físico só com F; Misto aceita as duas. Vale em todo caminho
+- **categoria_do_set_pivo.test.mjs** - Pivô fica FORA da regra de categoria (decisão do usuário, 13/11, pacote 12): Mega Blastoise é especial e o pivô pode ser físico
 - **categorias_de_golpe.test.mjs** - Categoria de golpe (soco, mordida, corte...) do NextDex (2026-09-29): antes
 - **categorias_de_golpe_da_config.test.mjs** - Depende de dado: rank/lutas (muda quando o rank é recalculado; não é regra de jogo fixa).
 - **checar_encoding.test.mjs** - A trava de codificação (scripts/checar_encoding.mjs) precisa pegar exatamente
