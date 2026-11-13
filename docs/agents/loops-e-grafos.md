@@ -10,15 +10,15 @@ concorrentes e testes frágeis, não do modelo.
 ## 1. Modelo por papel
 | Papel | Modelo | Por quê |
 |---|---|---|
-| Orquestrador (sessão principal) | Opus 5.5 | Monta o grafo, revisão final de G e mecânica, junção e GitHub |
+| gerente (decisão do usuário, 13/11/2026) e orquestrador (sessão principal) | Opus 5.5 | Monta o grafo, revisão final de G e mecânica, junção e GitHub |
 | supervisor (revisor em contexto separado) | Sonnet 5.5 | É quem segura a qualidade |
 | engenheira-do-motor, engenheira-frontend, engenheira-de-codigo (22/10/2026), arquiteta-de-software, designer-de-interface, analista-do-rank (os três últimos de 12/11/2026) | Sonnet 5.5 | Escrevem código ou decidem |
-| gerente (triagem), verificador, pesquisador-de-mecanica, pesquisador-web (27/10/2026), engenheira-de-release e engenheira-de-desempenho (12/11/2026), varreduras | Haiku 5.5 | Ler, extrair, conferir, rodar portão: tarefa mecânica e verificável |
+| verificador, pesquisador-de-mecanica, pesquisador-web (27/10/2026), engenheira-de-release e engenheira-de-desempenho (12/11/2026), varreduras | Haiku 5.5 | Ler, extrair, conferir, rodar portão: tarefa mecânica e verificável |
 | arquiteta-de-dados, qa-processo (ajuste fino de 13/11/2026) | Sonnet 5.5 | Escrevem código ou decidem (regra de 12/11) |
 | construtor-de-builds, meta-pokemon, playtester-de-build, revisor-de-codigo, seguranca, ux-acessibilidade, ponte-gpt (12/11/2026) | Haiku 5.5 (cabeçalho em 13/11/2026) | Ver a nota abaixo |
 
 Equipe atual: 22 agentes em `teste/.claude/agents/` (13/11/2026). O modelo de cada um é o do cabeçalho `model:` do arquivo; esta tabela só o espelha.
-Nota (13/11/2026): a regra do usuário de 12/11/2026 põe Sonnet para quem escreve código ou decide e Haiku para gerente, verificador, pesquisadores, release e desempenho. No ajuste fino de 13/11/2026 o usuário passou só arquiteta-de-dados e qa-processo para Sonnet; os sete da linha de Haiku ficam assim por decisão dele.
+Nota (13/11/2026): a regra do usuário de 12/11/2026 (o gerente passou para Opus 5.5 por decisão do usuário em 13/11/2026) põe Sonnet para quem escreve código ou decide e Haiku para verificador, pesquisadores, release e desempenho. No ajuste fino de 13/11/2026 o usuário passou só arquiteta-de-dados e qa-processo para Sonnet; os sete da linha de Haiku ficam assim por decisão dele.
 `supervisor-opus` foi aposentado em 20/10/2026 (cópia em `teste/salvaguarda/antes_ruflo_2026-10-20/`): G e mecânica têm revisão final do orquestrador.
 
 ## 2. O grafo (por demanda)

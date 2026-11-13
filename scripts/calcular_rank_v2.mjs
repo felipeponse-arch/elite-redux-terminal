@@ -59,6 +59,11 @@ for (const d of DIFICULDADES) {
   }).filter((l) => l && l.foes.length);
 }
 const ARG = (k) => (process.argv.find((x) => x.startsWith(k + "=")) || "").slice(k.length + 1) || null;
+// --gravar com --so gravaria um rank parcial por cima do completo: recusa antes de ler ou calcular qualquer coisa.
+if (process.argv.includes("--gravar") && ARG("--so")) {
+  console.error("Erro: --so não pode ser usado com --gravar (gravaria um rank parcial por cima do rank completo). Tire um dos dois.");
+  process.exit(1);
+}
 const dispPath = join(RAIZ, "data", "rank_disponibilidade.json");
 const DISP = existsSync(dispPath) ? JSON.parse(readFileSync(dispPath, "utf8")) : null;
 const etapaDe = (sname) => (DISP ? DISP.etapa[sname] : 0);

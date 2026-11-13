@@ -12,7 +12,7 @@ Práticas de trabalho que valem para todos (16/10/2026): [praticas-de-trabalho.m
    - Fala com o usuário, monta o grafo, delega, leva a entrega ao supervisor e faz a revisão final de G e mecânica.
    - Junção no master, GitHub e publicação.
 
-2. **Gerente (triagem + guardião do aprendizado, Haiku 5.5):**
+2. **Gerente (triagem + guardião do aprendizado, Opus 5.5 desde 13/11/2026):**
    - Classifica o domínio e recomenda o agente executor e a esteira (Fluxo Direto vs Gauntlet Loop).
    - Aplica o aprendizado nos agentes (autonomia de 14/10, `.claude/agents/gerente.md`).
    - Faz a ponte com o Obsidian (Second Brain) usando busca em duas camadas para economia de tokens.

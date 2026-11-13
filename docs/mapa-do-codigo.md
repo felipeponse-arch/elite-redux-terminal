@@ -123,7 +123,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **cache_sabotagem.mjs** - Cache de "arquivo lembrado" da sabotagem (tests/.sabotagem_cache.json, fora do git).
   mesclarCache:9, ler:18, gravarCacheMesclando:26
 - **calcular_rank_v2.mjs** - Rank v2 (modelo aprovado pelo usuário em 2026-10-02, depois da pesquisa de método):
-  capDe:41, foe:45, ARG:61, etapaDe:64, br:67, avaliar:74, lerTxt:157, notas:214
+  capDe:41, foe:45, ARG:61, etapaDe:69, br:72, avaliar:79, lerTxt:162, notas:219
 - **carimbo_derivado.mjs** - TK-24: grava em data/carimbo_derivados.json de que versão do jogo/config cada derivado foi gerado.
   carimbarDerivado:4, avisosDeFrescor:15, pendentesSemCarimbo:22, problemasDeCarimbo:27
 - **categorias_pela_config.mjs** - Categorias de golpe (soco, mordida, corte...) pelas FLAGS do jogo, não pelo texto da NextDex.
@@ -399,6 +399,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
 - **rank_fatia.test.mjs** - Nota do rank (scripts/rank_fatia.mjs): sem fatia, todas as lutas no mesmo saco. A fatia 60/40 e as lutas comuns saíram em 06/11/2026.
 - **rank_incremental.test.mjs** - Rank incremental (06/11/2026): impressão digital por espécie + global, e a decisão do que recalcular.
 - **rank_premia_hazard.test.mjs** - TK-32 (decisão do usuário de 29/10/2026): o rank premia suporte, só hazard. Dado real: Forretress no nível 40
+- **rank_so_com_gravar.test.mjs** - --so junto com --gravar gravaria rank parcial por cima do completo: o script tem que recusar sem gravar nada.
 - **rank_so_por_rankde.test.mjs** - ADR-003 (ticket 01): o dado do Rank só é lido por rankDe(); SPECIES_RANK não é reescrito depois da carga.
 - **recarga_e_dois_turnos.test.mjs** - TK-06 (decisão 7 do usuário, 28/10): recarga e golpe de 2 turnos lidos do EFEITO do dado, não da tradução PT.
 - **reconciliar_build.test.mjs** - Build salva que muda de espécie (auto-evolução) ou chega de um save antigo precisa
