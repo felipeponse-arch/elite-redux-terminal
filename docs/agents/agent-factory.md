@@ -20,13 +20,13 @@ Práticas de trabalho que valem para todos (16/10/2026): [praticas-de-trabalho.m
 3. **Especialistas de Domínio (Trabalhadores da Factory):**
    - Equipe atual (13/11/2026): 22 agentes em `teste/.claude/agents/`, contando gerente e supervisor. O modelo entre parênteses é o do cabeçalho `model:` de cada arquivo (a tabela completa está em `loops-e-grafos.md` §1).
    - Cada um atua em sua área, descrita no próprio arquivo do agente:
-     - `arquiteta-de-dados` (Haiku): pipeline, `data/*.json`, saves e integridade de dados.
+     - `arquiteta-de-dados` (Sonnet): pipeline, `data/*.json`, saves e integridade de dados.
      - `engenheira-frontend` (Sonnet): CSS, interface, tokens, renderização e layout.
      - `meta-pokemon` (Haiku): metagame de Elite Redux, Smogon AAA, tiers e validação de estratégias.
      - `playtester-de-build` (Haiku): aferição de viabilidade prática em runs 1x1 e level caps.
      - `construtor-de-builds` (Haiku): geração de builds (sinergia de habilidade + inata, prioridade, hit-kill).
      - `engenheira-do-motor` (Sonnet): motor de duelo (`src/regras/duelo.js`), rank pelo duelo, calibração com a calculadora e o simulador do jogo, time pelo motor (criada em 20/10/2026).
-     - `qa-processo` (Haiku): testes unitários, testes de mutação/sabotagem e esteiras de verificação.
+     - `qa-processo` (Sonnet): testes unitários, testes de mutação/sabotagem e esteiras de verificação.
      - `seguranca` (Haiku): dependências, sanitização e fronteiras locais/artifacts.
      - `ux-acessibilidade` (Haiku): WCAG, clareza de textos e mensagens em PT-BR.
      - `engenheira-de-codigo` (22/10/2026, Sonnet): refatoração e código novo fora do motor e dos dados, com TDD; passa pelo `revisor-de-codigo` e pelo `supervisor`.

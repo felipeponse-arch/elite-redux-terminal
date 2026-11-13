@@ -14,10 +14,11 @@ concorrentes e testes frágeis, não do modelo.
 | supervisor (revisor em contexto separado) | Sonnet 5.5 | É quem segura a qualidade |
 | engenheira-do-motor, engenheira-frontend, engenheira-de-codigo (22/10/2026), arquiteta-de-software, designer-de-interface, analista-do-rank (os três últimos de 12/11/2026) | Sonnet 5.5 | Escrevem código ou decidem |
 | gerente (triagem), verificador, pesquisador-de-mecanica, pesquisador-web (27/10/2026), engenheira-de-release e engenheira-de-desempenho (12/11/2026), varreduras | Haiku 5.5 | Ler, extrair, conferir, rodar portão: tarefa mecânica e verificável |
-| arquiteta-de-dados, construtor-de-builds, meta-pokemon, playtester-de-build, qa-processo, revisor-de-codigo, seguranca, ux-acessibilidade, ponte-gpt (12/11/2026) | Haiku 5.5 (cabeçalho em 13/11/2026) | Ver a nota abaixo |
+| arquiteta-de-dados, qa-processo (ajuste fino de 13/11/2026) | Sonnet 5.5 | Escrevem código ou decidem (regra de 12/11) |
+| construtor-de-builds, meta-pokemon, playtester-de-build, revisor-de-codigo, seguranca, ux-acessibilidade, ponte-gpt (12/11/2026) | Haiku 5.5 (cabeçalho em 13/11/2026) | Ver a nota abaixo |
 
 Equipe atual: 22 agentes em `teste/.claude/agents/` (13/11/2026). O modelo de cada um é o do cabeçalho `model:` do arquivo; esta tabela só o espelha.
-Nota (13/11/2026): a regra do usuário de 12/11/2026 põe Sonnet para quem escreve código ou decide e Haiku para gerente, verificador, pesquisadores, release e desempenho. Os nove agentes da última linha estão em Haiku no cabeçalho; se algum deles deve voltar a Sonnet fica para o usuário decidir.
+Nota (13/11/2026): a regra do usuário de 12/11/2026 põe Sonnet para quem escreve código ou decide e Haiku para gerente, verificador, pesquisadores, release e desempenho. No ajuste fino de 13/11/2026 o usuário passou só arquiteta-de-dados e qa-processo para Sonnet; os sete da linha de Haiku ficam assim por decisão dele.
 `supervisor-opus` foi aposentado em 20/10/2026 (cópia em `teste/salvaguarda/antes_ruflo_2026-10-20/`): G e mecânica têm revisão final do orquestrador.
 
 ## 2. O grafo (por demanda)
