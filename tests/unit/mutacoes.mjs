@@ -5014,7 +5014,7 @@ export const MUTACOES = [
     id: "foco-fisico-especial-filtra",
     descricao: "Categoria do set (foco ou natureza): golpe de outra categoria deixa de sair da tabela do conjunto",
     arquivo: "pipeline_build.js",
-    de: "if (catDe[n] !== catDoSet) delete tabela[n];",
+    de: "if (catDe[n] !== catDoSet && !ehGolpeDePivo(n)) delete tabela[n];",
     para: "if (false) delete tabela[n];",
   },
   {

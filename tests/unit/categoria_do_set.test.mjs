@@ -23,8 +23,10 @@ function errados(R, sp, c) {
   if (!set) return [];
   const mapa = danoEfetivo(R, sp, c);
   const proibida = set === "E" ? "F" : "E";
+  // Golpe fora de golpesProntos não passa em branco: cai na categoria do dado (poder>0). Pivô é livre (decisão do usuário, 13/11).
+  const info = (n) => { if (mapa[n]) return mapa[n]; const m = R.MOVE_BY_NAME[n]; return m ? { poder: m[3], cat: m[2] === 0 ? "F" : m[2] === 1 ? "E" : null } : { poder: 1, cat: proibida }; };
   // Array de outro realm (carregarRegras): deepStrictEqual com [] falha, então compara-se o tamanho.
-  return c.golpes.filter((n) => mapa[n] && mapa[n].poder > 0 && mapa[n].cat === proibida);
+  return c.golpes.filter((n) => !R.ehGolpeDePivo(n) && info(n).poder > 0 && info(n).cat === proibida);
 }
 
 test("Espeon Modest na Etapa 5: nenhum golpe físico de dano (Psycho Cut e Bite saíam antes)", () => {
@@ -61,4 +63,29 @@ test("varredura: nenhum set Especial tem golpe F de dano, e nenhum Físico tem g
     });
   });
   assert.equal(achados.length, 0, achados.join(" | "));
+});
+
+// Caminho do foco (chip Especial) e padrão, no kit e fora dele: o Alakazam Mega (especial) não leva golpe F de dano (Fire/Ice Punch).
+// A categoria de golpe fora do kit é a estática do dado (shortcut documentado em pipeline_build.js); este teste prova que não vaza.
+test("Alakazam Mega nas Etapas 1, 5 e 9: padrão e foco Especial sem golpe F de dano (Fire Punch, Ice Punch...)", () => {
+  const achados = [];
+  [1, 5, 9].forEach((m) => {
+    const R = regrasDaEtapa(m);
+    const sp = especiePorNome(R, "Alakazam Mega");
+    const fisico = (n) => { const x = R.MOVE_BY_NAME[n]; return x && x[3] > 0 && x[2] === 0 && !R.ehGolpeDePivo(n); };
+    R.candidatosDeBuild(sp, {}).candidatos.forEach((c) => { if (setDaCandidata(c) === "E") c.golpes.filter(fisico).forEach((n) => achados.push(`Etapa ${m} padrão ${n}`)); });
+    const f = R.buildFocadaDoMotor("Alakazam Mega", "Especial");
+    if (f.ok) f.build.golpes.filter(fisico).forEach((n) => achados.push(`Etapa ${m} foco ${n}`));
+  });
+  assert.equal(achados.length, 0, achados.join(" | "));
+});
+
+// Categoria efetiva: Magical Fists faz o golpe de soco ser especial; Meteor Mash (F no dado) PODE entrar no set Modest.
+test("categoria efetiva: Magical Fists torna o Meteor Mash especial e ele entra no set Modest do Electabuzz (Etapa 5)", () => {
+  const R = regrasDaEtapa(5);
+  const sp = especiePorNome(R, "Electabuzz");
+  const c = R.candidatosDeBuild(sp, {}).candidatos.find((x) => x.habilidade === "Magical Fists" && x.build.nature === "Modest" && x.golpes.includes("Meteor Mash"));
+  assert.ok(c, "Meteor Mash (F no dado) deveria entrar no set especial com Magical Fists");
+  assert.equal(R.MOVE_BY_NAME["Meteor Mash"][2], 0, "no dado é físico");
+  assert.equal(danoEfetivo(R, sp, c)["Meteor Mash"].cat, "E", "efetivo é especial");
 });

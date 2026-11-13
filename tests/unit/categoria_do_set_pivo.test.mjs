@@ -16,3 +16,12 @@ test("Mega Blastoise (especial) Pivô: o set continua Especial e leva pivô FÍS
   const fisicos = pivos.filter((g) => R.MOVES[R.MOVE_ID_BY_NAME[g]][2] === 0);
   assert.ok(fisicos.length >= 1, "pivô físico no set especial: " + r.build.golpes.join("/"));
 });
+
+// Caminho PADRÃO (pipelineCandidatos), sem foco: o pivô de outra categoria também é livre. Vaporeon Modest leva Flip Turn (F no dado).
+test("caminho padrão: Vaporeon (set especial Modest) pode levar o Flip Turn físico", () => {
+  const Rp = carregarRegras({ milestone: 5, difficulty: "ace", levelCapMode: "more" });
+  const sp = Rp.SPECIES.find((s) => s && s.n === "Vaporeon");
+  const c = Rp.candidatosDeBuild(sp, {}).candidatos.find((x) => x.build.nature === "Modest" && x.golpes.includes("Flip Turn"));
+  assert.ok(c, "Flip Turn (pivô F) deveria poder entrar no set Modest pelo caminho padrão");
+  assert.equal(Rp.MOVE_BY_NAME["Flip Turn"][2], 0);
+});

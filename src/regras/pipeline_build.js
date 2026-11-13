@@ -581,12 +581,13 @@
           var tabela = pipelineTabela(sp, hab, nat, kit, alvo);
           var pool = liberados;
           var catDoSet = pipelineCatDoSet(foco, nat);
-          if (catDoSet) { // só golpes dessa categoria (os de outra saem da tabela e do movepool); status não muda
+          if (catDoSet) { // só golpes dessa categoria (os de outra saem da tabela e do movepool); status e pivô não mudam
             var catDe = {};
-            Object.keys(tabela).forEach(function (n) { catDe[n] = tabela[n].g.cat; if (catDe[n] !== catDoSet) delete tabela[n]; });
+            Object.keys(tabela).forEach(function (n) { catDe[n] = tabela[n].g.cat; if (catDe[n] !== catDoSet && !ehGolpeDePivo(n)) delete tabela[n]; });
             // golpe fora do kit (não medido): usa a categoria estática do dado; golpe de dano sem categoria conhecida não entra.
             // shortcut: habilidade que troca a categoria de golpe fora do kit não é vista, upgrade: medir todo golpe liberado
             pool = liberados.filter(function (n) {
+              if (ehGolpeDePivo(n)) return true; // pivô é livre em todo caminho (decisão do usuário, 13/11)
               if (catDe[n]) return catDe[n] === catDoSet;
               var m = MOVE_BY_NAME[n], cat = m && m[3] > 0 ? (m[2] === 0 ? "F" : m[2] === 1 ? "E" : null) : null;
               return cat ? cat === catDoSet : moveRoleOf(n) !== "dano";

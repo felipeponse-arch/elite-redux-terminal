@@ -164,6 +164,9 @@ test("ranking do caso B: contra o Flame Burst do Ninetales (que não derruba) to
   const fisicos = r.candidatos.filter((x) => x.build.nature === "Adamant");
   assert.ok(fisicos.length > 0);
   assert.ok(fisicos.every((x) => tier(x) === 3), "o Flame Burst não derruba o Ledian: ele bate primeiro por velocidade");
+  const especiais = r.candidatos.filter((x) => x.build.nature === "Modest");
+  assert.ok(especiais.length > 0, "o set especial (Modest) existe");
+  assert.ok(especiais.every((x) => tier(x) !== 3), "o set Modest não é nível 3 por engano: não derruba nem bate primeiro como o físico");
 });
 
 // Ninetales da Meteor Falls sem o Flame Burst e com Def menor (Mild): o caso conferido na calculadora, sem prioridade do alvo.
@@ -171,10 +174,11 @@ const foeSemPrioridade = () => R.foeDeDuelo(Object.assign({}, courtney.party[0],
 
 // 13/11 (pacote 12): o kit que tinha o Seismic Fist como o golpe que derruba era o Air Slash-misto (set Adamant com golpe especial),
 // que a regra de categoria tirou. No set físico Adamant o que derruba é o Mega Punch (o Seismic Fist segue no kit, garantido).
+// TODO: a calibração original (versao-nova/03) era do Seismic Fist; hoje quem derruba o Ninetales é o Mega Punch (motor, 13/11).
 // PERGUNTA AO USUÁRIO: a calibração 'Seismic Fist derruba' (versao-nova/03) vale para o Mega Punch do set físico? Teste ajustado até ele decidir.
 test("sem prioridade do alvo, o set físico do Ledian (Adamant, com soco) derruba no turno 1: garantido e bate primeiro por velocidade; selo 'calibrada' (versao-nova/03)", () => {
   const r = R.candidatosDeBuild(sp("Ledian"), { alvo: { foe: foeSemPrioridade() } });
-  const c = r.candidatos.find((x) => x.golpes.includes("Seismic Fist") && x.build.nature === "Adamant" && x.habilidade === "Aerodynamics" && x.hitKill === 1 && /derruba no turno 1 o Ninetales/.test(x.motivos.join(" | ")));
+  const c = r.candidatos.find((x) => x.golpes.includes("Seismic Fist") && x.build.nature === "Adamant" && x.habilidade === "Aerodynamics" && x.hitKill === 1 && /Mega Punch derruba no turno 1 o Ninetales/.test(x.motivos.join(" | ")));
   assert.ok(c, r.candidatos.map((x) => x.habilidade + ":" + x.golpes.join("/")).join(" ; "));
   assert.equal(c.alvoAgeAntes, false);
   assert.equal(c.garantido, true);
@@ -315,7 +319,8 @@ test("todo candidato passa em validateAiBuild, tem de 1 a 2 conjuntos distintos 
     const r = R.candidatosDeBuild(sp(nome), { alvo: ninetales });
     const rico = !["Vaporeon", "Gigalith", "Lickilicky", "Diglett", "Gulpin"].includes(nome); // poucos golpes de dano contra o alvo
     assert.ok(r.candidatos.length >= (rico ? 2 : 1) && r.candidatos.length <= 2, nome + ": " + r.candidatos.length + " (" + r.aviso + ")");
-    const conjuntos = r.candidatos.map((c) => c.golpes.slice().sort().join(","));
+    // Dois papéis (Pivô/Tanque) podem ter os mesmos golpes e EVs diferentes (pivô já no set, pacote 12): conta golpes + EVs quando há papel.
+    const conjuntos = r.candidatos.map((c) => c.golpes.slice().sort().join(",") + (c.papel ? "|" + c.build.evs.join() : ""));
     assert.equal(new Set(conjuntos).size, conjuntos.length, nome + ": conjunto repetido");
     r.candidatos.forEach((c, i) => {
       assert.equal(c.golpes.length, 4);

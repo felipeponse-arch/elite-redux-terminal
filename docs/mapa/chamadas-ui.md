@@ -188,7 +188,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - renderRunStatus:9 - chama: state (nucleo.js:8)
 
 ## ui/quem_resolve.js
-- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:798)
+- quemResolveCalcular:22 - chama: especiesQueResolvem (pipeline_build.js:799)
 - quemResolveCardHtml:84 - chama: DIFF_TO_BOSSKEY (chefoes.js:25), DIFF_LABELS (aba_chefoes.js:236), state (nucleo.js:8) | chamado por: renderBossDetail (aba_chefoes.js:534)
 - quemResolveChave:17 - chama: getCurrentCap (level_cap.js:49), state (nucleo.js:8)
 - quemResolveItemHtml:43 - chama: speciesTypeNames (tipos.js:254), pipelineCandidatoHtml (pipeline_tela.js:78)
@@ -237,7 +237,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - zerarRun:342 - chama: logAutoAction (evolucao.js:229), getCurrentCap (level_cap.js:49), myBuildLevelIsCustom (aba_chefoes.js:31), generatedTeamResult (arquetipo.js:35), teamRecommendation (arquetipo.js:30), +4
 
 ## ui/time_build.js
-- alternarFocoDoCartao:109 - chama: getRemainingBossEntries (chefoes.js:60), getSpeciesByX (dados_base.js:78), buildFocadaDoMotor (pipeline_build.js:748), state (nucleo.js:8), renderTeam (time.js:17)
+- alternarFocoDoCartao:109 - chama: getRemainingBossEntries (chefoes.js:60), getSpeciesByX (dados_base.js:78), buildFocadaDoMotor (pipeline_build.js:749), state (nucleo.js:8), renderTeam (time.js:17)
 - avisoEnxutoHtml:64 - chama: avisosDaBuild (avisos_build.js:8)
 - categoriaDoGolpe:11 - chama: SPLIT_STATUS (dados_base.js:29)
 - evsBarrasHtml:22 - chamado por: bossMonCardHtml (aba_chefoes.js:434)
@@ -247,7 +247,7 @@ no máximo 5 por lista, o resto vira `+N`. Referência vale também como callbac
 - painelDaBuildHtml:72 - chama: ondeAcharItemTexto (avisos_build.js:100), stripNote (builds.js:44), buildSynergyHtml (dex_ficha.js:42), buildNoteHtml (editor_build.js:155), megaModeBuildNoteHtml (editor_build.js:174), +3 | chamado por: renderTeam (time.js:17)
 - papelChipsHtml:89 - chama: ROLE_LABEL_PT (dados_base.js:191), SPLIT_LABEL_PT (dados_base.js:192) | chamado por: renderTeam (time.js:17)
 - semBuildHtml:85 - chamado por: renderTeam (time.js:17)
-- sugestaoDoCartaoHtml:140 - chama: ROTULO_FOCO_BUILD (pipeline_build.js:701) | chamado por: renderTeam (time.js:17)
+- sugestaoDoCartaoHtml:140 - chama: ROTULO_FOCO_BUILD (pipeline_build.js:702) | chamado por: renderTeam (time.js:17)
 - sugestaoDoCartaoVale:104 - chama: state (nucleo.js:8)
 - usarSugestaoDoCartao:123 - chama: getSpeciesByX (dados_base.js:78), SUGESTAO_ROTULO (sugestao_do_motor.js:11), gravarSugestoesDoMotor (sugestao_do_motor.js:61), planoDeGravarSugestoes (sugestao_do_motor.js:39), flashToast (dex_lista.js:473), +2
 
