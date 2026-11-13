@@ -508,6 +508,72 @@
     return { v: v, itemDeRascunho: v.item === item ? item : null, tipoDoItem: tipo, pedras: regra ? regra.stones.slice() : [] };
   }
 
+  // ---- golpe de status no lugar do golpe de dano mais fraco (decisão do usuário, 13/11/2026) ----
+  // O motor compara no duelo COMPLETO (resultadoDoDuelo com os 4 golpes, que já simula setup, cura, status e sala): (a) 4 de dano,
+  // (b) 3 de dano + 1 buff do próprio usuário, (c) 3 de dano + 1 status útil. Fica a de maior nota; no máximo 1 golpe de status e só
+  // golpe liberado na Etapa. Sem alvo (nada simulado) não há comparação e o conjunto de dano segue como está.
+  // shortcut: testa no máximo 3 buffs e 3 status por candidato (cura, depois status no alvo, depois sala; buffs pelo tamanho do ganho), upgrade: medir todos se o tempo da ficha permitir.
+  var MAX_BUFFS_PIPELINE = 3, MAX_STATUS_PIPELINE = 3, GANHO_MIN_STATUS_PIPELINE = 0.01;
+  var ORDEM_STATUS_PIPELINE = { cura: 0, status: 1, sala: 2 };
+  function pipelineNotaDoSet(sp, b, alvo) {
+    var eu = unidadeDaBuild(sp, b, alvo.nivel, alvo.clima), foes = alvo.foes.slice(0, alvo.nChefoes || alvo.foes.length), soma = 0;
+    foes.forEach(function (foe) {
+      var r = resultadoDoDuelo(eu, foe, alvo.nivel, { detalhe: true });
+      if (!r || typeof r.nota !== "number") r = resultadoDoDuelo(pipelineSemFuga(eu), pipelineSemFuga(foe), alvo.nivel, { detalhe: true });
+      if (r && typeof r.nota === "number") soma += r.nota + 0.2 * r.fracEu;
+    });
+    return soma / foes.length;
+  }
+  // Golpes de status que o motor SIMULA (planoDoGolpeStatus) e que servem ao conjunto: buff que sobe o ataque da categoria do set, cura, status no alvo, sala.
+  function pipelineGolpesDeStatusUteis(liberados, cats) {
+    var buffs = [], outros = [];
+    liberados.forEach(function (n) {
+      if (moveRoleOf(n) === "dano" || ehGolpeDePivo(n)) return;
+      var p = planoDoGolpeStatus(MOVE_ID_BY_NAME[n]);
+      if (!p) return;
+      if (p.tipo === "setup") {
+        var e = p.estagios;
+        if ((cats.F && e.atk > 0) || (cats.E && e.spa > 0)) buffs.push({ n: n, peso: Object.keys(e).reduce(function (t, k) { return k === "custo" ? t : t + Math.max(0, e[k]); }, 0) });
+      } else if (ORDEM_STATUS_PIPELINE[p.tipo] !== undefined) outros.push({ n: n, ordem: ORDEM_STATUS_PIPELINE[p.tipo] });
+    });
+    buffs.sort(function (a, b) { return b.peso - a.peso || (a.n < b.n ? -1 : 1); });
+    outros.sort(function (a, b) { return a.ordem - b.ordem || (a.n < b.n ? -1 : 1); });
+    return { buffs: buffs.slice(0, MAX_BUFFS_PIPELINE).map(function (x) { return x.n; }), outros: outros.slice(0, MAX_STATUS_PIPELINE).map(function (x) { return x.n; }) };
+  }
+  // c = candidato validado ({ g, v }). Devolve { v, golpe, tipo, trocou, nota0, nota1 } se um golpe de status vence os 4 de dano
+  // pelo duelo, ou null (fica o conjunto de dano).
+  function pipelineComStatus(sp, c, kit, alvo, ctx, liberados) {
+    if (!alvo.foes.length) return null;
+    var golpes = c.v.moves;
+    if (golpes.length !== 4 || golpes.some(function (n) { return moveRoleOf(n) !== "dano"; })) return null; // já tem status/pivô: máximo 1 golpe de status
+    var tabela = pipelineTabela(sp, c.g.hab, c.g.fin, kit, alvo), cats = { F: false, E: false };
+    golpes.forEach(function (n) { var e = tabela[n]; if (e) cats[e.g.cat] = true; });
+    var uteis = pipelineGolpesDeStatusUteis(liberados.filter(function (n) { return golpes.indexOf(n) === -1; }), cats);
+    var opcoes = uteis.buffs.map(function (n) { return { n: n, tipo: "buff" }; }).concat(uteis.outros.map(function (n) { return { n: n, tipo: "status" }; }));
+    if (!opcoes.length) return null;
+    var cv = mesclarContextos(ctx, contextoDeValidacao(sp, null));
+    var base = { ability: c.v.ability, nature: c.v.nature, item: c.v.item, evs: c.v.evs.slice() };
+    var nota0 = pipelineNotaDoSet(sp, Object.assign({ moves: golpes.slice() }, base), alvo), melhor = null;
+    // Sai o golpe de dano mais fraco que não é a única sinergia nem o único STAB do conjunto.
+    var fracos = golpes.slice().sort(function (a, b) { return (tabela[a] ? tabela[a].fracMin : 0) - (tabela[b] ? tabela[b].fracMin : 0) || (a < b ? -1 : 1); });
+    var tiposStab = speciesTypeNames(sp).concat(pipelineTiposExtraDeStab(sp, c.g.hab));
+    var sinAntes = pipelinePesoDoConjunto(c.g.sinergias, golpes);
+    opcoes.forEach(function (o) {
+      var sai = fracos.filter(function (n) {
+        var resto = golpes.filter(function (m) { return m !== n; });
+        if (sinAntes > 0 && pipelinePesoDoConjunto(c.g.sinergias, resto.concat([o.n])) === 0) return false;
+        return !tabela[n] || tiposStab.indexOf(tabela[n].tipo) === -1 || resto.some(function (m) { return tabela[m] && tiposStab.indexOf(tabela[m].tipo) !== -1; });
+      })[0];
+      if (!sai) return;
+      var novos = golpes.map(function (m) { return m === sai ? o.n : m; });
+      var v = validateAiBuild(sp, Object.assign({ moves: novos }, base), {}, cv);
+      if (!v || v.moves.indexOf(o.n) === -1) return;
+      var nota = pipelineNotaDoSet(sp, Object.assign({ moves: v.moves.slice() }, base), alvo);
+      if (nota > nota0 + GANHO_MIN_STATUS_PIPELINE && (!melhor || nota > melhor.nota1 + 1e-9)) melhor = { v: v, golpe: o.n, tipo: o.tipo, trocou: sai, nota0: nota0, nota1: nota };
+    });
+    return melhor;
+  }
+
   // ---- espécie com 2 papéis no rank, um deles Pivô: uma build para cada papel (pedido 06/11/2026, opção A) ----
   // Pivô = a melhor build com o golpe de pivô no lugar do golpe mais fraco; o motor NÃO executa troca, então o golpe de pivô não entra na
   // simulação (o dano é o dos outros 3) e o candidato fica "estimado". Tanque = o mesmo conjunto com EVs de bulk, re-simulado.
@@ -655,6 +721,9 @@
       }
       var innNomes = innatesAtivasNoNivel(sp, alvo.nivel).map(nomeHabDuelo);
       aceitos.forEach(function (c) {
+        // Golpe de status só no conjunto de dano puro (papéis duplos e pivô já têm o seu); vence só se o duelo completo pontuar mais.
+        var comSt = c.papel || c.pivoEstimado ? null : pipelineComStatus(sp, c, kit, alvo, ctx, liberados);
+        if (comSt) c = Object.assign({}, c, { v: comSt.v });
         var av = c.g.av;
         var idsInatas = innatesAtivasNoNivel(sp, alvo.nivel);
         var semRegra = alvo.foes.length ? pipelineHabilidadesSemRegra(c.g.hab, idsInatas, alvo.foes) : [];
@@ -680,7 +749,8 @@
           sname: sp.sname, papel: c.papel || null,
           golpes: c.v.moves.slice(), habilidade: c.v.ability, inatas: innNomes.slice(),
           motivos: pipelineMotivos(av, c.g.sinergias, c.g.hab, calibrada, alvo).concat(c.g.fin.motivo ? [c.g.fin.motivo] : [],
-            c.g.protegePelaHab ? [c.g.hab + " (habilidade escolhida): anula o recuo de " + c.g.recuos.join(", ")] : []),
+            c.g.protegePelaHab ? [c.g.hab + " (habilidade escolhida): anula o recuo de " + c.g.recuos.join(", ")] : [],
+            comSt ? [comSt.golpe + (comSt.tipo === "buff" ? " (buff)" : " (status)") + " no lugar de " + comSt.trocou + ": o duelo completo pontua " + comSt.nota1.toFixed(2) + " contra " + comSt.nota0.toFixed(2) + " com 4 golpes de dano"] : []),
           hitKill: av.hitKill, garantido: !!av.garantido, baterPrimeiro: !!av.baterPrimeiro, porQue: av.porQue, alvoAgeAntes: !!av.alvoPrio,
           dano: { min: Math.round(av.fracMin * 1000) / 10, max: Math.round(av.fracMax * 1000) / 10 },
           rotulo: calibrada ? "calibrada" : "estimada", selo: calibrada ? SELO_CALIBRADO : "Estimado: " + motivosEstimada.join("; "), avisos: avisos,

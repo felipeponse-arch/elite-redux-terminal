@@ -5101,4 +5101,11 @@ export const MUTACOES = [
     de: "var mvDesc = descricaoDoGolpe(moveId);",
     para: "var mvDesc = (MOVES[moveId] || [])[6] || \"Sem descrição.\";",
   },
+  {
+    id: "pipeline-status-vence-sem-ganho",
+    descricao: "Pacote 13: o golpe de status entra no conjunto mesmo sem ganhar do conjunto de dano no duelo",
+    arquivo: "pipeline_build.js",
+    de: "if (nota > nota0 + GANHO_MIN_STATUS_PIPELINE && (!melhor",
+    para: "if (nota > -1 && (!melhor",
+  },
 ];
