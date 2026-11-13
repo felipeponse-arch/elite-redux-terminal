@@ -70,7 +70,7 @@ for (const [nome, abrir] of [["Time do Chefão", abrirChefao], ["Meu Time", abri
       const btn = await conferir(page, cartao, "golpe", (b) => b.click());
       expect((await page.locator("#lupa-balao").boundingBox()).width).toBeLessThanOrEqual(390 * 0.9 + 1);
       await page.screenshot({ path: testInfo.outputPath(`${nome === "Meu Time" ? "meutime" : "chefao"}_390.png`) });
-      // Evento de rolagem sem deslocar o botão (chega atrasado em máquina lenta) não fecha o balão; rolar de verdade fecha.
+      // Evento de rolagem sem deslocar o botão (chega atrasado em máquina lenta) não fecha o balão.
       await page.evaluate(() => window.dispatchEvent(new Event("scroll")));
       await expect(page.locator("#lupa-balao")).toBeVisible();
       await btn.click();
