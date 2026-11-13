@@ -18,22 +18,30 @@ Práticas de trabalho que valem para todos (16/10/2026): [praticas-de-trabalho.m
    - Faz a ponte com o Obsidian (Second Brain) usando busca em duas camadas para economia de tokens.
 
 3. **Especialistas de Domínio (Trabalhadores da Factory):**
-   - Cada um atua estritamente em sua fronteira:
-     - `arquiteta-de-dados`: pipeline, `data/*.json`, saves e integridade de dados.
-     - `engenheira-frontend`: CSS, interface, tokens, renderização e layout.
-     - `meta-pokemon`: metagame de Elite Redux, Smogon AAA, tiers e validação de estratégias.
-     - `playtester-de-build`: aferição de viabilidade prática em runs 1x1 e level caps.
-     - `construtor-de-builds`: geração de builds (sinergia de habilidade + inata, prioridade, hit-kill).
-     - `engenheira-do-motor`: motor de duelo (`src/regras/duelo.js`), rank pelo duelo, calibração com a calculadora e o simulador do jogo, time pelo motor (criada em 20/10/2026).
-     - `qa-processo`: testes unitários, testes de mutação/sabotagem e esteiras de verificação.
-     - `seguranca`: dependências, sanitização e fronteiras locais/artifacts.
-     - `ux-acessibilidade`: WCAG, clareza de textos e mensagens em PT-BR.
+   - Equipe atual (13/11/2026): 22 agentes em `teste/.claude/agents/`, contando gerente e supervisor. O modelo entre parênteses é o do cabeçalho `model:` de cada arquivo (a tabela completa está em `loops-e-grafos.md` §1).
+   - Cada um atua em sua área, descrita no próprio arquivo do agente:
+     - `arquiteta-de-dados` (Haiku): pipeline, `data/*.json`, saves e integridade de dados.
+     - `engenheira-frontend` (Sonnet): CSS, interface, tokens, renderização e layout.
+     - `meta-pokemon` (Haiku): metagame de Elite Redux, Smogon AAA, tiers e validação de estratégias.
+     - `playtester-de-build` (Haiku): aferição de viabilidade prática em runs 1x1 e level caps.
+     - `construtor-de-builds` (Haiku): geração de builds (sinergia de habilidade + inata, prioridade, hit-kill).
+     - `engenheira-do-motor` (Sonnet): motor de duelo (`src/regras/duelo.js`), rank pelo duelo, calibração com a calculadora e o simulador do jogo, time pelo motor (criada em 20/10/2026).
+     - `qa-processo` (Haiku): testes unitários, testes de mutação/sabotagem e esteiras de verificação.
+     - `seguranca` (Haiku): dependências, sanitização e fronteiras locais/artifacts.
+     - `ux-acessibilidade` (Haiku): WCAG, clareza de textos e mensagens em PT-BR.
      - `engenheira-de-codigo` (22/10/2026, Sonnet): refatoração e código novo fora do motor e dos dados, com TDD; passa pelo `revisor-de-codigo` e pelo `supervisor`.
-     - `revisor-de-codigo` (22/10/2026, Sonnet): revisão só de leitura do app inteiro, e de texto de agente, doc, prompt e ticket; não corrige.
+     - `revisor-de-codigo` (22/10/2026, Haiku): revisão só de leitura do app inteiro, e de texto de agente, doc, prompt e ticket; não corrige.
      - `pesquisador-web` (27/10/2026, Haiku): pesquisa na rede quando o código do jogo não responde; só relata, com fonte e data.
      - `pesquisador-de-mecanica` e `verificador` (Haiku): ver `loops-e-grafos.md` §1-§2.
+   - Agentes novos de 12/11/2026 (o que cada arquivo diz; a divisão de fronteiras entre eles ainda vai a reunião):
+     - `engenheira-de-release` (Haiku): prepara publicação ou merge no master (checklist, nota de versão, conferência do Pages, plano de rollback); não publica nem faz merge.
+     - `engenheira-de-desempenho` (Haiku): sob demanda, mede e aponta gargalo (hook de pré-commit, tamanho do artifact, FCP/CLS no celular, tempo do portão e do rank); não refatora.
+     - `analista-do-rank` (Sonnet): valida o rank com estatística (sensibilidade aos pesos, divergência com a comunidade, regressão entre rodadas); não altera motor, peso nem dado.
+     - `designer-de-interface` (Sonnet): direção visual, tokens e 2-3 alternativas antes da `engenheira-frontend` implementar; entrega proposta e mock, não o código final.
+     - `arquiteta-de-software` (Sonnet): estrutura do app, fronteiras regras/UI, dívida técnica e decisões de arquitetura; não implementa nem decide regra de jogo.
+     - `ponte-gpt` (Haiku): segunda opinião do GPT via Codex (`ferramentas/gpt/gpt.mjs`), confere cada achado contra o código; nunca decide merge nem altera código.
 
-4. **Validador de Entrega (`supervisor`, juiz único do Gauntlet Loop):**
+4. **Validador de Entrega (`supervisor`, Sonnet, juiz único do Gauntlet Loop):**
    - Nada vai ao usuário sem validação prévia.
    - Avalia conformidade com o pedido original, integridade mecânica, testes e padrão do projeto.
    - Se o supervisor não puder rodar (cota, erro), a entrega para e o usuário decide com opções. O autor nunca se auto-aprova.

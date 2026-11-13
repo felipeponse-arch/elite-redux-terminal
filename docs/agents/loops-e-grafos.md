@@ -11,11 +11,13 @@ concorrentes e testes frágeis, não do modelo.
 | Papel | Modelo | Por quê |
 |---|---|---|
 | Orquestrador (sessão principal) | Opus 5.5 | Monta o grafo, revisão final de G e mecânica, junção e GitHub |
-| Executores: qa-processo, construtor-de-builds, engenheira-do-motor, arquiteta-de-dados, engenheira-frontend, meta-pokemon, ux-acessibilidade, seguranca, playtester-de-build | Sonnet 5.5 | Acertar de primeira custa menos que várias voltas |
 | supervisor (revisor em contexto separado) | Sonnet 5.5 | É quem segura a qualidade |
-| pesquisador-de-mecanica, pesquisador-web (27/10/2026), verificador, varreduras, gerente (triagem) | Haiku 5.5 | Ler, extrair, rodar portão: tarefa mecânica e verificável |
-| engenheira-de-codigo (22/10/2026: refatora e escreve código fora do motor e dos dados) | Sonnet 5.5 | Executora, mesmo fluxo dos demais executores |
-| revisor-de-codigo (22/10/2026: só leitura, app inteiro; também texto de agente, doc, prompt e ticket) | Sonnet 5.5 | Revisão com arquivo:linha, antes do `supervisor` |
+| engenheira-do-motor, engenheira-frontend, engenheira-de-codigo (22/10/2026), arquiteta-de-software, designer-de-interface, analista-do-rank (os três últimos de 12/11/2026) | Sonnet 5.5 | Escrevem código ou decidem |
+| gerente (triagem), verificador, pesquisador-de-mecanica, pesquisador-web (27/10/2026), engenheira-de-release e engenheira-de-desempenho (12/11/2026), varreduras | Haiku 5.5 | Ler, extrair, conferir, rodar portão: tarefa mecânica e verificável |
+| arquiteta-de-dados, construtor-de-builds, meta-pokemon, playtester-de-build, qa-processo, revisor-de-codigo, seguranca, ux-acessibilidade, ponte-gpt (12/11/2026) | Haiku 5.5 (cabeçalho em 13/11/2026) | Ver a nota abaixo |
+
+Equipe atual: 22 agentes em `teste/.claude/agents/` (13/11/2026). O modelo de cada um é o do cabeçalho `model:` do arquivo; esta tabela só o espelha.
+Nota (13/11/2026): a regra do usuário de 12/11/2026 põe Sonnet para quem escreve código ou decide e Haiku para gerente, verificador, pesquisadores, release e desempenho. Os nove agentes da última linha estão em Haiku no cabeçalho; se algum deles deve voltar a Sonnet fica para o usuário decidir.
 `supervisor-opus` foi aposentado em 20/10/2026 (cópia em `teste/salvaguarda/antes_ruflo_2026-10-20/`): G e mecânica têm revisão final do orquestrador.
 
 ## 2. O grafo (por demanda)
