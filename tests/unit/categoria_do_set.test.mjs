@@ -5,8 +5,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { carregarRegras } from "./carregar_regras.mjs";
 
-// O set da candidata vem da natureza: Adamant/Jolly = Atk 252 (evs[1]); Modest/Timid = SpA (evs[3]).
-const setDaCandidata = (c) => (c.build.evs[1] > 0 ? "F" : "E");
+// O set da candidata vem da NATUREZA (não do EV): Machamp Modest com 4 EV de Atk ainda é Especial. Natureza neutra = sem set.
+const NATUREZA_DO_SET = { Adamant: "F", Jolly: "F", Modest: "E", Timid: "E" };
+const setDaCandidata = (c) => NATUREZA_DO_SET[c.build.nature] || null;
 const especiePorNome = (R, n) => R.SPECIES.find((s) => s && s.n === n);
 const regrasDaEtapa = (m) => carregarRegras({ milestone: m, difficulty: "ace", levelCapMode: "more" });
 // Golpes de dano da build com a categoria efetiva do motor (mesma conta de unidadeDaBuild). Status não entra.
@@ -18,8 +19,11 @@ function danoEfetivo(R, sp, c) {
 }
 // Golpes de dano da categoria `cat` que a build não podia ter.
 function errados(R, sp, c) {
+  const set = setDaCandidata(c);
+  if (!set) return [];
   const mapa = danoEfetivo(R, sp, c);
-  const proibida = setDaCandidata(c) === "E" ? "F" : "E";
+  const proibida = set === "E" ? "F" : "E";
+  // Array de outro realm (carregarRegras): deepStrictEqual com [] falha, então compara-se o tamanho.
   return c.golpes.filter((n) => mapa[n] && mapa[n].poder > 0 && mapa[n].cat === proibida);
 }
 
@@ -28,19 +32,19 @@ test("Espeon Modest na Etapa 5: nenhum golpe físico de dano (Psycho Cut e Bite 
   const sp = especiePorNome(R, "Espeon");
   const r = R.candidatosDeBuild(sp, {});
   assert.ok(r.candidatos.length > 0);
-  r.candidatos.forEach((c) => assert.deepEqual(errados(R, sp, c), [], `${c.build.nature}: ${c.golpes.join(", ")}`));
+  r.candidatos.forEach((c) => assert.equal(errados(R, sp, c).length, 0, `${c.build.nature}: ${c.golpes.join(", ")}`));
 });
 
 test("Indeedee Modest na Etapa 5: nenhum golpe físico de dano (Feint saía antes)", () => {
   const R = regrasDaEtapa(5);
   const sp = especiePorNome(R, "Indeedee");
-  R.candidatosDeBuild(sp, {}).candidatos.forEach((c) => assert.deepEqual(errados(R, sp, c), [], `${c.build.nature}: ${c.golpes.join(", ")}`));
+  R.candidatosDeBuild(sp, {}).candidatos.forEach((c) => assert.equal(errados(R, sp, c).length, 0, `${c.build.nature}: ${c.golpes.join(", ")}`));
 });
 
 test("Espeon Timid na Etapa 9: nenhum golpe físico de dano (Bite saía antes)", () => {
   const R = regrasDaEtapa(9);
   const sp = especiePorNome(R, "Espeon");
-  R.candidatosDeBuild(sp, {}).candidatos.forEach((c) => assert.deepEqual(errados(R, sp, c), [], `${c.build.nature}: ${c.golpes.join(", ")}`));
+  R.candidatosDeBuild(sp, {}).candidatos.forEach((c) => assert.equal(errados(R, sp, c).length, 0, `${c.build.nature}: ${c.golpes.join(", ")}`));
 });
 
 test("varredura: nenhum set Especial tem golpe F de dano, e nenhum Físico tem golpe E (amostra em 3 Etapas)", () => {
