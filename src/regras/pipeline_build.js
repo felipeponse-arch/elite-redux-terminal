@@ -424,6 +424,14 @@
     });
     return { f: f, e: e, split: !f && !e ? null : f > e ? "F" : e > f ? "E" : (sp.b[1] >= sp.b[3] ? "F" : "E") };
   }
+  // Categoria do set (pacote 12, fonte única dos caminhos padrão, chip, contra chefão e Meu Time): Misto = null (as duas); Físico/Especial =
+  // o foco; sem foco, a da natureza (Adamant/Jolly = F; Modest/Timid = E). A categoria do golpe é a efetiva (g.cat, com a habilidade).
+  function pipelineCatDoSet(foco, nat) {
+    if (foco === "Misto") return null;
+    if (foco === "Fisico") return "F";
+    if (foco === "Especial") return "E";
+    return nat.evs[1] > 0 ? "F" : "E";
+  }
   // A natureza (Adamant/Jolly = físico; Modest/Timid = especial) tem que ser a do split dos golpes escolhidos (regra dura).
   function pipelineNaturezaServe(nat, s) {
     return !s.split || (nat.evs[1] > 0 ? "F" : "E") === s.split;
@@ -507,10 +515,12 @@
   var ROTULO_PAPEL_PIPELINE = { Pivo: "Pivô", Tanque: "Tanque", Sweeper: "Sweeper", Wallbreaker: "Wallbreaker" };
   // `so` (foco do chip): "Pivo" ou o papel `outro` devolve só aquela build; sem `so`, as duas.
   function pipelinePapeisDuplos(sp, base, outro, kit, alvo, ctx, so) {
-    var pivos = kit.filter(ehGolpeDePivo);
-    if (!pivos.length && so !== outro) return null;
     var hab = base.g.hab, nat = base.g.nat, golpes = base.g.av.golpes;
     var tabela = pipelineTabela(sp, hab, nat, kit, alvo);
+    // Pivô de dano segue a categoria do set (pacote 12): um pivô F não entra no set Especial, e vice-versa.
+    var catSet = pipelineCatDoSet(null, nat);
+    var pivos = kit.filter(ehGolpeDePivo).filter(function (n) { return moveRoleOf(n) !== "dano" || (tabela[n] && tabela[n].g.cat === catSet); });
+    if (!pivos.length && so !== outro) return null;
     function montar(g, papel, estimado) {
       var rv = pipelineValidarRascunho(sp, g, ctx);
       if (!rv.v || conferirPapelDaBuild(ROTULO_PAPEL_PIPELINE[papel], rv.v.evs, rv.v.moves, sp, ctx)) return null;
@@ -565,7 +575,6 @@
       var kit = golpesDeDueloAte(sp, cap).map(function (id) { return MOVES[id][0]; })
         .filter(function (n, i, a) { return a.indexOf(n) === i && liberados.indexOf(n) !== -1 && moveRoleOf(n) !== "dupla" && GOLPES_QUE_DEPENDEM_DE_ITEM.indexOf(n) === -1 && GOLPES_QUE_FALHAM_SE_LEVAR_DANO.indexOf(n) === -1; });
       if (!kit.length) { saida.aviso = saida.aviso || sp.n + " não tem golpe de dano liberado nesta Etapa"; saida.avisos.push(sp.n + " não tem golpe de dano liberado nesta Etapa"); return saida; }
-      var catDoFoco = foco === "Fisico" ? "F" : foco === "Especial" ? "E" : null;
       var habilidades = uniqueIds(sp.ab || []).map(nomeHabDuelo).filter(Boolean);
       var geradas = {};
       habilidades.forEach(function (hab) {
@@ -573,10 +582,11 @@
         NATUREZAS_DO_PIPELINE.forEach(function (nat) {
           var tabela = pipelineTabela(sp, hab, nat, kit, alvo);
           var pool = liberados;
-          if (catDoFoco) { // Físico/Especial: só golpes dessa categoria (os de outra saem da tabela e do movepool)
+          var catDoSet = pipelineCatDoSet(foco, nat);
+          if (catDoSet) { // só golpes dessa categoria (os de outra saem da tabela e do movepool); status não muda
             var catDe = {};
-            Object.keys(tabela).forEach(function (n) { catDe[n] = tabela[n].g.cat; if (catDe[n] !== catDoFoco) delete tabela[n]; });
-            pool = liberados.filter(function (n) { return catDe[n] ? catDe[n] === catDoFoco : moveRoleOf(n) !== "dano"; }); // golpe de dano fora do kit não entra: a categoria dele não foi medida
+            Object.keys(tabela).forEach(function (n) { catDe[n] = tabela[n].g.cat; if (catDe[n] !== catDoSet) delete tabela[n]; });
+            pool = liberados.filter(function (n) { return catDe[n] ? catDe[n] === catDoSet : moveRoleOf(n) !== "dano"; }); // golpe de dano fora do kit não entra: a categoria dele não foi medida
           }
           var tiposStab = speciesTypeNames(sp).concat(pipelineTiposExtraDeStab(sp, hab));
           var nomes = Object.keys(tabela).sort();
