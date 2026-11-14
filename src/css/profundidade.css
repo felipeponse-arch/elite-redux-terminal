@@ -1,0 +1,77 @@
+/* Direção A (13/11/2026): profundidade leve no cartão de build (Meu Time, detalhe da PC Box) e na PC Box.
+   Poços fundos, golpes como teclas, casas em relevo. Só sombra e transform; tilt e transições só com
+   movimento permitido. Vem por último na cascata. Cores: tokens (--poco e --degrau existem nos 3 temas). */
+
+:root { --t1: var(--accent-2); --t2: var(--t1); --rx: 0deg; --ry: 0deg; } /* padrões (o verificador de variáveis olha arquivo a arquivo); o inclinar.js sobrescreve no cartão */
+/* ---- Cartão de build ---- */
+.team-slot.cartao-membro, .pcbox-detail.cartao-membro {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent),
+    0 3px 0 var(--degrau),
+    0 6px 0 color-mix(in srgb, var(--degrau) 70%, #000),
+    0 18px 22px -12px rgb(0 0 0 / .6);
+}
+/* Nome maior e rótulos em coluna: a hierarquia sai do tamanho, não de caixinhas iguais. */
+.team-slot.cartao-membro .ts-name { font-size: var(--fs-cartao); }
+.bp { gap: var(--space-3); }
+.bp-abis { display: flex; flex-wrap: wrap; align-items: center; }
+.bp-abis > .bp-rot { flex: 0 0 64px; }
+/* Poços fundos: habilidades, item e EVs. */
+.bp-abis, .bp-item, .bp-evs {
+  background: var(--poco); padding: var(--space-2) var(--space-3);
+  box-shadow: inset 0 3px 8px rgb(0 0 0 / .45), inset 0 -1px 0 color-mix(in srgb, #fff 6%, transparent);
+}
+.bp-chip { background: var(--surface-3); border-color: transparent; min-height: 28px; box-shadow: 0 3px 0 var(--degrau); }
+.bp-chip-sel { background: color-mix(in srgb, var(--t1) 38%, var(--surface-3)); box-shadow: 0 3px 0 color-mix(in srgb, var(--t1) 50%, #000); }
+.bp-ev-trilho { background: var(--bg); box-shadow: inset 0 2px 3px rgb(0 0 0 / .6); }
+.bp-evs { gap: 4px var(--space-4); }
+.bp-ev:not(.bp-ev-on) { opacity: .75; }
+/* Golpes como teclas: espessura embaixo, afunda ao apertar. */
+.cm-golpes { gap: var(--space-2); }
+.cm-golpe {
+  border-left: 0; min-height: var(--alvo-min); padding: 8px 10px; background: var(--surface-3);
+  border-top: 3px solid var(--t1); box-shadow: 0 4px 0 var(--degrau), 0 8px 10px -4px rgb(0 0 0 / .5);
+}
+.cm-golpe:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--degrau); }
+
+/* ---- PC Box: bandeja afundada, casas em relevo ---- */
+.pcbox-nav { gap: var(--space-4); }
+.pcbox-arrow { width: 44px; height: 44px; box-shadow: 0 3px 0 var(--degrau); }
+.pcbox-title { font-family: var(--fonte-display); font-size: var(--fs-cartao); text-transform: uppercase; line-height: 1; }
+.pcbox-grid {
+  background: var(--poco); border-color: var(--degrau); gap: var(--space-2); padding: var(--space-3);
+  box-shadow: inset 0 6px 14px rgb(0 0 0 / .55), inset 0 -1px 0 color-mix(in srgb, #fff 6%, transparent);
+}
+.pcbox-slot {
+  border-bottom-width: 1px; box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent), 0 3px 0 color-mix(in srgb, var(--t2) 55%, #000);
+}
+.pcbox-slot.empty { box-shadow: none; }
+.pcbox-slot.selected {
+  border-width: 1px; box-shadow: 0 8px 0 color-mix(in srgb, var(--t2) 55%, #000), 0 14px 16px -4px rgb(0 0 0 / .8), 0 0 18px -2px var(--t1);
+}
+
+@media (min-width: 1024px) {
+  /* Desktop: grade à esquerda, selecionado fixo à direita (some o vazio dos lados). */
+  #pcbox-content { display: grid; grid-template-columns: auto minmax(340px, 440px); gap: var(--space-3) 32px; justify-content: center; align-items: start; }
+  #pcbox-content > .pcbox-nav, #pcbox-content > .pcbox-grid { grid-column: 1; }
+  #pcbox-content > .pcbox-detail, #pcbox-content > .pcbox-empty-note { grid-column: 2; grid-row: 1 / span 3; position: sticky; top: var(--space-3); }
+  .pcbox-grid { grid-template-columns: repeat(6, 84px); }
+  .pcbox-slot { width: 84px; height: 84px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .team-slot.cartao-membro, .pcbox-detail.cartao-membro {
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .25s var(--ease-out);
+  }
+  .cm-golpe { transition: transform .12s var(--ease-out), box-shadow .12s var(--ease-out); }
+  .pcbox-slot { transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out); }
+  .pcbox-slot.selected { transform: translateY(-4px); }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .pcbox-slot:not(.empty):not(.selected):hover { transform: translateY(-3px); box-shadow: 0 6px 0 color-mix(in srgb, var(--t2) 55%, #000), 0 12px 12px -4px rgb(0 0 0 / .7); }
+}
+@media (max-width: 620px) {
+  .bp-abis > .bp-rot { flex-basis: 100%; }
+  .cm-golpe { min-height: 44px; }
+  .pcbox-grid { gap: var(--space-1); }
+}

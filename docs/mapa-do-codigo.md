@@ -84,6 +84,7 @@ Uso: ache o arquivo aqui, depois abra só o trecho (`arquivo:linha`, offset/limi
   copyText:11, itemDescHtml:45, hpEvEfficiencyNote:83, evBreakpointNote:116, buildEvNotesHtml:141, buildNoteHtml:155, buildContextNotesHtml:161, seloDaBuildHtml:168, megaModeBuildNoteHtml:174, entradaResumoHtml:183, buildEntryHtml:191, buildChipsHtml:219, myBuildEditorHtml:230, updateMyBuildEvTotal:324, updateMyBuildStatus:354, wireMyBuildEditor:418, lerFormularioDoEditor:446, apagarBuildComDesfazer:469
 - **ficha_extras.js** - Ficha: comparar builds, anotações, histórico de builds e builds de referência dos chefões.
   compareCardHtml:14, compareResultHtml:22, notesCardHtml:78, buildHistoryHtml:87, bossReferenceHtml:103, rotuloDaBuild:157, planoDaBuildHtml:166, megaLockedTagHtml:186, otherFormsHtml:193
+- **inclinar.js** - Inclinação do cartão de build (Meu Time e detalhe da PC Box), direção A de 13/11/2026:
 - **insignias_faixa.js** - Faixa de Etapa no cabeçalho (fatia 1 do visual "Carteira de Treinador", 07/11/2026).
   insigniaSvgHtml:38, etapaNomeCurto:42, etapaPara:46, renderFaixaEtapa:54
 - **lupa.js** - Lupa (11/11/2026): botão de lupa ao lado do nome de habilidade, inata ou golpe; abre um balão com o texto que a Dex já mostra.
