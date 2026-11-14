@@ -156,8 +156,10 @@ async function section09() {
   // achado real do usuário, 2026-09-12: numa tela larga cada slot virava um
   // quadrado enorme com o sprite minúsculo boiando no meio.
   const pcAnySlot = document.querySelector(".pcbox-slot:not(.empty)") || document.querySelector(".pcbox-slot.empty");
-  check("slots da PC Box têm largura fixa (60px), não esticam pra preencher a tela",
-    !!pcAnySlot && getComputedStyle(pcAnySlot).width === "60px",
+  // 14/11/2026 (redesenho A): bandeja em relevo usa casas de 84px no desktop (>=1024px), 60px abaixo disso.
+  const pcLarguraEsperada = window.innerWidth >= 1024 ? "84px" : "60px";
+  check("slots da PC Box têm largura fixa (84px no desktop, 60px abaixo), não esticam pra preencher a tela",
+    !!pcAnySlot && getComputedStyle(pcAnySlot).width === pcLarguraEsperada,
     pcAnySlot && getComputedStyle(pcAnySlot).width);
   const filledBefore = document.querySelectorAll(".pcbox-slot:not(.empty)").length;
   check("pelo menos 1 slot preenchido (caixa não está vazia nesta altura da suíte)", filledBefore > 0, filledBefore);
