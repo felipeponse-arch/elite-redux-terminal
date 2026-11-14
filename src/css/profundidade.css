@@ -12,7 +12,7 @@
     0 18px 22px -12px rgb(0 0 0 / .6);
 }
 /* Nome maior e rótulos em coluna: a hierarquia sai do tamanho, não de caixinhas iguais. */
-.team-slot.cartao-membro .ts-name { font-size: var(--fs-cartao); }
+@media (min-width: 621px) { .team-slot.cartao-membro .ts-name { font-size: var(--fs-cartao); } }
 .bp { gap: var(--space-3); }
 .bp-abis { display: flex; flex-wrap: wrap; align-items: center; }
 .bp-abis > .bp-rot { flex: 0 0 64px; }
